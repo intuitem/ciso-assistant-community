@@ -1,0 +1,103 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-12-21 15:36+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: asf_rm/settings.py:182
+msgid "Search Analysis..."
+msgstr ""
+
+#: asf_rm/settings.py:187
+msgid "Main"
+msgstr ""
+
+#: asf_rm/settings.py:191
+msgid "Core"
+msgstr ""
+
+#: asf_rm/settings.py:196
+msgid "Analysis Registry"
+msgstr ""
+
+#: asf_rm/settings.py:201
+msgid "Risk Instances"
+msgstr ""
+
+#: asf_rm/settings.py:206
+msgid "Mitigations"
+msgstr ""
+
+#: asf_rm/settings.py:211
+msgid "Risk Acceptances"
+msgstr ""
+
+#: asf_rm/settings.py:216
+msgid "Organization"
+msgstr ""
+
+#: asf_rm/settings.py:220
+msgid "General"
+msgstr ""
+
+#: asf_rm/settings.py:225
+msgid "Projects Hierarchy"
+msgstr ""
+
+#: asf_rm/settings.py:230
+msgid "Projects"
+msgstr ""
+
+#: asf_rm/settings.py:235
+msgid "Parent Risks"
+msgstr ""
+
+#: asf_rm/settings.py:240
+msgid "Solutions Catalog"
+msgstr ""
+
+#: asf_rm/settings.py:250
+msgid "Settings"
+msgstr ""
+
+#: asf_rm/settings.py:254
+msgid "Users and authorizations"
+msgstr ""
+
+#: asf_rm/settings.py:258
+msgid "User Guide"
+msgstr ""
+
+#: asf_rm/settings.py:260
+msgid "Staff"
+msgstr ""
+
+#: asf_rm/settings.py:261
+msgid "X-Rays (all)"
+msgstr ""
+
+#: asf_rm/settings.py:262
+msgid "Rating matrix"
+msgstr ""
+
+#: asf_rm/settings.py:263
+msgid "Scoring assistant"
+msgstr ""
+
+#: asf_rm/settings.py:265
+msgid "Extra"
+msgstr ""

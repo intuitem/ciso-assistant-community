@@ -1,0 +1,64 @@
+{% load i18n %}
+
+<main class="p-2 m-2 main">
+    <div class="p-2 m-2 shadow overflow-hidden">
+        <table class="w-full p-2 m-2 border">
+            <thead>
+            </thead>
+            <tbody>
+            {% if not context %}
+            <tr class="">
+                <td colspan="" class="p-4 m-2 text-xl text-center"><i class="fas fa-exclamation-circle"></i> 
+                {% trans "Risk Analysis seems to be empty. Mitigation Plan cannot be generated." %}
+                </td>
+            </tr>
+            {% endif %}
+            {% for instance in context %}
+            <tr class="bg-gray-100">
+                <td class="text-lg p-3" colspan="9">{{instance.rid}}: {{instance.title}} <span
+                        class="bg-blue-600 text-white text-xs text-center p-1 mx-1 rounded"> {{instance.get_treatment_display}}</span>
+                </td>
+            </tr>
+            {% if not instance.mitigation_set.all %}
+            <tr>
+                <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated mitigation" %}
+                </td>
+            </tr>
+            {% else %}
+            <tr class="text-sm uppercase">
+                <td class="p-2 text-center w-1">#</td>
+                <td class="font-semibold">{% trans "Title" %}</td>
+                <td class="font-semibold">{% trans "Description" %}</td>
+                <td class="font-semibold">{% trans "Type" %}</td>
+                <td class="font-semibold">{% trans "Solution" %}</td>
+                <td class="font-semibold">{% trans "ETA" %}</td>
+                <td class="font-semibold">{% trans "Effort" %}</td>
+                <td class="font-semibold text-center">{% trans "Link" %}</td>
+                <td class="font-semibold text-center">{% trans "Status" %}</td>
+            </tr>
+            {% endif %}
+            {% for mitigation in instance.mitigation_set.all %}
+            <tr class="border-b text-sm">
+                <td class="p-2 text-center"><a id="{{mitigation.id}}" href="#{{mitigation.id}}">{{mitigation.id}}</a></td>
+                <td class="">{{mitigation.title}}</td>
+                <td class="">{{mitigation.description}}</td>
+                <td class="">{{mitigation.get_type_display}}</td>
+                <td class="">{% if mitigation.solution %}{{mitigation.solution}}{% else %}--{% endif %}</td>
+                <td class="">{% if mitigation.eta %}{{mitigation.eta}}{% else %}--{%endif%}</td>
+                <td class="">{%if mitigation.effort%}{{mitigation.effort}}{% else %}--{%endif%}</td>
+                <td class="text-center">{% if mitigation.link %}<a href="{{mitigation.link}}"
+                                                                   class="hover:text-blue-400"><i
+                        class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
+                </td>
+                <td class="text-center">{{mitigation.get_status_display}}</td>
+            </tr>
+            {% endfor %}
+
+
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+</main>

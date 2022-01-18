@@ -1,0 +1,8 @@
+core/migrations/*
+general/migrations/*
+*.pyc
+*.DS_Store
+*~$*
+staticfiles/*
+*.mo
+*.env

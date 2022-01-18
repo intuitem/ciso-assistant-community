@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .VL {
+        @apply bg-green-200;
+    }
+    .L {
+        @apply bg-lime-300;
+    }
+    .M {
+        @apply bg-yellow-200;
+    }
+    .H {
+        @apply bg-amber-400;
+    }
+    .VH {
+        @apply bg-red-400;
+    }
+
+    .calendar {
+        @apply p-4 m-4 w-full;
+    }
+
+    .calendar tr td {
+        @apply border;
+    }
+    .calendar th {
+        @apply text-center;
+
+    }
+    .calendar td {
+        @apply hover:bg-blue-50;
+    }
+
+    .calendar td {
+        @apply px-2 py-3 h-32 w-32;
+    }
+    .calendar ul {
+        @apply h-full w-full p-1;
+    }
+    .calendar date {
+        @apply text-black;
+    }
+
+    .calendar li {
+        @apply text-indigo-600 hover:text-indigo-400 text-xs;
+    }
+    .month {
+        @apply text-xl pt-2 pb-3 my-2 rounded;
+    }
+    .my-select {
+        @apply my-2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm;
+    }
+
+}
+
+
+
+

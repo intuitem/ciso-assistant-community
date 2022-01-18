@@ -1,0 +1,63 @@
+<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+        var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+
+        // specify chart configuration item and data
+        var option = {
+    legend: {
+        top: 'bottom'
+    },
+    title: {
+        text: '{{name}}',
+        show: false,
+    },
+    toolbox: {
+        show: true,
+        feature: {
+            mark: {show: true},
+            dataView: {show: false, readOnly: true},
+            saveAsImage: {show: true}
+        }
+    },
+    tooltip: {
+        trigger: 'item',
+        formatter: '{b}: {c} instances ({d}%)'
+    },
+    series: [
+        {
+            name: '{{name}}',
+            type: 'pie',
+            radius: ['15%', '75%'],
+            center: ['50%', '50%'],
+            roseType: 'area',
+            itemStyle: {
+                borderRadius: 8
+            },
+            label: {
+                show: false
+            },
+            emphasis: {
+                label: {
+                    show: true
+                }
+            },
+            data: {{data|safe}},
+        }
+    ]
+};
+
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
+
+
+        {{name}}_ch.on('click', function (params) {
+        console.log('{{name}} '+params.dataIndex);
+        window.open(`/core/browser?{{name}}=${params.dataIndex}`);
+        });
+
+</script>

@@ -1,0 +1,14 @@
+django==3.2.10
+django-nested-inline==0.4.4
+django-jazzmin==2.4.8
+openpyxl==3.0.9
+pandas==1.3.3
+django-baton==2.2.3
+weasyprint==53.4
+django-reversion==4.0.1
+django-tailwind==3.0.1
+django-import-export==2.7.0
+django-admin-csvexport==1.11
+django-fieldsets-with-inlines==0.6
+psycopg2-binary==2.9.2
+gunicorn==20.1.0

@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    restart: on-failure
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - POSTGRES_NAME=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+    volumes:
+      - static_volume:/code/static
+    depends_on:
+      - db
+    networks:
+      - nginx_network
+      - db_network
+    entrypoint: gunicorn --chdir asf_rm --bind :8000 asf_rm.wsgi:application
+
+  nginx:
+    image: nginx:1.21
+    ports:
+      - 8000:80
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/code/static
+    depends_on:
+      - web
+    networks:
+      - nginx_network
+
+  db:
+    image: postgres:14.1
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    networks:
+      - db_network
+
+networks:
+  nginx_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+
+volumes:
+  db_volume:
+  static_volume:

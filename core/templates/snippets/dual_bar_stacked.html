@@ -1,0 +1,167 @@
+<div id="stacked_div" class="bg-white p-2 m-2 w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+        var stacked_ch = echarts.init(document.getElementById('stacked_div'), null, {renderer: 'svg'});
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'        // 'line' | 'shadow'
+                }
+            },
+            toolbox: {
+        show: true,
+        feature: {
+            mark: {show: true},
+            dataView: {show: false, readOnly: true},
+            saveAsImage: {show: true}
+            }
+        },
+            legend: {
+                data: [
+                    {name: 'Current: Very Low', 'itemStyle': {'color': '#BBF7D0' }},
+                    {name: 'Current: Low', 'itemStyle': {'color': '#BEF264' }},
+                    {name: 'Current: Medium', 'itemStyle': {'color': '#FEF08A' }},
+                    {name: 'Current: High', 'itemStyle': {'color': '#FBBF24' }},
+                    {name: 'Current: Very High', 'itemStyle': {'color': '#F87171' }},
+                    {name: 'Residual: Very Low', 'itemStyle': {'color': '#BBF7D0' }},
+                    {name: 'Residual: Low', 'itemStyle': {'color': '#BEF264' }},
+                    {name: 'Residual: Medium', 'itemStyle': {'color': '#FEF08A' }},
+                    {name: 'Residual: High', 'itemStyle': {'color': '#FBBF24' }},
+                    {name: 'Residual: Very High', 'itemStyle': {'color': '#F87171' }},
+                    ],
+                show: true
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    axisTick: {
+                    alignWithLabel: true,
+
+                    },
+                    axisLabel: {
+                        width: 80,
+                        interval: 0,
+                        overflow: 'break',
+                    },
+                    type: 'category',
+                    data: {{ch_context.names|safe}}
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+
+                    minInterval: 1,
+                    show: false,
+                }
+            ],
+            series: [
+                {
+                    name: 'Current: Very Low',
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.VL|safe}}
+                },
+                {
+                    name: 'Current: Low',
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.L|safe}}
+                },
+                {
+                    name: 'Current: Medium',
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.M|safe}}
+                },
+                {
+                    name: 'Current: High',
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.H|safe}}
+                },
+                {
+                    name: 'Current: Very High',
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.VH|safe}}
+                },
+
+                {
+                    name: 'Residual: Very Low',
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.VL|safe}}
+                },
+                {
+                    name: 'Residual: Low',
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.L|safe}}
+                },
+                {
+                    name: 'Residual: Medium',
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.M|safe}}
+                },
+                {
+                    name: 'Residual: High',
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.H|safe}}
+                },
+                {
+                    name: 'Residual: Very High',
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.VH|safe}}
+                },
+            ]
+        };
+        // use configuration item and data specified to show chart
+        stacked_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            stacked_ch.resize();
+        });
+
+</script>

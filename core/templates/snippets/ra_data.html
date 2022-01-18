@@ -1,0 +1,104 @@
+{% load i18n %}
+
+<main class="flex-grow bg-gray-50 main">
+    <!--Information banner-->
+    <div class="bg-white">
+        <div class="py-4 px-12 m-4 shadow rounded flex space-x-2 relative">
+            <a href="{% url 'admin:core_analysis_change' analysis.id %}" class="absolute right-0 top-0 p-1 m-1 bg-cyan-500 text-white text-sm rounded shadow">{% trans "Edit" %}</a>
+            <div class="container w-1/3 ">
+                <div class="text-sm">{% trans "Risk Analysis" %}</div>
+                <div class="text-lg">{{analysis}}</div>
+                <br>
+                <div class="text-sm">
+                    <ul class="">
+                        <li class="pb-1"><span class="font-semibold">{% trans "Audited by:" %}</span> {{analysis.auditor}}</li>
+                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> <span class="bg-blue-100 py-1 px-2 rounded-lg">{% if analysis.is_draft %} {% trans "Draft" %}{% else %} {% trans "Ready" %} {% endif %}</span>
+                        </li>
+                        <li class="pb-1"><span class="font-semibold">{% trans "Created at:" %}</span> {{analysis.created_at|date}}</li>
+                        <li class="pb-1"><span class="font-semibold">{% trans "Updated at:" %}</span> {{analysis.updated_at|date}}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="container w-2/3 ">
+                <div class="text-sm"><span class="font-semibold">{% trans "Profile:" %}</span> <span class="py-1 px-2 bg-sky-300 rounded-lg capitalize">{{analysis.rating_matrix}}</span>
+                </div>
+                <br>
+                <div class="text-sm"><span class="font-semibold">{% trans "Description" %}</></div>
+                <div class="text-sm"> {{analysis.comments}}</div>
+            </div>
+
+        </div>
+    </div>
+    <!--Risk Analysis-->
+    <div class="m-4 px-4 py-10 shadow rounded bg-white">
+        <div class="text-lg pb-2"> {% trans "Risk Instances" %} ({{context|length}})</div>
+        <table class="w-full border text-sm ">
+            <thead class="">
+            <tr class="border bg-gray-600 text-white">
+                <th style="width: 3%;" class="py-3">#</th>
+                <th style="width: 10%;">{% trans "Parent Risk" %}</th>
+                <th style="width: 12%;">{% trans "Subject" %}</th>
+                <th style="width: 16%;">{% trans "Scenario" %}</th>
+                <th style="width: 16%;">{% trans "Existing measures" %}</th>
+                <th style="width: 10%;" class="text-center border py-1">{% trans "Current Risk" %}</th>
+                <th style="width: 15%;">{% trans "Recommended mitigations" %}</th>
+                <th style="width: 10%;" class="text-center border py-1">{% trans "Residual Risk" %}</th>
+                <th style="width: 8%;">{% trans "Treatment" %}</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            {% if not context %}
+            <tr>
+                <td colspan="9" class="p-4 m-2 text-xl  text-center"><i class="fas fa-exclamation-circle"></i> {% trans "Risk Analysis is empty" %}
+                </td>
+            </tr>
+            {% endif %}
+            {% for RI in context %}
+            <tr class="border-b tr-hover">
+                <td class="py-2 px-2 text-center text-xs font-bold" id="{{RI.id}}"><a class=""
+                                                               href="#{{RI.id}}">{{RI.rid}}</a></td>
+                <td class="p-2 capitalize">{{RI.parent_risk}}</td>
+                <td class="p-2">{{RI.title}}</td>
+                <td class="text-xs p-2">{{RI.scenario|linebreaksbr}}</td>
+                <td class="text-xs p-2">{{RI.existing_measures|linebreaksbr}}</td>
+                <td class="text-center p-1 {{RI.current_level}}"><span class="font-semibold">{{RI.get_current_level_display}}</span><br>
+                    <span class="text-xs">I={{RI.get_current_impact_display}}, P={{RI.get_current_proba_display}}</span>
+                </td>
+                <td class="text-xs p-1">
+                    <ul class="pl-3 ml-3 list-disc">
+                        {% for mitigation in RI.mitigation_set.all %}
+                        <li> {{mitigation}}</li>
+                        {% endfor %}
+                    </ul>
+
+                </td>
+                <td class="text-center p-1 {{RI.residual_level}}"><span class="font-semibold">{{RI.get_residual_level_display}}</span><br>
+                    <span class="text-xs">I={{RI.get_residual_impact_display}}, P={{RI.get_residual_proba_display}}</span>
+                </td>
+                <td class="text-center">{{RI.get_treatment_display}}</td>
+            </tr>
+
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!--Matrix view-->
+    <div class="m-4 px-4 py-8 shadow rounded bg-white page-break">
+        <div class="text-xl pb-4">{% trans "Matrix view" %}</div>
+        <div class="flex space-x-3">
+            <div class="w-1/2 shadow rounded-lg relative">
+                <h3 class="font-bold p-2 m-2 text-lg">{% trans "Current" %}</h3>
+                {% include 'snippets/risk_matrix.html' with matrix=analysis.rating_matrix data=ri_clusters.current %}
+            </div>
+            <div class="w-1/2 shadow rounded-lg">
+                <h3 class="font-bold p-2 m-2 text-lg">{% trans "Residual" %}</h3>
+                {% include 'snippets/risk_matrix.html' with matrix=analysis.rating_matrix data=ri_clusters.residual %}
+            </div>
+
+
+        </div>
+
+    </div>
+
+</main>

@@ -1,0 +1,11 @@
+{% if item.obj_type == 'Analysis' %}
+<a class="text-blue-500 hover:text-gray-400" href="{% url 'RA' item.object.id %}"> <i class="far fa-eye"></i> </a> | <a class="text-blue-500 hover:text-gray-400" href="{% url 'admin:core_analysis_change' item.object.id %}"> <i class="far fa-edit"></i> </a>
+{% endif %}
+
+{% if item.obj_type == 'RiskInstance' %}
+<a class="text-blue-500 hover:text-gray-400" href="{% url 'RA' item.object.analysis.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-blue-500 hover:text-gray-400" href="{% url 'admin:core_riskinstance_change' item.object.id %}"> <i class="far fa-edit"></i> </a>
+{% endif %}
+
+{% if item.obj_type == 'Mitigation' %}
+<a class="text-blue-500 hover:text-gray-400" href="{% url 'MP' item.object.risk_instance.analysis.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-blue-500 hover:text-gray-400" href="{% url 'admin:core_mitigation_change' item.object.id %}"> <i class="far fa-edit"></i> </a>
+{% endif %}

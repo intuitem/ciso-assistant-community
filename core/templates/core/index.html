@@ -1,0 +1,156 @@
+{% extends 'core/base.html' %}
+
+{% load i18n %}
+{% block content %}
+
+<main class="flex-grow bg-gray-50">
+    <div class="container mx-auto px-4 sm:px-8">
+        <div class="py-8">
+            <div>
+                <h2 class="text-2xl font-semibold leading-tight">{% trans "Analysis Registry" %}</h2>
+            </div>
+
+            <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+                <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
+                    <table class="min-w-full leading-normal">
+                        <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                {% trans "ID" %}
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                {% trans "Assignee" %}
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                {% trans "Last Update" %}
+                            </th>
+                            <th class="px-7 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                {% trans "Actions" %}
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for analysis in page_obj %}
+                        <tr>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <div class="flex items-center">
+
+                                    {% if analysis.is_draft %}
+                                    <span class="bg-blue-100 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
+
+                                    {% else %}
+                                    <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
+
+                                    {% endif %}
+
+
+                                    <div class="ml-3">
+                                        <a id="analysis{{analysis.id}}" href="{% url 'RA' analysis.id %}"
+                                           class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                            {{analysis}}
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                    {%if analysis.auditor%}{{analysis.auditor}}{% else %}--{% endif %}
+                                </p>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <p class="text-gray-900 whitespace-no-wrap">
+                                    {{analysis.updated_at|date}}
+                                </p>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <div class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
+
+
+                                    <div class="flex justify-center">
+                                        <div class="flex items-center">
+
+
+                                            <a href="{% url 'MP' analysis.id %}" class="rounded bg-teal-500 text-white hover:bg-teal-400 text-center mr-2 h-full p-2"><span class="inline-block align-middle">{% trans "Treatment Plan" %}</span><a>
+                                                    <div x-data="{ dropdownOpen: false }" class="relative">
+                                                        <button @click="dropdownOpen = !dropdownOpen"
+                                                                class="relative z-10 block bg-gray-600 rounded p-2 hover:bg-gray-500 focus:outline-none focus:bg-gray-700">
+                                                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+                                                        </button>
+
+                                                        <div x-show="dropdownOpen" @click="dropdownOpen = false"
+                                                             class="fixed inset-0 h-full w-full z-10"></div>
+
+                                                        <div x-show="dropdownOpen"
+                                                             class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-20">
+                                                            <a
+                                                               class="block px-4 py-2 text-sm text-gray-800">{% trans "Risk Analysis" %}</a>
+                                                            <a href="{% url 'RA-PDF' analysis.id %}"
+                                                               class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
+                                                            <a href="{% url 'RA-CSV' analysis.id %}"
+                                                               class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
+                                                            <a
+                                                               class="block px-4 py-2 text-sm text-gray-800">{% trans "Treatment Plan" %}</a>
+                                                            <a href="{% url 'MP-PDF' analysis.id %}"
+                                                               class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
+                                                            <a href="{% url 'MP-CSV' analysis.id %}"
+                                                               class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
+
+                                                        </div>
+                                                    </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                    <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
+                        <span class="text-xs xs:text-sm text-gray-900">
+                                {% trans "Showing Page" %} {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        <div class="inline-flex mt-2 xs:mt-0 space-x-2">
+                            {% if page_obj.has_previous %}
+                            <a href="?page=1"
+                               class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-double-left"></i>
+                                {% trans "First" %}</a>
+                            <a href="?page={{ page_obj.previous_page_number }}"
+                               class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
+                            {% endif %} {% if page_obj.has_next %}
+                            <a id ="next" class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                               href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
+                            <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                               href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer>
+    <div>
+
+    </div>
+    <div class="bg-gray-800 p-2 w-screen">
+        <div class="grid grid-cols-3 w-full">
+            <div class="p-1 m-1 text-white text-xs text-left">Copyright © 2018-2021 
+                <a href="https://intuitem.com" class="text-lime-400">intuitem</a>
+            </div>
+            <div class="p-1 m-1 text-white text-xs text-center">Version 2.01</div>
+            <div class="p-1 m-1 mr-3 text-xs text-white text-right">
+                <a href="#" class="text-lime-400 hover:text-gray-400">{% trans "User guide" %}</a>
+                 | 
+                <a href="#" class="text-lime-400 hover:text-gray-400">Support</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'core/base.html' %}
+{% block head %}
+<title>{{analysis}}</title>
+<style>
+    .tr-hover:hover {
+        background-color: #F0F9FF;
+    }
+</style>
+{% endblock %}
+{% block content %}
+{% include 'snippets/ra_data.html' %}
+{% endblock %}

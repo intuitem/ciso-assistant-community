@@ -1,0 +1,158 @@
+<div id="progress_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+        var progress_ch = echarts.init(document.getElementById('progress_div'), null, {renderer: 'svg'});
+
+        // specify chart configuration item and data
+        var option = {
+        aria: {
+    enabled: true,
+    decal: {
+        show: true
+    }
+},
+toolbox: {
+        show: true,
+        feature: {
+            mark: {show: true},
+            dataView: {show: false, readOnly: true},
+            saveAsImage: {show: true}
+            }
+        },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            legend: {
+                data: [
+                    {name: 'Risk: open', 'itemStyle': {'color': '#fac858' }},
+                    {name: 'Risk: mitigated', 'itemStyle': {'color': '#91cc75' }},
+                    {name: 'Risk: accepted', 'itemStyle': {'color': '#73c0de' }},
+                    {name: 'Risk: blocking', 'itemStyle': {'color': '#ee6666' }},
+                    {name: 'Mitigation: open', 'itemStyle': {'color': '#fac858' }},
+                    {name: 'Mitigation: in progress', 'itemStyle': {'color': '#5470c6' }},
+                    {name: 'Mitigation: on hold', 'itemStyle': {'color': '#ee6666' }},
+                    {name: 'Mitigation: done', 'itemStyle': {'color': '#91cc75' }},
+
+                    ],
+                show: true
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    axisTick: {
+                    alignWithLabel: true,
+
+                    },
+                    axisLabel: {
+                        width: 80,
+                        interval: 0,
+                        overflow: 'break',
+                    },
+                    type: 'category',
+                    data: {{context.agg_data.names|safe}}
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+
+                    minInterval: 1,
+                    show: false,
+                }
+            ],
+            series: [
+                {
+                    name: 'Risk: open',
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.rsk_status_out.open|safe}}
+                },
+                {
+                    name: 'Risk: mitigated',
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.rsk_status_out.mitigated|safe}}
+                },
+                {
+                    name: 'Risk: accepted',
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.rsk_status_out.accepted|safe}}
+                },
+                {
+                    name: 'Risk: blocking',
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.rsk_status_out.blocker|safe}}
+                },
+                {
+                    name: 'Mitigation: open',
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'mitigations',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.mtg_status_out.open|safe}}
+                },
+                {
+                    name: 'Mitigation: in progress',
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'mitigations',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.mtg_status_out.in_progress|safe}}
+                },
+                {
+                    name: 'Mitigation: on hold',
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'mitigations',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.mtg_status_out.on_hold|safe}}
+                },
+                {
+                    name: 'Mitigation: done',
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'mitigations',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{context.agg_data.mtg_status_out.done|safe}}
+                },
+
+            ]
+        };
+        // use configuration item and data specified to show chart
+        progress_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            progress_ch.resize();
+        });
+
+</script>
