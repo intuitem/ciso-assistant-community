@@ -30,9 +30,9 @@
             <search class="flex-grow ml-0 mr-4">
                 <form action="{% url 'search' %}" class="">
                     <span class="h-10 m-0 bg-gray-200 hover:bg-gray-300 cursor-pointer border border-gray-300 text-sm rounded-full flex">
-                        <input required type="search" name="q" placeholder="{% trans "Search Risk instance, mitigation, analysis ..." %}" value="{{request.GET.q}}"
+                        <input id="search" required type="search" name="q" placeholder="{% trans "Search Risk instance, mitigation, analysis ..." %}" value="{{request.GET.q}}"
                                 class="flex-grow px-4 rounded-l-full rounded-r-full text-sm focus:outline-none border-none overflow-ellipsis">
-                        <button type="submit" class="text-gray-700">
+                        <button id="submit" type="submit" class="text-gray-700">
                                 <i class="fas fa-search text-lg w-4 h-4 ml-2 mr-4"></i>
                         </button>
                     </span>
