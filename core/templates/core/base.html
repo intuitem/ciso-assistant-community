@@ -96,7 +96,7 @@
 
                             <form action="{% url 'set_language' %}" method="post">
                                 {% csrf_token %}
-                                <select class="w-full border-none block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white" name="language" onchange="this.form.submit();"> 
+                                <select id="language" class="w-full border-none block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white" name="language" onchange="this.form.submit();"> 
                                     {% get_current_language as LANGUAGE_CODE %} 
                                     {% get_available_languages as LANGUAGES %}
                                     {% get_language_info_list for LANGUAGES as languages %}
