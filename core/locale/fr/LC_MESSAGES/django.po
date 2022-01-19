@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-21 15:36+0100\n"
+"POT-Creation-Date: 2022-01-19 15:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -794,6 +794,10 @@ msgstr "... format CSV"
 #: core/templates/core/index.html:114
 msgid "Showing Page"
 msgstr "Page"
+
+#: core/templates/core/index.html:114
+msgid "of"
+msgstr "sur"
 
 #: core/templates/core/index.html:120
 msgid "First"
