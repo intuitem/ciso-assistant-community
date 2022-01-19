@@ -43,19 +43,19 @@
             </div>
         </div>
         <div class="justify-between w-auto pl-0 pr-2 pb-0 hidden sm:flex">
-            <a href="/admin/" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i id="edit" class="fas fa-edit"></i> {% trans "Edit" %}</a>
-            <a href="{% url 'analytics' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i id="analytics" class="fas fa-chart-pie"></i> {% trans "Analytics" %}
+            <a id="edit" href="/admin/" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
+                <i class="fas fa-edit"></i> {% trans "Edit" %}</a>
+            <a id="analytics" href="{% url 'analytics' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
+                <i class="fas fa-chart-pie"></i> {% trans "Analytics" %}
             </a>
-            <a href="{% url 'my_projects' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i id="myprojects" class="fas fa-star"></i> {% trans "My Projects" %}
+            <a id="myprojects" href="{% url 'my_projects' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
+                <i class="fas fa-star"></i> {% trans "My Projects" %}
             </a>
-            <a href="{% url 'calendar' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i id="calendar" class="fas fa-calendar-alt"></i> {% trans "Calendar" %}
+            <a  id="calendar" href="{% url 'calendar' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
+                <i class="fas fa-calendar-alt"></i> {% trans "Calendar" %}
             </a>
-            <a href="{% url 'composer' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                 <i id="composer" class="fas fa-drafting-compass"></i> {% trans "Composer" %}
+            <a  id="composer" href="{% url 'composer' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
+                 <i class="fas fa-drafting-compass"></i> {% trans "Composer" %}
             </a>
 
 
