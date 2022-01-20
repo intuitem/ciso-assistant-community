@@ -2,13 +2,13 @@ version: "3.9"
 
 services:
   web:
-    build: .
+    image: app
     restart: on-failure
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - POSTGRES_NAME=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DB_HOST=${DB_HOST}
     volumes:
       - static_volume:/code/static
@@ -19,8 +19,27 @@ services:
       - db_network
     entrypoint: gunicorn --chdir asf_rm --bind :8000 asf_rm.wsgi:application
 
+  migration:
+    build: .
+    image: app
+    restart: on-failure
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${DB_HOST}
+    depends_on:
+      - db
+    networks:
+      - db_network
+    command: bash -c "
+             python manage.py makemigrations core general cal &&
+             python manage.py migrate"
+
   nginx:
     image: nginx:1.21
+    restart: on-failure
     ports:
       - 8000:80
     volumes:
@@ -33,12 +52,13 @@ services:
 
   db:
     image: postgres:14.1
+    restart: on-failure
     volumes:
       - db_volume:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - db_network
 
