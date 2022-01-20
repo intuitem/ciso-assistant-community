@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from .models import *
 from .views import *
@@ -16,3 +16,4 @@ def test_pre_month():
 def test_get_date():
     d = date(2021, 11, 1)
     assert get_date("2021-11") == d
+    assert get_date(False).strftime('%Y-%m-%d-%H:%M:%S') == datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
