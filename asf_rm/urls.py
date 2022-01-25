@@ -26,10 +26,10 @@ urlpatterns = [
     path('core/', include('core.urls')),
     path('general/', include('general.urls')),
     path('admin/', admin.site.urls),
-    path('', cv.UserLogin.as_view(), name='login'),
+    path('accounts/login/', cv.UserLogin.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout'),
     path('baton/', include('baton.urls')),
     path('search/', cv.SearchResults.as_view(), name='search'),
-    path('home/', login_required(cv.AnalysisListView.as_view()), name='home'),
+    path('', login_required(cv.AnalysisListView.as_view()), name='home'),
     path('staff/x-rays', staff_member_required(gv.ReviewView.as_view()), name='xrays'),
 ]
