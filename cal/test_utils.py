@@ -4,6 +4,7 @@ from calendar import LocaleHTMLCalendar
 from core.models import Mitigation, RiskAcceptance
 import pytest
 
+"""
 class test_Calendar(LocaleHTMLCalendar):
     def __init__(self, year=None, month=None, *args, **kwargs):
         self.year = year
@@ -21,3 +22,4 @@ def test_formatday():
         }
         day = '2022-1-24'
         print(Calendar.formatday(calendar, day, list))
+"""
