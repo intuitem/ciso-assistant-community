@@ -5,7 +5,7 @@ from fieldsets_with_inlines import FieldsetsInlineMixin
 from import_export.admin import ImportExportModelAdmin
 from import_export.admin import ImportExportActionModelAdmin
 from import_export import resources
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 # HINT: Whenever you register a model with django-reversion, run createinitialrevisions.
 # TODO: we could consider nested inlines at some point
