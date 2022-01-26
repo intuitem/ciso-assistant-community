@@ -109,10 +109,10 @@
                             </form>
                         </a>
                         {% if user.is_authenticated %}
-                        <a
+                        <a  id="signout"
                             href="{% url 'logout' %}"
                            class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
-                            <i id="signout" class="fas fa-sign-in-alt"></i> {% trans "Sign Out" %}
+                            <i class="fas fa-sign-in-alt"></i> {% trans "Sign Out" %}
                         </a>
                         {% endif %}
                     </div>
