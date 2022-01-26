@@ -30,4 +30,5 @@ jobs:
         pip install django-fieldsets-with-inlines
         python manage.py makemigrations
         python manage.py migrate
-        python manage.py test
+        pytest
+      

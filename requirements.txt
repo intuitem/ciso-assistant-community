@@ -12,3 +12,4 @@ django-admin-csvexport==1.11
 django-fieldsets-with-inlines==0.6
 psycopg2-binary==2.9.2
 gunicorn==20.1.0
+pytest-django==4.5.2
