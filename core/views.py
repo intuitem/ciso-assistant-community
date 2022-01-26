@@ -10,7 +10,7 @@ from general.models import Project
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
 from django.db.models import Q
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .helpers import (mitigation_per_status, risk_per_status, p_risks, p_risks_2,
                       risks_count_per_level, mitigation_per_cur_risk, mitigation_per_solution,

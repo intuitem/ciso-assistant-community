@@ -5,7 +5,7 @@ from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from datetime import date
 
 
