@@ -45,6 +45,6 @@ def test_mitigation_per_cur_risk(db, test_setUp):
     assert mitigation_per_cur_risk() == {'values': [{'name': 'Very Low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
                                         {'name': 'High', 'value': 0}, {'name': 'Very High', 'value': 0}]}
 
-def test_mitigation_per_solution():
-    print(mitigation_per_solution)
+def test_mitigation_per_solution(db, test_setUp):
+    assert mitigation_per_solution() == {'indicators': ['Test Solution'], 'values': [1], 'min': 0, 'max': 2}
 
