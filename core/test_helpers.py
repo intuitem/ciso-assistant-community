@@ -61,7 +61,14 @@ def test_p_risks_2(db, test_setUp):
     assert p_risks_2() == [{'value': 1, 'name': 'Test ParentRisk'}]
 
 def test_risks_per_project_groups(db, test_setUp): # Syntax problem, not good to compare strings, to review!
-    assert str(risks_per_project_groups()) == "[{'prj_grp': <ProjectsGroup: Test ProjectsGroup>, 'ri_level': <QuerySet [{'current_level': 'M', 'total': 1}]>}]"
+    list = [
+        {
+            'prj_grp': ProjectsGroup.objects.get(name = "Test ProjectsGroup"),
+            'ri_level': RiskInstance.objects.filter(analysis__project__parent_group=ProjectsGroup.objects.get(name = "Test ProjectsGroup")).values(
+            'current_level').annotate(total=Count('current_level'))
+        }
+    ]
+    assert str(risks_per_project_groups()) == str(list)
 
 def test_get_counters(db, test_setUp):
     assert get_counters() == {'RiskInstance': 1, 'Mitigation': 1, 'Analysis': 1, 'Project': 1, 'Solution': 2, 'RiskAcceptance': 0, 'ShowStopper': 0}
