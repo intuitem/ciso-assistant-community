@@ -19,8 +19,8 @@ import pytest
 list = {}
 
 class request:
-        class user:
-            is_authenticated = True
+    class user:
+        is_authenticated = True
 
 @pytest.fixture
 def test_setUp(db):
