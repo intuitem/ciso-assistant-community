@@ -81,7 +81,7 @@ class RiskAnalysisView(ListView):
 
 
 @login_required
-def generate_ra_pdf(request, analysis):
+def generate_ra_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
     ra = get_object_or_404(Analysis, pk=analysis)
     context = RiskInstance.objects.filter(analysis=analysis).order_by('id')
     data = {'context': context, 'analysis': ra, 'ri_clusters': build_ri_clusters(ra)}

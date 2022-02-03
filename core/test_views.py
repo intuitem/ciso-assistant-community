@@ -42,4 +42,7 @@ def test_build_ri_clusters(db, test_setUp):
 def test_generate_ra_pdf(db, test_setUp):
     assert generate_ra_pdf(request, 2)['Content-Disposition'] == f'filename="RA-2-Test Project-v-0.1.pdf"'
     assert str(generate_ra_pdf(request, 2)) == str(HttpResponse(status=200, content_type='application/pdf')) # Not good to compare strings, to review !
-    print(generate_ra_pdf(request, 2)['Content-Disposition'])
+
+def test_generate_mp_pdf(db, test_setUp):
+    assert generate_mp_pdf(request, 3)['Content-Disposition'] == f'filename="MP-3-Test Project-v-0.1.pdf"'
+    assert str(generate_mp_pdf(request, 3)) == str(HttpResponse(status=200, content_type='application/pdf')) # Not good to compare strings, to review !
