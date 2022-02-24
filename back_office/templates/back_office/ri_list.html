@@ -1,0 +1,56 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+
+{% block content %}
+{% with page_title='Risk Instances' %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+<div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
+    <table class="min-w-full leading-normal">
+        <thead>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Title" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Parent Risk" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Parent Project" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Treatment Status" %}
+            </th>
+        </thead>
+        <tbody>
+            {% for instance in instances %}
+                <tr>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <div class="flex items-center">
+
+                            <div class="">
+                                <a id="instance{{ instance.id }}" href="#"
+                                class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    {{ instance.title|capfirst }}
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
+                        </p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">
+                            {{ instance.parent_project }}
+                        </p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {{ instance.treatment }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
