@@ -1,0 +1,102 @@
+{% extends 'back_office/base.html' %}
+{% block content %}
+{% load i18n %}
+{% with page_title=instance %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+<div>
+    <form method="post" id="instance_update_form">{% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="flex flex-row space-x-4">
+            <div class="flex flex-col space-y-4">
+                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+                    <h2 class="text-lg font-semibold mb-4">Summary</h2>
+                    <section class="flex flex-col space-y-4">
+                        <div class="flex flex-row space-x-6">
+                            <div class="flex flex-col">
+                                <p class="text-gray-400 text-xs">Project</p>
+                                <p class="text-xs font-semibold">{{ instance.analysis.project }}</p>
+                            </div>
+                            <div class="flex flex-col">
+                                <p class="text-gray-400 text-xs">Auditor</p>
+                                <p class="text-xs font-semibold">{{ instance.analysis.auditor.get_full_name }}</p>
+                            </div>
+                            <div class="flex flex-col">
+                                <p class="text-gray-400 text-xs">Version</p>
+                                <p class="text-xs font-semibold">{{ instance.analysis.version }}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold">Parent Risk</p>
+                            {{ form.parent_risk.errors }}
+                            {{ form.parent_risk }}
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold">Scenario</p>
+                            {{ form.scenario.errors }}
+                            {{ form.scenario }}
+                        </div>
+                    </section>
+                </div>
+                <div class="flex flex-col space-y-4">
+                    <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+                        <h2 class="text-lg font-semibold mb-4">Residual Risk Level</h2>
+                        <div class="flex flex-row space-x-4 mt-4">
+                            <div>
+                                <p class="text-sm font-semibold whitespace-nowrap">Residual Probability</p>
+                                {{ form.residual_proba.errors }}
+                                {{ form.residual_proba }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold">Residual Impact</p>
+                                {{ form.residual_impact.errors }}
+                                {{ form.residual_impact }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-4 px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+                        <div>
+                            <h2 class="text-lg font-semibold mb-4">Follow up</h2>
+                            <p class="text-sm font-semibold">Treatment Status</p>
+                            {{ form.treatment.errors }}
+                            {{ form.treatment }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">Comments</p>
+                            {{ form.comments.errors }}
+                            {{ form.comments }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-3 w-full">
+                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+                    <h2 class="text-lg font-semibold mb-4">Current Risk Level</h2>
+                    <p class="text-sm font-semibold">Existing Measures</p>
+                    {{ form.existing_measures.errors }}
+                    {{ form.existing_measures }}
+                    <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
+                    
+                    <div class="flex flex-row space-x-8 mt-4">
+                        <div>
+                            <p class="text-sm font-semibold">Current Probability</p>
+                            {{ form.current_proba.errors }}
+                            {{ form.current_proba }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold">Current Impact</p>
+                            {{ form.current_impact.errors }}
+                            {{ form.current_impact }}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-row space-x-4 mb-4">
+                    <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
+                        <h2 class="text-lg font-semibold mb-4">Associated Mitigations</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}
