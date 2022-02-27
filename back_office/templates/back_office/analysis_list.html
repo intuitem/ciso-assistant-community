@@ -37,16 +37,11 @@
                     <tr>
                         <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                             <div class="flex items-center">
-
                                 {% if analysis.is_draft %}
                                 <span class="bg-blue-100 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
-
                                 {% else %}
                                 <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
-
                                 {% endif %}
-
-
                                 <div class="ml-3">
                                     <a id="analysis{{ analysis.id }}" href="{% url 'ra-update' analysis.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">

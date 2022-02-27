@@ -26,9 +26,8 @@
                 <tr>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <div class="flex items-center">
-
                             <div class="">
-                                <a id="instance{{ instance.id }}" href="#"
+                                <a id="instance{{ instance.id }}" href="{% url 'ri-update' instance.id %}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ instance.title|capfirst }}
                                 </a>
