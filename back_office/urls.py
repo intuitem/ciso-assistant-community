@@ -11,4 +11,5 @@ urlpatterns = [
     path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
 
     path('RA/<int:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
+    path('RI/<int:pk>', login_required(views.RiskInstanceUpdateView.as_view()), name='ri-update'),
 ]
