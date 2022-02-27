@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.template import loader
 
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
-from .forms import RiskAnalysisUpdateForm
+from .forms import RiskAnalysisUpdateForm, RiskInstanceUpdateForm
 
 # Create your views here.
 def index(request):
@@ -18,6 +18,7 @@ def index(request):
 class RiskAnalysisListView(ListView):
     template_name = 'back_office/analysis_list.html'
     context_object_name = 'analyses'
+
 
     ordering = 'id'
     paginate_by = 10
@@ -63,3 +64,9 @@ class RiskAnalysisUpdateView(UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
    
+class RiskInstanceUpdateView(UpdateView):
+    model = RiskInstance
+    template_name = 'back_office/ri_update.html'
+    context_object_name = 'instance'
+    form_class = RiskInstanceUpdateForm
+    
