@@ -28,3 +28,12 @@ $ python3 -m pytest <testName>.py --headed --slowmo 300
 ```
 
 To see others interesting commands please refer to [Pytest Plugin Documentation](https://playwright.dev/python/docs/test-runners).
+
+## **Errors**
+
+* An error can occured if you have multiple Python installations on your system. Try these command lines to fix this problem:
+```sh
+$ python3 -m pip install playwright
+$ python3 -m playwright install
+$ python3 -m pytest
+```
