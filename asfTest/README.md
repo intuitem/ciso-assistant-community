@@ -28,7 +28,7 @@
 
 ## **Running Tests**
 
-Check out our [Running Test Guide](/test/README.md) to see how to run tests.
+Check out our [Running Test Guide](/asfTest/test/README.md) to see how to run tests.
 
 ## **Tests List**
 
