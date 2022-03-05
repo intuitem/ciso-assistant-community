@@ -38,8 +38,11 @@ $ git clone https://github.com/intuitem/asf-rm.git
 $ cd asf-rm
 ```
 
-2. Create a virtual environment with the tool of your choice and activate it
+
+
+2. Create a virtual environment with the tool of your choice and activate it. For instance:
 ```sh
+$ pip install virtualenv
 $ virtualenv venv
 $ source venv/bin/activate
 ```
@@ -49,17 +52,33 @@ $ source venv/bin/activate
 (venv)$ pip install -r requirements.txt
 ```
 
-1. Apply migrations
+4. Setup secrets (env variable):
+
+```sh
+export DJANGO_SECRET_KEY=<>
+```
+make sure to keep the same one for the dev cycle otherwise some data could be compromised.
+
+5. Setup Postgre database for development and provide the following env variables. Make sure to use a dedicated database as per Django recommendations:
+
+```sh
+export POSTGRES_NAME=<>
+export POSTGRES_USER=<>
+export POSTGRES_PASSWORD=<>
+export DB_HOST=<>
+```
+
+1. Apply migrations. The first ones will init your database with the proper tables:
 ```sh
 (venv)$ python manage.py migrate
 ```
 
-5. Create a development Django user
+6. Create a development Django user
 ```sh
 (venv)$ python manage.py createsuperuser
 ```
 
-6. Run development server
+7. Run development server
 
 You may chose to run it dockerized or not.
 ```sh
@@ -106,4 +125,4 @@ TBD
 
 ## License
 
-TBD
+GPLv3
