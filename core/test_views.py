@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
@@ -45,10 +45,6 @@ def test_create_user(db, create_user):
 def test_create_anonymousUser(db):
     requestAnonym.user = AnonymousUser()
 
-def test_create_user(db, create_user):
-    user = create_user()
-    request.user = user
-
 def test_build_ri_clusters(db, test_setUp):
     matrix_current = [[set(), set(), set(), set(), set()], [set(), set(), set(), set(), set()],
                       [set(), set(), set(), set(), set()], [{'R.1'}, set(), set(), set(), set()],
@@ -67,4 +63,10 @@ def test_generate_mp_pdf(db, test_setUp):
     assert str(generate_mp_pdf(request, 3)) == str(HttpResponse(status=200, content_type='application/pdf')) # Not good to compare strings, to review !
 
 def test_global_analytics(db, test_setUp):
-    print(global_analytics(request))
+    assert str(global_analytics(request)) == str(HttpResponse(status=200))
+
+def test_generate_ra_pdf_login(db, test_setUp):
+    assert str(generate_ra_pdf(requestAnonym, 2)) == str(HttpResponseRedirect(status=302, redirect_to="/accounts/login/?next=/core/analytics"))
+
+def test_generate_mp_pdf_login(db, test_setUp):
+    assert str(generate_mp_pdf(requestAnonym, 3)) == str(HttpResponseRedirect(status=302, redirect_to="/accounts/login/?next=/core/analytics"))
