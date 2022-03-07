@@ -68,7 +68,14 @@ export POSTGRES_PASSWORD=<>
 export DB_HOST=<>
 ```
 
-1. Apply migrations. The first ones will init your database with the proper tables:
+6. prepare migrations 
+
+```sh
+python manage.py makemigrations
+python manage.py makemigrations general
+```
+
+7. Apply migrations. The first ones will init your database with the proper tables:
 ```sh
 (venv)$ python manage.py migrate
 ```
