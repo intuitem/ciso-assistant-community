@@ -98,11 +98,16 @@ You may chose to run it dockerized or not.
 
 ## Running the tests
 
+### Unit tests
+
 After setting up your development environment, you may run tests:
 
 ```sh
 (venv)$ python manage.py test <app_name>
 ```
+### Functional Tests
+
+You can find details about functional tests into our [Functional Test Book](/asfTest/README.md).
 
 ## Structure
 

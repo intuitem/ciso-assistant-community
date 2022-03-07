@@ -1369,7 +1369,7 @@ msgstr "Connexion"
 
 #: core/templates/snippets/mp_data.html:12
 msgid "Risk Analysis seems to be empty. Mitigation Plan cannot be generated."
-msgstr ""
+msgstr "L'analyse de risque semble être vide. Le Plan Mitigation ne peut pas être généré."
 
 #: core/templates/snippets/mp_data.html:24
 msgid "No associated mitigation"
