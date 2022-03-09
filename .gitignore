@@ -1,5 +1,4 @@
-core/migrations/*initial.py
-general/migrations/*initial.py
+*initial.py
 *.pyc
 *.DS_Store
 *~$*
