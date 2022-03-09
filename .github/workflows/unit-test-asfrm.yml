@@ -51,7 +51,7 @@ jobs:
     - name: Setup migrations
       run: |
         export $(grep -v '^#' .env | xargs)
-        python manage.py makemigrations core general cal
+        python manage.py makemigrations
         python manage.py migrate
     - name: Run Tests
       env:
