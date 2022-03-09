@@ -58,4 +58,4 @@ jobs:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
         export $(grep -v '^#' .env | xargs)
-        pytest core/test_views.py   
+        bash test.sh 
