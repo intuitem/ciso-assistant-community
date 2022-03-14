@@ -2,7 +2,7 @@ name: Unit Test on Asf-rm
 
 on:
   push:
-    branches: [ main, test-automatization ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
     
