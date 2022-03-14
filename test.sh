@@ -1,3 +1,3 @@
-pytest core/views_test.py
-pytest core/models_test.py
-pytest core/helpers_test.py
+pytest core/tests/test_views.py
+pytest core/tests/test_models.py
+pytest core/tests/test_helpers.py

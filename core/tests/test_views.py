@@ -1,20 +1,11 @@
-from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
-from django.utils.decorators import method_decorator
-from django.urls import reverse
-from django.http import HttpRequest
 from django.test.client import RequestFactory
 from django.contrib.auth.models import AnonymousUser, User
 
-from django.views.generic import ListView
 from core.models import Analysis, RiskInstance, Mitigation
 from core.views import *
 from general.models import ParentRisk, Project, ProjectsGroup
-from django.contrib.auth.views import LoginView
-from .forms import LoginForm
-from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 import pytest

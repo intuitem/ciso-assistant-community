@@ -1,8 +1,6 @@
-import logging
-from .models import *
-from .helpers import *
+from core.models import *
+from core.helpers import *
 from django.db.models import Count
-from collections import Counter
 import pytest
 
 RISK_COLOR_MAP = {"VL": "#BBF7D0", 'L': "#BEF264", 'M': "#FEF08A", 'H': "#FBBF24", 'VH': "#F87171"}
