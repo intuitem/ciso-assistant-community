@@ -51,6 +51,7 @@ jobs:
         sudo apt install gettext
         python manage.py compilemessages
         django-admin.py makemessages -l fr
+        python manage.py loaddata test-dump.json
         echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', '', 'root')" | python manage.py shell
         echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_user('root2', '', 'rootroot')" | python manage.py shell
     - name: Run server
