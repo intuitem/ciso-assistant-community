@@ -29,7 +29,8 @@ def test_ASF003(page):
     # 3 | Select the first project (if it exists or skip) and click on “Process” | Opening of the first analysis | 
     step = 3
     page.click("id=openmenu")
-    if page.locator("id=option"):
+    if page.locator("id=option").is_visible():
+        print(page.locator("id=option"))
         page.click("id=option")
         page.click("id=closemenu")
         page.click("id=process")
