@@ -61,4 +61,4 @@ jobs:
     - name: Run tests
       run: | 
         export $(grep -v '^#' .env | xargs)
-        pytest asfTest
+        pytest asfTest --slowmo 100
