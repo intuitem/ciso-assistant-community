@@ -28,14 +28,16 @@ def test_ASF003(page):
     assert page.url == urlpatterns.composer, "Step "+str(step)+": not Ok"
     # 3 | Select the first project (if it exists or skip) and click on “Process” | Opening of the first analysis | 
     step = 3
-    page.click("id=openmenu")
-    if page.locator("id=option").is_visible():
-        print(page.locator("id=option"))
+    page.click('id=analytics')
+    if page.locator('id=analysis').inner_text() != '0':
+        page.click("id=composer")
+        page.click("id=openmenu")
         page.click("id=option")
         page.click("id=closemenu")
         page.click("id=process")
         assert page.url == urlpatterns.composer +"?analysis=1", "Step "+str(step)+": not Ok"
     else:
+        page.click("id=composer")
         assert page.url == urlpatterns.composer, "Step "+str(step)+": not Ok"
         title = page.locator('id=title')
         assert title.is_visible() == True, "Step "+str(step)+": not Ok"
