@@ -1,8 +1,8 @@
-core/migrations/*
-general/migrations/*
+*initial.py
 *.pyc
 *.DS_Store
 *~$*
 staticfiles/*
 *.mo
 *.env
+dump.json

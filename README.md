@@ -71,8 +71,7 @@ export DB_HOST=<>
 6. prepare migrations 
 
 ```sh
-python manage.py makemigrations
-python manage.py makemigrations general
+(venv)$ python manage.py makemigrations
 ```
 
 7. Apply migrations. The first ones will init your database with the proper tables:
@@ -103,7 +102,7 @@ You may chose to run it dockerized or not.
 After setting up your development environment, you may run tests:
 
 ```sh
-(venv)$ python manage.py test <app_name>
+(venv)$ bash test.sh
 ```
 ### Functional Tests
 
