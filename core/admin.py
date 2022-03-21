@@ -89,8 +89,8 @@ class AnalysisAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin
     list_filter = ('project', 'auditor', 'is_draft')
 
     class Meta:
-        verbose_name = _("Analysis_sing")
-        verbose_name_plural = _("Analysis_plural")
+        verbose_name = _("Analysis")
+        verbose_name_plural = _("Analyses")
 
     def __str__(self):
         return self.Meta.verbose_name

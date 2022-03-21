@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-19 15:03+0000\n"
+"POT-Creation-Date: 2022-03-21 14:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,13 +34,21 @@ msgstr "Niveau de Risque Résiduel"
 msgid "Follow up"
 msgstr "Suivi"
 
-#: core/admin.py:92 core/models.py:32
-msgid "Analysis_sing"
+#: core/admin.py:92
+msgid "Analysis"
 msgstr "Analyse"
 
-#: core/admin.py:93 core/models.py:33
-msgid "Analysis_plural"
+#: core/admin.py:93 core/templates/core/analytics.html:40
+msgid "Analyses"
 msgstr "Analyses"
+
+#: core/admin_config.py:6
+msgid "Back office"
+msgstr ""
+
+#: core/admin_config.py:7
+msgid "Menu"
+msgstr ""
 
 #: core/apps.py:7
 msgid "Core"
@@ -94,6 +102,18 @@ msgstr "commentaires généraux qui aideront le lecteur"
 #: core/models.py:26 core/models.py:162 core/models.py:264
 msgid "Comments"
 msgstr "Commentaires"
+
+#: core/models.py:32
+#, fuzzy
+#| msgid "Analysis"
+msgid "Analysis_sing"
+msgstr "Analyse"
+
+#: core/models.py:33
+#, fuzzy
+#| msgid "Analysis"
+msgid "Analysis_plural"
+msgstr "Analyse"
 
 #: core/models.py:51
 msgid "Risk Analysis is still in Draft mode"
@@ -449,10 +469,6 @@ msgstr "Instances de risques"
 #: core/templates/core/analytics.html:34
 msgid "Show-stoppers"
 msgstr ""
-
-#: core/templates/core/analytics.html:40
-msgid "Analysis"
-msgstr "Analyses"
 
 #: core/templates/core/analytics.html:46
 msgid "Solutions in catalog"
