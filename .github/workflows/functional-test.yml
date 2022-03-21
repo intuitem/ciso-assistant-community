@@ -35,6 +35,8 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Ensure browsers are installed
       run: python -m playwright install
+    - name: Install operating system dependencies
+      run: python -m playwright install-deps
     - name: Create env variable
       run: |
         touch .env
