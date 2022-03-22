@@ -29,8 +29,8 @@ class Analysis(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _("Analysis_sing")
-        verbose_name_plural = _("Analysis_plural")
+        verbose_name = _("Analysis")
+        verbose_name_plural = _("Analyses")
 
     def __str__(self):
         return 'RA-' + str(self.id) + ': ' + str(self.project) + ', version ' + str(self.version)
