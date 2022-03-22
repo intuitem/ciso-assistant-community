@@ -10,6 +10,10 @@ urlpatterns = [
     path('mitigations/', login_required(views.MitigationListView.as_view()), name='mtg-list'),
     path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
 
+    path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='ra-create'),
+    path('RI/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
+    path('RI/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
+    
     path('RA/<int:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
     path('RI/<int:pk>', login_required(views.RiskInstanceUpdateView.as_view()), name='ri-update'),
 ]
