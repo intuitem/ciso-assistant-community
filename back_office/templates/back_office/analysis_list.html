@@ -6,15 +6,20 @@
     {% with page_title='My Analyses' %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
-    <div class="bg-white rounded-lg shadow w-72 h-24 px-4 my-4">
-        <form action="" class="p-1">
-            <p class="text-sm font-semibold mb-2">Action</p>
-            <select name="action" id="action" class="rounded-md border-gray-400">
-                <option>--</option>
-                <option value="1">Option 1</option>
-                <option value="2">Option 2</option>
-            </select>
-        </form>
+    <div class="flex flex-row">
+        <div class="bg-white rounded-lg shadow w-72 h-24 px-4 my-4">
+            <form action="" class="p-1">
+                <p class="text-sm font-semibold mb-2">Action</p>
+                <select name="action" id="action" class="rounded-md border-gray-400">
+                    <option>--</option>
+                    <option value="1">Option 1</option>
+                    <option value="2">Option 2</option>
+                </select>
+            </form>
+        </div>
+        <div class="my-auto mx-4">
+            <a href="{% url 'ra-create' %}" class="bg-blue-600 hover:bg-blue-700 rounded px-4 py-2 text-white">New Risk Analysis</a>
+        </div>
     </div>
     <div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
         <table class="min-w-full leading-normal">
