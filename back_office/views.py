@@ -1,11 +1,11 @@
 
 from django.urls import reverse_lazy
-from django.views.generic import ListView, UpdateView
-from django.http import HttpResponse
+from django.views.generic import ListView, UpdateView, CreateView
+from django.http import HttpResponse, HttpResponseRedirect, request
 from django.template import loader
 
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
-from .forms import RiskAnalysisUpdateForm, RiskInstanceUpdateForm
+from .forms import *
 
 # Create your views here.
 def index(request):
@@ -49,12 +49,35 @@ class RiskAcceptanceListView(ListView):
     model = RiskAcceptance
 
 
+class RiskAnalysisCreateView(CreateView):
+    model = Analysis
+    template_name = 'back_office/ra_create.html'
+    context_object_name = 'analysis'
+    form_class = RiskAnalysisCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ra-list')
+
+class RiskInstanceCreateView(CreateView):
+    model = RiskInstance
+    template_name = 'back_office/ri_create.html'
+    context_object_name = 'instance'
+    form_class = RiskInstanceCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ri-list')
+
+class RiskInstanceCreateViewModal(CreateView):
+    model = RiskInstance
+    template_name = 'back_office/ri_create_modal.html'
+    context_object_name = 'instance'
+    form_class = RiskInstanceCreateForm
+
 class RiskAnalysisUpdateView(UpdateView):
     model = Analysis
     template_name = 'back_office/ra_update.html'
     context_object_name = 'analysis'
     form_class = RiskAnalysisUpdateForm
-    # form_class = RiskAnalysisUpdateForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -69,4 +92,7 @@ class RiskInstanceUpdateView(UpdateView):
     template_name = 'back_office/ri_update.html'
     context_object_name = 'instance'
     form_class = RiskInstanceUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
     
