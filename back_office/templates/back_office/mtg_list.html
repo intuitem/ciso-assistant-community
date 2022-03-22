@@ -1,0 +1,62 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+
+{% block content %}
+{% with page_title='Mitigations' %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+<div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
+    <table class="min-w-full leading-normal">
+        <thead>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Title" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Parent Project" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Type" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Solution" %}
+            </th>
+        </thead>
+        <tbody>
+            {% for mitigation in mitigations %}
+                <tr>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <div class="flex items-center">
+
+                            <div class="">
+                                <a id="mitigation{{ mitigation.id }}" href="#"
+                                class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    {{ mitigation.title|capfirst }}
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <p class="text-gray-900 whitespace-no-wrap">
+                            {{ mitigation.parent_project }}
+                        </p>
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {% if mitigation.type == 'n/a' %}
+                            {{ mitigation.type|upper }}
+                        {% else %}
+                            {{ mitigation.type|capfirst }}
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        {% if mitigation.solution %}
+                            {{ mitigation.solution }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

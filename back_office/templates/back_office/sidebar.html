@@ -1,0 +1,160 @@
+{% load static tailwind_tags %}
+{% load i18n %}
+{% tailwind_css %}
+
+<div class="fixed flex flex-col top-0 left-0 w-64 bg-white h-full border-r">
+    <div class="flex items-center justify-center h-14">
+        <div>Back Office</div>
+    </div>
+    <div class="overflow-y-auto overflow-x-hidden flex-grow">
+        <ul class="flex flex-col py-4 space-y-1">
+        <li class="px-5">
+            <div class="flex flex-row items-center h-8">
+            <div class="text-sm font-light tracking-wide text-gray-500">Menu</div>
+            </div>
+        </li>
+        <li>
+            <a href="{% url 'index' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-home"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Dashboard</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'ra-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-glasses"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">My Analyses</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'ri-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-clone"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Risk Instances</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'mtg-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-fire-extinguisher"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Mitigations</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'acceptance-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-user-tie"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Risk Acceptances</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-sitemap"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Projects Hierarchy</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-cubes"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Projects</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-folder"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Parent Risks</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-cogs"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Solutions Catalog</span>
+            </a>
+        </li>
+
+        <li class="px-5">
+            <div class="flex flex-row items-center h-8">
+            <div class="text-sm font-light tracking-wide text-gray-500">Utility</div>
+            </div>
+        </li>
+        <li>
+            <a href="{% url 'xrays' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-bolt"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">X-Rays (all)</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'matrix' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-border-all"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Rating Matrix</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'scoring' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-star-half-alt"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Scoring Assistant</span>
+            </a>
+        </li>
+
+        <li class="px-5">
+            <div class="flex flex-row items-center h-8">
+            <div class="text-sm font-light tracking-wide text-gray-500">Placeholder</div>
+            </div>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-user-tag"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Roles</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-users"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Users</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <i class="fas fa-question-circle"></i>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">User Guide</span>
+            </a>
+        </li>
+        <li>
+            <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+            <span class="inline-flex justify-center items-center ml-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            </span>
+            <span class="ml-2 text-sm tracking-wide truncate">Logout</span>
+            </a>
+        </li>
+        </ul>
+    </div>
+    </div>
+</div>

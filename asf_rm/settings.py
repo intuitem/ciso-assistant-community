@@ -38,7 +38,6 @@ ARM_SETTINGS = {
 
 
 INSTALLED_APPS = [
-    'baton',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,7 +52,6 @@ INSTALLED_APPS = [
     'cal',
     'import_export',
     'reversion',
-    'baton.autodiscover',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +72,10 @@ LOGOUT_REDIRECT_URL = 'login'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / "core/templates",
+            BASE_DIR / "back_office/templates",
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -158,114 +159,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# https://simpleui.72wo.com/docs/simpleui/en/quick.html#modify-default-home
-
-BATON = {
-    'SITE_HEADER': 'ASF RM',
-    'SITE_TITLE': 'ASF Risk Manager',
-    'INDEX_TITLE': 'ASF Risk Manager',
-    'SUPPORT_HREF': 'https://github.com/intuitem/asf-rm/issues',
-    'COPYRIGHT': 'copyright © 2018-2021 <a href="https://intuitem.com">intuitem</a>',  # noqa
-    'POWERED_BY': '<a href="https://intuitem.com">intuitem</a>',
-    'CONFIRM_UNSAVED_CHANGES': True,
-    'SHOW_MULTIPART_UPLOADING': True,
-    'ENABLE_IMAGES_PREVIEW': True,
-    'CHANGELIST_FILTERS_IN_MODAL': True,
-    'CHANGELIST_FILTERS_ALWAYS_OPEN': False,
-    'CHANGELIST_FILTERS_FORM': True,
-    'MENU_ALWAYS_COLLAPSED': False,
-    'COLLAPSABLE_USER_AREA': True,
-    'MENU_TITLE': 'Menu',
-    'MESSAGES_TOASTS': False,
-    'GRAVATAR_DEFAULT_IMG': 'wavatar',
-    'LOGIN_SPLASH': '/static/core/img/login-splash.png',
-    'SEARCH_FIELD': {
-        'label': _('Search Analysis...'),
-        'url': '/admin/core/analysis/',
-    },
-    'MENU': (
-
-        {'type': 'title', 'label': _('Main')},
-        {
-            'type': 'app',
-            'name': 'core',
-            'label': _('Core'),
-            'default_open': True, # For debug
-            'models': (
-                {
-                    'name': 'analysis',
-                    'label': _('Analysis Registry'),
-                    'icon': 'fas fa-glasses',
-                },
-                {
-                    'name': 'riskinstance',
-                    'label': _('Risk Instances'),
-                    'icon': 'fas fa-clone',
-                },
-                {
-                    'name': 'mitigation',
-                    'label': _('Mitigations'),
-                    'icon': 'fas fa-fire-extinguisher',
-                },
-                {
-                    'name': 'riskacceptance',
-                    'label': _('Risk Acceptances'),
-                    'icon': 'fas fa-user-tie',
-                },
-            )
-        },
-        {'type': 'title', 'label': _('Organization')},
-        {
-            'type': 'app',
-            'name': 'general',
-            'label': _('General'),
-            'default_open': True, # For debug
-            'models': (
-                {
-                    'name': 'projectsgroup',
-                    'label': _('Projects Hierarchy'),
-                    'icon': 'fas fa-sitemap',
-                },
-                {
-                    'name': 'project',
-                    'label': _('Projects'),
-                    'icon': 'fas fa-cubes',
-                },
-                {
-                    'name': 'parentrisk',
-                    'label': _('Parent Risks'),
-                    'icon': 'fas fa-folder',
-                },
-                {
-                    'name': 'solution',
-                    'label': _('Solutions Catalog'),
-                    'icon': 'fas fa-cogs',
-                },
-            )
-        },
-        
-        {'type': 'title', 'label': _('Settings')},
-        {
-            'type': 'app',
-            'name': 'auth',
-            'label': _('Users and authorizations'),
-            'default_open': True, # For debug
-            'icon': 'fas fa-users',
-        },
-        {'type': 'free', 'label': _('User Guide'), 'icon': 'fas fa-question-circle', 'url': 'https://intuitem.com/'},
-
-        {'type': 'title', 'label': _('Staff')},
-        {'type': 'free', 'label': _('X-Rays (all)'), 'icon': 'fas fa-bolt', 'url': '/staff/x-rays?mode=all'},
-        {'type': 'free', 'label': _('Rating matrix'), 'url': 'https://intuitem.com/'},
-        {'type': 'free', 'label': _('Scoring assistant'), 'url': 'https://intuitem.com/'},
-
-        {'type': 'title', 'label': _('Extra')},
-        {'type': 'free', 'label': 'Agile Security Framework', 'url': 'https://intuitem.com/'},
-
-    ),
-}
 
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = [
