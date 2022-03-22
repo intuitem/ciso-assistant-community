@@ -7,18 +7,18 @@
 {% endblock %}
 {% block content %}
 <div class="p-2 m-2 bg-gray-50 h-screen">
-    <div class="flex space-x-10 pb-4 mx-2 mb-4 items-center">
+    <div id="header" class="flex space-x-10 pb-4 mx-2 mb-4 items-center">
 
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
             <span class="text-sm font-semibold text-gray-400">{% trans "Risks instances" %}</span>
-            <h1 class="text-2xl font-bold text-orange-400">{{counters.RiskInstance}}</h1>
+            <h1 id="riskinstances" class="text-2xl font-bold text-orange-400">{{counters.RiskInstance}}</h1>
           </div>
         </div>
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
             <span class="text-sm font-semibold text-gray-400">{% trans "Mitigations" %}</span>
-            <h1 class="text-2xl font-bold text-green-600">{{counters.Mitigation}}</h1>
+            <h1 id="mitigations" class="text-2xl font-bold text-green-600">{{counters.Mitigation}}</h1>
           </div>
         </div>
         <!--

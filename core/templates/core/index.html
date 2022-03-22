@@ -7,7 +7,7 @@
     <div class="container mx-auto px-4 sm:px-8">
         <div class="py-8">
             <div>
-                <h2 class="text-2xl font-semibold leading-tight">{% trans "Analysis Registry" %}</h2>
+                <h2 id="title" class="text-2xl font-semibold leading-tight">{% trans "Analysis Registry" %}</h2>
             </div>
 
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
@@ -109,8 +109,8 @@
 
                         </tbody>
                     </table>
-                    <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-                        <span class="text-xs xs:text-sm text-gray-900">
+                    <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">                    
+                        <span id="pagenum" class="text-xs xs:text-sm text-gray-900">
                                 {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
                             </span>
                         <div class="inline-flex mt-2 xs:mt-0 space-x-2">
