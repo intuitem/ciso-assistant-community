@@ -1,4 +1,4 @@
-django==3.2.10
+django==3.2.12
 django-nested-inline==0.4.4
 django-jazzmin==2.4.8
 openpyxl==3.0.9
