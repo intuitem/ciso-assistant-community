@@ -44,6 +44,7 @@ class MitigationPlanView(ListView):
 
     def get_queryset(self):
         self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
+        return RiskInstance.objects.filter(analysis=self.analysis).order_by('id')
 
 
 def build_ri_clusters(analysis: Analysis):
