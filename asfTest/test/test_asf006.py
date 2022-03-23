@@ -50,7 +50,7 @@ def test_ASF006(page):
 		for i in range (mitigation_count):
 			#print(page.locator("id=mitigation").element_handles()[i]) 
 			page.locator("id=mitigation").element_handles()[i].click()
-			name = page.locator('id=name')
+			name = page.locator('id='+str(i+1))
 			assert name.is_visible() == True, "Step "+str(step)+": not Ok"
 			page.goto(urlpatterns.search + "?q=e")
 	# 3.2 | (no links) check in "Analytics" there aren't any analysis, ... | Each counter should be '0' |
