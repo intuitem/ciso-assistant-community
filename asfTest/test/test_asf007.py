@@ -60,7 +60,7 @@ def test_ASF007(page):
 		page.locator('id=composer').inner_text().strip(),
 		page.locator('id=more').inner_text().strip()
 	]
-	tabsfr = [
+	tabsen = [
 		"Edit",
 		"Analytics",
 		"My Projects",
@@ -69,7 +69,7 @@ def test_ASF007(page):
 		"More"
 		
 	]
-	for tab in tabsfr:
+	for tab in tabsen:
 		assert tab in tabs, "Step "+str(step)+": not Ok"
 	assert title == "Analysis Registry", "Step "+str(step)+": not Ok"
 
