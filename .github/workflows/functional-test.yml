@@ -2,7 +2,7 @@ name: Functional test using Playwright
 
 on:
   push:
-    branches: [ main, functional-automation ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
