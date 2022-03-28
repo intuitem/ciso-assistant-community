@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, request
 from django.template import loader
 
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
+from general.models import Project, ProjectsGroup
 from .forms import *
 
 # Create your views here.
@@ -15,10 +16,26 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
+class ProjectTreeView(ListView):
+    template_name = 'back_office/project_tree.html'
+    context_object_name = 'projects'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = Project
+
+
+class ProjectsGroupListView(ListView):
+    template_name = 'back_office/project_domain_list.html'
+    context_object_name = 'domains'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = ProjectsGroup
+
 class RiskAnalysisListView(ListView):
     template_name = 'back_office/analysis_list.html'
     context_object_name = 'analyses'
-
 
     ordering = 'id'
     paginate_by = 10
@@ -55,6 +72,8 @@ class RiskAnalysisCreateView(CreateView):
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
 
+    
+
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
 
@@ -65,7 +84,7 @@ class RiskInstanceCreateView(CreateView):
     form_class = RiskInstanceCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ri-list')
+        return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
 
 class RiskInstanceCreateViewModal(CreateView):
     model = RiskInstance
@@ -82,6 +101,7 @@ class RiskAnalysisUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['instances'] = RiskInstance.objects.all()
+        context['crumbs'] = ['Analyses']
         return context
 
     def get_success_url(self) -> str:
@@ -93,6 +113,45 @@ class RiskInstanceUpdateView(UpdateView):
     context_object_name = 'instance'
     form_class = RiskInstanceUpdateForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mitigations'] = Mitigation.objects.all()
+        context['crumbs'] = ['Risk Instances']
+        return context
+
     def get_success_url(self) -> str:
         return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
-    
+
+class MitigationUpdateView(UpdateView):
+    model = Mitigation
+    template_name = 'back_office/mtg_update.html'
+    context_object_name = 'mitigation'
+    form_class = MitigationUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ri-update', kwargs = {'pk': self.object.risk_instance.id})
+
+class ProjectsGroupUpdateView(UpdateView):
+    model = ProjectsGroup
+    template_name = 'back_office/pd_update.html'
+    context_object_name = 'domain'
+    form_class = ProjectsGroupUpdateForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['projects'] = Project.objects.all()
+        crumbs = ['Projects Domains']
+        context['crumbs'] = crumbs
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('pd-list')
+
+class ProjectUpdateView(UpdateView):
+    model = Project
+    template_name = 'back_office/project_update.html'
+    context_object_name = 'project'
+    form_class = ProjectUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('project-list')
