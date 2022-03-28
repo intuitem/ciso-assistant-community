@@ -1,0 +1,77 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="">
+    {% with page_title='Project Domains' %}
+    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <div class="flex flex-row">
+        <div class="bg-white rounded-lg shadow w-72 h-24 px-4 my-4">
+            <form action="" class="p-1">
+                <p class="text-sm font-semibold mb-2">Action</p>
+                <select name="action" id="action" class="rounded-md border-gray-400">
+                    <option>--</option>
+                    <option value="1">Option 1</option>
+                    <option value="2">Option 2</option>
+                </select>
+            </form>
+        </div>
+        <div class="my-auto mx-4">
+            <a href="{% url 'ra-create' %}" class="bg-blue-600 hover:bg-blue-700 rounded px-4 py-2 text-white">New Project Domain</a>
+        </div>
+    </div>
+    <div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
+        <table class="min-w-full leading-normal">
+            <thead>
+                <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    {% trans "Domain" %}
+                </th>
+                <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    {% trans "Department" %}
+                </th>
+            </thead>
+            <tbody>
+                {% for domain in page_obj %}
+                    <tr>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <div class="flex items-center">
+                                <div class="ml-3">
+                                    <a id="domain{{ domain.id }}" href="{% url 'pd-update' domain.id %}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        {{ domain }}
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                {% if domain.department %}{{ domain.department }}{% else %}--{% endif %}
+                            </p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
+            <span class="text-xs xs:text-sm text-gray-900">
+                    {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                </span>
+            <div class="inline-flex mt-2 xs:mt-0 space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page=1"
+                   class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-double-left"></i>
+                    {% trans "First" %}</a>
+                <a href="?page={{ page_obj.previous_page_number }}"
+                   class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
+                {% endif %} {% if page_obj.has_next %}
+                <a id ="next" class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                   href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
+                <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                   href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
