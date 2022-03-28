@@ -1,7 +1,8 @@
 from dataclasses import fields
-from django.forms import ModelForm, Select, Textarea
+from django.forms import ModelForm, Select, TextInput, Textarea
 
-from core.models import Analysis, RiskInstance
+from core.models import Analysis, Mitigation, RiskInstance
+from general.models import Project, ProjectsGroup
 
 class RiskAnalysisCreateForm(ModelForm):
     class Meta:
@@ -50,3 +51,22 @@ class RiskInstanceUpdateForm(ModelForm):
             'residual_impact': Select(attrs={'class': 'w-full rounded-md text-sm'}),
             'treatment': Select(attrs={'class': 'w-full rounded-md text-sm'}),
         }
+
+class MitigationUpdateForm(ModelForm):
+    class Meta:
+        model = Mitigation
+        fields = '__all__'
+
+class ProjectsGroupUpdateForm(ModelForm):
+    class Meta:
+        model = ProjectsGroup
+        fields = '__all__'
+        widgets = { # Tailwind Styles go here
+            'name': TextInput(attrs={'class': 'w-full rounded-md text-sm h-32'}),
+            'department': TextInput(attrs={'class': 'w-full rounded-md text-sm h-32'}),
+        }
+
+class ProjectUpdateForm(ModelForm):
+    class Meta:
+        model = Project
+        fields = '__all__'
