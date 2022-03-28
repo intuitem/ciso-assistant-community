@@ -1,0 +1,16 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+{% block content %}
+{% with page_title=mitigation %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<form method="post" id="mtg_update_form">{% csrf_token %}
+{{ form }}
+
+<a href="{% url 'ra-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
+<button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
+
+</form>
+
+{% endblock %}

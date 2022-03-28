@@ -1,0 +1,37 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+{% block content %}
+{% with page_title=domain %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<div>
+    <form method="post" id="pd_update_form">{% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="bg-white rounded-lg shadow px-4 py-6 w-full mb-4">
+        <div class="flex flex-row space-x-6 mb-2">
+            <div class="flex flex-col">
+                <p class="text-gray-400 text-sm">Name</p>
+                {{ form.name.errors }}
+                {{ form.name }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-gray-400 text-sm">Department</p>
+                {{ form.department.errors }}
+                {{ form.department }}
+            </div>
+        </div>
+        
+        <a href="{% url 'ra-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
+        <button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
+    </div>
+</div>
+    </form>
+    <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
+        <h2 class="text-xl font-semibold mb-4">Associated Projects</h2>
+        <a href="{% url 'ri-create'%}" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">New Project</a>
+        {% include 'back_office/snippets/project_list_nested.html' %}
+    </div>
+</div>
+
+{% endblock %}
