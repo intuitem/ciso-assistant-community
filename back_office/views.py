@@ -1,9 +1,11 @@
 
-from django.urls import reverse_lazy
-from django.views.generic import ListView, UpdateView, CreateView
+from django.shortcuts import get_object_or_404
+from django.urls import reverse, reverse_lazy
+from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect, request
 from django.template import loader
 
+from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import Project, ProjectsGroup
 from .forms import *
@@ -65,6 +67,29 @@ class RiskAcceptanceListView(ListView):
     paginate_by = 10
     model = RiskAcceptance
 
+class UserListView(ListView):
+    template_name = 'back_office/user_list.html'
+    context_object_name = 'users'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = User
+
+class UserCreateView(CreateView):
+    template_name = 'back_office/user_create.html'
+    context_object_name = 'user'
+    form_class = UserCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('user-list')
+
+class GroupListView(ListView):
+    template_name = 'back_office/group_list.html'
+    context_object_name = 'groups'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = Group
 
 class RiskAnalysisCreateView(CreateView):
     model = Analysis
@@ -72,10 +97,17 @@ class RiskAnalysisCreateView(CreateView):
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
 
-    
-
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
+
+class ProjectsGroupCreateView(CreateView):
+    model = ProjectsGroup
+    template_name = 'back_office/pd_update.html'
+    context_object_name = 'domain'
+    form_class = ProjectsGroupUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('pd-list')
 
 class RiskInstanceCreateView(CreateView):
     model = RiskInstance
@@ -83,8 +115,19 @@ class RiskInstanceCreateView(CreateView):
     context_object_name = 'instance'
     form_class = RiskInstanceCreateForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['analysis'] = get_object_or_404(Analysis, id=self.kwargs['parent_analysis'])
+
+        return context
+
+    def form_valid(self, form: RiskInstanceCreateForm) -> HttpResponse:
+        if form.is_valid():
+            form.instance.analysis = get_object_or_404(Analysis, id=self.kwargs['parent_analysis'])
+            return super().form_valid(form)
+
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
+        return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['parent_analysis']).id})
 
 class RiskInstanceCreateViewModal(CreateView):
     model = RiskInstance
@@ -106,6 +149,11 @@ class RiskAnalysisUpdateView(UpdateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
+
+class RiskAnalysisDeleteView(DeleteView):
+    model = Analysis
+    success_url = reverse_lazy('ra-list')
+    template_name = 'back_office/snippets/ra_delete_modal.html'
    
 class RiskInstanceUpdateView(UpdateView):
     model = RiskInstance
@@ -151,7 +199,23 @@ class ProjectUpdateView(UpdateView):
     model = Project
     template_name = 'back_office/project_update.html'
     context_object_name = 'project'
-    form_class = ProjectUpdateForm
+    form_class = ProjectForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['analyses'] = Analysis.objects.all()
+        crumbs = ['Projects']
+        context['crumbs'] = crumbs
+        return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('project-list')
+        return reverse_lazy('project-tree')
+
+class ProjectCreateView(CreateView):
+    model = Project
+    template_name = 'back_office/project_create.html'
+    context_object_name = 'project'
+    form_class = ProjectForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('project-tree')
