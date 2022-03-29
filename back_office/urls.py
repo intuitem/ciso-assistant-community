@@ -13,8 +13,16 @@ urlpatterns = [
     path('project-domains/', login_required(views.ProjectsGroupListView.as_view()), name='pd-list'),
     path('projects/', login_required(views.ProjectTreeView.as_view()), name='project-tree'),
 
+    path('users/', login_required(views.UserListView.as_view()), name='user-list'),
+    path('groups/', login_required(views.GroupListView.as_view()), name='group-list'),
+
     path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='ra-create'),
-    path('RI/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
+    path('RA/<int:parent_analysis>/RI/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
+
+    path('PD/create', login_required(views.ProjectsGroupCreateView.as_view()), name='pd-create'),
+    path('PRJ/create', login_required(views.ProjectCreateView.as_view()), name='project-create'),
+    
+    path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
     
     path('RI/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
     
@@ -23,4 +31,6 @@ urlpatterns = [
     path('MTG/<int:pk>', login_required(views.MitigationUpdateView.as_view()), name='mtg-update'),
     path('PD/<int:pk>', login_required(views.ProjectsGroupUpdateView.as_view()), name='pd-update'),
     path('PRJ/<int:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
+    
+    path('RA/delete/<int:pk>', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),
 ]
