@@ -1,12 +1,13 @@
 {% extends 'back_office/base.html' %}
 {% block content %}
 {% load i18n %}
-{% with page_title='New Risk Instance' %}
+{% with page_title='New User' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div>
-    <form method="post" id="instance_create_form">{% csrf_token %}
+    <form method="post" id="user_create_form">{% csrf_token %}
         {{ form.non_field_errors }}
+        {{ form }}
         <div class="flex flex-row space-x-4">
             <div class="flex flex-col space-y-4">
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
@@ -14,18 +15,17 @@
                     <section class="flex flex-col space-y-4">
                         <div class="flex flex-row space-x-6">
                             <div class="flex flex-col">
-                                <p class="text-gray-400 text-xs">Parent Analysis</p>
-                                <p class="text-xs font-semibold">{{ analysis }}</p>
+                                <p class="text-gray-400 text-xs">Project</p>
+                                <p class="text-xs font-semibold">{{ instance.analysis.project }}</p>
                             </div>
                             <div class="flex flex-col">
                                 <p class="text-gray-400 text-xs">Auditor</p>
-                                <p class="text-xs font-semibold">{{ analysis.auditor.get_full_name }}</p>
+                                <p class="text-xs font-semibold">{{ instance.analysis.auditor.get_full_name }}</p>
                             </div>
-                        </div>
-                        <div class="flex flex-col">
-                            <p class="text-sm font-semibold">Instance Title</p>
-                            {{ form.title.errors }}
-                            {{ form.title }}
+                            <div class="flex flex-col">
+                                <p class="text-gray-400 text-xs">Version</p>
+                                <p class="text-xs font-semibold">{{ instance.analysis.version }}</p>
+                            </div>
                         </div>
                         <div class="flex flex-col">
                             <p class="text-sm font-semibold">Parent Risk</p>
