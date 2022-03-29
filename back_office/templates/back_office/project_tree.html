@@ -5,6 +5,13 @@
 {% with page_title='Projects' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
+<div class="grid mb-4">
+    <a href="{% url 'project-create' %}"
+           class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2">
+           <i class="fas fa-plus"></i>
+           New Project
+    </a>
+</div>
 <div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
     <table class="min-w-full leading-normal">
         <thead>
@@ -28,7 +35,7 @@
                         <div class="flex items-center">
 
                             <div class="">
-                                <a id="project{{ project.id }}" href="#"
+                                <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ project.name|capfirst }}
                                 </a>
