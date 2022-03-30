@@ -32,5 +32,5 @@ urlpatterns = [
     path('PD/<int:pk>', login_required(views.ProjectsGroupUpdateView.as_view()), name='pd-update'),
     path('PRJ/<int:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
     
-    path('RA/delete/<int:pk>', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),
+    path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),
 ]
