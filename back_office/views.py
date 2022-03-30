@@ -18,7 +18,8 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
-class ProjectListView(ListView):
+class ProjectListView(PermissionRequiredMixin, ListView):
+    permission_required = 'general.view_project'
     template_name = 'back_office/project_list.html'
     context_object_name = 'projects'
 
@@ -26,7 +27,8 @@ class ProjectListView(ListView):
     paginate_by = 10
     model = Project
 
-class ProjectsGroupListView(ListView):
+class ProjectsGroupListView(PermissionRequiredMixin, ListView):
+    permission_required = 'general.view_projectsgroup'
     template_name = 'back_office/project_domain_list.html'
     context_object_name = 'domains'
 
@@ -34,7 +36,8 @@ class ProjectsGroupListView(ListView):
     paginate_by = 10
     model = ProjectsGroup
 
-class RiskAnalysisListView(ListView):
+class RiskAnalysisListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_analysis'
     template_name = 'back_office/analysis_list.html'
     context_object_name = 'analyses'
 
@@ -49,7 +52,8 @@ class RiskAnalysisListView(ListView):
             agg_data = Analysis.objects.all().order_by('is_draft', 'id')
         return agg_data
 
-class RiskInstanceListView(ListView):
+class RiskInstanceListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_riskinstance'
     template_name = 'back_office/ri_list.html'
     context_object_name = 'instances'
 
@@ -64,7 +68,8 @@ class RiskInstanceListView(ListView):
             agg_data = RiskInstance.objects.all().order_by('id')
         return agg_data
 
-class MitigationListView(ListView):
+class MitigationListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_mitigation'
     template_name = 'back_office/mtg_list.html'
     context_object_name = 'mitigations'
 
@@ -79,7 +84,8 @@ class MitigationListView(ListView):
             agg_data = Mitigation.objects.all().order_by('risk_instance', 'id')
         return agg_data
 
-class RiskAcceptanceListView(ListView):
+class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_riskacceptance'
     template_name = 'back_office/acceptance_list.html'
     context_object_name = 'acceptances'
 
@@ -121,7 +127,8 @@ class GroupListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = Group
 
-class RiskAnalysisCreateView(CreateView):
+class RiskAnalysisCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_analysis'
     model = Analysis
     template_name = 'back_office/ra_create.html'
     context_object_name = 'analysis'
@@ -130,7 +137,8 @@ class RiskAnalysisCreateView(CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
 
-class ProjectsGroupCreateView(CreateView):
+class ProjectsGroupCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'general.add_projectsgroup'
     model = ProjectsGroup
     template_name = 'back_office/pd_update.html'
     context_object_name = 'domain'
@@ -139,7 +147,8 @@ class ProjectsGroupCreateView(CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('pd-list')
 
-class RiskInstanceCreateView(CreateView):
+class RiskInstanceCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_riskinstance'
     model = RiskInstance
     template_name = 'back_office/ri_create.html'
     context_object_name = 'instance'
@@ -159,13 +168,15 @@ class RiskInstanceCreateView(CreateView):
     def get_success_url(self) -> str:
         return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['parent_analysis']).id})
 
-class RiskInstanceCreateViewModal(CreateView):
+class RiskInstanceCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_riskinstance'
     model = RiskInstance
     template_name = 'back_office/ri_create_modal.html'
     context_object_name = 'instance'
     form_class = RiskInstanceCreateForm
 
-class RiskAnalysisUpdateView(UpdateView):
+class RiskAnalysisUpdateView(UpdateView, PermissionRequiredMixin):
+    permission_required = 'core.change_analysis'
     model = Analysis
     template_name = 'back_office/ra_update.html'
     context_object_name = 'analysis'
@@ -180,7 +191,9 @@ class RiskAnalysisUpdateView(UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
 
-class RiskAnalysisDeleteView(DeleteView):
+class RiskAnalysisDeleteView(DeleteView, PermissionRequiredMixin):
+    permission_required = 'core.delete_analysis'
+
     model = Analysis
     success_url = reverse_lazy('ra-list')
     template_name = 'back_office/snippets/ra_delete_modal.html'
@@ -188,7 +201,8 @@ class RiskAnalysisDeleteView(DeleteView):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
    
-class RiskInstanceUpdateView(UpdateView):
+class RiskInstanceUpdateView(UpdateView, PermissionRequiredMixin):
+    permission_required = 'core.change_riskinstance'
     model = RiskInstance
     template_name = 'back_office/ri_update.html'
     context_object_name = 'instance'
@@ -203,7 +217,8 @@ class RiskInstanceUpdateView(UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
 
-class MitigationUpdateView(UpdateView):
+class MitigationUpdateView(UpdateView, PermissionRequiredMixin):
+    permission_required = 'core.change_mitigation'
     model = Mitigation
     template_name = 'back_office/mtg_update.html'
     context_object_name = 'mitigation'
@@ -212,7 +227,8 @@ class MitigationUpdateView(UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ri-update', kwargs = {'pk': self.object.risk_instance.id})
 
-class ProjectsGroupUpdateView(UpdateView):
+class ProjectsGroupUpdateView(UpdateView, PermissionRequiredMixin):
+    permission_required = 'general.change_projectsgroup'
     model = ProjectsGroup
     template_name = 'back_office/pd_update.html'
     context_object_name = 'domain'
@@ -228,7 +244,8 @@ class ProjectsGroupUpdateView(UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('pd-list')
 
-class ProjectUpdateView(UpdateView):
+class ProjectUpdateView(UpdateView, PermissionRequiredMixin):
+    permission_required = 'general.change_project'
     model = Project
     template_name = 'back_office/project_update.html'
     context_object_name = 'project'
@@ -244,7 +261,8 @@ class ProjectUpdateView(UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('project-list')
 
-class ProjectCreateView(CreateView):
+class ProjectCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'general.add_project'
     model = Project
     template_name = 'back_office/project_create.html'
     context_object_name = 'project'
