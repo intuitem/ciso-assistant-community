@@ -1,1 +1,9 @@
 {% extends 'back_office/base.html' %}
+{% load i18n %}
+{% block content %}
+{% with page_title='Dashboard' %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+
+{% endblock %}
