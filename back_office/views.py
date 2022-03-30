@@ -1,4 +1,4 @@
-
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
@@ -18,8 +18,8 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
-class ProjectTreeView(ListView):
-    template_name = 'back_office/project_tree.html'
+class ProjectListView(ListView):
+    template_name = 'back_office/project_list.html'
     context_object_name = 'projects'
 
     ordering = 'id'
@@ -57,6 +57,13 @@ class RiskInstanceListView(ListView):
     paginate_by = 10
     model = RiskInstance
 
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            agg_data = RiskInstance.objects.filter(analysis__auditor=self.request.user).order_by('id')
+        else:
+            agg_data = RiskInstance.objects.all().order_by('id')
+        return agg_data
+
 class MitigationListView(ListView):
     template_name = 'back_office/mtg_list.html'
     context_object_name = 'mitigations'
@@ -64,6 +71,13 @@ class MitigationListView(ListView):
     ordering = 'id'
     paginate_by = 10
     model = Mitigation
+
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            agg_data = Mitigation.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('risk_instance', 'id')
+        else:
+            agg_data = Mitigation.objects.all().order_by('risk_instance', 'id')
+        return agg_data
 
 class RiskAcceptanceListView(ListView):
     template_name = 'back_office/acceptance_list.html'
@@ -73,7 +87,15 @@ class RiskAcceptanceListView(ListView):
     paginate_by = 10
     model = RiskAcceptance
 
-class UserListView(ListView):
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            agg_data = RiskAcceptance.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('type', 'id')
+        else:
+            agg_data = RiskAcceptance.objects.all().order_by('type', 'id')
+        return agg_data
+
+class UserListView(PermissionRequiredMixin, ListView):
+    permission_required = 'auth.view_user'
     template_name = 'back_office/user_list.html'
     context_object_name = 'users'
 
@@ -81,7 +103,8 @@ class UserListView(ListView):
     paginate_by = 10
     model = User
 
-class UserCreateView(CreateView):
+class UserCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'auth.add_user'
     template_name = 'back_office/user_create.html'
     context_object_name = 'user'
     form_class = UserCreateForm
@@ -89,7 +112,8 @@ class UserCreateView(CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
 
-class GroupListView(ListView):
+class GroupListView(PermissionRequiredMixin, ListView):
+    permission_required = 'auth.view_group'
     template_name = 'back_office/group_list.html'
     context_object_name = 'groups'
 
@@ -160,6 +184,9 @@ class RiskAnalysisDeleteView(DeleteView):
     model = Analysis
     success_url = reverse_lazy('ra-list')
     template_name = 'back_office/snippets/ra_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ra-list')
    
 class RiskInstanceUpdateView(UpdateView):
     model = RiskInstance
@@ -215,7 +242,7 @@ class ProjectUpdateView(UpdateView):
         return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('project-tree')
+        return reverse_lazy('project-list')
 
 class ProjectCreateView(CreateView):
     model = Project
@@ -224,4 +251,4 @@ class ProjectCreateView(CreateView):
     form_class = ProjectForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('project-tree')
+        return reverse_lazy('project-list')
