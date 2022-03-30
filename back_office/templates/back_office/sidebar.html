@@ -21,6 +21,7 @@
             <span class="ml-2 text-sm tracking-wide truncate">Dashboard</span>
             </a>
         </li>
+        {% if perms.core.view_analysis %}
         <li>
             <a href="{% url 'ra-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -29,6 +30,8 @@
             <span class="ml-2 text-sm tracking-wide truncate">My Analyses</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.core.view_riskinstance %}
         <li>
             <a href="{% url 'ri-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -37,6 +40,8 @@
             <span class="ml-2 text-sm tracking-wide truncate">Risk Instances</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.core.view_mitigation %}
         <li>
             <a href="{% url 'mtg-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -45,6 +50,8 @@
             <span class="ml-2 text-sm tracking-wide truncate">Mitigations</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.core.view_riskacceptance %}
         <li>
             <a href="{% url 'acceptance-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -53,23 +60,29 @@
             <span class="ml-2 text-sm tracking-wide truncate">Risk Acceptances</span>
             </a>
         </li>
+        {% endif %}
 
+        {% if perms.general.view_projectsgroup %}
         <li>
             <a href="{% url 'pd-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
                 <i class="fas fa-sitemap"></i>
             </span>
-            <span class="ml-2 text-sm tracking-wide truncate">Project Domains</span>
+            <span class="ml-2 text-sm tracking-wide truncate">Projects Domains</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.general.view_project %}
         <li>
-            <a href="{% url 'project-tree' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+            <a href="{% url 'project-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
                 <i class="fas fa-cubes"></i>
             </span>
             <span class="ml-2 text-sm tracking-wide truncate">Projects</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.general.view_parentrisk %}
         <li>
             <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -78,6 +91,8 @@
             <span class="ml-2 text-sm tracking-wide truncate">Parent Risks</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.general.view_solution %}
         <li>
             <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -86,6 +101,7 @@
             <span class="ml-2 text-sm tracking-wide truncate">Solutions Catalog</span>
             </a>
         </li>
+        {% endif %}
 
         <li class="px-5">
             <div class="flex flex-row items-center h-8">
@@ -122,6 +138,8 @@
             <div class="text-sm font-light tracking-wide text-gray-500">Placeholder</div>
             </div>
         </li>
+
+        {% if perms.auth.view_group %}
         <li>
             <a href="{% url 'group-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -130,6 +148,8 @@
             <span class="ml-2 text-sm tracking-wide truncate">Groups</span>
             </a>
         </li>
+        {% endif %}
+        {% if perms.auth.view_user %}
         <li>
             <a href="{% url 'user-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
@@ -138,6 +158,7 @@
             <span class="ml-2 text-sm tracking-wide truncate">Users</span>
             </a>
         </li>
+        {% endif %}
         <li>
             <a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
             <span class="inline-flex justify-center items-center ml-4">
