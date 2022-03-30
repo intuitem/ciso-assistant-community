@@ -26,7 +26,6 @@ class ProjectTreeView(ListView):
     paginate_by = 10
     model = Project
 
-
 class ProjectsGroupListView(ListView):
     template_name = 'back_office/project_domain_list.html'
     context_object_name = 'domains'
@@ -42,6 +41,13 @@ class RiskAnalysisListView(ListView):
     ordering = 'id'
     paginate_by = 10
     model = Analysis
+
+    def get_queryset(self):
+        if not self.request.user.is_superuser:
+            agg_data = Analysis.objects.filter(auditor=self.request.user).order_by('is_draft', 'id')
+        else:
+            agg_data = Analysis.objects.all().order_by('is_draft', 'id')
+        return agg_data
 
 class RiskInstanceListView(ListView):
     template_name = 'back_office/ri_list.html'
