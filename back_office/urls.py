@@ -11,7 +11,7 @@ urlpatterns = [
     path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
 
     path('project-domains/', login_required(views.ProjectsGroupListView.as_view()), name='pd-list'),
-    path('projects/', login_required(views.ProjectTreeView.as_view()), name='project-tree'),
+    path('projects/', login_required(views.ProjectListView.as_view()), name='project-list'),
 
     path('users/', login_required(views.UserListView.as_view()), name='user-list'),
     path('groups/', login_required(views.GroupListView.as_view()), name='group-list'),
