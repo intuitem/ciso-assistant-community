@@ -1,5 +1,5 @@
 from dataclasses import fields
-from django.forms import ModelForm, Select, TextInput, Textarea, widgets
+from django.forms import DateInput, DateTimeInput, ModelForm, Select, TextInput, Textarea, widgets
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, Mitigation, RiskInstance
@@ -51,6 +51,7 @@ class RiskInstanceUpdateForm(ModelForm):
     class Meta:
         model = RiskInstance
         fields = '__all__'
+        exclude = ['current_level', 'residual_level']
         widgets = { # Tailwind Styles go here
             'existing_measures': Textarea(attrs={'class': 'w-full rounded-md text-sm h-32'}),
             'scenario': Textarea(attrs={'class': 'w-full rounded-md text-sm h-24'}),
@@ -66,7 +67,10 @@ class RiskInstanceUpdateForm(ModelForm):
 class MitigationUpdateForm(ModelForm):
     class Meta:
         model = Mitigation
-        fields = '__all__'
+        exclude = ['risk_instance']
+        widgets = {
+            'eta': DateInput()
+        }
 
 class ProjectsGroupUpdateForm(ModelForm):
     class Meta:
