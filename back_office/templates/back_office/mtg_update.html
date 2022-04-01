@@ -6,7 +6,62 @@
 {% endwith %}
 
 <form method="post" id="mtg_update_form">{% csrf_token %}
-{{ form }}
+{{ form.non_field_errors }}
+{{ form.errors }}
+<div class="flex flex-col space-y-4">
+    <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+        <h2 class="text-lg font-semibold mb-4">Mitigation Summary</h2>
+        <section class="flex flex-col space-y-4">
+            <div class="flex flex-col">
+                <p class="text-gray-400 text-xs">Risk Instance</p>
+                <p class="text-black text-sm font-semibold antialiased">{{ mitigation.risk_instance }}</p>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Title</p>
+                {{ form.title.errors }}
+                {{ form.title }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Type</p>
+                {{ form.type.errors }}
+                {{ form.type }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Status</p>
+                {{ form.status.errors }}
+                {{ form.status }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">ETA</p>
+                {{ form.eta.errors }}
+                {{ form.eta }}
+                <p class="text-xs text-gray-400">{{ form.eta.help_text|striptags|capfirst }}</p>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Solution</p>
+                {{ form.solution.errors }}
+                {{ form.solution }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Description</p>
+                {{ form.description.errors }}
+                {{ form.description }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Link</p>
+                {{ form.link.errors }}
+                {{ form.link }}
+                <p class="text-xs text-gray-400">{{ form.link.help_text|striptags|capfirst }}</p>
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">Effort</p>
+                {{ form.effort.errors }}
+                {{ form.effort }}
+                <p class="text-xs text-gray-400">{{ form.effort.help_text|striptags|capfirst }}</p>
+            </div>
+        </section>
+    </div>
+</div>
 
 <a href="{% url 'ra-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
 <button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>

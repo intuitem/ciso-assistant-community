@@ -8,7 +8,7 @@
     <form method="post" id="instance_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
     <div class="flex flex-row space-x-4">
-        <div class="flex flex-col space-y-4">
+        <div class="flex flex-col space-y-4 w-full">
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
                 <h2 class="text-lg font-semibold mb-4">Summary</h2>
                 <section class="flex flex-col space-y-4">
@@ -64,8 +64,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">Residual Level</p>
-                            {{ form.residual_level.errors }}
-                            {{ form.residual_level }}
+                            {{ instance.residual_level }}
                         </div>
                     </div>
                 </div>
@@ -105,8 +104,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-semibold">Current Level</p>
-                        {{ form.current_level.errors }}
-                        {{ form.current_level }}
+                        {{ instance.current_level }}
                     </div>
                 </div>
             </div>
