@@ -1,4 +1,7 @@
 {% extends 'back_office/base.html' %}
+
+{% block title %}Projects{% endblock %}
+
 {% load i18n %}
 
 {% block content %}
@@ -12,7 +15,7 @@
            New Project
     </a>
 </div>
-<div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
+<div class="inline-block min-w-full shadow rounded-lg overflow-visible px-4 bg-white">
     <table class="min-w-full leading-normal">
         <thead>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -26,6 +29,9 @@
             </th>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 {% trans "Status" %}
+            </th>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Actions" %}
             </th>
         </thead>
         <tbody>
@@ -51,11 +57,91 @@
                         {{ project.parent_group.department|capfirst }}
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {% if project.lc_status %}
-                            {{ project.lc_status }}
-                        {% else %}
-                            --
-                        {% endif %}
+                        {% if project.lc_status %}{{ project.lc_status }}{% else %}--{% endif %}
+                    </td>
+                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible">
+                        <div class="relative" x-data="{
+                            open: false,
+                            toggle() {
+                                if (this.open) {
+                                    return this.close()
+                                }
+                 
+                                this.$refs.button.focus()
+                 
+                                this.open = true
+                            },
+                            close(focusAfter) {
+                                if (! this.open) return
+                 
+                                this.open = false
+                 
+                                focusAfter && focusAfter.focus()
+                            }
+                        }"
+                        x-on:keydown.escape.prevent.stop="close($refs.button)"
+                        x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                        x-id="['dropdown-button']">
+                            <!-- Button -->
+                            <button 
+                                x-ref="button"
+                                x-on:click="toggle()"
+                                :aria-expanded="open"
+                                :aria-controls="$id('dropdown-button')"
+                                type="button"
+                                class="border border-gray-400 px-4 py-2 rounded shadow hover:bg-gray-100" 
+                            >
+                            <span aria-hidden="true">&darr;</span>
+                            </button>
+
+                            <!-- Panel -->
+                            <ul 
+                                x-ref="panel"
+                                x-show="open"
+                                x-transition.origin.top.left
+                                x-on:click.outside="close($refs.button)"
+                                :id="$id('dropdown-button')"
+                                style="display: none;"
+                                class="absolute font-normal bg-white shadow overflow-hidden rounded w-24 border mt-2 py-1 z-20"
+                            >
+                                <li>
+                                    <a href="{% url 'project-update' project.id %}" class="flex items-center px-3 py-3 hover:bg-gray-100">
+                                        <i class="fas fa-edit"></i>
+                                        <span class="ml-2">Edit</span>
+
+                                    </a>
+                                </li>
+                                <li>
+                                    <div x-data="modal()">
+                                        <a x-on:click="open()" type="button" class="flex items-center px-3 py-3 hover:bg-gray-100 cursor-pointer" data-toggle="modal" data-target="#exampleModalTwo">
+                                            <i class="fas fa-trash"></i>
+                                            <span class="ml-2">Delete</span>
+                                        </a>
+                                      
+                                        {% include 'back_office/snippets/project_delete_modal.html' %}
+                                        
+                                      </div>
+                                      
+                                      <script>
+                                        function modal() {
+                                          return {
+                                            state: 'CLOSED', // [CLOSED, TRANSITION, OPEN]
+                                            open() {
+                                              this.state = 'TRANSITION'
+                                              setTimeout(() => { this.state = 'OPEN' }, 50)
+                                            },
+                                            close() {
+                                              this.state = 'TRANSITION'
+                                              setTimeout(() => { this.state = 'CLOSED' }, 300)
+                                            },
+                                            isOpen() { return this.state === 'OPEN' },
+                                            isOpening() { return this.state !== 'CLOSED' },
+                                          }
+                                        }
+                                      </script>
+                                </li>
+                            </ul>
+                        </div>
                     </td>
                 </tr>
             {% endfor %}

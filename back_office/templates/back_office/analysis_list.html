@@ -1,4 +1,7 @@
 {% extends 'back_office/base.html' %}
+
+{% block title %}My Analyses{% endblock %}
+
 {% load i18n %}
 
 {% block content %}
@@ -57,7 +60,7 @@
                                 {{ analysis.updated_at|date }}
                             </p>
                         </td>
-                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible">
 
                             <div class="relative" x-data="{
                                 open: false,
