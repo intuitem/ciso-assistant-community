@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
-from django.http import HttpResponse, HttpResponseRedirect, request
+from django.http import HttpResponse
 from django.template import loader
 
 from django.contrib.auth.models import User, Group
@@ -175,7 +175,7 @@ class RiskInstanceCreateViewModal(PermissionRequiredMixin, CreateView):
     context_object_name = 'instance'
     form_class = RiskInstanceCreateForm
 
-class RiskAnalysisUpdateView(UpdateView, PermissionRequiredMixin):
+class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_analysis'
     model = Analysis
     template_name = 'back_office/ra_update.html'
@@ -191,7 +191,7 @@ class RiskAnalysisUpdateView(UpdateView, PermissionRequiredMixin):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
 
-class RiskAnalysisDeleteView(DeleteView, PermissionRequiredMixin):
+class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_analysis'
 
     model = Analysis
@@ -200,8 +200,28 @@ class RiskAnalysisDeleteView(DeleteView, PermissionRequiredMixin):
 
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
+
+class ProjectDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'general.delete_project'
+
+    model = Project
+    success_url = reverse_lazy('project-list')
+    template_name = 'back_office/snippets/project_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('project-list')
+
+class ProjectsGroupDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'general.delete_projectsgroup'
+
+    model = ProjectsGroup
+    success_url = reverse_lazy('pd-list')
+    template_name = 'back_office/snippets/projects_domain_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('pd-list')
    
-class RiskInstanceUpdateView(UpdateView, PermissionRequiredMixin):
+class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_riskinstance'
     model = RiskInstance
     template_name = 'back_office/ri_update.html'
@@ -217,7 +237,7 @@ class RiskInstanceUpdateView(UpdateView, PermissionRequiredMixin):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
 
-class MitigationUpdateView(UpdateView, PermissionRequiredMixin):
+class MitigationUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_mitigation'
     model = Mitigation
     template_name = 'back_office/mtg_update.html'
@@ -227,7 +247,7 @@ class MitigationUpdateView(UpdateView, PermissionRequiredMixin):
     def get_success_url(self) -> str:
         return reverse_lazy('ri-update', kwargs = {'pk': self.object.risk_instance.id})
 
-class ProjectsGroupUpdateView(UpdateView, PermissionRequiredMixin):
+class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_projectsgroup'
     model = ProjectsGroup
     template_name = 'back_office/pd_update.html'
@@ -244,7 +264,7 @@ class ProjectsGroupUpdateView(UpdateView, PermissionRequiredMixin):
     def get_success_url(self) -> str:
         return reverse_lazy('pd-list')
 
-class ProjectUpdateView(UpdateView, PermissionRequiredMixin):
+class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_project'
     model = Project
     template_name = 'back_office/project_update.html'
