@@ -10,13 +10,8 @@
     <div class="flex flex-row space-x-4">
         <div class="flex flex-col space-y-4 w-full">
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4">Summary</h2>
+                <h2 class="text-lg font-semibold mb-4">Risk Scenario</h2>
                 <section class="flex flex-col space-y-4">
-                    <div class="flex flex-col">
-                        <p class="text-gray-400 text-xs">Analysis</p>
-                        {{ form.analysis.errors }}
-                        {{ form.analysis }}
-                    </div>
                     <div class="flex flex-row space-x-6">
                         <div class="flex flex-col">
                             <p class="text-gray-400 text-xs">Project</p>
@@ -32,14 +27,19 @@
                         </div>
                     </div>
                     <div class="flex flex-col">
-                        <p class="text-sm font-semibold">Title</p>
-                        {{ form.title.errors }}
-                        {{ form.title }}
+                        <p class="text-gray-400 text-xs">Analysis</p>
+                        {{ form.analysis.errors }}
+                        {{ form.analysis }}
                     </div>
                     <div class="flex flex-col">
-                        <p class="text-sm font-semibold">Parent Risk</p>
+                        <p class="text-sm font-semibold">Threat</p>
                         {{ form.parent_risk.errors }}
                         {{ form.parent_risk }}
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="text-sm font-semibold">Subject</p>
+                        {{ form.title.errors }}
+                        {{ form.title }}
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">Scenario</p>
@@ -50,7 +50,7 @@
             </div>
             <div class="flex flex-col space-y-4">
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                    <h2 class="text-lg font-semibold mb-4">Residual Risk Level</h2>
+                    <h2 class="text-lg font-semibold mb-4">Treatment</h2>
                     <div class="flex flex-row space-x-4 mt-4">
                         <div>
                             <p class="text-sm font-semibold whitespace-nowrap">Residual Probability</p>
@@ -85,7 +85,7 @@
         </div>
         <div class="flex flex-col space-y-3 w-full">
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4">Current Risk Level</h2>
+                <h2 class="text-lg font-semibold mb-4">Current Profile</h2>
                 <p class="text-sm font-semibold">Existing Measures</p>
                 {{ form.existing_measures.errors }}
                 {{ form.existing_measures }}

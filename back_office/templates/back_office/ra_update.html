@@ -8,9 +8,9 @@
     <form method="post" id="analysis_form">{% csrf_token %}
     {{ form.non_field_errors }}
     <div class="bg-white rounded-lg shadow mb-4">
-        <div class="flex flex-row space-x-4 mb-4 divide-x">
+        <div class="flex flex-row space-x-4 mb-4">
             <div class="px-4 py-6">
-                <h2 class="text-xl font-semibold mb-4">Summary</h2>
+                <h2 class="text-xl font-semibold mb-4">Risk Analysis</h2>
                 <section class="flex flex-col space-y-4">
                     <div class="flex flex-row space-x-6">
                         <div class="flex flex-col">
@@ -32,14 +32,13 @@
                         {{ form.rating_matrix }}
                     </div>
                     <div class="flex flex-row space-x-2 items-center">
-                        <p class="text-sm font-semibold">Is Draft</p>
+                        <p class="text-sm font-semibold">Draft</p>
                         {{ form.is_draft.errors }}
                         {{ form.is_draft }}
                     </div>
                 </section>
             </div>
             <div class="px-4 py-6 w-full">
-                <h2 class="text-xl font-semibold mb-4">Analysis</h2>
                 <p class="text-sm font-semibold">Comments</p>
                 {{ form.comments.errors }}
                 {{ form.comments }}

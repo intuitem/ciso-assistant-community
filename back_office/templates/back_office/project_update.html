@@ -5,53 +5,57 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<div>
-    <form method="post" id="project_form">{% csrf_token %}
-    {{ form.non_field_errors }}
-    <div class="bg-white rounded-lg shadow mb-4">
-        <div class="flex flex-row space-x-4 mb-4 divide-x">
-            <div class="px-4 py-6">
-                <h2 class="text-xl font-semibold mb-4">Summary</h2>
-                <section class="flex flex-col space-y-4">
-                    <div class="flex flex-row space-x-6">
-                        <div class="flex flex-col">
-                            <p class="text-gray-400 text-sm">Status</p>
-                            <p class="text-md font-semibold">{{ project.lc_status }}</p>
-                        </div>
-                        <div class="flex flex-col">
-                            <p class="text-gray-400 text-sm">Internal ID</p>
-                            <p class="text-md font-semibold">{{ project.internal_id }}</p>
-                        </div>
-                        <div class="flex flex-col">
-                            <p class="text-gray-400 text-sm">Parent Domain</p>
-                            <p class="text-md font-semibold">{{ project.parent_group }}</p>
-                        </div>
+<div class="mb-4">
+    <form method="post" id="analysis_form">{% csrf_token %}
+        <div class="bg-white rounded-lg shadow px-8 py-6">
+            <section class="flex flex-col space-y-4 mb-2">
+                <div class="flex flex-row space-x-6">
+                    <div class="flex flex-col w-full">
+                        <div class="inline"></div>
+                        <p class="text-sm font-semibold">Project Name</p>
+                        {{ form.name.errors }}
+                        {{ form.name }}
                     </div>
-                </section>
-            </div>
-            <div class="px-4 py-6 w-full">
-                <h2 class="text-xl font-semibold mb-4">Project</h2>
-                <p class="text-sm font-semibold">Summary</p>
-                {{ form.summary.errors }}
-                {{ form.summary }}
-                <p class="text-xs text-gray-400">{{ form.comments.help_text|striptags|capfirst }}</p>
+                    <div class="flex flex-col w-full">
+                        <p class="text-sm font-semibold">Internal ID</p>
+                        {{ form.internal_id.errors }}
+                        {{ form.internal_id }}
+                    </div>
+
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-sm font-semibold">Parent Domain</p>
+                    {{ form.parent_group.errors }}
+                    {{ form.parent_group }}
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-sm font-semibold">Status</p>
+                    {{ form.lc_statuserrors }}
+                    {{ form.lc_status}}
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-sm font-semibold">Summary</p>
+                    {{ form.summary.errors }}
+                    {{ form.summary }}
+                </div>
+            </section>
+            <div class="place-content-end">
+                <a href="{% url 'project-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
+                <button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
             </div>
         </div>
-        <a href="{% url 'ra-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
-        <button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
-    </div>
-    </div>
     </form>
-    <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
-        <div class="grid justify-items-stretch grid-cols-2 mb-2">
-            <h2 class="text-xl font-semibold">Associated Risk Analyses</h2>
-            <a href="{% url 'ra-create' %}"
-               class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-2 py-1">
-               <i class="fas fa-plus"></i>
-               New Risk Analysis
-            </a>
-        </div>
-        {% include 'back_office/snippets/ra_list_nested.html' %}
-    </div>
 </div>
+<div class="bg-white rounded-lg shadow px-4 py-6 w-full">
+    <div class="grid justify-items-stretch grid-cols-2 mb-2">
+        <h2 class="text-xl font-semibold">Associated Risk Analyses</h2>
+        <a href="{% url 'ra-create' %}"
+            class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-2 py-1">
+            <i class="fas fa-plus"></i>
+            New Risk Analysis
+        </a>
+    </div>
+    {% include 'back_office/snippets/ra_list_nested.html' %}
+</div>
+
 {% endblock %}
