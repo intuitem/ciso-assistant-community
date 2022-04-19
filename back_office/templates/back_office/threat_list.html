@@ -1,0 +1,34 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+
+{% block content %}
+{% with page_title='Threats' %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+<div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
+    <table class="min-w-full leading-normal">
+        <thead>
+            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                {% trans "Threat" %}
+            </th>
+        </thead>
+        <tbody>
+            {% for threat in threats %}
+                <tr>
+                    <td class="px-3 py-3 border-b border-gray-200 bg-white text-sm">
+                        <div class="flex items-center">
+                            <div class="">
+                                <a id="instance{{ threat.id }}" href="#"
+                                class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    {{ threat.title|capfirst }}
+                                </a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include 'back_office/snippets/paginator.html' %}
+</div>
+{% endblock %}

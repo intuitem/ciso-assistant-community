@@ -7,7 +7,7 @@ from django.template import loader
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
-from general.models import Project, ProjectsGroup
+from general.models import ParentRisk, Project, ProjectsGroup
 from .forms import *
 
 # Create your views here.
@@ -231,7 +231,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mitigations'] = Mitigation.objects.all()
-        context['crumbs'] = ['Risk Instances']
+        context['crumbs'] = ['Risk Scenarios']
         return context
 
     def get_success_url(self) -> str:
@@ -290,3 +290,12 @@ class ProjectCreateView(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('project-list')
+
+class ParentRiskListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_parentrisk'
+    template_name = 'back_office/threat_list.html'
+    context_object_name = 'threats'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = ParentRisk
