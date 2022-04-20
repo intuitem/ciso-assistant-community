@@ -84,11 +84,17 @@ export DB_HOST=<>
 (venv)$ python manage.py createsuperuser
 ```
 
-7. Run development server
+7. Install Tailwind's dependencies and build the css stylesheets
+```sh
+(venv)$ python manage.py tailwind install
+(venv)$ python manage.py tailwind build
+```
+
+8. Run development server
 
 You may chose to run it dockerized or not.
 ```sh
-(venv)$ docker-compose up
+$ docker-compose up
 ```
 **OR**
 ```sh
