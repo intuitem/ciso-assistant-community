@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 
 from django.contrib.auth.models import User, Group
@@ -27,6 +27,11 @@ class ProjectListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = Project
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['project_create_form'] = ProjectForm
+        return context
+
 class ProjectsGroupListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_projectsgroup'
     template_name = 'back_office/project_domain_list.html'
@@ -35,6 +40,11 @@ class ProjectsGroupListView(PermissionRequiredMixin, ListView):
     ordering = 'id'
     paginate_by = 10
     model = ProjectsGroup
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['projects_domain_create_form'] = ProjectsGroupUpdateForm
+        return context
 
 class RiskAnalysisListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_analysis'
@@ -51,6 +61,11 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
         else:
             agg_data = Analysis.objects.all().order_by('is_draft', 'id')
         return agg_data
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['analysis_create_form'] = RiskAnalysisCreateForm
+        return context
 
 class RiskInstanceListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_riskinstance'
@@ -137,10 +152,32 @@ class RiskAnalysisCreateView(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
 
+class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_analysis'
+    model = Analysis
+    template_name = 'back_office/snippets/analysis_create_modal.html'
+    context_object_name = 'analysis'
+    form_class = RiskAnalysisCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ra-list')
+
 class ProjectsGroupCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_projectsgroup'
     model = ProjectsGroup
     template_name = 'back_office/pd_update.html'
+    context_object_name = 'domain'
+    form_class = ProjectsGroupUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('pd-list')
+
+class ProjectsGroupCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'general.add_projectsgroup'
+
+    model = ProjectsGroup
+    success_url = reverse_lazy('pd-list')
+    template_name = 'back_office/snippets/projects_domain_create_modal.html'
     context_object_name = 'domain'
     form_class = ProjectsGroupUpdateForm
 
@@ -259,6 +296,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
         context['projects'] = Project.objects.all()
         crumbs = ['Projects Domains']
         context['crumbs'] = crumbs
+        context['project_create_form'] = ProjectForm
         return context
 
     def get_success_url(self) -> str:
@@ -290,6 +328,29 @@ class ProjectCreateView(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('project-list')
+
+class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'general.add_project'
+    model = Project
+    template_name = 'back_office/snippets/project_create_modal.html'
+    context_object_name = 'project'
+    form_class = ProjectForm
+
+    # def get(self, request):
+    #     next_url = request.GET.get('next')
+    #     return render(request, template_name=self.template_name, context={'form': self.form_class, 'next': next_url})
+    #     return redirect(next_url)
+
+    # def post(self, request):
+    #     form = ProjectForm(request.POST)
+    #     next_url = request.POST.get('next') if 'next' in request.POST else 'project-list'
+    #     return redirect(next_url)
+
+    def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        print(next_url)
+        print(self.request.path)
+        return redirect(next_url) if next_url is not None else reverse_lazy('project-list')
 
 class ParentRiskListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_parentrisk'

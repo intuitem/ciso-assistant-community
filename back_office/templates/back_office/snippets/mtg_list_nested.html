@@ -4,22 +4,30 @@
 <table class="min-w-full leading-normal">
     <thead>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "ID" %}
+        </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Title" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Type" %}
+            {% trans "Parent function" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Solution" %}
+            {% trans "Status" %}
         </th>
     </thead>
     <tbody>
         {% for mitigation in mitigations %}{% if mitigation.risk_instance == instance %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                        {{ mitigation.id }}
+                    </p>
+                </td>
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
-                        <div class="ml-3">
+                        <div class="">
                             <a id="mitigation{{ mitigation.id }}" href="{% url 'mtg-update' mitigation.id %}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ mitigation.title }}
@@ -29,12 +37,12 @@
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if mitigation.type %}{{ mitigation.type }}{% else %}--{% endif %}
+                        {% if mitigation.solution %}{{ mitigation.solution }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {% if mitigation.solution %}{{ mitigation.solution }}{% else %}--{% endif %}
+                        {{ mitigation.status }}
                     </p>
                 </td>
             </tr>

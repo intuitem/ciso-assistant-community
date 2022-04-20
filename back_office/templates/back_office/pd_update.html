@@ -1,5 +1,5 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 {% block content %}
 {% with page_title=domain %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
@@ -29,7 +29,13 @@
     </form>
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
         <h2 class="text-xl font-semibold mb-4">Associated Projects</h2>
-        <a href="{% url 'project-create'%}" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">New Project</a>
+        <div x-data="modal()">
+            <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+            class="justify-self-end rounded cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2">
+                <i class="fas fa-plus mr-2"></i>New Project</a>
+                {% include "back_office/snippets/project_create_modal.html" %}
+        </div>
+        <script src="{% static 'js/modal.js' %}"></script>
         {% include 'back_office/snippets/project_list_nested.html' %}
     </div>
 </div>

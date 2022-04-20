@@ -8,13 +8,19 @@
 {% with page_title='Projects' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
-<div class="grid mb-4">
-    <a href="{% url 'project-create' %}"
+<style>
+    [x-cloak] { display: none }
+</style>
+<div class="grid mb-4"
+        x-data="modal()">
+    <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
            class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2">
            <i class="fas fa-plus"></i>
            New Project
     </a>
+    {% include "back_office/snippets/project_create_modal.html" %}
 </div>
+<script src="{% static 'js/modal.js' %}"></script>
 <div class="inline-block min-w-full shadow rounded-lg overflow-visible px-4 bg-white">
     <table class="min-w-full leading-normal">
         <thead>

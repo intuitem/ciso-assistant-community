@@ -7,8 +7,8 @@
 <div>
     <form method="post" id="instance_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
-    <div class="flex flex-row space-x-4">
-        <div class="flex flex-col space-y-4 w-full">
+    <div class="flex flex-col space-y-8">
+        <section class="flex flex-row space-x-8 w-full">
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
                 <h2 class="text-lg font-semibold mb-4">Risk Scenario</h2>
                 <section class="flex flex-col space-y-4">
@@ -48,7 +48,43 @@
                     </div>
                 </section>
             </div>
-            <div class="flex flex-col space-y-4">
+            <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
+                <h2 class="text-lg font-semibold mb-4">Current Profile</h2>
+                <p class="text-sm font-semibold">Existing Measures</p>
+                {{ form.existing_measures.errors }}
+                {{ form.existing_measures }}
+                <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
+                
+                <div class="flex flex-row space-x-8 mt-4">
+                    <div>
+                        <p class="text-sm font-semibold">Current Probability</p>
+                        {{ form.current_proba.errors }}
+                        {{ form.current_proba }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold">Current Impact</p>
+                        {{ form.current_impact.errors }}
+                        {{ form.current_impact }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold">Current Level</p>
+                        {{ instance.current_level }}
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="flex flex-row space-x-8 w-full">
+
+            <div class="flex flex-row space-x-4 mb-4 w-full">
+                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
+                    <h2 class="text-lg font-semibold mb-4">Associated Measures</h2>
+                    {% include 'back_office/snippets/mtg_list_nested.html' %}
+                </div>
+            </div>
+            <div class="items-center self-center">
+                <i class="scale-[5] scale-y-[3] fas fa-caret-right text-warmgray-700 drop-shadow-xs"></i>
+            </div>
+            <div class="flex flex-col space-y-4 w-full">
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
                     <h2 class="text-lg font-semibold mb-4">Treatment</h2>
                     <div class="flex flex-row space-x-4 mt-4">
@@ -82,39 +118,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="flex flex-col space-y-3 w-full">
-            <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4">Current Profile</h2>
-                <p class="text-sm font-semibold">Existing Measures</p>
-                {{ form.existing_measures.errors }}
-                {{ form.existing_measures }}
-                <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
-                
-                <div class="flex flex-row space-x-8 mt-4">
-                    <div>
-                        <p class="text-sm font-semibold">Current Probability</p>
-                        {{ form.current_proba.errors }}
-                        {{ form.current_proba }}
-                    </div>
-                    <div>
-                        <p class="text-sm font-semibold">Current Impact</p>
-                        {{ form.current_impact.errors }}
-                        {{ form.current_impact }}
-                    </div>
-                    <div>
-                        <p class="text-sm font-semibold">Current Level</p>
-                        {{ instance.current_level }}
-                    </div>
-                </div>
-            </div>
-            <div class="flex flex-row space-x-4 mb-4">
-                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
-                    <h2 class="text-lg font-semibold mb-4">Associated Measures</h2>
-                    {% include 'back_office/snippets/mtg_list_nested.html' %}
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
     <a href="{% url 'ri-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
     <input type="hidden" name="next" value="{{ request.path }}">

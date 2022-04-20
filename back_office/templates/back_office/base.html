@@ -14,7 +14,7 @@
 
 	<body class="bg-gray-100">
 		
-		<div x-data="{ sidebarOpen: true }" class="flex overflow-x-hidden h-screen">
+		<div x-data="{ sidebarOpen: true }" class="flex h-screen">
 			<aside class="flex-shrink-0 w-64 flex flex-col border-r transition-all duration-300" :class="{ '-ml-64': !sidebarOpen }">
 				<nav class="flex-1 flex flex-col bg-white">
 					<div class="flex items-center justify-center h-14">
@@ -28,7 +28,7 @@
 							</div>
 						</li>
 						<li>
-							<a href="{% url 'index' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'index' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-home"></i>
 							</span>
@@ -37,7 +37,7 @@
 						</li>
 						{% if perms.core.view_analysis %}
 						<li>
-							<a href="{% url 'ra-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'ra-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-glasses"></i>
 							</span>
@@ -47,7 +47,7 @@
 						{% endif %}
 						{% if perms.core.view_riskinstance %}
 						<li>
-							<a href="{% url 'ri-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'ri-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-clone"></i>
 							</span>
@@ -57,7 +57,7 @@
 						{% endif %}
 						{% if perms.core.view_mitigation %}
 						<li>
-							<a href="{% url 'mtg-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'mtg-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-fire-extinguisher"></i>
 							</span>
@@ -67,7 +67,7 @@
 						{% endif %}
 						{% if perms.core.view_riskacceptance %}
 						<li>
-							<a href="{% url 'acceptance-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'acceptance-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-user-tie"></i>
 							</span>
@@ -78,7 +78,7 @@
 				
 						{% if perms.general.view_projectsgroup %}
 						<li>
-							<a href="{% url 'pd-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'pd-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-sitemap"></i>
 							</span>
@@ -88,7 +88,7 @@
 						{% endif %}
 						{% if perms.general.view_project %}
 						<li>
-							<a href="{% url 'project-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'project-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-cubes"></i>
 							</span>
@@ -98,7 +98,7 @@
 						{% endif %}
 						{% if perms.general.view_parentrisk %}
 						<li>
-							<a href="{% url 'threat-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'threat-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-folder"></i>
 							</span>
@@ -108,7 +108,7 @@
 						{% endif %}
 						{% if perms.general.view_solution %}
 						<li>
-							<a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-cogs"></i>
 							</span>
@@ -123,7 +123,7 @@
 							</div>
 						</li>
 						<li>
-							<a href="{% url 'xrays' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'xrays' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-bolt"></i>
 							</span>
@@ -131,7 +131,7 @@
 							</a>
 						</li>
 						<li>
-							<a href="{% url 'matrix' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'matrix' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-border-all"></i>
 							</span>
@@ -139,7 +139,7 @@
 							</a>
 						</li>
 						<li>
-							<a href="{% url 'scoring' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'scoring' %}" target="blank" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-star-half-alt"></i>
 							</span>
@@ -155,7 +155,7 @@
 				
 						{% if perms.auth.view_group %}
 						<li>
-							<a href="{% url 'group-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'group-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-user-tag"></i>
 							</span>
@@ -165,7 +165,7 @@
 						{% endif %}
 						{% if perms.auth.view_user %}
 						<li>
-							<a href="{% url 'user-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="{% url 'user-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-users"></i>
 							</span>
@@ -174,7 +174,7 @@
 						</li>
 						{% endif %}
 						<li>
-							<a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-blue-500 pr-6">
+							<a href="#" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-question-circle"></i>
 							</span>
