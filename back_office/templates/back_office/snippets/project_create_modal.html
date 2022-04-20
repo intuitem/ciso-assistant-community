@@ -1,0 +1,102 @@
+<!-- MODAL CONTAINER WITH BACKDROP -->
+<div x-cloak  x-show="isOpening()">
+                                          
+  <!-- MODAL -->
+  <div
+    :class="{ 'opacity-0': isOpening(), 'opacity-100': isOpen() }"
+    class="fixed z-50 top-0 left-0 w-full h-full outline-none transition-opacity duration-200 linear"
+    tabindex="-1"
+    role="dialog"
+  >
+
+    <!-- MODAL DIALOG -->
+    <div
+      :class="{ 'mt-4': isOpening(), 'mt-8': isOpen() }"
+      class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto transition-all duration-200 ease-out"
+    >
+
+      <!-- MODAL CONTAINER -->
+      <div class="relative flex flex-col w-full pointer-events-auto bg-white border border-gray-300 rounded-lg shadow-xl">
+        <div class="flex items-start justify-between p-4 border-b border-gray-300 rounded-t">
+          <h5 class="mb-0 text-md leading-normal font-semibold">Add Project</h5>
+          <button
+            type="button"
+            class="close"
+            x-on:click="close()"
+          >&times;</button>
+        </div>
+        <div class="flex p-8 flex-col border-t border-gray-300">
+          <form action="{% url 'project-create-modal' %}" method="post">{% csrf_token %}
+            {{ project_create_form.non_field_errors }}
+            {{ project_create_form.errors }}
+
+            {% comment %} {{ project_create_form }} {% endcomment %}
+            <div class="grid grid-cols-8 gap-y-6 font-medium">
+                <div class="col-span-2">
+                  <p>{{ project_create_form.name.label|striptags }}</p>
+                </div>
+                <div class="col-span-6">
+                  {{ project_create_form.name.errors }}
+                  {{ project_create_form.name }}
+                </div>
+                
+                <div class="col-span-2">
+                  <p>{{ project_create_form.internal_id.label|striptags }}</p>
+                </div>
+                <div class="col-span-6">
+                  {{ project_create_form.internal_id.errors }}
+                  {{ project_create_form.internal_id }}
+                </div>
+                
+                <div class="col-span-2">
+                  <p>{{ project_create_form.parent_group.label|striptags }}</p>
+                </div>
+                <div class="col-span-6">
+                  {{ project_create_form.parent_group.errors }}
+                  {{ project_create_form.parent_group }}
+                </div>
+                
+                <div class="col-span-2">
+                  <p>{{ project_create_form.lc_status.label|striptags }}</p>
+                </div>
+                <div class="col-span-6">
+                  {{ project_create_form.lc_status.errors }}
+                  {{ project_create_form.lc_status }}
+                </div>
+                
+                <div class="col-span-2">
+                  <p>{{ project_create_form.summary.label|striptags }}</p>
+                </div>
+                <div class="col-span-6">
+                  {{ project_create_form.summary.errors }}
+                  {{ project_create_form.summary }}
+                  <p class="text-xs font-normal text-gray-400">{{ project_create_form.summary.help_text|striptags }}</p>
+                </div>
+                
+                <section class="col-start-3 col-span-6 place-content-end">
+                  
+                  <section class="grid grid-cols-2 place-content-end">
+                    <button
+                    x-on:click="close()"
+                    type="button"
+                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2"
+                  >Cancel</button>
+                  <input type="hidden" name="next" value="{{ request.path|urlencode }}">
+                  <button type="submit" class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-600 hover:bg-indigo-700 mr-2">
+                    Save
+                  </button>
+                </section>
+              </section>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKDROP -->
+  <div
+    :class="{ 'opacity-25': isOpen() }"
+    class="z-40 fixed top-0 left-0 bottom-0 right-0 bg-black opacity-0 transition-opacity duration-200 linear"
+  ></div>
+</div>
