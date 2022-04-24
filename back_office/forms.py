@@ -77,8 +77,8 @@ class ProjectsGroupUpdateForm(ModelForm):
         model = ProjectsGroup
         fields = '__all__'
         widgets = { # Tailwind Styles go here
-            'name': TextInput(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'department': TextInput(attrs={'class': 'w-full rounded-md text-sm h-32'}),
+            'name': TextInput(attrs={'class': 'w-full rounded text-sm h-32 border border-gray-300'}),
+            'department': TextInput(attrs={'class': 'w-full rounded text-sm h-32 border border-gray-300'}),
         }
 
 class ProjectUpdateForm(ModelForm):
