@@ -91,9 +91,9 @@ class ProjectForm(ModelForm):
         model = Project
         fields = '__all__'
         widgets = {
-            'name': TextInput(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'internal_id': TextInput(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'parent_group': Select(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'lc_status': Select(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'summary': Textarea(attrs={'class': 'w-full rounded-md text-sm h-32'}),
+            'name': TextInput(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32'}),
+            'internal_id': TextInput(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
+            'parent_group': Select(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
+            'lc_status': Select(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
+            'summary': Textarea(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
         }
