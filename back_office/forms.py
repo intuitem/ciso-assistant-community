@@ -3,12 +3,28 @@ from django.forms import DateInput, DateTimeInput, ModelForm, Select, TextInput,
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, Mitigation, RiskInstance
-from general.models import Project, ProjectsGroup
+from general.models import Project, ProjectsGroup, Solution
 
 class RiskAnalysisCreateForm(ModelForm):
     class Meta:
         model = Analysis
         fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
+        widgets = { # Tailwind Styles go here
+            'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
+        }
+
+class MeasureCreateForm(ModelForm):
+    class Meta:
+        model = Mitigation
+        fields = '__all__'
+        widgets = { # Tailwind Styles go here
+            'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
+        }
+
+class SecurityFunctionCreateForm(ModelForm):
+    class Meta:
+        model = Solution
+        fields = '__all__'
         widgets = { # Tailwind Styles go here
             'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
         }

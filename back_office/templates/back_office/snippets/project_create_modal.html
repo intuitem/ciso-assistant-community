@@ -4,14 +4,14 @@
   <!-- MODAL -->
   <div
     :class="{ 'opacity-0': isOpening(), 'opacity-100': isOpen() }"
-    class="fixed z-50 top-0 left-0 w-full h-full outline-none transition-opacity duration-200 linear"
+    class="fixed z-50 top-0 left-0 w-full h-full outline-none transition-opacity duration-200 linear overflow-y-auto"
     tabindex="-1"
     role="dialog"
   >
 
     <!-- MODAL DIALOG -->
     <div
-      :class="{ 'mt-4': isOpening(), 'mt-8': isOpen() }"
+      :class="{ 'my-4': isOpening(), 'my-8': isOpen() }"
       class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto transition-all duration-200 ease-out"
     >
 

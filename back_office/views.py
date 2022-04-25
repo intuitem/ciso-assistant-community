@@ -7,7 +7,7 @@ from django.template import loader
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
-from general.models import ParentRisk, Project, ProjectsGroup
+from general.models import ParentRisk, Project, ProjectsGroup, Solution
 from .forms import *
 
 # Create your views here.
@@ -92,12 +92,31 @@ class MitigationListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = Mitigation
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['measure_create_form'] = MeasureCreateForm
+        return context
+
     def get_queryset(self):
         if not self.request.user.is_superuser:
-            agg_data = Mitigation.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('risk_instance', 'id')
+            agg_data = RiskInstance.objects.filter(analysis__auditor=self.request.user).order_by('id')
         else:
-            agg_data = Mitigation.objects.all().order_by('risk_instance', 'id')
+            agg_data = RiskInstance.objects.all().order_by('id')
         return agg_data
+
+class SecurityFunctionListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_solution'
+    template_name = 'back_office/security_function_list.html'
+    context_object_name = 'functions'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = Solution
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['security_function_create_form'] = SecurityFunctionCreateForm
+        return context
 
 class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_riskacceptance'
@@ -151,6 +170,26 @@ class RiskAnalysisCreateView(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
+
+class MeasureCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_mitigation'
+    model = Mitigation
+    template_name = 'back_office/snippets/measure_create_modal.html'
+    context_object_name = 'measure'
+    form_class = MeasureCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('mtg-list')
+
+class SecurityFunctionCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_solution'
+    model = Solution
+    template_name = 'back_office/snippets/security_function_create_modal.html'
+    context_object_name = 'function'
+    form_class = SecurityFunctionCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('mtg-list')
 
 class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_analysis'

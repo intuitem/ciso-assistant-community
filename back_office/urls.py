@@ -15,6 +15,7 @@ urlpatterns = [
     path('projects-domains/', login_required(views.ProjectsGroupListView.as_view()), name='pd-list'),
     path('projects/', login_required(views.ProjectListView.as_view()), name='project-list'),
     path('threats/', login_required(views.ParentRiskListView.as_view()), name='threat-list'),
+    path('security-functions/', login_required(views.SecurityFunctionListView.as_view()), name='security-function-list'),
 
     path('users/', login_required(views.UserListView.as_view()), name='user-list'),
     path('groups/', login_required(views.GroupListView.as_view()), name='group-list'),
@@ -22,6 +23,10 @@ urlpatterns = [
     # CREATE VIEWS
     path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='ra-create'),
     path('RA/create_modal/', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create-modal'),
+    
+    path('MSR/create_modal/', login_required(views.MeasureCreateViewModal.as_view()), name='measure-create-modal'),
+    
+    path('SF/create_modal/', login_required(views.SecurityFunctionCreateViewModal.as_view()), name='security-function-create-modal'),
 
     path('RA/<int:parent_analysis>/RI/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
 

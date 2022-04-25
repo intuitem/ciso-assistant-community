@@ -1,7 +1,13 @@
 {% load i18n %}
 {% load static tailwind_tags %}
 <div class="grid grid-rows-3 grid-cols-1 -mx-8 h-28 bg-white px-4 py-2 mb-8">
-    <h1 class="text-2xl font-bold">{{ page_title }}</h1>
+    <div class="flex flex-row space-x-4">
+        <!-- SIDEBAR TOGGLE -->
+        <button class="w-8 h-8 content-center self-center bg-white" @click="sidebarOpen = !sidebarOpen">
+            <i :class="sidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
+        </button>
+        <h1 class="text-2xl font-bold">{{ page_title }}</h1>
+    </div>
     <div class="w-full h-0 border-b my-auto"></div>
     <div class="inline-flex items-center text-sm font-semibold antialiased">
         <span class="inline-flex justify-center items-center mr-1">

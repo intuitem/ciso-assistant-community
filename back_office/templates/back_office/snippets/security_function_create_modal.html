@@ -18,7 +18,7 @@
         <!-- MODAL CONTAINER -->
         <div class="relative flex flex-col w-full pointer-events-auto bg-white border border-gray-300 rounded-lg shadow-xl">
           <div class="flex items-start justify-between p-4 border-b border-gray-300 rounded-t">
-            <h5 class="mb-0 text-md leading-normal font-semibold">Add Analysis</h5>
+            <h5 class="mb-0 text-md leading-normal font-semibold">Add Security Function</h5>
             <button
               type="button"
               class="close"
@@ -26,50 +26,51 @@
             >&times;</button>
           </div>
           <div class="flex p-8 flex-col border-t border-gray-300">
-            <form action="{% url 'analysis-create-modal' %}" method="post">{% csrf_token %}
-              {{ analysis_create_form.non_field_errors }}
-              {{ analysis_create_form.errors }}
+            <form action="{% url 'security-function-create-modal' %}" method="post">{% csrf_token %}
+              {{ security_function_create_form.non_field_errors }}
+              {{ security_function_create_form.errors }}
+              {{ security_function_create_form.as_p }}
   
-              {% comment %} {{ analysis_create_form }} {% endcomment %}
+              {% comment %} {{ security_function_create_form }} {% endcomment %}
               <div class="grid grid-cols-8 gap-y-6 font-medium">
                   <div class="col-span-2">
-                    <p>{{ analysis_create_form.project.label|striptags }}</p>
+                    <p>{{ security_function_create_form.project.label|striptags }}</p>
                   </div>
                   <div class="col-span-6">
-                    {{ analysis_create_form.project.errors }}
-                    {{ analysis_create_form.project }}
+                    {{ security_function_create_form.project.errors }}
+                    {{ security_function_create_form.project }}
                   </div>
                   
                   <div class="col-span-2">
-                    <p>{{ analysis_create_form.auditor.label|striptags }}</p>
+                    <p>{{ security_function_create_form.auditor.label|striptags }}</p>
                   </div>
                   <div class="col-span-6">
-                    {{ analysis_create_form.auditor.errors }}
-                    {{ analysis_create_form.auditor }}
+                    {{ security_function_create_form.auditor.errors }}
+                    {{ security_function_create_form.auditor }}
                   </div>
                   
                   <div class="col-span-2">
-                    <p>{{ analysis_create_form.rating_matrix.label|striptags }}</p>
+                    <p>{{ security_function_create_form.rating_matrix.label|striptags }}</p>
                   </div>
                   <div class="col-span-6">
-                    {{ analysis_create_form.rating_matrix.errors }}
-                    {{ analysis_create_form.rating_matrix }}
+                    {{ security_function_create_form.rating_matrix.errors }}
+                    {{ security_function_create_form.rating_matrix }}
                   </div>
                   
                   <div class="col-span-2">
-                    <p>{{ analysis_create_form.comments.label|striptags }}</p>
+                    <p>{{ security_function_create_form.comments.label|striptags }}</p>
                   </div>
                   <div class="col-span-6">
-                    {{ analysis_create_form.comments.errors }}
-                    {{ analysis_create_form.comments }}
-                    <p class="text-xs font-normal text-gray-400">{{ analysis_create_form.comments.help_text|striptags }}</p>
+                    {{ security_function_create_form.comments.errors }}
+                    {{ security_function_create_form.comments }}
+                    <p class="text-xs font-normal text-gray-400">{{ security_function_create_form.comments.help_text|striptags }}</p>
                   </div>
                   <div class="col-span-2">
-                    <p>{{ analysis_create_form.is_draft.label|striptags }}</p>
+                    <p>{{ security_function_create_form.is_draft.label|striptags }}</p>
                   </div>
                   <div class="col-span-6">
-                    {{ analysis_create_form.is_draft.errors }}
-                    {{ analysis_create_form.is_draft }}
+                    {{ security_function_create_form.is_draft.errors }}
+                    {{ security_function_create_form.is_draft }}
                   </div>
                   
                   <section class="col-start-3 col-span-6 place-content-end">
