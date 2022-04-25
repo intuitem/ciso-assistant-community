@@ -1,51 +1,58 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
-{% with page_title='Risk Scenarios' %}
+{% with page_title='Security Functions' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
+<div class="grid mb-4"
+    x-data="modal()">
+    <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+        class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 cursor-pointer">
+        <i class="fas fa-plus"></i>
+        New Security Function
+    </a>
+    {% include "back_office/snippets/security_function_create_modal.html" %}
+    <script src="{% static 'js/modal.js' %}"></script>
+</div>
 <div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
     <table class="min-w-full leading-normal">
         <thead>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Title" %}
+                {% trans "Name" %}
             </th>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Parent Risk" %}
+                {% trans "Provider" %}
             </th>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Parent Project" %}
-            </th>
-            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Treatment Status" %}
+                {% trans "Contact" %}
             </th>
         </thead>
         <tbody>
-            {% for instance in instances %}
+            {% for function in functions %}
                 <tr>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <div class="flex items-center">
+
                             <div class="">
-                                <a id="instance{{ instance.id }}" href="{% url 'ri-update' instance.id %}"
+                                <a id="function{{ function.id }}" href="{% url 'mtg-update' function.id %}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                    {{ instance.title|capfirst }}
+                                    {{ function.name|capfirst }}
                                 </a>
                             </div>
                         </div>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap capitalize">
-                            {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
-                        </p>
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <p class="text-gray-900 whitespace-no-wrap">
-                            {{ instance.parent_project }}
+                            {{ function.provider }}
                         </p>
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {{ instance.treatment }}
+                        {% if function.contact %}
+                            {{ function.contact }}
+                        {% else %}
+                            --
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}

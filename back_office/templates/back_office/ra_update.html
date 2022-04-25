@@ -4,13 +4,14 @@
 {% with page_title=analysis %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
+
 <div>
     <form method="post" id="analysis_form">{% csrf_token %}
     {{ form.non_field_errors }}
-    <div class="bg-white rounded-lg shadow">
-        <div class="flex flex-row space-x-4 mb-4 divide-x">
+    <div class="bg-white rounded-lg shadow mb-4 px-4">
+        <div class="flex flex-row space-x-4 mb-4">
             <div class="px-4 py-6">
-                <h2 class="text-xl font-semibold mb-4">Summary</h2>
+                <h2 class="text-xl font-semibold mb-4">Risk Analysis</h2>
                 <section class="flex flex-col space-y-4">
                     <div class="flex flex-row space-x-6">
                         <div class="flex flex-col">
@@ -32,27 +33,35 @@
                         {{ form.rating_matrix }}
                     </div>
                     <div class="flex flex-row space-x-2 items-center">
-                        <p class="text-sm font-semibold">Is Draft</p>
+                        <p class="text-sm font-semibold">Draft</p>
                         {{ form.is_draft.errors }}
                         {{ form.is_draft }}
                     </div>
                 </section>
             </div>
             <div class="px-4 py-6 w-full">
-                <h2 class="text-xl font-semibold mb-4">Analysis</h2>
                 <p class="text-sm font-semibold">Comments</p>
                 {{ form.comments.errors }}
                 {{ form.comments }}
                 <p class="text-xs text-gray-400">{{ form.comments.help_text|striptags|capfirst }}</p>
+                <div class="flex justify-end space-x-2">
+                    <a href="{% url 'ra-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
+                    <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+                </div>
             </div>
         </div>
-        <a href="{% url 'ra-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
-        <button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
-    </div>
     </div>
     </form>
+</div>
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
-        <h2 class="text-xl font-semibold mb-4">Associated Risk Instances</h2>
+        <div class="grid justify-items-stretch grid-cols-2 mb-2">
+            <h2 class="text-xl font-semibold">Associated Risk Scenarios</h2>
+            <a href="{% url 'ri-create' parent_analysis=analysis.id %}"
+               class="justify-self-end rounded bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1">
+               <i class="fas fa-plus"></i>
+               New Risk Scenario
+            </a>
+        </div>
         {% include 'back_office/snippets/ri_list_nested.html' %}
     </div>
 </div>

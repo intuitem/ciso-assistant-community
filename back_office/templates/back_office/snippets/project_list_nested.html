@@ -4,44 +4,38 @@
 <table class="min-w-full leading-normal">
     <thead>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Title" %}
+            {% trans "Name" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Parent Risk" %}
+            {% trans "Department" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Current Risk Level" %}
-        </th>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Residual Risk Level" %}
+            {% trans "Status" %}
         </th>
     </thead>
     <tbody>
-        {% for instance in instances %}{% if instance.analysis == analysis %}
+        {% for project in projects %}{% if project.parent_group == domain %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
-                        <div class="ml-0">
-                            <a id="instance{{ instance.id }}" href="{% url 'ri-update' instance.id %}"
+                        <div class="ml-3">
+                            <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                {{ instance.title }}
+                                {{ project.name }}
                             </a>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
+                        {% if project.department %}{{ project.department }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {{ instance.current_level }}
+                        {{ project.lc_status }}
                     </p>
-                </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.residual_level }}
                 </td>
             </tr>
         {% endif %}{% endfor %}

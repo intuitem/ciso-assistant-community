@@ -1,0 +1,61 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+{% block content %}
+{% with page_title=project %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<div class="mb-4">
+    <form method="post" id="analysis_form">{% csrf_token %}
+        <div class="bg-white rounded-lg shadow px-8 py-6">
+            <section class="flex flex-col space-y-4 mb-2">
+                <div class="flex flex-row space-x-6">
+                    <div class="flex flex-col w-full">
+                        <div class="inline"></div>
+                        <p class="text-sm font-semibold">Project Name</p>
+                        {{ form.name.errors }}
+                        {{ form.name }}
+                    </div>
+                    <div class="flex flex-col w-full">
+                        <p class="text-sm font-semibold">Internal ID</p>
+                        {{ form.internal_id.errors }}
+                        {{ form.internal_id }}
+                    </div>
+
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-sm font-semibold">Parent Domain</p>
+                    {{ form.parent_group.errors }}
+                    {{ form.parent_group }}
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-sm font-semibold">Status</p>
+                    {{ form.lc_statuserrors }}
+                    {{ form.lc_status}}
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-sm font-semibold">Summary</p>
+                    {{ form.summary.errors }}
+                    {{ form.summary }}
+                </div>
+            </section>
+            <div class="flex justify-end space-x-2">
+                <a href="{% url 'project-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
+                <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="bg-white rounded-lg shadow px-4 py-6 w-full">
+    <div class="grid justify-items-stretch grid-cols-2 mb-2">
+        <h2 class="text-xl font-semibold">Associated Risk Analyses</h2>
+        <a href="{% url 'ra-create' %}"
+            class="justify-self-end rounded bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1">
+            <i class="fas fa-plus"></i>
+            New Risk Analysis
+        </a>
+    </div>
+    {% include 'back_office/snippets/ra_list_nested.html' %}
+</div>
+
+{% endblock %}

@@ -1,10 +1,20 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
-{% with page_title='Mitigations' %}
+{% with page_title='Measures' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
+<div class="grid mb-4"
+x-data="modal()">
+<a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+       class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 cursor-pointer">
+       <i class="fas fa-plus"></i>
+       New Measure
+</a>
+{% include "back_office/snippets/measure_create_modal.html" %}
+<script src="{% static 'js/modal.js' %}"></script>
+</div>
 <div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
     <table class="min-w-full leading-normal">
         <thead>
@@ -18,7 +28,7 @@
                 {% trans "Type" %}
             </th>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Solution" %}
+                {% trans "Security Function" %}
             </th>
         </thead>
         <tbody>
@@ -28,7 +38,7 @@
                         <div class="flex items-center">
 
                             <div class="">
-                                <a id="mitigation{{ mitigation.id }}" href="#"
+                                <a id="mitigation{{ mitigation.id }}" href="{% url 'mtg-update' mitigation.id %}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ mitigation.title|capfirst }}
                                 </a>
@@ -58,5 +68,6 @@
             {% endfor %}
         </tbody>
     </table>
+    {% include 'back_office/snippets/paginator.html' %}
 </div>
 {% endblock %}

@@ -1,7 +1,23 @@
 {% load i18n %}
 {% load static tailwind_tags %}
 <div class="grid grid-rows-3 grid-cols-1 -mx-8 h-28 bg-white px-4 py-2 mb-8">
-    <h1 class="text-2xl font-bold">{{ page_title }}</h1>
+    <div class="flex flex-row space-x-4">
+        <!-- SIDEBAR TOGGLE -->
+        <button class="w-8 h-8 content-center self-center bg-white" @click="sidebarOpen = !sidebarOpen">
+            <i :class="sidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
+        </button>
+        <h1 class="text-2xl font-bold">{{ page_title }}</h1>
+    </div>
     <div class="w-full h-0 border-b my-auto"></div>
-    <div class="breadcrumbs text-sm font-semibold">Home > TODO: Finish breadcrumb implementation.</div>
+    <div class="inline-flex items-center text-sm font-semibold antialiased">
+        <span class="inline-flex justify-center items-center mr-1">
+            <i class="fas fa-home"></i>
+        </span>
+        Home 
+        <svg class="inline-flex justify-center items-center w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+        {% for crumb in crumbs %}{{ crumb }} 
+        <svg class="inline-flex justify-center items-center w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+
+        {% endfor %} <p class="text-sm font-semibold antialiased text-gray-400">{{ page_title }}</p>
+    </div>
 </div>

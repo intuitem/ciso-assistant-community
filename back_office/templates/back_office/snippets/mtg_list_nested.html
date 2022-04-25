@@ -4,44 +4,46 @@
 <table class="min-w-full leading-normal">
     <thead>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "ID" %}
+        </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Title" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Parent Risk" %}
+            {% trans "Parent function" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Current Risk Level" %}
-        </th>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Residual Risk Level" %}
+            {% trans "Status" %}
         </th>
     </thead>
     <tbody>
-        {% for instance in instances %}{% if instance.analysis == analysis %}
+        {% for mitigation in mitigations %}{% if mitigation.risk_instance == instance %}
             <tr>
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                        {{ mitigation.id }}
+                    </p>
+                </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
-                        <div class="ml-0">
-                            <a id="instance{{ instance.id }}" href="{% url 'ri-update' instance.id %}"
+                        <div class="">
+                            <a id="mitigation{{ mitigation.id }}" href="{% url 'mtg-update' mitigation.id %}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                {{ instance.title }}
+                                {{ mitigation.title }}
                             </a>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
+                        {% if mitigation.solution %}{{ mitigation.solution }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {{ instance.current_level }}
+                        {{ mitigation.status }}
                     </p>
-                </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.residual_level }}
                 </td>
             </tr>
         {% endif %}{% endfor %}
