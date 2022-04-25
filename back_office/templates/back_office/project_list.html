@@ -8,9 +8,6 @@
 {% with page_title='Projects' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
-<style>
-    [x-cloak] { display: none }
-</style>
 <div class="grid mb-4"
         x-data="modal()">
     <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"

@@ -181,6 +181,16 @@ class MeasureCreateViewModal(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('mtg-list')
 
+class ThreatCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_parentrisk'
+    model = ParentRisk
+    template_name = 'back_office/snippets/threat_create_modal.html'
+    context_object_name = 'measure'
+    form_class = ThreatCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('mtg-list')
+
 class SecurityFunctionCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_solution'
     model = Solution
@@ -308,6 +318,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['mitigations'] = Mitigation.objects.all()
         context['crumbs'] = ['Risk Scenarios']
+        context['measure_create_form'] = MeasureCreateForm
         return context
 
     def get_success_url(self) -> str:
@@ -399,3 +410,9 @@ class ParentRiskListView(PermissionRequiredMixin, ListView):
     ordering = 'id'
     paginate_by = 10
     model = ParentRisk
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['threat_create_form'] = ThreatCreateForm
+        return context

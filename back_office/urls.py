@@ -27,6 +27,8 @@ urlpatterns = [
     path('MSR/create_modal/', login_required(views.MeasureCreateViewModal.as_view()), name='measure-create-modal'),
     
     path('SF/create_modal/', login_required(views.SecurityFunctionCreateViewModal.as_view()), name='security-function-create-modal'),
+    
+    path('TH/create_modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
 
     path('RA/<int:parent_analysis>/RI/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
 

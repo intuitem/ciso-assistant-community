@@ -14,7 +14,9 @@
 </head>
 
 <body class="bg-gray-100">
-
+	<style>
+		[x-cloak] { display: none }
+	</style>
 	<div x-data="{ sidebarOpen: true }" class="flex h-screen">
 		<aside class="flex-shrink-0 w-64 flex flex-col border-r transition-all duration-300 fixed h-screen overflow-y-auto left-0"
 			:class="{ '-ml-64': !sidebarOpen }">
