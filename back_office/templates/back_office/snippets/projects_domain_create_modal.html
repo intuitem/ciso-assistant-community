@@ -36,7 +36,7 @@
               <div class="col-span-2">
                 <p>Department</p>
               </div>
-              <div class="col-span-6">
+              <div id="domaindepartment" class="col-span-6">
                 {{ projects_domain_create_form.department.errors }}
                 {{ projects_domain_create_form.department }}
               </div>
@@ -48,7 +48,7 @@
                     class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2">Cancel</button>
                   <input
                     class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500"
-                    type="submit" value="Save">
+                    id="save" type="submit" value="Save">
                 </section>
               </section>
             </div>

@@ -18,7 +18,7 @@
         <!-- MODAL CONTAINER -->
         <div class="relative flex flex-col w-full pointer-events-auto bg-white border border-gray-300 rounded-lg shadow-xl">
           <div class="flex items-start justify-between p-4 border-b border-gray-300 rounded-t">
-            <h5 class="mb-0 text-md leading-normal font-semibold">Add Analysis</h5>
+            <h5 id="modaltitle" class="mb-0 text-md leading-normal font-semibold">Add Analysis</h5>
             <button
               type="button"
               class="close"
@@ -76,12 +76,13 @@
                     
                     <section class="grid grid-cols-2 place-content-end">
                       <button
+                      id="cancel"
                       x-on:click="close()"
                       type="button"
                       class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2"
                     >Cancel</button>
                     <input type="hidden" name="next" value="{{ request.path|urlencode }}">
-                    <button type="submit" class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-600 hover:bg-indigo-700 mr-2">
+                    <button id="save" type="submit" class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-600 hover:bg-indigo-700 mr-2">
                       Save
                     </button>
                   </section>

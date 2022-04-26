@@ -1,5 +1,5 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 {% block content %}
 {% with page_title=project %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
@@ -49,13 +49,15 @@
 <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
     <div class="grid justify-items-stretch grid-cols-2 mb-2">
         <h2 class="text-xl font-semibold">Associated Risk Analyses</h2>
-        <a href="{% url 'ra-create' %}"
+        <div x-data="modal()">
+            <a id="newRiskAnalysisModal"  x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
             class="justify-self-end rounded bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-2 py-1">
-            <i class="fas fa-plus"></i>
-            New Risk Analysis
-        </a>
+            <i class="fas fa-plus"></i>New Risk Analysis</a>
+            {% include "back_office/snippets/analysis_create_modal.html" %}
+        </div>
+        <script src="{% static 'js/modal.js' %}"></script>
+        {% include 'back_office/snippets/ra_list_nested.html' %}
     </div>
-    {% include 'back_office/snippets/ra_list_nested.html' %}
 </div>
 
 {% endblock %}
