@@ -70,6 +70,18 @@ def test_BO001(page):
 	page.select_option('id=id_rating_matrix', "critical")
 	page.fill('id=id_comments', "Test")
 	page.set_checked('id=id_is_draft', checked=False)
+	page.click('id=analysis_save')
+	analysisName = "Project Test, version 0.1"
+	analyses = re.findall(r'id="analysis([0-9]+)"', page.content(), re.MULTILINE)
+	for analysisId in analyses:		
+		analysis = page.locator('id=analysis'+analysisId).inner_text()
+		if analysisName in analysis:
+			break
+	assert analysisName in analysis, "Step "+str(step)+": not Ok"
+	# 6 |
+	step = 6
+	page.click('id=analysis'+analysisId)
+	assert page.locator('id=page_title').inner_text() == "RA-"+ analysisId + ": " + analysisName, "Step "+str(step)+": not Ok"
 	# clear |
 	page.click('id=projectsdomains')
 	page.click('id=action'+id)
