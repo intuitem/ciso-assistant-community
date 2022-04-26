@@ -70,7 +70,7 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
 class RiskInstanceListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_riskinstance'
     template_name = 'back_office/ri_list.html'
-    context_object_name = 'instances'
+    context_object_name = 'scenarios'
 
     ordering = 'id'
     paginate_by = 10
@@ -86,7 +86,7 @@ class RiskInstanceListView(PermissionRequiredMixin, ListView):
 class MitigationListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_mitigation'
     template_name = 'back_office/mtg_list.html'
-    context_object_name = 'mitigations'
+    context_object_name = 'measures'
 
     ordering = 'id'
     paginate_by = 10
@@ -99,9 +99,9 @@ class MitigationListView(PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         if not self.request.user.is_superuser:
-            agg_data = RiskInstance.objects.filter(analysis__auditor=self.request.user).order_by('id')
+            agg_data = Mitigation.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('id')
         else:
-            agg_data = RiskInstance.objects.all().order_by('id')
+            agg_data = Mitigation.objects.all().order_by('id')
         return agg_data
 
 class SecurityFunctionListView(PermissionRequiredMixin, ListView):
@@ -185,11 +185,11 @@ class ThreatCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_parentrisk'
     model = ParentRisk
     template_name = 'back_office/snippets/threat_create_modal.html'
-    context_object_name = 'measure'
+    context_object_name = 'threat'
     form_class = ThreatCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('mtg-list')
+        return reverse_lazy('threat-list')
 
 class SecurityFunctionCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_solution'
@@ -199,7 +199,7 @@ class SecurityFunctionCreateViewModal(PermissionRequiredMixin, CreateView):
     form_class = SecurityFunctionCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('mtg-list')
+        return reverse_lazy('security-function-list')
 
 class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_analysis'
@@ -270,7 +270,8 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['instances'] = RiskInstance.objects.all()
+        context['instances'] = RiskInstance.objects.all().order_by('id')
+        context['suggested_measures'] = Mitigation.objects.all().order_by('id')
         context['crumbs'] = ['Analyses']
         return context
 
@@ -286,6 +287,43 @@ class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
+
+class RiskScenarioDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_riskinstance'
+
+    model = RiskInstance
+    success_url = reverse_lazy('ri-list')
+    template_name = 'back_office/snippets/risk_scenario_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('ri-list')
+
+class MeasureDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_mitigation'
+
+    model = Mitigation
+    success_url = reverse_lazy('mtg-list')
+    template_name = 'back_office/snippets/measure_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('mtg-list')
+
+class SecurityFunctionDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_solution'
+
+    model = Solution
+    success_url = reverse_lazy('security-function-list')
+    template_name = 'back_office/snippets/security_function_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('security-function-list')
+
+class ThreatDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_threat'
+
+    model = ParentRisk
+    success_url = reverse_lazy('threat-list')
+    template_name = 'back_office/snippets/threat_delete_modal.html'
 
 class ProjectDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'general.delete_project'
@@ -334,6 +372,26 @@ class MitigationUpdateView(PermissionRequiredMixin, UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('ri-update', kwargs = {'pk': self.object.risk_instance.id})
 
+class SecurityFunctionUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_solution'
+    model = Solution
+    template_name = 'back_office/security_function_update.html'
+    context_object_name = 'function'
+    form_class = SecurityFunctionUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('security-function-list')
+
+class ThreatUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_parentrisk'
+    model = ParentRisk
+    template_name = 'back_office/threat_update.html'
+    context_object_name = 'threat'
+    form_class = ThreatUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('threat-list')
+
 class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_projectsgroup'
     model = ProjectsGroup
@@ -362,6 +420,7 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['analyses'] = Analysis.objects.all()
+        context['analysis_create_form'] = RiskAnalysisCreateForm
         crumbs = ['Projects']
         context['crumbs'] = crumbs
         return context
