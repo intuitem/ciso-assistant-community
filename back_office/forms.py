@@ -11,6 +11,7 @@ class RiskAnalysisCreateForm(ModelForm):
         fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
         widgets = { # Tailwind Styles go here
             'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
+            'project': Select(attrs={'class': 'w-full rounded-md'}),
         }
 
 class MeasureCreateForm(ModelForm):
