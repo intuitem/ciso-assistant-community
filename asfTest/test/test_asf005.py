@@ -2,8 +2,10 @@
 from playwright.sync_api import *
 from playwright.async_api import *
 from playwright import *
+
 import time
 import urlpatterns
+import re
 
 def test_ASF005(page):
     # Test case: ASF-005
@@ -32,23 +34,24 @@ def test_ASF005(page):
         page.click("id=homepage")
         assert page.url == urlpatterns.url, "Step "+str(step)+": not Ok"
         assert page.locator('id=pagenum').is_visible() == True, "Step "+str(step)+": not Ok"
-        id = 2
         next = 1
         step = 3
+        countAnalyses = 0
         while next != 0:
-            # 3.1 | Click on the next link “id” | Opening of RA-id
-            if page.locator('id=analysis'+ str(id)).is_visible():
-                step = 3.1
-                page.click('id=analysis'+ str(id))
-                assert page.url == urlpatterns.ra + str(id) + "/", "Step "+str(step)+": not Ok"
-                print(page.locator('id=analysis'+ str(id)))
-                # 3.2 | Go to the previous page “p” | 	Opening of page number “p”
-                step = 3.2
-                page.goto(urlpatterns.url + "?page=" + str(next))
-                assert page.url == urlpatterns.url + "?page=" + str(next), "Step "+str(step)+": not Ok"
-                id += 1
+            analyses = re.findall(r'id="analysis([0-9]+)"', page.content(), re.MULTILINE)
+            for id in analyses:
+                # 3.1 | Click on the next link “id” | Opening of RA-id
+                if page.locator('id=analysis'+ str(id)).is_visible():
+                    step = 3.1
+                    page.click('id=analysis'+ str(id))
+                    assert page.url == urlpatterns.ra + str(id) + "/", "Step "+str(step)+": not Ok"
+                    # 3.2 | Go to the previous page “p” | 	Opening of page number “p”
+                    step = 3.2
+                    page.goto(urlpatterns.url + "?page=" + str(next))
+                    assert page.url == urlpatterns.url + "?page=" + str(next), "Step "+str(step)+": not Ok"
+                    countAnalyses += 1
             # 3.3 | Click on next page if necessary | Go to the next page
-            elif page.locator("id=next").is_visible():
+            if page.locator("id=next").is_visible():
                 step = 3.3
                 page.click("id=next")
                 next += 1
@@ -61,7 +64,7 @@ def test_ASF005(page):
                 page.click("id=homepage")
                 assert page.url == urlpatterns.url, "Step "+str(step)+": not Ok"
         page.click('id=analytics')
-        assert page.locator('id=analysis').inner_text() == str(id-1), "Step "+str(step)+": not Ok"
+        assert page.locator('id=analysis').inner_text() == str(countAnalyses), "Step "+str(step)+": not Ok"
     else:
         time.sleep(0.1)
         assert page.locator('id=pagenum').is_visible() == True, "Step "+str(step)+": not Ok"
