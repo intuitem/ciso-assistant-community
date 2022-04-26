@@ -39,7 +39,7 @@
 							</a>
 						</li>
 						<li>
-							<a href="#"
+							<a id="logout" href="#"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -60,7 +60,7 @@
 
 						{% if perms.core.view_analysis %}
 						<li>
-							<a href="{% url 'ra-list' %}"
+							<a id="analyses_registry" href="{% url 'ra-list' %}"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-glasses"></i>
@@ -71,7 +71,7 @@
 						{% endif %}
 						{% if perms.core.view_riskinstance %}
 						<li>
-							<a href="{% url 'ri-list' %}"
+							<a id="risk_scenarios" href="{% url 'ri-list' %}"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-clone"></i>
@@ -82,7 +82,7 @@
 						{% endif %}
 						{% if perms.core.view_mitigation %}
 						<li>
-							<a href="{% url 'mtg-list' %}"
+							<a id="security_measures" href="{% url 'mtg-list' %}"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-fire-extinguisher"></i>
@@ -93,7 +93,7 @@
 						{% endif %}
 						{% if perms.core.view_riskacceptance %}
 						<li>
-							<a href="{% url 'acceptance-list' %}"
+							<a id="risk_acceptances" href="{% url 'acceptance-list' %}"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-user-tie"></i>
