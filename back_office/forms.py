@@ -49,7 +49,7 @@ class UserCreateForm(ModelForm):
 class RiskAnalysisUpdateForm(ModelForm):
     class Meta:
         model = Analysis
-        fields = ['is_draft', 'rating_matrix', 'comments']
+        fields = ['project', 'auditor', 'version', 'is_draft', 'rating_matrix', 'comments']
         widgets = { # Tailwind Styles go here
             'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
         }
@@ -109,6 +109,16 @@ class ProjectsGroupUpdateForm(ModelForm):
 class ProjectUpdateForm(ModelForm):
     class Meta:
         model = Project
+        fields = '__all__'
+
+class SecurityFunctionUpdateForm(ModelForm):
+    class Meta:
+        model = Solution
+        fields = '__all__'
+
+class ThreatUpdateForm(ModelForm):
+    class Meta:
+        model = ParentRisk
         fields = '__all__'
 
 class ProjectForm(ModelForm):

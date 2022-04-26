@@ -46,12 +46,18 @@ urlpatterns = [
     path('RA/<int:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
     path('RI/<int:pk>', login_required(views.RiskInstanceUpdateView.as_view()), name='ri-update'),
     path('MTG/<int:pk>', login_required(views.MitigationUpdateView.as_view()), name='mtg-update'),
+    path('TH/<int:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
+    path('SF/<int:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
 
     path('PD/<int:pk>', login_required(views.ProjectsGroupUpdateView.as_view()), name='pd-update'),
     path('PRJ/<int:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
     
     # DELETE VIEWS
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),
+    path('RS/<int:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='risk-scenario-delete'),
+    path('MSR/<int:pk>/delete/', login_required(views.MeasureDeleteView.as_view()), name='measure-delete'),
     path('PRJ/<int:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
-    path('D/<int:pk>/delete/', login_required(views.ProjectsGroupDeleteView.as_view()), name='pd-delete'),
+    path('SF/<int:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
+    path('PD/<int:pk>/delete/', login_required(views.ProjectsGroupDeleteView.as_view()), name='pd-delete'),
+    path('TH/<int:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),
 ]

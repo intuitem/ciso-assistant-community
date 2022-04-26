@@ -4,7 +4,7 @@
     <div class="flex flex-row space-x-4">
         <!-- SIDEBAR TOGGLE -->
         <button class="w-8 h-8 content-center self-center bg-white" @click="sidebarOpen = !sidebarOpen">
-            <i :class="sidebarOpen ? 'fas fa-chevron-left' : 'fas fa-chevron-right'"></i>
+            <i class="fas fa-arrow-left transition-all duration-300" :class="{ 'rotate-180': sidebarOpen == false }"></i>
         </button>
         <h1 class="text-2xl font-bold">{{ page_title }}</h1>
     </div>
