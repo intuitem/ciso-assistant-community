@@ -23,12 +23,12 @@ def test_BO001(page):
 	page.fill('id=id_username', 'root')
 	page.fill('id=id_password', 'root')
 	page.click('id=login')
-    # 2 |
+    # 2 | Log in the back-office
 	step = 2
 	page.click('id=edit')
 	message = page.locator('id=title')
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
-	# 3 |
+	# 3 | Create a threat and a security function
 	step = 3
 	threatName = 'Threat Test'
 	solutionName = 'Solution Test'
@@ -53,7 +53,7 @@ def test_BO001(page):
 		if function == solutionName:
 			break
 	assert function == solutionName, "Step "+str(step)+": not Ok"
-	# 4 |
+	# 4 | Create a project domain
 	step = 4
 	domainName = 'Domain Test'
 	department = 'Test Department'
@@ -68,7 +68,7 @@ def test_BO001(page):
 		if domain == domainName:
 			break
 	assert domain == domainName, "Step "+str(step)+": not Ok"
-	# 5 |
+	# 5 | Create a test project inside the new domain
 	step = 5
 	page.click('id=domain'+id)
 	assert page.locator('id=page_title').inner_text() == domainName, "Step "+str(step)+": not Ok"
@@ -85,7 +85,7 @@ def test_BO001(page):
 		if project == projectName:
 			break
 	assert project == projectName, "Step "+str(step)+": not Ok"
-	# 6 |
+	# 6 | Create a risk analysis inside the test project
 	step = 6
 	page.click('id=project'+projectId)
 	assert page.locator('id=page_title').inner_text() == projectName, "Step "+str(step)+": not Ok"
@@ -103,7 +103,7 @@ def test_BO001(page):
 		if analysisName in analysis:
 			break
 	assert analysisName in analysis, "Step "+str(step)+": not Ok"
-	# 7 |
+	# 7 | Create a risk scenario inside the test risk analysis
 	step = 7
 	page.click('id=analysis'+analysisId)
 	assert page.locator('id=page_title').inner_text() == "RA-"+ analysisId + ": " + analysisName, "Step "+str(step)+": not Ok"
@@ -127,7 +127,7 @@ def test_BO001(page):
 		if instanceName in instance:
 			break
 	assert instanceName in instance, "Step "+str(step)+": not Ok"
-	# 8 |
+	# 8 | Create a mesure in side the test scenario
 	step = 8
 	page.click('id=instance'+instanceId)
 	assert page.locator('id=page_title').inner_text() == "Project Test: Scenario Test", "Step "+str(step)+": not Ok"
@@ -140,7 +140,6 @@ def test_BO001(page):
 	page.fill('id=id_eta', 'Tomorrow')
 	page.select_option('id=id_effort', 'M')
 	page.click('id=save')
-	time.sleep(1000)
 	# clear |
 	page.click('id=projectsdomains')
 	page.click('id=action'+id)
