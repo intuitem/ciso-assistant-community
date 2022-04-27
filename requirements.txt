@@ -3,6 +3,7 @@ django-nested-inline==0.4.4
 django-jazzmin==2.4.8
 openpyxl==3.0.9
 pandas==1.3.3
+django-baton==2.2.3
 weasyprint==53.4
 django-reversion==4.0.1
 django-tailwind==3.0.1
