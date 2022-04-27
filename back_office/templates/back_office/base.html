@@ -39,7 +39,7 @@
 							</a>
 						</li>
 						<li>
-							<a href="#"
+							<a href="{% url 'logout' %}"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -241,8 +241,12 @@
 					</div>
 				</nav>
 			</aside>
-			<div class="flex-1 ml-64">
-			  <main class="px-8 pb-8 transition-all duration-300" :class="{ '-ml-64': sidebarOpen == false }">
+			<!-- SIDEBAR TOGGLE -->
+			<button class="fixed left-64 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-500 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-64': sidebarOpen == false }">
+				<i class="fas fa-arrow-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
+			</button>
+			<div class="flex-1">
+			  <main class="px-8 pb-8 transition-all duration-300 ml-64" :class="sidebarOpen == false ? 'ml-0' : 'ml-64'">
 				{% block content %}
 				{% endblock %}
 			</main>

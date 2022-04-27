@@ -1,5 +1,5 @@
 from dataclasses import fields
-from django.forms import DateInput, DateTimeInput, ModelForm, Select, TextInput, Textarea, URLInput, widgets
+from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, ModelForm, Select, TextInput, Textarea, URLInput, widgets
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
@@ -14,14 +14,28 @@ class RiskAnalysisCreateForm(ModelForm):
             'project': Select(attrs={'class': 'w-full rounded-md'}),
         }
 
+    name = CheckboxInput()
+    _class = str(name.__class__).split('.')[-1].strip("'>")
+    print(_class)
+
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
+        for fname, f in self.fields.items():
+            f.widget.attrs['class'] = 'w-full rounded-md'
+
 class MeasureCreateForm(ModelForm):
     class Meta:
         model = Mitigation
         fields = '__all__'
-        widgets = { # Tailwind Styles go here
-            'risk_instance': Select(attrs={'class': 'w-full rounded-md'}),
-            'description': Textarea(attrs={'class': 'w-full rounded-md'}),
+        labels = {
+            'risk_instance': 'Risk Scenario',
+            'solution': 'Security Function',
         }
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
+        for fname, f in self.fields.items():
+            f.widget.attrs['class'] = 'w-full rounded-md'
+        
 
 class SecurityFunctionCreateForm(ModelForm):
     class Meta:
@@ -96,7 +110,7 @@ class MitigationUpdateForm(ModelForm):
         exclude = ['risk_instance']
         widgets = {
             'eta': DateInput(),
-            'link': URLInput(attrs={'class': 'w-full rounded-md text-sm invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500'}),
+            'link': URLInput(attrs={'class': 'w-full rounded-md text-sm'}),
         }
 
 class ProjectsGroupUpdateForm(ModelForm):
@@ -112,6 +126,11 @@ class ProjectUpdateForm(ModelForm):
     class Meta:
         model = Project
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
+        for fname, f in self.fields.items():
+            f.widget.attrs['class'] = 'w-full rounded-md'
 
 class SecurityFunctionUpdateForm(ModelForm):
     class Meta:

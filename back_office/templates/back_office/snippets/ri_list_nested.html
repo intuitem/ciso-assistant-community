@@ -55,7 +55,7 @@
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {{ instance.current_level }}
+                        {{ instance.get_current_level_display }}
                     </p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
@@ -73,10 +73,10 @@
                     </ul>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.residual_level }}
+                    {{ instance.get_residual_level_display }}
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.treatment }}
+                    {{ instance.get_treatment_display }}
                 </td>
             </tr>
         {% endif %}{% endfor %}

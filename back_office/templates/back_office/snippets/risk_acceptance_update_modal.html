@@ -22,10 +22,10 @@
           </div>
           <div class="flex p-8 flex-col border-gray-300">
             <form action="{% url 'acceptance-update-modal' acceptance.id %}" method="post">{% csrf_token %}
-              {{ acceptance_create_form.non_field_errors }}
-              {{ acceptance_create_form.errors }}
+              {{ acceptance_update_form.non_field_errors }}
+              {{ acceptance_update_form.errors }}
               <div class="grid grid-cols-8 gap-y-6 font-medium">
-                {% for field in risk_acceptance_create_form %}
+                {% for field in risk_acceptance_update_form %}
                 <div class="col-span-2">
                   <p>{{ field.label|striptags }}</p>
                 </div>

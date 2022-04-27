@@ -68,7 +68,7 @@
                     </div>
                     <div>
                         <p class="text-sm font-semibold">Current Level</p>
-                        {{ instance.current_level }}
+                        {{ instance.get_current_level_display }}
                     </div>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold">Residual Level</p>
-                            {{ instance.residual_level }}
+                            {{ instance.get_residual_level_display }}
                         </div>
                     </div>
                 </div>

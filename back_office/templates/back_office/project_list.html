@@ -60,7 +60,7 @@
                         {{ project.summary|capfirst }}
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {% if project.lc_status %}{{ project.lc_status }}{% else %}--{% endif %}
+                        {% if project.lc_status %}{{ project.get_lc_status_display }}{% else %}--{% endif %}
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible">
                         <div class="relative" x-data="{
