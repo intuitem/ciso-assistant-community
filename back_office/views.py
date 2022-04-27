@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import loader
+from django.template import context, loader
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
@@ -127,6 +127,11 @@ class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = RiskAcceptance
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
+        return context
+
     def get_queryset(self):
         if not self.request.user.is_superuser:
             agg_data = RiskAcceptance.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('type', 'id')
@@ -180,6 +185,26 @@ class MeasureCreateViewModal(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('mtg-list')
+
+class RiskAcceptanceCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_riskacceptance'
+    model = RiskAcceptance
+    template_name = 'back_office/snippets/risk_acceptance_create_modal.html'
+    context_object_name = 'acceptance'
+    form_class = RiskAcceptanceCreateUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('acceptance-list')
+
+class RiskAcceptanceUpdateViewModal(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_riskacceptance'
+    model = RiskAcceptance
+    template_name = 'back_office/snippets/risk_acceptance_update_modal.html'
+    context_object_name = 'acceptance'
+    form_class = RiskAcceptanceCreateUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('acceptance-list')
 
 class ThreatCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_parentrisk'

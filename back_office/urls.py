@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', login_required(views.index), name='index'),
 
     # LIST VIEWS
     path('analyses-registry/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),
@@ -26,6 +26,8 @@ urlpatterns = [
     
     path('MSR/create_modal/', login_required(views.MeasureCreateViewModal.as_view()), name='measure-create-modal'),
     
+    path('RAC/create_modal/', login_required(views.RiskAcceptanceCreateViewModal.as_view()), name='acceptance-create-modal'),
+    
     path('SF/create_modal/', login_required(views.SecurityFunctionCreateViewModal.as_view()), name='security-function-create-modal'),
     
     path('TH/create_modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
@@ -46,6 +48,7 @@ urlpatterns = [
     path('RA/<int:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
     path('RI/<int:pk>', login_required(views.RiskInstanceUpdateView.as_view()), name='ri-update'),
     path('MTG/<int:pk>', login_required(views.MitigationUpdateView.as_view()), name='mtg-update'),
+    path('RAC/<int:pk>', login_required(views.RiskAcceptanceUpdateViewModal.as_view()), name='acceptance-update-modal'),
     path('TH/<int:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
     path('SF/<int:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
 

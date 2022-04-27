@@ -1,8 +1,8 @@
 from dataclasses import fields
-from django.forms import DateInput, DateTimeInput, ModelForm, Select, TextInput, Textarea, widgets
+from django.forms import DateInput, DateTimeInput, ModelForm, Select, TextInput, Textarea, URLInput, widgets
 
 from django.contrib.auth.models import User, Group
-from core.models import Analysis, Mitigation, RiskInstance
+from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
 
 class RiskAnalysisCreateForm(ModelForm):
@@ -95,7 +95,8 @@ class MitigationUpdateForm(ModelForm):
         model = Mitigation
         exclude = ['risk_instance']
         widgets = {
-            'eta': DateInput()
+            'eta': DateInput(),
+            'link': URLInput(attrs={'class': 'w-full rounded-md text-sm invalid:border-pink-500 invalid:text-pink-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500'}),
         }
 
 class ProjectsGroupUpdateForm(ModelForm):
@@ -121,6 +122,18 @@ class ThreatUpdateForm(ModelForm):
     class Meta:
         model = ParentRisk
         fields = '__all__'
+
+class RiskAcceptanceCreateUpdateForm(ModelForm):
+    class Meta:
+        model = RiskAcceptance
+        fields = '__all__'
+        widgets =  {
+            'risk_instance': Select(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32'}),
+            'validator': TextInput(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32'}),
+            'type': Select(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32'}),
+            'expiry_date': DateInput(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32'}),
+            'comments': TextInput(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32'}),
+        }
 
 class ProjectForm(ModelForm):
     class Meta:
