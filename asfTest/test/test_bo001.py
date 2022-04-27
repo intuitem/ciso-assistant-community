@@ -30,23 +30,48 @@ def test_BO001(page):
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
 	# 3 |
 	step = 3
-	name = 'Domain Test'
+	threatName = 'Threat Test'
+	solutionName = 'Solution Test'
+	page.click('id=threats')
+	page.click('id=newThreat')
+	page.fill('id=threat_title_id', threatName)
+	page.click('id=save_threat')
+	threats = re.findall(r'id="instance([0-9]+)"', page.content(), re.MULTILINE)
+	for threatId in threats:		
+		threat = page.locator('id=instance'+threatId).inner_text()
+		if threat == threatName:
+			break
+	assert threat == threatName, "Step "+str(step)+": not Ok"
+	page.click('id=securityFunctions')
+	page.click('id=newSecurityFunction')
+	page.fill('id=id_name', solutionName)
+	page.fill('id=id_provider', 'us')
+	page.click('id=save')
+	functions = re.findall(r'id="function([0-9]+)"', page.content(), re.MULTILINE)
+	for functionId in functions:		
+		function = page.locator('id=function'+functionId).inner_text()
+		if function == solutionName:
+			break
+	assert function == solutionName, "Step "+str(step)+": not Ok"
+	# 4 |
+	step = 4
+	domainName = 'Domain Test'
 	department = 'Test Department'
 	page.click('id=projectsdomains')
 	page.click('id=modal')
-	page.fill('id=id_name', name)
+	page.fill('id=id_name', domainName)
 	page.fill('id=id_department', department)
 	page.click('id=save')
 	domains = re.findall(r'id="domain([0-9]+)"', page.content(), re.MULTILINE)
 	for id in domains:		
 		domain = page.locator('id=domain'+id).inner_text()
-		if domain == name:
+		if domain == domainName:
 			break
-	assert domain == name, "Step "+str(step)+": not Ok"
-	# 4 |
-	step = 4
+	assert domain == domainName, "Step "+str(step)+": not Ok"
+	# 5 |
+	step = 5
 	page.click('id=domain'+id)
-	assert page.locator('id=page_title').inner_text() == name, "Step "+str(step)+": not Ok"
+	assert page.locator('id=page_title').inner_text() == domainName, "Step "+str(step)+": not Ok"
 	projectName = "Project Test"
 	page.click('id=newProjectModal')
 	page.fill('id=id_project_name', projectName)
@@ -60,13 +85,13 @@ def test_BO001(page):
 		if project == projectName:
 			break
 	assert project == projectName, "Step "+str(step)+": not Ok"
-	# 5 |
-	step = 5
+	# 6 |
+	step = 6
 	page.click('id=project'+projectId)
 	assert page.locator('id=page_title').inner_text() == projectName, "Step "+str(step)+": not Ok"
 	page.click('id=newRiskAnalysisModal')
 	page.select_option('id=id_project', projectId)
-	page.select_option('id=id_auditor', "3")
+	page.select_option('id=id_auditor', label="root")
 	page.select_option('id=id_rating_matrix', "critical")
 	page.fill('id=id_comments', "Test")
 	page.set_checked('id=id_is_draft', checked=False)
@@ -78,10 +103,44 @@ def test_BO001(page):
 		if analysisName in analysis:
 			break
 	assert analysisName in analysis, "Step "+str(step)+": not Ok"
-	# 6 |
-	step = 6
+	# 7 |
+	step = 7
 	page.click('id=analysis'+analysisId)
 	assert page.locator('id=page_title').inner_text() == "RA-"+ analysisId + ": " + analysisName, "Step "+str(step)+": not Ok"
+	page.click("id=newRiskScenario")
+	assert page.locator('id=page_title').inner_text() == "New Risk Scenario", "Step "+str(step)+": not Ok"
+	page.fill('id=id_title', 'Scenario Test')
+	page.select_option('id=parent_risk_id', label=threatName)
+	page.fill('id=scenario_id', 'scenario test')
+	page.select_option('id=current_impact_id', 'M')
+	page.select_option('id=current_proba_id', 'L')
+	page.fill('id=existing_measures_id', 'test measures')
+	page.select_option('id=residual_proba_id', 'VL')
+	page.select_option('id=residual_impact_id', 'M')
+	page.select_option('id=treatment_id', 'mitigated')
+	page.fill('id=comments_id', 'test comments')
+	page.click('id=submit')
+	instanceName = 'Scenario Test'
+	instances = re.findall(r'id="instance([0-9]+)"', page.content(), re.MULTILINE)
+	for instanceId in instances:		
+		instance = page.locator('id=instance'+instanceId).inner_text()
+		if instanceName in instance:
+			break
+	assert instanceName in instance, "Step "+str(step)+": not Ok"
+	# 8 |
+	step = 8
+	page.click('id=instance'+instanceId)
+	assert page.locator('id=page_title').inner_text() == "Project Test: Scenario Test", "Step "+str(step)+": not Ok"
+	page.click('id=newMeasures')
+	page.select_option('id=id_risk_instance', label='Project Test: Scenario Test')
+	page.select_option('id=id_solution', label='Solution Test')
+	page.fill('id=id_description', 'test description')
+	page.select_option('id=id_type', 'technical')
+	page.select_option('id=id_status', 'in_progress')
+	page.fill('id=id_eta', 'Tomorrow')
+	page.select_option('id=id_effort', 'M')
+	page.click('id=save')
+	time.sleep(1000)
 	# clear |
 	page.click('id=projectsdomains')
 	page.click('id=action'+id)
