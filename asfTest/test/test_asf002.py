@@ -4,9 +4,7 @@ from playwright.async_api import *
 from playwright import *
 import time
 import urlpatterns
-import pytest
 
-@pytest.mark.skip(reason="waiting new back-office")
 def test_ASF002(page):
     # Test case: ASF-002
 	# Step # | action | expected
