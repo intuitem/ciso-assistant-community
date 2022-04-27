@@ -35,7 +35,7 @@ class ThreatCreateForm(ModelForm):
         model = ParentRisk
         fields = '__all__'
         widgets = { # Tailwind Styles go here
-            'title': TextInput(attrs={'class': 'w-full rounded-md'}),
+            'title': TextInput(attrs={'class': 'w-full rounded-md', 'id': 'threat_title_id'}),
         }
 
 class UserCreateForm(ModelForm):
@@ -60,16 +60,16 @@ class RiskInstanceCreateForm(ModelForm):
         exclude = ['analysis', 'residual_level', 'current_level']
         
         widgets = { # Tailwind Styles go here
-            'analysis': Select(attrs={'class': 'w-auto rounded-md text-sm h-32'}),
-            'existing_measures': Textarea(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'scenario': Textarea(attrs={'class': 'w-full rounded-md text-sm h-24'}),
-            'comments': Textarea(attrs={'class': 'w-full rounded-md text-sm h-18'}),
-            'parent_risk': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'current_proba': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'current_impact': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'residual_proba': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'residual_impact': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'treatment': Select(attrs={'class': 'w-full rounded-md text-sm'}),
+            'analysis': Select(attrs={'class': 'w-auto rounded-md text-sm h-32', 'id': 'analysis_id'}),
+            'existing_measures': Textarea(attrs={'class': 'w-full rounded-md text-sm h-32', 'id': 'existing_measures_id'}),
+            'scenario': Textarea(attrs={'class': 'w-full rounded-md text-sm h-24', 'id': 'scenario_id'}),
+            'comments': Textarea(attrs={'class': 'w-full rounded-md text-sm h-18', 'id': 'comments_id'}),
+            'parent_risk': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'parent_risk_id'}),
+            'current_proba': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'current_proba_id'}),
+            'current_impact': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'current_impact_id'}),
+            'residual_proba': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'residual_proba_id'}),
+            'residual_impact': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'residual_impact_id'}),
+            'treatment': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'treatment_id'}),
         }
 
 class RiskInstanceUpdateForm(ModelForm):

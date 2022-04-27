@@ -144,7 +144,7 @@
 						{% endif %}
 						{% if perms.general.view_parentrisk %}
 						<li>
-							<a href="{% url 'threat-list' %}"
+							<a id="threats" href="{% url 'threat-list' %}"
 								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-folder"></i>
@@ -155,7 +155,7 @@
 						{% endif %}
 						{% if perms.general.view_solution %}
 						<li>
-							<a href="{% url 'security-function-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+							<a id="securityFunctions" href="{% url 'security-function-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-cogs"></i>
 							</span>
