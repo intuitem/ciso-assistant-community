@@ -242,8 +242,8 @@
 				</nav>
 			</aside>
 			<!-- SIDEBAR TOGGLE -->
-			<button class="fixed left-64 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-500 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-64': sidebarOpen == false }">
-				<i class="fas fa-arrow-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
+			<button class="fixed left-64 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-500 shadow shadow-blue-500/50 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-64': sidebarOpen == false }">
+				<i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
 			</button>
 			<div class="flex-1">
 			  <main class="px-8 pb-8 transition-all duration-300 ml-64" :class="sidebarOpen == false ? 'ml-0' : 'ml-64'">
