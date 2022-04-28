@@ -74,21 +74,7 @@
                 </div>
             </div>
         </section>
-        <section class="flex flex-row space-x-8 w-full">
-
-            <div class="flex flex-row space-x-4 mb-4 w-full">
-                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
-                    <h2 class="text-lg font-semibold mb-4">Associated Measures</h2>
-                    <div x-data="modal()">
-                        <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-                        class="justify-self-end rounded cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2">
-                            <i class="fas fa-plus mr-2"></i>New Measure</a>
-                            {% include "back_office/snippets/measure_create_modal.html" %}
-                    </div>
-                    <script src="{% static 'js/modal.js' %}"></script>
-                    {% include 'back_office/snippets/mtg_list_nested.html' %}
-                </div>
-            </div>
+        <section class="flex flex-row-reverse w-full">
             <div class="items-center self-center">
                 <i class="scale-[5] scale-y-[3] fas fa-caret-right text-warmgray-700 drop-shadow-xs"></i>
             </div>
@@ -126,11 +112,24 @@
                     </div>
                 </div>
             </div>
+        </form>
+            <div class="flex flex-row space-x-4 mb-4 w-full">
+                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
+                    <h2 class="text-lg font-semibold mb-4">Associated Measures</h2>
+                    <div x-data="modal()">
+                        <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+                        class="justify-self-end rounded cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2">
+                            <i class="fas fa-plus mr-2"></i>New Measure</a>
+                            {% include "back_office/snippets/measure_create_modal.html" %}
+                    </div>
+                    <script src="{% static 'js/modal.js' %}"></script>
+                    {% include 'back_office/snippets/mtg_list_nested.html' %}
+                </div>
+            </div>
         </section>
     </div>
     <a href="{% url 'ri-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
     <input type="hidden" name="next" value="{{ request.path }}">
     <button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
-    </form>
 </div>
 {% endblock %}
