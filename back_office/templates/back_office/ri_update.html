@@ -7,6 +7,7 @@
 <div>
     <form method="post" id="instance_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
+    {{ form.errors }}
     <div class="flex flex-col space-y-8">
         <section class="flex flex-row space-x-8 w-full">
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
@@ -31,7 +32,7 @@
                         {{ form.analysis.errors }}
                         {{ form.analysis }}
                     </div>
-                    <div class="flex flex-col">
+                    <div class="flex flex-col border-2">
                         <p class="text-sm font-semibold">Threat</p>
                         {{ form.parent_risk.errors }}
                         {{ form.parent_risk }}

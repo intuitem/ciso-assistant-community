@@ -1,19 +1,24 @@
+from sqlite3 import Date
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
 
+class DefaultDateInput(DateInput):
+    input_type = 'date'
+
 class StyledModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
-        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DateInput, DateTimeInput, TimeInput, Textarea)
+        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput, Textarea)
         select_inputs = (Select, SelectMultiple, NullBooleanSelect)
         for fname, f in self.fields.items():
             input_type = f.widget.__class__
-            # input_type = str(f.widget.__class__).split('.')[-1].strip("'>")
+            model_name = str(self.Meta.model).split('.')[-1].strip("'>").lower()
             if input_type in text_inputs or input_type in select_inputs:
                 f.widget.attrs['class'] = 'w-full rounded-md'
+                f.widget.attrs['id'] = f'id_{model_name}_{fname}'
 
 class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:
@@ -28,6 +33,10 @@ class MeasureCreateForm(StyledModelForm):
             'risk_instance': 'Risk Scenario',
             'solution': 'Security Function',
         }
+        widgets = {
+            'eta': DefaultDateInput()
+        }
+
         
 class SecurityFunctionCreateForm(StyledModelForm):
     class Meta:
