@@ -24,23 +24,32 @@
 				<div class="flex items-center justify-center">
 					<svg height="75%" width="75%" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><style>.b,.c{fill:#694998;}.c{opacity:.15;}</style></defs><g><path class="b" d="M342.11,142.79l-11.34-59.33c-62.57,12.14-116.99,22.39-163.27,30.76-46.28,8.36-71.52,12.86-75.73,13.47l-5.2,60.77c2.73,1.12,21.87,8.86,57.43,23.23,35.56,14.37,68.89,27.94,99.99,40.7v1.49c-39.15,15.98-73.97,29.99-104.45,42-30.48,12.02-48.13,18.89-52.97,20.63l6.32,59.66c7.19,1.49,34.17,6.91,80.94,16.26,46.77,9.36,99.15,20.54,157.13,33.54l10.96-57.52c-36.57-6.42-72.15-13.14-106.73-20.18-34.58-7.03-54.85-11.17-60.81-12.4l.04-.94c6.2-2.6,23.21-9.85,51.03-21.75,27.82-11.9,56.98-23.61,87.47-35.14v-46.28c-30.53-11.66-59.35-23.21-86.47-34.63-27.12-11.42-44.52-18.8-52.21-22.15l.29-1,167.58-31.2Z"/><rect class="b" x="365.9" y="162.81" width="58.91" height="43.86"/><path class="b" d="M423.88,236.22h-57.05c.25,19.58,.4,37.17,.46,52.78,.06,15.61,.09,30.54,.09,44.79,0,16.85-.09,34.94-.28,54.27-.19,19.33-.28,31.97-.28,37.91h57.05c0-5.58-.12-15.7-.37-30.39-.25-14.68-.37-36.15-.37-64.4,0-17.72,.09-33.55,.28-47.48,.19-13.94,.34-29.76,.46-47.48Z"/></g><polygon class="c" points="480.91 253.74 68.58 15.68 68.58 491.8 480.91 253.74"/></svg>
 				</div>
-				<div class="flex items-center justify-center h-14">
+				<div class="flex items-center justify-center h-14 bg-white">
 					<div class="text-lg"><b>MIRA</b> Back Office</div>
 				</div>
-				<div class="overflow-y-auto overflow-x-hidden flex-grow">
+				<div class="overflow-y-auto overflow-x-hidden flex-grow bg-gray-700">
 					<ul class="flex flex-col py-4 space-y-1">
 						<li>
 							<a href="{% url 'index' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
-									<i class="fas fa-home"></i>
+									<i class="fas fa-tachometer-alt"></i>
 								</span>
 								<span class="ml-2 text-sm tracking-wide truncate">Dashboard</span>
 							</a>
 						</li>
 						<li>
+							<a href="{% url 'analysis_list' %}"
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								<span class="inline-flex justify-center items-center ml-4">
+									<i class="fas fa-home"></i>
+								</span>
+								<span class="ml-2 text-sm tracking-wide truncate">Front Office</span>
+							</a>
+						</li>
+						<li>
 							<a href="{% url 'logout' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
 										xmlns="http://www.w3.org/2000/svg">
@@ -52,16 +61,16 @@
 								<span class="ml-2 text-sm tracking-wide truncate">Logout</span>
 							</a>
 						</li>
-						<li class="px-5">
+						<li class="px-5 bg-gradient-to-r from-gray-800">
 							<div class="flex flex-row items-center h-8">
-								<div class="text-sm font-light tracking-wide text-gray-500">Core</div>
+								<div class="text-md tracking-wide text-white font-bold subpixel-antialiased">Core</div>
 							</div>
 						</li>
 
 						{% if perms.core.view_analysis %}
 						<li>
 							<a href="{% url 'ra-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-glasses"></i>
 								</span>
@@ -72,7 +81,7 @@
 						{% if perms.core.view_riskinstance %}
 						<li>
 							<a href="{% url 'ri-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-clone"></i>
 								</span>
@@ -83,7 +92,7 @@
 						{% if perms.core.view_mitigation %}
 						<li>
 							<a href="{% url 'mtg-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-fire-extinguisher"></i>
 								</span>
@@ -94,7 +103,7 @@
 						{% if perms.core.view_riskacceptance %}
 						<li>
 							<a href="{% url 'acceptance-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-user-tie"></i>
 								</span>
@@ -103,16 +112,16 @@
 						</li>
 						{% endif %}
 
-						<li class="px-5">
+						<li class="px-5 bg-gradient-to-r from-gray-800">
 							<div class="flex flex-row items-center h-8">
-								<div class="text-sm font-light tracking-wide text-gray-500">General</div>
+								<div class="text-md tracking-wide text-white font-bold subpixel-antialiased">General</div>
 							</div>
 						</li>
 
 						{% if perms.general.view_projectsgroup %}
 						<li>
 							<a href="{% url 'pd-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-sitemap"></i>
 								</span>
@@ -123,7 +132,7 @@
 						{% if perms.general.view_project %}
 						<li>
 							<a href="{% url 'project-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-cubes"></i>
 								</span>
@@ -134,7 +143,7 @@
 						{% if perms.general.view_project %}
 						<li>
 							<a href="{% url 'project-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-cubes"></i>
 								</span>
@@ -145,7 +154,7 @@
 						{% if perms.general.view_parentrisk %}
 						<li>
 							<a href="{% url 'threat-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-folder"></i>
 								</span>
@@ -155,7 +164,7 @@
 						{% endif %}
 						{% if perms.general.view_solution %}
 						<li>
-							<a href="{% url 'security-function-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+							<a href="{% url 'security-function-list' %}" class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 							<span class="inline-flex justify-center items-center ml-4">
 								<i class="fas fa-cogs"></i>
 							</span>
@@ -167,16 +176,16 @@
 
 
 
-						<li class="px-5">
+						<li class="px-5 bg-gradient-to-r from-gray-800">
 							<div class="flex flex-row items-center h-8">
-								<div class="text-sm font-light tracking-wide text-gray-500">Settings</div>
+								<div class="text-md tracking-wide text-white font-bold subpixel-antialiased">Settings</div>
 							</div>
 						</li>
 
 						{% if perms.auth.view_group %}
 						<li>
 							<a href="{% url 'group-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-user-tag"></i>
 								</span>
@@ -187,7 +196,7 @@
 						{% if perms.auth.view_user %}
 						<li>
 							<a href="{% url 'user-list' %}"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-users"></i>
 								</span>
@@ -197,21 +206,21 @@
 						{% endif %}
 						<li>
 							<a href="{% url 'matrix' %}" target="blank"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-border-all"></i>
 								</span>
 								<span class="ml-2 text-sm tracking-wide truncate">Rating Matrix</span>
 							</a>
 						</li>
-						<li class="px-5">
+						<li class="px-5 bg-gradient-to-r from-gray-800">
 							<div class="flex flex-row items-center h-8">
-								<div class="text-sm font-light tracking-wide text-gray-500">Extra</div>
+								<div class="text-md tracking-wide text-white font-bold subpixel-antialiased">Extra</div>
 							</div>
 						</li>
 						<li>
 							<a href="{% url 'xrays' %}" target="blank"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-bolt"></i>
 								</span>
@@ -221,7 +230,7 @@
 						
 						<li>
 							<a href="{% url 'scoring' %}" target="blank"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-star-half-alt"></i>
 								</span>
@@ -230,7 +239,7 @@
 						</li>
 						<li>
 							<a href="#"
-								class="relative flex flex-row items-center h-11 focus:outline-none hover:bg-gray-50 text-gray-600 hover:text-gray-800 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+								class="relative flex flex-row items-center h-11 focus:outline-none text-white hover:text-gray-300 border-l-4 border-transparent hover:border-indigo-500 pr-6">
 								<span class="inline-flex justify-center items-center ml-4">
 									<i class="fas fa-question-circle"></i>
 								</span>
@@ -242,7 +251,7 @@
 				</nav>
 			</aside>
 			<!-- SIDEBAR TOGGLE -->
-			<button class="fixed left-64 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-500 shadow shadow-blue-500/50 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-64': sidebarOpen == false }">
+			<button class="fixed left-64 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-violet-800 shadow shadow-blue-500/50 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-64': sidebarOpen == false }">
 				<i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
 			</button>
 			<div class="flex-1">
