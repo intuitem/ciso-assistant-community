@@ -117,7 +117,7 @@
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
                     <h2 class="text-lg font-semibold mb-4">Associated Measures</h2>
                     <div x-data="modal()">
-                        <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+                        <a id="newMeasures" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                         class="justify-self-end rounded cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2">
                             <i class="fas fa-plus mr-2"></i>New Measure</a>
                             {% include "back_office/snippets/measure_create_modal.html" %}
