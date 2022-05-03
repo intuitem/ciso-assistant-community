@@ -5,7 +5,7 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<div class="flex flex-col xl:flex-row xl:space-x-4">
+<div class="flex flex-col lg:flex-row lg:space-x-4">
     <div>
         <form method="post" id="analysis_form">{% csrf_token %}
         {{ form.non_field_errors }}

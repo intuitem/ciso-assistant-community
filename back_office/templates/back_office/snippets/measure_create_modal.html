@@ -24,75 +24,16 @@
           <form action="{% url 'measure-create-modal' %}" method="post">{% csrf_token %}
             {{ measure_create_form.non_field_errors }}
             {{ measure_create_form.errors }}
-
             <div class="grid grid-cols-8 gap-y-6 font-medium">
-              <div class="col-span-2">
-                <p>Risk Scenario</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.risk_instance.errors }}
-                {{ measure_create_form.risk_instance }}
-              </div>
-
-              <div class="col-span-2">
-                <p>Security Function</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.solution.errors }}
-                {{ measure_create_form.solution }}
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ measure_create_form.description.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.description.errors }}
-                {{ measure_create_form.description }}
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ measure_create_form.type.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.type.errors }}
-                {{ measure_create_form.type }}
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ measure_create_form.status.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.status.errors }}
-                {{ measure_create_form.status }}
-                <p class="text-xs font-normal text-gray-400">{{ measure_create_form.status.help_text|striptags }}</p>
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ measure_create_form.eta.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.eta.errors }}
-                {{ measure_create_form.eta }}
-                <p class="text-xs font-normal text-gray-400">{{ measure_create_form.eta.help_text|striptags }}</p>
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ measure_create_form.link.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.link.errors }}
-                {{ measure_create_form.link }}
-                <p class="text-xs font-normal text-gray-400">{{ measure_create_form.link.help_text|striptags }}</p>
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ measure_create_form.effort.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ measure_create_form.effort.errors }}
-                {{ measure_create_form.effort }}
-                <p class="text-xs font-normal text-gray-400">{{ measure_create_form.effort.help_text|striptags }}</p>
-              </div>
+              {% for field in measure_create_form %}
+                <div class="col-span-2">
+                  <p>{{ field.label|striptags }}</p>
+                </div>
+                <div class="col-span-6">
+                  {{ field.errors }}
+                  {{ field }}
+                </div>
+              {% endfor %}
 
               <section class="col-start-3 col-span-6 place-content-end">
 

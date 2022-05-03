@@ -1,134 +1,105 @@
-from dataclasses import fields
-from django.forms import DateInput, DateTimeInput, ModelForm, Select, TextInput, Textarea, widgets
+from sqlite3 import Date
+from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 
 from django.contrib.auth.models import User, Group
-from core.models import Analysis, Mitigation, RiskInstance
+from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
 
-class RiskAnalysisCreateForm(ModelForm):
+class DefaultDateInput(DateInput):
+    input_type = 'date'
+
+class StyledModelForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
+        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput, Textarea)
+        select_inputs = (Select, SelectMultiple, NullBooleanSelect)
+        for fname, f in self.fields.items():
+            input_type = f.widget.__class__
+            model_name = str(self.Meta.model).split('.')[-1].strip("'>").lower()
+            if input_type in text_inputs or input_type in select_inputs:
+                f.widget.attrs['class'] = 'w-full rounded-md'
+                f.widget.attrs['id'] = f'id_{model_name}_{fname}'
+
+class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:
         model = Analysis
         fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
-        widgets = { # Tailwind Styles go here
-            'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
-        }
 
-class MeasureCreateForm(ModelForm):
+class MeasureCreateForm(StyledModelForm):
     class Meta:
         model = Mitigation
         fields = '__all__'
-        widgets = { # Tailwind Styles go here
-            'risk_instance': Select(attrs={'class': 'w-full rounded-md'}),
-            'description': Textarea(attrs={'class': 'w-full rounded-md'}),
+        labels = {
+            'risk_instance': 'Risk Scenario',
+            'solution': 'Security Function',
+        }
+        widgets = {
+            'eta': DefaultDateInput()
         }
 
-class SecurityFunctionCreateForm(ModelForm):
+        
+class SecurityFunctionCreateForm(StyledModelForm):
     class Meta:
         model = Solution
         fields = '__all__'
-        widgets = { # Tailwind Styles go here
-            'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
-        }
 
-class ThreatCreateForm(ModelForm):
+class ThreatCreateForm(StyledModelForm):
     class Meta:
         model = ParentRisk
         fields = '__all__'
-        widgets = { # Tailwind Styles go here
-            'title': TextInput(attrs={'class': 'w-full rounded-md', 'id': 'threat_title_id'}),
-        }
 
-class UserCreateForm(ModelForm):
+class UserCreateForm(StyledModelForm):
     class Meta:
         model = User
         fields = '__all__'
-        widgets = { # Tailwind Styles go here
-            'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
-        }
 
-class RiskAnalysisUpdateForm(ModelForm):
+class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:
         model = Analysis
         fields = ['project', 'auditor', 'version', 'is_draft', 'rating_matrix', 'comments']
-        widgets = { # Tailwind Styles go here
-            'comments': Textarea(attrs={'class': 'w-full rounded-md'}),
-        }
 
-class RiskInstanceCreateForm(ModelForm):
+class RiskInstanceCreateForm(StyledModelForm):
     class Meta:
         model = RiskInstance
         exclude = ['analysis', 'residual_level', 'current_level']
-        
-        widgets = { # Tailwind Styles go here
-            'analysis': Select(attrs={'class': 'w-auto rounded-md text-sm h-32', 'id': 'analysis_id'}),
-            'existing_measures': Textarea(attrs={'class': 'w-full rounded-md text-sm h-32', 'id': 'existing_measures_id'}),
-            'scenario': Textarea(attrs={'class': 'w-full rounded-md text-sm h-24', 'id': 'scenario_id'}),
-            'comments': Textarea(attrs={'class': 'w-full rounded-md text-sm h-18', 'id': 'comments_id'}),
-            'parent_risk': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'parent_risk_id'}),
-            'current_proba': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'current_proba_id'}),
-            'current_impact': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'current_impact_id'}),
-            'residual_proba': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'residual_proba_id'}),
-            'residual_impact': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'residual_impact_id'}),
-            'treatment': Select(attrs={'class': 'w-full rounded-md text-sm', 'id': 'treatment_id'}),
-        }
 
-class RiskInstanceUpdateForm(ModelForm):
+class RiskInstanceUpdateForm(StyledModelForm):
     class Meta:
         model = RiskInstance
         fields = '__all__'
         exclude = ['current_level', 'residual_level']
-        widgets = { # Tailwind Styles go here
-            'existing_measures': Textarea(attrs={'class': 'w-full rounded-md text-sm h-32'}),
-            'scenario': Textarea(attrs={'class': 'w-full rounded-md text-sm h-24'}),
-            'comments': Textarea(attrs={'class': 'w-full rounded-md text-sm h-18'}),
-            'parent_risk': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'current_proba': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'current_impact': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'residual_proba': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'residual_impact': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-            'treatment': Select(attrs={'class': 'w-full rounded-md text-sm'}),
-        }
 
-class MitigationUpdateForm(ModelForm):
+class MitigationUpdateForm(StyledModelForm):
     class Meta:
         model = Mitigation
         exclude = ['risk_instance']
-        widgets = {
-            'eta': DateInput()
-        }
 
-class ProjectsGroupUpdateForm(ModelForm):
+class ProjectsGroupUpdateForm(StyledModelForm):
     class Meta:
         model = ProjectsGroup
         fields = '__all__'
-        widgets = { # Tailwind Styles go here
-            'name': TextInput(attrs={'class': 'w-full rounded text-sm h-32 border border-gray-300'}),
-            'department': TextInput(attrs={'class': 'w-full rounded text-sm h-32 border border-gray-300'}),
-        }
 
-class ProjectUpdateForm(ModelForm):
+class ProjectUpdateForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
 
-class SecurityFunctionUpdateForm(ModelForm):
+class SecurityFunctionUpdateForm(StyledModelForm):
     class Meta:
         model = Solution
         fields = '__all__'
 
-class ThreatUpdateForm(ModelForm):
+class ThreatUpdateForm(StyledModelForm):
     class Meta:
         model = ParentRisk
         fields = '__all__'
 
-class ProjectForm(ModelForm):
+class RiskAcceptanceCreateUpdateForm(StyledModelForm):
+    class Meta:
+        model = RiskAcceptance
+        fields = '__all__'
+
+class ProjectForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        widgets = {
-            'name': TextInput(attrs={'class': 'w-full rounded text-sm border border-gray-300 h-32', 'id': 'id_project_name'}),
-            'internal_id': TextInput(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
-            'parent_group': Select(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
-            'lc_status': Select(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
-            'summary': Textarea(attrs={'class': 'w-full rounded border border-gray-300 text-sm h-32'}),
-        }

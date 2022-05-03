@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import loader
+from django.template import context, loader
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
@@ -127,6 +127,12 @@ class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = RiskAcceptance
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
+        context['risk_acceptance_update_form'] = RiskAcceptanceCreateUpdateForm
+        return context
+
     def get_queryset(self):
         if not self.request.user.is_superuser:
             agg_data = RiskAcceptance.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('type', 'id')
@@ -181,6 +187,26 @@ class MeasureCreateViewModal(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('mtg-list')
 
+class RiskAcceptanceCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_riskacceptance'
+    model = RiskAcceptance
+    template_name = 'back_office/snippets/risk_acceptance_create_modal.html'
+    context_object_name = 'acceptance'
+    form_class = RiskAcceptanceCreateUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('acceptance-list')
+
+class RiskAcceptanceUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_riskacceptance'
+    model = RiskAcceptance
+    template_name = 'back_office/risk_acceptance_update.html'
+    context_object_name = 'acceptance'
+    form_class = RiskAcceptanceCreateUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('acceptance-list')
+
 class ThreatCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_parentrisk'
     model = ParentRisk
@@ -207,6 +233,14 @@ class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     template_name = 'back_office/snippets/analysis_create_modal.html'
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
+
+    # def form_valid(self, form: form_class) -> HttpResponse:
+    #     if form.is_valid():
+    #         form.project = get_object_or_404(Project, id=self.kwargs['parent_project'])
+    #         form.auditor = self.request.user
+    #         analysis = form.save(commit=False)
+    #         analysis.project = get_object_or_404(Project, id=3)
+    #         return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return reverse_lazy('ra-list')
@@ -298,6 +332,15 @@ class RiskScenarioDeleteView(PermissionRequiredMixin, DeleteView):
     def get_success_url(self) -> str:
         return reverse_lazy('ri-list')
 
+class RiskAcceptanceDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_riskacceptance'
+
+    model = RiskAcceptance
+    success_url = reverse_lazy('acceptance-list')
+    template_name = 'back_office/snippets/risk_acceptance_delete_modal.html'
+
+    success_url = reverse_lazy('acceptance-list')
+
 class MeasureDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_mitigation'
 
@@ -356,7 +399,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['mitigations'] = Mitigation.objects.all()
         context['crumbs'] = ['Risk Scenarios']
-        context['measure_create_form'] = MeasureCreateForm
+        context['measure_create_form'] = MeasureCreateForm(initial={'risk_instance': get_object_or_404(RiskInstance, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
@@ -404,7 +447,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
         context['projects'] = Project.objects.all()
         crumbs = ['Projects Domains']
         context['crumbs'] = crumbs
-        context['project_create_form'] = ProjectForm
+        context['project_create_form'] = ProjectForm(initial={'parent_group': get_object_or_404(ProjectsGroup, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
@@ -419,11 +462,18 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['analyses'] = Analysis.objects.all()
-        context['analysis_create_form'] = RiskAnalysisCreateForm
+        context['analyses'] = Analysis.objects.all().order_by('is_draft', 'id')
+        context['analysis_create_form'] = RiskAnalysisCreateForm(initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
         crumbs = ['Projects']
         context['crumbs'] = crumbs
         return context
+    
+    # def get_queryset(self):
+    #     if not self.request.user.is_superuser:
+    #         agg_data = Analysis.objects.filter(auditor=self.request.user).order_by('is_draft', 'id')
+    #     else:
+    #         agg_data = Analysis.objects.all().order_by('is_draft', 'id')
+    #     return agg_data
 
     def get_success_url(self) -> str:
         return reverse_lazy('project-list')
