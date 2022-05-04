@@ -101,5 +101,5 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
 
 class ProjectForm(StyledModelForm):
     class Meta:
-        model = Project
+        model = RiskAcceptance
         fields = '__all__'

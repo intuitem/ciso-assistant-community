@@ -6,3 +6,4 @@ staticfiles/*
 *.mo
 *.env
 dump.json
+styles.css

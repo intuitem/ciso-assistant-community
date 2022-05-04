@@ -7,7 +7,7 @@
 {% endwith %}
 <div class="grid mb-4"
     x-data="modal()">
-    <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+    <a id="newThreat" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
         class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 cursor-pointer">
         <i class="fas fa-plus"></i>
         New Threat
@@ -64,6 +64,7 @@
                         x-id="['dropdown-button']">
                             <!-- Button -->
                             <button 
+                                id="action{{ threat.id }}"
                                 x-ref="button"
                                 x-on:click="toggle()"
                                 :aria-expanded="open"
@@ -87,7 +88,7 @@
                                 <li>
                                     <a href="{% url 'threat-update' threat.id %}" class="flex items-center px-3 py-3 hover:bg-gray-100">
                                         <i class="fas fa-edit"></i>
-                                        <span class="ml-2">Edit</span>
+                                        <span id="editAction{{ threat.id }}" class="ml-2">Edit</span>
 
                                     </a>
                                 </li>
@@ -95,7 +96,7 @@
                                     <div x-data="modal()">
                                         <a x-on:click="open()" type="button" class="flex items-center px-3 py-3 hover:bg-gray-100 cursor-pointer" data-toggle="modal" data-target="#exampleModalTwo">
                                             <i class="fas fa-trash"></i>
-                                            <span class="ml-2">Delete</span>
+                                            <span id="deleteAction{{ threat.id }}" class="ml-2">Delete</span>
                                         </a>
                                       
                                         {% include 'back_office/snippets/threat_delete_modal.html' %}

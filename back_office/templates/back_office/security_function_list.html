@@ -7,7 +7,7 @@
 {% endwith %}
 <div class="grid mb-4"
     x-data="modal()">
-    <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+    <a id="newSecurityFunction" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
         class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 cursor-pointer">
         <i class="fas fa-plus"></i>
         New Security Function
@@ -82,7 +82,8 @@
                         x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
                         x-id="['dropdown-button']">
                             <!-- Button -->
-                            <button 
+                            <button
+                                id="action{{ function.id }}"
                                 x-ref="button"
                                 x-on:click="toggle()"
                                 :aria-expanded="open"
@@ -106,7 +107,7 @@
                                 <li>
                                     <a href="{% url 'security-function-update' function.id %}" class="flex items-center px-3 py-3 hover:bg-gray-100">
                                         <i class="fas fa-edit"></i>
-                                        <span class="ml-2">Edit</span>
+                                        <span id="editAction{{ function.id }}" class="ml-2">Edit</span>
 
                                     </a>
                                 </li>
@@ -114,7 +115,7 @@
                                     <div x-data="modal()">
                                         <a x-on:click="open()" type="button" class="flex items-center px-3 py-3 hover:bg-gray-100 cursor-pointer" data-toggle="modal" data-target="#exampleModalTwo">
                                             <i class="fas fa-trash"></i>
-                                            <span class="ml-2">Delete</span>
+                                            <span id="deleteAction{{ function.id }}" class="ml-2">Delete</span>
                                         </a>
                                       
                                         {% include 'back_office/snippets/security_function_delete_modal.html' %}
