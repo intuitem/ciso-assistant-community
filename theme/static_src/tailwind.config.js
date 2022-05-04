@@ -13,9 +13,7 @@ module.exports = {
      * Set mode to "jit" if you want to generate your styles on-demand as you author your templates;
      * Set mode to "aot" if you want to generate the stylesheet in advance and purge later (aka legacy mode).
      */
-    mode: "jit",
-
-    purge: [
+    content: [
         /**
          * HTML. Paths to Django template files that will contain Tailwind CSS classes.
          */
@@ -50,7 +48,6 @@ module.exports = {
          */
         // '../../**/*.py'
     ],
-    darkMode: false, // or 'media' or 'class'
     theme: {
         extend: {
             screens: {
@@ -62,14 +59,14 @@ module.exports = {
             // Now we build the full color palette, using all colors available
             // as shown at this link: https://tailwindcss.com/docs/customizing-colors#color-palette-reference
             transparent: "transparent",
-            current: "currentColor",
+            current: 'currentColor',
             black: "#000",
             white: "#fff",
-            bluegray: colors.blueGray,
-            coolgray: colors.coolGray,
+            bluegray: colors.slate,
+            coolgray: colors.gray,
             gray: colors.gray,
-            truegray: colors.trueGray,
-            warmgray: colors.warmGray,
+            truegray: colors.neutral,
+            warmgray: colors.stone,
             red: colors.red,
             orange: colors.orange,
             amber: colors.amber,

@@ -3,45 +3,80 @@
 
 <table class="min-w-full leading-normal">
     <thead>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "ID" %}
+        </th>
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Threat" %}
+        </th>
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Title" %}
         </th>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Parent Risk" %}
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Existing measures" %}
         </th>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Current Risk Level" %}
         </th>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Suggested measures" %}
+        </th>
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Residual Risk Level" %}
+        </th>
+        <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Status" %}
         </th>
     </thead>
     <tbody>
         {% for instance in instances %}{% if instance.analysis == analysis %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    {{ instance.id }}
+                </td>
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                        {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
+                    </p>
+                </td>
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
-                        <div class="ml-3">
-                            <a id="instance{{ instance.id }}" href="#"
+                        <div class="ml-0">
+                            <a id="instance{{ instance.id }}" href="{% url 'ri-update' instance.id %}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ instance.title }}
                             </a>
                         </div>
                     </div>
                 </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
-                    </p>
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p class="max-h-64 max-w-full overflow-hidden">{{ instance.existing_measures }}</p>
                 </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {{ instance.current_level }}
+                        {{ instance.get_current_level_display }}
                     </p>
                 </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.residual_level }}
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
+                    <ul class="list-disc space-y-4">
+                        {% for measure in suggested_measures  %}
+                            {% if measure.risk_instance == instance %}
+                            <li>
+                                <a href="{% url 'mtg-update' measure.id %}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    {{ measure }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
+                    {{ instance.get_residual_level_display }}
+                </td>
+                <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
+                    {{ instance.get_treatment_display }}
                 </td>
             </tr>
         {% endif %}{% endfor %}

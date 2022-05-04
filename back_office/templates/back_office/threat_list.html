@@ -2,70 +2,41 @@
 {% load i18n static %}
 
 {% block content %}
-{% with page_title='Measures' %}
+{% with page_title='Threats' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div class="grid mb-4"
-x-data="modal()">
-<a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-       class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 cursor-pointer">
-       <i class="fas fa-plus"></i>
-       New Measure
-</a>
-{% include "back_office/snippets/measure_create_modal.html" %}
-<script src="{% static 'js/modal.js' %}"></script>
+    x-data="modal()">
+    <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+        class="justify-self-end rounded bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 cursor-pointer">
+        <i class="fas fa-plus"></i>
+        New Threat
+    </a>
+    {% include "back_office/snippets/threat_create_modal.html" %}
+    <script src="{% static 'js/modal.js' %}"></script>
 </div>
-<div class="inline-block min-w-full shadow rounded-lg overflow-hidden px-4 bg-white">
+<div class="inline-block min-w-full shadow rounded-lg overflow-visible px-4 bg-white">
     <table class="min-w-full leading-normal">
         <thead>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Title" %}
-            </th>
-            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Parent Project" %}
-            </th>
-            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Type" %}
-            </th>
-            <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {% trans "Security Function" %}
+                {% trans "Threat" %}
             </th>
             <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 {% trans "Actions" %}
             </th>
         </thead>
         <tbody>
-            {% for measure in measures %}
+            {% for threat in threats %}
                 <tr>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <td class="px-3 py-3 border-b border-gray-200 bg-white text-sm">
                         <div class="flex items-center">
-
                             <div class="">
-                                <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}"
+                                <a id="instance{{ threat.id }}" href="{% url 'threat-update' threat.id %}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                    {{ measure.title|capfirst }}
+                                    {{ threat.title|capfirst }}
                                 </a>
                             </div>
                         </div>
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">
-                            {{ measure.parent_project }}
-                        </p>
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {% if measure.type == 'n/a' %}
-                            {{ measure.type|upper }}
-                        {% else %}
-                            {{ measure.type|capfirst }}
-                        {% endif %}
-                    </td>
-                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        {% if measure.solution %}
-                            {{ measure.solution }}
-                        {% else %}
-                            --
-                        {% endif %}
                     </td>
                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible">
 
@@ -114,7 +85,7 @@ x-data="modal()">
                                 class="absolute font-normal bg-white shadow overflow-hidden rounded w-24 border mt-2 py-1 z-20"
                             >
                                 <li>
-                                    <a href="{% url 'mtg-update' measure.id %}" class="flex items-center px-3 py-3 hover:bg-gray-100">
+                                    <a href="{% url 'threat-update' threat.id %}" class="flex items-center px-3 py-3 hover:bg-gray-100">
                                         <i class="fas fa-edit"></i>
                                         <span class="ml-2">Edit</span>
 
@@ -127,7 +98,7 @@ x-data="modal()">
                                             <span class="ml-2">Delete</span>
                                         </a>
                                       
-                                        {% include 'back_office/snippets/measure_delete_modal.html' %}
+                                        {% include 'back_office/snippets/threat_delete_modal.html' %}
                                         
                                       </div>
                                       
