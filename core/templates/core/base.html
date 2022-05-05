@@ -18,120 +18,143 @@
 
 </head>
 
-
-<body class="flex flex-col h-screen bg-white">
-<header class="print:hidden">
-    <nav class="flex flex-wrap justify-between bg-gray-700 shadow w-screen items-center p-1">
-        <a id="homepage" href="/" class="mx-2 my-auto sm:mx-8 flex flex-shrink-0">
-            <div class="bg-white rounded-lg p-1">
-                <svg height="42" width="42" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><style>.b,.c{fill:#694998;}.c{opacity:.15;}</style></defs><g><path class="b" d="M342.11,142.79l-11.34-59.33c-62.57,12.14-116.99,22.39-163.27,30.76-46.28,8.36-71.52,12.86-75.73,13.47l-5.2,60.77c2.73,1.12,21.87,8.86,57.43,23.23,35.56,14.37,68.89,27.94,99.99,40.7v1.49c-39.15,15.98-73.97,29.99-104.45,42-30.48,12.02-48.13,18.89-52.97,20.63l6.32,59.66c7.19,1.49,34.17,6.91,80.94,16.26,46.77,9.36,99.15,20.54,157.13,33.54l10.96-57.52c-36.57-6.42-72.15-13.14-106.73-20.18-34.58-7.03-54.85-11.17-60.81-12.4l.04-.94c6.2-2.6,23.21-9.85,51.03-21.75,27.82-11.9,56.98-23.61,87.47-35.14v-46.28c-30.53-11.66-59.35-23.21-86.47-34.63-27.12-11.42-44.52-18.8-52.21-22.15l.29-1,167.58-31.2Z"/><rect class="b" x="365.9" y="162.81" width="58.91" height="43.86"/><path class="b" d="M423.88,236.22h-57.05c.25,19.58,.4,37.17,.46,52.78,.06,15.61,.09,30.54,.09,44.79,0,16.85-.09,34.94-.28,54.27-.19,19.33-.28,31.97-.28,37.91h57.05c0-5.58-.12-15.7-.37-30.39-.25-14.68-.37-36.15-.37-64.4,0-17.72,.09-33.55,.28-47.48,.19-13.94,.34-29.76,.46-47.48Z"/></g><polygon class="c" points="480.91 253.74 68.58 15.68 68.58 491.8 480.91 253.74"/></svg>
-
-            </div>
-            <span class=" ml-2 text-lg hover:text-gray-300 flex justify-center items-center antialiased font-semibold text-white ">MIRA</span>
-        </a>
-        <div class="flex flex-grow">
-            <search class="flex-grow ml-0 mr-4">
-                <form action="{% url 'search' %}" class="">
-                    <span class="h-10 m-0 bg-gray-200 hover:bg-gray-300 cursor-pointer border border-gray-300 text-sm rounded-full flex">
-                        <input id="search" required type="search" name="q" placeholder="{% trans "Search Risk instance, mitigation, analysis ..." %}" value="{{request.GET.q}}"
-                                class="flex-grow px-4 rounded-l-full rounded-r-full text-sm focus:outline-none border-none overflow-ellipsis">
-                        <button id="submit" type="submit" class="text-gray-700">
-                                <i class="fas fa-search text-lg w-4 h-4 ml-2 mr-4"></i>
-                        </button>
-                    </span>
-                </form>
-            </search>
-            <div class="mr-5 my-auto sm:hidden border border-gray-300 py-2 px-3 rounded-lg">
-                <i class="fas fa-bars text-gray-100"></i>
-            </div>
-        </div>
-        <div class="justify-between w-auto pl-0 pr-2 pb-0 hidden sm:flex">
-            <a id="edit" href="/back-office/" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i 
-                 class="fas fa-edit"></i> {% trans "Edit" %}</a>
-            <a id="analytics" href="{% url 'analytics' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i  class="fas fa-chart-pie"></i> {% trans "Analytics" %}
-            </a>
-            <a id="myprojects" href="{% url 'my_projects' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i class="fas fa-star"></i> {% trans "My Projects" %}
-            </a>
-            <a  id="calendar" href="{% url 'calendar' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                <i class="fas fa-calendar-alt"></i> {% trans "Calendar" %}
-            </a>
-            <a  id="composer" href="{% url 'composer' %}" class="px-2 py-2 m-2 text-center text-white hover:text-gray-300">
-                 <i class="fas fa-drafting-compass"></i> {% trans "Composer" %}
-            </a>
-
-
-            <div class="flex justify-center m-2">
-                <div x-data="{ dropdownOpen: false }" class="relative">
-                    <button id="more" @click="dropdownOpen = !dropdownOpen"
-                            class="relative z-10 block rounded-md  text-white hover:text-gray-300 px-2 py-2 focus:outline-none">
-                        {% trans "More" %}
-                        <i class="fas fa-angle-down"></i>
-                    </button>
-
-                    <div x-show="dropdownOpen" @click="dropdownOpen = false"
-                         class="fixed inset-0 h-full w-full z-10"></div>
-
-                    <div x-show="dropdownOpen"
-                         class="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
-                        <a class="block px-4 py-2 text-sm capitalize text-gray-700 border-b">
-                            {% if user.is_authenticated %}
-                            <i class="fas fa-user-circle"></i> {% trans "Hello" %}, {{user}}
-                            {% else %}
-                            {% trans "You're not logged in" %}
-                            {% endif %}
-                        </a>
-                        <a href="{% url 'xrays' %}"
-                           class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
-                            <i id="xrays" class="fas fa-bolt"></i> {% trans "X-Rays (my projects)" %}
-                        </a>
-                        <a href="{% url 'scoring' %}"
-                           class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
-                            <i id="scoring" class="fas fa-compass"></i> {% trans "Scoring assistant" %}
-                        </a>
-                        <a href="{% url 'matrix' %}"
-                           class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white border-b">
-                            <i id="riskmatrix" class="fas fa-border-all"></i> {% trans "Risk Matrix" %}
-                        </a>
-                        <a class="block px-4 py-2 text-sm capitalize text-gray-700 border-b">
-                            <i id="translation" class="fas fa-language"></i> {% trans "Language" %}
-
-                            <form action="{% url 'set_language' %}" method="post">
-                                {% csrf_token %}
-                                <select id="language" class="w-full border-none block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white" name="language" onchange="this.form.submit();"> 
-                                    {% get_current_language as LANGUAGE_CODE %} 
-                                    {% get_available_languages as LANGUAGES %}
-                                    {% get_language_info_list for LANGUAGES as languages %}
-                                    {% for language in languages %}
-                                        <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
-                                            {{ language.name_local }} ({{ language.code }})
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </form>
-                        </a>
-                        {% if user.is_authenticated %}
-                        <a  id="signout"
-                            href="{% url 'logout' %}"
-                           class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
-                            <i class="fas fa-sign-in-alt"></i> {% trans "Sign Out" %}
-                        </a>
-                        {% endif %}
+<body class="bg-gray-100">
+	<style>
+		[x-cloak] { display: none }
+	</style>
+	<div x-data="{ sidebarOpen: true }" class="flex h-screen">
+		<aside class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-y-auto left-0"
+			:class="{ '-ml-72': !sidebarOpen }">
+			<nav class="flex-1 flex flex-col overflow-y-auto bg-white">
+                <a href="/">
+                    <div class="flex items-center justify-center p-3">
+                        <svg height="128" width="128" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><style>.b,.c{fill:#694998;}.c{opacity:.15;}</style></defs><g><path class="b" d="M342.11,142.79l-11.34-59.33c-62.57,12.14-116.99,22.39-163.27,30.76-46.28,8.36-71.52,12.86-75.73,13.47l-5.2,60.77c2.73,1.12,21.87,8.86,57.43,23.23,35.56,14.37,68.89,27.94,99.99,40.7v1.49c-39.15,15.98-73.97,29.99-104.45,42-30.48,12.02-48.13,18.89-52.97,20.63l6.32,59.66c7.19,1.49,34.17,6.91,80.94,16.26,46.77,9.36,99.15,20.54,157.13,33.54l10.96-57.52c-36.57-6.42-72.15-13.14-106.73-20.18-34.58-7.03-54.85-11.17-60.81-12.4l.04-.94c6.2-2.6,23.21-9.85,51.03-21.75,27.82-11.9,56.98-23.61,87.47-35.14v-46.28c-30.53-11.66-59.35-23.21-86.47-34.63-27.12-11.42-44.52-18.8-52.21-22.15l.29-1,167.58-31.2Z"/><rect class="b" x="365.9" y="162.81" width="58.91" height="43.86"/><path class="b" d="M423.88,236.22h-57.05c.25,19.58,.4,37.17,.46,52.78,.06,15.61,.09,30.54,.09,44.79,0,16.85-.09,34.94-.28,54.27-.19,19.33-.28,31.97-.28,37.91h57.05c0-5.58-.12-15.7-.37-30.39-.25-14.68-.37-36.15-.37-64.4,0-17.72,.09-33.55,.28-47.48,.19-13.94,.34-29.76,.46-47.48Z"/></g><polygon class="c" points="480.91 253.74 68.58 15.68 68.58 491.8 480.91 253.74"/></svg>
                     </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-    
-
-
-</header>
-
-{% block content %}{% endblock %}
-
-
+                    <div class="flex items-center justify-center h-14 py-2">
+                        <div id="title" class="text-xl text-indigo-900"><span class="font-semibold">MIRA</span> <i class="fas fa-circle-notch"></i> <span class="font-bold">Viewer</span></div>
+                    </div>
+                </a>
+				<div class="overflow-y-auto overflow-x-hidden flex-grow">
+					<ul class="flex flex-col py-4 space-y-1">
+						<li>
+							<a id="edit" href="/back-office/"
+								class="relative flex flex-row items-center pr-6 nav-link">
+								<span class="inline-flex justify-center items-center ml-4">
+									<i class="fas fa-edit"></i>
+								</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Edit" %}</span>
+							</a>
+						</li>
+                        <li>
+							<a id="analytics" href="{% url 'analytics' %}"
+								class="relative flex flex-row items-center pr-6 nav-link">
+								<span class="inline-flex justify-center items-center ml-4">
+									<i class="fas fa-chart-pie"></i>
+								</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Analytics" %}</span>
+							</a>
+						</li>
+                        <li>
+							<a id="myprojects" href="{% url 'my_projects' %}"
+								class="relative flex flex-row items-center pr-6 nav-link">
+								<span class="inline-flex justify-center items-center ml-4">
+									<i class="fas fa-star"></i>
+								</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "My Projects" %}</span>
+							</a>
+						</li>
+                        <li>
+							<a id="calendar" href="{% url 'calendar' %}"
+								class="relative flex flex-row items-center pr-6 nav-link">
+								<span class="inline-flex justify-center items-center ml-4">
+									<i class="fas fa-calendar-alt"></i> 
+								</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Calendar" %}</span>
+							</a>
+						</li>
+                        <li>
+							<a id="composer" href="{% url 'composer' %}"
+								class="relative flex flex-row items-center pr-6 nav-link">
+								<span class="inline-flex justify-center items-center ml-4">
+									<i class="fas fa-drafting-compass"></i> 
+								</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Composer" %}</span>
+							</a>
+						</li>
+                        <li class="nav-seperator text-md">
+                            <div x-data="{ dropdownOpen: false }" class="relative">
+                                <button id="more" @click="dropdownOpen = !dropdownOpen"
+                                        class="relative z-10 block rounded-md  text-black hover:text-gray-300 px-2 py-2 focus:outline-none">
+                                    {% trans "More" %}
+                                    <i class="fas fa-angle-down"></i>
+                                </button>
+            
+                                <div x-show="dropdownOpen" @click="dropdownOpen = false"
+                                     class="fixed inset-0 h-full w-full z-10"></div>
+            
+                                <div x-show="dropdownOpen"
+                                     class="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
+                                    <a class="block px-4 py-2 text-sm capitalize text-gray-700 border-b">
+                                        {% if user.is_authenticated %}
+                                        <i class="fas fa-user-circle"></i> {% trans "Hello" %}, {{user}}
+                                        {% else %}
+                                        {% trans "You're not logged in" %}
+                                        {% endif %}
+                                    </a>
+                                    <a href="{% url 'xrays' %}"
+                                       class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
+                                        <i id="xrays" class="fas fa-bolt"></i> {% trans "X-Rays (my projects)" %}
+                                    </a>
+                                    <a href="{% url 'scoring' %}"
+                                       class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
+                                        <i id="scoring" class="fas fa-compass"></i> {% trans "Scoring assistant" %}
+                                    </a>
+                                    <a href="{% url 'matrix' %}"
+                                       class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white border-b">
+                                        <i id="riskmatrix" class="fas fa-border-all"></i> {% trans "Risk Matrix" %}
+                                    </a>
+                                    <a class="block px-4 py-2 text-sm capitalize text-gray-700 border-b">
+                                        <i id="translation" class="fas fa-language"></i> {% trans "Language" %}
+            
+                                        <form action="{% url 'set_language' %}" method="post">
+                                            {% csrf_token %}
+                                            <select id="language" class="w-full border-none block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white" name="language" onchange="this.form.submit();"> 
+                                                {% get_current_language as LANGUAGE_CODE %} 
+                                                {% get_available_languages as LANGUAGES %}
+                                                {% get_language_info_list for LANGUAGES as languages %}
+                                                {% for language in languages %}
+                                                    <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
+                                                        {{ language.name_local }} ({{ language.code }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                    </a>
+                                    {% if user.is_authenticated %}
+                                    <a  id="signout"
+                                        href="{% url 'logout' %}"
+                                       class="block px-4 py-2 text-sm capitalize text-gray-700 hover:bg-blue-500 hover:text-white">
+                                        <i class="fas fa-sign-in-alt"></i> {% trans "Sign Out" %}
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+					</ul>
+				</div>
+			</nav>
+		</aside>
+        <!-- SIDEBAR TOGGLE -->
+        <button class="fixed left-72 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-900 shadow shadow-blue-500/50 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-72': sidebarOpen == false }">
+            <i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
+        </button>
+        <div class="flex-1">
+            <main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-0' : 'ml-72'">
+            {% block content %}
+            {% endblock %}
+        </main>
+		</div>
+	</div>
 </body>
 
 

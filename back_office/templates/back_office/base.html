@@ -241,19 +241,19 @@
 								<span class="ml-2 text-sm tracking-wide truncate">User Guide</span>
 							</a>
 						</li>
-						</ul>
-					</div>
-				</nav>
-			</aside>
-			<!-- SIDEBAR TOGGLE -->
-			<button class="fixed left-72 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-900 shadow shadow-blue-500/50 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-72': sidebarOpen == false }">
-				<i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
-			</button>
-			<div class="flex-1">
-			  <main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-0' : 'ml-72'">
-				{% block content %}
-				{% endblock %}
-			</main>
+					</ul>
+				</div>
+			</nav>
+		</aside>
+		<!-- SIDEBAR TOGGLE -->
+		<button class="fixed left-72 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-900 shadow shadow-blue-500/50 text-white hover:scale-125"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-72': sidebarOpen == false }">
+			<i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
+		</button>
+		<div class="flex-1">
+			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-0' : 'ml-72'">
+			{% block content %}
+			{% endblock %}
+		</main>
 		</div>
 	</div>
 </body>
