@@ -4,16 +4,15 @@
 {% load i18n %}
 {% block content %}
 
-<main class="flex-grow bg-gray-50">
-    {% include '../snippets/breadcrumbs.html' %}
-    <div class="container mx-auto px-4 sm:px-8">
+<main class="p-2 m-2 bg-gray-50">
+    <div class="container ml-5 mt-5 px-4 sm:px-8">
         <div class="py-8">
             <div>
-                <h2 id="title" class="text-2xl font-semibold leading-tight">{% trans "Analysis Registry" %}</h2>
+                <h2 id="title" class="text-2xl ml-3 font-semibold leading-tight">{% trans "Analysis Registry" %}</h2>
             </div>
 
-            <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-                <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
+            <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4">
+                <div class="inline-block min-w-full shadow rounded-lg">
                     <table class="min-w-full leading-normal">
                         <thead>
                         <tr>
