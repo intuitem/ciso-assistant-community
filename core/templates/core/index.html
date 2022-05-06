@@ -1,36 +1,52 @@
-
 {% extends 'core/base.html' %}
-
 {% load i18n %}
 {% block content %}
 
-<main class="p-2 m-2 bg-gray-50">
-    <div class="container ml-5 mt-5 px-4 sm:px-8">
-        <div class="py-8">
-            <div>
-                <h2 id="title" class="text-2xl ml-3 font-semibold leading-tight">{% trans "Analysis Registry" %}</h2>
+<div class="w-full h-full mx-auto">
+    <section class="">
+        <div class=" flex items-center content-center">
+            <div class="flex-grow mx-14 my-14">
+                <search>
+                    <form action="{% url 'search' %}" class="">
+                        <span class="h-10 m-0 bg-gray-200 hover:bg-gray-300 cursor-pointer border border-gray-300 text-sm rounded-full flex">
+                            <input id="search" required type="search" name="q" placeholder="{% trans "Search Risk instance, mitigation, analysis ..." %}" value="{{request.GET.q}}"
+                                    class="flex-grow px-4 rounded-l-full rounded-r-full text-sm focus:outline-none border-none overflow-ellipsis">
+                            <button id="submit" type="submit" class="text-gray-700">
+                                    <i class="fas fa-search text-lg w-4 h-4 ml-2 mr-4"></i>
+                            </button>
+                        </span>
+                    </form>
+                </search>
             </div>
+        </div>
+        <div>
+            <h2 id="title" class="text-2xl ml-2 font-bold leading-tight">{% trans "Analysis Registry" %}</h2>
+        </div>
 
-            <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4">
-                <div class="inline-block min-w-full shadow rounded-lg">
-                    <table class="min-w-full leading-normal">
-                        <thead>
+        <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4">
+            <div class="inline-block min-w-full shadow rounded-lg">
+                <table class="min-w-full leading-normal">
+                    <thead>
                         <tr>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th
+                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 {% trans "ID" %}
                             </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th
+                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 {% trans "Assignee" %}
                             </th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th
+                                class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 {% trans "Last Update" %}
                             </th>
-                            <th class="px-7 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th
+                                class="px-7 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 {% trans "Actions" %}
                             </th>
                         </tr>
-                        </thead>
-                        <tbody>
+                    </thead>
+                    <tbody>
                         {% for analysis in page_obj %}
                         <tr>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
@@ -47,7 +63,7 @@
 
                                     <div class="ml-3">
                                         <a id="analysis{{analysis.id}}" href="{% url 'RA' analysis.id %}"
-                                           class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                             {{analysis}}
                                         </a>
                                     </div>
@@ -71,32 +87,35 @@
                                         <div class="flex items-center">
 
 
-                                            <a href="{% url 'MP' analysis.id %}" class="rounded bg-teal-500 text-white hover:bg-teal-400 text-center mr-2 h-full p-2"><span class="inline-block align-middle">{% trans "Treatment Plan" %}</span><a>
+                                            <a href="{% url 'MP' analysis.id %}"
+                                                class="rounded bg-teal-500 text-white hover:bg-teal-400 text-center mr-2 h-full p-2"><span
+                                                    class="inline-block align-middle">{% trans "Treatment Plan" %}</span><a>
                                                     <div x-data="{ dropdownOpen: false }" class="relative">
                                                         <button @click="dropdownOpen = !dropdownOpen"
-                                                                class="relative z-10 block bg-gray-600 rounded p-2 hover:bg-gray-500 focus:outline-none focus:bg-gray-700">
-                                                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
+                                                            class="relative z-10 block bg-gray-600 rounded p-2 hover:bg-gray-500 focus:outline-none focus:bg-gray-700">
+                                                            <svg class="h-6 w-6 text-white" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                            </svg>
                                                         </button>
 
                                                         <div x-show="dropdownOpen" @click="dropdownOpen = false"
-                                                             class="fixed inset-0 h-full w-full z-10"></div>
+                                                            class="fixed inset-0 h-full w-full z-10"></div>
 
                                                         <div x-show="dropdownOpen"
-                                                             class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-20">
-                                                            <a
-                                                               class="block px-4 py-2 text-sm text-gray-800">{% trans "Risk Analysis" %}</a>
+                                                            class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-20">
+                                                            <a class="block px-4 py-2 text-sm text-gray-800">{% trans "Risk Analysis" %}</a>
                                                             <a href="{% url 'RA-PDF' analysis.id %}"
-                                                               class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
+                                                                class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
                                                             <a href="{% url 'RA-CSV' analysis.id %}"
-                                                               class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
-                                                            <a
-                                                               class="block px-4 py-2 text-sm text-gray-800">{% trans "Treatment Plan" %}</a>
+                                                                class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
+                                                            <a class="block px-4 py-2 text-sm text-gray-800">{% trans "Treatment Plan" %}</a>
                                                             <a href="{% url 'MP-PDF' analysis.id %}"
-                                                               class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
+                                                                class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
                                                             <a href="{% url 'MP-CSV' analysis.id %}"
-                                                               class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
+                                                                class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
 
                                                         </div>
                                                     </div>
@@ -108,50 +127,36 @@
                         </tr>
                         {% endfor %}
 
-                        </tbody>
-                    </table>
-                    <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">                    
-                        <span id="pagenum" class="text-xs xs:text-sm text-gray-900">
-                                {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
-                            </span>
-                        <div class="inline-flex mt-2 xs:mt-0 space-x-2">
-                            {% if page_obj.has_previous %}
-                            <a href="?page=1"
-                               class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-double-left"></i>
-                                {% trans "First" %}</a>
-                            <a href="?page={{ page_obj.previous_page_number }}"
-                               class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
-                            {% endif %} {% if page_obj.has_next %}
-                            <a id ="next" class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
-                               href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
-                            <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
-                               href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
+                    </tbody>
+                </table>
+                <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
+                    <span id="pagenum" class="text-xs xs:text-sm text-gray-900">
+                        {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                    </span>
+                    <div class="inline-flex mt-2 xs:mt-0 space-x-2">
+                        {% if page_obj.has_previous %}
+                        <a href="?page=1"
+                            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i
+                                class="fas fa-angle-double-left"></i>
+                            {% trans "First" %}</a>
+                        <a href="?page={{ page_obj.previous_page_number }}"
+                            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i
+                                class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <a id="next"
+                            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                            href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
+                        <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                            href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
 
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
-<footer>
-    <div>
+    </section>
 
-    </div>
-    <div class="bg-gray-800 p-2 w-screen">
-        <div class="grid grid-cols-3 w-full">
-            <div class="p-1 m-1 text-white text-xs text-left">Copyright © 2018-2022 
-                <a href="https://intuitem.com" class="text-violet-400">intuitem</a>
-            </div>
-            <div class="p-1 m-1 text-white text-xs text-center">Version 3.0-beta</div>
-            <div class="p-1 m-1 mr-3 text-xs text-white text-right">
-                <a href="#" class="text-violet-400 hover:text-gray-400">{% trans "User guide" %}</a>
-                 | 
-                <a href="#" class="text-violet-400 hover:text-gray-400">Support</a>
-            </div>
-        </div>
-    </div>
-</footer>
+</div>
 
 
 {% endblock %}
