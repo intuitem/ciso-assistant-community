@@ -7,7 +7,7 @@
 	<title>{% block title %}MIRA Back-Office{% endblock title %}</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://unpkg.com/flowbite@1.4.5/dist/flowbite.min.css" />
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<script defer src="https://unpkg.com/alpinejs@3.9.2/dist/cdn.min.js"></script>
@@ -61,7 +61,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-glasses"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Analyses Registry</span>
+								<span class="ml-2 text-sm tracking-wide truncate">Risk Analyses</span>
 							</a>
 						</li>
 						{% endif %}
@@ -110,7 +110,7 @@
 							<a id="projectsdomains" href="{% url 'pd-list' %}"
 								class="relative flex flex-row items-center pr-6 nav-link">
 								<span class="nav-link-icon">
-									<i class="fas fa-sitemap"></i>
+									<i class="fas fa-project-diagram"></i>
 								</span>
 								<span class="ml-2 text-sm tracking-wide truncate">Projects Domains</span>
 							</a>
@@ -169,7 +169,7 @@
 							<a href="{% url 'group-list' %}"
 								class="relative flex flex-row items-center pr-6 nav-link">
 								<span class="nav-link-icon">
-									<i class="fas fa-user-tag"></i>
+									<i class="fas fa-sitemap"></i>
 								</span>
 								<span class="ml-2 text-sm tracking-wide truncate">Groups</span>
 							</a>
