@@ -11,14 +11,24 @@ class DefaultDateInput(DateInput):
 class StyledModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
-        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput, Textarea)
+        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput)
         select_inputs = (Select, SelectMultiple, NullBooleanSelect)
         for fname, f in self.fields.items():
             input_type = f.widget.__class__
             model_name = str(self.Meta.model).split('.')[-1].strip("'>").lower()
-            if input_type in text_inputs or input_type in select_inputs:
-                f.widget.attrs['class'] = 'w-full rounded-md'
+            if input_type in text_inputs:
+                f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
+            if input_type in select_inputs:
+                f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+                f.widget.attrs['id'] = f'id_{model_name}_{fname}'
+            if input_type == Textarea:
+                f.widget.attrs['class'] = 'block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                f.widget.attrs['placeholder'] = 'Comments are often useful...'
+            if input_type == CheckboxInput:
+                f.widget.attrs['id'] = f'id_{model_name}_{fname}'
+                f.widget.attrs['class'] = 'w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
+                
 
 class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:

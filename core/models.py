@@ -22,7 +22,6 @@ class Analysis(models.Model):
     rating_matrix = models.CharField(choices=RATING_METHODS, default='default', max_length=20, verbose_name=_("Rating matrix"))
 
     comments = models.TextField(max_length=1000, blank=True, null=True,
-                                help_text=_("general comments that will help the reader"),
                                 verbose_name=_("Comments"))
 
     created_at = models.DateTimeField(auto_now_add=True)
