@@ -65,17 +65,21 @@
     }
 
     .nav-link {
-        @apply h-11 focus:outline-none text-gray-600 font-semibold text-lg hover:text-indigo-900 border-l-4 border-transparent hover:border-indigo-500;
+        @apply flex items-center p-2 text-base font-normal text-gray-800 rounded-lg hover:bg-gray-100;
+    }
+
+    .nav-link-icon {
+        @apply text-gray-600 transition duration-75 ml-4;
     }
 
     .dashboard-card {
-        @apply text-white bg-gradient-to-r from-indigo-500 to-indigo-800 rounded-md shadow-lg p-4 m-4 w-1/6;
+        @apply text-white bg-gradient-to-r from-indigo-500 to-indigo-800 rounded-md shadow-lg p-4 m-4 w-1/5;
     }
 
 
 
     .nav-seperator {
-        @apply p-4 tracking-wide text-indigo-900 font-bold;
+        @apply p-3 tracking-wide text-indigo-900 font-semibold;
     }
 
 
