@@ -100,6 +100,10 @@
         @apply justify-self-end rounded bg-violet-800 hover:bg-violet-600 text-white font-medium px-4 py-2 cursor-pointer shadow;
     }
 
+    .simple-link {
+        @apply text-blue-800 font-semibold;
+    }
+
 
 
 
