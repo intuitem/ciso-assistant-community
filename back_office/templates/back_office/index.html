@@ -5,30 +5,72 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div class="w-full h-full mx-auto">
-    <section class="border">
-        <div class="container mx-w-8xl mx-auto py-2">
-            <div class="container px-5 py-24 mx-auto">
-                <div class="flex flex-wrap -m-4 text-center">
-                    <div class="dashboard-card">
-                        <h2 class="title-font font-medium sm:text-4xl text-3xl">2.7K</h2>
-                        <p class="leading-relaxed">Risk Scenarios</p>
-                    </div>
-                    <div class="dashboard-card">
-                        <h2 class="title-font font-medium sm:text-4xl text-3xl">1.8K</h2>
-                        <p class="leading-relaxed">Measures</p>
-                    </div>
-                    <div class="dashboard-card">
-                        <h2 class="title-font font-medium sm:text-4xl text-3xl">35</h2>
-                        <p class="leading-relaxed">Projects</p>
-                    </div>
-                    <div class="dashboard-card">
-                        <h2 class="title-font font-medium sm:text-4xl text-3xl">4</h2>
-                        <p class="leading-relaxed">Exceptions</p>
-                    </div>
+    <div class="">
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 border-l-8 border-r-8 border-indigo-700" id="stats">
+            <div class="p-2 m-2">
+                <span class="text-2xl font-extrabold text-slate-700">Statistics</span>
+            </div>
+            <div class="flex items-center content-center">
+                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-orange-500 mr-2"><i class="fas fa-biohazard"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">12</div> <div class="font-semibold text-slate-500 text-sm">Threats</div></div>
+                </div>
+                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-violet-500 mr-2"><i class="fas fa-glasses"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">34</div> <div class="font-semibold text-slate-500 text-sm">Analysis</div></div>
+                </div>
+                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-sky-500 mr-2"><i class="fas fa-clone"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">56</div> <div class="font-semibold text-slate-500 text-sm">Scenarios</div></div>
+                </div>
+                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-green-500 mr-2"><i class="fas fa-fire-extinguisher"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">78</div> <div class="font-semibold text-slate-500 text-sm">Measures</div></div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+            <div class="p-2 m-2">
+                <div class="text-2xl font-extrabold text-slate-700">My projects</div>
+                <div class="text-sm text-slate-500 font-semibold">Assigned to <span class="font-bold text-slate-700">8</span> projects</div>
+            </div>
+            <div class="flex items-center content-center">
+                <div class="border p-2 m-2 w-1/2">
+                    <span>Donut about risk scenarios status (limited to current user)</span>
+                </div>
+                <div class="border p-2 m-2 w-1/2">
+                    <span>Donut about security measures status (limited to current user)</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+            <div class="p-2 m-2">
+                <div class="text-2xl font-extrabold text-slate-700">Risks over time</div>
+                <div class="text-sm text-slate-500 font-semibold">by current risk level</div>
+            </div>
+            <div class="border m-2 p-2">
+                line charts about risks over time
+            </div>
+        </section>
+
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+            <div class="p-2 m-2">
+                <div class="text-2xl font-extrabold text-slate-700">Watch List</div>
+                <div class="text-sm text-slate-500 font-semibold">Items that have expired or with close ETA</div>
+            </div>
+            <div class="flex items-center content-center">
+                <div class="border p-2 m-2 w-1/2">
+                    <span>Measures list that match the filter</span>
+                </div>
+                <div class="border p-2 m-2 w-1/2">
+                    <span>Exceptions list that match the filter</span>
+                </div>
+            </div>
+        </section>
+        
+    </div>
 </div>
 
 
