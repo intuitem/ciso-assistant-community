@@ -40,7 +40,7 @@
 
             </div>
         </div>
-        <div class="mt-4 shadow-lg p-2 ">
+        <div class="mt-4 bg-gradient-to-br from-slate-200 shadow-lg rounded-lg p-2 ">
             <i class="fas fa-hand-point-right"></i> <span class="font-semibold">{% trans "For the selected scope, you have:" %}</span>
             <ul class="list-disc py-2 px-6 m-2">
                 <li><b>{{context.counters.untreated}}</b> {% trans "untreated risk(s)," %}</li>
@@ -83,7 +83,7 @@
               </div>
 
               <div>
-                  <a class="text-blue-600 hover:text-blue-400 py-2 my-2" href="{% url 'RA' item.analysis.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to full risk analysis" %}</a>
+                  <a class="text-violet-800 hover:text-violet-600 py-2 my-2" href="{% url 'RA' item.analysis.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to full risk analysis" %}</a>
               </div>
               </div>
 
