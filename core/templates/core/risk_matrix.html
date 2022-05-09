@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="bg-gray-100 min-h-screen">
+<div class="min-h-screen">
 <div class="bg-white p-4 m-4 rounded-lg shadow-lg relative">
     <div class="absolute right-0 top-0 bg-indigo-500 text-sm text-white p-2 m-2 w-16 rounded shadow">{% trans "Default" %}</div>
     {% include 'snippets/risk_matrix.html' with matrix='default' data=ri_clusters.current %}

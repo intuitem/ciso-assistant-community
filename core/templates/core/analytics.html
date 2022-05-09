@@ -6,7 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
 {% endblock %}
 {% block content %}
-<div class="p-2 m-2 bg-gray-50 h-screen">
+<div class="p-2 m-2 h-screen">
     <div id="header" class="flex space-x-10 pb-4 mx-2 mb-4 items-center">
 
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
@@ -92,10 +92,10 @@
 
     </div>
 
-    <div class="p-2 m-2 shadow-lg rounded-lg">
+    <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
         <div class="text-lg py-4 px-2">{% trans "Mitigations Overview" %}</div>
         <div class="justify-center flex flex-wrap">
-            <div class="w-1/3 min-w-[400px]">
+            <div class="w-1/3 min-w-[300px]">
                 <div>{% trans "Breakdown per Status" %}</div>
                 {% include 'snippets/bar_chart.html' with name='mtg' labels=mitigation_status.labels values=mitigation_status.values %}
             </div>
@@ -113,7 +113,7 @@
     </div>
 
 
-    <div class="p-2 m-2 shadow-lg rounded-lg">
+    <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
         <div>
             <div></div>
             <div class="m-2 p-2 text-lg">{% trans "Mitigations priority quadrants" %}</div>
@@ -167,7 +167,7 @@
         </div>
     </div>
 
-    <div class="p-2 m-2 shadow-lg rounded-lg">
+    <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
         <div class="text-lg p-2 m-2">{% trans "Risks per project group (category)" %}</div>
         <div class="text-sm p-2 m-2">{% trans "Current vs Residual" %}</div>
         <div class="p-2">

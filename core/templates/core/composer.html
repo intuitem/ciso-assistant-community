@@ -6,7 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
 {% endblock %}
 {% block content %}
-<div class="p-4 mx-auto bg-gray-100 w-screen min-h-screen">
+<div class="p-4 mx-auto min-h-screen">
     <div class="p-2 m-2 font-semibold text-xl">{% trans "Your selection" %}</div>
     <div class="p-2 m-2 text-sm"><i class="fas fa-info-circle"></i> {% trans "Hint: you can bookmark this page for future usage" %}</div>
     <div class="p-4 m-2 bg-white shadow rounded-xl">
@@ -54,12 +54,12 @@
 {% for item in context.analysis_objects %}
 
     <div x-data={show:false} class="rounded">
-          <div class="border border-b-0 bg-gradient-to-r from-indigo-500 to-indigo-200 px-6 py-4" id="headingOne">
+          <div class="border border-b-0 bg-gradient-to-r from-violet-800 to-violet-600 px-6 py-4 rounded-t-lg" id="headingOne">
               <button @click="show=!show" class=" text-white font-semibold hover:text-gray-300 focus:outline-none" type="button">
                 {{item.analysis}}
               </button>
           </div>
-          <div x-show="show" class="border border-1 px-10 py-6 bg-gray-50 flex space-x-4">
+          <div x-show="show" class="border border-1 px-10 py-6 bg-white flex space-x-4 rounded-b-lg">
               <div class="w-1/3">
               <div class="my-4"> <span class="font-semibold">{% trans "Risk Analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-blue-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
                   <b>{{item.analysis.quality_check.count}}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}</div>
