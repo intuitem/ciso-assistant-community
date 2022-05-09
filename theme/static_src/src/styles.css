@@ -65,14 +65,47 @@
     }
 
     .nav-link {
-        @apply h-11 focus:outline-none text-gray-600 font-semibold text-lg hover:text-indigo-900 border-l-4 border-transparent hover:border-indigo-500;
+        @apply flex items-center p-2 text-base font-normal text-gray-800 rounded-lg hover:bg-gray-100;
     }
 
+    .nav-link-icon {
+        @apply text-gray-600 transition duration-75 ml-4;
+    }
 
+    .dashboard-card {
+        @apply text-white bg-gradient-to-r from-indigo-500 to-indigo-800 rounded-md shadow-lg p-4 m-4 w-1/5;
+    }
+
+    .table-action{
+        @apply text-xl text-slate-500 hover:text-indigo-900 m-2;
+    }
+    
+    .tooltip-custom {
+        @apply p-2 text-white bg-gray-600 rounded-xl shadow-sm;
+    }
 
     .nav-seperator {
-        @apply p-4 tracking-wide text-indigo-900 font-bold;
+        @apply p-3 tracking-wide text-indigo-900 font-semibold;
     }
+
+    .form-label {
+        @apply block mb-2 text-sm font-medium text-gray-900;
+    }
+
+    .form-input {
+        @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5;
+    }
+    
+    .add-button {
+        @apply justify-self-end rounded bg-violet-800 hover:bg-violet-600 text-white font-medium px-4 py-2 cursor-pointer shadow;
+    }
+
+    .simple-link {
+        @apply text-blue-800 font-semibold;
+    }
+
+
+
 
 
 }

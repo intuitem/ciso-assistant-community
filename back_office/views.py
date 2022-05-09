@@ -10,9 +10,15 @@ from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
 from .forms import *
 
-# Create your views here.
 def index(request):
     template = loader.get_template('back_office/index.html')
+    context = {
+        'hello': 'world',
+    }
+    return HttpResponse(template.render(context, request))
+
+def fast_track(request):
+    template = loader.get_template('back_office/fast_track.html')
     context = {
         'hello': 'world',
     }

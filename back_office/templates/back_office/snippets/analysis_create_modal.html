@@ -1,102 +1,106 @@
 <!-- MODAL CONTAINER WITH BACKDROP -->
 <div x-cloak x-show="isOpening()">
-                                          
-    <!-- MODAL -->
-    <div
-      :class="{ 'opacity-0': isOpening(), 'opacity-100': isOpen() }"
-      class="fixed z-50 top-0 left-0 w-full h-full outline-none transition-opacity duration-200 linear overflow-y-auto"
-      tabindex="-1"
-      role="dialog"
-    >
-  
-      <!-- MODAL DIALOG -->
-      <div
-        :class="{ 'my-4': isOpening(), 'my-8': isOpen() }"
-        class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto transition-all duration-200 ease-out"
-      >
-  
-        <!-- MODAL CONTAINER -->
-        <div class="relative flex flex-col w-full pointer-events-auto bg-white border border-gray-300 rounded-lg shadow-xl">
-          <div class="flex items-start justify-between p-4 border-b border-gray-300 rounded-t">
-            <h5 id="modaltitle" class="mb-0 text-md leading-normal font-semibold">Add Analysis</h5>
-            <button
-              type="button"
-              class="close"
-              x-on:click="close()"
-            >&times;</button>
-          </div>
-          <div class="flex p-8 flex-col border-t border-gray-300">
-            <form action="{% url 'analysis-create-modal' %}" method="post">{% csrf_token %}
-              {{ analysis_create_form.non_field_errors }}
-              {{ analysis_create_form.errors }}
-  
-              {% comment %} {{ analysis_create_form }} {% endcomment %}
-              <div class="grid grid-cols-8 gap-y-6 font-medium">
-                  <div class="col-span-2">
-                    <p>{{ analysis_create_form.project.label|striptags }}</p>
-                  </div>
-                  <div class="col-span-6">
-                    {{ analysis_create_form.project.errors }}
-                    {{ analysis_create_form.project }}
-                  </div>
-                  
-                  <div class="col-span-2">
-                    <p>{{ analysis_create_form.auditor.label|striptags }}</p>
-                  </div>
-                  <div class="col-span-6">
-                    {{ analysis_create_form.auditor.errors }}
-                    {{ analysis_create_form.auditor }}
-                  </div>
-                  
-                  <div class="col-span-2">
-                    <p>{{ analysis_create_form.rating_matrix.label|striptags }}</p>
-                  </div>
-                  <div class="col-span-6">
-                    {{ analysis_create_form.rating_matrix.errors }}
-                    {{ analysis_create_form.rating_matrix }}
-                  </div>
-                  
-                  <div class="col-span-2">
-                    <p>{{ analysis_create_form.comments.label|striptags }}</p>
-                  </div>
-                  <div class="col-span-6">
-                    {{ analysis_create_form.comments.errors }}
-                    {{ analysis_create_form.comments }}
-                    <p class="text-xs font-normal text-gray-400">{{ analysis_create_form.comments.help_text|striptags }}</p>
-                  </div>
-                  <div class="col-span-2">
-                    <p>{{ analysis_create_form.is_draft.label|striptags }}</p>
-                  </div>
-                  <div class="col-span-6">
-                    {{ analysis_create_form.is_draft.errors }}
-                    {{ analysis_create_form.is_draft }}
-                  </div>
-                  
-                  <section class="col-start-3 col-span-6 place-content-end">
-                    
-                    <section class="grid grid-cols-2 place-content-end">
-                      <button
-                      id="cancel"
-                      x-on:click="close()"
-                      type="button"
-                      class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2"
-                    >Cancel</button>
-                    <input type="hidden" name="next" value="{{ request.path|urlencode }}">
-                    <button id="analysis_save" type="submit" class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-600 hover:bg-indigo-700 mr-2">
-                      Save
-                    </button>
-                  </section>
-                </section>
+
+  <!-- MODAL -->
+  <div :class="{ 'opacity-0': isOpening(), 'opacity-100': isOpen() }"
+    class="fixed z-50 top-0 left-0 w-full h-full outline-none transition-opacity duration-200 linear overflow-y-auto"
+    tabindex="-1" role="dialog">
+
+    <!-- MODAL DIALOG -->
+    <div :class="{ 'my-4': isOpening(), 'my-8': isOpen() }"
+      class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto transition-all duration-200 ease-out">
+
+      <!-- MODAL CONTAINER -->
+      <div class="relative flex flex-col w-full pointer-events-auto bg-white shadow-xl" id="new_analysis_modal">
+        <div class="flex items-start justify-between p-4 bg-gradient-to-r from-slate-200">
+          <div class="mb-4 text-xl text-gray-800"><span class="text-indigo-900"><i
+                class="fas fa-hashtag"></i></span><span class="ml-2 font-medium">Add Analysis</span></div>
+          <button type="button" class="close" x-on:click="close()">
+            <span class="text-lg text-gray-600 hover:bg-gray-200 py-2 px-3 rounded-lg">
+              <i class="fas fa-times"></i></span>
+          </button>
+        </div>
+        <div class="flex flex-col p-8">
+          <form action="{% url 'analysis-create-modal' %}" method="post">{% csrf_token %}
+            {{ analysis_create_form.non_field_errors }}
+            {{ analysis_create_form.errors }}
+
+            {% comment %} {{ analysis_create_form }} {% endcomment %}
+            <div class="" id="new_analysis-form">
+
+              <div class="mb-6">
+                <label class="form-label">{{ analysis_create_form.project.label|striptags }}</label>
+                <div class="">
+                  {{ analysis_create_form.project.errors }}
+                  {{ analysis_create_form.project }}
+                </div>
               </div>
-            </form>
-          </div>
+
+              <div class="mb-6">
+                <label class="form-label">{{ analysis_create_form.auditor.label|striptags }}</label>
+                <div class="">
+                  {{ analysis_create_form.auditor.errors }}
+                  {{ analysis_create_form.auditor }}
+                </div>
+              </div>
+
+              <div class="mb-6">
+                <label class="form-label">{{ analysis_create_form.rating_matrix.label|striptags }}</label>
+                <div class="">
+                  {{ analysis_create_form.rating_matrix.errors }}
+                  {{ analysis_create_form.rating_matrix }}
+                </div>
+              </div>
+
+              <div class="mb-6">
+                <label class="form-label">{{ analysis_create_form.comments.label|striptags }}</label>
+                <div class="">
+                  {{ analysis_create_form.comments.errors }}
+                  {{ analysis_create_form.comments }}
+                  <label class="text-xs font-normal text-gray-400">
+                    {{ analysis_create_form.comments.help_text|striptags }}
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-center mb-4">
+                {{ analysis_create_form.is_draft.errors }}
+                {{ analysis_create_form.is_draft }}
+                <label class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                  {{ analysis_create_form.is_draft.label|striptags }}
+                </label>
+              </div>
+
+              <div class="mb-6 hidden">
+                <label for="checked-toggle" class="relative inline-flex items-center mb-4 cursor-pointer">
+                  <input type="checkbox" value="" id="checked-toggle" class="sr-only peer" checked>
+                  <div
+                    class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600">
+                  </div>
+                  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Checked toggle</span>
+                </label>
+              </div>
+
+              <section class="col-start-3 col-span-6 place-content-end">
+
+                <section class="grid grid-cols-2 place-content-end">
+                  <button id="cancel" x-on:click="close()" type="button"
+                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">Cancel</button>
+                  <input type="hidden" name="next" value="{{ request.path|urlencode }}">
+                  <button id="analysis_save" type="submit"
+                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
+                    Save
+                  </button>
+                </section>
+              </section>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  
-    <!-- BACKDROP -->
-    <div
-      :class="{ 'opacity-25': isOpen() }"
-      class="z-40 fixed top-0 left-0 bottom-0 right-0 bg-black opacity-0 transition-opacity duration-200 linear"
-    ></div>
   </div>
+
+  <!-- BACKDROP -->
+  <div :class="{ 'opacity-25': isOpen() }"
+    class="z-40 fixed top-0 left-0 bottom-0 right-0 bg-black opacity-0 transition-opacity duration-200 linear"></div>
+</div>
