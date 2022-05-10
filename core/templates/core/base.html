@@ -27,7 +27,7 @@
 	</style>
 	<div x-data="{ sidebarOpen: true }" class="flex h-screen">
 		<aside
-			class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-y-auto left-0" :class="{ '-ml-72': !sidebarOpen }">
+			class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-y-auto left-0" :class="{ '-ml-64': !sidebarOpen }">
 			<nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50  py-4 px-3">
 				<div class="bg-white rounded-xl shadow" aria-label="logo">
 					<div class="flex items-center justify-center p-3">
@@ -209,17 +209,14 @@
 			</nav>
 		</aside>
 		<!-- SIDEBAR TOGGLE -->
-		<button
-			class="fixed left-72 mx-1 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-indigo-900 shadow shadow-blue-500/50 text-white hover:scale-125"
-			@click="sidebarOpen = !sidebarOpen" :class="{ '-ml-72': sidebarOpen == false }">
-			<i class="fas fa-angle-left transition-all duration-100"
-				:class="{ 'rotate-180': sidebarOpen == false }"></i>
+		<button class="fixed left-64 ml-5 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow shadow-blue-500/50 text-violet-900 hover:scale-105 hover:bg-violet-900 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-58': sidebarOpen == false }">
+			<i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
 		</button>
 		<div class="flex-1">
-			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-0' : 'ml-72'">
-				{% block content %}
-				{% endblock %}
-			</main>
+			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-8' : 'ml-72'">
+			{% block content %}
+			{% endblock %}
+		</main>
 		</div>
 	</div>
 	<script src="https://unpkg.com/flowbite@1.4.5/dist/flowbite.js"></script>
