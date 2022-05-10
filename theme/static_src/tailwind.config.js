@@ -50,6 +50,9 @@ module.exports = {
     ],
     theme: {
         extend: {
+            spacing: {
+                '58': '236px'
+            },
             colors: {
                 // Now we build the full color palette, using all colors available
                 // as shown at this link: https://tailwindcss.com/docs/customizing-colors#color-palette-reference
