@@ -11,54 +11,38 @@
       class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto transition-all duration-200 ease-out">
 
       <!-- MODAL CONTAINER -->
-      <div
-        class="relative flex flex-col w-full pointer-events-auto bg-white rounded-xl shadow-xl">
-        <div class="flex items-start justify-between p-4 bg-indigo-700 text-white">
-          <h5 class="mb-0 text-xl">
-            <i class="fas fa-plus-circle"></i>
-            Add Security Function
-          </h5>
-          <button type="button" class="close" x-on:click="close()"><span class="text-lg">&times;</span></button>
+      <div class="relative flex flex-col w-full pointer-events-auto bg-white shadow-xl" id="new_analysis_modal">
+        <div class="flex items-start justify-between p-4 bg-gradient-to-r from-slate-200">
+          <div class="mb-4 text-xl text-gray-800"><span class="text-indigo-900"><i
+                class="fas fa-hashtag"></i></span><span class="ml-2 font-medium">Add Security Function</span></div>
+          <button type="button" class="close" x-on:click="close()">
+            <span class="text-lg text-gray-600 hover:bg-gray-200 py-2 px-3 rounded-lg">
+              <i class="fas fa-times"></i></span>
+          </button>
         </div>
-        <div class="flex p-8 flex-col border-gray-300">
+        <div class="flex flex-col p-8">
           <form action="{% url 'security-function-create-modal' %}" method="post">{% csrf_token %}
-            {{ security_function_create_form.non_field_errors }}
-            {{ security_function_create_form.errors }}
-
-            {% comment %} {{ security_function_create_form }} {% endcomment %}
-            <div class="grid grid-cols-8 gap-y-6 font-medium">
-              <div class="col-span-2">
-                <p>{{ security_function_create_form.name.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ security_function_create_form.name.errors }}
-                {{ security_function_create_form.name }}
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ security_function_create_form.provider.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ security_function_create_form.provider.errors }}
-                {{ security_function_create_form.provider }}
-              </div>
-
-              <div class="col-span-2">
-                <p>{{ security_function_create_form.contact.label|striptags }}</p>
-              </div>
-              <div class="col-span-6">
-                {{ security_function_create_form.contact.errors }}
-                {{ security_function_create_form.contact }}
-              </div>
+              {{ security_function_create_form.non_field_errors }}
+              {{ security_function_create_form.errors }}
+              <div class="">
+                {% for field in security_function_create_form %}
+                <div class="mb-6">
+                  <label class="form-label">{{ field.label|striptags }}</label>
+                  <div class="">
+                    {{ field.errors }}
+                    {{ field }}
+                  </div>
+                </div>
+                {% endfor %}
 
               <section class="col-start-3 col-span-6 place-content-end">
 
                 <section class="grid grid-cols-2 place-content-end">
                   <button x-on:click="close()" type="button"
-                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2">Cancel</button>
+                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">Cancel</button>
                   <input type="hidden" name="next" value="{{ request.path|urlencode }}">
                   <button id="save" type="submit"
-                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500">
+                    class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
                     Save
                   </button>
                 </section>
