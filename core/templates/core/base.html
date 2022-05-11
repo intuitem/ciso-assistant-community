@@ -14,9 +14,31 @@
     {% tailwind_css %}
     <script src="{% static "js/cdn.min.js" %}" defer></script>
     {% block head %}{% endblock %}
-
     <title>MIRA</title>
+	<style>
+		.scrollbar::-webkit-scrollbar {
+			margin-top: 20px;
+			width: 5px;
+			height: 20px;
+		}
 
+		.scrollbar::-webkit-scrollbar-track {
+			margin-top: 20px;
+			border-radius: 100vh;
+			background: #c0c0c0;
+		}
+
+		.scrollbar::-webkit-scrollbar-thumb {
+			margin-top: 20px;
+			background: #694998;
+			border-radius: 100vh;
+			border: 1px solid #694998;
+		}
+
+		.scrollbar::-webkit-scrollbar-thumb:hover {
+			background: #53229c;
+		}
+	</style>
 </head>
 
 <body class="bg-gradient-to-br from-slate-200" style="height: 100%; margin: 0; background-repeat: no-repeat; background-attachment: fixed;">
@@ -62,7 +84,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="overflow-y-auto overflow-x-hidden flex-grow">
+				<div class="scrollbar overflow-x-hidden flex-grow mr-2">
 					<ul class="flex flex-col py-4 space-y-1">
 						<li>
 							<a href="/" class="relative flex flex-row items-center pr-6 nav-link">
