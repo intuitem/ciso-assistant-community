@@ -58,13 +58,14 @@
                 {{ form.effort.errors }}
                 {{ form.effort }}
                 <p class="text-xs text-gray-400">{{ form.effort.help_text|striptags|capfirst }}</p>
-            </div>
+            </div>           
         </section>
+        <div class="mt-4 flex space-x-2 justify-end">
+            <a href="{% url 'mtg-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
+            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+        </div>
     </div>
 </div>
-
-<a href="{% url 'ra-list' %}" class="bg-red-700 text-white font-semibold p-2 py-2.5 rounded-lg hover:bg-red-600">Cancel</a>
-<button action="submit" class="bg-blue-700 text-white font-semibold p-2 rounded-lg hover:bg-blue-600">Submit</button>
 
 </form>
 
