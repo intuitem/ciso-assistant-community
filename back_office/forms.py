@@ -108,6 +108,9 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
     class Meta:
         model = RiskAcceptance
         fields = '__all__'
+        widgets = {
+            'expiry_date': DefaultDateInput()
+        }
 
 class ProjectForm(StyledModelForm):
     class Meta:
