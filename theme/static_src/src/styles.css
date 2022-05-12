@@ -97,7 +97,7 @@
     }
     
     .add-button {
-        @apply justify-self-end rounded bg-violet-800 hover:bg-violet-600 text-white font-medium px-4 py-2 cursor-pointer shadow;
+        @apply justify-self-end rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-medium px-4 py-2 cursor-pointer shadow;
     }
 
     .simple-link {
