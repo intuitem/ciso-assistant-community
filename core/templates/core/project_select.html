@@ -13,14 +13,12 @@
 {% block content %}
 <main class="m-2 p-2 h-screen"> 
   <div class="p-2 m-2 bg-white rounded shadow">
-
-
-      <select x-cloak id="select">
-          {% for prj in context %}
-          <option value="{{prj.id}}">{{prj}}</option>
-          {% endfor %}
-      </select>
 <div id="title" class="text-lg font-black m-1 p-1">{% trans "Composer" %}</div>
+<select x-cloak id="select" hidden>
+    {% for prj in context %}
+    <option value="{{prj.id}}">{{prj}}</option>
+    {% endfor %}
+</select>
 <div>
     {% trans "This will help you aggregate multiple components (projects) to get the compiled view on your risks. This is particularly useful for two use cases:" %}
     <ul class="list-disc px-4 py-2 mx-4 my-2">
