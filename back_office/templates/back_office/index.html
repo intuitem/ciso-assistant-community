@@ -70,11 +70,13 @@
                 <div class="text-sm text-slate-500 font-semibold">Items that have expired or with close ETA</div>
             </div>
             <div class="flex items-center content-center">
-                <div class="border p-2 m-2 w-1/2">
-                    <span>Measures list that match the filter</span>
+                <div class=" p-2 m-2 w-1/2">
+                    <span class="text-sm font-semibold">Measures to review</span>
+                    {% include 'back_office/fragments/watchlist_measures.html' %}
                 </div>
-                <div class="border p-2 m-2 w-1/2">
-                    <span>Exceptions list that match the filter</span>
+                <div class=" p-2 m-2 w-1/2">
+                    <span class="text-sm font-semibold">Exceptions to review</span>
+                    {% include 'back_office/fragments/watchlist_exceptions.html' %}
                 </div>
             </div>
         </section>
