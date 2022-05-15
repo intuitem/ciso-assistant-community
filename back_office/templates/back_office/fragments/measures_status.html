@@ -1,0 +1,23 @@
+<div id="measures_status_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+    var myChart2 = echarts.init(document.getElementById('measures_status_div'), null, { renderer: 'svg' });
+    var option;
+
+    option = {
+        xAxis: {
+            type: 'category',
+            data: ['new', 'in progress', 'blocked', 'done', 'canceled'],
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: [120, 200, 150, 80, 70],
+                type: 'bar'
+            }
+        ]
+    };
+
+    option && myChart2.setOption(option);
+</script>

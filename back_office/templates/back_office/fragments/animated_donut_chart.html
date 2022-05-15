@@ -1,7 +1,7 @@
-<div id=" anim_donut_div" class="bg-white w-auto h-[600px]"></div>
+<div id="anim_donut_div" class="bg-white w-auto h-[600px]"></div>
 <script type="text/javascript">
 
-    var myChart = echarts.init(document.getElementById(' anim_donut_div'), null, { renderer: 'svg' });
+    var myChart1 = echarts.init(document.getElementById('anim_donut_div'), null, { renderer: 'svg' });
     var option;
 
     const data = [
@@ -121,8 +121,8 @@
     let currentOption = (option = pieOption);
     setInterval(function () {
         currentOption = currentOption === pieOption ? parliamentOption : pieOption;
-        myChart.setOption(currentOption);
+        myChart1.setOption(currentOption);
     }, 5000);
 
-    option && myChart.setOption(option);
+    option && myChart1.setOption(option);
 </script>

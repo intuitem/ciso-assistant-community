@@ -40,14 +40,15 @@
             </div>
             <div class="flex items-center content-center">
                 <div class=" p-2 m-2 w-1/2">
-                    <span>Risk scenarios of my projects</span>
+                    <span class="text-sm font-semibold">Risk scenarios overview</span>
                     <!--Chart starts here-->
-                    {% include 'back_office/snippets/animated_chart.html' %}
+                    {% include 'back_office/fragments/animated_donut_chart.html' %}
                     
                     <!--Chart ends here-->
                 </div>
-                <div class="border p-2 m-2 w-1/2">
-                    <span>bar chart about security measures status (limited to current user)</span>
+                <div class="p-2 m-2 w-1/2">
+                    <span class="text-sm font-semibold">Security measures status</span>
+                    {% include 'back_office/fragments/measures_status.html' %}
                 </div>
             </div>
         </section>
