@@ -6,4 +6,4 @@ staticfiles/*
 *.mo
 *.env
 dump.json
-styles.css
+theme/static/css/dist/styles.css
