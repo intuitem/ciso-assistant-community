@@ -109,6 +109,7 @@
                     </div>
                 </div>
             </div>
+    </form>
             <div class="flex flex-col justify-center w-20 space-y-4">
                 <div class="items-center pl-5 pb-20">
                     <i class="scale-[5] scale-y-[3] fas fa-caret-right text-warmgray-700 drop-shadow-xs"></i>
@@ -121,6 +122,7 @@
                         <a id="newMeasures" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                         class="add-button">
                             <i class="fas fa-plus mr-2"></i>New Measure</a>
+                        {% include "back_office/snippets/measure_create_modal.html" %}
                     </div>
                     <script src="{% static 'js/modal.js' %}"></script>
                     {% include 'back_office/snippets/mtg_list_nested.html' %}
@@ -129,10 +131,8 @@
         </section>
         <div class="flex pb-4 space-x-2 justify-end"> 
             <a href="{% url 'ri-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
-            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+            <button action="submit" form="instance_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
         </div>
     </div>
-    </form>
-    {% include "back_office/snippets/measure_create_modal.html" %}
 </div>
 {% endblock %}
