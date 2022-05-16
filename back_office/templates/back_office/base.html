@@ -15,10 +15,14 @@
 	{% endblock %}
 	{% tailwind_css %}
 	<style>
+		.scrollbar {
+			overflow-y: scroll;
+			scrollbar-color: #694998 transparent;
+		}
 		.scrollbar::-webkit-scrollbar {
 			margin-top: 22px;
 			margin-bottom: 22px;
-			width: 5px;
+			width: 3px;
 			height: 20px;
 		}
 
@@ -63,7 +67,7 @@
 						<div id="title" class="text-xl text-indigo-900"><span class="font-semibold">MIRA</span> <i class="fas fa-circle-notch"></i> <span class="font-bold">Editor</span></div>
 					</div>
 				</div>
-				<div class="scrollbar overflow-x-hidden flex-grow mr-3">
+				<div class="scrollbar overflow-x-hidden flex-grow mr-4">
 					<ul class="flex flex-col py-4 space-y-2">
 						<li>
 							<a href="{% url 'index' %}" class="relative flex flex-row items-center pr-6 nav-link">

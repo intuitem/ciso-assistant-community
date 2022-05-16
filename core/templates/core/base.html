@@ -16,10 +16,14 @@
     {% block head %}{% endblock %}
     <title>MIRA</title>
 	<style>
+		.scrollbar {
+			overflow-y: scroll;
+			scrollbar-color: #694998 transparent;
+		}
 		.scrollbar::-webkit-scrollbar {
 			margin-top: 22px;
 			margin-bottom: 22px;
-			width: 5px;
+			width: 3px;
 			height: 20px;
 		}
 
@@ -86,7 +90,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="scrollbar overflow-x-hidden flex-grow mr-3">
+				<div class="scrollbar overflow-x-hidden flex-grow mr-4">
 					<ul class="flex flex-col py-4 space-y-1">
 						<li>
 							<a href="/" class="relative flex flex-row items-center pr-6 nav-link">
