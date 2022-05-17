@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     path('', login_required(views.index), name='index'),
 
-    path('fast-track', login_required(views.fast_track), name='fast_track'),
+    path('fast-track', login_required(views.FastTrackView.as_view()), name='fast_track'),
 
     # LIST VIEWS
     path('analyses-registry/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),

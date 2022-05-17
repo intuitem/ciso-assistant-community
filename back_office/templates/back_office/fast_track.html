@@ -14,33 +14,64 @@
                 <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">Step 1</div>
                     <div class="font-semibold mb-4">Projects</div>
-                    <div class="text-sm mb-2 rounded  ">Setup a <a href="#" class="simple-link">domain</a> to organize projects
-                        and <a href="#" class="simple-link">create one</a>. Start identifying your <a href="#"
-                            class="simple-link">assets</a> to keep focus.</div>
+                    <div class="text-sm mb-2 rounded">Setup a
+                        <span x-data="modal()">
+                            <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
+                               class="simple-link">domain</a>
+                            {% include "back_office/snippets/projects_domain_create_modal.html" %}
+                        </span>
+                        to organize projects and 
+                        <span x-data="modal()">
+                            <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
+                               class="simple-link">create one</a>
+                            {% include "back_office/snippets/project_create_modal.html" %}
+                        </span>
+                        . Start identifying your <a href="#"
+                        class="simple-link">assets</a> to keep focus.
+                    </div>    
+                    <script src="{% static 'js/modal.js' %}"></script>      
                 </div>
 
                 <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">Step 2</div>
                     <div class="font-semibold mb-4">Threats</div>
-                    <div class="text-sm mb-2 rounded  ">Identify what and who are the <a href="#" class="simple-link">threat</a> factors and agents that can be relevant to your organization and how they apply to your case.</div>
+                    <div class="text-sm mb-2 rounded  ">Identify what and who are the 
+                        <span x-data="modal()">
+                        <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
+                           class="simple-link">threat</a>
+                           {% include "back_office/snippets/threat_create_modal.html" %}
+                        </span> factors and agents that can be relevant to your organization and how they apply to your case.</div>
+                    <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
                 <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">Step 3</div>
                     <div class="font-semibold mb-4">Security Functions</div>
-                    <div class="text-sm mb-2 rounded  ">Understand and inventory the <a href="#" class="simple-link">security functions</a> that your organization have. They can be technical or organizational.</div>
+                    <div class="text-sm mb-2 rounded ">Understand and inventory the
+                        <span x-data="modal()">
+                        <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
+                           class="simple-link">security functions</a>
+                           {% include "back_office/snippets/security_function_create_modal.html" %}
+                        </span> that your organization have. They can be technical or organizational.</div>
+                    <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
                 <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">Step 4</div>
                     <div class="font-semibold mb-4">Risk Analysis</div>
-                    <div class="text-sm mb-2 rounded  ">You will have to define a scoring <a href="#" class="simple-link">matrix</a> or use a preset. Now you can start a new <a href="#" class="simple-link">risk analysis</a> and combine the previous items.</div>
+                    <div class="text-sm mb-2 rounded  ">You will have to define a scoring <a href="#" class="simple-link">matrix</a> or use a preset. Now you can start a new <span x-data="modal()">
+                        <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
+                           class="simple-link">risk analysis</a>
+                           {% include "back_office/snippets/analysis_create_modal.html" %}
+                        </span> and combine the previous items.</div>
+                    <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
                 <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">Step 5</div>
                     <div class="font-semibold mb-4">Scenarios and Remediations</div>
                     <div class="text-sm mb-2 rounded  ">Enrich <a href="#" class="simple-link">your analysis</a> by identifying the potential risk scenarios and the security measures to mitigate them.</div>
+                    <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
 

@@ -17,12 +17,22 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
-def fast_track(request):
-    template = loader.get_template('back_office/fast_track.html')
-    context = {
-        'hello': 'world',
-    }
-    return HttpResponse(template.render(context, request))
+class FastTrackView(PermissionRequiredMixin, ListView):
+    permission_required = 'general.view_projectsgroup'
+    template_name = 'back_office/fast_track.html'
+    context_object_name = 'fast-track'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['projects_domain_create_form'] = ProjectsGroupUpdateForm
+        context['project_create_form'] = ProjectForm
+        context['analysis_create_form'] = RiskAnalysisCreateForm
+        context['threat_create_form'] = ThreatCreateForm
+        context['security_function_create_form'] = SecurityFunctionCreateForm
+        return context
+
+    def get_queryset(self):
+        return True
 
 class ProjectListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_project'
