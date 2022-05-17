@@ -2,9 +2,9 @@
 {% load tailwind_tags %}
 
 {% load i18n %}
-
+{% get_current_language as LANGUAGE_CODE %}
 <!doctype html>
-<html class="overflow-x-hidden" lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 
 <head>
     <meta charset="UTF-8"/>

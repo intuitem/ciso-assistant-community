@@ -83,6 +83,9 @@ class MitigationUpdateForm(StyledModelForm):
     class Meta:
         model = Mitigation
         exclude = ['risk_instance']
+        widgets = {
+            'eta': DefaultDateInput(format='%Y-%m-%d')
+        }
 
 class ProjectsGroupUpdateForm(StyledModelForm):
     class Meta:
@@ -109,7 +112,7 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         model = RiskAcceptance
         fields = '__all__'
         widgets = {
-            'expiry_date': DefaultDateInput()
+            'expiry_date': DefaultDateInput(format='%Y-%m-%d')
         }
 
 class ProjectForm(StyledModelForm):
