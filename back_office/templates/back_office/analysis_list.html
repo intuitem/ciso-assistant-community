@@ -19,11 +19,13 @@
         {% include "back_office/snippets/analysis_create_modal.html" %}
     </div>
     <script src="{% static 'js/modal.js' %}"></script>
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <form method="get">
+    <form method="get">
+    <div class="flex flex-row w-full bg-gray-50 mb-8">
             {{ filter.form.as_p }}
             <input type="submit"/>
-        </form>
+        </div>
+    </form>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <th class="px-6 py-3">{% trans "ID" %}</th>
