@@ -10,6 +10,8 @@ from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
 from .forms import *
 
+from .filters import *
+
 def index(request):
     template = loader.get_template('back_office/index.html')
     context = {
@@ -72,14 +74,20 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
     model = Analysis
 
     def get_queryset(self):
-        if not self.request.user.is_superuser:
-            agg_data = Analysis.objects.filter(auditor=self.request.user).order_by('is_draft', 'id')
-        else:
-            agg_data = Analysis.objects.all().order_by('is_draft', 'id')
-        return agg_data
+        qs = self.model.objects.all()
+        filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+        # if not self.request.user.is_superuser:
+        #     agg_data = Analysis.objects.filter(auditor=self.request.user).order_by('is_draft', 'id')
+        # else:
+        #     agg_data = Analysis.objects.all().order_by('is_draft', 'id')
+        # return agg_data
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = AnalysisFilter(self.request.GET, queryset)
+        context['filter'] = filter
         context['analysis_create_form'] = RiskAnalysisCreateForm
         return context
 

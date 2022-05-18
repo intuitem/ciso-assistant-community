@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'core',
     'general',
     'cal',
+    'django_filters',
     'import_export',
     'reversion',
     'baton.autodiscover',
