@@ -81,11 +81,13 @@
                                         <select class="rounded-lg w-full" name="auditor" id="id_auditor" multiple>
                                             {% for auditor in filter.auditor_list %}
                                                 <option value={{ auditor.pk }}>
-                                                    {% comment %} {% if auditor.get_full_name %} {% endcomment %}
-                                                        {{ auditor.get_first_name }}
-                                                    {% comment %} {% else %}
-                                                        {{ auditor }} {% endcomment %}
-                                                    {% comment %} {% endif %} {% endcomment %}
+                                                    {% if auditor.get_full_name %}
+                                                        {{ auditor.get_full_name }}
+                                                    {% elif auditor.get_short_name %}
+                                                        {{ auditor.get_short_name }}
+                                                    {% else %}
+                                                        {{ auditor }}
+                                                    {% endif %}
                                                 </option>
                                             {% endfor %}
                                         </select>
