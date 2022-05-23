@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-23 13:04+0000\n"
+"POT-Creation-Date: 2022-05-23 13:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,12 +18,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: back_office/forms.py:44 back_office/templates/back_office/mtg_update.html:16
+#: back_office/filters.py:40
+msgid "Search Analysis..."
+msgstr "Rechercher une Analyse..."
+
+#: back_office/forms.py:46 back_office/templates/back_office/mtg_update.html:16
 #: back_office/templates/back_office/ri_update.html:14
 msgid "Risk Scenario"
 msgstr "Scenario de risque"
 
-#: back_office/forms.py:45 back_office/templates/back_office/mtg_list.html:24
+#: back_office/forms.py:47 back_office/templates/back_office/mtg_list.html:24
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security Function"
 msgstr "Fonction de Sécurité"
@@ -51,7 +55,7 @@ msgid "Expiry Date"
 msgstr "Date d'expiration"
 
 #: back_office/templates/back_office/acceptance_list.html:26
-#: back_office/templates/back_office/analysis_list.html:34
+#: back_office/templates/back_office/analysis_list.html:126
 #: back_office/templates/back_office/mtg_list.html:25
 #: back_office/templates/back_office/project_domain_list.html:24
 #: back_office/templates/back_office/project_list.html:28
@@ -70,19 +74,23 @@ msgstr "temporaire"
 msgid "permanent"
 msgstr ""
 
-#: back_office/templates/back_office/analysis_list.html:17
-#: back_office/templates/back_office/project_update.html:57
-msgid "New Risk Analysis"
-msgstr "Nouvelle Analyse"
+#: back_office/templates/back_office/analysis_list.html:16
+msgid "Clear Filters"
+msgstr "Effacer les Filtres"
 
-#: back_office/templates/back_office/analysis_list.html:31
-#: back_office/templates/back_office/snippets/mtg_list_nested.html:7
-#: back_office/templates/back_office/snippets/ra_list_nested.html:7
-#: back_office/templates/back_office/snippets/ri_list_nested.html:7
-msgid "ID"
-msgstr ""
+#: back_office/templates/back_office/analysis_list.html:60
+msgid "Filters"
+msgstr "Filtres"
 
-#: back_office/templates/back_office/analysis_list.html:32
+#: back_office/templates/back_office/analysis_list.html:76
+#: back_office/templates/back_office/ra_update.html:44
+#, fuzzy
+#| msgid "draft"
+msgid "Draft"
+msgstr "brouillon"
+
+#: back_office/templates/back_office/analysis_list.html:80
+#: back_office/templates/back_office/analysis_list.html:124
 #: back_office/templates/back_office/ra_create.html:22
 #: back_office/templates/back_office/ra_update.html:23
 #: back_office/templates/back_office/ri_create.html:21
@@ -91,17 +99,42 @@ msgstr ""
 msgid "Auditor"
 msgstr "Auditeur"
 
-#: back_office/templates/back_office/analysis_list.html:33
+#: back_office/templates/back_office/analysis_list.html:96
+#: back_office/templates/back_office/ra_create.html:17
+#: back_office/templates/back_office/ra_update.html:18
+#: back_office/templates/back_office/ri_update.html:18
+#, fuzzy
+#| msgid "projects"
+msgid "Project"
+msgstr "projets"
+
+#: back_office/templates/back_office/analysis_list.html:99
+msgid "Apply"
+msgstr "Appliquer"
+
+#: back_office/templates/back_office/analysis_list.html:112
+#: back_office/templates/back_office/project_update.html:57
+msgid "New Risk Analysis"
+msgstr "Nouvelle Analyse"
+
+#: back_office/templates/back_office/analysis_list.html:123
+#: back_office/templates/back_office/snippets/mtg_list_nested.html:7
+#: back_office/templates/back_office/snippets/ra_list_nested.html:7
+#: back_office/templates/back_office/snippets/ri_list_nested.html:7
+msgid "ID"
+msgstr ""
+
+#: back_office/templates/back_office/analysis_list.html:125
 #: back_office/templates/back_office/snippets/ra_list_nested.html:13
 msgid "Last Update"
 msgstr "Dernière mise à jour"
 
-#: back_office/templates/back_office/analysis_list.html:42
+#: back_office/templates/back_office/analysis_list.html:134
 #: back_office/templates/back_office/snippets/ra_list_nested.html:25
 msgid "draft"
 msgstr "brouillon"
 
-#: back_office/templates/back_office/analysis_list.html:44
+#: back_office/templates/back_office/analysis_list.html:136
 #: back_office/templates/back_office/snippets/ra_list_nested.html:27
 msgid "ready"
 msgstr "prêt"
@@ -403,14 +436,6 @@ msgstr "Domaine"
 msgid "Associated Risk Analyses"
 msgstr "Analyses Associées"
 
-#: back_office/templates/back_office/ra_create.html:17
-#: back_office/templates/back_office/ra_update.html:18
-#: back_office/templates/back_office/ri_update.html:18
-#, fuzzy
-#| msgid "projects"
-msgid "Project"
-msgstr "projets"
-
 #: back_office/templates/back_office/ra_create.html:33
 #, fuzzy
 #| msgid "draft"
@@ -437,12 +462,6 @@ msgstr "Analyse de risque"
 #: back_office/templates/back_office/ri_update.html:26
 msgid "Version"
 msgstr ""
-
-#: back_office/templates/back_office/ra_update.html:44
-#, fuzzy
-#| msgid "draft"
-msgid "Draft"
-msgstr "brouillon"
 
 #: back_office/templates/back_office/ra_update.html:60
 msgid "Associated Risk Scenarios"

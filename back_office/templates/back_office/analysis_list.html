@@ -9,25 +9,117 @@
     {% with page_title='Risk Analyses' %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
-    <div class="grid mb-4"
-        x-data="modal()">
-        <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-               class="add-button">
-               <i class="fas fa-plus"></i>
-               {% trans "New Risk Analysis" %}
+    <div class="flex flex-row justify-end space-x-4">
+        {% url 'ra-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <a href="{% url 'ra-list' %}" class="hover:underline px-4 py-2 h-fit cursor-pointer">
+            <span>{% trans "Clear Filters" %}</span>
         </a>
-        {% include "back_office/snippets/analysis_create_modal.html" %}
-    </div>
-    <script src="{% static 'js/modal.js' %}"></script>
-    <form method="get">
-    <div class="flex flex-row w-full bg-gray-50 mb-8">
-            {{ filter.form.as_p }}
-            <input type="submit"/>
+        {% endif %}
+        <!-- Searchbar and Dropdown Form -->
+        <form method="get">
+                <div class="flex flex-row space-x-4">
+                {{ filter.form.project__name }}
+                    <div class="flex justify-center">
+                        <div
+                            x-data="{
+                                open: false,
+                                toggle() {
+                                    if (this.open) {
+                                        return this.close()
+                                    }
+                     
+                                    this.$refs.button.focus()
+                     
+                                    this.open = true
+                                },
+                                close(focusAfter) {
+                                    if (! this.open) return
+                     
+                                    this.open = false
+                     
+                                    focusAfter && focusAfter.focus()
+                                }
+                            }"
+                            x-on:keydown.escape.prevent.stop="close($refs.button)"
+                            x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                            x-id="['dropdown-button']"
+                            class="relative z-10"
+                        >
+                            <!-- Button -->
+                            <button
+                                x-ref="button"
+                                x-on:click="toggle()"
+                                :aria-expanded="open"
+                                :aria-controls="$id('dropdown-button')"
+                                type="button"
+                                class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow"
+                                :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
+                            >
+                                <i class="fas fa-filter"></i>
+                                <span>{% trans "Filters" %}</span>
+                            </button>
+                     
+                            <!-- Panel -->
+                            <div
+                                x-ref="panel"
+                                x-show="open"
+                                x-transition.origin.top.left
+                                x-on:click.outside="close($refs.button)"
+                                :id="$id('dropdown-button')"
+                                style="display: none;"
+                                class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                            >
+                     
+                                <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
+                                    <div>
+                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
+                                        {{ filter.form.is_draft }}
+                                    </div>
+                                    <div>
+                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
+                                        <select class="rounded-lg w-full" name="auditor" id="id_auditor" multiple>
+                                            {% for auditor in filter.auditor_list %}
+                                                <option value={{ auditor.pk }}>
+                                                    {% if auditor.get_full_name %}
+                                                        {{ auditor.get_full_name }}
+                                                    {% elif auditor.get_short_name %}
+                                                        {{ auditor.get_short_name }}
+                                                    {% else %}
+                                                        {{ auditor }}
+                                                    {% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Project" %}</p>
+                                        {{ filter.form.project }}
+                                    </div>
+                                    <button type="submit" class="mt-4 bg-blue-600 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>        
+                </div>
+                </form>
+            <!-- End Filters Dropdown Form -->
+        <div class="grid mb-4"
+            x-data="modal()">
+            <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+                   class="add-button">
+                   <i class="fas fa-plus"></i>
+                   {% trans "New Risk Analysis" %}
+            </a>
+            {% include "back_office/snippets/analysis_create_modal.html" %}
         </div>
-    </form>
+        <script src="{% static 'js/modal.js' %}"></script>
+    
+    </div>
+
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "ID" %}</th>
                 <th class="px-6 py-3">{% trans "Auditor" %}</th>
                 <th class="px-6 py-3">{% trans "Last Update" %}</th>
@@ -36,7 +128,7 @@
             <tbody>
                 {% for analysis in page_obj %}
                     <tr class=" odd:bg-white even:bg-gray-50 ">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if analysis.is_draft %}
                                 <span class="bg-blue-100 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
@@ -53,7 +145,13 @@
                         </th>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
-                                {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
+                                {% if analysis.auditor %}
+                                    {% if analysis.auditor.get_full_name %}
+                                        {{ analysis.auditor.get_full_name }}
+                                    {% else %}
+                                        {{ analysis.auditor }}
+                                    {% endif %}
+                                {% else %}--{% endif %}
                             </p>
                         </td>
                         <td class="px-6 py-4">
@@ -83,6 +181,15 @@
                                           
                                           <script src="{% static 'js/modal.js' %}"></script>
 
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td>
+                            <div class="text-black p-4">
+                                <i class="inline fas fa-exclamation-triangle"></i>
+                                <p class="inline test-gray-900">No analysis found.</p>
                             </div>
                         </td>
                     </tr>
