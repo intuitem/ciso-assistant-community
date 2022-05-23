@@ -4,6 +4,7 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import context, loader
+from django.utils.translation import gettext_lazy as _
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
@@ -330,7 +331,7 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['instances'] = RiskInstance.objects.all().order_by('id')
         context['suggested_measures'] = Mitigation.objects.all().order_by('id')
-        context['crumbs'] = ['Analyses']
+        context['crumbs'] = [_('Analyses')]
         return context
 
     def get_success_url(self) -> str:
@@ -422,7 +423,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mitigations'] = Mitigation.objects.all()
-        context['crumbs'] = ['Risk Scenarios']
+        context['crumbs'] = [_('Risk Scenarios')]
         context['measure_create_form'] = MeasureCreateForm(initial={'risk_instance': get_object_or_404(RiskInstance, id=self.kwargs['pk'])})
         return context
 
@@ -469,7 +470,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.all()
-        crumbs = ['Projects Domains']
+        crumbs = [_('Projects Domains')]
         context['crumbs'] = crumbs
         context['project_create_form'] = ProjectForm(initial={'parent_group': get_object_or_404(ProjectsGroup, id=self.kwargs['pk'])})
         return context
@@ -488,7 +489,7 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['analyses'] = Analysis.objects.all().order_by('is_draft', 'id')
         context['analysis_create_form'] = RiskAnalysisCreateForm(initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
-        crumbs = ['Projects']
+        crumbs = [_('Projects')]
         context['crumbs'] = crumbs
         return context
     

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-21 14:01+0100\n"
+"POT-Creation-Date: 2022-05-23 13:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,142 +18,129 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: back_office/templates/back_office/acceptance_list.html:12
+#: asf_rm/settings.py:187
+msgid "Search Analysis..."
+msgstr "Rechercher une Analyse..."
+
+#: asf_rm/settings.py:192
+msgid "Main"
+msgstr ""
+
+#: asf_rm/settings.py:196
+msgid "Core"
+msgstr ""
+
+#: asf_rm/settings.py:201
+msgid "Analysis Registry"
+msgstr "Registre d'Analyse"
+
+#: asf_rm/settings.py:206
+msgid "Risk Instances"
+msgstr "Instances de Risques"
+
+#: asf_rm/settings.py:211
+msgid "Mitigations"
+msgstr ""
+
+#: asf_rm/settings.py:216
 #, fuzzy
 #| msgid "Risk Acceptances"
-msgid "Risk Acceptance"
+msgid "Risk Acceptances"
 msgstr "Acceptations de Risques"
 
-#: back_office/templates/back_office/acceptance_list.html:15
-#: back_office/templates/back_office/mtg_list.html:18
-msgid "Type"
+#: asf_rm/settings.py:221
+msgid "Organization"
+msgstr "Organisation"
+
+#: asf_rm/settings.py:225
+msgid "General"
 msgstr ""
 
-#: back_office/templates/back_office/acceptance_list.html:18
-msgid "Validator"
-msgstr ""
+#: asf_rm/settings.py:230
+msgid "Projects Hierarchy"
+msgstr "Hiérarchie des Projets"
 
-#: back_office/templates/back_office/acceptance_list.html:21
-msgid "Expiry Date"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:23
-msgid "ID"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:26
-msgid "Auditor"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:29
-msgid "Last Update"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:32
-msgid "Actions"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:41
-msgid "draft"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:43
-msgid "ready"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:72
-msgid "Showing Page"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:72
-msgid "of"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:78
-msgid "First"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:80
-msgid "Prev"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:83
-msgid "Next"
-msgstr ""
-
-#: back_office/templates/back_office/analysis_list.html:85
-msgid "Last"
-msgstr ""
-
-#: back_office/templates/back_office/mtg_list.html:12
-#: back_office/templates/back_office/ri_list.html:12
-#: back_office/templates/back_office/snippets/ri_list_nested.html:7
-msgid "Title"
-msgstr ""
-
-#: back_office/templates/back_office/mtg_list.html:15
-#: back_office/templates/back_office/ri_list.html:18
+#: asf_rm/settings.py:235
 #, fuzzy
 #| msgid "Projects"
-msgid "Parent Project"
+msgid "Projects"
 msgstr "Projets"
 
-#: back_office/templates/back_office/mtg_list.html:21
+#: asf_rm/settings.py:240
+#, fuzzy
+#| msgid "Parent Risks"
+msgid "Parent Risks"
+msgstr "Risques Parents"
+
+#: asf_rm/settings.py:245
 #, fuzzy
 #| msgid "Solutions Catalog"
-msgid "Solution"
+msgid "Solutions Catalog"
 msgstr "Catalogue des Solutions"
 
-#: back_office/templates/back_office/ri_list.html:15
-#: back_office/templates/back_office/snippets/ri_list_nested.html:10
-#, fuzzy
-#| msgid "Parent Risks"
-msgid "Parent Risk"
-msgstr "Risques Parents"
+#: asf_rm/settings.py:251
+msgid "Settings"
+msgstr "Paramètres"
 
-#: back_office/templates/back_office/ri_list.html:21
-msgid "Treatment Status"
+#: asf_rm/settings.py:255
+msgid "Users and authorizations"
+msgstr "Utilisateurs et Autorisations"
+
+#: asf_rm/settings.py:259
+msgid "User Guide"
+msgstr "Guide Utilisateur"
+
+#: asf_rm/settings.py:261
+msgid "Staff"
 msgstr ""
 
-#: back_office/templates/back_office/snippets/ri_list_nested.html:13
-#, fuzzy
-#| msgid "Parent Risks"
-msgid "Current Risk Level"
-msgstr "Risques Parents"
+#: asf_rm/settings.py:262
+msgid "X-Rays (all)"
+msgstr "X-Rays (tous)"
 
-#: back_office/templates/back_office/snippets/ri_list_nested.html:16
-msgid "Residual Risk Level"
+#: asf_rm/settings.py:263
+msgid "Rating matrix"
+msgstr "Matrice d'évaluation"
+
+#: asf_rm/settings.py:264
+msgid "Scoring assistant"
+msgstr "Assistant d'évaluation"
+
+#: asf_rm/settings.py:266
+msgid "Extra"
 msgstr ""
 
-#~ msgid "Search Analysis..."
-#~ msgstr "Rechercher une Analyse..."
+#, fuzzy
+#~| msgid "Risk Acceptances"
+#~ msgid "Risk Acceptance"
+#~ msgstr "Acceptations de Risques"
 
-#~ msgid "Analysis Registry"
-#~ msgstr "Registre d'Analyses"
+#, fuzzy
+#~| msgid "Projects"
+#~ msgid "Parent Project"
+#~ msgstr "Projets"
 
-#~ msgid "Risk Instances"
-#~ msgstr "Instances de Risques"
-
-#~ msgid "Organization"
-#~ msgstr "Organisation"
-
-#~ msgid "Projects Hierarchy"
+#, fuzzy
+#~| msgid "Projects Hierarchy"
+#~ msgid "Project Name"
 #~ msgstr "Hiérarchie des Projets"
 
-#~ msgid "Settings"
-#~ msgstr "Paramètres"
+#, fuzzy
+#~| msgid "Parent Risks"
+#~ msgid "Parent Domain"
+#~ msgstr "Risques Parents"
 
-#~ msgid "Users and authorizations"
-#~ msgstr "Utilisateurs et Autorisations"
+#, fuzzy
+#~| msgid "Parent Risks"
+#~ msgid "Parent Risk"
+#~ msgstr "Risques Parents"
 
-#~ msgid "User Guide"
-#~ msgstr "Guide Utilisateur"
+#, fuzzy
+#~| msgid "Projects"
+#~ msgid "Parent function"
+#~ msgstr "Projets"
 
-#~ msgid "X-Rays (all)"
-#~ msgstr "X-Rays (tous)"
-
-#~ msgid "Rating matrix"
-#~ msgstr "Matrice d'évaluation"
-
-#~ msgid "Scoring assistant"
-#~ msgstr "Assistant d'évaluation"
+#, fuzzy
+#~| msgid "Parent Risks"
+#~ msgid "Current Risk Level"
+#~ msgstr "Risques Parents"

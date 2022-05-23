@@ -10,59 +10,59 @@
 {{ form.errors }}
 <div class="flex flex-col space-y-4">
     <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-        <h2 class="text-lg font-semibold mb-4">Measure Summary</h2>
+        <h2 class="text-lg font-semibold mb-4">{% trans "Measure Summary" %}</h2>
         <section class="flex flex-col space-y-4">
             <div class="flex flex-col">
-                <p class="text-gray-400 text-xs">Risk Scenario</p>
+                <p class="text-gray-400 text-xs">{% trans "Risk Scenario" %}</p>
                 <p class="text-black text-sm font-semibold antialiased">{{ mitigation.risk_instance }}</p>
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Title</p>
+                <p class="text-sm font-semibold">{% trans "Title" %}</p>
                 {{ form.title.errors }}
                 {{ form.title }}
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Type</p>
+                <p class="text-sm font-semibold">{% trans "Type" %}</p>
                 {{ form.type.errors }}
                 {{ form.type }}
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Status</p>
+                <p class="text-sm font-semibold">{% trans "Status" %}</p>
                 {{ form.status.errors }}
                 {{ form.status }}
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">ETA</p>
+                <p class="text-sm font-semibold">{% trans "ETA" %}</p>
                 {{ form.eta.errors }}
                 {{ form.eta }}
                 <p class="text-xs text-gray-400">{{ form.eta.help_text|striptags|capfirst }}</p>
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Security Function</p>
+                <p class="text-sm font-semibold">{% trans "Security Function" %}</p>
                 {{ form.solution.errors }}
                 {{ form.solution }}
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Description</p>
+                <p class="text-sm font-semibold">{% trans "Description" %}</p>
                 {{ form.description.errors }}
                 {{ form.description }}
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Link</p>
+                <p class="text-sm font-semibold">{% trans "Link" %}</p>
                 {{ form.link.errors }}
                 {{ form.link }}
                 <p class="text-xs text-gray-400">{{ form.link.help_text|striptags|capfirst }}</p>
             </div>
             <div class="flex flex-col">
-                <p class="text-sm font-semibold">Effort</p>
+                <p class="text-sm font-semibold">{% trans "Effort" %}</p>
                 {{ form.effort.errors }}
                 {{ form.effort }}
                 <p class="text-xs text-gray-400">{{ form.effort.help_text|striptags|capfirst }}</p>
             </div>           
         </section>
         <div class="mt-4 flex space-x-2 justify-end">
-            <a href="{% url 'mtg-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
-            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+            <a href="{% url 'mtg-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
         </div>
     </div>
 </div>

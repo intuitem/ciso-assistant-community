@@ -11,29 +11,29 @@
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full mb-4">
         <div class="flex flex-row space-x-6 mb-2">
             <div class="flex flex-col">
-                <p class="text-gray-400 text-sm">Name</p>
+                <p class="text-gray-400 text-sm">{% trans "Name" %}</p>
                 {{ form.name.errors }}
                 {{ form.name }}
             </div>
             <div class="flex flex-col">
-                <p class="text-gray-400 text-sm">Department</p>
+                <p class="text-gray-400 text-sm">{% trans "Department" %}</p>
                 {{ form.department.errors }}
                 {{ form.department }}
             </div>
         </div>
         <div class="flex space-x-2 mt-4">
-            <a href="{% url 'pd-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
-            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+            <a href="{% url 'pd-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
         </div>
     </div>
 </div>
     </form>
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
-        <h2 class="text-xl font-semibold mb-4">Associated Projects</h2>
+        <h2 class="text-xl font-semibold mb-4">{% trans "Associated Projects" %}</h2>
         <div x-data="modal()">
             <a id="newProjectModal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
             class="add-button">
-                <i class="fas fa-plus mr-2"></i>New Project</a>
+                <i class="fas fa-plus mr-2"></i>{% trans "New Project" %}</a>
                 {% include "back_office/snippets/project_create_modal.html" %}
         </div>
         <script src="{% static 'js/modal.js' %}"></script>

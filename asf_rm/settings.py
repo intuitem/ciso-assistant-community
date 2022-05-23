@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'theme',
     'core',
     'general',
+    'back_office',
     'cal',
     'django_filters',
     'import_export',

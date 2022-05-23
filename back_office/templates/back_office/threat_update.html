@@ -10,14 +10,14 @@
         <div class="bg-white rounded-lg shadow px-8 py-6">
             <section class="flex flex-col space-y-4 mb-2">
                 <div class="flex flex-col">
-                    <p class="text-sm font-semibold">Title</p>
+                    <p class="text-sm font-semibold">{% trans "Title" %}</p>
                     {{ form.title.errors }}
                     {{ form.title }}
                 </div>
             </section>
             <div class="flex justify-end space-x-2">
-                <a href="{% url 'threat-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
-                <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+                <a href="{% url 'threat-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+                <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
             </div>
         </div>
     </form>

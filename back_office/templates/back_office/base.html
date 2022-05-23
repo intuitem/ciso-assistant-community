@@ -75,7 +75,7 @@
 								<span class="nav-link-icon">
 								<i class="fas fa-tachometer-alt"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Overview</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Overview" %}</span>
 							</a>
 						</li>
 						<li>
@@ -84,7 +84,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-home"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Switch to viewer</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Switch to viewer" %}</span>
 							</a>
 						</li>
 						<li class="nav-seperator text-md">
@@ -100,7 +100,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-glasses"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Risk Analyses</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk Analyses" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -111,7 +111,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-clone"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Risk Scenarios</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk Scenarios" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -122,7 +122,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-fire-extinguisher"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Security Measures</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Security Measures" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -133,7 +133,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-user-tie"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Risk Acceptances</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk Acceptances" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -151,7 +151,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-project-diagram"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Projects Domains</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects Domains" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -162,7 +162,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-cubes"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Projects</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -173,7 +173,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-gem"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Assets (fix me)</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %} (fix me)</span>
 							</a>
 						</li>
 						{% endif %}
@@ -184,7 +184,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-biohazard"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Threats</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Threats" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -194,13 +194,13 @@
 							<span class="nav-link-icon">
 								<i class="fas fa-cogs"></i>
 							</span>
-							<span class="ml-2 text-sm tracking-wide truncate">Security Functions</span>
+							<span class="ml-2 text-sm tracking-wide truncate">{% trans "Security Functions" %}</span>
 							</a>
 						</li>
 						{% endif %}
 						<li class="nav-seperator text-md">
 							<div class="flex flex-row items-center h-8">
-								<div class="t">Settings</div>
+								<div class="t">{% trans "Settings" %}</div>
 							</div>
 						</li>
 						{% if perms.auth.view_group %}
@@ -210,7 +210,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-sitemap"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Groups</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -221,7 +221,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-users"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Users</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Users" %}</span>
 							</a>
 						</li>
 						{% endif %}
@@ -231,13 +231,13 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-border-all"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Rating Matrix</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating Matrix" %}</span>
 							</a>
 						</li>
 
 						<li class="nav-seperator text-md">
 							<div class="flex flex-row items-center h-8">
-								<div class="">Extra</div>
+								<div class="">{% trans "Extra" %}</div>
 							</div>
 						</li>
 						<li>
@@ -264,7 +264,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-star-half-alt"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Scoring Assistant</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Scoring Assistant" %}</span>
 							</a>
 						</li>
 						<li>
@@ -273,7 +273,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-question-circle"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">User Guide</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "User Guide" %}</span>
 							</a>
 						</li>
 						<li>
@@ -303,7 +303,7 @@
 								<span class="nav-link-icon">
 									<i class="fas fa-sign-in-alt"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">Logout</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Logout" %}</span>
 							</a>
 						</li>
 					</ul>

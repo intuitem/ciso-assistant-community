@@ -1,3 +1,4 @@
+{% load i18n static %}
 <!-- MODAL CONTAINER WITH BACKDROP -->
 <div x-show="isOpening()">
                                           
@@ -18,7 +19,7 @@
         <!-- MODAL CONTAINER -->
         <div class="relative flex flex-col w-full pointer-events-auto bg-white border border-gray-300 rounded-lg shadow-xl">
           <div class="flex items-start justify-between p-4 border-b border-gray-300 rounded-t">
-            <h5 class="mb-0 text-md leading-normal font-semibold">Delete Risk Acceptance?</h5>
+            <h5 class="mb-0 text-md leading-normal font-semibold">{% trans "Delete Risk Acceptance?" %}</h5>
             <button
               type="button"
               class="close"
@@ -26,17 +27,17 @@
             >&times;</button>
           </div>
           <p class="relative p-4">
-            This action cannot be undone. This will permanently delete the following Risk Acceptance: <strong class="inline">{{ acceptance }}</strong>.
+            {% trans "This action cannot be undone. This will permanently delete the following Risk Acceptance: " %}<strong class="inline">{{ acceptance }}</strong>.
           </p>
           <div class="flex items-center justify-end p-4 border-t border-gray-300">
             <button
               x-on:click="close()"
               type="button"
               class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gray-600 hover:bg-gray-500 mr-2"
-            >No, take me back</button>
+            >{% trans "No, take me back" %}</button>
             <form action="{% url 'risk-acceptance-delete' acceptance.id %}" method="post">{% csrf_token %}
                 <input class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-red-600 hover:bg-red-700 mr-2"
-                type="submit" value="Yes, I'm sure">
+                type="submit" value={% trans "Yes" %}>
             </form>
           </div>
         </div>
