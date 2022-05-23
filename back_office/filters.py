@@ -25,6 +25,14 @@ class StyledFilterSet(FilterSet):
     #             f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
 
 class AnalysisFilter(FilterSet):
+
+    def get_full_names():
+        full_names = ()
+        users = User.objects.all()
+        for user in users:
+            full_names += (user.id, user.get_full_name),
+        return full_names
+
     STATUS_CHOICES = (
         (True, 'Yes'),
         (False, 'No'),
@@ -35,20 +43,38 @@ class AnalysisFilter(FilterSet):
     project__name = CharFilter(
         lookup_expr='icontains',
         widget=TextInput(
-            attrs={'class': 'h-10 rounded-lg',
-            'placeholder': 'Search Analysis...'}
-            ))
+            attrs={
+                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+                'placeholder': 'Search Analysis...'
+            }))
 
     is_draft = ChoiceFilter(choices=STATUS_CHOICES)
     auditor = ModelMultipleChoiceFilter(
         queryset=auditor_list,
         )
+
+    auditor = MultipleChoiceFilter(choices=get_full_names,label=('Auditor'))
+
     project = ModelMultipleChoiceFilter(queryset=Project.objects.all())
+
+    orderby = OrderingFilter(
+        fields=(
+            ('is_draft', 'is_draft'),
+            ('auditor', 'auditor'),
+            ('updated_at', 'updated_at'),
+        )
+    )
 
     def __init__(self, data=None, queryset=None, *, request=None, prefix=None):
         super().__init__(data, queryset, request=request, prefix=prefix)
         self.filters['is_draft'].field.widget.attrs.update({'class': 'rounded-lg w-full'})
         self.filters['project'].field.widget.attrs.update({'class': 'rounded-lg w-full'})
+        self.filters['auditor'].field.widget.attrs.update({'class': 'rounded-lg w-full'})
+        self.filters['orderby'].field.widget.attrs.update({
+            'class': ' rounded-r-lg border-none focus:ring-0',
+            'onchange': 'this.form.submit();'
+            })
+
 
 
     class Meta:

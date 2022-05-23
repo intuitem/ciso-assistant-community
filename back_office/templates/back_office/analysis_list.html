@@ -18,8 +18,19 @@
         {% endif %}
         <!-- Searchbar and Dropdown Form -->
         <form method="get">
-                <div class="flex flex-row space-x-4">
-                {{ filter.form.project__name }}
+            <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        {{ filter.form.project__name }}
+                    </div>
                     <div class="flex justify-center">
                         <div
                             x-data="{
@@ -53,7 +64,7 @@
                                 :aria-expanded="open"
                                 :aria-controls="$id('dropdown-button')"
                                 type="button"
-                                class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow"
+                                class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
                                 :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
                             >
                                 <i class="fas fa-filter"></i>
@@ -78,19 +89,7 @@
                                     </div>
                                     <div>
                                         <p class="block mb-1 text-sm font-medium text-gray-900">Auditor</p>
-                                        <select class="rounded-lg w-full" name="auditor" id="id_auditor" multiple>
-                                            {% for auditor in filter.auditor_list %}
-                                                <option value={{ auditor.pk }}>
-                                                    {% if auditor.get_full_name %}
-                                                        {{ auditor.get_full_name }}
-                                                    {% elif auditor.get_short_name %}
-                                                        {{ auditor.get_short_name }}
-                                                    {% else %}
-                                                        {{ auditor }}
-                                                    {% endif %}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
+                                        {{ filter.form.auditor }}
                                     </div>
                                     <div>
                                         <p class="block mb-1 text-sm font-medium text-gray-900">Project</p>
