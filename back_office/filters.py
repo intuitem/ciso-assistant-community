@@ -59,6 +59,7 @@ class AnalysisFilter(FilterSet):
     project = ModelMultipleChoiceFilter(queryset=Project.objects.all())
 
     orderby = OrderingFilter(
+        empty_label="Order by",
         fields=(
             ('is_draft', 'is_draft'),
             ('auditor', 'auditor'),
