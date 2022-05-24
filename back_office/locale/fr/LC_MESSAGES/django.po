@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-24 09:25+0000\n"
+"POT-Creation-Date: 2022-05-24 10:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,6 +47,11 @@ msgstr "Scenario de risque"
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security Function"
 msgstr "Fonction de Sécurité"
+
+#: back_office/templates/back_office/acceptance_list.html:6
+#: back_office/templates/back_office/base.html:136
+msgid "Risk Acceptances"
+msgstr "Acceptations du risque"
 
 #: back_office/templates/back_office/acceptance_list.html:14
 msgid "New Risk Acceptance"
@@ -89,6 +94,11 @@ msgstr "temporaire"
 #: back_office/templates/back_office/acceptance_list.html:36
 msgid "permanent"
 msgstr ""
+
+#: back_office/templates/back_office/analysis_list.html:9
+#: back_office/templates/back_office/base.html:103
+msgid "Risk Analyses"
+msgstr "Analyses de risques"
 
 #: back_office/templates/back_office/analysis_list.html:16
 msgid "Clear Filters"
@@ -163,10 +173,6 @@ msgstr "Vue d'ensemble"
 msgid "Switch to viewer"
 msgstr "Basculer vers le lecteur"
 
-#: back_office/templates/back_office/base.html:103
-msgid "Risk Analyses"
-msgstr "Analyses de risques"
-
 #: back_office/templates/back_office/base.html:114 back_office/views.py:426
 msgid "Risk Scenarios"
 msgstr "Scenarios de risques"
@@ -174,10 +180,6 @@ msgstr "Scenarios de risques"
 #: back_office/templates/back_office/base.html:125
 msgid "Security Measures"
 msgstr "Mesures de sécurité"
-
-#: back_office/templates/back_office/base.html:136
-msgid "Risk Acceptances"
-msgstr "Acceptations du risque"
 
 #: back_office/templates/back_office/base.html:154 back_office/views.py:473
 msgid "Projects Domains"
@@ -300,7 +302,9 @@ msgstr "fonctions de sécurité"
 
 #: back_office/templates/back_office/fast_track.html:55
 msgid "that your organization have. They can be technical or organizational."
-msgstr "dont dispose votre organisation. Elles peuvent être techniques ou organisationnelles."
+msgstr ""
+"dont dispose votre organisation. Elles peuvent être techniques ou "
+"organisationnelles."
 
 #: back_office/templates/back_office/fast_track.html:61
 #: back_office/templates/back_office/ra_update.html:15
@@ -317,7 +321,9 @@ msgstr "matrice"
 
 #: back_office/templates/back_office/fast_track.html:62
 msgid "or use a preset. Now you can start a new"
-msgstr "de score ou en utiliser une déjà prête. Maintenant vous pouvez commencer une nouvelle"
+msgstr ""
+"de score ou en utiliser une déjà prête. Maintenant vous pouvez commencer une "
+"nouvelle"
 
 #: back_office/templates/back_office/fast_track.html:64
 msgid "risk analysis"
@@ -344,8 +350,8 @@ msgid ""
 "by identifying the potential risk scenarios and the security measures to "
 "mitigate them."
 msgstr ""
-"en identifiant les scenarios de risques potentiels ainsi que les mesures de sécurité pour "
-"les atténuer."
+"en identifiant les scenarios de risques potentiels ainsi que les mesures de "
+"sécurité pour les atténuer."
 
 #: back_office/templates/back_office/group_list.html:21
 msgid "New Group"
