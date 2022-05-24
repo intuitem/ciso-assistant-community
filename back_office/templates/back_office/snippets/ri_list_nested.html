@@ -29,7 +29,7 @@
         </th>
     </thead>
     <tbody>
-        {% for instance in instances %}{% if instance.analysis == analysis %}
+        {% for instance in instances %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     {{ instance.id }}
@@ -79,6 +79,15 @@
                     {{ instance.get_treatment_display }}
                 </td>
             </tr>
-        {% endif %}{% endfor %}
+            {% empty %}
+                    <tr>
+                        <div class="text-black p-4">
+                                <td colspan="8">
+                                <i class="inline fas fa-exclamation-triangle"></i>
+                                <p class="inline test-gray-900">No scenario found. {{ model.verbose_name }}</p>
+                            </div>
+                        </td>
+                    </tr>
+        {% endfor %}
     </tbody>
 </table>

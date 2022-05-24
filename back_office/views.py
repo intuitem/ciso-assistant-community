@@ -329,7 +329,7 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['instances'] = RiskInstance.objects.all().order_by('id')
+        context['instances'] = RiskInstance.objects.filter(analysis=self.get_object()).order_by('id')
         context['suggested_measures'] = Mitigation.objects.all().order_by('id')
         context['crumbs'] = [_('Analyses')]
         return context
@@ -469,7 +469,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['projects'] = Project.objects.all()
+        context['projects'] = Project.objects.filter(parent_group=self.get_object())
         crumbs = [_('Projects Domains')]
         context['crumbs'] = crumbs
         context['project_create_form'] = ProjectForm(initial={'parent_group': get_object_or_404(ProjectsGroup, id=self.kwargs['pk'])})

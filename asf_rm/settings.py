@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'fieldsets_with_inlines',
     'tailwind',
     'theme',
+    'django_browser_reload',
+    'custom_auth',
     'core',
     'general',
     'back_office',
@@ -67,6 +69,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'django_browser_reload.middleware.BrowserReloadMiddleware',
 ]
 
 ROOT_URLCONF = 'asf_rm.urls'
