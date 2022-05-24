@@ -1,8 +1,8 @@
 {% extends 'back_office/base.html' %}
-
-{% block title %}Risk Analyses{% endblock %}
-
 {% load i18n static %}
+
+{% block title %}{% trans "Risk Analyses"|capitalize %}{% endblock %}
+
 
 {% block content %}
 <div class="">
@@ -16,7 +16,7 @@
             <span>{% trans "Clear Filters" %}</span>
         </a>
         {% endif %}
-        <!-- Searchbar and Dropdown Form -->
+        <!-- Ordering, Searchbar and Dropdown Form -->
         <form method="get">
             <div class="flex flex-row space-x-4">
                 <div class="flex flex-row space-x-0 rounded-lg h-fit shadow">
@@ -30,78 +30,78 @@
                             <i class="fas fa-search"></i>
                         </div>
                         {{ filter.form.project__name }}
-                    </div>
-                    <div class="flex justify-center">
-                        <div
-                            x-data="{
-                                open: false,
-                                toggle() {
-                                    if (this.open) {
-                                        return this.close()
-                                    }
-                     
-                                    this.$refs.button.focus()
-                     
-                                    this.open = true
-                                },
-                                close(focusAfter) {
-                                    if (! this.open) return
-                     
-                                    this.open = false
-                     
-                                    focusAfter && focusAfter.focus()
+                </div>
+                <div class="flex justify-center">
+                    <div
+                        x-data="{
+                            open: false,
+                            toggle() {
+                                if (this.open) {
+                                    return this.close()
                                 }
-                            }"
-                            x-on:keydown.escape.prevent.stop="close($refs.button)"
-                            x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
-                            x-id="['dropdown-button']"
-                            class="relative z-10"
+                    
+                                this.$refs.button.focus()
+                    
+                                this.open = true
+                            },
+                            close(focusAfter) {
+                                if (! this.open) return
+                    
+                                this.open = false
+                    
+                                focusAfter && focusAfter.focus()
+                            }
+                        }"
+                        x-on:keydown.escape.prevent.stop="close($refs.button)"
+                        x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                        x-id="['dropdown-button']"
+                        class="relative z-10"
+                    >
+                        <!-- Button -->
+                        <button
+                            x-ref="button"
+                            x-on:click="toggle()"
+                            :aria-expanded="open"
+                            :aria-controls="$id('dropdown-button')"
+                            type="button"
+                            class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
+                            :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
                         >
-                            <!-- Button -->
-                            <button
-                                x-ref="button"
-                                x-on:click="toggle()"
-                                :aria-expanded="open"
-                                :aria-controls="$id('dropdown-button')"
-                                type="button"
-                                class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
-                                :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
-                            >
-                                <i class="fas fa-filter"></i>
-                                <span>{% trans "Filters" %}</span>
-                            </button>
-                     
-                            <!-- Panel -->
-                            <div
-                                x-ref="panel"
-                                x-show="open"
-                                x-transition.origin.top.left
-                                x-on:click.outside="close($refs.button)"
-                                :id="$id('dropdown-button')"
-                                style="display: none;"
-                                class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
-                            >
-                     
-                                <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
-                                    <div>
-                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
-                                        {{ filter.form.is_draft }}
-                                    </div>
-                                    <div>
-                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
-                                        {{ filter.form.auditor }}
-                                    </div>
-                                    <div>
-                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Project" %}</p>
-                                        {{ filter.form.project }}
-                                    </div>
-                                    <button type="submit" class="mt-4 bg-blue-600 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                            <i class="fas fa-filter"></i>
+                            <span>{% trans "Filters" %}</span>
+                        </button>
+                    
+                        <!-- Panel -->
+                        <div
+                            x-ref="panel"
+                            x-show="open"
+                            x-transition.origin.top.left
+                            x-on:click.outside="close($refs.button)"
+                            :id="$id('dropdown-button')"
+                            style="display: none;"
+                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                        >
+                    
+                            <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
+                                <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
+                                    {{ filter.form.is_draft }}
                                 </div>
+                                <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
+                                    {{ filter.form.auditor }}
+                                </div>
+                                <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Project" %}</p>
+                                    {{ filter.form.project }}
+                                </div>
+                                <button type="submit" class="mt-4 bg-blue-600 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>
                         </div>
-                    </div>        
-                </div>
-                </form>
+                    </div>
+                </div>        
+            </div>
+        </form>
             <!-- End Filters Dropdown Form -->
         <div class="grid mb-4"
             x-data="modal()">

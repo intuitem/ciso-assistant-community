@@ -97,11 +97,15 @@
     }
     
     .add-button {
-        @apply justify-self-end rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-medium px-4 py-2 cursor-pointer shadow;
+        @apply justify-self-end rounded-lg bg-indigo-700 hover:bg-indigo-600 text-white font-medium px-4 py-2 cursor-pointer shadow whitespace-nowrap h-fit;
     }
 
     .simple-link {
         @apply text-blue-800 font-semibold;
+    }
+
+    .filter-searchbar {
+        @apply bg-gray-50 text-gray-900 text-sm rounded-lg block w-full p-2.5;
     }
 
 
