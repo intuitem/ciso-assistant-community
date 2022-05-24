@@ -5,27 +5,15 @@
 
 
 {% block content %}
-<div class="">
+<div>
     {% with page_title=_('Risk Analyses') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
-    <div class="flex flex-row justify-end space-x-4">
-        {% url 'ra-list' as short_path %}
-        {% if request.get_full_path != short_path %}
-        <a href="{% url 'ra-list' %}" class="hover:underline px-4 py-2 h-fit cursor-pointer">
-            <span>{% trans "Clear Filters" %}</span>
-        </a>
-        {% endif %}
+    <div class="flex flex-row justify-start space-x-4 h-fit">
         <!-- Ordering, Searchbar and Dropdown Form -->
         <form method="get">
             <div class="flex flex-row space-x-4">
-                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow">
-                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
-                        <i class="fas fa-sort"></i>
-                    </div>
-                    {{ filter.form.orderby }}
-                </div>
-                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
@@ -99,11 +87,23 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
                 </div>        
             </div>
         </form>
-            <!-- End Filters Dropdown Form -->
-        <div class="grid mb-4"
+        {% url 'ra-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <a href="{% url 'ra-list' %}" class="hover:underline px-4 cursor-pointer leading-tight mb-2">
+            <span>{% trans "Clear Filters" %}</span>
+        </a>
+        {% endif %}
+        <!-- End Filters Dropdown Form -->
+        <div class="grid mb-4 w-full"
             x-data="modal()">
             <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                    class="add-button">
@@ -158,7 +158,7 @@
                                 {{ analysis.updated_at|date }}
                             </p>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 whitespace-nowrap">
 
                             <div class="">
                                 <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
