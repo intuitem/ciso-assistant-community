@@ -17,8 +17,8 @@
     </div>
     <script src="{% static 'js/modal.js' %}"></script>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Risk Acceptance" %}</th>
                 <th class="px-6 py-3">{% trans "Type" %}</th>
                 <th class="px-6 py-3">{% trans "Validator" %}</th>
@@ -28,7 +28,7 @@
             <tbody>
                 {% for acceptance in acceptances %}
                     <tr class="odd:bg-white even:bg-gray-50">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if acceptance.type == "temporary" %}
                                 <span class="bg-red-300 p-1 rounded-lg text-xs">{% trans "temporary" %}</span>
@@ -79,6 +79,15 @@
                                         
                                         <script src="{% static 'js/modal.js' %}"></script>
 
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td>
+                            <div class="text-black p-4">
+                                <i class="inline fas fa-exclamation-triangle"></i>
+                                <p class="inline test-gray-900">No risk acceptance found. {{ model.verbose_name }}</p>
                             </div>
                         </td>
                     </tr>

@@ -38,6 +38,16 @@
                     </p>
                 </td>
             </tr>
-        {% endif %}{% endfor %}
+        {% endif %}
+        {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            <div class="text-black p-4">
+                                <i class="inline fas fa-exclamation-triangle"></i>
+                                <p class="inline test-gray-900">No project found. {{ model.verbose_name }}</p>
+                            </div>
+                        </td>
+                    </tr>
+        {% endfor %}
     </tbody>
 </table>

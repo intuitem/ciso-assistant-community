@@ -116,8 +116,10 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         widgets = {
             'expiry_date': DefaultDateInput(format='%Y-%m-%d')
         }
+        labels = {'risk_instance': 'Risk scenario'}
 
 class ProjectForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
+        labels = {'parent_group': 'Parent domain'}
