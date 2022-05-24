@@ -17,7 +17,7 @@
         </th>
     </thead>
     <tbody>
-        {% for mitigation in mitigations %}{% if mitigation.risk_instance == instance %}
+        {% for mitigation in mitigations %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
@@ -46,6 +46,13 @@
                     </p>
                 </td>
             </tr>
-        {% endif %}{% endfor %}
+        {% empty %}
+            <tr class="text-black p-4 text-center">
+                <td colspan="4">
+                <i class="inline fas fa-exclamation-triangle"></i>
+                <p class="inline test-gray-900">{% trans "No measure found." %}</p>
+                </td>
+            </tr>
+        {% endfor %}
     </tbody>
 </table>

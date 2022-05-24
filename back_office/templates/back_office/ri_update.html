@@ -115,14 +115,16 @@
                     <i class="scale-[5] scale-y-[3] fas fa-caret-right text-warmgray-700 drop-shadow-xs"></i>
                 </div>
             </div>
-            <div class="flex flex-row space-x-4 mb-4 w-full">
+            <div class="mb-4 w-full">
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
-                    <h2 class="text-lg font-semibold mb-4">{% trans "Associated Measures" %}</h2>
-                    <div x-data="modal()">
-                        <a id="newMeasures" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-                        class="add-button">
+                    <div class="grid justify-items-stretch grid-cols-2">
+                        <h2 class="text-lg font-semibold mb-4">{% trans "Associated Measures" %}</h2>
+                        <div x-data="modal()" class="justify-self-end">
+                            <a id="newMeasures" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+                            class="add-button">
                             <i class="fas fa-plus mr-2"></i>{% trans "New Measure" %}</a>
-                        {% include "back_office/snippets/measure_create_modal.html" %}
+                            {% include "back_office/snippets/measure_create_modal.html" %}
+                        </div>
                     </div>
                     <script src="{% static 'js/modal.js' %}"></script>
                     {% include 'back_office/snippets/mtg_list_nested.html' %}

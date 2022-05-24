@@ -422,7 +422,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['mitigations'] = Mitigation.objects.all()
+        context['mitigations'] = Mitigation.objects.filter(risk_instance=self.get_object())
         context['crumbs'] = [_('Risk Scenarios')]
         context['measure_create_form'] = MeasureCreateForm(initial={'risk_instance': get_object_or_404(RiskInstance, id=self.kwargs['pk'])})
         return context
@@ -487,7 +487,7 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['analyses'] = Analysis.objects.all().order_by('is_draft', 'id')
+        context['analyses'] = Analysis.objects.filter(project=self.get_object()).order_by('is_draft', 'id')
         context['analysis_create_form'] = RiskAnalysisCreateForm(initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
         crumbs = [_('Projects')]
         context['crumbs'] = crumbs

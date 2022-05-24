@@ -17,7 +17,7 @@
         </th>
     </thead>
     <tbody>
-        {% for analysis in analyses %}{% if analysis.project == project %}
+        {% for analysis in analyses %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
@@ -68,6 +68,13 @@
                     </div>
                 </td>
             </tr>
-        {% endif %}{% endfor %}
+        {% empty %}
+            <tr class="text-black p-4 text-center">
+                <td colspan="4" class="pt-4">
+                <i class="inline fas fa-exclamation-triangle"></i>
+                <p class="inline test-gray-900">{% trans "No analysis found." %}</p>
+                </td>
+            </tr>
+        {% endfor %}
     </tbody>
 </table>
