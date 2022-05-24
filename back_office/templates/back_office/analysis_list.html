@@ -98,7 +98,7 @@
         </form>
         {% url 'ra-list' as short_path %}
         {% if request.get_full_path != short_path %}
-        <a href="{% url 'ra-list' %}" class="hover:underline px-4 cursor-pointer leading-tight mb-2">
+        <a href="{% url 'ra-list' %}" class="hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap align-middle mb-2">
             <span>{% trans "Clear Filters" %}</span>
         </a>
         {% endif %}
