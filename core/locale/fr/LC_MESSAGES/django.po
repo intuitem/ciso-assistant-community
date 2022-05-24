@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-24 10:27+0000\n"
+"POT-Creation-Date: 2022-05-24 14:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -440,7 +440,7 @@ msgstr "Acceptation du Risque"
 
 #: core/models.py:267 core/templates/core/analytics.html:52
 msgid "Risk Acceptances"
-msgstr "Acceptations de Risques"
+msgstr "Acceptations du risque"
 
 #: core/templates/core/analytics.html:14
 msgid "Risks instances"

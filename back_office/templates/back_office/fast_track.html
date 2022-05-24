@@ -2,7 +2,7 @@
 {% load i18n static %}
 
 {% block content %}
-{% with page_title='Fast Track' %}
+{% with page_title=_('Fast Track') %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 
@@ -58,8 +58,8 @@
 
                 <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 4</div>
-                    <div class="font-semibold mb-4">{% trans "Risk Analysis" %}</div>
-                    <div class="text-sm mb-2 rounded  ">{% trans "You will have to define a scoring" %} <a href="#" class="simple-link">{% trans "matrix" %}</a> {% trans "or use a preset. Now you can start a new" %} <span x-data="modal()">
+                    <div class="font-semibold mb-4">{% trans "Risk Analyses" %}</div>
+                    <div class="text-sm mb-2 rounded  ">{% trans "You need to define a scoring" %} <a href="#" class="simple-link">{% trans "matrix" %}</a> {% trans "or use a preset. Now you can start a new" %} <span x-data="modal()">
                         <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
                            class="simple-link">{% trans "risk analysis" %}</a>
                            {% include "back_office/snippets/analysis_create_modal.html" %}

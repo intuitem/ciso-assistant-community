@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-24 10:27+0000\n"
+"POT-Creation-Date: 2022-05-24 14:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,95 +18,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: asf_rm/settings.py:191
+#: asf_rm/settings.py:190
 msgid "Search Analysis..."
 msgstr "Rechercher une Analyse..."
 
-#: asf_rm/settings.py:196
+#: asf_rm/settings.py:195
 msgid "Main"
 msgstr ""
 
-#: asf_rm/settings.py:200
+#: asf_rm/settings.py:199
 msgid "Core"
 msgstr ""
 
-#: asf_rm/settings.py:205
+#: asf_rm/settings.py:204
 msgid "Analysis Registry"
 msgstr "Registre d'Analyse"
 
-#: asf_rm/settings.py:210
+#: asf_rm/settings.py:209
 msgid "Risk Instances"
 msgstr "Instances de Risques"
 
-#: asf_rm/settings.py:215
+#: asf_rm/settings.py:214
 msgid "Mitigations"
 msgstr ""
 
-#: asf_rm/settings.py:220
+#: asf_rm/settings.py:219
 #, fuzzy
 #| msgid "Risk Acceptances"
 msgid "Risk Acceptances"
 msgstr "Acceptations de Risques"
 
-#: asf_rm/settings.py:225
+#: asf_rm/settings.py:224
 msgid "Organization"
 msgstr "Organisation"
 
-#: asf_rm/settings.py:229
+#: asf_rm/settings.py:228
 msgid "General"
 msgstr ""
 
-#: asf_rm/settings.py:234
+#: asf_rm/settings.py:233
 msgid "Projects Hierarchy"
 msgstr "Hiérarchie des Projets"
 
-#: asf_rm/settings.py:239
+#: asf_rm/settings.py:238
 #, fuzzy
 #| msgid "Projects"
 msgid "Projects"
 msgstr "Projets"
 
-#: asf_rm/settings.py:244
+#: asf_rm/settings.py:243
 #, fuzzy
 #| msgid "Parent Risks"
 msgid "Parent Risks"
 msgstr "Risques Parents"
 
-#: asf_rm/settings.py:249
+#: asf_rm/settings.py:248
 #, fuzzy
 #| msgid "Solutions Catalog"
 msgid "Solutions Catalog"
 msgstr "Catalogue des Solutions"
 
-#: asf_rm/settings.py:255
+#: asf_rm/settings.py:254
 msgid "Settings"
 msgstr "Paramètres"
 
-#: asf_rm/settings.py:259
+#: asf_rm/settings.py:258
 msgid "Users and authorizations"
 msgstr "Utilisateurs et Autorisations"
 
-#: asf_rm/settings.py:263
+#: asf_rm/settings.py:262
 msgid "User Guide"
 msgstr "Guide Utilisateur"
 
-#: asf_rm/settings.py:265
+#: asf_rm/settings.py:264
 msgid "Staff"
 msgstr ""
 
-#: asf_rm/settings.py:266
+#: asf_rm/settings.py:265
 msgid "X-Rays (all)"
 msgstr "X-Rays (tous)"
 
-#: asf_rm/settings.py:267
+#: asf_rm/settings.py:266
 msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
-#: asf_rm/settings.py:268
+#: asf_rm/settings.py:267
 msgid "Scoring assistant"
 msgstr "Assistant d'évaluation"
 
-#: asf_rm/settings.py:270
+#: asf_rm/settings.py:269
 msgid "Extra"
 msgstr ""
 
