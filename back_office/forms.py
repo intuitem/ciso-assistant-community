@@ -4,6 +4,7 @@ from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, Ema
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
+from django.utils.translation import gettext_lazy as _
 
 class DefaultDateInput(DateInput):
     input_type = 'date'
@@ -42,8 +43,8 @@ class MeasureCreateForm(StyledModelForm):
         model = Mitigation
         fields = '__all__'
         labels = {
-            'risk_instance': 'Risk Scenario',
-            'solution': 'Security Function',
+            'risk_instance': _('Risk Scenario'),
+            'solution': _('Security Function'),
         }
         widgets = {
             'eta': DefaultDateInput()
@@ -98,6 +99,7 @@ class ProjectUpdateForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
+        
 
 class SecurityFunctionUpdateForm(StyledModelForm):
     class Meta:

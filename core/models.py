@@ -250,7 +250,7 @@ class Mitigation(models.Model):
 
 class RiskAcceptance(models.Model):
     ACCEPTANCE_TYPE = [
-        (_('temporary'), _('Temporary')),
+        ('temporary', _('Temporary')),
         ('permanent', _('Permanent')),
     ]
     risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk instance"))

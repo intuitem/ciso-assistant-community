@@ -1,10 +1,12 @@
 from django.urls import path
+from django.urls.conf import include
 from django.contrib.auth.decorators import login_required
 
 from . import views
 
 urlpatterns = [
     path('', login_required(views.index), name='index'),
+    path('i18n/', include('django.conf.urls.i18n')),
 
     path('fast-track', login_required(views.FastTrackView.as_view()), name='fast_track'),
 

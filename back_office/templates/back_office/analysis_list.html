@@ -13,7 +13,7 @@
         {% url 'ra-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <a href="{% url 'ra-list' %}" class="hover:underline px-4 py-2 h-fit cursor-pointer">
-            <span>Clear Filters</span>
+            <span>{% trans "Clear Filters" %}</span>
         </a>
         {% endif %}
         <!-- Searchbar and Dropdown Form -->
@@ -68,7 +68,7 @@
                                 :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
                             >
                                 <i class="fas fa-filter"></i>
-                                <span>Filters</span>
+                                <span>{% trans "Filters" %}</span>
                             </button>
                      
                             <!-- Panel -->
@@ -84,18 +84,18 @@
                      
                                 <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                                     <div>
-                                        <p class="block mb-1 text-sm font-medium text-gray-900">Draft</p>
+                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
                                         {{ filter.form.is_draft }}
                                     </div>
                                     <div>
-                                        <p class="block mb-1 text-sm font-medium text-gray-900">Auditor</p>
+                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
                                         {{ filter.form.auditor }}
                                     </div>
                                     <div>
-                                        <p class="block mb-1 text-sm font-medium text-gray-900">Project</p>
+                                        <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Project" %}</p>
                                         {{ filter.form.project }}
                                     </div>
-                                    <button type="submit" class="mt-4 bg-blue-600 text-white rounded-lg px-4 py-2">Apply</button>
+                                    <button type="submit" class="mt-4 bg-blue-600 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                                 </div>
                             </div>
                         </div>
@@ -108,7 +108,7 @@
             <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                    class="add-button">
                    <i class="fas fa-plus"></i>
-                   New Risk Analysis
+                   {% trans "New Risk Analysis" %}
             </a>
             {% include "back_office/snippets/analysis_create_modal.html" %}
         </div>

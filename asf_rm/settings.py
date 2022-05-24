@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'custom_auth',
     'core',
     'general',
+    'back_office',
     'cal',
     'django_filters',
     'import_export',

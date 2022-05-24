@@ -5,6 +5,7 @@ from django_filters import *
 from core.models import Analysis
 from general.models import Project
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 class StyledFilterSet(FilterSet):
     pass
@@ -34,8 +35,8 @@ class AnalysisFilter(FilterSet):
         return full_names
 
     STATUS_CHOICES = (
-        (True, 'Yes'),
-        (False, 'No'),
+        (True, _('Yes')),
+        (False, _('No')),
     )
 
     auditor_list = User.objects.all()
@@ -45,7 +46,7 @@ class AnalysisFilter(FilterSet):
         widget=TextInput(
             attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Analysis...'
+                'placeholder': _('Search Analysis...')
             }))
 
     is_draft = ChoiceFilter(choices=STATUS_CHOICES)

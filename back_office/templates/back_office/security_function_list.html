@@ -10,7 +10,7 @@
     <a id="newSecurityFunction" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
         class="add-button">
         <i class="fas fa-plus"></i>
-        New Security Function
+        {% trans "New Security Function" %}
     </a>
     {% include "back_office/snippets/security_function_create_modal.html" %}
     <script src="{% static 'js/modal.js' %}"></script>
