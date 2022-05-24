@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-23 13:41+0000\n"
+"POT-Creation-Date: 2022-05-24 09:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: back_office/filters.py:30
+#: back_office/templates/back_office/snippets/measure_delete_modal.html:41
+#: back_office/templates/back_office/snippets/project_delete_modal.html:40
+#: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:41
+#: back_office/templates/back_office/snippets/ra_delete_modal.html:41
+#: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:40
+#: back_office/templates/back_office/snippets/risk_scenario_delete_modal.html:41
+#: back_office/templates/back_office/snippets/security_function_delete_modal.html:40
+#: back_office/templates/back_office/snippets/threat_delete_modal.html:40
+msgid "Yes"
+msgstr ""
+
+#: back_office/filters.py:31
+msgid "No"
+msgstr ""
 
 #: back_office/filters.py:40
 msgid "Search Analysis..."
@@ -167,7 +183,9 @@ msgstr "Acceptations du risque"
 msgid "Projects Domains"
 msgstr "Domaines de projets"
 
-#: back_office/templates/back_office/base.html:165 back_office/views.py:492
+#: back_office/templates/back_office/base.html:165
+#: back_office/templates/back_office/fast_track.html:16
+#: back_office/views.py:492
 msgid "Projects"
 msgstr ""
 
@@ -176,11 +194,13 @@ msgid "Assets"
 msgstr "Biens"
 
 #: back_office/templates/back_office/base.html:187
+#: back_office/templates/back_office/fast_track.html:37
 #: back_office/templates/back_office/index.html:19
 msgid "Threats"
 msgstr "Menaces"
 
 #: back_office/templates/back_office/base.html:197
+#: back_office/templates/back_office/fast_track.html:49
 msgid "Security Functions"
 msgstr "Fonctions de sécurité"
 
@@ -217,6 +237,115 @@ msgstr ""
 #: back_office/templates/back_office/base.html:306
 msgid "Logout"
 msgstr ""
+
+#: back_office/templates/back_office/fast_track.html:15
+#: back_office/templates/back_office/fast_track.html:36
+#: back_office/templates/back_office/fast_track.html:48
+#: back_office/templates/back_office/fast_track.html:60
+#: back_office/templates/back_office/fast_track.html:71
+msgid "Step"
+msgstr "Étape"
+
+#: back_office/templates/back_office/fast_track.html:17
+msgid "Setup a"
+msgstr "Mettez en place un"
+
+#: back_office/templates/back_office/fast_track.html:20
+msgid "domain"
+msgstr "domaine"
+
+#: back_office/templates/back_office/fast_track.html:23
+msgid "to organize projects and"
+msgstr "pour organiser des projets et"
+
+#: back_office/templates/back_office/fast_track.html:26
+msgid "create one"
+msgstr "créez-en un"
+
+#: back_office/templates/back_office/fast_track.html:29
+msgid "Start identifying your"
+msgstr "Commencez par identifer vos"
+
+#: back_office/templates/back_office/fast_track.html:30
+msgid "assets"
+msgstr "biens"
+
+#: back_office/templates/back_office/fast_track.html:30
+msgid "to keep focus"
+msgstr "pour garder le cap"
+
+#: back_office/templates/back_office/fast_track.html:38
+msgid "Identify what and who are the"
+msgstr "Identifiez quels sont les facteurs et agents de"
+
+#: back_office/templates/back_office/fast_track.html:41
+msgid "threat"
+msgstr "menace"
+
+#: back_office/templates/back_office/fast_track.html:43
+msgid ""
+"factors and agents that can be relevant to your organization and how they "
+"apply to your case."
+msgstr ""
+"qui peuvent être pertinents pour votre organisation et comment ils "
+"s'appliquent dans votre cas."
+
+#: back_office/templates/back_office/fast_track.html:50
+msgid "Understand and inventory the"
+msgstr "Comprenez et inventoriez les"
+
+#: back_office/templates/back_office/fast_track.html:53
+msgid "security functions"
+msgstr "fonctions de sécurité"
+
+#: back_office/templates/back_office/fast_track.html:55
+msgid "that your organization have. They can be technical or organizational."
+msgstr "dont dispose votre organisation. Elles peuvent être techniques ou organisationnelles."
+
+#: back_office/templates/back_office/fast_track.html:61
+#: back_office/templates/back_office/ra_update.html:15
+msgid "Risk Analysis"
+msgstr "Analyse de risque"
+
+#: back_office/templates/back_office/fast_track.html:62
+msgid "You will have to define a scoring"
+msgstr "Vous devrez définir une"
+
+#: back_office/templates/back_office/fast_track.html:62
+msgid "matrix"
+msgstr "matrice"
+
+#: back_office/templates/back_office/fast_track.html:62
+msgid "or use a preset. Now you can start a new"
+msgstr "de score ou en utiliser une déjà prête. Maintenant vous pouvez commencer une nouvelle"
+
+#: back_office/templates/back_office/fast_track.html:64
+msgid "risk analysis"
+msgstr "analyse de risque"
+
+#: back_office/templates/back_office/fast_track.html:66
+msgid "and combine the previous items."
+msgstr "et combiner les éléments précédents."
+
+#: back_office/templates/back_office/fast_track.html:72
+msgid "Scenarios and Remediations"
+msgstr "Scenarios et Remédiations"
+
+#: back_office/templates/back_office/fast_track.html:73
+msgid "Enrich"
+msgstr "Enrichissez"
+
+#: back_office/templates/back_office/fast_track.html:73
+msgid "your analysis"
+msgstr "votre analyse"
+
+#: back_office/templates/back_office/fast_track.html:73
+msgid ""
+"by identifying the potential risk scenarios and the security measures to "
+"mitigate them."
+msgstr ""
+"en identifiant les scenarios de risques potentiels ainsi que les mesures de sécurité pour "
+"les atténuer."
 
 #: back_office/templates/back_office/group_list.html:21
 msgid "New Group"
@@ -454,10 +583,6 @@ msgstr "Analyse"
 msgid "Comments"
 msgstr "Commentaires"
 
-#: back_office/templates/back_office/ra_update.html:15
-msgid "Risk Analysis"
-msgstr "Analyse de risque"
-
 #: back_office/templates/back_office/ra_update.html:28
 #: back_office/templates/back_office/ri_update.html:26
 msgid "Version"
@@ -617,17 +742,6 @@ msgstr "ainsi que tout objet enfant."
 #: back_office/templates/back_office/snippets/security_function_delete_modal.html:37
 #: back_office/templates/back_office/snippets/threat_delete_modal.html:37
 msgid "No, take me back"
-msgstr ""
-
-#: back_office/templates/back_office/snippets/measure_delete_modal.html:41
-#: back_office/templates/back_office/snippets/project_delete_modal.html:40
-#: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:41
-#: back_office/templates/back_office/snippets/ra_delete_modal.html:41
-#: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:40
-#: back_office/templates/back_office/snippets/risk_scenario_delete_modal.html:41
-#: back_office/templates/back_office/snippets/security_function_delete_modal.html:40
-#: back_office/templates/back_office/snippets/threat_delete_modal.html:40
-msgid "Yes"
 msgstr ""
 
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:13
