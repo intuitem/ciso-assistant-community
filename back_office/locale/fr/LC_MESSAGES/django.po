@@ -201,7 +201,7 @@ msgstr ""
 
 #: back_office/templates/back_office/base.html:169
 msgid "Assets"
-msgstr "Biens"
+msgstr "Biens sensibles"
 
 #: back_office/templates/back_office/base.html:180
 #: back_office/templates/back_office/fast_track.html:37
@@ -286,7 +286,7 @@ msgstr "Commencez par identifer vos"
 
 #: back_office/templates/back_office/fast_track.html:30
 msgid "assets"
-msgstr "biens"
+msgstr "biens sensibles"
 
 #: back_office/templates/back_office/fast_track.html:30
 msgid "to keep focus"
