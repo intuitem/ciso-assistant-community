@@ -210,7 +210,7 @@ class MeasureCreateViewModal(PermissionRequiredMixin, CreateView):
     form_class = MeasureCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('mtg-list')
+        return self.request.POST.get('next', '/')
 
 class RiskAcceptanceCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_riskacceptance'
@@ -220,7 +220,7 @@ class RiskAcceptanceCreateViewModal(PermissionRequiredMixin, CreateView):
     form_class = RiskAcceptanceCreateUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('acceptance-list')
+        return self.request.POST.get('next', '/')
 
 class RiskAcceptanceUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_riskacceptance'
@@ -240,7 +240,7 @@ class ThreatCreateViewModal(PermissionRequiredMixin, CreateView):
     form_class = ThreatCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('threat-list')
+        return self.request.POST.get('next', '/')
 
 class SecurityFunctionCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_solution'
@@ -250,7 +250,7 @@ class SecurityFunctionCreateViewModal(PermissionRequiredMixin, CreateView):
     form_class = SecurityFunctionCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('security-function-list')
+        return self.request.POST.get('next', '/')
 
 class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_analysis'
@@ -268,7 +268,7 @@ class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     #         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-list')
+        return self.request.POST.get('next', '/')
 
 class ProjectsGroupCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_projectsgroup'
@@ -282,15 +282,13 @@ class ProjectsGroupCreateView(PermissionRequiredMixin, CreateView):
 
 class ProjectsGroupCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_projectsgroup'
-
     model = ProjectsGroup
-    success_url = reverse_lazy('pd-list')
     template_name = 'back_office/snippets/projects_domain_create_modal.html'
     context_object_name = 'domain'
     form_class = ProjectsGroupUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('pd-list')
+        return self.request.POST.get('next', '/')
 
 class RiskInstanceCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_riskinstance'
@@ -531,10 +529,7 @@ class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
     #     return redirect(next_url)
 
     def get_success_url(self):
-        next_url = self.request.GET.get('next')
-        print(next_url)
-        print(self.request.path)
-        return redirect(next_url) if next_url is not None else reverse_lazy('project-list')
+        return self.request.POST.get('next', '/')
 
 class ParentRiskListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_parentrisk'
