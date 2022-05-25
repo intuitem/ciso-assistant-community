@@ -51,7 +51,9 @@ module.exports = {
     theme: {
         extend: {
             spacing: {
-                '58': '236px'
+                '58': '236px',
+                '66': '270px',
+                '62': '250px'
             },
             colors: {
                 // Now we build the full color palette, using all colors available
