@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-25 09:33+0000\n"
+"POT-Creation-Date: 2022-05-25 12:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -535,7 +535,8 @@ msgstr ""
 msgid ""
 "measure(s) have not been processed because the estimated effort is not set."
 msgstr ""
-"measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas déterminé"
+"measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas "
+"déterminé"
 
 #: core/templates/core/analytics.html:171
 msgid "Risks per project domain(category)"
@@ -695,7 +696,7 @@ msgstr "risques acceptés"
 
 #: core/templates/core/composer.html:64
 msgid "Risk Analysis status:"
-msgstr "Statut de l'Analyse des Risques :"
+msgstr "Statut de l'Analyse de risque :"
 
 #: core/templates/core/composer.html:64
 msgid "Review needed"
@@ -723,7 +724,7 @@ msgstr "Résiduels"
 
 #: core/templates/core/composer.html:86
 msgid "Jump to full risk analysis"
-msgstr "Aller à l'analyse des risques complète"
+msgstr "Aller à l'analyse de risque complète"
 
 #: core/templates/core/composer.html:92
 msgid "High or very high risks based on the"
@@ -1445,7 +1446,7 @@ msgstr "Traitement"
 
 #: core/templates/snippets/ra_data.html:53
 msgid "Risk Analysis is empty"
-msgstr "L'analyse des risques est vide"
+msgstr "L'analyse de risque est vide"
 
 #: core/templates/snippets/ra_data.html:88
 msgid "Matrix view"

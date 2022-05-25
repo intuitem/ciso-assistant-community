@@ -124,4 +124,4 @@ class ProjectForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        labels = {'parent_group': 'Parent domain'}
+        labels = {'parent_group': _('Parent domain')}

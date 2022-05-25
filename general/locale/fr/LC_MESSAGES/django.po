@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-25 09:33+0000\n"
+"POT-Creation-Date: 2022-05-25 12:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,7 +80,7 @@ msgstr "<court nom de projet>"
 
 #: general/models.py:30
 msgid "Project Name"
-msgstr "Nom du Projet"
+msgstr "Nom du projet"
 
 #: general/models.py:31
 msgid "<if an internal reference applies>"
@@ -88,11 +88,11 @@ msgstr "<si une référence interne s'applique>"
 
 #: general/models.py:32
 msgid "Internal ID"
-msgstr "Identifiant Interne"
+msgstr "Identifiant interne"
 
 #: general/models.py:33
-msgid "Parent group"
-msgstr "Groupe parent"
+msgid "Parent domain"
+msgstr "Domaine parent"
 
 #: general/models.py:35
 msgid "Status"
@@ -168,3 +168,6 @@ msgstr "Groupes de Projets Autorisés"
 #: general/models.py:91
 msgid "Project groups allowed for read access on the Portal. "
 msgstr "Groupes de projets autorisés à accéder en lecture au Portail. "
+
+#~ msgid "Parent group"
+#~ msgstr "Groupe parent"

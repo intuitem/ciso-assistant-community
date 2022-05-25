@@ -30,7 +30,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200, default=_("<short project name>"), verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"), 
         null=True, blank=True, verbose_name=_("Internal ID"))
-    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Parent group"))
+    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Parent domain"))
     lc_status = models.CharField(max_length=20, default='in_design', 
         choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True, 

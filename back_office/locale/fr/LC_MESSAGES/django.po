@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-25 09:33+0000\n"
+"POT-Creation-Date: 2022-05-25 12:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,6 +47,12 @@ msgstr "Scenario de risque"
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security Function"
 msgstr "Fonction de Sécurité"
+
+#: back_office/forms.py:127
+#, fuzzy
+#| msgid "Parent Domain"
+msgid "Parent domain"
+msgstr "Domaine Parent"
 
 #: back_office/templates/back_office/acceptance_list.html:6
 #: back_office/templates/back_office/base.html:129
@@ -178,7 +184,7 @@ msgid "Switch to viewer"
 msgstr "Basculer vers le lecteur"
 
 #: back_office/templates/back_office/base.html:107
-#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:426
+#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:424
 msgid "Risk Scenarios"
 msgstr "Scenarios de risques"
 
@@ -188,14 +194,14 @@ msgstr "Mesures de sécurité"
 
 #: back_office/templates/back_office/base.html:147
 #: back_office/templates/back_office/project_domain_list.html:5
-#: back_office/views.py:473
+#: back_office/views.py:471
 msgid "Projects Domains"
 msgstr "Domaines de projets"
 
 #: back_office/templates/back_office/base.html:158
 #: back_office/templates/back_office/fast_track.html:16
 #: back_office/templates/back_office/project_list.html:8
-#: back_office/views.py:492
+#: back_office/views.py:490
 msgid "Projects"
 msgstr ""
 
@@ -376,7 +382,7 @@ msgstr ""
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: back_office/templates/back_office/index.html:23 back_office/views.py:334
+#: back_office/templates/back_office/index.html:23 back_office/views.py:332
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -516,7 +522,7 @@ msgstr "Annuler"
 #: back_office/templates/back_office/snippets/analysis_create_modal.html:84
 #: back_office/templates/back_office/snippets/measure_create_modal.html:47
 #: back_office/templates/back_office/snippets/project_create_modal.html:82
-#: back_office/templates/back_office/snippets/projects_domain_create_modal.html:46
+#: back_office/templates/back_office/snippets/projects_domain_create_modal.html:48
 #: back_office/templates/back_office/snippets/risk_acceptance_create_modal.html:47
 #: back_office/templates/back_office/snippets/security_function_create_modal.html:47
 #: back_office/templates/back_office/snippets/threat_create_modal.html:47
