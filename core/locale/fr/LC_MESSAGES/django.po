@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-24 14:16+0000\n"
+"POT-Creation-Date: 2022-05-25 09:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -110,8 +110,8 @@ msgid "No auditor assigned to this risk analysis yet"
 msgstr "Pas d'auditeur assigné à cette analyse de risques"
 
 #: core/models.py:54
-msgid "Analysis is empty. No risk instance declared yet"
-msgstr "Analyse vide. Pas d'instance de risque déclarée."
+msgid "Analysis is empty. No risk scenario declared yet"
+msgstr "Analyse vide. Pas de scenario de risque déclaré."
 
 #: core/models.py:61
 msgid "R#{} residual risk level is higher than the current one"
@@ -302,7 +302,7 @@ msgstr "Mis à jour le"
 msgid "Risk Instance"
 msgstr "Instance de Risque"
 
-#: core/models.py:165 core/templates/snippets/ra_data.html:34
+#: core/models.py:165
 msgid "Risk Instances"
 msgstr "Instances de risques"
 
@@ -350,7 +350,7 @@ msgstr "Très Important"
 msgid "Risk instance"
 msgstr "Instance de risque"
 
-#: core/models.py:211 core/templates/snippets/mp_data.html:33
+#: core/models.py:211
 msgid "Solution"
 msgstr ""
 
@@ -400,12 +400,11 @@ msgstr "Effort relatif impliqué par la mitigation"
 msgid "Effort"
 msgstr ""
 
-#: core/models.py:229 core/templates/core/my_projects.html:36
+#: core/models.py:229
 msgid "Mitigation"
 msgstr ""
 
-#: core/models.py:230 core/templates/core/analytics.html:20
-#: core/templates/core/search_results.html:34
+#: core/models.py:230 core/templates/core/search_results.html:34
 msgid "Mitigations"
 msgstr ""
 
@@ -443,16 +442,20 @@ msgid "Risk Acceptances"
 msgstr "Acceptations du risque"
 
 #: core/templates/core/analytics.html:14
-msgid "Risks instances"
-msgstr "Instances de risques"
+msgid "Risk scenarios"
+msgstr "Scenarios de risque"
+
+#: core/templates/core/analytics.html:20
+msgid "Measures"
+msgstr "Mesures"
 
 #: core/templates/core/analytics.html:34
 msgid "Show-stoppers"
 msgstr ""
 
 #: core/templates/core/analytics.html:46
-msgid "Solutions in catalog"
-msgstr "Solutions dans le catalogue"
+msgid "Security functions"
+msgstr "Fonctions de sécurité"
 
 #: core/templates/core/analytics.html:60
 msgid "Break down per Parent Risk"
@@ -465,10 +468,10 @@ msgstr "Statuts des Risques"
 #: core/templates/core/analytics.html:76
 msgid ""
 "Risks breakdown per level: Current (with the existing measures) Versus "
-"Residual (Once all mitigation implemented)"
+"Residual (Once all measures implemented)"
 msgstr ""
 "Risques répartis par niveau: Actuels (avec les mesures existantes) Contre "
-"Résiduels (une fois toutes les mitigations implémentées)"
+"Résiduels (une fois toutes les mesures implémentées)"
 
 #: core/templates/core/analytics.html:80
 #: core/templates/snippets/ra_data.html:43
@@ -481,28 +484,28 @@ msgid "Residual Risk"
 msgstr "Risque Résiduel"
 
 #: core/templates/core/analytics.html:96
-msgid "Mitigations Overview"
-msgstr "Aperçu des Mitigations"
+msgid "Measures Overview"
+msgstr "Aperçu des Mesures"
 
 #: core/templates/core/analytics.html:99
 msgid "Breakdown per Status"
 msgstr "Répartition par Statut"
 
 #: core/templates/core/analytics.html:103
-msgid "Pending mitigation per associated risk level (current)"
-msgstr "Mitigations en attente par niveau de risque associé (actuel)"
+msgid "Pending measure per associated risk level (current)"
+msgstr "Mesures en attente par niveau de risque associé (actuel)"
 
 #: core/templates/core/analytics.html:107
-msgid "Breakdown per solution"
-msgstr "Répartition par solution"
+msgid "Breakdown per security function"
+msgstr "Répartition par fonction de sécurité"
 
 #: core/templates/core/analytics.html:108
-msgid "Mitigations per solution"
-msgstr "Mitigations par solution"
+msgid "Measures per security function"
+msgstr "Mesures par fonction de sécurité"
 
 #: core/templates/core/analytics.html:119
-msgid "Mitigations priority quadrants"
-msgstr "Quadrant des priorités des mitigations"
+msgid "Measures priority quadrants"
+msgstr "Quadrant des priorités des mesures"
 
 #: core/templates/core/analytics.html:127
 msgid "4th"
@@ -530,14 +533,13 @@ msgstr ""
 
 #: core/templates/core/analytics.html:165
 msgid ""
-"mitigation(s) have not been processed because the estimated effort is not "
-"set."
+"measure(s) have not been processed because the estimated effort is not set."
 msgstr ""
-"mitigations n'ont pas été traitées car l'effort estimé n'est pas déterminé"
+"measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas déterminé"
 
 #: core/templates/core/analytics.html:171
-msgid "Risks per project group (category)"
-msgstr "Risques par groupe de projet (catégorie)"
+msgid "Risks per project domain(category)"
+msgstr "Risques par domaine de projets (catégorie)"
 
 #: core/templates/core/analytics.html:172
 msgid "Current vs Residual"
@@ -656,8 +658,8 @@ msgid "Current Risks"
 msgstr "Risques Courants"
 
 #: core/templates/core/composer.html:27
-msgid "Associated mitigations status"
-msgstr "Statuts des mitigations associées"
+msgid "Associated measures status"
+msgstr "Statuts des mesures associées"
 
 #: core/templates/core/composer.html:35
 msgid "Residual risks levels"
@@ -736,8 +738,8 @@ msgid "Nothing to show here."
 msgstr "Rien à voir ici."
 
 #: core/templates/core/index.html:12
-msgid "Search Risk instance, mitigation, analysis ..."
-msgstr "Rechercher une instance de risque, mitigation, analyse ..."
+msgid "Search risk scenario, measure, analysis ..."
+msgstr "Rechercher un scenario de risque, mesure, analyse ..."
 
 #: core/templates/core/index.html:23
 msgid "Analyses Registry"
@@ -818,12 +820,16 @@ msgid "Treatment Progress Overview"
 msgstr "Aperçu de l'Avancement du Traitement"
 
 #: core/templates/core/my_projects.html:30
-msgid "Your Pending mitigation(s)"
-msgstr "Vos mitigations en attente"
+msgid "Your Pending measure(s)"
+msgstr "Vos mesures en attente"
 
 #: core/templates/core/my_projects.html:31
 msgid "ordered by ranking score"
 msgstr "classées par évaluation"
+
+#: core/templates/core/my_projects.html:36
+msgid "Measure"
+msgstr ""
 
 #: core/templates/core/my_projects.html:37
 msgid "Ranking Score"
@@ -859,10 +865,10 @@ msgstr ""
 #: core/templates/core/project_select.html:25
 msgid ""
 "business intelligence approach to focus on a specific subset across "
-"different project groups (eg. across divisions)"
+"different project domains (eg. across divisions)"
 msgstr ""
 "vous adoptez une approche Business Intelligence afin de vous concentrer sur "
-"un sous-ensemble précis distribué sur différents groupes de projets (ex : "
+"un sous-ensemble précis distribué sur différents domaines de projets (ex : "
 "plusieurs divisions)"
 
 #: core/templates/core/project_select.html:26
@@ -1362,14 +1368,18 @@ msgid "Login"
 msgstr "Connexion"
 
 #: core/templates/snippets/mp_data.html:12
-msgid "Risk Analysis seems to be empty. Mitigation Plan cannot be generated."
+msgid "Risk Analysis seems to be empty. Measure Plan cannot be generated."
 msgstr ""
-"L'analyse de risque semble être vide. Le Plan Mitigation ne peut pas être "
+"L'analyse de risque semble être vide. Le Plan de Mesure ne peut pas être "
 "généré."
 
 #: core/templates/snippets/mp_data.html:24
-msgid "No associated mitigation"
-msgstr "Pas de mitigation associée"
+msgid "No associated measure"
+msgstr "Pas de mesure associée"
+
+#: core/templates/snippets/mp_data.html:33
+msgid "Security function"
+msgstr "Fonction de sécurité"
 
 #: core/templates/snippets/ra_data.html:7
 msgid "Edit"
@@ -1403,9 +1413,15 @@ msgstr "Dernière mise à jour :"
 msgid "Profile:"
 msgstr "Profil :"
 
+#: core/templates/snippets/ra_data.html:34
+msgid "Risk Scenarios"
+msgstr "Scénarios de risques"
+
 #: core/templates/snippets/ra_data.html:39
-msgid "Parent Risk"
-msgstr "Risque Parent"
+#, fuzzy
+#| msgid "Treatment"
+msgid "Threat"
+msgstr "Traitement"
 
 #: core/templates/snippets/ra_data.html:40
 msgid "Subject"
@@ -1420,8 +1436,8 @@ msgid "Existing measures"
 msgstr "Mesures existantes"
 
 #: core/templates/snippets/ra_data.html:44
-msgid "Recommended mitigations"
-msgstr "Mitigations recommandées"
+msgid "Recommended measures"
+msgstr "Mesures recommandées"
 
 #: core/templates/snippets/ra_data.html:46
 msgid "Treatment"
@@ -1452,6 +1468,18 @@ msgstr "Élevée"
 msgctxt "Probability"
 msgid "Very High"
 msgstr "Très Élevée"
+
+#~ msgid "Risks instances"
+#~ msgstr "Instances de risques"
+
+#~ msgid "Solutions in catalog"
+#~ msgstr "Solutions dans le catalogue"
+
+#~ msgid "Mitigations per solution"
+#~ msgstr "Mitigations par solution"
+
+#~ msgid "Parent Risk"
+#~ msgstr "Risque Parent"
 
 #~ msgid "general comments that will help the reader"
 #~ msgstr "commentaires généraux qui aideront le lecteur"

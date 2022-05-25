@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-24 14:16+0000\n"
+"POT-Creation-Date: 2022-05-25 09:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,20 +102,16 @@ msgstr ""
 msgid "Risk Analyses"
 msgstr "Analyses de risques"
 
-#: back_office/templates/back_office/analysis_list.html:16
-msgid "Clear Filters"
-msgstr "Effacer les Filtres"
-
-#: back_office/templates/back_office/analysis_list.html:71
+#: back_office/templates/back_office/analysis_list.html:59
 msgid "Filters"
 msgstr "Filtres"
 
-#: back_office/templates/back_office/analysis_list.html:87
+#: back_office/templates/back_office/analysis_list.html:75
 #: back_office/templates/back_office/ra_update.html:44
 msgid "Draft"
 msgstr "Brouillon"
 
-#: back_office/templates/back_office/analysis_list.html:91
+#: back_office/templates/back_office/analysis_list.html:79
 #: back_office/templates/back_office/analysis_list.html:123
 #: back_office/templates/back_office/ra_create.html:22
 #: back_office/templates/back_office/ra_update.html:23
@@ -125,16 +121,20 @@ msgstr "Brouillon"
 msgid "Auditor"
 msgstr "Auditeur"
 
-#: back_office/templates/back_office/analysis_list.html:95
+#: back_office/templates/back_office/analysis_list.html:83
 #: back_office/templates/back_office/ra_create.html:17
 #: back_office/templates/back_office/ra_update.html:18
 #: back_office/templates/back_office/ri_update.html:18
 msgid "Project"
 msgstr "Projets"
 
-#: back_office/templates/back_office/analysis_list.html:98
+#: back_office/templates/back_office/analysis_list.html:86
 msgid "Apply"
 msgstr "Appliquer"
+
+#: back_office/templates/back_office/analysis_list.html:102
+msgid "Clear Filters"
+msgstr "Effacer les Filtres"
 
 #: back_office/templates/back_office/analysis_list.html:111
 #: back_office/templates/back_office/project_update.html:57
@@ -240,6 +240,7 @@ msgid "Extra"
 msgstr ""
 
 #: back_office/templates/back_office/base.html:251
+#: back_office/templates/back_office/fast_track.html:5
 msgid "Fast Track"
 msgstr "Démarrage rapide"
 
@@ -491,7 +492,7 @@ msgstr ""
 #: back_office/templates/back_office/ri_update.html:135
 #: back_office/templates/back_office/risk_acceptance_update.html:22
 #: back_office/templates/back_office/security_function_update.html:29
-#: back_office/templates/back_office/snippets/analysis_create_modal.html:90
+#: back_office/templates/back_office/snippets/analysis_create_modal.html:80
 #: back_office/templates/back_office/snippets/measure_create_modal.html:43
 #: back_office/templates/back_office/snippets/project_create_modal.html:78
 #: back_office/templates/back_office/snippets/projects_domain_create_modal.html:43
@@ -512,7 +513,7 @@ msgstr "Annuler"
 #: back_office/templates/back_office/ri_update.html:136
 #: back_office/templates/back_office/risk_acceptance_update.html:23
 #: back_office/templates/back_office/security_function_update.html:30
-#: back_office/templates/back_office/snippets/analysis_create_modal.html:94
+#: back_office/templates/back_office/snippets/analysis_create_modal.html:84
 #: back_office/templates/back_office/snippets/measure_create_modal.html:47
 #: back_office/templates/back_office/snippets/project_create_modal.html:82
 #: back_office/templates/back_office/snippets/projects_domain_create_modal.html:46
@@ -703,7 +704,7 @@ msgstr "Mesures Associées"
 msgid "Parent Risk"
 msgstr "Risque parent"
 
-#: back_office/templates/back_office/ri_list.html:83
+#: back_office/templates/back_office/ri_list.html:82
 #: back_office/templates/back_office/snippets/ri_list_nested.html:86
 msgid "No scenario found."
 msgstr ""

@@ -11,13 +11,13 @@
 
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
-            <span class="text-sm font-semibold text-gray-400">{% trans "Risks instances" %}</span>
+            <span class="text-sm font-semibold text-gray-400">{% trans "Risk scenarios" %}</span>
             <h1 id="riskinstances" class="text-2xl font-bold text-orange-400">{{counters.RiskInstance}}</h1>
           </div>
         </div>
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
-            <span class="text-sm font-semibold text-gray-400">{% trans "Mitigations" %}</span>
+            <span class="text-sm font-semibold text-gray-400">{% trans "Measures" %}</span>
             <h1 id="mitigations" class="text-2xl font-bold text-green-600">{{counters.Mitigation}}</h1>
           </div>
         </div>
@@ -43,7 +43,7 @@
         </div>
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
-            <span class="text-sm font-semibold text-gray-400">{% trans "Solutions in catalog" %}</span>
+            <span class="text-sm font-semibold text-gray-400">{% trans "Security functions" %}</span>
             <h1 class="text-2xl font-bold">{{counters.Solution}}</h1>
           </div>
         </div>
@@ -73,7 +73,7 @@
         </div>
     </div>
     <div class="px-4 py-10 m-2 bg-white shadow-lg rounded-lg">
-        <div>{% trans "Risks breakdown per level: Current (with the existing measures) Versus Residual (Once all mitigation implemented)" %}
+        <div>{% trans "Risks breakdown per level: Current (with the existing measures) Versus Residual (Once all measures implemented)" %}
         </div>
         <div class="px-4 py-10 m-2  flex space-x-2 w-auto">
             <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
@@ -93,19 +93,19 @@
     </div>
 
     <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
-        <div class="text-lg py-4 px-2">{% trans "Mitigations Overview" %}</div>
+        <div class="text-lg py-4 px-2">{% trans "Measures Overview" %}</div>
         <div class="justify-center flex flex-wrap">
             <div class="w-1/3 min-w-[300px]">
                 <div>{% trans "Breakdown per Status" %}</div>
                 {% include 'snippets/bar_chart.html' with name='mtg' labels=mitigation_status.labels values=mitigation_status.values %}
             </div>
             <div class="w-1/3 min-w-[300px]">
-                <div>{% trans "Pending mitigation per associated risk level (current)" %}</div>
+                <div>{% trans "Pending measure per associated risk level (current)" %}</div>
                 {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=mitigation_per_cur_risk.values %}
             </div>
             <div class="w-1/3 min-w-[300px]">
-                <div>{% trans "Breakdown per solution" %}</div>
-                {% trans "Mitigations per solution" as mitigations_per_solution_label %}
+                <div>{% trans "Breakdown per security function" %}</div>
+                {% trans "Measures per security function" as mitigations_per_solution_label %}
                 {% include 'snippets/radar_chart.html' with name='mtg_sol' s_label=mitigations_per_solution_label data=mitigation_per_solution %}
             </div>
         </div>
@@ -116,7 +116,7 @@
     <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
         <div>
             <div></div>
-            <div class="m-2 p-2 text-lg">{% trans "Mitigations priority quadrants" %}</div>
+            <div class="m-2 p-2 text-lg">{% trans "Measures priority quadrants" %}</div>
             <div>
 
             </div>
@@ -162,13 +162,13 @@
                     </tr>
                 </table>
             </div>
-            <div class="p-2 m-2 text-md"><i class="fas fa-info-circle"></i> {% trans "Note" %}: <b>{{mitigation_priority.undefined|length}}</b> {% trans "mitigation(s) have not been processed because the estimated effort is not set." %}</div>
+            <div class="p-2 m-2 text-md"><i class="fas fa-info-circle"></i> {% trans "Note" %}: <b>{{mitigation_priority.undefined|length}}</b> {% trans "measure(s) have not been processed because the estimated effort is not set." %}</div>
 
         </div>
     </div>
 
     <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
-        <div class="text-lg p-2 m-2">{% trans "Risks per project group (category)" %}</div>
+        <div class="text-lg p-2 m-2">{% trans "Risks per project domain(category)" %}</div>
         <div class="text-sm p-2 m-2">{% trans "Current vs Residual" %}</div>
         <div class="p-2">
             {% include 'snippets/dual_bar_stacked.html' with ch_context=extra %}
