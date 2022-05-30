@@ -1490,7 +1490,7 @@ msgstr "L'analyse de risque est vide"
 
 #: core/templates/snippets/ra_data.html:88
 msgid "Matrix view"
-msgstr "Vue Matrice"
+msgstr "Vue Matricielle"
 
 #: core/templates/snippets/risk_matrix.html:52
 #: core/templates/snippets/risk_matrix.html:110

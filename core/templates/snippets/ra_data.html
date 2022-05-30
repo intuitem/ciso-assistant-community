@@ -3,11 +3,11 @@
 <main class="flex-grow main">
     <!--Information banner-->
     <div class="">
-        <div class="bg-white py-4 px-12 m-4 shadow rounded flex space-x-2 relative">
-            <a href="{% url 'ra-update' analysis.id %}" class="absolute right-0 top-0 p-1 m-1 bg-violet-800 text-white text-sm rounded shadow">{% trans "Edit" %}</a>
+        <div class="bg-white py-4 px-12 m-4 shadow rounded-lg flex space-x-2 relative">
+            <a href="{% url 'ra-update' analysis.id %}" class="absolute right-2 top-2 p-1 m-1 add-button">{% trans "Edit" %}</a>
             <div class="container w-1/3 ">
-                <div class="text-sm">{% trans "Risk Analysis" %}</div>
-                <div id="name" class="text-lg">{{analysis}}</div>
+                <div class="text-sm font-semibold ">{% trans "Risk Analysis" %}</div>
+                <div id="name" class="text-lg font-semibold ">{{analysis}}</div>
                 <br>
                 <div class="text-sm">
                     <ul class="">
@@ -19,7 +19,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="container w-2/3 ">
+            <div class="container w-2/3 rounded">
                 <div class="text-sm"><span class="font-semibold">{% trans "Profile:" %}</span> <span class="py-1 px-2 bg-sky-300 rounded-lg capitalize">{{analysis.rating_matrix}}</span>
                 </div>
                 <br>
@@ -30,11 +30,11 @@
         </div>
     </div>
     <!--Risk Analysis-->
-    <div class="m-4 px-4 py-10 shadow rounded bg-white">
+    <div class="m-4 px-4 py-10 shadow rounded-lg bg-white">
         <div class="text-lg pb-2"> {% trans "Risk Scenarios" %} ({{context|length}})</div>
         <table class="w-full border text-sm ">
             <thead class="">
-            <tr class="border bg-gray-600 text-white">
+            <tr class="border bg-gray-50 text-gray-700">
                 <th style="width: 3%;" class="py-3">#</th>
                 <th style="width: 10%;">{% trans "Threat" %}</th>
                 <th style="width: 12%;">{% trans "Subject" %}</th>
@@ -84,7 +84,7 @@
         </table>
     </div>
     <!--Matrix view-->
-    <div class="m-4 px-4 py-8 shadow rounded bg-white page-break">
+    <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break">
         <div class="text-xl pb-4">{% trans "Matrix view" %}</div>
         <div class="flex space-x-3">
             <div class="w-1/2 shadow rounded-lg relative">
