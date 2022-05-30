@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-30 11:49+0000\n"
+"POT-Creation-Date: 2022-05-30 13:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -458,8 +458,8 @@ msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
 #: core/templates/core/analytics.html:60
-msgid "Break down per Parent Risk"
-msgstr "Répartition par Risque Parent"
+msgid "Break down per Threat"
+msgstr "Répartition par Meance"
 
 #: core/templates/core/analytics.html:68
 msgid "Risks status"
@@ -884,7 +884,7 @@ msgstr ""
 msgid "Select your targets"
 msgstr "Sélectionnez vos cibles"
 
-#: core/templates/core/project_select.html:109
+#: core/templates/core/project_select.html:110
 msgid "Process"
 msgstr "Traiter"
 

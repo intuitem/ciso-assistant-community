@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-30 11:49+0000\n"
+"POT-Creation-Date: 2022-05-30 13:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,7 +115,8 @@ msgstr ""
 msgid "Risk Scenario"
 msgstr "Scenario de risque"
 
-#: back_office/forms.py:47 back_office/templates/back_office/mtg_list.html:121
+#: back_office/forms.py:47 back_office/templates/back_office/mtg_list.html:80
+#: back_office/templates/back_office/mtg_list.html:121
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security Function"
 msgstr "Fonction de Sécurité"
@@ -141,32 +142,14 @@ msgid "Filters"
 msgstr "Filtres"
 
 #: back_office/templates/back_office/acceptance_list.html:72
-#: back_office/templates/back_office/mtg_list.html:72
-#: back_office/templates/back_office/ri_create.html:31
-#: back_office/templates/back_office/ri_list.html:72
-#: back_office/templates/back_office/ri_update.html:36
-#: back_office/templates/back_office/snippets/ri_list_nested.html:10
-#: back_office/templates/back_office/threat_list.html:50
-msgid "Threat"
-msgstr "Menace"
-
-#: back_office/templates/back_office/acceptance_list.html:76
+#: back_office/templates/back_office/acceptance_list.html:112
 #: back_office/templates/back_office/mtg_list.html:76
-#: back_office/templates/back_office/mtg_list.html:119
-#: back_office/templates/back_office/ri_list.html:76
-#: back_office/templates/back_office/ri_list.html:119
-msgid "Parent Project"
+#: back_office/templates/back_office/mtg_list.html:120
+#: back_office/templates/back_office/mtg_update.html:25
+msgid "Type"
 msgstr ""
 
-#: back_office/templates/back_office/acceptance_list.html:80
-#: back_office/templates/back_office/mtg_list.html:80
-#: back_office/templates/back_office/ri_create.html:61
-#: back_office/templates/back_office/ri_list.html:80
-#: back_office/templates/back_office/ri_update.html:101
-msgid "Treatment Status"
-msgstr "Statut du traitement"
-
-#: back_office/templates/back_office/acceptance_list.html:83
+#: back_office/templates/back_office/acceptance_list.html:75
 #: back_office/templates/back_office/analysis_list.html:86
 #: back_office/templates/back_office/mtg_list.html:83
 #: back_office/templates/back_office/project_list.html:81
@@ -175,7 +158,7 @@ msgstr "Statut du traitement"
 msgid "Apply"
 msgstr "Appliquer"
 
-#: back_office/templates/back_office/acceptance_list.html:100
+#: back_office/templates/back_office/acceptance_list.html:92
 #: back_office/templates/back_office/analysis_list.html:103
 #: back_office/templates/back_office/mtg_list.html:100
 #: back_office/templates/back_office/project_domain_list.html:31
@@ -186,29 +169,23 @@ msgstr "Appliquer"
 msgid "Clear Filters"
 msgstr "Effacer les Filtres"
 
-#: back_office/templates/back_office/acceptance_list.html:110
+#: back_office/templates/back_office/acceptance_list.html:102
 msgid "New Risk Acceptance"
 msgstr "Nouvelle Acceptation d'un Risque"
 
-#: back_office/templates/back_office/acceptance_list.html:119
+#: back_office/templates/back_office/acceptance_list.html:111
 msgid "Risk Acceptance"
 msgstr ""
 
-#: back_office/templates/back_office/acceptance_list.html:120
-#: back_office/templates/back_office/mtg_list.html:120
-#: back_office/templates/back_office/mtg_update.html:25
-msgid "Type"
-msgstr ""
-
-#: back_office/templates/back_office/acceptance_list.html:121
+#: back_office/templates/back_office/acceptance_list.html:113
 msgid "Validator"
 msgstr "Validateur"
 
-#: back_office/templates/back_office/acceptance_list.html:122
+#: back_office/templates/back_office/acceptance_list.html:114
 msgid "Expiry Date"
 msgstr "Date d'expiration"
 
-#: back_office/templates/back_office/acceptance_list.html:123
+#: back_office/templates/back_office/acceptance_list.html:115
 #: back_office/templates/back_office/analysis_list.html:127
 #: back_office/templates/back_office/mtg_list.html:122
 #: back_office/templates/back_office/project_domain_list.html:52
@@ -440,6 +417,13 @@ msgstr "Mesures à revoir"
 #: back_office/templates/back_office/index.html:78
 msgid "Exceptions to review"
 msgstr "Exceptions à revoir"
+
+#: back_office/templates/back_office/mtg_list.html:72
+#: back_office/templates/back_office/mtg_list.html:119
+#: back_office/templates/back_office/ri_list.html:76
+#: back_office/templates/back_office/ri_list.html:119
+msgid "Parent Project"
+msgstr ""
 
 #: back_office/templates/back_office/mtg_list.html:109
 #: back_office/templates/back_office/ri_update.html:125
@@ -753,6 +737,15 @@ msgstr "Analyse parent"
 msgid "Scenario Title"
 msgstr "Titre du Scenario"
 
+#: back_office/templates/back_office/ri_create.html:31
+#: back_office/templates/back_office/ri_list.html:72
+#: back_office/templates/back_office/ri_list.html:118
+#: back_office/templates/back_office/ri_update.html:36
+#: back_office/templates/back_office/snippets/ri_list_nested.html:10
+#: back_office/templates/back_office/threat_list.html:50
+msgid "Threat"
+msgstr "Menace"
+
 #: back_office/templates/back_office/ri_create.html:36
 #: back_office/templates/back_office/ri_update.html:46
 msgid "Scenario"
@@ -779,6 +772,12 @@ msgstr "Impact résiduel"
 msgid "Follow up"
 msgstr "Suivi"
 
+#: back_office/templates/back_office/ri_create.html:61
+#: back_office/templates/back_office/ri_list.html:80
+#: back_office/templates/back_office/ri_update.html:101
+msgid "Treatment Status"
+msgstr "Statut du traitement"
+
 #: back_office/templates/back_office/ri_create.html:75
 #: back_office/templates/back_office/ri_update.html:71
 #: back_office/templates/back_office/snippets/ri_list_nested.html:19
@@ -804,10 +803,6 @@ msgstr "Impact courant"
 #: back_office/templates/back_office/ri_update.html:121
 msgid "Associated Measures"
 msgstr "Mesures Associées"
-
-#: back_office/templates/back_office/ri_list.html:118
-msgid "Parent Risk"
-msgstr "Risque parent"
 
 #: back_office/templates/back_office/ri_list.html:192
 #: back_office/templates/back_office/snippets/ri_list_nested.html:86
@@ -1076,6 +1071,9 @@ msgstr ""
 #: back_office/templates/back_office/user_list.html:41
 msgid "superuser"
 msgstr "super-utilisateur"
+
+#~ msgid "Parent Risk"
+#~ msgstr "Risque parent"
 
 #~ msgid "Search Analysis..."
 #~ msgstr "Rechercher une Analyse..."

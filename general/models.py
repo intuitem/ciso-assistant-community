@@ -54,8 +54,8 @@ class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<parent risk short title>"), verbose_name=_("Title"))
 
     class Meta:
-        verbose_name = _("Parent Risk")
-        verbose_name_plural = _("Parent Risks")
+        verbose_name = _("Threat")
+        verbose_name_plural = _("Threats")
 
     def __str__(self):
         return self.title
