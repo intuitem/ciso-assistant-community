@@ -13,7 +13,7 @@
 
             {% for analysis in context %}
             <div class="border-b mb-4">
-                <div class="text-lg font-semibold mb-2"><i class="far fa-lightbulb text-yellow-500"></i> {{analysis}}</div>
+                <div class="text-lg font-semibold mb-2"><i class="far fa-lightbulb text-amber-400"></i> {{analysis}}</div>
                 {% if analysis.quality_check.count == 0 %}
                 <div class="py-2 mb-4 px-4"><i class="fas fa-check-square"></i> {% trans "All good" %}</div>
                 {% else %}
