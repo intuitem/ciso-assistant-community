@@ -6,14 +6,42 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div class="">
-    <div class="grid mb-4"
+    <div class="flex flex-row justify-start space-x-4 h-fit">
+        <!-- Ordering, Searchbar and Dropdown Form -->
+        <form method="get">
+            <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        {{ filter.form.name }}
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
+                </div>        
+            </div>
+        </form>
+        {% url 'pd-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <div class="flex items-center h-10 w-full">
+            <a href="{% url 'pd-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+                <span>{% trans "Clear Filters" %}</span>
+            </a>
+        </div>
+        {% endif %}
+        <!-- End Filters Dropdown Form -->
+        <div class="grid mb-4 w-full"
         x-data="modal()">
-        <a id="modal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-               class="add-button">
-               <i class="fas fa-plus"></i>
-               {% trans "New Projects Domain" %}
-        </a>
-        {% include "back_office/snippets/projects_domain_create_modal.html" %}
+            <a id="modal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+                class="add-button">
+                <i class="fas fa-plus"></i>
+                {% trans "New Projects Domain" %}
+            </a>
+            {% include "back_office/snippets/projects_domain_create_modal.html" %}
+        </div>
     </div>
     <script src="{% static 'js/modal.js' %}"></script>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -41,7 +69,7 @@
                                 {% if domain.department %}{{ domain.department }}{% else %}--{% endif %}
                             </p>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
@@ -70,7 +98,7 @@
                         <td>
                             <div class="text-black p-4">
                                 <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">No projects domain found. {{ model.verbose_name }}</p>
+                                <p class="inline test-gray-900">{% trans "No projects domain found." %}</p>
                             </div>
                         </td>
                     </tr>

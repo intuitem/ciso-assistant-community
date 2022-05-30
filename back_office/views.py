@@ -46,8 +46,16 @@ class ProjectListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = Project
 
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        filtered_list = ProjectFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = ProjectFilter(self.request.GET, queryset)
+        context['filter'] = filter
         context['project_create_form'] = ProjectForm
         return context
 
@@ -60,8 +68,16 @@ class ProjectsGroupListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = ProjectsGroup
 
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = ProjectsDomainFilter(self.request.GET, queryset)
+        context['filter'] = filter
         context['projects_domain_create_form'] = ProjectsGroupUpdateForm
         return context
 
@@ -102,11 +118,21 @@ class RiskInstanceListView(PermissionRequiredMixin, ListView):
     model = RiskInstance
 
     def get_queryset(self):
-        if not self.request.user.is_superuser:
-            agg_data = RiskInstance.objects.filter(analysis__auditor=self.request.user).order_by('id')
-        else:
-            agg_data = RiskInstance.objects.all().order_by('id')
-        return agg_data
+        qs = self.model.objects.all()
+        filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+        # if not self.request.user.is_superuser:
+        #     agg_data = RiskInstance.objects.filter(analysis__auditor=self.request.user).order_by('id')
+        # else:
+        #     agg_data = RiskInstance.objects.all().order_by('id')
+        # return agg_data
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = RiskScenarioFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        return context
 
 class MitigationListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_mitigation'
@@ -119,15 +145,21 @@ class MitigationListView(PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = MeasureFilter(self.request.GET, queryset)
+        context['filter'] = filter
         context['measure_create_form'] = MeasureCreateForm
         return context
 
     def get_queryset(self):
-        if not self.request.user.is_superuser:
-            agg_data = Mitigation.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('id')
-        else:
-            agg_data = Mitigation.objects.all().order_by('id')
-        return agg_data
+        qs = self.model.objects.all()
+        filtered_list = MeasureFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+        # if not self.request.user.is_superuser:
+        #     agg_data = Mitigation.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('id')
+        # else:
+        #     agg_data = Mitigation.objects.all().order_by('id')
+        # return agg_data
 
 class SecurityFunctionListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_solution'
@@ -138,9 +170,40 @@ class SecurityFunctionListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = Solution
 
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = SecurityFunctionFilter(self.request.GET, queryset)
+        context['filter'] = filter
         context['security_function_create_form'] = SecurityFunctionCreateForm
+        return context
+
+
+class ParentRiskListView(PermissionRequiredMixin, ListView):
+    permission_required = 'core.view_parentrisk'
+    template_name = 'back_office/threat_list.html'
+    context_object_name = 'threats'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = ParentRisk
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        filtered_list = ThreatFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = ThreatFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        context['threat_create_form'] = ThreatCreateForm
         return context
 
 class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
@@ -154,16 +217,22 @@ class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = RiskAcceptanceFilter(self.request.GET, queryset)
+        context['filter'] = filter
         context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
         context['risk_acceptance_update_form'] = RiskAcceptanceCreateUpdateForm
         return context
 
     def get_queryset(self):
-        if not self.request.user.is_superuser:
-            agg_data = RiskAcceptance.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('type', 'id')
-        else:
-            agg_data = RiskAcceptance.objects.all().order_by('type', 'id')
-        return agg_data
+        qs = self.model.objects.all()
+        filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+        # if not self.request.user.is_superuser:
+        #     agg_data = RiskAcceptance.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('type', 'id')
+        # else:
+        #     agg_data = RiskAcceptance.objects.all().order_by('type', 'id')
+        # return agg_data
 
 class UserListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_user'
@@ -529,19 +598,7 @@ class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
     #     return redirect(next_url)
 
     def get_success_url(self):
-        return self.request.POST.get('next', '/')
-
-class ParentRiskListView(PermissionRequiredMixin, ListView):
-    permission_required = 'core.view_parentrisk'
-    template_name = 'back_office/threat_list.html'
-    context_object_name = 'threats'
-
-    ordering = 'id'
-    paginate_by = 10
-    model = ParentRisk
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['threat_create_form'] = ThreatCreateForm
-        return context
+        next_url = self.request.GET.get('next')
+        print(next_url)
+        print(self.request.path)
+        return redirect(next_url) if next_url is not None else reverse_lazy('project-list')
