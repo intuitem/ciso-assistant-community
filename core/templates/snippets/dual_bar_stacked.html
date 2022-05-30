@@ -1,7 +1,18 @@
+{% load i18n %}
 <div id="stacked_div" class="bg-white p-2 m-2 w-auto h-[600px]"></div>
 <script type="text/javascript">
 
         var stacked_ch = echarts.init(document.getElementById('stacked_div'), null, {renderer: 'svg'});
+        var current_vl = {% blocktrans %} "Current: Very Low" {% endblocktrans %};
+        var current_l = {% blocktrans %} "Current: Low" {% endblocktrans %};
+        var current_m = {% blocktrans %} "Current: Medium" {% endblocktrans %};
+        var current_h = {% blocktrans %} "Current: High" {% endblocktrans %};
+        var current_vh = {% blocktrans %} "Current: Very High" {% endblocktrans %};
+        var residual_vl = {% blocktrans %} "Residual: Very Low" {% endblocktrans %};
+        var residual_l = {% blocktrans %} "Residual: Low" {% endblocktrans %};
+        var residual_m = {% blocktrans %} "Residual: Medium" {% endblocktrans %};
+        var residual_h = {% blocktrans %} "Residual: High" {% endblocktrans %};
+        var residual_vh = {% blocktrans %} "Residual: Very High" {% endblocktrans %};
 
         // specify chart configuration item and data
         var option = {
@@ -21,16 +32,16 @@
         },
             legend: {
                 data: [
-                    {name: 'Current: Very Low', 'itemStyle': {'color': '#BBF7D0' }},
-                    {name: 'Current: Low', 'itemStyle': {'color': '#BEF264' }},
-                    {name: 'Current: Medium', 'itemStyle': {'color': '#FEF08A' }},
-                    {name: 'Current: High', 'itemStyle': {'color': '#FBBF24' }},
-                    {name: 'Current: Very High', 'itemStyle': {'color': '#F87171' }},
-                    {name: 'Residual: Very Low', 'itemStyle': {'color': '#BBF7D0' }},
-                    {name: 'Residual: Low', 'itemStyle': {'color': '#BEF264' }},
-                    {name: 'Residual: Medium', 'itemStyle': {'color': '#FEF08A' }},
-                    {name: 'Residual: High', 'itemStyle': {'color': '#FBBF24' }},
-                    {name: 'Residual: Very High', 'itemStyle': {'color': '#F87171' }},
+                    {name: current_vl, 'itemStyle': {'color': '#BBF7D0' }},
+                    {name: current_l, 'itemStyle': {'color': '#BEF264' }},
+                    {name: current_m, 'itemStyle': {'color': '#FEF08A' }},
+                    {name: current_h, 'itemStyle': {'color': '#FBBF24' }},
+                    {name: current_vh, 'itemStyle': {'color': '#F87171' }},
+                    {name: residual_vl, 'itemStyle': {'color': '#BBF7D0' }},
+                    {name: residual_l, 'itemStyle': {'color': '#BEF264' }},
+                    {name: residual_m, 'itemStyle': {'color': '#FEF08A' }},
+                    {name: residual_h, 'itemStyle': {'color': '#FBBF24' }},
+                    {name: residual_vh, 'itemStyle': {'color': '#F87171' }},
                     ],
                 show: true
             },
@@ -65,7 +76,7 @@
             ],
             series: [
                 {
-                    name: 'Current: Very Low',
+                    name: current_vl,
                     type: 'bar',
                     stack: 'CurrentRisks',
                     emphasis: {
@@ -74,7 +85,7 @@
                     data: {{ch_context.current_out.VL|safe}}
                 },
                 {
-                    name: 'Current: Low',
+                    name: current_l,
                     type: 'bar',
                     stack: 'CurrentRisks',
                     emphasis: {
@@ -83,7 +94,7 @@
                     data: {{ch_context.current_out.L|safe}}
                 },
                 {
-                    name: 'Current: Medium',
+                    name: current_m,
                     type: 'bar',
                     stack: 'CurrentRisks',
                     emphasis: {
@@ -92,7 +103,7 @@
                     data: {{ch_context.current_out.M|safe}}
                 },
                 {
-                    name: 'Current: High',
+                    name: current_h,
                     type: 'bar',
                     stack: 'CurrentRisks',
                     emphasis: {
@@ -101,7 +112,7 @@
                     data: {{ch_context.current_out.H|safe}}
                 },
                 {
-                    name: 'Current: Very High',
+                    name: current_vl,
                     type: 'bar',
                     stack: 'CurrentRisks',
                     emphasis: {
@@ -111,7 +122,7 @@
                 },
 
                 {
-                    name: 'Residual: Very Low',
+                    name: residual_vl,
                     type: 'bar',
                     stack: 'ResidualRisks',
                     emphasis: {
@@ -120,7 +131,7 @@
                     data: {{ch_context.residual_out.VL|safe}}
                 },
                 {
-                    name: 'Residual: Low',
+                    name: residual_l,
                     type: 'bar',
                     stack: 'ResidualRisks',
                     emphasis: {
@@ -129,7 +140,7 @@
                     data: {{ch_context.residual_out.L|safe}}
                 },
                 {
-                    name: 'Residual: Medium',
+                    name: residual_m,
                     type: 'bar',
                     stack: 'ResidualRisks',
                     emphasis: {
@@ -138,7 +149,7 @@
                     data: {{ch_context.residual_out.M|safe}}
                 },
                 {
-                    name: 'Residual: High',
+                    name: residual_h,
                     type: 'bar',
                     stack: 'ResidualRisks',
                     emphasis: {
@@ -147,7 +158,7 @@
                     data: {{ch_context.residual_out.H|safe}}
                 },
                 {
-                    name: 'Residual: Very High',
+                    name: residual_vh,
                     type: 'bar',
                     stack: 'ResidualRisks',
                     emphasis: {

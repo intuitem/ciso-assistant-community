@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-30 08:35+0000\n"
+"POT-Creation-Date: 2022-05-30 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1368,6 +1368,46 @@ msgstr ""
 msgid "Login"
 msgstr "Connexion"
 
+#: core/templates/snippets/dual_bar_stacked.html:6
+msgid " \"Current: Very Low\" "
+msgstr " \"Courant: Très Faible\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:7
+msgid " \"Current: Low\" "
+msgstr " \"Courant: Faible\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:8
+msgid " \"Current: Medium\" "
+msgstr " \"Courant: Moyen\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:9
+msgid " \"Current: High\" "
+msgstr " \"Courant: Élevé\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:10
+msgid " \"Current: Very High\" "
+msgstr " \"Courant: Très Élevé\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:11
+msgid " \"Residual: Very Low\" "
+msgstr " \"Résiduel: Très Faible\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:12
+msgid " \"Residual: Low\" "
+msgstr " \"Résiduel: Faible\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:13
+msgid " \"Residual: Medium\" "
+msgstr " \"Résiduel: Moyen\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:14
+msgid " \"Residual: High\" "
+msgstr " \"Résiduel: Élevé\" "
+
+#: core/templates/snippets/dual_bar_stacked.html:15
+msgid " \"Residual: Very High\" "
+msgstr " \"Résiduel: Très Élevé\" "
+
 #: core/templates/snippets/mp_data.html:12
 msgid "Risk Analysis seems to be empty. Measure Plan cannot be generated."
 msgstr ""
@@ -1470,6 +1510,38 @@ msgctxt "Probability"
 msgid "Very High"
 msgstr "Très Élevée"
 
+#: core/templates/snippets/treatment_progress_dual_bar.html:6
+msgid " \"Risk: open\" "
+msgstr " \"Risque: ouvert\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:7
+msgid " \"Risk: mitigated\" "
+msgstr " \"Risque: mitigé\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:8
+msgid " \"Risk: accepted\" "
+msgstr " \"Risque: accepté\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:9
+msgid " \"Risk: blocking\" "
+msgstr " \"Risque: bloquant\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:10
+msgid " \"Measure: open\" "
+msgstr " \"Mesure: ouverte\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:11
+msgid " \"Measure: in progress\" "
+msgstr " \"Mesure: en cours\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:12
+msgid " \"Measure: on hold\" "
+msgstr " \"Mesure: en attente\" "
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:13
+msgid " \"Measure: done\" "
+msgstr " \"Mesure: terminée\" "
+
 #~ msgid "Risks instances"
 #~ msgstr "Instances de risques"
 
@@ -1518,9 +1590,6 @@ msgstr "Très Élevée"
 
 #~ msgid "open"
 #~ msgstr "ouvert"
-
-#~ msgid "mitigated"
-#~ msgstr "mitigé/atténué"
 
 #~ msgid "accepted"
 #~ msgstr "accepté"
