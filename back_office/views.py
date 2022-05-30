@@ -20,10 +20,10 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
-class FastTrackView(PermissionRequiredMixin, ListView):
+class QuickStartView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_projectsgroup'
-    template_name = 'back_office/fast_track.html'
-    context_object_name = 'fast-track'
+    template_name = 'back_office/quick_start.html'
+    context_object_name = 'quick-start'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
