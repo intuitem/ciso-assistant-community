@@ -28,9 +28,19 @@
                 {% for measure in measures %}
                     <tr class="odd:bg-white even:bg-gray-50">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            <div class="flex items-center">
-
-                                <div class="">
+                            <div class="flex items-center">                           
+                                <span class=" p-1 rounded-lg text-xs
+                                {% if measure.status == 'open' %}
+                                bg-orange-200 
+                                {% elif measure.status == 'in_progress' %}
+                                bg-blue-200 
+                                {% elif measure.status == 'on_hold' %}
+                                bg-gray-200 
+                                {% else %}
+                                bg-green-200 
+                                {% endif %}">{{ measure.get_status_display|lower}}
+                                </span>
+                                <div class="ml-3">
                                     <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ measure.title|capfirst }}

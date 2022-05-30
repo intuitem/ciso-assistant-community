@@ -20,7 +20,7 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Risk Acceptance" %}</th>
-                <th class="px-6 py-3">{% trans "Type" %}</th>
+                <!--<th class="px-6 py-3">{% trans "Type" %}</th>-->
                 <th class="px-6 py-3">{% trans "Validator" %}</th>
                 <th class="px-6 py-3">{% trans "Expiry Date" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
@@ -30,11 +30,13 @@
                     <tr class="odd:bg-white even:bg-gray-50">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
+                                <span class=" p-1 rounded-lg text-xs
                                 {% if acceptance.type == "temporary" %}
-                                <span class="bg-red-300 p-1 rounded-lg text-xs">{% trans "temporary" %}</span>
+                                bg-red-300
                                 {% else %}
-                                <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "permanent" %}</span>
-                                {% endif %}
+                                bg-green-200
+                                {% endif %}">{{ acceptance.get_type_display|lower}}
+                                </span>
                                 <div class="ml-3">
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
@@ -43,11 +45,11 @@
                                 </div>
                             </div>
                         </th>
-                        <td class="px-6 py-4">
+                        <!--<td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
                                 {{ acceptance.type }}
                             </p>
-                        </td>
+                        </td> -->
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">
                                 {{ acceptance.validator }}
