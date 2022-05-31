@@ -9,6 +9,37 @@ var label_low = {% blocktrans %}'Low'{% endblocktrans %};
 var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
 var label_high = {% blocktrans %}'High'{% endblocktrans %};
 var label_very_high = {% blocktrans %}'Very High'{% endblocktrans %};
+
+window.onload = function() {
+    BI_lbl = document.getElementById("BI");
+    TI_lbl = document.getElementById("TI");
+    var C = document.getElementById("C")
+    var A = document.getElementById("A")
+    var I = document.getElementById("I")
+    var T = document.getElementById("T")
+    var Fd = document.getElementById("fd");
+    var Rp = document.getElementById("rp");
+    var Cm = document.getElementById("cm");
+    var Pi = document.getElementById("pi");
+    var BIchecked = document.getElementById("ignoreBI");
+    var TIchecked = document.getElementById("ignoreTI");
+
+    BI_lbl.innerHTML = "--";
+    TI_lbl.innerHTML = "--";
+    C.disabled = true;
+    C.selectedIndex = 0;
+    A.disabled = true;
+    A.selectedIndex = 0;
+    I.disabled = true;
+    I.selectedIndex = 0;
+    T.disabled = true;
+    T.selectedIndex = 0;
+    Fd.disabled = false;
+    Rp.disabled = false;
+    Cm.disabled = false;
+    Pi.disabled = false;
+};
+
 function refresh() {
     //TA
   var sl = document.getElementById("sl").value;

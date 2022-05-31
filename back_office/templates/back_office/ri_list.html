@@ -118,9 +118,9 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Title" %}</th>
-                <th class="px-6 py-3">{% trans "Parent Risk" %}</th>
+                <th class="px-6 py-3">{% trans "Threat" %}</th>
                 <th class="px-6 py-3">{% trans "Parent Project" %}</th>
-                <th class="px-6 py-3">{% trans "Treatment Status" %}</th>
+                {% comment %} <th class="px-6 py-3">{% trans "Treatment Status" %}</th> {% endcomment %}
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>
@@ -128,7 +128,18 @@
                     <tr class="odd:bg-white even:bg-gray-50">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="">
+                                <span class=" p-1 rounded-lg text-xs
+                                {% if scenario.treatment == 'open' %}
+                                bg-orange-200 
+                                {% elif scenario.treatment == 'mitigated' %}
+                                bg-blue-200 
+                                {% elif scenario.treatment == 'accepted' %}
+                                bg-green-200 
+                                {% else %}
+                                bg-red-300 
+                                {% endif %}">{{ scenario.get_treatment_display|lower}}
+                                </span>
+                                <div class="ml-3">
                                     <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ scenario.title|capfirst }}
@@ -146,14 +157,14 @@
                                 {{ scenario.parent_project }}
                             </p>
                         </td>
-                        <td class="px-6 py-4">
+                        {% comment %} <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">
                                 {{ scenario.get_treatment_display }}
                             </p>
-                        </td>
+                        </td> {% endcomment %}
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'RA' scenario.analysis.id %}#{{scenario.id}}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
                                     <a href="{% url 'ri-update' scenario.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>

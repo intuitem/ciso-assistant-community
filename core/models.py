@@ -51,7 +51,7 @@ class Analysis(models.Model):
         if not self.auditor:
             info_lst.append({"msg": _("No auditor assigned to this risk analysis yet"), "obj_type": "Analysis", "object": self})
         if not self.riskinstance_set.all():
-            warnings_lst.append({"msg": _("Analysis is empty. No risk instance declared yet"), "obj_type": "Analysis", "object": self})
+            warnings_lst.append({"msg": _("Analysis is empty. No risk scenario declared yet"), "obj_type": "Analysis", "object": self})
         # ---
 
         # --- checks on the risk instances

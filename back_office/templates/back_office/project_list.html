@@ -117,7 +117,7 @@
             <th class="px-6 py-3">{% trans "Project Name" %}</th>
             <th class="px-6 py-3">{% trans "Parent Domain" %}</th>
             <th class="px-6 py-3">{% trans "Summary" %}</th>
-            <th class="px-6 py-3">{% trans "Status" %}</th>
+            {% comment %} <th class="px-6 py-3">{% trans "Status" %}</th> {% endcomment %}
             <th class="px-6 py-3">{% trans "Actions" %}</th>
         </thead>
         <tbody>
@@ -125,8 +125,21 @@
                 <tr class="odd:bg-white even:bg-gray-50">
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                         <div class="flex items-center">
-
-                            <div class="">
+                            <span class=" p-1 rounded-lg text-xs
+                                {% if project.lc_status == 'in_design' %}
+                                bg-orange-200 
+                                {% elif project.lc_status == 'in_dev' %}
+                                bg-blue-200 
+                                {% elif project.lc_status == 'in_prod' %}
+                                bg-green-200 
+                                {% elif project.lc_status == 'eol' %}
+                                bg-red-300 
+                                {% elif project.lc_status == 'dropped' %}
+                                bg-gray-200 
+                                {% else %}
+                                {% endif %}">{{ project.get_lc_status_display|lower}}
+                                </span>
+                            <div class="ml-3">
                                 <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ project.name|capfirst }}
@@ -144,14 +157,14 @@
                         {{ project.summary|capfirst }}
                         </p>
                     </td>
-                    <td class="px-6 py-4">
+                    {% comment %} <td class="px-6 py-4">
                         <p class="text-gray-900 whitespace-no-wrap">
                             {% if project.lc_status %}{{ project.get_lc_status_display }}{% else %}--{% endif %}
                         </p>
-                    </td>
+                    </td> {% endcomment %}
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
-                            <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
+                            {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
                             <span>
                                 <a href="{% url 'project-update' project.id %}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
@@ -174,14 +187,12 @@
                     </td>
                 </tr>
                 {% empty %}
-                    <tr>
-                        <td>
-                            <div class="text-black p-4">
-                                <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">No project found. {{ model.verbose_name }}</p>
-                            </div>
-                        </td>
-                    </tr>
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No project found." %}</p>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

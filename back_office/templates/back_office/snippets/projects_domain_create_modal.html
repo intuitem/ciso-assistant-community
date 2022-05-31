@@ -41,9 +41,11 @@
                 <section class="grid grid-cols-2">
                   <button x-on:click="close()" type="button"
                     class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
+                    <input
+                    type="hidden" name="next" value={{ request.get_full_path }}>
                   <input
                     class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2"
-                    id="save" type="submit" value={% trans "Save" %}>
+                    id="save" type="submit" name="next[]" value={% trans "Save" %}>
                 </section>
               </section>
             </div>

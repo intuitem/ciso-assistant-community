@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-24 14:16+0000\n"
+"POT-Creation-Date: 2022-05-31 10:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,7 +80,7 @@ msgstr "<court nom de projet>"
 
 #: general/models.py:30
 msgid "Project Name"
-msgstr "Nom du Projet"
+msgstr "Nom du projet"
 
 #: general/models.py:31
 msgid "<if an internal reference applies>"
@@ -88,11 +88,11 @@ msgstr "<si une référence interne s'applique>"
 
 #: general/models.py:32
 msgid "Internal ID"
-msgstr "Identifiant Interne"
+msgstr "Identifiant interne"
 
 #: general/models.py:33
-msgid "Parent group"
-msgstr "Groupe parent"
+msgid "Parent domain"
+msgstr "Domaine parent"
 
 #: general/models.py:35
 msgid "Status"
@@ -130,12 +130,12 @@ msgid "Title"
 msgstr "Titre"
 
 #: general/models.py:57
-msgid "Parent Risk"
-msgstr "Risque Parent"
+msgid "Threat"
+msgstr ""
 
 #: general/models.py:58
-msgid "Parent Risks"
-msgstr "Risques Parents"
+msgid "Threats"
+msgstr ""
 
 #: general/models.py:66
 msgid "Provider"
@@ -168,3 +168,12 @@ msgstr "Groupes de Projets Autorisés"
 #: general/models.py:91
 msgid "Project groups allowed for read access on the Portal. "
 msgstr "Groupes de projets autorisés à accéder en lecture au Portail. "
+
+#~ msgid "Parent Risk"
+#~ msgstr "Risque Parent"
+
+#~ msgid "Parent Risks"
+#~ msgstr "Risques Parents"
+
+#~ msgid "Parent group"
+#~ msgstr "Groupe parent"

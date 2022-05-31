@@ -132,7 +132,7 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if analysis.is_draft %}
-                                <span class="bg-blue-100 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
+                                <span class="bg-blue-200 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
                                 {% else %}
                                 <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
                                 {% endif %}
@@ -186,14 +186,12 @@
                         </td>
                     </tr>
                 {% empty %}
-                    <tr>
-                        <td>
-                            <div class="text-black p-4">
-                                <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">{% trans "No analysis found." %}</p>
-                            </div>
-                        </td>
-                    </tr>
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No analysis found." %}</p>
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

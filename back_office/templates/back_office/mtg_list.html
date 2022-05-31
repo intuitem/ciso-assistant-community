@@ -73,7 +73,7 @@
                                     {{ filter.form.risk_instance__analysis__project }}
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Measure Type" %}</p>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Type" %}</p>
                                     {{ filter.form.type }}
                                 </div>
                                 <div>
@@ -125,9 +125,19 @@
                 {% for measure in measures %}
                     <tr class="odd:bg-white even:bg-gray-50">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            <div class="flex items-center">
-
-                                <div class="">
+                            <div class="flex items-center">                           
+                                <span class=" p-1 rounded-lg text-xs
+                                {% if measure.status == 'open' %}
+                                bg-orange-200 
+                                {% elif measure.status == 'in_progress' %}
+                                bg-blue-200 
+                                {% elif measure.status == 'on_hold' %}
+                                bg-gray-200 
+                                {% else %}
+                                bg-green-200 
+                                {% endif %}">{{ measure.get_status_display|lower}}
+                                </span>
+                                <div class="ml-3">
                                     <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ measure.title|capfirst }}
@@ -160,7 +170,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'MP' measure.risk_instance.analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
                                     <a href="{% url 'mtg-update' measure.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
@@ -183,12 +193,10 @@
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td>
-                            <div class="text-black p-4">
-                                <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">No measure found. {{ model.verbose_name }}</p>
-                            </div>
+                    <tr class="text-black p-4 text-center">
+                        <td colspan="8" class="py-2">
+                            <i class="inline fas fa-exclamation-triangle"></i>
+                            <p class="inline test-gray-900">{% trans "No measure found." %}</p>
                         </td>
                     </tr>
                 {% endfor %}

@@ -22,7 +22,7 @@
 <div>
     {% trans "This will help you aggregate multiple components (projects) to get the compiled view on your risks. This is particularly useful for two use cases:" %}
     <ul class="list-disc px-4 py-2 mx-4 my-2">
-        <li> {% trans "business intelligence approach to focus on a specific subset across different project groups (eg. across divisions)" %}</li>
+        <li> {% trans "business intelligence approach to focus on a specific subset across different project domains (eg. across divisions)" %}</li>
         <li> {% trans "you are interested in the risk assessment of a specific system, for which you need the risk assessment of the underlying components" %} </li>
     </ul>
 </div>
@@ -37,7 +37,7 @@
                             <template x-for="(option,index) in selected" :key="options[option].value">
                                 <div
                                     class="flex justify-center items-center m-1 font-medium py-1 px-2 rounded-full text-teal-700 bg-teal-100 border border-teal-300 ">
-                                    <div class="text-xs font-normal leading-none max-w-full flex-initial x-model="
+                                    <div class="text-xs font-normal leading-none max-w-full flex-initial" x-model="
                                         options[option]" x-text="options[option].text"></div>
                                     <div class="flex flex-auto flex-row-reverse">
                                         <div x-on:click="remove(index,option)">
@@ -52,10 +52,10 @@
                                     </div>
                                 </div>
                             </template>
-                            <div x-show="selected.length    == 0" class="flex">
+                            <div x-show="selected.length == 0" class="flex">
                                 <input placeholder="{% trans "Select your targets" %}"
                                     class="bg-transparent p-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
-                                    x-bind:value="selectedValues()"
+                                    {% comment %} x-bind:value="selectedValues()" {% endcomment %}
                                 >
                             </div>
                         </div>
@@ -156,6 +156,7 @@
                             return this.options[option].value;
                         })
                     }
+                    
                 }
             }
         </script>

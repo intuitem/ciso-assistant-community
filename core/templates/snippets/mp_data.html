@@ -9,7 +9,7 @@
             {% if not context %}
             <tr class="">
                 <td colspan="" class="p-4 m-2 text-xl text-center"><i class="fas fa-exclamation-circle"></i> 
-                {% trans "Risk Analysis seems to be empty. Mitigation Plan cannot be generated." %}
+                {% trans "Risk Analysis seems to be empty. Measure Plan cannot be generated." %}
                 </td>
             </tr>
             {% endif %}
@@ -21,7 +21,7 @@
             </tr>
             {% if not instance.mitigation_set.all %}
             <tr>
-                <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated mitigation" %}
+                <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated measure" %}
                 </td>
             </tr>
             {% else %}
@@ -30,7 +30,7 @@
                 <td class="font-semibold">{% trans "Title" %}</td>
                 <td class="font-semibold">{% trans "Description" %}</td>
                 <td class="font-semibold">{% trans "Type" %}</td>
-                <td class="font-semibold">{% trans "Solution" %}</td>
+                <td class="font-semibold">{% trans "Security function" %}</td>
                 <td class="font-semibold">{% trans "ETA" %}</td>
                 <td class="font-semibold">{% trans "Effort" %}</td>
                 <td class="font-semibold text-center">{% trans "Link" %}</td>
