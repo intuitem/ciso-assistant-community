@@ -1,6 +1,6 @@
-<div id="risks_stacked_div" class="bg-white w-auto h-[600px]"></div>
+<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
 <script type="text/javascript">
-    var myChart3 = echarts.init(document.getElementById('risks_stacked_div'), null, { renderer: 'svg' });
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
     var option;
 
     option = {
@@ -97,5 +97,10 @@
         ]
     };
 
-    option && myChart3.setOption(option);
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
 </script>

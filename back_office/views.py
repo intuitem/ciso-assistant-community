@@ -5,11 +5,14 @@ from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import context, loader
 from django.utils.translation import gettext_lazy as _
+from django.core.paginator import Paginator
+
 from datetime import date
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import ParentRisk, Project, ProjectsGroup, Solution
+
 from .forms import *
 
 from .filters import *
@@ -18,11 +21,14 @@ from core.helpers import get_counters, risks_count_per_level, mitigation_per_sta
 
 def index(request):
     template = loader.get_template('back_office/index.html')
+    _measures_to_review = measures_to_review()
+    mtr_paginator = Paginator(_measures_to_review, 5)
+
     context = {
         "counters": get_counters(),
         "risks_level": risks_count_per_level(),
         "mitigation_status": mitigation_per_status(),
-        "measures_to_review": measures_to_review(),
+        "measures_to_review": _measures_to_review,
         "today": date.today()
     }
     return HttpResponse(template.render(context, request))
