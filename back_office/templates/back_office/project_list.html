@@ -164,7 +164,7 @@
                     </td> {% endcomment %}
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
-                            <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
+                            {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
                             <span>
                                 <a href="{% url 'project-update' project.id %}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
@@ -187,14 +187,12 @@
                     </td>
                 </tr>
                 {% empty %}
-                    <tr>
-                        <td>
-                            <div class="text-black p-4">
-                                <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">No project found. {{ model.verbose_name }}</p>
-                            </div>
-                        </td>
-                    </tr>
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No project found." %}</p>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

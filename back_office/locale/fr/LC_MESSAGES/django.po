@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-30 13:42+0000\n"
+"POT-Creation-Date: 2022-05-31 10:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: back_office/filters.py:20 back_office/filters.py:21
+msgid "Order by"
+msgstr "Trier par"
+
+#: back_office/filters.py:83
+#: back_office/templates/back_office/analysis_list.html:135
+#: back_office/templates/back_office/snippets/ra_list_nested.html:25
+msgid "draft"
+msgstr "brouillon"
+
+#: back_office/filters.py:84
+#, fuzzy
+#| msgid "Auditor"
+msgid "auditor"
+msgstr "Auditeur"
+
 #: back_office/filters.py:85
+#, fuzzy
+#| msgid "Created At"
+msgid "updated at"
+msgstr "Créé le"
+
+#: back_office/filters.py:90
 #: back_office/templates/back_office/snippets/measure_delete_modal.html:41
 #: back_office/templates/back_office/snippets/project_delete_modal.html:40
 #: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:41
@@ -30,83 +52,109 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: back_office/filters.py:86
+#: back_office/filters.py:91
 msgid "No"
 msgstr ""
 
-#: back_office/filters.py:123 back_office/filters.py:153
-#: back_office/filters.py:180 back_office/filters.py:250
-msgid "title"
-msgstr ""
+#: back_office/filters.py:97
+msgid "Search Analysis..."
+msgstr "Rechercher une Analyse..."
 
-#: back_office/filters.py:124
+#: back_office/filters.py:113
+msgid "Search Scenario..."
+msgstr "Rechercher un Scenario..."
+
+#: back_office/filters.py:128 back_office/filters.py:158
+#: back_office/filters.py:185 back_office/filters.py:255
+msgid "title"
+msgstr "titre"
+
+#: back_office/filters.py:129
+#: back_office/templates/back_office/quick_start.html:41
+msgid "threat"
+msgstr "menace"
+
+#: back_office/filters.py:130 back_office/filters.py:160
+#: back_office/filters.py:235
 #, fuzzy
 #| msgid "Parent Risk"
-msgid "parent risk"
+msgid "parent"
 msgstr "Risque parent"
 
-#: back_office/filters.py:125 back_office/filters.py:155
-#, fuzzy
-#| msgid "My projects"
-msgid "parent project"
-msgstr "Mes projets"
-
-#: back_office/filters.py:126
-#, fuzzy
-#| msgid "Department"
+#: back_office/filters.py:131
 msgid "treatment"
-msgstr "Departement"
+msgstr "traitement"
 
-#: back_office/filters.py:154 back_office/filters.py:181
+#: back_office/filters.py:143
+msgid "Search Measure..."
+msgstr "Rechercher une Mesure..."
+
+#: back_office/filters.py:159 back_office/filters.py:186
 msgid "type"
 msgstr ""
 
-#: back_office/filters.py:156
+#: back_office/filters.py:161
 msgid "solution"
 msgstr ""
 
-#: back_office/filters.py:182
+#: back_office/filters.py:173
+msgid "Search Acceptance..."
+msgstr "Rechercher une Acceptation..."
+
+#: back_office/filters.py:187
 #, fuzzy
 #| msgid "Expiry Date"
-msgid "expiry date"
+msgid "expiry"
 msgstr "Date d'expiration"
 
-#: back_office/filters.py:183
+#: back_office/filters.py:188
 #, fuzzy
 #| msgid "Validator"
 msgid "validator"
 msgstr "Validateur"
 
-#: back_office/filters.py:204 back_office/filters.py:228
-#: back_office/filters.py:272
+#: back_office/filters.py:200
+msgid "Search Domain..."
+msgstr "Rechercher un Domaine..."
+
+#: back_office/filters.py:209 back_office/filters.py:233
+#: back_office/filters.py:277
 #, fuzzy
 #| msgid "Username"
 msgid "name"
 msgstr "Nom d'utilisateur"
 
-#: back_office/filters.py:205
+#: back_office/filters.py:210
 #, fuzzy
 #| msgid "Department"
 msgid "department"
 msgstr "Departement"
 
-#: back_office/filters.py:229
+#: back_office/filters.py:221
+msgid "Search Project..."
+msgstr "Rechercher un Projet..."
+
+#: back_office/filters.py:234
 #, fuzzy
 #| msgid "Status"
-msgid "lc_status"
+msgid "status"
 msgstr "Statut"
 
-#: back_office/filters.py:230
-msgid "parent group"
-msgstr ""
+#: back_office/filters.py:247
+msgid "Search Threat..."
+msgstr "Rechercher une Menace..."
 
-#: back_office/filters.py:273
+#: back_office/filters.py:267
+msgid "Search Function..."
+msgstr "Rechercher une Fonction..."
+
+#: back_office/filters.py:278
 #, fuzzy
 #| msgid "Provider"
 msgid "provider"
 msgstr "Fournisseur"
 
-#: back_office/filters.py:274
+#: back_office/filters.py:279
 msgid "contact"
 msgstr ""
 
@@ -154,7 +202,7 @@ msgstr ""
 #: back_office/templates/back_office/mtg_list.html:83
 #: back_office/templates/back_office/project_list.html:81
 #: back_office/templates/back_office/ri_list.html:83
-#: back_office/templates/back_office/security_function_list.html:82
+#: back_office/templates/back_office/security_function_list.html:74
 msgid "Apply"
 msgstr "Appliquer"
 
@@ -164,7 +212,7 @@ msgstr "Appliquer"
 #: back_office/templates/back_office/project_domain_list.html:31
 #: back_office/templates/back_office/project_list.html:98
 #: back_office/templates/back_office/ri_list.html:100
-#: back_office/templates/back_office/security_function_list.html:99
+#: back_office/templates/back_office/security_function_list.html:91
 #: back_office/templates/back_office/threat_list.html:31
 msgid "Clear Filters"
 msgstr "Effacer les Filtres"
@@ -191,11 +239,15 @@ msgstr "Date d'expiration"
 #: back_office/templates/back_office/project_domain_list.html:52
 #: back_office/templates/back_office/project_list.html:122
 #: back_office/templates/back_office/ri_list.html:122
-#: back_office/templates/back_office/security_function_list.html:121
+#: back_office/templates/back_office/security_function_list.html:113
 #: back_office/templates/back_office/snippets/ra_list_nested.html:16
 #: back_office/templates/back_office/threat_list.html:51
 msgid "Actions"
 msgstr "Actions"
+
+#: back_office/templates/back_office/acceptance_list.html:181
+msgid "No risk acceptance found."
+msgstr "Aucune acceptation de risque n'a été trouvée."
 
 #: back_office/templates/back_office/analysis_list.html:4
 #: back_office/templates/back_office/analysis_list.html:9
@@ -206,7 +258,6 @@ msgstr "Analyses de risques"
 
 #: back_office/templates/back_office/analysis_list.html:75
 #: back_office/templates/back_office/ra_update.html:44
-#: back_office/templates/back_office/security_function_list.html:71
 msgid "Draft"
 msgstr "Brouillon"
 
@@ -216,7 +267,6 @@ msgstr "Brouillon"
 #: back_office/templates/back_office/ra_update.html:23
 #: back_office/templates/back_office/ri_create.html:21
 #: back_office/templates/back_office/ri_update.html:22
-#: back_office/templates/back_office/security_function_list.html:75
 #: back_office/templates/back_office/snippets/ra_list_nested.html:10
 msgid "Auditor"
 msgstr "Auditeur"
@@ -225,7 +275,6 @@ msgstr "Auditeur"
 #: back_office/templates/back_office/ra_create.html:17
 #: back_office/templates/back_office/ra_update.html:18
 #: back_office/templates/back_office/ri_update.html:18
-#: back_office/templates/back_office/security_function_list.html:79
 msgid "Project"
 msgstr "Projets"
 
@@ -246,11 +295,6 @@ msgstr ""
 msgid "Last Update"
 msgstr "Dernière mise à jour"
 
-#: back_office/templates/back_office/analysis_list.html:135
-#: back_office/templates/back_office/snippets/ra_list_nested.html:25
-msgid "draft"
-msgstr "brouillon"
-
 #: back_office/templates/back_office/analysis_list.html:137
 #: back_office/templates/back_office/snippets/ra_list_nested.html:27
 msgid "ready"
@@ -259,7 +303,7 @@ msgstr "prêt"
 #: back_office/templates/back_office/analysis_list.html:193
 #: back_office/templates/back_office/snippets/ra_list_nested.html:75
 msgid "No analysis found."
-msgstr ""
+msgstr "Aucune analyse n'a été trouvée."
 
 #: back_office/templates/back_office/base.html:71
 #: back_office/templates/back_office/index.html:7
@@ -437,7 +481,12 @@ msgstr "Nouvelle Mesure"
 #: back_office/templates/back_office/snippets/ri_list_nested.html:13
 #: back_office/templates/back_office/threat_update.html:13
 msgid "Title"
-msgstr ""
+msgstr "Titre"
+
+#: back_office/templates/back_office/mtg_list.html:200
+#: back_office/templates/back_office/snippets/mtg_list_nested.html:53
+msgid "No measure found."
+msgstr "Aucune mesure n'a été trouvée"
 
 #: back_office/templates/back_office/mtg_update.html:13
 msgid "Measure Summary"
@@ -512,7 +561,7 @@ msgid "Save"
 msgstr "Enregistrer"
 
 #: back_office/templates/back_office/pd_update.html:14
-#: back_office/templates/back_office/security_function_list.html:118
+#: back_office/templates/back_office/security_function_list.html:110
 #: back_office/templates/back_office/security_function_update.html:13
 #: back_office/templates/back_office/snippets/project_list_nested.html:7
 msgid "Name"
@@ -569,10 +618,8 @@ msgid "Domain"
 msgstr "Domaine"
 
 #: back_office/templates/back_office/project_domain_list.html:101
-#, fuzzy
-#| msgid "New Projects Domain"
 msgid "No projects domain found."
-msgstr "Nouveau Domaine de Projets"
+msgstr "Aucun domaine de projets n'a été trouvé."
 
 #: back_office/templates/back_office/project_update.html:51
 msgid "Associated Risk Analyses"
@@ -617,10 +664,6 @@ msgstr "pour garder le cap"
 #: back_office/templates/back_office/quick_start.html:38
 msgid "Identify what and who are the"
 msgstr "Identifiez quels sont les facteurs et agents de"
-
-#: back_office/templates/back_office/quick_start.html:41
-msgid "threat"
-msgstr "menace"
 
 #: back_office/templates/back_office/quick_start.html:43
 msgid ""
@@ -693,8 +736,6 @@ msgid "New Analysis"
 msgstr "Nouvelle Analyse"
 
 #: back_office/templates/back_office/ra_create.html:33
-#, fuzzy
-#| msgid "draft"
 msgid "Is Draft"
 msgstr "brouillon"
 
@@ -807,7 +848,7 @@ msgstr "Mesures Associées"
 #: back_office/templates/back_office/ri_list.html:192
 #: back_office/templates/back_office/snippets/ri_list_nested.html:86
 msgid "No scenario found."
-msgstr ""
+msgstr "Aucun scenario n'a été trouvé."
 
 #: back_office/templates/back_office/ri_update.html:41
 msgid "Subject"
@@ -823,19 +864,24 @@ msgstr "Profile Courant"
 msgid "Treatment"
 msgstr "Departement"
 
-#: back_office/templates/back_office/security_function_list.html:109
-msgid "New Security Function"
-msgstr "Nouvelle Fonction de Sécurité"
-
-#: back_office/templates/back_office/security_function_list.html:119
+#: back_office/templates/back_office/security_function_list.html:71
+#: back_office/templates/back_office/security_function_list.html:111
 #: back_office/templates/back_office/security_function_update.html:18
 msgid "Provider"
 msgstr "Fournisseur"
 
-#: back_office/templates/back_office/security_function_list.html:120
+#: back_office/templates/back_office/security_function_list.html:101
+msgid "New Security Function"
+msgstr "Nouvelle Fonction de Sécurité"
+
+#: back_office/templates/back_office/security_function_list.html:112
 #: back_office/templates/back_office/security_function_update.html:23
 msgid "Contact"
 msgstr ""
+
+#: back_office/templates/back_office/security_function_list.html:172
+msgid "No security function found."
+msgstr "Aucune fonction de sécurité n'a été trouvée."
 
 #: back_office/templates/back_office/snippets/analysis_create_modal.html:18
 msgid "Add Analysis"
@@ -880,10 +926,6 @@ msgstr ""
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:13
 msgid "Parent function"
 msgstr "Fonction parent"
-
-#: back_office/templates/back_office/snippets/mtg_list_nested.html:53
-msgid "No measure found."
-msgstr ""
 
 #: back_office/templates/back_office/snippets/paginator.html:4
 #: back_office/templates/back_office/user_list.html:79
@@ -932,10 +974,8 @@ msgstr ""
 "Projet suivant: "
 
 #: back_office/templates/back_office/snippets/project_list_nested.html:46
-#, fuzzy
-#| msgid "New Projects Domain"
 msgid "No project found."
-msgstr "Nouveau Domaine de Projets"
+msgstr "Aucun projet n'a été trouvé"
 
 #: back_office/templates/back_office/snippets/projects_domain_create_modal.html:18
 msgid "Create New Domain"
@@ -1046,7 +1086,7 @@ msgstr "Nouvelle Menace"
 
 #: back_office/templates/back_office/threat_list.html:95
 msgid "No threat found."
-msgstr ""
+msgstr "Aucune menace n'a été trouvée"
 
 #: back_office/templates/back_office/user_list.html:27
 msgid "Username"
@@ -1072,11 +1112,22 @@ msgstr ""
 msgid "superuser"
 msgstr "super-utilisateur"
 
+#~ msgid "Parent project"
+#~ msgstr "Projet parent"
+
+#~ msgid "parent project"
+#~ msgstr "projet parent"
+
+#, fuzzy
+#~| msgid "Status"
+#~ msgid "lc_status"
+#~ msgstr "Statut"
+
+#~ msgid "is draft"
+#~ msgstr "brouillon"
+
 #~ msgid "Parent Risk"
 #~ msgstr "Risque parent"
-
-#~ msgid "Search Analysis..."
-#~ msgstr "Rechercher une Analyse..."
 
 #~ msgid "temporary"
 #~ msgstr "temporaire"

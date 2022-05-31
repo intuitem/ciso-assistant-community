@@ -17,8 +17,8 @@ class GenericFilterSet(FilterSet):
     pass
 
 class GenericOrderingFilter(OrderingFilter):
-    def __init__(self, *args, empty_label="Order by", **kwargs):
-        super().__init__(self, *args, empty_label="Order by", widget=Select, **kwargs)
+    def __init__(self, *args, empty_label=_("Order by"), **kwargs):
+        super().__init__(self, *args, empty_label=_("Order by"), widget=Select, **kwargs)
         self.field.widget.attrs={
             'class': 'h-10 rounded-r-lg border-none focus:ring-0',
             'onchange': 'this.form.submit();'
@@ -78,7 +78,12 @@ class AnalysisFilter(GenericFilterSet):
             ('is_draft', 'is_draft'),
             ('auditor', 'auditor'),
             ('updated_at', 'updated_at'),
-        )
+        ),
+        field_labels={
+            'is_draft': _('draft'.capitalize()),
+            'auditor': _('auditor'.capitalize()),
+            'updated_at': _('updated at'.capitalize())
+        }
     )
 
     STATUS_CHOICES = (
@@ -89,7 +94,7 @@ class AnalysisFilter(GenericFilterSet):
     project__name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Analysis...'
+                'placeholder': _('Search Analysis...')
         }
     ))
     is_draft = GenericChoiceFilter(choices=STATUS_CHOICES)
@@ -105,7 +110,7 @@ class RiskScenarioFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Scenario...'
+                'placeholder': _('Search Scenario...')
         }
     ))
     parent_risk = GenericModelMultipleChoiceFilter(queryset=ParentRisk.objects.all())
@@ -120,10 +125,10 @@ class RiskScenarioFilter(GenericFilterSet):
             ('treatment', 'treatment'),
         ),
         field_labels={
-            'title': _('title').capitalize(),
-            'parent_risk': _('parent risk').capitalize(),
-            'analysis__project': _('parent project').capitalize(),
-            'treatment': _('treatment').capitalize(),
+            'title': _('title'.capitalize()),
+            'parent_risk': _('threat'.capitalize()),
+            'analysis__project': _('parent'.capitalize() + ' project'),
+            'treatment': _('treatment'.capitalize()),
         }
     )
 
@@ -135,7 +140,7 @@ class MeasureFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Measure...'
+                'placeholder': _('Search Measure...')
         }
     ))
     risk_instance__analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
@@ -150,10 +155,10 @@ class MeasureFilter(GenericFilterSet):
             ('solution', 'solution'),
         ),
         field_labels={
-            'title': _('title').capitalize(),
-            'type': _('type').capitalize(),
-            'risk_instance__analysis__project': _('parent project').capitalize(),
-            'solution': _('solution').capitalize(),
+            'title': _('title'.capitalize()),
+            'type': _('type'.capitalize()),
+            'risk_instance__analysis__project': _('parent'.capitalize() + ' project'),
+            'solution': _('solution'.capitalize()),
         }
     )
 
@@ -165,7 +170,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
     risk_instance__title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Acceptance...'
+                'placeholder': _('Search Acceptance...')
         }
     ))
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
@@ -177,10 +182,10 @@ class RiskAcceptanceFilter(GenericFilterSet):
             ('validator', 'validator'),
         ),
         field_labels={
-            'risk_instance__title': _('title').capitalize(),
-            'type': _('type').capitalize(),
-            'expiry_date': _('expiry date').capitalize(),
-            'validator': _('validator').capitalize(),
+            'risk_instance__title': _('title'.capitalize()),
+            'type': _('type'.capitalize()),
+            'expiry_date': _('expiry'.capitalize() + ' date'),
+            'validator': _('validator'.capitalize()),
         }
     )
 
@@ -192,7 +197,7 @@ class ProjectsDomainFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Domain...'
+                'placeholder': _('Search Domain...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -201,8 +206,8 @@ class ProjectsDomainFilter(GenericFilterSet):
             ('department', 'department'),
         ),
         field_labels={
-            'name': _('name').capitalize(),
-            'department': _('department').capitalize(),
+            'name': _('name'.capitalize()),
+            'department': _('department'.capitalize()),
         }
     )
     class Meta:
@@ -213,7 +218,7 @@ class ProjectFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Project...'
+                'placeholder': _('Search Project...')
         }
     ))
     parent_group = GenericModelMultipleChoiceFilter(queryset=ProjectsGroup.objects.all())
@@ -225,9 +230,9 @@ class ProjectFilter(GenericFilterSet):
             ('parent_group', 'parent_group'),
         ),
         field_labels={
-            'name': _('name').capitalize(),
-            'lc_status': _('lc_status').capitalize(),
-            'parent_group': _('parent group').capitalize(),
+            'name': _('name'.capitalize()),
+            'lc_status': _('status'.capitalize()),
+            'parent_group': _('parent'.capitalize() + ' domain'),
         }
     )
 
@@ -239,7 +244,7 @@ class ThreatFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Threat...'
+                'placeholder': _('Search Threat...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -247,7 +252,7 @@ class ThreatFilter(GenericFilterSet):
             ('title', 'title'),
         ),
         field_labels={
-            'title': _('title').capitalize(),
+            'title': _('title'.capitalize()),
         }
     )
 
@@ -259,7 +264,7 @@ class SecurityFunctionFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': 'Search Function...'
+                'placeholder': _('Search Function...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -269,9 +274,9 @@ class SecurityFunctionFilter(GenericFilterSet):
             ('contact', 'contact'),
         ),
         field_labels={
-            'name': _('name').capitalize(),
-            'provider': _('provider').capitalize(),
-            'contact': _('contact').capitalize(),
+            'name': _('name'.capitalize()),
+            'provider': _('provider'.capitalize()),
+            'contact': _('contact'.capitalize()),
         }
     )
 
