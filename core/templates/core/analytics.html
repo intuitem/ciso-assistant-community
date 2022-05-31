@@ -75,7 +75,7 @@
     <div class="px-4 py-10 m-2 bg-white shadow-lg rounded-lg">
         <div>{% trans "Risks breakdown per level: Current (with the existing measures) Versus Residual (Once all measures implemented)" %}
         </div>
-        <div class="px-4 py-10 m-2  flex space-x-2 w-auto">
+        <div class="px-4 py-10 m-2 flex space-x-2 w-auto">
             <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
                 {% trans "Current Risk" as cur_rsk_label %}
                 {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=risks_level.current %}
@@ -93,23 +93,28 @@
     </div>
 
     <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
-        <div class="text-lg py-4 px-2">{% trans "Measures Overview" %}</div>
-        <div class="justify-center flex flex-wrap">
-            <div class="w-1/3 min-w-[300px]">
-                <div>{% trans "Breakdown per Status" %}</div>
-                {% include 'snippets/bar_chart.html' with name='mtg' labels=mitigation_status.labels values=mitigation_status.values %}
+        <div class="text-lg py-4 px-2">
+            {% trans "Measures Overview" %}           
+        </div>
+        <div class="flex-row">
+            <div class="px-4 m-2 flex space-x-2 w-auto">
+                <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
+                    <div>{% trans "Breakdown per Status" %}</div>
+                    {% include 'snippets/bar_chart.html' with name='mtg' labels=mitigation_status.labels values=mitigation_status.values %}
+                </div>
+                <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
+                    <div>{% trans "Pending measure per associated risk level (current)" %}</div>
+                    {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=mitigation_per_cur_risk.values %}
+                </div>
             </div>
-            <div class="w-1/3 min-w-[300px]">
-                <div>{% trans "Pending measure per associated risk level (current)" %}</div>
-                {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=mitigation_per_cur_risk.values %}
-            </div>
-            <div class="w-1/3 min-w-[300px]">
-                <div>{% trans "Breakdown per security function" %}</div>
-                {% trans "Measures per security function" as mitigations_per_solution_label %}
-                {% include 'snippets/radar_chart.html' with name='mtg_sol' s_label=mitigations_per_solution_label data=mitigation_per_solution %}
+            <div class="px-4 m-2 space-x-2">
+                <div class="rounded-lg shadow p-2 items-center justify-center"> 
+                    {% trans "Breakdown per security function" %}
+                    {% trans "Measures per security function" as mitigations_per_solution_label %}
+                    {% include 'snippets/radar_chart.html' with name='mtg_sol' s_label=mitigations_per_solution_label data=mitigation_per_solution %}
+                </div>            
             </div>
         </div>
-
     </div>
 
 
