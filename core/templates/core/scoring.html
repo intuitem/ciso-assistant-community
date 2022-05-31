@@ -188,10 +188,10 @@ function rl_class(label) {
 {% endblock %}
 {% block content %}
 
-<main class="p-2 2xl:p-8text-sm h-full flex flex-col">
+<main class="text-sm h-full flex flex-col" onmousemove="refresh();">
 
     <div class="mx-auto">
-        <div class="grid lg:grid-cols-2 mx-7">
+        <div class="grid lg:grid-cols-2">
             <div class="">
                 <!--Threat Agent Factors-->
                 <div id="ta_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
@@ -447,8 +447,8 @@ function rl_class(label) {
                             <div class="font-bold text-white text-lg" id="BI">--</div>
                             <div class="flex flex-row space-x-2 items-center">
                                 <input onchange="refresh()" id="ignoreBI" type="checkbox" class="w-4 h-4 text-green-800 bg-gray-100 border-gray-300 rounded focus:ring-green-800 
-                                dark:focus:ring-green-800 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                                <label class="ml-2 text-sm font-medium text-gray-100 dark:text-gray-300">
+                                focus:ring-2">
+                                <label class="ml-2 text-sm font-medium text-gray-100">
                                     {% trans "Ignore" %}
                                   </label>
                             </div>
@@ -458,7 +458,7 @@ function rl_class(label) {
             </div>
         </div>
         
-        <div class="p-2 mx-8 my-8 bg-white rounded shadow">
+        <div class="p-2 my-8 bg-white rounded shadow">
             <div class="p-1 m-1 text-xs">{% trans "Assessment vector:" %} <span id="vector"></span></div>
             <div class="grid grid-cols-3 grid-rows-1 items-center justify-center">
         

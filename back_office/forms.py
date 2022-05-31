@@ -76,6 +76,11 @@ class RiskInstanceCreateForm(StyledModelForm):
         model = RiskInstance
         exclude = ['analysis', 'residual_level', 'current_level']
 
+class RiskScenarioCreateForm(StyledModelForm):
+    class Meta:
+        model = RiskInstance
+        fields = ['analysis', 'parent_risk', 'title', 'scenario']
+
 class RiskInstanceUpdateForm(StyledModelForm):
     class Meta:
         model = RiskInstance

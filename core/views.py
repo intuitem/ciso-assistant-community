@@ -7,9 +7,11 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from core.models import Analysis, RiskInstance, Mitigation
 from general.models import Project
+
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
 from django.db.models import Q
+
 from django.utils.translation import gettext_lazy as _
 
 from .helpers import (mitigation_per_status, risk_per_status, p_risks, p_risks_2,

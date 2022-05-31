@@ -1,76 +1,49 @@
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+{% load i18n %}
+
+<div class="overflow-x-auto shadow-md sm:rounded-lg mt-2">
+    <table class="w-full text-sm text-left text-gray-500">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-                <th scope="col" class="px-6 py-3">
-                    Measure
+                <th scope="col" class="px-3 py-3">
+                    {% trans "Measure" %}
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    Project
+                <th scope="col" class="px-3 py-3">
+                    {% trans "Project" %}
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    Status
+                <th scope="col" class="px-3 py-3">
+                    {% trans "Status" %}
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    ETA
+                <th scope="col" class="px-3 py-3">
+                    {% trans "ETA" %}
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    <span class="sr-only">Jump</span>
+                <th scope="col" class="px-3 py-3">
+                    <span class="sr-only">{% trans "Jump" %}</span>
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Apple MacBook Pro 17"
+            {% for measure in measures_to_review %}
+            <tr class="bg-white border-b">
+                <th scope="row" class="px-3 py-4 font-medium text-gray-900">
+                    {{ measure }}
                 </th>
-                <td class="px-6 py-4">
-                    Sliver
+                <td class="px-3 py-4">
+                    {{ measure.parent_project }}
                 </td>
-                <td class="px-6 py-4">
-                    Laptop
+                <td class="px-3 py-4">
+                    {{ measure.get_status_display }}
                 </td>
-                <td class="px-6 py-4">
-                    $2999
+                <td class="px-3 py-4">
+                    {% if measure.eta < today %}
+                        <span class="rounded bg-red-400 text-white p-1 text-xs mr-1">{% trans "expired" %}</span>
+                    {% endif %}
+                    {{ measure.eta }}
                 </td>
-                <td class="px-6 py-4 text-right">
-                    <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Jump</a>
+                <td class="px-3 py-4 text-right">
+                    <a href="{% url 'mtg-update' measure.id %}" class="font-medium text-blue-600 hover:underline">{% trans "Jump" %}</a>
                 </td>
             </tr>
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Microsoft Surface Pro
-                </th>
-                <td class="px-6 py-4">
-                    White
-                </td>
-                <td class="px-6 py-4">
-                    Laptop PC
-                </td>
-                <td class="px-6 py-4">
-                    $1999
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Jump</a>
-                </td>
-            </tr>
-            <tr class="bg-white dark:bg-gray-800">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Magic Mouse 2
-                </th>
-                <td class="px-6 py-4">
-                    Black
-                </td>
-                <td class="px-6 py-4">
-                    Accessories
-                </td>
-                <td class="px-6 py-4">
-                    $99
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Jump</a>
-                </td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>

@@ -5,6 +5,7 @@ from django.views.generic import ListView, UpdateView, CreateView, DeleteView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import context, loader
 from django.utils.translation import gettext_lazy as _
+from datetime import date
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
@@ -13,10 +14,16 @@ from .forms import *
 
 from .filters import *
 
+from core.helpers import get_counters, risks_count_per_level, mitigation_per_status, measures_to_review
+
 def index(request):
     template = loader.get_template('back_office/index.html')
     context = {
-        'hello': 'world',
+        "counters": get_counters(),
+        "risks_level": risks_count_per_level(),
+        "mitigation_status": mitigation_per_status(),
+        "measures_to_review": measures_to_review(),
+        "today": date.today()
     }
     return HttpResponse(template.render(context, request))
 
@@ -132,6 +139,7 @@ class RiskInstanceListView(PermissionRequiredMixin, ListView):
         queryset = self.get_queryset()
         filter = RiskScenarioFilter(self.request.GET, queryset)
         context['filter'] = filter
+        context['risk_scenario_create_form'] = RiskScenarioCreateForm
         return context
 
 class MitigationListView(PermissionRequiredMixin, ListView):
@@ -328,6 +336,13 @@ class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
 
+class RiskScenarioCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_analysis'
+    model = RiskInstance
+    template_name = 'back_office/snippets/risk_scenario_create_modal.html'
+    context_object_name = 'scenario'
+    form_class = RiskScenarioCreateForm
+
     # def form_valid(self, form: form_class) -> HttpResponse:
     #     if form.is_valid():
     #         form.project = get_object_or_404(Project, id=self.kwargs['parent_project'])
@@ -337,7 +352,7 @@ class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     #         return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-list')
+        return reverse_lazy('ri-list')
 
 class ProjectsGroupCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_projectsgroup'

@@ -46,12 +46,12 @@
 		}
 	</style>
 </head>
-<body class="bg-gradient-to-br from-slate-200 h-full bg-no-repeat m-0 bg-fixed">
+<body class="bg-gradient-to-br from-slate-200 h-full w-full max-w-screen bg-no-repeat m-0 bg-fixed">
 	<style>
 		[x-cloak] { display: none }
 	</style>
 	<div x-data="{ sidebarOpen: true }" class="flex h-screen">
-		<aside aria-label="Sidebar" class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen left-0 z-10" :class="{ '-ml-64 ': !sidebarOpen }">
+		<aside aria-label="Sidebar" class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen top-0 left-0 z-10" :class="{ '-ml-64 ': !sidebarOpen }">
 			<nav class="flex-1 flex flex-col bg-gray-50 overflow-y-auto py-4 px-3">
 				<div class="bg-white rounded-xl shadow" aria-label="logo">
 					<div class="flex items-center justify-center p-3">
