@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-01 12:04+0000\n"
+"POT-Creation-Date: 2022-06-01 14:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -300,7 +300,6 @@ msgid "Updated at"
 msgstr "Mis à jour le"
 
 #: core/models.py:164
-#| msgid "Risk Scenarios"
 msgid "Risk Scenario"
 msgstr "Scénario de risque"
 
@@ -349,7 +348,6 @@ msgid "Extra-Large"
 msgstr "Très Important"
 
 #: core/models.py:210 core/models.py:256
-#| msgid "Risk scenarios"
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 

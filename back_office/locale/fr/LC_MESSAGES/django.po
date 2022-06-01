@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-01 12:04+0000\n"
+"POT-Creation-Date: 2022-06-01 14:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -504,7 +504,7 @@ msgid "Parent Project"
 msgstr ""
 
 #: back_office/templates/back_office/mtg_list.html:109
-#: back_office/templates/back_office/ri_update.html:125
+#: back_office/templates/back_office/ri_update.html:147
 msgid "New Measure"
 msgstr "Nouvelle Mesure"
 
@@ -545,7 +545,7 @@ msgstr ""
 #: back_office/templates/back_office/ra_create.html:48
 #: back_office/templates/back_office/ra_update.html:49
 #: back_office/templates/back_office/ri_create.html:102
-#: back_office/templates/back_office/ri_update.html:135
+#: back_office/templates/back_office/ri_update.html:157
 #: back_office/templates/back_office/risk_acceptance_update.html:22
 #: back_office/templates/back_office/security_function_update.html:29
 #: back_office/templates/back_office/snippets/analysis_create_modal.html:80
@@ -567,7 +567,7 @@ msgstr "Annuler"
 #: back_office/templates/back_office/ra_create.html:49
 #: back_office/templates/back_office/ra_update.html:52
 #: back_office/templates/back_office/ri_create.html:103
-#: back_office/templates/back_office/ri_update.html:138
+#: back_office/templates/back_office/ri_update.html:160
 #: back_office/templates/back_office/risk_acceptance_update.html:24
 #: back_office/templates/back_office/security_function_update.html:31
 #: back_office/templates/back_office/snippets/analysis_create_modal.html:84
@@ -774,7 +774,7 @@ msgstr "Analyse"
 #: back_office/templates/back_office/ra_create.html:41
 #: back_office/templates/back_office/ra_update.html:38
 #: back_office/templates/back_office/ri_create.html:66
-#: back_office/templates/back_office/ri_update.html:106
+#: back_office/templates/back_office/ri_update.html:128
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -820,34 +820,34 @@ msgid "Scenario"
 msgstr ""
 
 #: back_office/templates/back_office/ri_create.html:44
-#: back_office/templates/back_office/ri_update.html:93
+#: back_office/templates/back_office/ri_update.html:115
 #: back_office/templates/back_office/snippets/ri_list_nested.html:25
 msgid "Residual Risk Level"
 msgstr "Niveau de Risque Résiduel"
 
 #: back_office/templates/back_office/ri_create.html:47
-#: back_office/templates/back_office/ri_update.html:83
+#: back_office/templates/back_office/ri_update.html:105
 msgid "Residual Probability"
 msgstr "Probabilité résiduelle"
 
 #: back_office/templates/back_office/ri_create.html:52
-#: back_office/templates/back_office/ri_update.html:88
+#: back_office/templates/back_office/ri_update.html:110
 msgid "Residual Impact"
 msgstr "Impact résiduel"
 
 #: back_office/templates/back_office/ri_create.html:60
-#: back_office/templates/back_office/ri_update.html:100
+#: back_office/templates/back_office/ri_update.html:122
 msgid "Follow up"
 msgstr "Suivi"
 
 #: back_office/templates/back_office/ri_create.html:61
 #: back_office/templates/back_office/ri_list.html:80
-#: back_office/templates/back_office/ri_update.html:101
+#: back_office/templates/back_office/ri_update.html:123
 msgid "Treatment Status"
 msgstr "Statut du traitement"
 
 #: back_office/templates/back_office/ri_create.html:75
-#: back_office/templates/back_office/ri_update.html:71
+#: back_office/templates/back_office/ri_update.html:78
 #: back_office/templates/back_office/snippets/ri_list_nested.html:19
 msgid "Current Risk Level"
 msgstr "Niveau de Risque Courant"
@@ -858,17 +858,17 @@ msgid "Existing Measures"
 msgstr "Mesures Existantes"
 
 #: back_office/templates/back_office/ri_create.html:83
-#: back_office/templates/back_office/ri_update.html:61
+#: back_office/templates/back_office/ri_update.html:62
 msgid "Current Probability"
 msgstr "Probabilité courante"
 
 #: back_office/templates/back_office/ri_create.html:88
-#: back_office/templates/back_office/ri_update.html:66
+#: back_office/templates/back_office/ri_update.html:70
 msgid "Current Impact"
 msgstr "Impact courant"
 
 #: back_office/templates/back_office/ri_create.html:96
-#: back_office/templates/back_office/ri_update.html:121
+#: back_office/templates/back_office/ri_update.html:143
 msgid "Associated Measures"
 msgstr "Mesures Associées"
 
@@ -885,7 +885,11 @@ msgstr "Sujet"
 msgid "Current Profile"
 msgstr "Profile Courant"
 
-#: back_office/templates/back_office/ri_update.html:80
+#: back_office/templates/back_office/ri_update.html:59
+msgid "Current Indicator"
+msgstr "Indicateur courant"
+
+#: back_office/templates/back_office/ri_update.html:102
 #, fuzzy
 #| msgid "Department"
 msgid "Treatment"
