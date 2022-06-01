@@ -1,88 +1,84 @@
 {% extends 'back_office/base.html' %}
+
 {% load i18n %}
+
 {% block head %}
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
 {% endblock %}
 {% block content %}
-{% with page_title=_('Overview') %}
-{% include 'back_office/snippets/breadcrumbs.html' %}
-{% endwith %}
-<div class="w-full h-full mx-auto">
-    <div class="">
-        <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="stats">
-            <div class="p-2 m-2">
-                <span class="text-2xl font-extrabold text-slate-700">{% trans "Statistics" %}</span>
+<div class="h-screen">
+    {% with page_title=_('Overview') %}
+    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="stats">
+        <div class="p-2 m-2">
+            <span class="text-2xl font-extrabold text-slate-700">{% trans "Statistics" %}</span>
+        </div>
+        <div class="flex items-center content-center">
+            <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                <div class="text-5xl text-yellow-500 mr-2"><i class="fas fa-biohazard"></i></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Threat }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Threats" %}</div></div>
             </div>
-            <div class="flex items-center content-center">
-                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
-                    <div class="text-5xl text-yellow-500 mr-2"><i class="fas fa-biohazard"></i></div>
-                    <div class=" text-left"><div class="text-4xl font-bold">12</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Threats" %}</div></div>
-                </div>
-                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
-                    <div class="text-5xl text-blue-500 mr-2"><i class="fas fa-glasses"></i></div>
-                    <div class=" text-left"><div class="text-4xl font-bold">34</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Analyses" %}</div></div>
-                </div>
-                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
-                    <div class="text-5xl text-green-500 mr-2"><i class="fas fa-clone"></i></div>
-                    <div class=" text-left"><div class="text-4xl font-bold">56</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Scenarios" %}</div></div>
-                </div>
-                <div class="w-1/4 p-2 m-2  flex content-center bg-white">
-                    <div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher"></i></div>
-                    <div class=" text-left"><div class="text-4xl font-bold">78</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Measures" %}</div></div>
-                </div>
+            <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                <div class="text-5xl text-blue-500 mr-2"><i class="fas fa-glasses"></i></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Analysis }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Analyses" %}</div></div>
             </div>
-        </section>
+            <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                <div class="text-5xl text-green-500 mr-2"><i class="fas fa-clone"></i></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.RiskInstance }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Scenarios" %}</div></div>
+            </div>
+            <div class="w-1/4 p-2 m-2  flex content-center bg-white">
+                <div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher"></i></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Mitigation }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Measures" %}</div></div>
+            </div>
+        </div>
+    </section>
 
-        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
-            <div class="p-2 m-2">
-                <div class="text-2xl font-extrabold text-slate-700">{% trans "My projects" %}</div>
-                <div class="text-sm text-slate-500 font-semibold">{% trans "Assigned to" %} <span class="font-bold text-slate-700">8</span> {% trans "projects" %}</div>
+    <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+        <div class="p-2 m-2">
+            <div class="text-2xl font-extrabold text-slate-700">{% trans "My projects" %}</div>
+            <div class="text-sm text-slate-500 font-semibold">{% trans "Assigned to" %} <span class="font-bold text-slate-700">{{ counters.Project }}</span> {% trans "projects" %}</div>
+        </div>
+        <div class="flex items-center content-center">
+            <div class=" p-2 m-2 w-1/2">
+                <span class="text-sm font-semibold">{% trans "Risk scenarios overview" %}</span>
+                <!--Chart starts here-->
+                {% include 'back_office/fragments/animated_donut_chart.html' with name='risk_scenarios_overview' values=risks_level.current %}
+                <!--Chart ends here-->
             </div>
-            <div class="flex items-center content-center">
-                <div class=" p-2 m-2 w-1/2">
-                    <span class="text-sm font-semibold">{% trans "Risk scenarios overview" %}</span>
-                    <!--Chart starts here-->
-                    {% include 'back_office/fragments/animated_donut_chart.html' %}
-                    
-                    <!--Chart ends here-->
-                </div>
-                <div class="p-2 m-2 w-1/2">
-                    <span class="text-sm font-semibold">{% trans "Security measures status" %}</span>
-                    {% include 'back_office/fragments/measures_status.html' %}
-                </div>
+            <div class="p-2 m-2 w-1/2">
+                <span class="text-sm font-semibold">{% trans "Security measures status" %}</span>
+                {% include 'back_office/fragments/measures_status.html' with name='security_measures_status' labels=mitigation_status.labels values=mitigation_status.values %}
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
-            <div class="p-2 m-2">
-                <div class="text-2xl font-extrabold text-slate-700">{% trans "Risks over time" %}</div>
-                <div class="text-sm text-slate-500 font-semibold">{% trans "by current risk level" %}</div>
-            </div>
-            <div class=" m-2 p-2">
-                <span class="text-sm font-semibold"> </span>
-                {% include 'back_office/fragments/risks_over_time.html' %}
-            </div>
-        </section>
+    <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+        <div class="p-2 m-2">
+            <div class="text-2xl font-extrabold text-slate-700">{% trans "Risks over time" %}</div>
+            <div class="text-sm text-slate-500 font-semibold">{% trans "by current risk level" %}</div>
+        </div>
+        <div class="m-2 p-2 w-[97%]">
+            <span class="text-sm font-semibold"> </span>
+            {% include 'back_office/fragments/risks_over_time.html' with name='risks_over_time' %}
+        </div>
+    </section>
 
-        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
-            <div class="p-2 m-2">
-                <div class="text-2xl font-extrabold text-slate-700">{% trans "Watch List" %}</div>
-                <div class="text-sm text-slate-500 font-semibold">{% trans "Items that have expired or with close ETA" %}</div>
+    <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+        <div class="p-2 m-2">
+            <div class="text-2xl font-extrabold text-slate-700">{% trans "Watch List" %}</div>
+            <div class="text-sm text-slate-500 font-semibold">{% trans "Items that have expired or with close ETA" %}</div>
+        </div>
+        <div class="p-2 m-2 flex flex-row space-x-4 items-center content-center">
+            <div class="w-1/2">
+                <span class="text-sm font-semibold">{% trans "Measures to review" %}</span>
+                {% include 'back_office/fragments/watchlist_measures.html' %}
             </div>
-            <div class="flex items-center content-center">
-                <div class=" p-2 m-2 w-1/2">
-                    <span class="text-sm font-semibold">{% trans "Measures to review" %}</span>
-                    {% include 'back_office/fragments/watchlist_measures.html' %}
-                </div>
-                <div class=" p-2 m-2 w-1/2">
-                    <span class="text-sm font-semibold">{% trans "Exceptions to review" %}</span>
-                    {% include 'back_office/fragments/watchlist_exceptions.html' %}
-                </div>
+            <div class="w-1/2">
+                <span class="text-sm font-semibold">{% trans "Exceptions to review" %}</span>
+                {% include 'back_office/fragments/watchlist_exceptions.html' %}
             </div>
-        </section>
-        
-    </div>
+        </div>
+    </section>
 </div>
-
-
 {% endblock %}

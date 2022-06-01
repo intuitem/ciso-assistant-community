@@ -1,3 +1,4 @@
+from datetime import timedelta
 import logging
 from .models import *
 from django.db.models import Count
@@ -132,13 +133,14 @@ def risks_per_project_groups():
 
 def get_counters():
     output = {
-        "RiskInstance": RiskInstance.objects.count(),
-        "Mitigation": Mitigation.objects.count(),
-        "Analysis": Analysis.objects.count(),
-        "Project": Project.objects.count(),
-        "Solution": Solution.objects.count(),
-        "RiskAcceptance": RiskAcceptance.objects.count(),
-        "ShowStopper": RiskInstance.objects.filter(treatment="blocker").count(),
+        "RiskInstance": RiskInstance.objects.count(),   # TODO: Update Name
+        "Mitigation": Mitigation.objects.count(),   # TODO: Update Name
+        "Analysis": Analysis.objects.count(),   # TODO: Update Name
+        "Project": Project.objects.count(), # TODO: Update Name
+        "Solution": Solution.objects.count(),   # TODO: Update Name
+        "RiskAcceptance": RiskAcceptance.objects.count(),   # TODO: Update Name
+        "ShowStopper": RiskInstance.objects.filter(treatment="blocker").count(),    # TODO: Update Name
+        "Threat": ParentRisk.objects.count(),
     }
     return output
 
@@ -238,3 +240,8 @@ def risks_levels_per_prj_grp():
         'residual_out': residual_out,
         "y_max_rsk": y_max_rsk
     }
+
+def measures_to_review():
+    measures = Mitigation.objects.filter(eta__lte=date.today()+timedelta(days=30)).order_by('eta')
+
+    return measures

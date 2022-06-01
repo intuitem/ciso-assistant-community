@@ -109,7 +109,10 @@
                     <i class="fas fa-plus"></i>
                     {% trans "New Risk Scenario" %}
                 </a>
+                {% include "back_office/snippets/risk_scenario_create_modal.html" %}
         </div>
+        <script src="{% static 'js/modal.js' %}"></script>
+
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">

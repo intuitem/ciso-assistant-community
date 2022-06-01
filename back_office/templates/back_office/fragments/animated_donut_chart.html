@@ -1,15 +1,15 @@
-<div id="anim_donut_div" class="bg-white w-auto h-[600px]"></div>
+<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
 <script type="text/javascript">
 
-    var myChart1 = echarts.init(document.getElementById('anim_donut_div'), null, { renderer: 'svg' });
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
     var option;
 
     const data = [
-        { value: 80, name: 'Very Low' },
-        { value: 63, name: 'Low' },
-        { value: 58, name: 'Medium' },
-        { value: 48, name: 'High' },
-        { value: 30, name: 'Very High' }
+        { name: 'Very Low' },
+        { name: 'Low' },
+        { name: 'Medium' },
+        { name: 'High' },
+        { name: 'Very High' }
     ];
     const defaultPalette = [
         // '#51689b', '#ce5c5c', '#fbc357', '#8fbf8f', '#659d84', '#fb8e6a', '#c77288', '#786090', '#91c4c5', '#6890ba'
@@ -35,7 +35,7 @@
                 },
                 universalTransition: true,
                 animationDurationUpdate: 1000,
-                data: data
+                data: {{values|safe}}
             }
         ]
     };
@@ -77,7 +77,7 @@
             series: {
                 type: 'custom',
                 id: 'distribution',
-                data: data,
+                data: {{values|safe}},
                 coordinateSystem: undefined,
                 universalTransition: true,
                 animationDurationUpdate: 1000,
@@ -124,5 +124,10 @@
         myChart1.setOption(currentOption);
     }, 5000);
 
-    option && myChart1.setOption(option);
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
 </script>
