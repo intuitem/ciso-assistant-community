@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-31 10:05+0000\n"
+"POT-Creation-Date: 2022-05-31 13:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -218,9 +218,11 @@ msgstr "Très Élevé"
 msgid "Analysis_bo"
 msgstr "Analyse"
 
-#: core/models.py:133
-msgid "Parent risk"
-msgstr "Risque Parent"
+#: core/models.py:133 core/templates/snippets/ra_data.html:39
+#, fuzzy
+#| msgid "Treatment"
+msgid "Threat"
+msgstr "Traitement"
 
 #: core/models.py:134
 msgid "<risk instance short title>"
@@ -395,7 +397,7 @@ msgstr "Lien"
 msgid "Relative effort of the mitigation (using T-Shirt sizing)"
 msgstr "Effort relatif impliqué par la mitigation"
 
-#: core/models.py:223 core/templates/core/analytics.html:135
+#: core/models.py:223 core/templates/core/analytics.html:140
 #: core/templates/snippets/mp_data.html:35
 msgid "Effort"
 msgstr ""
@@ -404,7 +406,7 @@ msgstr ""
 msgid "Mitigation"
 msgstr ""
 
-#: core/models.py:230 core/templates/core/search_results.html:34
+#: core/models.py:230
 msgid "Mitigations"
 msgstr ""
 
@@ -442,10 +444,12 @@ msgid "Risk Acceptances"
 msgstr "Acceptations du risque"
 
 #: core/templates/core/analytics.html:14
+#: core/templates/core/search_results.html:21
 msgid "Risk scenarios"
 msgstr "Scenarios de risque"
 
 #: core/templates/core/analytics.html:20
+#: core/templates/core/search_results.html:34
 msgid "Measures"
 msgstr "Mesures"
 
@@ -483,66 +487,66 @@ msgstr "Risque Courant"
 msgid "Residual Risk"
 msgstr "Risque Résiduel"
 
-#: core/templates/core/analytics.html:96
+#: core/templates/core/analytics.html:97
 msgid "Measures Overview"
 msgstr "Aperçu des Mesures"
 
-#: core/templates/core/analytics.html:99
+#: core/templates/core/analytics.html:102
 msgid "Breakdown per Status"
 msgstr "Répartition par Statut"
 
-#: core/templates/core/analytics.html:103
+#: core/templates/core/analytics.html:106
 msgid "Pending measure per associated risk level (current)"
 msgstr "Mesures en attente par niveau de risque associé (actuel)"
 
-#: core/templates/core/analytics.html:107
+#: core/templates/core/analytics.html:112
 msgid "Breakdown per security function"
 msgstr "Répartition par fonction de sécurité"
 
-#: core/templates/core/analytics.html:108
+#: core/templates/core/analytics.html:113
 msgid "Measures per security function"
 msgstr "Mesures par fonction de sécurité"
 
-#: core/templates/core/analytics.html:119
+#: core/templates/core/analytics.html:124
 msgid "Measures priority quadrants"
 msgstr "Quadrant des priorités des mesures"
 
-#: core/templates/core/analytics.html:127
+#: core/templates/core/analytics.html:132
 msgid "4th"
 msgstr "4ème"
 
-#: core/templates/core/analytics.html:136
+#: core/templates/core/analytics.html:141
 msgid "2nd"
 msgstr "2ème"
 
-#: core/templates/core/analytics.html:146
+#: core/templates/core/analytics.html:151
 msgid "3rd"
 msgstr "3ème"
 
-#: core/templates/core/analytics.html:154
+#: core/templates/core/analytics.html:159
 msgid "Risk level"
 msgstr "Niveau de Risque"
 
-#: core/templates/core/analytics.html:155
+#: core/templates/core/analytics.html:160
 msgid "1st"
 msgstr "1er"
 
-#: core/templates/core/analytics.html:165
+#: core/templates/core/analytics.html:170
 msgid "Note"
 msgstr ""
 
-#: core/templates/core/analytics.html:165
+#: core/templates/core/analytics.html:170
 msgid ""
 "measure(s) have not been processed because the estimated effort is not set."
 msgstr ""
 "measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas "
 "déterminé"
 
-#: core/templates/core/analytics.html:171
+#: core/templates/core/analytics.html:176
 msgid "Risks per project domain(category)"
 msgstr "Risques par domaine de projets (catégorie)"
 
-#: core/templates/core/analytics.html:172
+#: core/templates/core/analytics.html:177
 msgid "Current vs Residual"
 msgstr "Courants vs Résiduels"
 
@@ -950,49 +954,49 @@ msgstr "'Très Élevé'"
 
 # OWASP Methodology translations taken from 
 # https://cours.etsmtl.ca/mgr850/documents/cours/Hiv2013/MGR850_H13_Cours-05_Analyse2Risques.pdf
-#: core/templates/core/scoring.html:199
+#: core/templates/core/scoring.html:230
 msgid "How technically skilled is this group of threat agents?"
 msgstr "Quel est le niveau de qualification de l'attaquant ?"
 
-#: core/templates/core/scoring.html:202
+#: core/templates/core/scoring.html:233
 msgid "Security penetration skills"
 msgstr "Compétences d'intrusion"
 
-#: core/templates/core/scoring.html:204
+#: core/templates/core/scoring.html:235
 msgid "Network and programming skills"
 msgstr "Compétences en réseaux et programmation"
 
-#: core/templates/core/scoring.html:206
+#: core/templates/core/scoring.html:237
 msgid "Advanced computer user"
 msgstr "Utilisateur d'ordinateur expérimenté"
 
-#: core/templates/core/scoring.html:207
+#: core/templates/core/scoring.html:238
 msgid "Some technical skills"
 msgstr "Quelques compétences techniques"
 
-#: core/templates/core/scoring.html:210
+#: core/templates/core/scoring.html:241
 msgid "No technical skills"
 msgstr "Pas de compétence technique"
 
-#: core/templates/core/scoring.html:212
+#: core/templates/core/scoring.html:243
 msgid ""
 "How motivated is this group of threat agents to find and exploit this "
 "vulnerability?"
 msgstr "Quels sont les bénéfices espérés de l'attaquant ?"
 
-#: core/templates/core/scoring.html:215
+#: core/templates/core/scoring.html:246
 msgid "Low or no reward"
 msgstr "Pas ou peu de bénéfice"
 
-#: core/templates/core/scoring.html:218
+#: core/templates/core/scoring.html:249
 msgid "Possible reward"
 msgstr "Bénéfice possible"
 
-#: core/templates/core/scoring.html:223
+#: core/templates/core/scoring.html:254
 msgid "High reward"
 msgstr "Bénéfice important"
 
-#: core/templates/core/scoring.html:225
+#: core/templates/core/scoring.html:256
 msgid ""
 "What resources and opportunities are required for this group of threat "
 "agents to find and exploit this vulnerability?"
@@ -1000,323 +1004,323 @@ msgstr ""
 "Quelles sont les ressources et opportunités requises par l'attaquant pour "
 "trouver et exploiter la vulnérabilité ?"
 
-#: core/templates/core/scoring.html:227
+#: core/templates/core/scoring.html:258
 msgid "Full access or expensive resources required"
 msgstr "Accès complet ou ressources coûteuses"
 
-#: core/templates/core/scoring.html:231
+#: core/templates/core/scoring.html:262
 msgid "Special access or resources required"
 msgstr "Ressources et droits d'accès spéciaux"
 
-#: core/templates/core/scoring.html:234
+#: core/templates/core/scoring.html:265
 msgid "Some access or resources required"
 msgstr "Quelques ressources et droits d'accès"
 
-#: core/templates/core/scoring.html:236
+#: core/templates/core/scoring.html:267
 msgid "No access or resources required"
 msgstr "Aucun droit d'accès et aucune ressource"
 
-#: core/templates/core/scoring.html:238
+#: core/templates/core/scoring.html:269
 msgid "How large is this group of threat agents?"
 msgstr "Quelle est l'étendue potentielle du groupe d'attaquants ?"
 
-#: core/templates/core/scoring.html:242
+#: core/templates/core/scoring.html:273
 msgid "Developers or system administrators"
 msgstr "Développeurs ou administrateurs système"
 
-#: core/templates/core/scoring.html:244
+#: core/templates/core/scoring.html:275
 msgid "Intranet users"
 msgstr "Utilisateurs de l'intranet"
 
-#: core/templates/core/scoring.html:245
+#: core/templates/core/scoring.html:276
 msgid "Partners"
 msgstr "Partenaires"
 
-#: core/templates/core/scoring.html:246
+#: core/templates/core/scoring.html:277
 msgid "Authenticated users"
 msgstr "Utilisateurs authentifiés"
 
-#: core/templates/core/scoring.html:249
+#: core/templates/core/scoring.html:280
 msgid "Anonymous Internet users"
 msgstr "Utilisateurs Internet anonymes"
 
-#: core/templates/core/scoring.html:254
+#: core/templates/core/scoring.html:285
 msgid "Threat Agent Factor"
 msgstr "Facteur Attaquant"
 
-#: core/templates/core/scoring.html:262
+#: core/templates/core/scoring.html:293
 msgid ""
 "How easy is it for this group of threat agents to discover this "
 "vulnerability?"
 msgstr "Avec quelle facilité l'attaquant peut-il découvrir la vulnérabilité ?"
 
-#: core/templates/core/scoring.html:265
+#: core/templates/core/scoring.html:296
 msgid "Practically impossible"
 msgstr "Pratiquement impossible"
 
-#: core/templates/core/scoring.html:267 core/templates/core/scoring.html:280
+#: core/templates/core/scoring.html:298 core/templates/core/scoring.html:311
 msgid "Difficult"
 msgstr "Difficilement"
 
-#: core/templates/core/scoring.html:271 core/templates/core/scoring.html:282
+#: core/templates/core/scoring.html:302 core/templates/core/scoring.html:313
 msgid "Easy"
 msgstr "Facilement"
 
-#: core/templates/core/scoring.html:273 core/templates/core/scoring.html:286
+#: core/templates/core/scoring.html:304 core/templates/core/scoring.html:317
 msgid "Automated tools available"
 msgstr "Outils automatiques disponible"
 
-#: core/templates/core/scoring.html:275
+#: core/templates/core/scoring.html:306
 msgid ""
 "How easy is it for this group of threat agents to actually exploit this "
 "vulnerability?"
 msgstr "Avec quelle facilité l'attaquant peut-il exploiter la vulnérabilité ?"
 
-#: core/templates/core/scoring.html:278
+#: core/templates/core/scoring.html:309
 msgid "Theoretical"
 msgstr "Théoriquement"
 
-#: core/templates/core/scoring.html:288
+#: core/templates/core/scoring.html:319
 msgid "How well known is this vulnerability to this group of threat agents?"
 msgstr "Dans quelle mesure la vulnérabilité est-elle connue de l'attaquant ?"
 
-#: core/templates/core/scoring.html:291
+#: core/templates/core/scoring.html:322
 msgid "Unknown"
 msgstr "Inconnue"
 
-#: core/templates/core/scoring.html:294
+#: core/templates/core/scoring.html:325
 msgid "Hidden"
 msgstr "Cachée"
 
-#: core/templates/core/scoring.html:296
+#: core/templates/core/scoring.html:327
 msgid "Obvious"
 msgstr "Évidente"
 
-#: core/templates/core/scoring.html:299
+#: core/templates/core/scoring.html:330
 msgid "Public knowledge"
 msgstr "De notoriété publique"
 
-#: core/templates/core/scoring.html:301
+#: core/templates/core/scoring.html:332
 msgid "How likely is an exploit to be detected?"
 msgstr "Quelle est la probabilité qu'un exploit soit détecté"
 
-#: core/templates/core/scoring.html:304
+#: core/templates/core/scoring.html:335
 msgid "Active detection in application"
 msgstr "Détection active dans l'application"
 
-#: core/templates/core/scoring.html:306
+#: core/templates/core/scoring.html:337
 msgid "Logged and reviewed"
 msgstr "Audit et révision"
 
-#: core/templates/core/scoring.html:311
+#: core/templates/core/scoring.html:342
 msgid "Logged without review"
 msgstr "Audit sans révision"
 
-#: core/templates/core/scoring.html:312
+#: core/templates/core/scoring.html:343
 msgid "Not logged"
 msgstr "Absence d'audit"
 
-#: core/templates/core/scoring.html:317
+#: core/templates/core/scoring.html:348
 msgid "Vulnerability Factor"
 msgstr "Facteur Vulnérabilité"
 
-#: core/templates/core/scoring.html:328
+#: core/templates/core/scoring.html:359
 msgid "How much data could be disclosed and how sensitive is it?"
 msgstr ""
 "Quelle quantité de données pourrait être divulguée et s'agit-il de données "
 "sensible ?"
 
-#: core/templates/core/scoring.html:332
+#: core/templates/core/scoring.html:363
 msgid "Minimal non-sensitive data disclosed"
 msgstr "Quantité minime de données non-sensibles divulguée"
 
-#: core/templates/core/scoring.html:336
+#: core/templates/core/scoring.html:367
 msgid "Minimal critical data or extensive non-sensitive data disclosed"
 msgstr ""
 "Quantité minime de données critiques ou quantité importante de données non-"
 "sensibles divulguée"
 
-#: core/templates/core/scoring.html:337
+#: core/templates/core/scoring.html:368
 msgid "Extensive critical data disclosed"
 msgstr "Quantité importante de données critiques divulguée"
 
-#: core/templates/core/scoring.html:339
+#: core/templates/core/scoring.html:370
 msgid "All data disclosed"
 msgstr "Totalité des données divulguée"
 
-#: core/templates/core/scoring.html:341
+#: core/templates/core/scoring.html:372
 msgid "How much data could be corrupted and how damaged is it?"
 msgstr ""
 "Quelle quantité de données pourrait être corrompue et dans quelle mesure ?"
 
-#: core/templates/core/scoring.html:344
+#: core/templates/core/scoring.html:375
 msgid "Minimal slightly corrupt data"
 msgstr "Quantité minime de données légèrement corrompue"
 
-#: core/templates/core/scoring.html:346
+#: core/templates/core/scoring.html:377
 msgid "Minimal seriously corrupt data"
 msgstr "Quantité minime de données sérieusement corrompue"
 
-#: core/templates/core/scoring.html:348
+#: core/templates/core/scoring.html:379
 msgid "Extensive slightly corrupt data"
 msgstr "Quantité importante de données légèrement corrompue"
 
-#: core/templates/core/scoring.html:350
+#: core/templates/core/scoring.html:381
 msgid "Extensive seriously corrupt data"
 msgstr "Quantité importante de données sérieusement corrompue"
 
-#: core/templates/core/scoring.html:352
+#: core/templates/core/scoring.html:383
 msgid "All data totally corrupt"
 msgstr "Totalité des données corrompue"
 
-#: core/templates/core/scoring.html:354
+#: core/templates/core/scoring.html:385
 msgid "How much service could be lost and how vital is it?"
 msgstr ""
 "Quelle quantité de service pourrait être perdue et à quel point est-elle "
 "vitale ?"
 
-#: core/templates/core/scoring.html:357
+#: core/templates/core/scoring.html:388
 msgid "Minimal secondary services interrupted"
 msgstr "Quantité minime de services secondaires interrompue"
 
-#: core/templates/core/scoring.html:361
+#: core/templates/core/scoring.html:392
 msgid "Minimal primary or extensive secondary services interrupted"
 msgstr ""
 "Quantité minime de services primaires ou quantité importante de services "
 "secondaires interrompue"
 
-#: core/templates/core/scoring.html:363
+#: core/templates/core/scoring.html:394
 msgid "Extensive primary services interrupted"
 msgstr "Quantité importante de services primaires interrompue"
 
-#: core/templates/core/scoring.html:365
+#: core/templates/core/scoring.html:396
 msgid "All services completely lost"
 msgstr "Totalité des services complètement perdue"
 
-#: core/templates/core/scoring.html:367
+#: core/templates/core/scoring.html:398
 msgid "Are the threat agents' actions traceable to an individual?"
 msgstr "Les actions des attaquants sont-elles attribuables à un individu ?"
 
-#: core/templates/core/scoring.html:370
+#: core/templates/core/scoring.html:401
 msgid "Fully traceable"
 msgstr "Traçabilité complète"
 
-#: core/templates/core/scoring.html:374
+#: core/templates/core/scoring.html:405
 msgid "Possibly traceable"
 msgstr "Traçabilité possible"
 
-#: core/templates/core/scoring.html:378
+#: core/templates/core/scoring.html:409
 msgid "Completely anonymous"
 msgstr "Traçabilité impossible"
 
-#: core/templates/core/scoring.html:383
+#: core/templates/core/scoring.html:414
 msgid "Technical Impact Factor"
 msgstr "Facteur Impact Technique"
 
-#: core/templates/core/scoring.html:391
+#: core/templates/core/scoring.html:422
 msgid "How much financial damage will result from an exploit?"
 msgstr "Quelle serait la hauteur des dégâts financiers suivant un exploit"
 
-#: core/templates/core/scoring.html:394
+#: core/templates/core/scoring.html:425
 msgid "Less than the cost to fix the vulnerability"
 msgstr "Moins que le coût de la correction de la vulnérabilité"
 
-#: core/templates/core/scoring.html:396
+#: core/templates/core/scoring.html:427
 msgid "Minor effect on annual profit"
 msgstr "Effet mineur sur le bénéfice annuel"
 
-#: core/templates/core/scoring.html:400
+#: core/templates/core/scoring.html:431
 msgid "Significant effect on annual profit"
 msgstr "Effet significatif sur le bénéfice annuel"
 
-#: core/templates/core/scoring.html:402
+#: core/templates/core/scoring.html:433
 msgid "Bankruptcy"
 msgstr "Faillite"
 
-#: core/templates/core/scoring.html:404
+#: core/templates/core/scoring.html:435
 msgid ""
 "Would an exploit result in reputation damage that would harm the business?"
 msgstr ""
 "Un exploit impacterait-il la réputation de l'entreprise au point de nuire à "
 "ses affaires ?"
 
-#: core/templates/core/scoring.html:407
+#: core/templates/core/scoring.html:438
 msgid "Minimal damage"
 msgstr "Impact minime"
 
-#: core/templates/core/scoring.html:410
+#: core/templates/core/scoring.html:441
 msgid "Loss of major accounts"
 msgstr "Perte de grands comptes"
 
-#: core/templates/core/scoring.html:411
+#: core/templates/core/scoring.html:442
 msgid "Loss of goodwill"
 msgstr "Chute d'écart d'acquisition (goodwill)"
 
-#: core/templates/core/scoring.html:415
+#: core/templates/core/scoring.html:446
 msgid "Brand damage"
 msgstr "Image de marque détériorée"
 
-#: core/templates/core/scoring.html:417
+#: core/templates/core/scoring.html:448
 msgid "How much exposure does non-compliance introduce?"
 msgstr "Dans quelle mesure s'expose-t-on en cas de non-conformité ?"
 
-#: core/templates/core/scoring.html:421
+#: core/templates/core/scoring.html:452
 msgid "Minor violation"
 msgstr "Violation mineure"
 
-#: core/templates/core/scoring.html:424
+#: core/templates/core/scoring.html:455
 msgid "Clear violation"
 msgstr "Violation flagrante"
 
-#: core/templates/core/scoring.html:426
+#: core/templates/core/scoring.html:457
 msgid "High profile violation"
 msgstr "Violation de haut niveau"
 
-#: core/templates/core/scoring.html:430
+#: core/templates/core/scoring.html:461
 msgid "How much personally identifiable information could be disclosed?"
 msgstr ""
 "Quelle quantité d'informations personnellement identifiable pourrait être "
 "divulguée ?"
 
-#: core/templates/core/scoring.html:435
+#: core/templates/core/scoring.html:466
 msgid "One individual"
 msgstr "Un seul individu"
 
-#: core/templates/core/scoring.html:437
+#: core/templates/core/scoring.html:468
 msgid "Hundreds of people"
 msgstr "Centaines de personnes"
 
-#: core/templates/core/scoring.html:439
+#: core/templates/core/scoring.html:470
 msgid "Thousands of people"
 msgstr "Milliers de personnes"
 
-#: core/templates/core/scoring.html:441
+#: core/templates/core/scoring.html:472
 msgid "Millions of people"
 msgstr "Millions de personnes"
 
-#: core/templates/core/scoring.html:446
+#: core/templates/core/scoring.html:477
 msgid "Business Impact Factor"
 msgstr "Facteur Impact Commercial"
 
-#: core/templates/core/scoring.html:452
+#: core/templates/core/scoring.html:483
 msgid "Ignore"
 msgstr "Ignorer"
 
-#: core/templates/core/scoring.html:462
+#: core/templates/core/scoring.html:493
 msgid "Assessment vector:"
 msgstr "Vecteurs d'évaluation :"
 
-#: core/templates/core/scoring.html:467
+#: core/templates/core/scoring.html:498
 #: core/templates/snippets/risk_matrix.html:55
 #: core/templates/snippets/risk_matrix.html:113
 msgid "Probability"
 msgstr "Probabilité"
 
-#: core/templates/core/scoring.html:475
+#: core/templates/core/scoring.html:506
 msgid "Risk Level"
 msgstr "Niveau de Risque"
 
-#: core/templates/core/scoring.html:484
+#: core/templates/core/scoring.html:515
 #: core/templates/snippets/risk_matrix.html:6
 #: core/templates/snippets/risk_matrix.html:64
 msgid "Impact"
@@ -1329,10 +1333,6 @@ msgid "No results matched your query. Try something more specific."
 msgstr ""
 "Aucun résultat ne correspond à votre requête. Essayez quelque chose de plus "
 "spécifique."
-
-#: core/templates/core/search_results.html:21
-msgid "Risk instances"
-msgstr "Instances de risques"
 
 #: core/templates/registration/login.html:11
 msgid "Hello there"
@@ -1458,12 +1458,6 @@ msgstr "Profil :"
 msgid "Risk Scenarios"
 msgstr "Scénarios de risques"
 
-#: core/templates/snippets/ra_data.html:39
-#, fuzzy
-#| msgid "Treatment"
-msgid "Threat"
-msgstr "Traitement"
-
 #: core/templates/snippets/ra_data.html:40
 msgid "Subject"
 msgstr "Sujet"
@@ -1541,6 +1535,12 @@ msgstr " \"Mesure: en attente\" "
 #: core/templates/snippets/treatment_progress_dual_bar.html:13
 msgid " \"Measure: done\" "
 msgstr " \"Mesure: terminée\" "
+
+#~ msgid "Parent risk"
+#~ msgstr "Risque Parent"
+
+#~ msgid "Risk instances"
+#~ msgstr "Instances de risques"
 
 #~ msgid "Risks instances"
 #~ msgstr "Instances de risques"

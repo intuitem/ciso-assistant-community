@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-31 10:05+0000\n"
+"POT-Creation-Date: 2022-05-31 13:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -300,7 +300,7 @@ msgstr "Dernière mise à jour"
 msgid "ready"
 msgstr "prêt"
 
-#: back_office/templates/back_office/analysis_list.html:193
+#: back_office/templates/back_office/analysis_list.html:192
 #: back_office/templates/back_office/snippets/ra_list_nested.html:75
 msgid "No analysis found."
 msgstr "Aucune analyse n'a été trouvée."
@@ -483,7 +483,7 @@ msgstr "Nouvelle Mesure"
 msgid "Title"
 msgstr "Titre"
 
-#: back_office/templates/back_office/mtg_list.html:200
+#: back_office/templates/back_office/mtg_list.html:199
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:53
 msgid "No measure found."
 msgstr "Aucune mesure n'a été trouvée"
@@ -620,6 +620,11 @@ msgstr "Domaine"
 #: back_office/templates/back_office/project_domain_list.html:101
 msgid "No projects domain found."
 msgstr "Aucun domaine de projets n'a été trouvé."
+
+#: back_office/templates/back_office/project_list.html:196
+#: back_office/templates/back_office/snippets/project_list_nested.html:46
+msgid "No project found."
+msgstr "Aucun projet n'a été trouvé"
 
 #: back_office/templates/back_office/project_update.html:51
 msgid "Associated Risk Analyses"
@@ -972,10 +977,6 @@ msgid ""
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement le "
 "Projet suivant: "
-
-#: back_office/templates/back_office/snippets/project_list_nested.html:46
-msgid "No project found."
-msgstr "Aucun projet n'a été trouvé"
 
 #: back_office/templates/back_office/snippets/projects_domain_create_modal.html:18
 msgid "Create New Domain"

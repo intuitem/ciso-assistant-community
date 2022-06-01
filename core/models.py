@@ -130,8 +130,8 @@ class RiskInstance(models.Model):
     ]
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis_bo"))
-    parent_risk = models.ForeignKey(ParentRisk, on_delete=models.CASCADE, verbose_name=_("Parent risk"))
-    title = models.CharField(max_length=200, default=_("<risk instance short title>"), verbose_name=_("Title"))
+    parent_risk = models.ForeignKey(ParentRisk, on_delete=models.CASCADE, verbose_name=_("Threat"))
+    title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing measures to manage this risk. Edit the risk instance to add extra mitigations."),

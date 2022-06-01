@@ -51,7 +51,7 @@ class Project(models.Model):
 
 
 class ParentRisk(models.Model):
-    title = models.CharField(max_length=200, default=_("<parent risk short title>"), verbose_name=_("Title"))
+    title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
 
     class Meta:
         verbose_name = _("Threat")
