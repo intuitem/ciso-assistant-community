@@ -68,7 +68,7 @@ class Analysis(models.Model):
                 ri.current_proba] or ri_value[ri.residual_impact] < ri_value[ri.current_impact]:
                 if ri.associated_mitigations() == 0:
                     errors_lst.append(
-                        {"msg": _("R#{}: residual risk level has been lowered without any specific mitigation").format(ri.id), "obj_type": "RiskInstance", "object": ri})
+                        {"msg": _("R#{}: residual risk level has been lowered without any specific measure").format(ri.id), "obj_type": "RiskInstance", "object": ri})
 
             if ri.treatment == 'accepted':
                 if not ri.riskacceptance_set.exists():
@@ -134,7 +134,7 @@ class RiskInstance(models.Model):
     title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=("Scenario"))
     existing_measures = models.TextField(max_length=2000,
-                                         help_text=_("The existing measures to manage this risk. Edit the risk instance to add extra mitigations."),
+                                         help_text=_("The existing measures to manage this risk. Edit the risk scenario to add extra measures."),
                                          default=_("<we have solution A and Process B to handle this>"),
                                          verbose_name=_("Existing Measures"))
 
@@ -150,7 +150,7 @@ class RiskInstance(models.Model):
                                       verbose_name=_("Residual Probability"))
     residual_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Residual Impact"))
     residual_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                      help_text=_('The risk level when all the extra mitigations are done. Automatically updated on Save, based on the chosen matrix'),
+                                      help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'),
                                       verbose_name=_("Residual Level"))
 
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
@@ -161,8 +161,8 @@ class RiskInstance(models.Model):
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
-        verbose_name = _("Risk Instance")
-        verbose_name_plural = _("Risk Instances")
+        verbose_name = _("Risk Scenario")
+        verbose_name_plural = _("Risk Scenarios")
 
     def parent_project(self):
         return self.analysis.project
@@ -207,10 +207,10 @@ class Mitigation(models.Model):
     MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
     MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
 
-    risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk instance"))
+    risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Solution"))
 
-    title = models.CharField(max_length=200, default=_("<short title for the mitigation>"), verbose_name=_("Title"))
+    title = models.CharField(max_length=200, default=_("<short title for the measure>"), verbose_name=_("Title"))
     description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
     type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
     status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
@@ -219,15 +219,15 @@ class Mitigation(models.Model):
                             help_text=_("External url for action follow-up (eg. Jira ticket)"),
                             verbose_name=_("Link"))
     effort = models.CharField(null=True, blank=True, max_length=2, choices=EFFORT,
-                              help_text=_("Relative effort of the mitigation (using T-Shirt sizing)"),
+                              help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
                               verbose_name=_("Effort"))
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
 
     class Meta:
-        verbose_name = _("Mitigation")
-        verbose_name_plural = _("Mitigations")
+        verbose_name = _("Measure")
+        verbose_name_plural = _("Measures")
 
     def parent_project(self):
         return self.risk_instance.parent_project()
@@ -253,7 +253,7 @@ class RiskAcceptance(models.Model):
         ('temporary', _('Temporary')),
         ('permanent', _('Permanent')),
     ]
-    risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk instance"))
+    risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
     validator = models.CharField(max_length=200, default=_("<Risk owner and validator identity>"), verbose_name=_("Validator"))
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
     expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),

@@ -133,6 +133,8 @@
         </section>
         <div class="flex pb-4 space-x-2 justify-end"> 
             <a href="{% url 'ri-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+            <input
+                type="hidden" form="instance_update_form" name="next" value={{ request.GET.next }}>
             <button action="submit" form="instance_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
         </div>
     </div>

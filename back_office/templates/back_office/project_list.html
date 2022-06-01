@@ -140,7 +140,7 @@
                                 {% endif %}">{{ project.get_lc_status_display|lower}}
                                 </span>
                             <div class="ml-3">
-                                <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}"
+                                <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ project.name|capfirst }}
                                 </a>
@@ -166,7 +166,7 @@
                         <div class="">
                             {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
                             <span>
-                                <a href="{% url 'project-update' project.id %}" class="cursor-pointer table-action">
+                                <a href="{% url 'project-update' project.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </span>

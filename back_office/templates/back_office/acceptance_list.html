@@ -127,7 +127,7 @@
                                 {% endif %}">{{ acceptance.get_type_display|lower}}
                                 </span>
                                 <div class="ml-3">
-                                    <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}"
+                                    <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ acceptance.risk_instance }}
                                     </a>
@@ -153,7 +153,7 @@
                             <div class="">
                                 {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
                                 <span>
-                                    <a href="{% url 'acceptance-update' acceptance.id %}" class="cursor-pointer table-action">
+                                    <a href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>

@@ -132,7 +132,7 @@
                                 {% elif measure.status == 'in_progress' %}
                                 bg-blue-200 
                                 {% elif measure.status == 'on_hold' %}
-                                bg-gray-200 
+                                bg-red-300 
                                 {% else %}
                                 bg-green-200 
                                 {% endif %}">{{ measure.get_status_display|lower}}

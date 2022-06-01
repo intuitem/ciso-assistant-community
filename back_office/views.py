@@ -313,7 +313,10 @@ class RiskAcceptanceUpdateView(PermissionRequiredMixin, UpdateView):
     form_class = RiskAcceptanceCreateUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('acceptance-list')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('acceptance-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class ThreatCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_parentrisk'
@@ -423,7 +426,10 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-list')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('ra-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_analysis'
@@ -516,7 +522,10 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-update', kwargs = {'pk': self.object.analysis.id})
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('ri-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class MitigationUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_mitigation'
@@ -526,7 +535,10 @@ class MitigationUpdateView(PermissionRequiredMixin, UpdateView):
     form_class = MitigationUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ri-update', kwargs = {'pk': self.object.risk_instance.id})
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('mtg-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class SecurityFunctionUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_solution'
@@ -536,7 +548,10 @@ class SecurityFunctionUpdateView(PermissionRequiredMixin, UpdateView):
     form_class = SecurityFunctionUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('security-function-list')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('security-function-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class ThreatUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_parentrisk'
@@ -546,7 +561,10 @@ class ThreatUpdateView(PermissionRequiredMixin, UpdateView):
     form_class = ThreatUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('threat-list')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('threat-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_projectsgroup'
@@ -564,7 +582,10 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('pd-list')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('pd-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_project'
@@ -589,7 +610,10 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
     #     return agg_data
 
     def get_success_url(self) -> str:
-        return reverse_lazy('project-list')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('project-list')
+        else:
+          return self.request.POST.get('next', '/')
 
 class ProjectCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_project'

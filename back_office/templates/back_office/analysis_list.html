@@ -137,7 +137,7 @@
                                 <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
                                 {% endif %}
                                 <div class="ml-3">
-                                    <a id="analysis{{ analysis.id }}" href="{% url 'ra-update' analysis.id %}"
+                                    <a id="analysis{{ analysis.id }}" href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ analysis }}
                                     </a>
@@ -165,7 +165,7 @@
                             <div class="">
                                 <span><a href="{% url 'RA' analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
-                                    <a href="{% url 'ra-update' analysis.id %}" class="cursor-pointer table-action">
+                                    <a href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>

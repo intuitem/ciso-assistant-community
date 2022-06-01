@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-31 13:52+0000\n"
+"POT-Creation-Date: 2022-06-01 12:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -111,7 +111,7 @@ msgstr "Pas d'auditeur assigné à cette analyse de risques"
 
 #: core/models.py:54
 msgid "Analysis is empty. No risk scenario declared yet"
-msgstr "Analyse vide. Pas de scenario de risque déclaré."
+msgstr "Analyse vide. Pas de scénario de risque déclaré."
 
 #: core/models.py:61
 msgid "R#{} residual risk level is higher than the current one"
@@ -127,10 +127,9 @@ msgid "R#{} residual risk impact is higher than the current one"
 msgstr "R#{} impact du risque résiduel plus haut que l'impact initial"
 
 #: core/models.py:71
-msgid ""
-"R#{}: residual risk level has been lowered without any specific mitigation"
+msgid "R#{}: residual risk level has been lowered without any specific measure"
 msgstr ""
-"R#{} : le niveau de risque résiduel a été réduit sans mitigation spécifique"
+"R#{} : le niveau de risque résiduel a été réduit sans mesure spécifique"
 
 #: core/models.py:75
 msgid "R#{} risk accepted but no risk acceptance attached"
@@ -225,8 +224,8 @@ msgid "Threat"
 msgstr "Traitement"
 
 #: core/models.py:134
-msgid "<risk instance short title>"
-msgstr "<titre bref de l'instance de risque>"
+msgid "<risk scenario short title>"
+msgstr "<titre bref du scénario de risque>"
 
 #: core/models.py:134 core/models.py:213 core/templates/core/browser.html:93
 #: core/templates/core/browser.html:118 core/templates/snippets/mp_data.html:30
@@ -239,10 +238,10 @@ msgstr "<description du scénario du risque et de son impact>"
 
 #: core/models.py:137
 msgid ""
-"The existing measures to manage this risk. Edit the risk instance to add "
-"extra mitigations."
+"The existing measures to manage this risk. Edit the risk scenario to add "
+"extra measures."
 msgstr ""
-"Les mesures existantes pour gérer ce risque. Modifier le scenario de risque "
+"Les mesures existantes pour gérer ce risque. Modifier le scénario de risque "
 "pour y ajouter des mesures supplémentaires."
 
 #: core/models.py:138
@@ -281,11 +280,11 @@ msgstr "Impact Résiduel"
 
 #: core/models.py:153
 msgid ""
-"The risk level when all the extra mitigations are done. Automatically "
-"updated on Save, based on the chosen matrix"
+"The risk level when all the extra measures are done. Automatically updated "
+"on Save, based on the chosen matrix"
 msgstr ""
-"Le niveau de risque une fois les mitigations supplémentaires appliquées. Mis "
-"à jour automatiquement lors de l'enregistrement. Basé sur la matrice "
+"Le niveau de risque une fois les mesuress supplémentaires appliquées. Mis à "
+"jour automatiquement lors de l'enregistrement. Basé sur la matrice "
 "d'évaluation choisie."
 
 #: core/models.py:157 core/templates/core/browser.html:96
@@ -301,12 +300,13 @@ msgid "Updated at"
 msgstr "Mis à jour le"
 
 #: core/models.py:164
-msgid "Risk Instance"
-msgstr "Instance de Risque"
+#| msgid "Risk Scenarios"
+msgid "Risk Scenario"
+msgstr "Scénario de risque"
 
-#: core/models.py:165
-msgid "Risk Instances"
-msgstr "Instances de risques"
+#: core/models.py:165 core/templates/snippets/ra_data.html:34
+msgid "Risk Scenarios"
+msgstr "Scénarios de risques"
 
 #: core/models.py:169 core/models.py:234
 msgid "Parent Project"
@@ -349,16 +349,17 @@ msgid "Extra-Large"
 msgstr "Très Important"
 
 #: core/models.py:210 core/models.py:256
-msgid "Risk instance"
-msgstr "Instance de risque"
+#| msgid "Risk scenarios"
+msgid "Risk scenario"
+msgstr "Scénario de risque"
 
 #: core/models.py:211
 msgid "Solution"
 msgstr ""
 
 #: core/models.py:213
-msgid "<short title for the mitigation>"
-msgstr "<titre bref de la mitigation>"
+msgid "<short title for the measure>"
+msgstr "<titre bref de la mesure>"
 
 #: core/models.py:214 core/templates/snippets/mp_data.html:31
 #: core/templates/snippets/ra_data.html:26
@@ -394,21 +395,22 @@ msgid "Link"
 msgstr "Lien"
 
 #: core/models.py:222
-msgid "Relative effort of the mitigation (using T-Shirt sizing)"
-msgstr "Effort relatif impliqué par la mitigation"
+msgid "Relative effort of the measure (using T-Shirt sizing)"
+msgstr "Effort relatif impliqué par la mesure"
 
 #: core/models.py:223 core/templates/core/analytics.html:140
 #: core/templates/snippets/mp_data.html:35
 msgid "Effort"
 msgstr ""
 
-#: core/models.py:229
-msgid "Mitigation"
+#: core/models.py:229 core/templates/core/my_projects.html:36
+msgid "Measure"
 msgstr ""
 
-#: core/models.py:230
-msgid "Mitigations"
-msgstr ""
+#: core/models.py:230 core/templates/core/analytics.html:20
+#: core/templates/core/search_results.html:34
+msgid "Measures"
+msgstr "Mesures"
 
 #: core/models.py:253
 msgid "Temporary"
@@ -446,12 +448,7 @@ msgstr "Acceptations du risque"
 #: core/templates/core/analytics.html:14
 #: core/templates/core/search_results.html:21
 msgid "Risk scenarios"
-msgstr "Scenarios de risque"
-
-#: core/templates/core/analytics.html:20
-#: core/templates/core/search_results.html:34
-msgid "Measures"
-msgstr "Mesures"
+msgstr "Scénarios de risque"
 
 #: core/templates/core/analytics.html:34
 msgid "Show-stoppers"
@@ -625,8 +622,8 @@ msgid "Associated risk"
 msgstr "Risque associé"
 
 #: core/templates/core/calendar.html:6
-msgid "Mitigation calendar"
-msgstr "Calendrier des Mitigations"
+msgid "Measure calendar"
+msgstr "Calendrier des Mesures"
 
 #: core/templates/core/calendar.html:12
 msgid "Previous month"
@@ -744,7 +741,7 @@ msgstr "Rien à voir ici."
 
 #: core/templates/core/index.html:12
 msgid "Search risk scenario, measure, analysis ..."
-msgstr "Rechercher un scenario de risque, mesure, analyse ..."
+msgstr "Rechercher un scénario de risque, mesure, analyse ..."
 
 #: core/templates/core/index.html:23
 msgid "Analyses Registry"
@@ -831,10 +828,6 @@ msgstr "Vos mesures en attente"
 #: core/templates/core/my_projects.html:31
 msgid "ordered by ranking score"
 msgstr "classées par évaluation"
-
-#: core/templates/core/my_projects.html:36
-msgid "Measure"
-msgstr ""
 
 #: core/templates/core/my_projects.html:37
 msgid "Ranking Score"
@@ -1454,10 +1447,6 @@ msgstr "Dernière mise à jour :"
 msgid "Profile:"
 msgstr "Profil :"
 
-#: core/templates/snippets/ra_data.html:34
-msgid "Risk Scenarios"
-msgstr "Scénarios de risques"
-
 #: core/templates/snippets/ra_data.html:40
 msgid "Subject"
 msgstr "Sujet"
@@ -1536,20 +1525,8 @@ msgstr " \"Mesure: en attente\" "
 msgid " \"Measure: done\" "
 msgstr " \"Mesure: terminée\" "
 
-#~ msgid "Parent risk"
-#~ msgstr "Risque Parent"
-
-#~ msgid "Risk instances"
-#~ msgstr "Instances de risques"
-
-#~ msgid "Risks instances"
-#~ msgstr "Instances de risques"
-
 #~ msgid "Solutions in catalog"
 #~ msgstr "Solutions dans le catalogue"
-
-#~ msgid "Mitigations per solution"
-#~ msgstr "Mitigations par solution"
 
 #~ msgid "Parent Risk"
 #~ msgstr "Risque Parent"
