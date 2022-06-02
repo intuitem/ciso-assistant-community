@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-02 13:19+0000\n"
+"POT-Creation-Date: 2022-06-02 15:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -65,8 +65,8 @@ msgstr "Rechercher une Analyse..."
 msgid "Search Scenario..."
 msgstr "Rechercher un Scénario..."
 
-#: back_office/filters.py:129 back_office/filters.py:159
-#: back_office/filters.py:186 back_office/filters.py:256
+#: back_office/filters.py:129 back_office/filters.py:162
+#: back_office/filters.py:189 back_office/filters.py:259
 msgid "title"
 msgstr "titre"
 
@@ -75,8 +75,8 @@ msgstr "titre"
 msgid "threat"
 msgstr "menace"
 
-#: back_office/filters.py:131 back_office/filters.py:161
-#: back_office/filters.py:236
+#: back_office/filters.py:131 back_office/filters.py:164
+#: back_office/filters.py:239
 #, fuzzy
 #| msgid "Parent Risk"
 msgid "parent"
@@ -90,91 +90,91 @@ msgstr "traitement"
 msgid "Search Measure..."
 msgstr "Rechercher une Mesure..."
 
-#: back_office/filters.py:160 back_office/filters.py:187
-msgid "type"
-msgstr ""
-
-#: back_office/filters.py:162
-msgid "solution"
-msgstr ""
-
-#: back_office/filters.py:174
-msgid "Search Acceptance..."
-msgstr "Rechercher une Acceptation..."
-
-#: back_office/filters.py:188
-#, fuzzy
-#| msgid "Expiry Date"
-msgid "expiry"
-msgstr "Date d'expiration"
-
-#: back_office/filters.py:189
-#, fuzzy
-#| msgid "Validator"
-msgid "validator"
-msgstr "Validateur"
-
-#: back_office/filters.py:201
-msgid "Search Domain..."
-msgstr "Rechercher un Domaine..."
-
-#: back_office/filters.py:210 back_office/filters.py:234
-#: back_office/filters.py:278 back_office/filters.py:300
-#, fuzzy
-#| msgid "Username"
-msgid "name"
-msgstr "Nom d'utilisateur"
-
-#: back_office/filters.py:211
-#, fuzzy
-#| msgid "Department"
-msgid "department"
-msgstr "Departement"
-
-#: back_office/filters.py:222
-msgid "Search Project..."
-msgstr "Rechercher un Projet..."
-
-#: back_office/filters.py:235
+#: back_office/filters.py:161 back_office/filters.py:238
 #, fuzzy
 #| msgid "Status"
 msgid "status"
 msgstr "Statut"
 
-#: back_office/filters.py:248
+#: back_office/filters.py:163 back_office/filters.py:190
+msgid "type"
+msgstr ""
+
+#: back_office/filters.py:165
+msgid "solution"
+msgstr ""
+
+#: back_office/filters.py:177
+msgid "Search Acceptance..."
+msgstr "Rechercher une Acceptation..."
+
+#: back_office/filters.py:191
+#, fuzzy
+#| msgid "Expiry Date"
+msgid "expiry"
+msgstr "Date d'expiration"
+
+#: back_office/filters.py:192
+#, fuzzy
+#| msgid "Validator"
+msgid "validator"
+msgstr "Validateur"
+
+#: back_office/filters.py:204
+msgid "Search Domain..."
+msgstr "Rechercher un Domaine..."
+
+#: back_office/filters.py:213 back_office/filters.py:237
+#: back_office/filters.py:281 back_office/filters.py:303
+#, fuzzy
+#| msgid "Username"
+msgid "name"
+msgstr "Nom d'utilisateur"
+
+#: back_office/filters.py:214
+#, fuzzy
+#| msgid "Department"
+msgid "department"
+msgstr "Departement"
+
+#: back_office/filters.py:225
+msgid "Search Project..."
+msgstr "Rechercher un Projet..."
+
+#: back_office/filters.py:251
 msgid "Search Threat..."
 msgstr "Rechercher une Menace..."
 
-#: back_office/filters.py:268
+#: back_office/filters.py:271
 msgid "Search Function..."
 msgstr "Rechercher une Fonction..."
 
-#: back_office/filters.py:279
+#: back_office/filters.py:282
 #, fuzzy
 #| msgid "Provider"
 msgid "provider"
 msgstr "Fournisseur"
 
-#: back_office/filters.py:280
+#: back_office/filters.py:283
 msgid "contact"
 msgstr ""
 
-#: back_office/filters.py:292
+#: back_office/filters.py:295
 msgid "Search Asset..."
 msgstr "Rechercher un Bien sensible..."
 
 #: back_office/forms.py:46 back_office/templates/back_office/mtg_update.html:16
-#: back_office/templates/back_office/ri_update.html:14
+#: back_office/templates/back_office/ri_update.html:106
 msgid "Risk Scenario"
 msgstr "Scénario de risque"
 
-#: back_office/forms.py:47 back_office/templates/back_office/mtg_list.html:80
-#: back_office/templates/back_office/mtg_list.html:122
+#: back_office/forms.py:47 back_office/templates/back_office/mtg_list.html:84
+#: back_office/templates/back_office/mtg_list.html:126
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security Function"
 msgstr "Fonction de Sécurité"
 
-#: back_office/forms.py:132
+#: back_office/forms.py:139
 #, fuzzy
 #| msgid "Parent Domain"
 msgid "Parent domain"
@@ -196,15 +196,15 @@ msgstr "Filtres"
 
 #: back_office/templates/back_office/acceptance_list.html:72
 #: back_office/templates/back_office/acceptance_list.html:112
-#: back_office/templates/back_office/mtg_list.html:76
-#: back_office/templates/back_office/mtg_list.html:120
+#: back_office/templates/back_office/mtg_list.html:80
+#: back_office/templates/back_office/mtg_list.html:124
 #: back_office/templates/back_office/mtg_update.html:25
 msgid "Type"
 msgstr ""
 
 #: back_office/templates/back_office/acceptance_list.html:75
 #: back_office/templates/back_office/analysis_list.html:86
-#: back_office/templates/back_office/mtg_list.html:83
+#: back_office/templates/back_office/mtg_list.html:87
 #: back_office/templates/back_office/project_list.html:81
 #: back_office/templates/back_office/ri_list.html:83
 #: back_office/templates/back_office/security_function_list.html:74
@@ -214,7 +214,7 @@ msgstr "Appliquer"
 #: back_office/templates/back_office/acceptance_list.html:92
 #: back_office/templates/back_office/analysis_list.html:103
 #: back_office/templates/back_office/asset_list.html:34
-#: back_office/templates/back_office/mtg_list.html:100
+#: back_office/templates/back_office/mtg_list.html:104
 #: back_office/templates/back_office/project_domain_list.html:31
 #: back_office/templates/back_office/project_list.html:98
 #: back_office/templates/back_office/ri_list.html:100
@@ -242,7 +242,7 @@ msgstr "Date d'expiration"
 #: back_office/templates/back_office/acceptance_list.html:115
 #: back_office/templates/back_office/analysis_list.html:127
 #: back_office/templates/back_office/asset_list.html:57
-#: back_office/templates/back_office/mtg_list.html:123
+#: back_office/templates/back_office/mtg_list.html:127
 #: back_office/templates/back_office/project_domain_list.html:52
 #: back_office/templates/back_office/project_list.html:122
 #: back_office/templates/back_office/ri_list.html:125
@@ -273,7 +273,7 @@ msgstr "Brouillon"
 #: back_office/templates/back_office/ra_create.html:22
 #: back_office/templates/back_office/ra_update.html:23
 #: back_office/templates/back_office/ri_create.html:21
-#: back_office/templates/back_office/ri_update.html:22
+#: back_office/templates/back_office/ri_update.html:114
 #: back_office/templates/back_office/snippets/ra_list_nested.html:10
 msgid "Auditor"
 msgstr "Auditeur"
@@ -282,7 +282,7 @@ msgstr "Auditeur"
 #: back_office/templates/back_office/fragments/watchlist_measures.html:11
 #: back_office/templates/back_office/ra_create.html:17
 #: back_office/templates/back_office/ra_update.html:18
-#: back_office/templates/back_office/ri_update.html:18
+#: back_office/templates/back_office/ri_update.html:110
 msgid "Project"
 msgstr "Projets"
 
@@ -315,7 +315,7 @@ msgstr "Aucune analyse n'a été trouvée."
 
 #: back_office/templates/back_office/asset_list.html:4
 #: back_office/templates/back_office/asset_list.html:9
-#: back_office/templates/back_office/base.html:169 back_office/views.py:662
+#: back_office/templates/back_office/base.html:169 back_office/views.py:652
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -347,7 +347,7 @@ msgstr "Aucune bien sensible n'a été trouvé"
 #: back_office/templates/back_office/ra_create.html:48
 #: back_office/templates/back_office/ra_update.html:49
 #: back_office/templates/back_office/ri_create.html:102
-#: back_office/templates/back_office/ri_update.html:177
+#: back_office/templates/back_office/ri_update.html:269
 #: back_office/templates/back_office/risk_acceptance_update.html:22
 #: back_office/templates/back_office/security_function_update.html:29
 #: back_office/templates/back_office/snippets/analysis_create_modal.html:80
@@ -371,7 +371,7 @@ msgstr "Annuler"
 #: back_office/templates/back_office/ra_create.html:49
 #: back_office/templates/back_office/ra_update.html:52
 #: back_office/templates/back_office/ri_create.html:103
-#: back_office/templates/back_office/ri_update.html:180
+#: back_office/templates/back_office/ri_update.html:272
 #: back_office/templates/back_office/risk_acceptance_update.html:24
 #: back_office/templates/back_office/security_function_update.html:31
 #: back_office/templates/back_office/snippets/analysis_create_modal.html:84
@@ -397,7 +397,7 @@ msgid "Switch to viewer"
 msgstr "Basculer vers le lecteur"
 
 #: back_office/templates/back_office/base.html:107
-#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:554
+#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:544
 msgid "Risk Scenarios"
 msgstr "Scénarios de risques"
 
@@ -407,14 +407,14 @@ msgstr "Mesures de sécurité"
 
 #: back_office/templates/back_office/base.html:147
 #: back_office/templates/back_office/project_domain_list.html:5
-#: back_office/views.py:613
+#: back_office/views.py:603
 msgid "Projects Domains"
 msgstr "Domaines de projets"
 
 #: back_office/templates/back_office/base.html:158
 #: back_office/templates/back_office/project_list.html:8
 #: back_office/templates/back_office/quick_start.html:16
-#: back_office/views.py:635
+#: back_office/views.py:625
 msgid "Projects"
 msgstr ""
 
@@ -544,6 +544,7 @@ msgid "Measure"
 msgstr "Mesure"
 
 #: back_office/templates/back_office/fragments/watchlist_measures.html:14
+#: back_office/templates/back_office/mtg_list.html:72
 #: back_office/templates/back_office/mtg_update.html:30
 #: back_office/templates/back_office/project_create.html:31
 #: back_office/templates/back_office/project_list.html:78
@@ -555,7 +556,7 @@ msgid "Status"
 msgstr "Statut"
 
 #: back_office/templates/back_office/fragments/watchlist_measures.html:17
-#: back_office/templates/back_office/mtg_list.html:121
+#: back_office/templates/back_office/mtg_list.html:125
 #: back_office/templates/back_office/mtg_update.html:35
 msgid "ETA"
 msgstr ""
@@ -566,10 +567,8 @@ msgid "Jump"
 msgstr ""
 
 #: back_office/templates/back_office/fragments/watchlist_measures.html:38
-#, fuzzy
-#| msgid "Expiry Date"
 msgid "expired"
-msgstr "Date d'expiration"
+msgstr "expiré"
 
 #: back_office/templates/back_office/group_list.html:21
 msgid "New Group"
@@ -583,7 +582,7 @@ msgstr ""
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: back_office/templates/back_office/index.html:24 back_office/views.py:449
+#: back_office/templates/back_office/index.html:24 back_office/views.py:439
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -630,7 +629,7 @@ msgstr "Liste de surveillance"
 
 #: back_office/templates/back_office/index.html:70
 msgid "Items that have expired or with close ETA"
-msgstr "Objets expirés ou dont l'échéance est proche "
+msgstr "Objets expirés ou dont l'échéance est proche"
 
 #: back_office/templates/back_office/index.html:74
 msgid "Measures to review"
@@ -640,19 +639,19 @@ msgstr "Mesures à revoir"
 msgid "Exceptions to review"
 msgstr "Exceptions à revoir"
 
-#: back_office/templates/back_office/mtg_list.html:72
-#: back_office/templates/back_office/mtg_list.html:119
+#: back_office/templates/back_office/mtg_list.html:76
+#: back_office/templates/back_office/mtg_list.html:123
 #: back_office/templates/back_office/ri_list.html:76
 #: back_office/templates/back_office/ri_list.html:122
 msgid "Parent Project"
 msgstr ""
 
-#: back_office/templates/back_office/mtg_list.html:109
-#: back_office/templates/back_office/ri_update.html:167
+#: back_office/templates/back_office/mtg_list.html:113
+#: back_office/templates/back_office/ri_update.html:259
 msgid "New Measure"
 msgstr "Nouvelle Mesure"
 
-#: back_office/templates/back_office/mtg_list.html:118
+#: back_office/templates/back_office/mtg_list.html:122
 #: back_office/templates/back_office/mtg_update.html:20
 #: back_office/templates/back_office/ri_list.html:120
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:10
@@ -661,7 +660,7 @@ msgstr "Nouvelle Mesure"
 msgid "Title"
 msgstr "Titre"
 
-#: back_office/templates/back_office/mtg_list.html:207
+#: back_office/templates/back_office/mtg_list.html:211
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:53
 msgid "No measure found."
 msgstr "Aucune mesure n'a été trouvée"
@@ -860,14 +859,14 @@ msgid "Is Draft"
 msgstr "brouillon"
 
 #: back_office/templates/back_office/ra_create.html:40
-#: back_office/templates/back_office/ri_update.html:31
+#: back_office/templates/back_office/ri_update.html:123
 msgid "Analysis"
 msgstr "Analyse"
 
 #: back_office/templates/back_office/ra_create.html:41
 #: back_office/templates/back_office/ra_update.html:38
 #: back_office/templates/back_office/ri_create.html:66
-#: back_office/templates/back_office/ri_update.html:148
+#: back_office/templates/back_office/ri_update.html:240
 msgid "Comments"
 msgstr "Commentaires"
 
@@ -876,7 +875,7 @@ msgid "Risk Analysis"
 msgstr "Analyse de risque"
 
 #: back_office/templates/back_office/ra_update.html:28
-#: back_office/templates/back_office/ri_update.html:26
+#: back_office/templates/back_office/ri_update.html:118
 msgid "Version"
 msgstr ""
 
@@ -901,67 +900,67 @@ msgstr "Titre du Scénario"
 #: back_office/templates/back_office/ri_create.html:31
 #: back_office/templates/back_office/ri_list.html:72
 #: back_office/templates/back_office/ri_list.html:121
-#: back_office/templates/back_office/ri_update.html:36
+#: back_office/templates/back_office/ri_update.html:128
 #: back_office/templates/back_office/snippets/ri_list_nested.html:10
 #: back_office/templates/back_office/threat_list.html:50
 msgid "Threat"
 msgstr "Menace"
 
 #: back_office/templates/back_office/ri_create.html:36
-#: back_office/templates/back_office/ri_update.html:46
+#: back_office/templates/back_office/ri_update.html:138
 msgid "Scenario"
 msgstr ""
 
 #: back_office/templates/back_office/ri_create.html:44
-#: back_office/templates/back_office/ri_update.html:121
+#: back_office/templates/back_office/ri_update.html:213
 #: back_office/templates/back_office/snippets/ri_list_nested.html:25
 msgid "Residual Risk Level"
 msgstr "Niveau de Risque Résiduel"
 
 #: back_office/templates/back_office/ri_create.html:47
-#: back_office/templates/back_office/ri_update.html:105
+#: back_office/templates/back_office/ri_update.html:197
 msgid "Residual Probability"
 msgstr "Probabilité résiduelle"
 
 #: back_office/templates/back_office/ri_create.html:52
-#: back_office/templates/back_office/ri_update.html:113
+#: back_office/templates/back_office/ri_update.html:205
 msgid "Residual Impact"
 msgstr "Impact résiduel"
 
 #: back_office/templates/back_office/ri_create.html:60
-#: back_office/templates/back_office/ri_update.html:142
+#: back_office/templates/back_office/ri_update.html:234
 msgid "Follow up"
 msgstr "Suivi"
 
 #: back_office/templates/back_office/ri_create.html:61
 #: back_office/templates/back_office/ri_list.html:80
-#: back_office/templates/back_office/ri_update.html:143
+#: back_office/templates/back_office/ri_update.html:235
 msgid "Treatment Status"
 msgstr "Statut du traitement"
 
 #: back_office/templates/back_office/ri_create.html:75
-#: back_office/templates/back_office/ri_update.html:78
+#: back_office/templates/back_office/ri_update.html:170
 #: back_office/templates/back_office/snippets/ri_list_nested.html:19
 msgid "Current Risk Level"
 msgstr "Niveau de Risque Courant"
 
 #: back_office/templates/back_office/ri_create.html:76
-#: back_office/templates/back_office/ri_update.html:54
+#: back_office/templates/back_office/ri_update.html:146
 msgid "Existing Measures"
 msgstr "Mesures Existantes"
 
 #: back_office/templates/back_office/ri_create.html:83
-#: back_office/templates/back_office/ri_update.html:62
+#: back_office/templates/back_office/ri_update.html:154
 msgid "Current Probability"
 msgstr "Probabilité courante"
 
 #: back_office/templates/back_office/ri_create.html:88
-#: back_office/templates/back_office/ri_update.html:70
+#: back_office/templates/back_office/ri_update.html:162
 msgid "Current Impact"
 msgstr "Impact courant"
 
 #: back_office/templates/back_office/ri_create.html:96
-#: back_office/templates/back_office/ri_update.html:163
+#: back_office/templates/back_office/ri_update.html:255
 msgid "Associated Measures"
 msgstr "Mesures Associées"
 
@@ -970,19 +969,45 @@ msgstr "Mesures Associées"
 msgid "No scenario found."
 msgstr "Aucun scénario n'a été trouvé."
 
-#: back_office/templates/back_office/ri_update.html:41
+#: back_office/templates/back_office/ri_update.html:8
+#, fuzzy
+#| msgid " \"Very Low\" "
+msgid "'Very Low'"
+msgstr " \"Très Faible\" "
+
+#: back_office/templates/back_office/ri_update.html:9
+msgid "'Low'"
+msgstr ""
+
+#: back_office/templates/back_office/ri_update.html:10
+#, fuzzy
+#| msgid " \"Medium\" "
+msgid "'Medium'"
+msgstr " \"Moyen\" "
+
+#: back_office/templates/back_office/ri_update.html:11
+msgid "'High'"
+msgstr ""
+
+#: back_office/templates/back_office/ri_update.html:12
+#, fuzzy
+#| msgid " \"Very High\" "
+msgid "'Very High'"
+msgstr " \"Très Élevé\" "
+
+#: back_office/templates/back_office/ri_update.html:133
 msgid "Subject"
 msgstr "Sujet"
 
-#: back_office/templates/back_office/ri_update.html:53
+#: back_office/templates/back_office/ri_update.html:145
 msgid "Current Profile"
 msgstr "Profile Courant"
 
-#: back_office/templates/back_office/ri_update.html:59
+#: back_office/templates/back_office/ri_update.html:151
 msgid "Current Indicator"
 msgstr "Indicateur courant"
 
-#: back_office/templates/back_office/ri_update.html:102
+#: back_office/templates/back_office/ri_update.html:194
 #, fuzzy
 #| msgid "Department"
 msgid "Treatment"
