@@ -146,16 +146,19 @@ class MeasureFilter(GenericFilterSet):
     ))
     risk_instance__analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
     type=GenericMultipleChoiceFilter(choices=Mitigation.MITIGATION_TYPE)
+    status=GenericMultipleChoiceFilter(choices=Mitigation.MITIGATION_STATUS)
     solution=GenericModelMultipleChoiceFilter(queryset=Solution.objects.all())
 
     orderby = GenericOrderingFilter(
         fields=(
+            ('status', 'status'),
             ('title', 'title'),
             ('type', 'type'),
             ('risk_instance__analysis__project', 'risk_instance__analysis__project'),
             ('solution', 'solution'),
         ),
         field_labels={
+            'status': _('status'.capitalize()),
             'title': _('title'.capitalize()),
             'type': _('type'.capitalize()),
             'risk_instance__analysis__project': _('parent'.capitalize() + ' project'),

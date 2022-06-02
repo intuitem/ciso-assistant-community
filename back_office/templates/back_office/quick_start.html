@@ -10,8 +10,8 @@
 
     <div class="p-4">
         <div class="">
-            <div class="flex w-full rounded shadow bg-white p-4">
-                <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
+            <div class="flex w-full rounded-lg shadow bg-white p-4">
+                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 1</div>
                     <div class="font-semibold mb-4">{% trans "Projects" %}</div>
                     <div class="text-sm mb-2 rounded">{% trans "Setup a" %}
@@ -32,7 +32,7 @@
                     <script src="{% static 'js/modal.js' %}"></script>      
                 </div>
 
-                <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
+                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 2</div>
                     <div class="font-semibold mb-4">{% trans "Threats" %}</div>
                     <div class="text-sm mb-2 rounded  ">{% trans "Identify what and who are the" %}
@@ -44,7 +44,7 @@
                     <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
-                <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
+                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 3</div>
                     <div class="font-semibold mb-4">{% trans "Security Functions" %}</div>
                     <div class="text-sm mb-2 rounded ">{% trans "Understand and inventory the" %}
@@ -56,10 +56,10 @@
                     <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
-                <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
+                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 4</div>
                     <div class="font-semibold mb-4">{% trans "Risk Analyses" %}</div>
-                    <div class="text-sm mb-2 rounded  ">{% trans "You need to define a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or use a preset. Now you can start a new" %} <span x-data="modal()">
+                    <div class="text-sm mb-2 rounded">{% trans "You need to define a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or use a preset. Now you can start a new" %} <span x-data="modal()">
                         <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
                            class="simple-link">{% trans "risk analysis" %}</a>
                            {% include "back_office/snippets/analysis_create_modal.html" %}
@@ -67,7 +67,7 @@
                     <script src="{% static 'js/modal.js' %}"></script> 
                 </div>
 
-                <div class="w-1/5 bg-white h-96 border-t-4 border-violet-700 mx-4 py-2">
+                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 5</div>
                     <div class="font-semibold mb-4">{% trans "Scenarios and Remediations" %}</div>
                     <div class="text-sm mb-2 rounded  ">{% trans "Enrich" %} <a href="{% url 'ra-list' %}" class="simple-link">{% trans "your analysis" %}</a> {% trans "by identifying the potential risk scenarios and the security measures to mitigate them." %}</div>

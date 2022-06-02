@@ -82,6 +82,13 @@ class RiskScenarioCreateForm(StyledModelForm):
         fields = ['analysis', 'parent_risk', 'title', 'scenario']
 
 class RiskInstanceUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['current_proba'].widget.attrs['onchange'] = 'refresh();'
+        self.fields['current_impact'].widget.attrs['onchange'] = 'refresh();'
+        self.fields['residual_proba'].widget.attrs['onchange'] = 'refresh();'
+        self.fields['residual_impact'].widget.attrs['onchange'] = 'refresh();'
+
     class Meta:
         model = RiskInstance
         fields = '__all__'

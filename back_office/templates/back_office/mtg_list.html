@@ -69,6 +69,10 @@
                     
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                                 <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Status" %}</p>
+                                    {{ filter.form.status }}
+                                </div>
+                                <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent Project" %}</p>
                                     {{ filter.form.risk_instance__analysis__project }}
                                 </div>

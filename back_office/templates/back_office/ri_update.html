@@ -4,6 +4,98 @@
 {% with page_title=instance %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
+<script>
+    var label_very_low = {% blocktrans %}'Very Low'{% endblocktrans %};
+    var label_low = {% blocktrans %}'Low'{% endblocktrans %};
+    var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
+    var label_high = {% blocktrans %}'High'{% endblocktrans %};
+    var label_very_high = {% blocktrans %}'Very High'{% endblocktrans %};
+    
+    window.onload = function() {
+        var current_proba = document.getElementById("id_riskinstance_current_proba").value;
+        var current_impact = document.getElementById("id_riskinstance_current_impact").value;
+        var current_level = document.getElementById("current_risk_level").value;
+
+        var residual_proba = document.getElementById("id_riskinstance_residual_proba").value;
+        var residual_impact = document.getElementById("id_riskinstance_residual_impact").value;
+        var residual_level = document.getElementById("residual_risk_level").value;
+    };
+    
+    function refresh() {
+        var current_proba = document.getElementById("id_riskinstance_current_proba").value;
+        var current_impact = document.getElementById("id_riskinstance_current_impact").value;
+        var current_level = document.getElementById("current_risk_level").value;
+        CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
+        CRL_lbl = document.getElementById("current_risk_level");
+        CRL_lbl.innerHTML = `${CRL}`;
+        CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
+        CRL_lbl.classList.remove('VL','L','M','H','VH');
+        CRL_lbl.classList.add(rl_class(CRL));
+
+        var residual_proba = document.getElementById("id_riskinstance_residual_proba").value;
+        var residual_impact = document.getElementById("id_riskinstance_residual_impact").value;
+        var residual_level = document.getElementById("residual_risk_level").value;
+        RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
+        RRL_lbl = document.getElementById("residual_risk_level");
+        RRL_lbl.innerHTML = `${RRL}`;
+        RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
+        RRL_lbl.classList.remove('VL','L','M','H','VH');
+        RRL_lbl.classList.add(rl_class(RRL));
+    }
+
+    function getValueIndex(label) {
+      if (label == 'VL') return 0;
+      if (label == 'L') return 1;
+      if (label == 'M') return 2;
+      if (label == 'H') return 3;
+      if (label == 'VH') return 4;
+    }
+    
+    function riskLevel(p, i) {
+        var matrix = [];
+        matrix[0] = [];
+        matrix[1] = [];
+        matrix[2] = [];
+        matrix[3] = [];
+        matrix[4] = [];
+        matrix[0][0] = label_very_low;
+        matrix[1][0] = label_very_low;
+        matrix[2][0] = label_low;
+        matrix[3][0] = label_low;
+        matrix[4][0] = label_medium;
+        matrix[0][1] = label_very_low;
+        matrix[1][1] = label_low;
+        matrix[2][1] = label_low;
+        matrix[3][1] = label_medium;
+        matrix[4][1] = label_medium;
+        matrix[0][2] = label_low;
+        matrix[1][2] = label_low;
+        matrix[2][2] = label_medium;
+        matrix[3][2] = label_medium;
+        matrix[4][2] = label_high;
+        matrix[0][3] = label_low;
+        matrix[1][3] = label_medium;
+        matrix[2][3] = label_medium;
+        matrix[3][3] = label_high;
+        matrix[4][3] = label_very_high;
+        matrix[0][4] = label_medium;
+        matrix[1][4] = label_medium;
+        matrix[2][4] = label_high;
+        matrix[3][4] = label_very_high;
+        matrix[4][4] = label_very_high;
+        console.log(i);
+        return matrix[p][i];
+    }
+    
+    function rl_class(label) {
+        if (label == label_very_low) return 'VL';
+        if (label == label_low) return 'L';
+        if (label == label_medium) return 'M';
+        if (label == label_high) return 'H';
+        if (label == label_very_high) return 'VH';
+    }
+    
+    </script>
 <div>
     <form method="post" id="instance_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
@@ -77,17 +169,17 @@
                         <div class=""> 
                             <p class="pl-1 text-sm font-semibold">{% trans "Current Risk Level" %}</p>
                             <div class="">
-                                <span class="rounded-lg text-sm flex pb-2 pt-2 justify-center
+                                <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
                                     {% if instance.current_level == 'VL' %}
-                                        bg-green-200 
+                                        VL 
                                     {% elif instance.current_level == 'L' %}
-                                        bg-lime-200
+                                        L
                                     {% elif instance.current_level == 'M' %}
-                                        bg-yellow-200
+                                        M
                                     {% elif instance.current_level == 'H' %}
-                                        bg-orange-300
+                                        H
                                     {% elif instance.current_level == 'VH' %}
-                                        bg-red-400
+                                        VH
                                     {% endif %}" style="margin-bottom: 10px">{{ instance.get_current_level_display }}
                                 </span>
                             </div>
@@ -120,17 +212,17 @@
                         <div class=""> 
                             <p class="pl-1 text-sm font-semibold">{% trans "Residual Risk Level" %}</p>
                             <div class="">
-                                <span class="rounded-lg text-sm flex pb-2 pt-2 justify-center
+                                <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
                                     {% if instance.residual_level == 'VL' %}
-                                        bg-green-200 
+                                        VL 
                                     {% elif instance.residual_level == 'L' %}
-                                        bg-lime-200
+                                        L
                                     {% elif instance.residual_level == 'M' %}
-                                        bg-yellow-200
+                                        M
                                     {% elif instance.residual_level == 'H' %}
-                                        bg-orange-300
+                                        H
                                     {% elif instance.residual_level == 'VH' %}
-                                        bg-red-400
+                                        VH
                                     {% endif %}" style="margin-bottom: 10px">{{ instance.get_residual_level_display }}
                                 </span>
                             </div>

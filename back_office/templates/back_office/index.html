@@ -69,14 +69,14 @@
             <div class="text-2xl font-extrabold text-slate-700">{% trans "Watch List" %}</div>
             <div class="text-sm text-slate-500 font-semibold">{% trans "Items that have expired or with close ETA" %}</div>
         </div>
-        <div class="p-2 m-2 flex flex-row space-x-4 items-center content-center">
-            <div class="w-1/2">
-                <span class="text-sm font-semibold">{% trans "Measures to review" %}</span>
-                {% include 'back_office/fragments/watchlist_measures.html' %}
+        <div class="p-2 m-2 flex flex-col space-y-5 items-center content-center">
+            <div class="w-full">
+                <span class="text-md font-semibold">{% trans "Measures to review" %}</span>
+                <div>{% include 'back_office/fragments/watchlist_measures.html' %}</div>
             </div>
-            <div class="w-1/2">
-                <span class="text-sm font-semibold">{% trans "Exceptions to review" %}</span>
-                {% include 'back_office/fragments/watchlist_exceptions.html' %}
+            <div class="w-full">
+                <span class="text-md font-semibold">{% trans "Exceptions to review" %}</span>
+                <div>{% include 'back_office/fragments/watchlist_exceptions.html' %}</div>
             </div>
         </div>
     </section>

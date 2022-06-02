@@ -60,7 +60,7 @@ class ProjectListView(PermissionRequiredMixin, ListView):
     model = Project
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('lc_status', 'id')
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -104,7 +104,7 @@ class ProjectsGroupListView(PermissionRequiredMixin, ListView):
     model = ProjectsGroup
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('id')
         filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -153,14 +153,9 @@ class RiskInstanceListView(PermissionRequiredMixin, ListView):
     model = RiskInstance
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('treatment', 'id')
         filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
-        # if not self.request.user.is_superuser:
-        #     agg_data = RiskInstance.objects.filter(analysis__auditor=self.request.user).order_by('id')
-        # else:
-        #     agg_data = RiskInstance.objects.all().order_by('id')
-        # return agg_data
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -188,7 +183,7 @@ class MitigationListView(PermissionRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('status', 'id')
         filtered_list = MeasureFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -207,7 +202,7 @@ class SecurityFunctionListView(PermissionRequiredMixin, ListView):
     model = Solution
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('id')
         filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -230,7 +225,7 @@ class ParentRiskListView(PermissionRequiredMixin, ListView):
     model = ParentRisk
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('id')
         filtered_list = ThreatFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -261,14 +256,9 @@ class RiskAcceptanceListView(PermissionRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('type', 'id')
         filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
-        # if not self.request.user.is_superuser:
-        #     agg_data = RiskAcceptance.objects.filter(risk_instance__analysis__auditor=self.request.user).order_by('type', 'id')
-        # else:
-        #     agg_data = RiskAcceptance.objects.all().order_by('type', 'id')
-        # return agg_data
 
 class UserListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_user'
