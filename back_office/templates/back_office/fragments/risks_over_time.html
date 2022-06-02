@@ -1,7 +1,25 @@
+{% load i18n %}
 <div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
 <script type="text/javascript">
     var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
     var option;
+    var vl = {% blocktrans %} "Very Low" {% endblocktrans %};
+    var l = {% blocktrans %} "Low" {% endblocktrans %};
+    var m = {% blocktrans %} "Medium" {% endblocktrans %};
+    var h = {% blocktrans %} "High" {% endblocktrans %};
+    var vh = {% blocktrans %} "Very High" {% endblocktrans %};
+    var jan = {% blocktrans %} "Jan" {% endblocktrans %};
+    var feb = {% blocktrans %} "Feb" {% endblocktrans %};
+    var mar = {% blocktrans %} "Mar" {% endblocktrans %};
+    var apr = {% blocktrans %} "Apr" {% endblocktrans %};
+    var may = {% blocktrans %} "May" {% endblocktrans %};
+    var jun = {% blocktrans %} "Jun" {% endblocktrans %};
+    var jul = {% blocktrans %} "Jul" {% endblocktrans %};
+    var aug = {% blocktrans %} "Aug" {% endblocktrans %};
+    var sep = {% blocktrans %} "Sep" {% endblocktrans %};
+    var oct = {% blocktrans %} "Oct" {% endblocktrans %};
+    var nov = {% blocktrans %} "Nov" {% endblocktrans %};
+    var dec = {% blocktrans %} "Dec" {% endblocktrans %};
 
     option = {
         tooltip: {
@@ -14,7 +32,7 @@
             }
         },
         legend: {
-            data: ['Very Low', 'Low', 'Medium', 'High', 'Very High']
+            data: [vl, l, m, h, vh]
         },
         toolbox: {
             feature: {
@@ -31,7 +49,7 @@
             {
                 type: 'category',
                 boundaryGap: false,
-                data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                data: [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
             }
         ],
         yAxis: [
@@ -41,47 +59,51 @@
         ],
         series: [
             {
-                name: 'Very Low',
+                name: vl,
                 type: 'line',
                 stack: 'Total',
                 areaStyle: {},
                 emphasis: {
                     focus: 'series'
                 },
-                data: [120, 132, 101, 134, 90, 230, 210, 120, 132, 101, 134, 90]
+                data: [120, 132, 101, 134, 90, 230, 210, 120, 132, 101, 134, 90],
+                color: ["#BBF7D0"]
             },
             {
-                name: 'Low',
+                name: l,
                 type: 'line',
                 stack: 'Total',
                 areaStyle: {},
                 emphasis: {
                     focus: 'series'
                 },
-                data: [220, 182, 191, 234, 290, 330, 310, 220, 182, 191, 234, 290]
+                data: [220, 182, 191, 234, 290, 330, 310, 220, 182, 191, 234, 290],
+                color: ["#BEF264"]
             },
             {
-                name: 'Medium',
+                name: m,
                 type: 'line',
                 stack: 'Total',
                 areaStyle: {},
                 emphasis: {
                     focus: 'series'
                 },
-                data: [150, 232, 201, 154, 190, 330, 410, 150, 232, 201, 154, 190]
+                data: [150, 232, 201, 154, 190, 330, 410, 150, 232, 201, 154, 190],
+                color: ["#FEF08A"]
             },
             {
-                name: 'High',
+                name: h,
                 type: 'line',
                 stack: 'Total',
                 areaStyle: {},
                 emphasis: {
                     focus: 'series'
                 },
-                data: [320, 332, 301, 334, 390, 330, 320, 320, 332, 301, 334, 390]
+                data: [320, 332, 301, 334, 390, 330, 320, 320, 332, 301, 334, 390],
+                color: ["#FBBF24"]
             },
             {
-                name: 'Very High',
+                name: vh,
                 type: 'line',
                 stack: 'Total',
                 label: {
@@ -92,7 +114,8 @@
                 emphasis: {
                     focus: 'series'
                 },
-                data: [820, 932, 901, 934, 1290, 1330, 1320, 820, 932, 901, 934, 1290]
+                data: [820, 932, 901, 934, 1290, 1330, 1320, 820, 932, 901, 934, 1290],
+                color: ["#F87171"]
             }
         ]
     };

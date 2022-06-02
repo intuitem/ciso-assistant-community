@@ -5,7 +5,7 @@
     var option;
 
     const data = [
-    { value: {{ values.0.value|safe }}, name: 'Very Low' },
+    { value: {{ values.1.value|safe }}, name: 'Very Low' },
     { value: {{ values.1.value|safe }}, name: 'Low' },
     { value: {{ values.2.value|safe }}, name: 'Medium' },
     { value: {{ values.3.value|safe }}, name: 'High' },
@@ -13,11 +13,11 @@
     ];
     const defaultPalette = [
         // '#51689b', '#ce5c5c', '#fbc357', '#8fbf8f', '#659d84', '#fb8e6a', '#c77288', '#786090', '#91c4c5', '#6890ba'
-        '#5470c6',
-        '#91cc75',
-        '#fac858',
-        '#ee6666',
-        '#73c0de',
+        '#BBF7D0',
+        '#BEF264',
+        '#FEF08A',
+        '#FBBF24',
+        '#F87171',
         '#3ba272',
         '#fc8452',
         '#9a60b4',
@@ -35,7 +35,8 @@
                 },
                 universalTransition: true,
                 animationDurationUpdate: 1000,
-                data: {{values|safe}}
+                data: {{values|safe}},
+                color:["#BBF7D0","#BEF264","#FEF08A","#FBBF24","#F87171"]
             }
         ]
     };

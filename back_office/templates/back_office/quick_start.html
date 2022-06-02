@@ -26,8 +26,11 @@
                                class="simple-link">{% trans "create one" %}</a>.
                             {% include "back_office/snippets/project_create_modal.html" %}
                         </span>
-                        {% trans "Start identifying your" %} <a href="#"
-                        class="simple-link">{% trans "assets" %}</a> {%trans "to keep focus" %}.
+                        {% trans "Start identifying your" %} <span x-data="modal()">
+                            <a href="#" x-on:click="open()" data-toggle="modal" data-target="#createModal"
+                               class="simple-link">{% trans "assets" %}</a>
+                            {% include "back_office/snippets/asset_create_modal.html" %}
+                        </span> {%trans "to keep focus" %}.
                     </div>    
                     <script src="{% static 'js/modal.js' %}"></script>      
                 </div>

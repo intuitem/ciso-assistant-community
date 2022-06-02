@@ -45,6 +45,7 @@ class QuickStartView(PermissionRequiredMixin, ListView):
         context['analysis_create_form'] = RiskAnalysisCreateForm
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
+        context['asset_create_form']= AssetForm
         return context
 
     def get_queryset(self):

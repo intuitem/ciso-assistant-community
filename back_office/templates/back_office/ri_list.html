@@ -132,9 +132,9 @@
                                 {% if scenario.treatment == 'open' %}
                                 bg-orange-200 
                                 {% elif scenario.treatment == 'mitigated' %}
-                                bg-blue-200 
-                                {% elif scenario.treatment == 'accepted' %}
                                 bg-green-200 
+                                {% elif scenario.treatment == 'accepted' %}
+                                bg-sky-200 
                                 {% else %}
                                 bg-red-300 
                                 {% endif %}">{{ scenario.get_treatment_display|lower}}
