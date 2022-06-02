@@ -365,13 +365,6 @@ class RiskScenarioCreateViewModal(PermissionRequiredMixin, CreateView):
     context_object_name = 'scenario'
     form_class = RiskScenarioCreateForm
 
-    # def form_valid(self, form: form_class) -> HttpResponse:
-    #     if form.is_valid():
-    #         form.project = get_object_or_404(Project, id=self.kwargs['parent_project'])
-    #         form.auditor = self.request.user
-    #         analysis = form.save(commit=False)
-    #         analysis.project = get_object_or_404(Project, id=3)
-    #         return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -433,7 +426,7 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['risk_scenario_create_form'] = RiskScenarioCreateForm
+        context['risk_scenario_create_form'] = RiskScenarioCreateForm(initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['instances'] = RiskInstance.objects.filter(analysis=self.get_object()).order_by('id')
         context['suggested_measures'] = Mitigation.objects.all().order_by('id')
         context['crumbs'] = [_('Analyses')]
