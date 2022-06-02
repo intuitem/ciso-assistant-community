@@ -64,10 +64,10 @@ class ParentRisk(models.Model):
 class Asset(models.Model):
     ASSETS_TYPES_LIST = [
         ('undefined', _('--')),
-        ('cs', _('control systems')),
-        ('das', _('data acquisition systems')),
-        ('ne', _('networking equipment')),
-        ('hpvms', _('hardware platforms for virtual machines or storage')),
+        ('cs', _('Control Systems')),
+        ('das', _('Data Acquisition Systems')),
+        ('ne', _('Networking Equipment')),
+        ('hpvms', _('Hardware Platforms for Virtual Machines or Storage')),
     ]
    
 
