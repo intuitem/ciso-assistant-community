@@ -1,10 +1,11 @@
+from logging import critical
 from attr import fields
 from django.forms import CharField, CheckboxInput, ChoiceField, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from django_filters import *
 from django_filters.widgets import *
 
 from core.models import Analysis, RiskInstance, Mitigation, Solution, RiskAcceptance
-from general.models import ProjectsGroup, Project, ParentRisk, Solution
+from general.models import Asset, ProjectsGroup, Project, ParentRisk, Solution
 from general.models import ParentRisk, Project
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -282,4 +283,35 @@ class SecurityFunctionFilter(GenericFilterSet):
 
     class Meta:
         model = Solution
+        fields = '__all__'
+
+class AssetFilter(GenericFilterSet):
+    YES_NO_CHOICES = (
+        (True, _('Yes')),
+        (False, _('No')),
+    )
+
+    name = GenericCharFilter(widget=TextInput(
+        attrs={
+                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+                'placeholder': _('Search Asset...')
+        }
+    ))
+    is_critical = GenericChoiceFilter(choices=YES_NO_CHOICES)
+    type = GenericMultipleChoiceFilter(choices=Asset.ASSETS_TYPES_LIST)
+    orderby = GenericOrderingFilter(
+        fields=(
+            ('name', 'name'),
+            ('type', 'type'),
+            ('is_critical', 'is_critical'),
+        ),
+        field_labels={
+            'name': _('name'.capitalize()),
+            'type': _('type'.capitalize()),
+            'is_critical': _('critical'.capitalize()),
+        }
+    )
+
+    class Meta:
+        model = Asset
         fields = '__all__'
