@@ -37,19 +37,19 @@
               </div>
 
               <div class="mb-6">
-                <label class="form-label">{{ asset_create_form.type.label|striptags }}</label>
+                <label class="form-label">{{ asset_create_form.business_value.label|striptags }}</label>
                 <div class="">
-                  {{ asset_create_form.type.errors }}
-                  {{ asset_create_form.type }}
+                  {{ asset_create_form.business_value.errors }}
+                  {{ asset_create_form.business_value }}
                 </div>
               </div>
 
-              <div class="flex items-center mb-4">
-                {{ asset_create_form.is_critical.errors }}
-                {{ asset_create_form.is_critical }}
-                <label class="ml-2 text-sm font-medium text-gray-900">
-                  {{ asset_create_form.is_critical.label|striptags }}
-                </label>
+              <div class="mb-6">
+                <label class="form-label">{{ asset_create_form.comments.label|striptags }}</label>
+                <div class="">
+                  {{ asset_create_form.comments.errors }}
+                  {{ asset_create_form.comments }}
+                </div>
               </div>
 
               <section class="col-start-3 col-span-6 place-content-end">

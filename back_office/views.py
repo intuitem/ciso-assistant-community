@@ -82,7 +82,7 @@ class AssetListView(PermissionRequiredMixin, ListView):
     model = Asset
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('-is_critical', 'id')
+        qs = self.model.objects.all().order_by('id')
         filtered_list = AssetFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 

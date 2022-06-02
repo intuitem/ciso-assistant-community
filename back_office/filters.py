@@ -286,29 +286,18 @@ class SecurityFunctionFilter(GenericFilterSet):
         fields = '__all__'
 
 class AssetFilter(GenericFilterSet):
-    YES_NO_CHOICES = (
-        (True, _('Yes')),
-        (False, _('No')),
-    )
-
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
                 'placeholder': _('Search Asset...')
         }
     ))
-    is_critical = GenericChoiceFilter(choices=YES_NO_CHOICES)
-    type = GenericMultipleChoiceFilter(choices=Asset.ASSETS_TYPES_LIST)
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
-            ('type', 'type'),
-            ('is_critical', 'is_critical'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
-            'type': _('type'.capitalize()),
-            'is_critical': _('critical'.capitalize()),
         }
     )
 

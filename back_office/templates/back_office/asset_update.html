@@ -17,14 +17,14 @@
                         {{ form.name }}
                     </div>
                     <div class="flex flex-col w-full">
-                        <p class="text-sm font-semibold">{{ form.type.label }}</p>
-                        {{ form.type.errors }}
-                        {{ form.type }}
+                        <p class="text-sm font-semibold">{{ form.business_value.label }}</p>
+                        {{ form.business_value.errors }}
+                        {{ form.business_value }}
                     </div>
-                    <div class="flex flex-row space-x-4 w-full items-center">
-                        <p class="text-sm font-semibold">{{ form.is_critical.label }}</p>
-                        {{ form.is_critical.errors }}
-                        {{ form.is_critical }}
+                    <div class="flex flex-col w-full">
+                        <p class="text-sm font-semibold">{{ form.comments.label }}</p>
+                        {{ form.comments.errors }}
+                        {{ form.comments }}
                     </div>
                 </div>
             </section>
