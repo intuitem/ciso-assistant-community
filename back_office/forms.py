@@ -3,7 +3,7 @@ from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, Ema
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
-from general.models import ParentRisk, Project, ProjectsGroup, Solution
+from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
 from django.utils.translation import gettext_lazy as _
 
 class DefaultDateInput(DateInput):
@@ -130,3 +130,8 @@ class ProjectForm(StyledModelForm):
         model = Project
         fields = '__all__'
         labels = {'parent_group': _('Parent domain')}
+
+class AssetForm(StyledModelForm):
+    class Meta:
+        model = Asset
+        fields = '__all__'

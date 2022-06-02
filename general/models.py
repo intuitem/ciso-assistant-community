@@ -61,6 +61,29 @@ class ParentRisk(models.Model):
         return self.title
 
 
+class Asset(models.Model):
+    ASSETS_TYPES_LIST = [
+        ('undefined', _('--')),
+        ('cs', _('Control Systems')),
+        ('das', _('Data Acquisition Systems')),
+        ('ne', _('Networking Equipment')),
+        ('hpvms', _('Hardware Platforms for Virtual Machines or Storage')),
+    ]
+   
+
+    name = models.CharField(max_length=200, verbose_name=_("name"))
+    type = models.CharField(max_length=20, default='undefined', 
+        choices=ASSETS_TYPES_LIST, verbose_name=_("type"))
+    is_critical = models.BooleanField(verbose_name=_("critical"), default=False)
+
+    class Meta:
+        verbose_name = _("asset")
+        verbose_name_plural = _("assets")
+
+    def __str__(self):
+        return self.name
+
+
 class Solution(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))

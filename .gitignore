@@ -3,6 +3,7 @@
 *.DS_Store
 *~$*
 staticfiles/*
+**/migrations/*
 *.mo
 *.env
 dump.json

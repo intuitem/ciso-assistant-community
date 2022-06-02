@@ -18,6 +18,7 @@ urlpatterns = [
 
     path('projects-domains/', login_required(views.ProjectsGroupListView.as_view()), name='pd-list'),
     path('projects/', login_required(views.ProjectListView.as_view()), name='project-list'),
+    path('assets/', login_required(views.AssetListView.as_view()), name='asset-list'),
     path('threats/', login_required(views.ParentRiskListView.as_view()), name='threat-list'),
     path('security-functions/', login_required(views.SecurityFunctionListView.as_view()), name='security-function-list'),
 
@@ -45,6 +46,8 @@ urlpatterns = [
     path('PRJ/create', login_required(views.ProjectCreateView.as_view()), name='project-create'),
     path('PRJ/create_modal/', login_required(views.ProjectCreateViewModal.as_view()), name='project-create-modal'),
     
+    path('AST/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
+    
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
     
     # path('RI/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
@@ -59,6 +62,7 @@ urlpatterns = [
 
     path('PD/<int:pk>', login_required(views.ProjectsGroupUpdateView.as_view()), name='pd-update'),
     path('PRJ/<int:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
+    path('AST/<int:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
     
     # DELETE VIEWS
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),
@@ -66,6 +70,7 @@ urlpatterns = [
     path('RAC/<int:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
     path('MSR/<int:pk>/delete/', login_required(views.MeasureDeleteView.as_view()), name='measure-delete'),
     path('PRJ/<int:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
+    path('asset/<int:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
     path('SF/<int:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
     path('PD/<int:pk>/delete/', login_required(views.ProjectsGroupDeleteView.as_view()), name='pd-delete'),
     path('TH/<int:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),

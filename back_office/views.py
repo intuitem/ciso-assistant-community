@@ -11,7 +11,7 @@ from datetime import date
 
 from django.contrib.auth.models import User, Group
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
-from general.models import ParentRisk, Project, ProjectsGroup, Solution
+from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
 
 from .forms import *
 
@@ -72,6 +72,28 @@ class ProjectListView(PermissionRequiredMixin, ListView):
         context['project_create_form'] = ProjectForm
         return context
 
+class AssetListView(PermissionRequiredMixin, ListView):
+    permission_required = 'general.view_asset'
+    template_name = 'back_office/asset_list.html'
+    context_object_name = 'assets'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = Asset
+
+    def get_queryset(self):
+        qs = self.model.objects.all().order_by('-is_critical', 'id')
+        filtered_list = AssetFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = AssetFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        context['asset_create_form'] = AssetForm
+        return context
+
 class ProjectsGroupListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_projectsgroup'
     template_name = 'back_office/project_domain_list.html'
@@ -104,7 +126,7 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
     model = Analysis
 
     def get_queryset(self):
-        qs = self.model.objects.all()
+        qs = self.model.objects.all().order_by('is_draft', 'id')
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -498,6 +520,16 @@ class ProjectDeleteView(PermissionRequiredMixin, DeleteView):
     def get_success_url(self) -> str:
         return reverse_lazy('project-list')
 
+class AssetDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'general.delete_asset'
+
+    model = Asset
+    success_url = reverse_lazy('asset-list')
+    template_name = 'back_office/snippets/asset_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('asset-list')
+
 class ProjectsGroupDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'general.delete_projectsgroup'
 
@@ -616,6 +648,23 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
         else:
           return self.request.POST.get('next', '/')
 
+
+class AssetUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'general.change_asset'
+    model = Asset
+    template_name = 'back_office/asset_update.html'
+    context_object_name = 'asset'
+    form_class = AssetForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        crumbs = [_('Assets')]
+        context['crumbs'] = crumbs
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('asset-list')
+
 class ProjectCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_project'
     model = Project
@@ -648,3 +697,16 @@ class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
         print(next_url)
         print(self.request.path)
         return redirect(next_url) if next_url is not None else reverse_lazy('project-list')
+
+class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
+    permission_required = 'general.add_asset'
+    model = Asset
+    template_name = 'back_office/snippets/asset_create_modal.html'
+    context_object_name = 'asset'
+    form_class = AssetForm
+
+    def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        print(next_url)
+        print(self.request.path)
+        return redirect(next_url) if next_url is not None else reverse_lazy('asset-list')

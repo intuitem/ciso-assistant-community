@@ -161,12 +161,12 @@
 						{% endif %}
 						{% if perms.general.view_project %}
 						<li>
-							<a href="{% url 'project-list' %}"
+							<a href="{% url 'asset-list' %}"
 								class="relative flex flex-row items-center pr-6 nav-link">
 								<span class="nav-link-icon">
 									<i class="fas fa-gem"></i>
 								</span>
-								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %} (fix me)</span>
+								<span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %}</span>
 							</a>
 						</li>
 						{% endif %}

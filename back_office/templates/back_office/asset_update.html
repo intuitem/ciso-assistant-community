@@ -1,0 +1,39 @@
+{% extends 'back_office/base.html' %}
+{% load i18n static %}
+{% block content %}
+{% with page_title=asset %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<div class="mb-4">
+    <form method="post" id="analysis_form">{% csrf_token %}
+        <div class="bg-white rounded-lg shadow px-8 py-6">
+            <section class="flex flex-col space-y-4 mb-2">
+                <div class="flex flex-col space-y-4">
+                    <div class="flex flex-col w-full">
+                        <div class="inline"></div>
+                        <p class="text-sm font-semibold">{{ form.name.label }}</p>
+                        {{ form.name.errors }}
+                        {{ form.name }}
+                    </div>
+                    <div class="flex flex-col w-full">
+                        <p class="text-sm font-semibold">{{ form.type.label }}</p>
+                        {{ form.type.errors }}
+                        {{ form.type }}
+                    </div>
+                    <div class="flex flex-row space-x-4 w-full items-center">
+                        <p class="text-sm font-semibold">{{ form.is_critical.label }}</p>
+                        {{ form.is_critical.errors }}
+                        {{ form.is_critical }}
+                    </div>
+                </div>
+            </section>
+            <div class="flex justify-end space-x-2">
+                <a href="{% url 'asset-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+                <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
