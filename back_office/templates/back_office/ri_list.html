@@ -140,7 +140,7 @@
                                 {% endif %}">{{ scenario.get_treatment_display|lower}}
                                 </span>
                                 <div class="ml-3">
-                                    <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}"
+                                    <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ scenario.title|capfirst }}
                                     </a>
@@ -166,7 +166,7 @@
                             <div class="">
                                 <span><a href="{% url 'RA' scenario.analysis.id %}#{{scenario.id}}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
-                                    <a href="{% url 'ri-update' scenario.id %}" class="cursor-pointer table-action">
+                                    <a href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>

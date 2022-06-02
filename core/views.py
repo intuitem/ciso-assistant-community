@@ -263,8 +263,8 @@ def export_risks_csv(request, analysis):
     response['Content-Disposition'] = f'attachment; filename="RA-{ra.id}-{ra.project}-v-{ra.version}.csv"'
 
     writer = csv.writer(response, delimiter=';')
-    columns = ['rid', 'parent_risk', 'title', 'scenario',
-               'existing_measures', 'current_level', 'mitigations', 'residual_level',
+    columns = ['rid', 'threat', 'title', 'scenario',
+               'existing_measures', 'current_level', 'measures', 'residual_level',
                'treatment']
     writer.writerow(columns)
 
@@ -291,7 +291,7 @@ def export_mp_csv(request, analysis):
 
     writer = csv.writer(response, delimiter=';')
     columns = ['rid', 'risk_title',
-               'mtg_id', 'mtg_title', 'mtg_desc', 'type', 'solution', 'eta', 'effort', 'link', 'status',
+               'measure_id', 'measure_title', 'measure_desc', 'type', 'solution', 'eta', 'effort', 'link', 'status',
                ]
     writer.writerow(columns)
 

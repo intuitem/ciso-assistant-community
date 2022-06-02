@@ -55,21 +55,43 @@
                 {{ form.existing_measures.errors }}
                 {{ form.existing_measures }}
                 <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
-                
-                <div class="flex flex-row space-x-8 mt-4">
-                    <div>
-                        <p class="text-sm font-semibold">{% trans "Current Probability" %}</p>
-                        {{ form.current_proba.errors }}
-                        {{ form.current_proba }}
-                    </div>
-                    <div>
-                        <p class="text-sm font-semibold">{% trans "Current Impact" %}</p>
-                        {{ form.current_impact.errors }}
-                        {{ form.current_impact }}
-                    </div>
-                    <div>
-                        <p class="text-sm font-semibold">{% trans "Current Risk Level" %}</p>
-                        {{ instance.get_current_level_display }}
+                <div class="px-4 pt-2 pb-4 flex flex-col space-x-6 mt-10 rounded-lg shadow w-full border">
+                    <p class="text-lg pb-2 font-semibold">{% trans "Current Indicator" %}</p>
+                    <div class="px-4 pt-2 pb-4 flex flex-row space-x-6 justify-center">
+                        <div>
+                            <p class="pl-1 text-sm font-semibold">{% trans "Current Probability" %}</p>
+                            {{ form.current_proba.errors }}
+                            {{ form.current_proba }}
+                        </div>
+                        <div class="items-center pt-7">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div>
+                            <p class="pl-1 text-sm font-semibold">{% trans "Current Impact" %}</p>
+                            {{ form.current_impact.errors }}
+                            {{ form.current_impact }}
+                        </div>
+                        <div class="items-center pt-7">
+                            <i class="fas fa-equals"></i>
+                        </div>
+                        <div class=""> 
+                            <p class="pl-1 text-sm font-semibold">{% trans "Current Risk Level" %}</p>
+                            <div class="">
+                                <span class="rounded-lg text-sm flex pb-2 pt-2 justify-center
+                                    {% if instance.current_level == 'VL' %}
+                                        bg-green-200 
+                                    {% elif instance.current_level == 'L' %}
+                                        bg-lime-200
+                                    {% elif instance.current_level == 'M' %}
+                                        bg-yellow-200
+                                    {% elif instance.current_level == 'H' %}
+                                        bg-orange-300
+                                    {% elif instance.current_level == 'VH' %}
+                                        bg-red-400
+                                    {% endif %}" style="margin-bottom: 10px">{{ instance.get_current_level_display }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -78,20 +100,40 @@
             <div class="flex flex-col space-y-4 w-full mb-4">
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
                     <h2 class="text-lg font-semibold mb-4">{% trans "Treatment" %}</h2>
-                    <div class="flex flex-row space-x-4 mt-4">
+                    <div class="flex flex-row space-x-4 mt-4 justify-center">
                         <div>
                             <p class="text-sm font-semibold whitespace-nowrap">{% trans "Residual Probability" %}</p>
                             {{ form.residual_proba.errors }}
                             {{ form.residual_proba }}
+                        </div>
+                        <div class="items-center pt-7">
+                            <i class="fas fa-times"></i>
                         </div>
                         <div>
                             <p class="text-sm font-semibold">{% trans "Residual Impact" %}</p>
                             {{ form.residual_impact.errors }}
                             {{ form.residual_impact }}
                         </div>
-                        <div>
-                            <p class="text-sm font-semibold">{% trans "Residual Risk Level" %}</p>
-                            {{ instance.get_residual_level_display }}
+                        <div class="items-center pt-7">
+                            <i class="fas fa-equals"></i>
+                        </div>
+                        <div class=""> 
+                            <p class="pl-1 text-sm font-semibold">{% trans "Residual Risk Level" %}</p>
+                            <div class="">
+                                <span class="rounded-lg text-sm flex pb-2 pt-2 justify-center
+                                    {% if instance.residual_level == 'VL' %}
+                                        bg-green-200 
+                                    {% elif instance.residual_level == 'L' %}
+                                        bg-lime-200
+                                    {% elif instance.residual_level == 'M' %}
+                                        bg-yellow-200
+                                    {% elif instance.residual_level == 'H' %}
+                                        bg-orange-300
+                                    {% elif instance.residual_level == 'VH' %}
+                                        bg-red-400
+                                    {% endif %}" style="margin-bottom: 10px">{{ instance.get_residual_level_display }}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,8 +173,10 @@
                 </div>
             </div>
         </section>
-        <div class="flex pb-4 space-x-2 justify-end"> 
+        <div class="flex space-x-2 justify-end"> 
             <a href="{% url 'ri-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+            <input
+                type="hidden" form="instance_update_form" name="next" value={{ request.GET.next }}>
             <button action="submit" form="instance_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
         </div>
     </div>

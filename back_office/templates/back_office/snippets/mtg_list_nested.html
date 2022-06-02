@@ -28,7 +28,7 @@
                     <div class="flex items-center">
 
                         <div class="">
-                            <a id="mitigation{{ mitigation.id }}" href="{% url 'mtg-update' mitigation.id %}"
+                            <a id="mitigation{{ mitigation.id }}" href="{% url 'mtg-update' mitigation.id %}?next={{ request.path|urlencode }}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ mitigation.title }}
                             </a>

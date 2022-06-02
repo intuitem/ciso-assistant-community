@@ -20,7 +20,7 @@
                     <div class="flex items-center">
 
                         <div>
-                            <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}"
+                            <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}?next={{ request.path|urlencode }}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ project.name }}
                             </a>
