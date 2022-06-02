@@ -420,6 +420,7 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['risk_scenario_create_form'] = RiskScenarioCreateForm
         context['instances'] = RiskInstance.objects.filter(analysis=self.get_object()).order_by('id')
         context['suggested_measures'] = Mitigation.objects.all().order_by('id')
         context['crumbs'] = [_('Analyses')]
