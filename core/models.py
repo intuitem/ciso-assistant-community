@@ -39,6 +39,11 @@ class Analysis(models.Model):
             ri.save()
         super(Analysis, self).save(*args, **kwargs)
 
+    def get_scenario_count(self):
+        count = RiskInstance.objects.filter(analysis=self.id).count()
+        scenario_count = count
+        return scenario_count
+
     def quality_check(self) -> dict:
 
         ri_value = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}

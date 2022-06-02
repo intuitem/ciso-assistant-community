@@ -123,6 +123,7 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "ID" %}</th>
                 <th class="px-6 py-3">{% trans "Auditor" %}</th>
+                <th class="px-6 py-3">{% trans "Risk Scenarios" %}</th>
                 <th class="px-6 py-3">{% trans "Last Update" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
@@ -153,6 +154,11 @@
                                         {{ analysis.auditor }}
                                     {% endif %}
                                 {% else %}--{% endif %}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                {{ analysis.get_scenario_count }}
                             </p>
                         </td>
                         <td class="px-6 py-4">
