@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-01 14:07+0000\n"
+"POT-Creation-Date: 2022-06-02 13:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,7 +217,7 @@ msgstr "Très Élevé"
 msgid "Analysis_bo"
 msgstr "Analyse"
 
-#: core/models.py:133 core/templates/snippets/ra_data.html:39
+#: core/models.py:133 core/templates/snippets/ra_data.html:41
 #, fuzzy
 #| msgid "Treatment"
 msgid "Threat"
@@ -303,7 +303,7 @@ msgstr "Mis à jour le"
 msgid "Risk Scenario"
 msgstr "Scénario de risque"
 
-#: core/models.py:165 core/templates/snippets/ra_data.html:34
+#: core/models.py:165 core/templates/snippets/ra_data.html:36
 msgid "Risk Scenarios"
 msgstr "Scénarios de risques"
 
@@ -360,7 +360,7 @@ msgid "<short title for the measure>"
 msgstr "<titre bref de la mesure>"
 
 #: core/models.py:214 core/templates/snippets/mp_data.html:31
-#: core/templates/snippets/ra_data.html:26
+#: core/templates/snippets/ra_data.html:28
 msgid "Description"
 msgstr ""
 
@@ -457,12 +457,12 @@ msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
 #: core/templates/core/analytics.html:60
-msgid "Break down per Threat"
-msgstr "Répartition par Menace"
+msgid "Risk scenarios broken down by Threat"
+msgstr "Scénarios de risque répartis par Menace"
 
 #: core/templates/core/analytics.html:68
-msgid "Risks status"
-msgstr "Statuts des Risques"
+msgid "Risk scenarios status"
+msgstr "Statut des Scénarios de risque"
 
 #: core/templates/core/analytics.html:76
 msgid ""
@@ -473,12 +473,12 @@ msgstr ""
 "Résiduels (une fois toutes les mesures implémentées)"
 
 #: core/templates/core/analytics.html:80
-#: core/templates/snippets/ra_data.html:43
+#: core/templates/snippets/ra_data.html:45
 msgid "Current Risk"
 msgstr "Risque Courant"
 
 #: core/templates/core/analytics.html:86
-#: core/templates/snippets/ra_data.html:45
+#: core/templates/snippets/ra_data.html:47
 msgid "Residual Risk"
 msgstr "Risque Résiduel"
 
@@ -713,11 +713,11 @@ msgstr "incohérences que vous devez vérifier (utilisez x-rays)."
 msgid "Ok"
 msgstr ""
 
-#: core/templates/core/composer.html:70 core/templates/snippets/ra_data.html:91
+#: core/templates/core/composer.html:70 core/templates/snippets/ra_data.html:93
 msgid "Current"
 msgstr "Courants"
 
-#: core/templates/core/composer.html:71 core/templates/snippets/ra_data.html:95
+#: core/templates/core/composer.html:71 core/templates/snippets/ra_data.html:97
 msgid "Residual"
 msgstr "Résiduels"
 
@@ -767,7 +767,7 @@ msgid "ready"
 msgstr "prêt"
 
 #: core/templates/core/index.html:106 core/templates/core/search_results.html:8
-#: core/templates/snippets/ra_data.html:9
+#: core/templates/snippets/ra_data.html:11
 msgid "Risk Analysis"
 msgstr "Analyse de Risque"
 
@@ -782,6 +782,10 @@ msgstr "... format CSV"
 #: core/templates/core/index.html:111
 msgid "Treatment Plan"
 msgstr "Plan de Traitement"
+
+#: core/templates/core/index.html:130 core/templates/core/review.html:59
+msgid "No analysis found."
+msgstr ""
 
 #: core/templates/core/index.html:140
 msgid "Showing Page"
@@ -1413,63 +1417,63 @@ msgstr "Pas de mesure associée"
 msgid "Security function"
 msgstr "Fonction de sécurité"
 
-#: core/templates/snippets/ra_data.html:7
+#: core/templates/snippets/ra_data.html:9
 msgid "Edit"
 msgstr "Modifier"
 
-#: core/templates/snippets/ra_data.html:14
+#: core/templates/snippets/ra_data.html:16
 msgid "Audited by:"
 msgstr "Auditée par :"
 
-#: core/templates/snippets/ra_data.html:15
+#: core/templates/snippets/ra_data.html:17
 msgid "Status:"
 msgstr "Statut :"
 
-#: core/templates/snippets/ra_data.html:15
+#: core/templates/snippets/ra_data.html:17
 msgid "Draft"
 msgstr "Brouillon"
 
-#: core/templates/snippets/ra_data.html:15
+#: core/templates/snippets/ra_data.html:17
 msgid "Ready"
 msgstr "Prêt"
 
-#: core/templates/snippets/ra_data.html:17
+#: core/templates/snippets/ra_data.html:19
 msgid "Created at:"
 msgstr "Création :"
 
-#: core/templates/snippets/ra_data.html:18
+#: core/templates/snippets/ra_data.html:20
 msgid "Updated at:"
 msgstr "Dernière mise à jour :"
 
-#: core/templates/snippets/ra_data.html:23
+#: core/templates/snippets/ra_data.html:25
 msgid "Profile:"
 msgstr "Profil :"
 
-#: core/templates/snippets/ra_data.html:40
+#: core/templates/snippets/ra_data.html:42
 msgid "Subject"
 msgstr "Sujet"
 
-#: core/templates/snippets/ra_data.html:41
+#: core/templates/snippets/ra_data.html:43
 msgid "Scenario"
 msgstr "Scénario"
 
-#: core/templates/snippets/ra_data.html:42
+#: core/templates/snippets/ra_data.html:44
 msgid "Existing measures"
 msgstr "Mesures existantes"
 
-#: core/templates/snippets/ra_data.html:44
+#: core/templates/snippets/ra_data.html:46
 msgid "Recommended measures"
 msgstr "Mesures recommandées"
 
-#: core/templates/snippets/ra_data.html:46
+#: core/templates/snippets/ra_data.html:48
 msgid "Treatment"
 msgstr "Traitement"
 
-#: core/templates/snippets/ra_data.html:53
+#: core/templates/snippets/ra_data.html:55
 msgid "Risk Analysis is empty"
 msgstr "L'analyse de risque est vide"
 
-#: core/templates/snippets/ra_data.html:88
+#: core/templates/snippets/ra_data.html:90
 msgid "Matrix view"
 msgstr "Vue Matricielle"
 
@@ -1522,6 +1526,9 @@ msgstr " \"Mesure: en attente\" "
 #: core/templates/snippets/treatment_progress_dual_bar.html:13
 msgid " \"Measure: done\" "
 msgstr " \"Mesure: terminée\" "
+
+#~ msgid "Break down per Threat"
+#~ msgstr "Répartition par Menace"
 
 #~ msgid "Solutions in catalog"
 #~ msgstr "Solutions dans le catalogue"

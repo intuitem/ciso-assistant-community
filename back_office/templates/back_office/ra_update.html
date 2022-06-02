@@ -1,5 +1,5 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 {% block content %}
 {% with page_title=analysis %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
@@ -46,7 +46,7 @@
                             {{ form.is_draft }}
                         </div>
                         <div class="flex justify-end space-x-2">
-                            <a href="{% url 'ra-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+                            <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
                             <input
                                 type="hidden" name="next" value={{ request.GET.next }}>
                             <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
@@ -60,12 +60,14 @@
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
         <div class="grid justify-items-stretch grid-cols-2 mb-2">
             <h2 class="text-xl font-semibold">{% trans "Associated Risk Scenarios" %}</h2>
-            <a id="newRiskScenario" href="{% url 'ri-create' parent_analysis=analysis.id %}"
-               class="add-button">
-               <i class="fas fa-plus"></i>
-               {% trans "New Risk Scenario" %}
-            </a>
+            <div x-data="modal()" class="justify-self-end">
+                <a id="newRiskScenario" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+                class="add-button">
+                <i class="fas fa-plus mr-2"></i>{% trans "New Risk Scenario" %}</a>
+                {% include "back_office/snippets/risk_scenario_create_modal.html" %}
+            </div>
         </div>
+        <script src="{% static 'js/modal.js' %}"></script>
         {% include 'back_office/snippets/ri_list_nested.html' %}
     </div>
 </div>

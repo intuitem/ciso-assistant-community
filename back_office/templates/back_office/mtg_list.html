@@ -122,6 +122,7 @@
                 <th class="px-6 py-3">{% trans "Title" %}</th>
                 <th class="px-6 py-3">{% trans "Parent Project" %}</th>
                 <th class="px-6 py-3">{% trans "Type" %}</th>
+                <th class="px-6 py-3">{% trans "ETA" %}</th>
                 <th class="px-6 py-3">{% trans "Security Function" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
@@ -156,10 +157,17 @@
                         </td>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">
-                                {% if measure.type == 'n/a' %}
-                                {{ measure.type|upper }}
+                                {% if measure.type %}
+                                {{ measure.get_type_display }}
+                                {% endif %}
+                            </p>                     
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-gray-900 whitespace-no-wrap">
+                                {% if measure.eta %}
+                                {{ measure.eta }}
                                 {% else %}
-                                {{ measure.type|capfirst }}
+                                  --
                                 {% endif %}
                             </p>                     
                         </td>

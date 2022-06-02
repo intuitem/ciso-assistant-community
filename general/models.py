@@ -66,9 +66,9 @@ class Asset(models.Model):
         verbose_name_plural = _("Assets")
         verbose_name = _("Asset")
     
-    name = models.CharField(max_length=100)
-    business_value = models.TextField(blank=True)
-    comments = models.TextField(blank=True)
+    name = models.CharField(max_length=100, verbose_name=_('name'))
+    business_value = models.TextField(blank=True, verbose_name=_('business value'))
+    comments = models.TextField(blank=True, verbose_name=_('comments'))
 
     def __str__(self):
         return self.name

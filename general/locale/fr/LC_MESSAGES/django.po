@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-01 14:07+0000\n"
+"POT-Creation-Date: 2022-06-02 13:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgstr ""
 msgid "<Group title>"
 msgstr "<Titre du groupe>"
 
-#: general/models.py:7 general/models.py:65
+#: general/models.py:7 general/models.py:78
 msgid "Name"
 msgstr "Nom"
 
@@ -138,34 +138,54 @@ msgid "Threats"
 msgstr ""
 
 #: general/models.py:66
+msgid "Assets"
+msgstr ""
+
+#: general/models.py:67
+msgid "Asset"
+msgstr ""
+
+#: general/models.py:69
+msgid "name"
+msgstr "nom"
+
+#: general/models.py:70
+msgid "business value"
+msgstr "valeur commerciale"
+
+#: general/models.py:71
+msgid "comments"
+msgstr "commentaires"
+
+#: general/models.py:79
 msgid "Provider"
 msgstr "Fournisseur"
 
-#: general/models.py:67
+#: general/models.py:80
 msgid "Contact"
 msgstr ""
 
-#: general/models.py:70
+#: general/models.py:83
 msgid "Solution"
 msgstr ""
 
-#: general/models.py:71
+#: general/models.py:84
 msgid "Solutions"
 msgstr ""
 
-#: general/models.py:87
+#: general/models.py:100
 msgid "Group email for notifications"
 msgstr "E-mail de groupe pour les notifications"
 
-#: general/models.py:88
+#: general/models.py:101
 msgid "Group email"
 msgstr "E-mail de groupe"
 
-#: general/models.py:90
+#: general/models.py:103
 msgid "Allowed Projects Groups"
 msgstr "Groupes de Projets Autorisés"
 
-#: general/models.py:91
+#: general/models.py:104
 msgid "Project groups allowed for read access on the Portal. "
 msgstr "Groupes de projets autorisés à accéder en lecture au Portail. "
 
