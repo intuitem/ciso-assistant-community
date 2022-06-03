@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-02 15:13+0000\n"
+"POT-Creation-Date: 2022-06-03 22:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -72,7 +72,7 @@ msgstr "Fin De Vie"
 
 #: general/models.py:27
 msgid "Dropped"
-msgstr "Abandonnée"
+msgstr "Abandonné"
 
 #: general/models.py:30
 msgid "<short project name>"
@@ -106,7 +106,7 @@ msgstr "<bref résumé du projet>"
 msgid ""
 "This summary is optional and will appear in the risk analysis for context"
 msgstr ""
-"Ce résumé est optionnel et apparaîtra dans l'analyse des risques pour la "
+"Ce résumé est optionnel et apparaîtra dans l'analyse de risque pour la "
 "contextualiser"
 
 #: general/models.py:39
@@ -188,12 +188,6 @@ msgstr "Groupes de Projets Autorisés"
 #: general/models.py:104
 msgid "Project groups allowed for read access on the Portal. "
 msgstr "Groupes de projets autorisés à accéder en lecture au Portail. "
-
-#~ msgid "Parent Risk"
-#~ msgstr "Risque Parent"
-
-#~ msgid "Parent Risks"
-#~ msgstr "Risques Parents"
 
 #~ msgid "Parent group"
 #~ msgstr "Groupe parent"

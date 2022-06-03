@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-02 15:13+0000\n"
+"POT-Creation-Date: 2022-06-03 22:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgid "Order by"
 msgstr "Trier par"
 
 #: back_office/filters.py:84
-#: back_office/templates/back_office/analysis_list.html:135
+#: back_office/templates/back_office/analysis_list.html:136
 #: back_office/templates/back_office/snippets/ra_list_nested.html:25
 msgid "draft"
 msgstr "brouillon"
@@ -163,18 +163,24 @@ msgstr ""
 msgid "Search Asset..."
 msgstr "Rechercher un Bien sensible..."
 
-#: back_office/forms.py:46 back_office/templates/back_office/mtg_update.html:16
+#: back_office/forms.py:45 back_office/templates/back_office/mtg_update.html:16
 #: back_office/templates/back_office/ri_update.html:106
 msgid "Risk Scenario"
 msgstr "Scénario de risque"
 
-#: back_office/forms.py:47 back_office/templates/back_office/mtg_list.html:84
+#: back_office/forms.py:46 back_office/templates/back_office/mtg_list.html:84
 #: back_office/templates/back_office/mtg_list.html:126
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security Function"
 msgstr "Fonction de Sécurité"
 
-#: back_office/forms.py:139
+#: back_office/forms.py:132
+#, fuzzy
+#| msgid "Risk Scenario"
+msgid "Risk scenario"
+msgstr "Scénario de risque"
+
+#: back_office/forms.py:138
 #, fuzzy
 #| msgid "Parent Domain"
 msgid "Parent domain"
@@ -225,7 +231,7 @@ msgstr "Effacer les Filtres"
 
 #: back_office/templates/back_office/acceptance_list.html:102
 msgid "New Risk Acceptance"
-msgstr "Nouvelle Acceptation d'un Risque"
+msgstr "Nouvelle Acceptation d'un risque"
 
 #: back_office/templates/back_office/acceptance_list.html:111
 msgid "Risk Acceptance"
@@ -240,7 +246,7 @@ msgid "Expiry Date"
 msgstr "Date d'expiration"
 
 #: back_office/templates/back_office/acceptance_list.html:115
-#: back_office/templates/back_office/analysis_list.html:127
+#: back_office/templates/back_office/analysis_list.html:128
 #: back_office/templates/back_office/asset_list.html:57
 #: back_office/templates/back_office/mtg_list.html:127
 #: back_office/templates/back_office/project_domain_list.html:52
@@ -261,7 +267,7 @@ msgstr "Aucune acceptation de risque n'a été trouvée."
 #: back_office/templates/back_office/base.html:96
 #: back_office/templates/back_office/quick_start.html:64
 msgid "Risk Analyses"
-msgstr "Analyses de risques"
+msgstr "Analyses de risque"
 
 #: back_office/templates/back_office/analysis_list.html:75
 #: back_office/templates/back_office/ra_update.html:44
@@ -299,23 +305,29 @@ msgid "ID"
 msgstr ""
 
 #: back_office/templates/back_office/analysis_list.html:126
+#: back_office/templates/back_office/base.html:107
+#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:537
+msgid "Risk Scenarios"
+msgstr "Scénarios de risque"
+
+#: back_office/templates/back_office/analysis_list.html:127
 #: back_office/templates/back_office/snippets/ra_list_nested.html:13
 msgid "Last Update"
 msgstr "Dernière mise à jour"
 
-#: back_office/templates/back_office/analysis_list.html:137
+#: back_office/templates/back_office/analysis_list.html:138
 #: back_office/templates/back_office/snippets/ra_list_nested.html:27
 msgid "ready"
 msgstr "prêt"
 
-#: back_office/templates/back_office/analysis_list.html:192
+#: back_office/templates/back_office/analysis_list.html:198
 #: back_office/templates/back_office/snippets/ra_list_nested.html:75
 msgid "No analysis found."
 msgstr "Aucune analyse n'a été trouvée."
 
 #: back_office/templates/back_office/asset_list.html:4
 #: back_office/templates/back_office/asset_list.html:9
-#: back_office/templates/back_office/base.html:169 back_office/views.py:652
+#: back_office/templates/back_office/base.html:169 back_office/views.py:645
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -396,25 +408,20 @@ msgstr "Vue d'ensemble"
 msgid "Switch to viewer"
 msgstr "Basculer vers le lecteur"
 
-#: back_office/templates/back_office/base.html:107
-#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:544
-msgid "Risk Scenarios"
-msgstr "Scénarios de risques"
-
 #: back_office/templates/back_office/base.html:118
 msgid "Security Measures"
 msgstr "Mesures de sécurité"
 
 #: back_office/templates/back_office/base.html:147
 #: back_office/templates/back_office/project_domain_list.html:5
-#: back_office/views.py:603
+#: back_office/views.py:596
 msgid "Projects Domains"
 msgstr "Domaines de projets"
 
 #: back_office/templates/back_office/base.html:158
 #: back_office/templates/back_office/project_list.html:8
 #: back_office/templates/back_office/quick_start.html:16
-#: back_office/views.py:625
+#: back_office/views.py:618
 msgid "Projects"
 msgstr ""
 
@@ -582,7 +589,7 @@ msgstr ""
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: back_office/templates/back_office/index.html:24 back_office/views.py:439
+#: back_office/templates/back_office/index.html:24 back_office/views.py:432
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -609,7 +616,7 @@ msgstr "projets"
 
 #: back_office/templates/back_office/index.html:44
 msgid "Risk scenarios overview"
-msgstr "Vue d'ensemble des scénarios de risques"
+msgstr "Vue d'ensemble des scénarios de risque"
 
 #: back_office/templates/back_office/index.html:50
 msgid "Security measures status"
@@ -689,7 +696,7 @@ msgstr "Departement"
 
 #: back_office/templates/back_office/pd_update.html:34
 msgid "Associated Projects"
-msgstr "Projets Associés"
+msgstr "Projets associés"
 
 #: back_office/templates/back_office/pd_update.html:38
 #: back_office/templates/back_office/project_create.html:4
@@ -742,7 +749,7 @@ msgstr "Aucun projet n'a été trouvé"
 
 #: back_office/templates/back_office/project_update.html:52
 msgid "Associated Risk Analyses"
-msgstr "Analyses Associées"
+msgstr "Analyses associées"
 
 #: back_office/templates/back_office/quick_start.html:15
 #: back_office/templates/back_office/quick_start.html:39
@@ -845,7 +852,7 @@ msgid ""
 "by identifying the potential risk scenarios and the security measures to "
 "mitigate them."
 msgstr ""
-"en identifiant les scénarios de risques potentiels ainsi que les mesures de "
+"en identifiant les scénarios de risque potentiels ainsi que les mesures de "
 "sécurité pour les atténuer."
 
 #: back_office/templates/back_office/ra_create.html:4
@@ -881,7 +888,7 @@ msgstr ""
 
 #: back_office/templates/back_office/ra_update.html:62
 msgid "Associated Risk Scenarios"
-msgstr "Scénarios Asscociés"
+msgstr "Scénarios de risque asscociés"
 
 #: back_office/templates/back_office/ra_update.html:66
 #: back_office/templates/back_office/ri_create.html:4
@@ -915,7 +922,7 @@ msgstr ""
 #: back_office/templates/back_office/ri_update.html:213
 #: back_office/templates/back_office/snippets/ri_list_nested.html:25
 msgid "Residual Risk Level"
-msgstr "Niveau de Risque Résiduel"
+msgstr "Niveau de risque résiduel"
 
 #: back_office/templates/back_office/ri_create.html:47
 #: back_office/templates/back_office/ri_update.html:197
@@ -942,12 +949,12 @@ msgstr "Statut du traitement"
 #: back_office/templates/back_office/ri_update.html:170
 #: back_office/templates/back_office/snippets/ri_list_nested.html:19
 msgid "Current Risk Level"
-msgstr "Niveau de Risque Courant"
+msgstr "Niveau de risque courant"
 
 #: back_office/templates/back_office/ri_create.html:76
 #: back_office/templates/back_office/ri_update.html:146
 msgid "Existing Measures"
-msgstr "Mesures Existantes"
+msgstr "Mesures existantes"
 
 #: back_office/templates/back_office/ri_create.html:83
 #: back_office/templates/back_office/ri_update.html:154
@@ -962,7 +969,7 @@ msgstr "Impact courant"
 #: back_office/templates/back_office/ri_create.html:96
 #: back_office/templates/back_office/ri_update.html:255
 msgid "Associated Measures"
-msgstr "Mesures Associées"
+msgstr "Mesures associées"
 
 #: back_office/templates/back_office/ri_list.html:195
 #: back_office/templates/back_office/snippets/ri_list_nested.html:86
@@ -1001,7 +1008,7 @@ msgstr "Sujet"
 
 #: back_office/templates/back_office/ri_update.html:145
 msgid "Current Profile"
-msgstr "Profile Courant"
+msgstr "Profile courant"
 
 #: back_office/templates/back_office/ri_update.html:151
 msgid "Current Indicator"
@@ -1163,13 +1170,13 @@ msgid ""
 "Risk Analysis: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement "
-"l'Analyse de Risque suivante: "
+"l'Analyse de risque suivante: "
 
 #: back_office/templates/back_office/snippets/ra_delete_modal.html:31
 msgid ""
 "as well as any child object, this includes: Risk Scenarios and Measures."
 msgstr ""
-"ainsi que tout objet enfant, ce qui inclut : Scénarios de Risques et Mesures."
+"ainsi que tout objet enfant, ce qui inclut : Scénarios de risque et Mesures."
 
 #: back_office/templates/back_office/snippets/ri_list_nested.html:16
 msgid "Existing measures"
@@ -1185,7 +1192,7 @@ msgstr "Ajouter une Acceptation"
 
 #: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:22
 msgid "Delete Risk Acceptance?"
-msgstr "Supprimer l'Acceptation de Risque?"
+msgstr "Supprimer l'Acceptation de risque?"
 
 #: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:30
 msgid ""
@@ -1209,7 +1216,7 @@ msgid ""
 "Risk Scenario: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement le "
-"Scénario de Risque suivant: "
+"Scénario de risque suivant: "
 
 #: back_office/templates/back_office/snippets/risk_scenario_delete_modal.html:31
 msgid "as well as any child object, this includes: Security Measures."
@@ -1305,9 +1312,9 @@ msgstr "super-utilisateur"
 #, fuzzy
 #~| msgid "Current Risk Level"
 #~ msgid "Current Level"
-#~ msgstr "Niveau de Risque Courant"
+#~ msgstr "Niveau de risque courant"
 
 #, fuzzy
 #~| msgid "Residual Risk Level"
 #~ msgid "Residual Level"
-#~ msgstr "Niveau de Risque Résiduel"
+#~ msgstr "Niveau de risque résiduel"
