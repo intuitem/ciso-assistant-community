@@ -35,8 +35,8 @@ msgid "Analysis registry"
 msgstr "Registre des analyses"
 
 #: asf_rm/settings.py:209
-msgid "Risk instances"
-msgstr "Instances de risque"
+msgid "Risk scenarios"
+msgstr "Scénarios de risque"
 
 #: asf_rm/settings.py:214
 msgid "Mitigations"

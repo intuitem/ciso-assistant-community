@@ -116,6 +116,7 @@ msgstr ""
 msgid "<risk instance short title>"
 msgstr ""
 
+#: core/templates/snippets/ra_data.html:40
 #: core/models.py:135 core/models.py:209
 msgid "Title"
 msgstr ""
@@ -126,8 +127,8 @@ msgstr ""
 
 #: core/models.py:138
 msgid ""
-"The existing security measures to manage this risk. Edit the risk instance to add "
-"extra mitigations."
+"The existing security measures to manage this risk. Edit the risk scenario to add "
+"extra measures."
 msgstr ""
 
 #: core/models.py:139
@@ -375,7 +376,7 @@ msgid "Current versus residual"
 msgstr ""
 
 #: core/templates/core/base.html:31
-msgid "Search Risk instance, mitigation, analysis ..."
+msgid "Search risk scenario, security measure, analysis..."
 msgstr ""
 
 #: core/templates/core/base.html:43 core/templates/snippets/ra_data.html:7
@@ -1106,10 +1107,6 @@ msgstr ""
 
 #: core/templates/snippets/ra_data.html:39
 msgid "Parent Risk
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:40
-msgid "Subject"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:41

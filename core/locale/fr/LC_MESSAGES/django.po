@@ -66,7 +66,7 @@ msgstr "Mot de passe"
 
 #: core/models.py:14
 msgid "Balanced (default)"
-msgstr "Équilibré (par défaut)"
+msgstr "Équilibrée (par défaut)"
 
 #: core/models.py:15
 msgid "Critical (FAIR-based)"
@@ -247,7 +247,7 @@ msgid ""
 "The existing security measures to manage this risk. Edit the risk scenario to add "
 "extra security measures."
 msgstr ""
-"Les mesures de sécurité existantes pour gérer ce risque. Modifier le scénario de risque "
+"Les mesures de sécurité existantes pour gérer ce risque. Modifiez le scénario de risque "
 "pour y ajouter des mesures de sécurité supplémentaires."
 
 #: core/models.py:143
@@ -1259,7 +1259,7 @@ msgstr "Violation de haut niveau"
 #: core/templates/core/scoring.html:461
 msgid "How much personally identifiable information could be disclosed?"
 msgstr ""
-"Quelle quantité d'informations personnellement identifiable pourrait être "
+"Quelle quantité d'information personnellement identifiable pourrait être "
 "divulguée ?"
 
 #: core/templates/core/scoring.html:466

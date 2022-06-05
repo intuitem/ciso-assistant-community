@@ -628,7 +628,7 @@ msgid "by current risk level"
 msgstr "selon le risque courant"
 
 #: back_office/templates/back_office/index.html:69
-msgid "Watch List"
+msgid "Watch list"
 msgstr "Liste de surveillance"
 
 #: back_office/templates/back_office/index.html:70
@@ -655,6 +655,7 @@ msgstr "Projet parent"
 msgid "New security measure"
 msgstr "Nouvelle mesure de sécurité"
 
+#: back_office/templates/back_office/ri_update.html:133
 #: back_office/templates/back_office/mtg_list.html:122
 #: back_office/templates/back_office/mtg_update.html:20
 #: back_office/templates/back_office/ri_list.html:120
@@ -988,10 +989,6 @@ msgstr ""
 #| msgid " \"Very high\" "
 msgid "'Very high'"
 msgstr " \"Très élevé\" "
-
-#: back_office/templates/back_office/ri_update.html:133
-msgid "Subject"
-msgstr "Sujet"
 
 #: back_office/templates/back_office/ri_update.html:145
 msgid "Current profile"

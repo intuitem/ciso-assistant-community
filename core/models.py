@@ -139,7 +139,7 @@ class RiskInstance(models.Model):
     title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
-                                         help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra measures."),
+                                         help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
                                          default=_("<we have solution A and Process B to handle this>"),
                                          verbose_name=_("Existing measures"))
 
