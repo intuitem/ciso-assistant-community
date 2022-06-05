@@ -41,16 +41,16 @@ def test_mitigation_per_status(db, test_setUp):
                                       {'itemStyle': {'color': '#91cc75'}, 'value': 0}]}
 
 def test_mitigation_per_cur_risk(db, test_setUp):
-    assert mitigation_per_cur_risk() == {'values': [{'name': 'Very Low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
-                                        {'name': 'High', 'value': 0}, {'name': 'Very High', 'value': 0}]}
+    assert mitigation_per_cur_risk() == {'values': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
+                                        {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}]}
 
 def test_mitigation_per_solution(db, test_setUp):
     assert mitigation_per_solution() == {'indicators': ['Test SolutionOne'], 'values': [1], 'min': 0, 'max': 2}
 
 def test_risks_count_per_level(db, test_setUp):
-    assert risks_count_per_level() == {'current': [{'name': 'Very Low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
-                                      {'name': 'High', 'value': 0}, {'name': 'Very High', 'value': 0}], 'residual': [{'name': 'Very Low', 'value': 1}, 
-                                      {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 0}, {'name': 'High', 'value': 0}, {'name': 'Very High', 'value': 0}]}
+    assert risks_count_per_level() == {'current': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
+                                      {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}], 'residual': [{'name': 'Very low', 'value': 1}, 
+                                      {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 0}, {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}]}
 
 def test_p_risks(db, test_setUp):
     assert p_risks() == {'indicators': ['Test ParentRisk'], 'values': [1], 'min': 0, 'max': 2}

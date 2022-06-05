@@ -24,7 +24,7 @@ msgstr "Accès portail et paramètres supplémentaires"
 
 #: general/apps.py:9
 msgid "General"
-msgstr ""
+msgstr "Général"
 
 #: general/models.py:7
 msgid "<Group title>"

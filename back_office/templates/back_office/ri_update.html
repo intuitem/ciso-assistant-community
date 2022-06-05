@@ -5,11 +5,11 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <script>
-    var label_very_low = {% blocktrans %}'Very Low'{% endblocktrans %};
+    var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
     var label_low = {% blocktrans %}'Low'{% endblocktrans %};
     var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
     var label_high = {% blocktrans %}'High'{% endblocktrans %};
-    var label_very_high = {% blocktrans %}'Very High'{% endblocktrans %};
+    var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
     
     window.onload = function() {
         var current_proba = document.getElementById("id_riskinstance_current_proba").value;
@@ -167,7 +167,7 @@
                             <i class="fas fa-equals"></i>
                         </div>
                         <div class=""> 
-                            <p class="pl-1 text-sm font-semibold">{% trans "Current Risk Level" %}</p>
+                            <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
                             <div class="">
                                 <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
                                     {% if instance.current_level == 'VL' %}
@@ -210,7 +210,7 @@
                             <i class="fas fa-equals"></i>
                         </div>
                         <div class=""> 
-                            <p class="pl-1 text-sm font-semibold">{% trans "Residual Risk Level" %}</p>
+                            <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
                             <div class="">
                                 <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
                                     {% if instance.residual_level == 'VL' %}

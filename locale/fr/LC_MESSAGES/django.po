@@ -31,12 +31,12 @@ msgid "Core"
 msgstr ""
 
 #: asf_rm/settings.py:204
-msgid "Analysis Registry"
-msgstr "Registre d'Analyse"
+msgid "Analysis registry"
+msgstr "Registre des analyses"
 
 #: asf_rm/settings.py:209
-msgid "Risk Instances"
-msgstr "Instances de Risques"
+msgid "Risk instances"
+msgstr "Instances de risque"
 
 #: asf_rm/settings.py:214
 msgid "Mitigations"
@@ -54,7 +54,7 @@ msgstr "Organisation"
 
 #: asf_rm/settings.py:228
 msgid "General"
-msgstr ""
+msgstr "Général"
 
 #: asf_rm/settings.py:233
 msgid "Projects Hierarchy"
@@ -142,5 +142,5 @@ msgstr ""
 
 #, fuzzy
 #~| msgid "Parent Risks"
-#~ msgid "Current Risk Level"
+#~ msgid "Current risk level"
 #~ msgstr "Risques Parents"

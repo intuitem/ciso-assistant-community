@@ -59,7 +59,7 @@ msgid "Comments"
 msgstr ""
 
 #: core/models.py:32 core/templates/core/index.html:10
-msgid "Analysis Registry"
+msgid "Analysis registry"
 msgstr ""
 
 #: core/models.py:33
@@ -83,7 +83,7 @@ msgid "Show-stopper"
 msgstr ""
 
 #: core/models.py:126
-msgid "Very Low"
+msgid "Very low"
 msgstr ""
 
 #: core/models.py:127
@@ -101,7 +101,7 @@ msgid "High"
 msgstr ""
 
 #: core/models.py:130
-msgid "Very High"
+msgid "Very high"
 msgstr ""
 
 #: core/models.py:133
@@ -312,16 +312,16 @@ msgstr ""
 
 #: core/templates/core/analytics.html:77
 msgid ""
-"Risks breakdown per level: Current (with the existing measures) Versus "
-"Residual (Once all mitigation implemented)"
+"Risks breakdown per level: current (with the existing measures) versus "
+"residual (once all mitigations implemented)"
 msgstr ""
 
 #: core/templates/core/analytics.html:95
-msgid "Mitigations Overview"
+msgid "Mitigations overview"
 msgstr ""
 
 #: core/templates/core/analytics.html:99
-msgid "Breakdown per Status"
+msgid "Breakdown per status"
 msgstr ""
 
 #: core/templates/core/analytics.html:103
@@ -371,7 +371,7 @@ msgid "Risks per project group (category)"
 msgstr ""
 
 #: core/templates/core/analytics.html:172
-msgid "Current vs Residual"
+msgid "Current versus residual"
 msgstr ""
 
 #: core/templates/core/base.html:31
@@ -387,7 +387,7 @@ msgid "Analytics"
 msgstr ""
 
 #: core/templates/core/base.html:48
-msgid "My Projects"
+msgid "My projects"
 msgstr ""
 
 #: core/templates/core/base.html:51
@@ -419,7 +419,7 @@ msgid "Scoring assistant"
 msgstr ""
 
 #: core/templates/core/base.html:89
-msgid "Risk Matrix"
+msgid "Risk matrix"
 msgstr ""
 
 #: core/templates/core/base.html:95
@@ -523,7 +523,7 @@ msgid "Jump to full risk analysis"
 msgstr ""
 
 #: core/templates/core/composer.html:90
-msgid "High or very high risks based on the"
+msgid "High or very high risk based on the"
 msgstr ""
 
 #: core/templates/core/composer.html:90
@@ -599,19 +599,19 @@ msgid "User guide"
 msgstr ""
 
 #: core/templates/core/my_projects.html:11
-msgid "My projects Summary"
+msgid "My projects summary"
 msgstr ""
 
 #: core/templates/core/my_projects.html:16
-msgid "Risks level Overview"
+msgid "Risk level overview"
 msgstr ""
 
 #: core/templates/core/my_projects.html:25
-msgid "Treatment Progress Overview"
+msgid "Treatment progress overview"
 msgstr ""
 
 #: core/templates/core/my_projects.html:186
-msgid "Your Pending mitigation(s)"
+msgid "Your pending mitigation(s)"
 msgstr ""
 
 #: core/templates/core/my_projects.html:187
@@ -623,7 +623,7 @@ msgid "Mitigation"
 msgstr ""
 
 #: core/templates/core/my_projects.html:193
-msgid "Ranking Score"
+msgid "Ranking score"
 msgstr ""
 
 #: core/templates/core/my_projects.html:213
@@ -636,7 +636,7 @@ msgstr ""
 #: core/templates/core/project_select.html:25
 msgid ""
 "This will help you aggregate multiple components (projects) to get the "
-"compiled view on your risks. This is particularly useful for two use cases:"
+"compiled view on your risk. This is particularly useful for two use cases:"
 msgstr ""
 
 #: core/templates/core/project_select.html:27
@@ -660,7 +660,7 @@ msgid "Process"
 msgstr ""
 
 #: core/templates/core/review.html:6
-msgid "X-Rays: Review engine"
+msgid "X-Rays: review engine"
 msgstr ""
 
 #: core/templates/core/review.html:18
@@ -1033,7 +1033,7 @@ msgid "Probability"
 msgstr ""
 
 #: core/templates/core/scoring.html:420
-msgid "Risk Level"
+msgid "Risk level"
 msgstr ""
 
 #: core/templates/core/scoring.html:426
@@ -1049,7 +1049,7 @@ msgid "This is the ASF Risk Manager. Your streamlined"
 msgstr ""
 
 #: core/templates/registration/login.html:13
-msgid "One-Stop Shop"
+msgid "one-stop shop"
 msgstr ""
 
 #: core/templates/registration/login.html:14
@@ -1101,11 +1101,11 @@ msgid "Profile:"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:34
-msgid "Risk Instances"
+msgid "Risk instances"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:39
-msgid "Parent Risk"
+msgid "Parent Risk
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:40

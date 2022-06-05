@@ -127,11 +127,11 @@ class RiskInstance(models.Model):
     ]
     # 1 very low, 2 low, 3 medium, 4 high, 5 very high
     RATING_OPTIONS = [
-        ('VL', _('Very Low')),
+        ('VL', _('Very low')),
         ('L', _('Low')),
         ('M', _('Medium')),
         ('H', _('High')),
-        ('VH', _('Very High')),
+        ('VH', _('Very high')),
     ]
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis_bo"))

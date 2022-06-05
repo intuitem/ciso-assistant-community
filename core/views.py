@@ -137,7 +137,7 @@ class Browser(ListView):
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
-            return {"type": "Risk Instances", "filter": self.map_rsk[rsk], "items": RiskInstance.objects.filter(treatment=self.map_rsk[rsk])}
+            return {"type": "Risk instances", "filter": self.map_rsk[rsk], "items": RiskInstance.objects.filter(treatment=self.map_rsk[rsk])}
         if mtg:
             return {"type": "Mitigations", "filter": self.map_mtg[mtg], "items": Mitigation.objects.filter(status=self.map_mtg[mtg])}
 

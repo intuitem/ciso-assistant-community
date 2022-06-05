@@ -52,7 +52,7 @@ msgstr ""
 
 #: core/apps.py:7
 msgid "Core"
-msgstr ""
+msgstr "Coeur"
 
 #: core/forms.py:7
 msgid "Username"
@@ -187,8 +187,8 @@ msgstr ""
 #: core/templates/snippets/risk_matrix.html:50
 #: core/templates/snippets/risk_matrix.html:99
 #: core/templates/snippets/risk_matrix.html:108
-msgid "Very Low"
-msgstr "Très Faible"
+msgid "Very low"
+msgstr "Très faible"
 
 #: core/models.py:131 core/templates/snippets/risk_matrix.html:33
 #: core/templates/snippets/risk_matrix.html:51
@@ -210,8 +210,8 @@ msgstr "Élevé"
 
 #: core/models.py:134 core/templates/snippets/risk_matrix.html:9
 #: core/templates/snippets/risk_matrix.html:67
-msgid "Very High"
-msgstr "Très Élevé"
+msgid "Very high"
+msgstr "Très élevé"
 
 #: core/models.py:137
 msgid "Analysis_bo"
@@ -461,20 +461,20 @@ msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
 #: core/templates/core/analytics.html:60
-msgid "Risk scenarios broken down by Threat"
-msgstr "Scénarios de risque répartis par Menace"
+msgid "Risk scenarios broken down by threat"
+msgstr "Scénarios de risque répartis par menace"
 
 #: core/templates/core/analytics.html:68
-msgid "Risk scenarios broken down by Status"
-msgstr "Scénarios de risque répartis par Statut"
+msgid "Risk scenarios broken down by status"
+msgstr "Scénarios de risque répartis par statut"
 
 #: core/templates/core/analytics.html:76
 msgid ""
-"Risk scenarios breakdown per level: Current (with the existing measures) versus "
-"Residual (Once all measures implemented)"
+"Risk scenarios breakdown per level: current (with the existing measures) versus "
+"residual (once all measures implemented)"
 msgstr ""
-"Risques répartis par niveau: Actuel (avec les mesures existantes) contre "
-"Résiduel (une fois toutes les mesures implémentées)"
+"Scénarios répartis par niveau de risque: actuel (avec les mesures existantes) contre "
+"résiduel (une fois toutes les mesures implémentées)"
 
 #: core/templates/core/analytics.html:80
 #: core/templates/snippets/ra_data.html:45
@@ -492,11 +492,11 @@ msgid "Measures overview"
 msgstr "Aperçu des mesures"
 
 #: core/templates/core/analytics.html:102
-msgid "Breakdown per Status"
+msgid "Breakdown per status"
 msgstr "Répartition par statut"
 
 #: core/templates/core/analytics.html:106
-msgid "Pending measure per associated risk level (current)"
+msgid "Pending measures per associated risk level (current)"
 msgstr "Mesures en attente par niveau de risque associé (actuel)"
 
 #: core/templates/core/analytics.html:112
@@ -523,6 +523,7 @@ msgstr "2ème"
 msgid "3rd"
 msgstr "3ème"
 
+#: core/templates/core/scoring.html:506
 #: core/templates/core/analytics.html:159
 msgid "Risk level"
 msgstr "Niveau de risque"
@@ -544,15 +545,16 @@ msgstr ""
 
 #: core/templates/core/analytics.html:176
 msgid "Risk per project domain (category)"
-msgstr "Risques par domaine de projets (catégorie)"
+msgstr "Risque par domaine de projets (catégorie)"
 
 #: core/templates/core/analytics.html:177
-msgid "Current vs Residual"
-msgstr "Courant vs Résiduel"
+msgid "Current versus residual"
+msgstr "Courant contre résiduel"
 
+#: core/templates/core/index.html:23
 #: core/templates/core/base.html:100
-msgid "Analyses registry"
-msgstr "Registre d'analyses"
+msgid "Analysis registry"
+msgstr "Registre des analyses"
 
 #: core/templates/core/base.html:108
 msgid "Switch to editor"
@@ -564,7 +566,7 @@ msgstr "Analytique"
 
 #: core/templates/core/base.html:135
 msgid "My Projects"
-msgstr "Mes Projets"
+msgstr "Mes projets"
 
 #: core/templates/core/base.html:144
 msgid "Calendar"
@@ -593,7 +595,7 @@ msgstr ""
 #: core/templates/core/base.html:224
 #, fuzzy
 #| msgid "User guide"
-msgid "User Guide"
+msgid "User guide"
 msgstr "Guide utilisateur"
 
 #: core/templates/core/base.html:232
@@ -727,8 +729,8 @@ msgid "Jump to full risk analysis"
 msgstr "Aller à l'analyse de risque complète"
 
 #: core/templates/core/composer.html:92
-msgid "High or very high risks based on the"
-msgstr "Risques élevés ou très élevés selon le"
+msgid "High or very high risk based on the"
+msgstr "Risque élevé ou très élevé selon le"
 
 #: core/templates/core/composer.html:92
 msgid "current level"
@@ -741,10 +743,6 @@ msgstr "Rien à voir ici."
 #: core/templates/core/index.html:12
 msgid "Search risk scenario, measure, analysis ..."
 msgstr "Rechercher un scénario de risque, mesure, analyse ..."
-
-#: core/templates/core/index.html:23
-msgid "Analyses Registry"
-msgstr "Registre d'Analyses"
 
 #: core/templates/core/index.html:32
 msgid "ID"
@@ -813,19 +811,19 @@ msgid "Last"
 msgstr "Fin"
 
 #: core/templates/core/my_projects.html:11
-msgid "My projects Summary"
+msgid "My projects summary"
 msgstr "Résumé de mes projets"
 
 #: core/templates/core/my_projects.html:15
-msgid "Risks level Overview"
-msgstr "Aperçu du Niveau de Risque"
+msgid "Risk level overview"
+msgstr "Aperçu du niveau de risque"
 
 #: core/templates/core/my_projects.html:23
-msgid "Treatment Progress Overview"
-msgstr "Aperçu de l'Avancement du Traitement"
+msgid "Treatment progress overview"
+msgstr "Aperçu de l'avancement du traitement"
 
 #: core/templates/core/my_projects.html:30
-msgid "Your Pending measure(s)"
+msgid "Your pending measure(s)"
 msgstr "Vos mesures en attente"
 
 #: core/templates/core/my_projects.html:31
@@ -833,7 +831,7 @@ msgid "ordered by ranking score"
 msgstr "classées par évaluation"
 
 #: core/templates/core/my_projects.html:37
-msgid "Ranking Score"
+msgid "Ranking score"
 msgstr "Évaluation"
 
 #: core/templates/core/my_projects.html:40
@@ -851,16 +849,16 @@ msgstr ""
 "priorisation."
 
 #: core/templates/core/my_projects.html:60
-msgid "Projects Summary is empty."
+msgid "Projects summary is empty."
 msgstr "Le résumé des projets est vide."
 
 #: core/templates/core/project_select.html:23
 msgid ""
 "This will help you aggregate multiple components (projects) to get the "
-"compiled view on your risks. This is particularly useful for two use cases:"
+"compiled view on your risk. This is particularly useful for two use cases:"
 msgstr ""
 "Cet outil vous aidera à agréger des composants (projets) multiples afin "
-"d'avoir une vue synthétique sur vos risques, ce qui est particulièrement "
+"d'avoir une vue synthétique sur votre risque, ce qui est particulièrement "
 "utile dans deux cas :"
 
 #: core/templates/core/project_select.html:25
@@ -877,8 +875,8 @@ msgid ""
 "you are interested in the risk assessment of a specific system, for which "
 "you need the risk assessment of the underlying components"
 msgstr ""
-"vous voulez évaluer les risques d'un système spécifique, pour lequel vous "
-"avez besoin de l'évaluation des risques des composants sous-jacents"
+"vous voulez évaluer le risque d'un système spécifique, pour lequel vous "
+"avez besoin de l'évaluation du risque des composants sous-jacents"
 
 #: core/templates/core/project_select.html:56
 msgid "Select your targets"
@@ -889,8 +887,8 @@ msgid "Process"
 msgstr "Traiter"
 
 #: core/templates/core/review.html:6
-msgid "X-Rays: Review engine"
-msgstr "X-Rays : Moteur d'Analyse"
+msgid "X-Rays: review engine"
+msgstr "X-Rays : moteur de revue"
 
 #: core/templates/core/review.html:18
 msgid "All good"
@@ -929,8 +927,8 @@ msgid "Critical"
 msgstr "Critique"
 
 #: core/templates/core/scoring.html:7
-msgid "'Very Low'"
-msgstr "'Très Faible'"
+msgid "'Very low'"
+msgstr "'Très faible'"
 
 #: core/templates/core/scoring.html:8
 msgid "'Low'"
@@ -945,8 +943,8 @@ msgid "'High'"
 msgstr "'Élevé'"
 
 #: core/templates/core/scoring.html:11
-msgid "'Very High'"
-msgstr "'Très Élevé'"
+msgid "'Very high'"
+msgstr "'Très élevé'"
 
 # OWASP Methodology translations taken from 
 # https://cours.etsmtl.ca/mgr850/documents/cours/Hiv2013/MGR850_H13_Cours-05_Analyse2Risques.pdf
@@ -1312,10 +1310,6 @@ msgstr "Vecteurs d'évaluation :"
 msgid "Probability"
 msgstr "Probabilité"
 
-#: core/templates/core/scoring.html:506
-msgid "Risk Level"
-msgstr "Niveau de Risque"
-
 #: core/templates/core/scoring.html:515
 #: core/templates/snippets/risk_matrix.html:6
 #: core/templates/snippets/risk_matrix.html:64
@@ -1339,12 +1333,12 @@ msgid "This is the ASF Risk Manager. Your streamlined"
 msgstr "Bienvenue dans ASF Risk Manager. Votre "
 
 #: core/templates/registration/login.html:13
-msgid "One-Stop Shop"
-msgstr "Solution Complète"
+msgid "one-stop shop"
+msgstr "solution complète"
 
 #: core/templates/registration/login.html:14
 msgid "for risk assessment and management."
-msgstr "sur mesure pour l'évaluation et la gestion des risques."
+msgstr "sur mesure pour l'évaluation et la gestion du risque."
 
 #: core/templates/registration/login.html:16
 msgid "You need to"
@@ -1365,8 +1359,8 @@ msgid "Login"
 msgstr "Connexion"
 
 #: core/templates/snippets/dual_bar_stacked.html:6
-msgid " \"Current: Very Low\" "
-msgstr " \"Courant: Très Faible\" "
+msgid " \"Current: Very low\" "
+msgstr " \"Courant: Très faible\" "
 
 #: core/templates/snippets/dual_bar_stacked.html:7
 msgid " \"Current: Low\" "
@@ -1381,12 +1375,12 @@ msgid " \"Current: High\" "
 msgstr " \"Courant: Élevé\" "
 
 #: core/templates/snippets/dual_bar_stacked.html:10
-msgid " \"Current: Very High\" "
-msgstr " \"Courant: Très Élevé\" "
+msgid " \"Current: Very high\" "
+msgstr " \"Courant: Très élevé\" "
 
 #: core/templates/snippets/dual_bar_stacked.html:11
-msgid " \"Residual: Very Low\" "
-msgstr " \"Résiduel: Très Faible\" "
+msgid " \"Residual: Very low\" "
+msgstr " \"Résiduel: Très faible\" "
 
 #: core/templates/snippets/dual_bar_stacked.html:12
 msgid " \"Residual: Low\" "
@@ -1401,8 +1395,8 @@ msgid " \"Residual: High\" "
 msgstr " \"Résiduel: Élevé\" "
 
 #: core/templates/snippets/dual_bar_stacked.html:15
-msgid " \"Residual: Very High\" "
-msgstr " \"Résiduel: Très Élevé\" "
+msgid " \"Residual: Very high\" "
+msgstr " \"Résiduel: Très élevé\" "
 
 #: core/templates/snippets/mp_data.html:12
 msgid "Risk analysis seems to be empty. Measure Plan cannot be generated."
@@ -1485,8 +1479,8 @@ msgstr "Élevée"
 #: core/templates/snippets/risk_matrix.html:54
 #: core/templates/snippets/risk_matrix.html:112
 msgctxt "Probability"
-msgid "Very High"
-msgstr "Très Élevée"
+msgid "Very high"
+msgstr "Très élevée"
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:6
 msgid " \"Risk: open\" "
@@ -1554,7 +1548,7 @@ msgstr " \"Mesure: terminée\" "
 #~ msgid "X-Rays (my projects)"
 #~ msgstr "X-Rays (mes projets)"
 
-#~ msgid "Risk Matrix"
+#~ msgid "Risk matrix"
 #~ msgstr "Matrice des risques"
 
 #~ msgid "Language"

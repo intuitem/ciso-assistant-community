@@ -201,12 +201,12 @@ BATON = {
             'models': (
                 {
                     'name': 'analysis',
-                    'label': _('Analysis Registry'),
+                    'label': _('Analysis registry'),
                     'icon': 'fas fa-glasses',
                 },
                 {
                     'name': 'riskinstance',
-                    'label': _('Risk Instances'),
+                    'label': _('Risk instances'),
                     'icon': 'fas fa-clone',
                 },
                 {
@@ -259,7 +259,7 @@ BATON = {
             'default_open': True, # For debug
             'icon': 'fas fa-users',
         },
-        {'type': 'free', 'label': _('User Guide'), 'icon': 'fas fa-question-circle', 'url': 'https://intuitem.com/'},
+        {'type': 'free', 'label': _('User guide'), 'icon': 'fas fa-question-circle', 'url': 'https://intuitem.com/'},
 
         {'type': 'title', 'label': _('Staff')},
         {'type': 'free', 'label': _('X-Rays (all)'), 'icon': 'fas fa-bolt', 'url': '/staff/x-rays?mode=all'},

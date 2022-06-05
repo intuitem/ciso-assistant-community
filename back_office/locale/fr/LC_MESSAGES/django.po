@@ -476,7 +476,7 @@ msgid "Scoring Assistant"
 msgstr ""
 
 #: back_office/templates/back_office/base.html:269
-msgid "User Guide"
+msgid "User guide"
 msgstr ""
 
 #: back_office/templates/back_office/base.html:299
@@ -484,8 +484,8 @@ msgid "Logout"
 msgstr ""
 
 #: back_office/templates/back_office/fragments/risks_over_time.html:6
-msgid " \"Very Low\" "
-msgstr " \"Très Faible\" "
+msgid " \"Very low\" "
+msgstr " \"Très faible\" "
 
 #: back_office/templates/back_office/fragments/risks_over_time.html:7
 msgid " \"Low\" "
@@ -500,8 +500,8 @@ msgid " \"High\" "
 msgstr " \"Élevé\" "
 
 #: back_office/templates/back_office/fragments/risks_over_time.html:10
-msgid " \"Very High\" "
-msgstr " \"Très Élevé\" "
+msgid " \"Very high\" "
+msgstr " \"Très élevé\" "
 
 #: back_office/templates/back_office/fragments/risks_over_time.html:11
 msgid " \"Jan\" "
@@ -678,8 +678,8 @@ msgid "No measure found."
 msgstr "Aucune mesure n'a été trouvée"
 
 #: back_office/templates/back_office/mtg_update.html:13
-msgid "Measure Summary"
-msgstr "Résumé de la Mesure"
+msgid "Measure summary"
+msgstr "Résumé de la mesure"
 
 #: back_office/templates/back_office/mtg_update.html:46
 msgid "Description"
@@ -915,7 +915,7 @@ msgstr ""
 #: back_office/templates/back_office/ri_create.html:44
 #: back_office/templates/back_office/ri_update.html:213
 #: back_office/templates/back_office/snippets/ri_list_nested.html:25
-msgid "Residual Risk Level"
+msgid "Residual risk level"
 msgstr "Niveau de risque résiduel"
 
 #: back_office/templates/back_office/ri_create.html:47
@@ -942,7 +942,7 @@ msgstr "Statut du traitement"
 #: back_office/templates/back_office/ri_create.html:75
 #: back_office/templates/back_office/ri_update.html:170
 #: back_office/templates/back_office/snippets/ri_list_nested.html:19
-msgid "Current Risk Level"
+msgid "Current risk level"
 msgstr "Niveau de risque courant"
 
 #: back_office/templates/back_office/ri_create.html:76
@@ -972,9 +972,9 @@ msgstr "Aucun scénario n'a été trouvé."
 
 #: back_office/templates/back_office/ri_update.html:8
 #, fuzzy
-#| msgid " \"Very Low\" "
-msgid "'Very Low'"
-msgstr " \"Très Faible\" "
+#| msgid " \"Very low\" "
+msgid "'Very low'"
+msgstr " \"Très faible\" "
 
 #: back_office/templates/back_office/ri_update.html:9
 msgid "'Low'"
@@ -992,9 +992,9 @@ msgstr ""
 
 #: back_office/templates/back_office/ri_update.html:12
 #, fuzzy
-#| msgid " \"Very High\" "
-msgid "'Very High'"
-msgstr " \"Très Élevé\" "
+#| msgid " \"Very high\" "
+msgid "'Very high'"
+msgstr " \"Très élevé\" "
 
 #: back_office/templates/back_office/ri_update.html:133
 msgid "Subject"
@@ -1042,22 +1042,16 @@ msgid "Add Asset"
 msgstr "Ajouter un Bien sensible"
 
 #: back_office/templates/back_office/snippets/asset_delete_modal.html:22
-#: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:22
-#: back_office/templates/back_office/snippets/ra_delete_modal.html:22
-msgid "Are you absolutely sure?"
-msgstr "Etes-vous absolument sûr?"
+msgid "Delete asset?"
+msgstr "Supprimer le bien sensible ?"
 
 #: back_office/templates/back_office/snippets/asset_delete_modal.html:30
-#, fuzzy
-#| msgid ""
-#| "This action cannot be undone. This will permanently delete the following "
-#| "Threat: "
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Asset: "
+"asset: "
 msgstr ""
-"Cette action ne peut pas être annulée. Elle supprimera définitivement la "
-"Menace suivante: "
+"Cette action ne peut pas être annulée. Elle supprimera définitivement le "
+"bien sensible suivant: "
 
 #: back_office/templates/back_office/snippets/asset_delete_modal.html:37
 #: back_office/templates/back_office/snippets/measure_delete_modal.html:38
@@ -1080,16 +1074,16 @@ msgid "Add Measure"
 msgstr "Ajouter une Mesure"
 
 #: back_office/templates/back_office/snippets/measure_delete_modal.html:22
-msgid "Delete Measure?"
-msgstr "Supprimer la Mesure?"
+msgid "Delete security measure?"
+msgstr "Supprimer la mesure de sécurité ?"
 
 #: back_office/templates/back_office/snippets/measure_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Measure: "
+"security measure: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement la "
-"Mesure suivante: "
+"mesure de sécurité suivante: "
 
 #: back_office/templates/back_office/snippets/measure_delete_modal.html:31
 #: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:31
@@ -1118,59 +1112,68 @@ msgstr ""
 #: back_office/templates/back_office/snippets/paginator.html:12
 #: back_office/templates/back_office/user_list.html:87
 msgid "Prev"
-msgstr ""
+msgstr "Précédent"
 
 #: back_office/templates/back_office/snippets/paginator.html:15
 #: back_office/templates/back_office/user_list.html:90
 msgid "Next"
-msgstr ""
+msgstr "Suivant"
 
 #: back_office/templates/back_office/snippets/paginator.html:17
 #: back_office/templates/back_office/user_list.html:92
 msgid "Last"
-msgstr ""
+msgstr "Dernier"
 
 #: back_office/templates/back_office/snippets/project_create_modal.html:18
 msgid "Add Project"
 msgstr "Ajouter un projet"
 
 #: back_office/templates/back_office/snippets/project_delete_modal.html:22
-msgid "Delete this project?"
-msgstr ""
+msgid "Delete the project?"
+msgstr "Supprimer le projet ?"
 
 #: back_office/templates/back_office/snippets/project_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Project: "
+"project: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement le "
-"Projet suivant: "
+"projet suivant: "
 
 #: back_office/templates/back_office/snippets/projects_domain_create_modal.html:18
 msgid "Create New Domain"
 msgstr "Créer un nouveau domaine"
 
+#: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:22
+msgid "Delete project domain?"
+msgstr "Supprimer le domaine de projet ?"
+
 #: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Projects domain: "
+"projects domain: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement le "
 "domaine de projets suivant: "
 
+
+#: back_office/templates/back_office/snippets/ra_delete_modal.html:22
+msgid "Delete risk analysis?"
+msgstr "Supprimer l'analyse de risque ?"
+
 #: back_office/templates/back_office/snippets/ra_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Risk analysis: "
+"risk analysis: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement "
-"l'Analyse de risque suivante: "
+"l'analyse de risque suivante: "
 
 #: back_office/templates/back_office/snippets/ra_delete_modal.html:31
 msgid ""
-"as well as any child object, this includes: Risk Scenarios and Measures."
+"as well as any child object. This includes: risk scenarios and security measures."
 msgstr ""
-"ainsi que tout objet enfant, ce qui inclut : Scénarios de risque et Mesures."
+"ainsi que tout objet enfant. Ceci inclut : scénarios de risque et mesures de sécurité."
 
 #: back_office/templates/back_office/snippets/ri_list_nested.html:16
 msgid "Existing measures"
@@ -1186,35 +1189,35 @@ msgstr "Ajouter une Acceptation"
 
 #: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:22
 msgid "Delete risk acceptance?"
-msgstr "Supprimer l'Acceptation de risque?"
+msgstr "Supprimer l'acceptation de risque ?"
 
 #: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Risk acceptance: "
+"risk acceptance: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement "
-"l'Acceptation du risque suivant: "
+"l'acceptation du risque suivant: "
 
 #: back_office/templates/back_office/snippets/risk_scenario_create_modal.html:18
-msgid "Add Risk Scenario"
-msgstr "Ajouter un Scénario de risque"
+msgid "Add risk scenario"
+msgstr "Ajouter un scénario de risque"
 
 #: back_office/templates/back_office/snippets/risk_scenario_delete_modal.html:22
-msgid "Delete Risk Scenario?"
-msgstr "Supprimer le Scénario?"
+msgid "Delete risk scenario?"
+msgstr "Supprimer le scénario de risque ?"
 
 #: back_office/templates/back_office/snippets/risk_scenario_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Risk Scenario: "
+"risk scenario: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement le "
-"Scénario de risque suivant: "
+"scénario de risque suivant: "
 
 #: back_office/templates/back_office/snippets/risk_scenario_delete_modal.html:31
-msgid "as well as any child object, this includes: Security Measures."
-msgstr "ainsi que tout objet enfant, ce qui inclut: Mesures de Sécurité"
+msgid "as well as any child object. This includes: security measures."
+msgstr "ainsi que tout objet enfant. Ceci inclut: mesures de sécurité."
 
 #: back_office/templates/back_office/snippets/security_function_create_modal.html:18
 msgid "Add security function"
@@ -1222,15 +1225,15 @@ msgstr "Ajouter une fonction de sécurité"
 
 #: back_office/templates/back_office/snippets/security_function_delete_modal.html:22
 msgid "Delete security function?"
-msgstr "Supprimer la fonction de sécurité?"
+msgstr "Supprimer la fonction de sécurité ?"
 
 #: back_office/templates/back_office/snippets/security_function_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Security function: "
+"security function: "
 msgstr ""
-"Cette actiNew on ne peut pas être annulée. Elle supprimera définitivement la "
-"Fonction de Sécurité suivante: "
+"Cette action on ne peut pas être annulée. Elle supprimera définitivement la "
+"fonction de sécurité suivante: "
 
 #: back_office/templates/back_office/snippets/threat_create_modal.html:18
 msgid "Add threat"
@@ -1238,15 +1241,15 @@ msgstr "Ajouter une menace"
 
 #: back_office/templates/back_office/snippets/threat_delete_modal.html:22
 msgid "Delete threat?"
-msgstr "Supprimer la menace?"
+msgstr "Supprimer la menace ?"
 
 #: back_office/templates/back_office/snippets/threat_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Threat: "
+"threat: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement la "
-"Menace suivante: "
+"menace suivante: "
 
 #: back_office/templates/back_office/threat_list.html:41
 msgid "New threat"
@@ -1304,11 +1307,11 @@ msgstr "super-utilisateur"
 #~ msgstr "Démarrage rapide"
 
 #, fuzzy
-#~| msgid "Current Risk Level"
-#~ msgid "Current Level"
+#~| msgid "Current risk level"
+#~ msgid "Current level"
 #~ msgstr "Niveau de risque courant"
 
 #, fuzzy
-#~| msgid "Residual Risk Level"
-#~ msgid "Residual Level"
+#~| msgid "Residual risk level"
+#~ msgid "Residual level"
 #~ msgstr "Niveau de risque résiduel"

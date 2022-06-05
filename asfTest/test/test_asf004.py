@@ -34,7 +34,7 @@ def test_ASF004(page):
 	step = 3
 	page.click("id=scoring")
 	assert page.url == urlpatterns.scoringassistant, "Step "+str(step)+": not Ok"
-	# 4 | Click on “Risk Matrix” | Opening of “Risk Matrix” page
+	# 4 | Click on “Risk matrix” | Opening of “Risk matrix” page
 	step = 4
 	page.click("id=more")
 	page.click("id=riskmatrix")
@@ -49,7 +49,7 @@ def test_ASF004(page):
 	page.fill("id=id_username", "root2")
 	page.fill("id=id_password", "rootroot")
 	page.click('id=login')
-	# 6 | Click on “X-Rays (My Projects)” | Opening of admin registration page
+	# 6 | Click on “X-Rays (my projects)” | Opening of admin registration page
 	step = 6
 	page.click("id=more")
 	page.remove_listener("response", log_response)

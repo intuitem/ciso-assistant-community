@@ -74,7 +74,7 @@ Check out our [Running Test Guide](/asfTest/test/README.md) to see how to run te
   |  2  | Click on composer                                                      | Opening of "Composer" page    |        |
   |  3  | Select the first project (if it exists or skips) and click on “Process” | Opening of the first analysis |        |
   |  4  | Click on “Calendar”                                                    | Opening of the Calendar       |        |
-  |  5  | Click on “My Projects”                                                 | Opening of "My Projects"      |        |
+  |  5  | Click on “My projects”                                                 | Opening of "My projects"      |        |
   |  6  | Click on “Analytics”                                                   | Opening of "Analytics"        |        |
   
 * **Test sheet 4**
@@ -88,9 +88,9 @@ Check out our [Running Test Guide](/asfTest/test/README.md) to see how to run te
   |  1  | Go to the URL http://127.0.0.1:8000/ and login | Opening of home page                                      |        |
   |  2  | Click on the menu "More"                           | Opening of the menu with the message: "Hello, (username)" |        |
   |  3  | Click on "Scoring Assistant"                   | Opening of "Scoring Assistant" page                       |        |
-  |  4  | Click on "Risk Matrix"                         | Opening of "Risk Matrix" page                             |        |
+  |  4  | Click on "Risk matrix"                         | Opening of "Risk matrix" page                             |        |
   |  5  | Click on "Sign-out"                            | Go back on login page                                     |        |
-  |  6  | Click on "X-Rays (My Projects)"                | Opening of admin registration page                        |        |
+  |  6  | Click on "X-Rays (my projects)"                | Opening of admin registration page                        |        |
   
 * **Test sheet 5**
  

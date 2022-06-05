@@ -4,11 +4,11 @@
 
 {% block head %}
 <script>
-var label_very_low = {% blocktrans %}'Very Low'{% endblocktrans %};
+var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
 var label_low = {% blocktrans %}'Low'{% endblocktrans %};
 var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
 var label_high = {% blocktrans %}'High'{% endblocktrans %};
-var label_very_high = {% blocktrans %}'Very High'{% endblocktrans %};
+var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
 
 window.onload = function() {
     BI_lbl = document.getElementById("BI");
@@ -503,7 +503,7 @@ function rl_class(label) {
                 </div>
         
                 <div class="text-2xl p-2 grid grid-rows-2 grid-cols-3 items-center text-center w-full mb-4" id="score">
-                    <div class="text-lg p-1 col-span-3">{% trans "Risk Level" %}</div>
+                    <div class="text-lg p-1 col-span-3">{% trans "Risk level" %}</div>
                     <i class="fas fa-arrow-alt-circle-right"></i>
                     <span class="py-2 px-0 font-semibold rounded shadow" id="risk_level">
                         <p class="overflow-clip">--</p></span>
