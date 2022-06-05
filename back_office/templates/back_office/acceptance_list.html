@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="" >
-    {% with page_title=_('Risk Acceptances') %}
+    {% with page_title=_('Risk acceptances') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
     <!-- Ordering, Searchbar and Dropdown Form -->
@@ -99,7 +99,7 @@
             <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
             class="add-button">
             <i class="fas fa-plus"></i>
-            {% trans "New Risk Acceptance" %}
+            {% trans "New risk acceptance" %}
         </a>
         {% include "back_office/snippets/risk_acceptance_create_modal.html" %}
         </div>
@@ -108,7 +108,7 @@
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <th class="px-6 py-3">{% trans "Risk Acceptance" %}</th>
+                <th class="px-6 py-3">{% trans "Risk acceptance" %}</th>
                 <!--<th class="px-6 py-3">{% trans "Type" %}</th>-->
                 <th class="px-6 py-3">{% trans "Validator" %}</th>
                 <th class="px-6 py-3">{% trans "Expiry Date" %}</th>

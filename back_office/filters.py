@@ -95,7 +95,7 @@ class AnalysisFilter(GenericFilterSet):
     project__name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Analysis...')
+                'placeholder': _('Search analysis...')
         }
     ))
     is_draft = GenericChoiceFilter(choices=STATUS_CHOICES)
@@ -111,7 +111,7 @@ class RiskScenarioFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Scenario...')
+                'placeholder': _('Search scenario...')
         }
     ))
     parent_risk = GenericModelMultipleChoiceFilter(queryset=ParentRisk.objects.all())
@@ -141,7 +141,7 @@ class MeasureFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Measure...')
+                'placeholder': _('Search security measure...')
         }
     ))
     risk_instance__analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
@@ -174,7 +174,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
     risk_instance__title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Acceptance...')
+                'placeholder': _('Search acceptance...')
         }
     ))
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
@@ -201,7 +201,7 @@ class ProjectsDomainFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Domain...')
+                'placeholder': _('Search domain...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -222,7 +222,7 @@ class ProjectFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Project...')
+                'placeholder': _('Search project...')
         }
     ))
     parent_group = GenericModelMultipleChoiceFilter(queryset=ProjectsGroup.objects.all())
@@ -248,7 +248,7 @@ class ThreatFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Threat...')
+                'placeholder': _('Search threat...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -268,7 +268,7 @@ class SecurityFunctionFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Function...')
+                'placeholder': _('Search function...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -292,7 +292,7 @@ class AssetFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search Asset...')
+                'placeholder': _('Search asset...')
         }
     ))
     orderby = GenericOrderingFilter(

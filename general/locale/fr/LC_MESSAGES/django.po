@@ -55,20 +55,20 @@ msgid "--"
 msgstr ""
 
 #: general/models.py:23
-msgid "In Design"
-msgstr "En Conception"
+msgid "Design"
+msgstr "Conception"
 
 #: general/models.py:24
-msgid "In Dev"
-msgstr "En Développement"
+msgid "Development"
+msgstr "Développement"
 
 #: general/models.py:25
-msgid "In Production"
-msgstr "En Production"
+msgid "Production"
+msgstr "Production"
 
 #: general/models.py:26
 msgid "End Of Life"
-msgstr "Fin De Vie"
+msgstr "Fin de vie"
 
 #: general/models.py:27
 msgid "Dropped"
@@ -91,8 +91,8 @@ msgid "Internal ID"
 msgstr "Identifiant interne"
 
 #: general/models.py:33
-msgid "Parent domain"
-msgstr "Domaine parent"
+msgid "Domain"
+msgstr "Domaine"
 
 #: general/models.py:35
 msgid "Status"

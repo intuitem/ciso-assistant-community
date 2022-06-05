@@ -1,12 +1,12 @@
 {% extends 'back_office/base.html' %}
 {% load i18n static %}
 
-{% block title %}{% trans "Risk Analyses"|title %}{% endblock %}
+{% block title %}{% trans "Risk analyses"|title %}{% endblock %}
 
 
 {% block content %}
 <div>
-    {% with page_title=_('Risk Analyses') %}
+    {% with page_title=_('Risk analyses') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
     <div class="flex flex-row justify-start space-x-4 h-fit">
@@ -110,7 +110,7 @@
             <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                    class="add-button">
                    <i class="fas fa-plus"></i>
-                   {% trans "New Risk Analysis" %}
+                   {% trans "New risk analysis" %}
             </a>
             {% include "back_office/snippets/analysis_create_modal.html" %}
         </div>

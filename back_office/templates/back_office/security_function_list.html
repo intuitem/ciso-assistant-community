@@ -2,7 +2,7 @@
 {% load i18n static %}
 
 {% block content %}
-{% with page_title=_('Security Functions') %}
+{% with page_title=_('Security functions') %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div class="flex flex-row justify-start space-x-4 h-fit">
@@ -98,7 +98,7 @@
         <a id="newSecurityFunction" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
             class="add-button">
             <i class="fas fa-plus"></i>
-            {% trans "New Security Function" %}
+            {% trans "New security function" %}
         </a>
         {% include "back_office/snippets/security_function_create_modal.html" %}
         <script src="{% static 'js/modal.js' %}"></script>

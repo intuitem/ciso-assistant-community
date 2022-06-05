@@ -71,7 +71,7 @@
                 
                         <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                             <div>
-                                <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent Domain" %}</p>
+                                <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Domain" %}</p>
                                 {{ filter.form.parent_group }}
                             </div>
                             <div>
@@ -105,7 +105,7 @@
         <a id="modal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
             class="add-button">
             <i class="fas fa-plus"></i>
-            {% trans "New Project" %}
+            {% trans "New project" %}
         </a>
         {% include "back_office/snippets/project_create_modal.html" %}
     </div>
@@ -115,7 +115,7 @@
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Project Name" %}</th>
-            <th class="px-6 py-3">{% trans "Parent Domain" %}</th>
+            <th class="px-6 py-3">{% trans "Domain" %}</th>
             <th class="px-6 py-3">{% trans "Summary" %}</th>
             {% comment %} <th class="px-6 py-3">{% trans "Status" %}</th> {% endcomment %}
             <th class="px-6 py-3">{% trans "Actions" %}</th>

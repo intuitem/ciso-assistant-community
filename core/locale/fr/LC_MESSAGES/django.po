@@ -24,11 +24,11 @@ msgstr "Description de la Menace"
 
 #: core/admin.py:46 core/admin.py:73 core/models.py:150
 msgid "Current Level"
-msgstr "Niveau de Risque courant"
+msgstr "Niveau de risque courant"
 
 #: core/admin.py:47 core/admin.py:75 core/models.py:159
 msgid "Residual Level"
-msgstr "Niveau de Risque Résiduel"
+msgstr "Niveau de risque résiduel"
 
 #: core/admin.py:48 core/admin.py:76
 msgid "Follow up"
@@ -60,7 +60,7 @@ msgstr "Nom d'utilisateur"
 
 #: core/forms.py:8
 msgid "Password"
-msgstr "Mot de Passe"
+msgstr "Mot de passe"
 
 #: core/models.py:14
 msgid "Balanced (default)"
@@ -102,7 +102,7 @@ msgid "Comments"
 msgstr "Commentaires"
 
 #: core/models.py:55
-msgid "Risk Analysis is still in Draft mode"
+msgid "Risk analysis is still in Draft mode"
 msgstr "Analyse de risque toujours en mode Brouillon"
 
 #: core/models.py:57
@@ -411,8 +411,8 @@ msgstr ""
 
 #: core/models.py:235 core/templates/core/analytics.html:20
 #: core/templates/core/search_results.html:34
-msgid "Measures"
-msgstr "Mesures"
+msgid "Security measures"
+msgstr "Mesures de sécurité"
 
 #: core/models.py:258
 msgid "Temporary"
@@ -440,12 +440,12 @@ msgid "Expiry date"
 msgstr "Date d'expiration"
 
 #: core/models.py:271
-msgid "Risk Acceptance"
-msgstr "Acceptation du Risque"
+msgid "Risk acceptance"
+msgstr "Acceptation de risque"
 
 #: core/models.py:272 core/templates/core/analytics.html:52
-msgid "Risk Acceptances"
-msgstr "Acceptations du risque"
+msgid "Risk acceptances"
+msgstr "Acceptations de risque"
 
 #: core/templates/core/analytics.html:14
 #: core/templates/core/search_results.html:21
@@ -465,16 +465,16 @@ msgid "Risk scenarios broken down by Threat"
 msgstr "Scénarios de risque répartis par Menace"
 
 #: core/templates/core/analytics.html:68
-msgid "Risk scenarios status"
-msgstr "Statut des Scénarios de risque"
+msgid "Risk scenarios broken down by Status"
+msgstr "Scénarios de risque répartis par Statut"
 
 #: core/templates/core/analytics.html:76
 msgid ""
-"Risks breakdown per level: Current (with the existing measures) Versus "
+"Risk scenarios breakdown per level: Current (with the existing measures) versus "
 "Residual (Once all measures implemented)"
 msgstr ""
-"Risques répartis par niveau: Actuels (avec les mesures existantes) Contre "
-"Résiduels (une fois toutes les mesures implémentées)"
+"Risques répartis par niveau: Actuel (avec les mesures existantes) contre "
+"Résiduel (une fois toutes les mesures implémentées)"
 
 #: core/templates/core/analytics.html:80
 #: core/templates/snippets/ra_data.html:45
@@ -483,16 +483,17 @@ msgstr "Risque courant"
 
 #: core/templates/core/analytics.html:86
 #: core/templates/snippets/ra_data.html:47
+#: core/templates/core/composer.html:37
 msgid "Residual Risk"
-msgstr "Risque Résiduel"
+msgstr "Risque résiduel"
 
 #: core/templates/core/analytics.html:97
-msgid "Measures Overview"
-msgstr "Aperçu des Mesures"
+msgid "Measures overview"
+msgstr "Aperçu des mesures"
 
 #: core/templates/core/analytics.html:102
 msgid "Breakdown per Status"
-msgstr "Répartition par Statut"
+msgstr "Répartition par statut"
 
 #: core/templates/core/analytics.html:106
 msgid "Pending measure per associated risk level (current)"
@@ -524,7 +525,7 @@ msgstr "3ème"
 
 #: core/templates/core/analytics.html:159
 msgid "Risk level"
-msgstr "Niveau de Risque"
+msgstr "Niveau de risque"
 
 #: core/templates/core/analytics.html:160
 msgid "1st"
@@ -542,12 +543,12 @@ msgstr ""
 "déterminé"
 
 #: core/templates/core/analytics.html:176
-msgid "Risks per project domain(category)"
+msgid "Risk per project domain (category)"
 msgstr "Risques par domaine de projets (catégorie)"
 
 #: core/templates/core/analytics.html:177
 msgid "Current vs Residual"
-msgstr "Courants vs Résiduels"
+msgstr "Courant vs Résiduel"
 
 #: core/templates/core/base.html:100
 msgid "Analyses registry"
@@ -654,51 +655,47 @@ msgid "selected projects"
 msgstr "projets sélectionnés "
 
 #: core/templates/core/composer.html:18
-msgid "Current risks levels"
-msgstr "Niveaux de risque courants"
+msgid "Current risk level"
+msgstr "Niveau de risque courant"
 
 #: core/templates/core/composer.html:21
 msgid "Current Risks"
-msgstr "Risques courants"
+msgstr "Risque courant"
 
 #: core/templates/core/composer.html:27
-msgid "Associated measures status"
-msgstr "Statuts des mesures associées"
+msgid "Status of associated measures"
+msgstr "Statut des mesures associées"
 
 #: core/templates/core/composer.html:35
-msgid "Residual risks levels"
-msgstr "Niveaux de risque résiduels"
-
-#: core/templates/core/composer.html:37
-msgid "Residual Risks"
-msgstr "Risques résiduels"
+msgid "Residual risk level"
+msgstr "Niveau de risque résiduel"
 
 #: core/templates/core/composer.html:44
 msgid "For the selected scope, you have:"
 msgstr "Pour le périmètre sélectionné, vous avez :"
 
 #: core/templates/core/composer.html:46
-msgid "untreated risk(s),"
-msgstr "risques non traités"
+msgid "untreated risk scenario(s),"
+msgstr "scénario(s) de risque non traité(s)"
 
 #: core/templates/core/composer.html:47
 msgid "among which,"
 msgstr "dont"
 
 #: core/templates/core/composer.html:47
-msgid "are currently of level high or above,"
-msgstr "sont au moins de niveau élevé"
+msgid "currently of level high or above,"
+msgstr "au moins de niveau élevé"
 
 #: core/templates/core/composer.html:48
 msgid "and"
 msgstr "et"
 
 #: core/templates/core/composer.html:48
-msgid "risk(s) accepted."
-msgstr "risques acceptés"
+msgid "risk scenario(s) accepted."
+msgstr "scénario(s) de risque accepté(s)"
 
 #: core/templates/core/composer.html:64
-msgid "Risk Analysis status:"
+msgid "Risk analysis status:"
 msgstr "Statut de l'Analyse de risque :"
 
 #: core/templates/core/composer.html:64
@@ -719,11 +716,11 @@ msgstr ""
 
 #: core/templates/core/composer.html:70 core/templates/snippets/ra_data.html:93
 msgid "Current"
-msgstr "Courants"
+msgstr "Risque courant"
 
 #: core/templates/core/composer.html:71 core/templates/snippets/ra_data.html:97
 msgid "Residual"
-msgstr "Résiduels"
+msgstr "Risque résiduel"
 
 #: core/templates/core/composer.html:86
 msgid "Jump to full risk analysis"
@@ -772,8 +769,8 @@ msgstr "prêt"
 
 #: core/templates/core/index.html:106 core/templates/core/search_results.html:8
 #: core/templates/snippets/ra_data.html:11
-msgid "Risk Analysis"
-msgstr "Analyse de Risque"
+msgid "Risk analysis"
+msgstr "Analyse de risque"
 
 #: core/templates/core/index.html:108 core/templates/core/index.html:113
 msgid "... as PDF"
@@ -1408,7 +1405,7 @@ msgid " \"Residual: Very High\" "
 msgstr " \"Résiduel: Très Élevé\" "
 
 #: core/templates/snippets/mp_data.html:12
-msgid "Risk Analysis seems to be empty. Measure Plan cannot be generated."
+msgid "Risk analysis seems to be empty. Measure Plan cannot be generated."
 msgstr ""
 "L'analyse de risque semble être vide. Le Plan de Mesure ne peut pas être "
 "généré."
@@ -1453,10 +1450,6 @@ msgstr "Dernière mise à jour :"
 msgid "Profile:"
 msgstr "Profil :"
 
-#: core/templates/snippets/ra_data.html:42
-msgid "Subject"
-msgstr "Sujet"
-
 #: core/templates/snippets/ra_data.html:44
 msgid "Existing measures"
 msgstr "Mesures existantes"
@@ -1470,12 +1463,12 @@ msgid "Treatment"
 msgstr "Traitement"
 
 #: core/templates/snippets/ra_data.html:55
-msgid "Risk Analysis is empty"
+msgid "Risk analysis is empty"
 msgstr "L'analyse de risque est vide"
 
 #: core/templates/snippets/ra_data.html:90
 msgid "Matrix view"
-msgstr "Vue Matricielle"
+msgstr "Vue matricielle"
 
 #: core/templates/snippets/risk_matrix.html:52
 #: core/templates/snippets/risk_matrix.html:110

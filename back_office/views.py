@@ -593,7 +593,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.filter(parent_group=self.get_object())
-        crumbs = [_('Projects Domains')]
+        crumbs = [_('Projects domains')]
         context['crumbs'] = crumbs
         context['project_create_form'] = ProjectForm(initial={'parent_group': get_object_or_404(ProjectsGroup, id=self.kwargs['pk'])})
         return context

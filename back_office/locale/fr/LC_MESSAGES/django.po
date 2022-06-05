@@ -58,12 +58,12 @@ msgid "No"
 msgstr ""
 
 #: back_office/filters.py:98
-msgid "Search Analysis..."
-msgstr "Rechercher une Analyse..."
+msgid "Search analysis..."
+msgstr "Rechercher une analyse..."
 
 #: back_office/filters.py:114
-msgid "Search Scenario..."
-msgstr "Rechercher un Scénario..."
+msgid "Search scenario..."
+msgstr "Rechercher un scénario..."
 
 #: back_office/filters.py:129 back_office/filters.py:162
 #: back_office/filters.py:189 back_office/filters.py:259
@@ -87,8 +87,8 @@ msgid "treatment"
 msgstr "traitement"
 
 #: back_office/filters.py:144
-msgid "Search Measure..."
-msgstr "Rechercher une Mesure..."
+msgid "Search security measure..."
+msgstr "Rechercher une mesure..."
 
 #: back_office/filters.py:161 back_office/filters.py:238
 #, fuzzy
@@ -105,8 +105,8 @@ msgid "solution"
 msgstr ""
 
 #: back_office/filters.py:177
-msgid "Search Acceptance..."
-msgstr "Rechercher une Acceptation..."
+msgid "Search acceptance..."
+msgstr "Rechercher une acceptation..."
 
 #: back_office/filters.py:191
 #, fuzzy
@@ -121,8 +121,8 @@ msgid "validator"
 msgstr "Validateur"
 
 #: back_office/filters.py:204
-msgid "Search Domain..."
-msgstr "Rechercher un Domaine..."
+msgid "Search domain..."
+msgstr "Rechercher un domaine..."
 
 #: back_office/filters.py:213 back_office/filters.py:237
 #: back_office/filters.py:281 back_office/filters.py:303
@@ -138,16 +138,16 @@ msgid "department"
 msgstr "Departement"
 
 #: back_office/filters.py:225
-msgid "Search Project..."
-msgstr "Rechercher un Projet..."
+msgid "Search project..."
+msgstr "Rechercher un projet..."
 
 #: back_office/filters.py:251
-msgid "Search Threat..."
-msgstr "Rechercher une Menace..."
+msgid "Search threat..."
+msgstr "Rechercher une menace..."
 
 #: back_office/filters.py:271
-msgid "Search Function..."
-msgstr "Rechercher une Fonction..."
+msgid "Search function..."
+msgstr "Rechercher une fonction..."
 
 #: back_office/filters.py:282
 #, fuzzy
@@ -160,8 +160,8 @@ msgid "contact"
 msgstr ""
 
 #: back_office/filters.py:295
-msgid "Search Asset..."
-msgstr "Rechercher un Bien sensible..."
+msgid "Search asset..."
+msgstr "Rechercher un bien sensible..."
 
 #: back_office/forms.py:45 back_office/templates/back_office/mtg_update.html:16
 #: back_office/templates/back_office/ri_update.html:106
@@ -171,8 +171,8 @@ msgstr "Scénario de risque"
 #: back_office/forms.py:46 back_office/templates/back_office/mtg_list.html:84
 #: back_office/templates/back_office/mtg_list.html:126
 #: back_office/templates/back_office/mtg_update.html:41
-msgid "Security Function"
-msgstr "Fonction de Sécurité"
+msgid "Security function"
+msgstr "Fonction de sécurité"
 
 #: back_office/forms.py:132
 #, fuzzy
@@ -181,15 +181,20 @@ msgid "Risk scenario"
 msgstr "Scénario de risque"
 
 #: back_office/forms.py:138
+#: back_office/templates/back_office/project_create.html:26
+#: back_office/templates/back_office/project_list.html:74
+#: back_office/templates/back_office/project_list.html:118
+#: back_office/templates/back_office/project_update.html:27
+#: back_office/templates/back_office/project_domain_list.html:50
 #, fuzzy
-#| msgid "Parent Domain"
-msgid "Parent domain"
-msgstr "Domaine Parent"
+#| msgid "Domain"
+msgid "Domain"
+msgstr "Domaine"
 
 #: back_office/templates/back_office/acceptance_list.html:6
 #: back_office/templates/back_office/base.html:129
-msgid "Risk Acceptances"
-msgstr "Acceptations du risque"
+msgid "Risk acceptances"
+msgstr "Acceptations de risque"
 
 #: back_office/templates/back_office/acceptance_list.html:56
 #: back_office/templates/back_office/analysis_list.html:59
@@ -230,11 +235,11 @@ msgid "Clear Filters"
 msgstr "Effacer les Filtres"
 
 #: back_office/templates/back_office/acceptance_list.html:102
-msgid "New Risk Acceptance"
-msgstr "Nouvelle Acceptation d'un risque"
+msgid "New risk acceptance"
+msgstr "Nouvelle acceptation de risque"
 
 #: back_office/templates/back_office/acceptance_list.html:111
-msgid "Risk Acceptance"
+msgid "Risk acceptance"
 msgstr ""
 
 #: back_office/templates/back_office/acceptance_list.html:113
@@ -266,7 +271,7 @@ msgstr "Aucune acceptation de risque n'a été trouvée."
 #: back_office/templates/back_office/analysis_list.html:9
 #: back_office/templates/back_office/base.html:96
 #: back_office/templates/back_office/quick_start.html:64
-msgid "Risk Analyses"
+msgid "Risk analyses"
 msgstr "Analyses de risque"
 
 #: back_office/templates/back_office/analysis_list.html:75
@@ -294,8 +299,8 @@ msgstr "Projets"
 
 #: back_office/templates/back_office/analysis_list.html:113
 #: back_office/templates/back_office/project_update.html:58
-msgid "New Risk Analysis"
-msgstr "Nouvelle Analyse"
+msgid "New risk analysis"
+msgstr "Nouvelle analyse"
 
 #: back_office/templates/back_office/analysis_list.html:124
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:7
@@ -332,8 +337,8 @@ msgid "Assets"
 msgstr "Biens sensibles"
 
 #: back_office/templates/back_office/asset_list.html:44
-msgid "New Asset"
-msgstr "Nouveau Bien sensible"
+msgid "New asset"
+msgstr "Nouveau bien sensible"
 
 #: back_office/templates/back_office/asset_list.html:55
 #: back_office/templates/back_office/pd_update.html:14
@@ -415,7 +420,7 @@ msgstr "Mesures de sécurité"
 #: back_office/templates/back_office/base.html:147
 #: back_office/templates/back_office/project_domain_list.html:5
 #: back_office/views.py:596
-msgid "Projects Domains"
+msgid "Projects domains"
 msgstr "Domaines de projets"
 
 #: back_office/templates/back_office/base.html:158
@@ -435,7 +440,7 @@ msgstr "Menaces"
 #: back_office/templates/back_office/base.html:190
 #: back_office/templates/back_office/quick_start.html:52
 #: back_office/templates/back_office/security_function_list.html:5
-msgid "Security Functions"
+msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
 #: back_office/templates/back_office/base.html:196
@@ -463,7 +468,7 @@ msgstr ""
 
 #: back_office/templates/back_office/base.html:251
 #: back_office/templates/back_office/quick_start.html:5
-msgid "Quick Start"
+msgid "Quick start"
 msgstr "Démarrage rapide"
 
 #: back_office/templates/back_office/base.html:260
@@ -599,8 +604,8 @@ msgstr "Scénarios"
 
 #: back_office/templates/back_office/index.html:32
 #: back_office/templates/back_office/mtg_list.html:6
-msgid "Measures"
-msgstr "Mesures"
+msgid "Security measures"
+msgstr "Mesures de sécurité"
 
 #: back_office/templates/back_office/index.html:39
 msgid "My projects"
@@ -655,8 +660,8 @@ msgstr ""
 
 #: back_office/templates/back_office/mtg_list.html:113
 #: back_office/templates/back_office/ri_update.html:259
-msgid "New Measure"
-msgstr "Nouvelle Mesure"
+msgid "New measure"
+msgstr "Nouvelle mesure"
 
 #: back_office/templates/back_office/mtg_list.html:122
 #: back_office/templates/back_office/mtg_update.html:20
@@ -701,8 +706,8 @@ msgstr "Projets associés"
 #: back_office/templates/back_office/pd_update.html:38
 #: back_office/templates/back_office/project_create.html:4
 #: back_office/templates/back_office/project_list.html:108
-msgid "New Project"
-msgstr "Nouveau Projet"
+msgid "New project"
+msgstr "Nouveau projet"
 
 #: back_office/templates/back_office/project_create.html:14
 #: back_office/templates/back_office/project_list.html:117
@@ -715,13 +720,6 @@ msgstr ""
 msgid "Internal ID"
 msgstr ""
 
-#: back_office/templates/back_office/project_create.html:26
-#: back_office/templates/back_office/project_list.html:74
-#: back_office/templates/back_office/project_list.html:118
-#: back_office/templates/back_office/project_update.html:27
-msgid "Parent Domain"
-msgstr "Domaine Parent"
-
 #: back_office/templates/back_office/project_create.html:36
 #: back_office/templates/back_office/project_list.html:119
 #: back_office/templates/back_office/project_update.html:37
@@ -731,12 +729,8 @@ msgid "Summary"
 msgstr "Résumé"
 
 #: back_office/templates/back_office/project_domain_list.html:41
-msgid "New Projects Domain"
-msgstr "Nouveau Domaine de Projets"
-
-#: back_office/templates/back_office/project_domain_list.html:50
-msgid "Domain"
-msgstr "Domaine"
+msgid "New projects domain"
+msgstr "Nouveau domaine de projets"
 
 #: back_office/templates/back_office/project_domain_list.html:101
 msgid "No projects domain found."
@@ -748,8 +742,8 @@ msgid "No project found."
 msgstr "Aucun projet n'a été trouvé"
 
 #: back_office/templates/back_office/project_update.html:52
-msgid "Associated Risk Analyses"
-msgstr "Analyses associées"
+msgid "Associated risk analyses"
+msgstr "Analyses de risque associées"
 
 #: back_office/templates/back_office/quick_start.html:15
 #: back_office/templates/back_office/quick_start.html:39
@@ -857,9 +851,9 @@ msgstr ""
 
 #: back_office/templates/back_office/ra_create.html:4
 #, fuzzy
-#| msgid "New Risk Analysis"
-msgid "New Analysis"
-msgstr "Nouvelle Analyse"
+#| msgid "New risk analysis"
+msgid "New analysis"
+msgstr "Nouvelle analyse"
 
 #: back_office/templates/back_office/ra_create.html:33
 msgid "Is Draft"
@@ -878,7 +872,7 @@ msgid "Comments"
 msgstr "Commentaires"
 
 #: back_office/templates/back_office/ra_update.html:15
-msgid "Risk Analysis"
+msgid "Risk analysis"
 msgstr "Analyse de risque"
 
 #: back_office/templates/back_office/ra_update.html:28
@@ -888,13 +882,13 @@ msgstr ""
 
 #: back_office/templates/back_office/ra_update.html:62
 msgid "Associated Risk Scenarios"
-msgstr "Scénarios de risque asscociés"
+msgstr "Scénarios de risque associés"
 
 #: back_office/templates/back_office/ra_update.html:66
 #: back_office/templates/back_office/ri_create.html:4
 #: back_office/templates/back_office/ri_list.html:110
-msgid "New Risk Scenario"
-msgstr "Nouveau Scénario"
+msgid "New risk scenario"
+msgstr "Nouveau scénario de risque"
 
 #: back_office/templates/back_office/ri_create.html:17
 msgid "Parent Analysis"
@@ -1008,7 +1002,7 @@ msgstr "Sujet"
 
 #: back_office/templates/back_office/ri_update.html:145
 msgid "Current Profile"
-msgstr "Profile courant"
+msgstr "Profil courant"
 
 #: back_office/templates/back_office/ri_update.html:151
 msgid "Current Indicator"
@@ -1027,8 +1021,8 @@ msgid "Provider"
 msgstr "Fournisseur"
 
 #: back_office/templates/back_office/security_function_list.html:101
-msgid "New Security Function"
-msgstr "Nouvelle Fonction de Sécurité"
+msgid "New security function"
+msgstr "Nouvelle fonction de sécurité"
 
 #: back_office/templates/back_office/security_function_list.html:112
 #: back_office/templates/back_office/security_function_update.html:23
@@ -1159,15 +1153,15 @@ msgstr "Créer un nouveau domaine"
 #: back_office/templates/back_office/snippets/projects_domain_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Projects Domain: "
+"Projects domain: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement le "
-"Domaine de Projets suivant: "
+"domaine de projets suivant: "
 
 #: back_office/templates/back_office/snippets/ra_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Risk Analysis: "
+"Risk analysis: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement "
 "l'Analyse de risque suivante: "
@@ -1191,13 +1185,13 @@ msgid "Add Acceptance"
 msgstr "Ajouter une Acceptation"
 
 #: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:22
-msgid "Delete Risk Acceptance?"
+msgid "Delete risk acceptance?"
 msgstr "Supprimer l'Acceptation de risque?"
 
 #: back_office/templates/back_office/snippets/risk_acceptance_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Risk Acceptance: "
+"Risk acceptance: "
 msgstr ""
 "Cette action ne peut pas être annulée. Elle supprimera définitivement "
 "l'Acceptation du risque suivant: "
@@ -1223,28 +1217,28 @@ msgid "as well as any child object, this includes: Security Measures."
 msgstr "ainsi que tout objet enfant, ce qui inclut: Mesures de Sécurité"
 
 #: back_office/templates/back_office/snippets/security_function_create_modal.html:18
-msgid "Add Security Function"
-msgstr "Ajouter une Fonction de Sécurité"
+msgid "Add security function"
+msgstr "Ajouter une fonction de sécurité"
 
 #: back_office/templates/back_office/snippets/security_function_delete_modal.html:22
-msgid "Delete Security Function?"
-msgstr "Supprimer la Fonction de Sécurité?"
+msgid "Delete security function?"
+msgstr "Supprimer la fonction de sécurité?"
 
 #: back_office/templates/back_office/snippets/security_function_delete_modal.html:30
 msgid ""
 "This action cannot be undone. This will permanently delete the following "
-"Security Function: "
+"Security function: "
 msgstr ""
-"Cette action ne peut pas être annulée. Elle supprimera définitivement la "
+"Cette actiNew on ne peut pas être annulée. Elle supprimera définitivement la "
 "Fonction de Sécurité suivante: "
 
 #: back_office/templates/back_office/snippets/threat_create_modal.html:18
-msgid "Add Threat"
-msgstr "Ajouter une Menace"
+msgid "Add threat"
+msgstr "Ajouter une menace"
 
 #: back_office/templates/back_office/snippets/threat_delete_modal.html:22
-msgid "Delete Threat?"
-msgstr "Supprimer la Menace?"
+msgid "Delete threat?"
+msgstr "Supprimer la menace?"
 
 #: back_office/templates/back_office/snippets/threat_delete_modal.html:30
 msgid ""
@@ -1255,8 +1249,8 @@ msgstr ""
 "Menace suivante: "
 
 #: back_office/templates/back_office/threat_list.html:41
-msgid "New Threat"
-msgstr "Nouvelle Menace"
+msgid "New threat"
+msgstr "Nouvelle menace"
 
 #: back_office/templates/back_office/threat_list.html:95
 msgid "No threat found."
@@ -1266,9 +1260,9 @@ msgstr "Aucune menace n'a été trouvée"
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: back_office/templates/back_office/user_list.html:28
-msgid "Full Name"
-msgstr "Nom Complet"
+#: back_office/templates/back_office/user_list.html:21
+msgid "New user"
+msgstr "Nouvel utilisateur"
 
 #: back_office/templates/back_office/user_list.html:29
 msgid "Created At"

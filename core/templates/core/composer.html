@@ -15,16 +15,16 @@
             <div class="w-1/3 ">
 
                 <div>
-                    <div class="p-2">{% trans "Current risks levels" %}</div>
+                    <div class="p-2">{% trans "Current risk level" %}</div>
 
                     <div class="items-center">
-                        {% trans "Current Risks" as cur_rsk_label %}
+                        {% trans "Current Risk" as cur_rsk_label %}
                         {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=context.current_level %}
                     </div>
                 </div>
             </div>
             <div class="w-1/3 ">
-                <div class="p-2 m-2">{% trans "Associated measures status" %}</div>
+                <div class="p-2 m-2">{% trans "Status of associated measures" %}</div>
                 <div>
                     <div class="items-center justify-center">
                         {% include 'snippets/bar_chart.html' with name='mtg' labels=context.mitigation_status.labels values=context.mitigation_status.values %}
@@ -32,9 +32,9 @@
                 </div>
             </div>
             <div class="w-1/3 ">
-                <div class="p-2">{% trans "Residual risks levels" %}</div>
+                <div class="p-2">{% trans "Residual risk level" %}</div>
                 <div class="items-center">
-                    {% trans "Residual Risks" as rsd_rsk_label %}
+                    {% trans "Residual Risk" as rsd_rsk_label %}
                     {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=context.residual_level %}
                 </div>
 
@@ -43,9 +43,9 @@
         <div class="mt-4 bg-gradient-to-br from-slate-200 shadow-lg rounded-lg p-2 ">
             <i class="fas fa-hand-point-right"></i> <span class="font-semibold">{% trans "For the selected scope, you have:" %}</span>
             <ul class="list-disc py-2 px-6 m-2">
-                <li><b>{{context.counters.untreated}}</b> {% trans "untreated risk(s)," %}</li>
-                <li>{% trans "among which," %} <b>{{context.counters.untreated_h_vh}}</b> {% trans "are currently of level high or above," %}</li>
-                <li>{% trans "and" %} <b>{{context.counters.accepted}}</b> {% trans "risk(s) accepted." %}</li>
+                <li><b>{{context.counters.untreated}}</b> {% trans "untreated risk scenario(s)," %}</li>
+                <li>{% trans "among which," %} <b>{{context.counters.untreated_h_vh}}</b> {% trans "currently of level high or above," %}</li>
+                <li>{% trans "and" %} <b>{{context.counters.accepted}}</b> {% trans "risk scenario(s) accepted." %}</li>
             </ul>
 
         </div>
@@ -61,7 +61,7 @@
           </div>
           <div x-show="show" class="border border-1 px-10 py-6 bg-white flex space-x-4 rounded-b-lg">
               <div class="w-1/3">
-              <div class="my-4"> <span class="font-semibold">{% trans "Risk Analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
+              <div class="my-4"> <span class="font-semibold">{% trans "Risk analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
                   <b>{{item.analysis.quality_check.count}}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}</div>
               <div>
                   <table class="border border-collapse m-2 p-2 rounded">

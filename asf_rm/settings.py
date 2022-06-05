@@ -187,7 +187,7 @@ BATON = {
     'GRAVATAR_DEFAULT_IMG': 'wavatar',
     'LOGIN_SPLASH': '/static/core/img/login-splash.png',
     'SEARCH_FIELD': {
-        'label': _('Search Analysis...'),
+        'label': _('Search analysis...'),
         'url': '/admin/core/analysis/',
     },
     'MENU': (
@@ -216,7 +216,7 @@ BATON = {
                 },
                 {
                     'name': 'riskacceptance',
-                    'label': _('Risk Acceptances'),
+                    'label': _('Risk acceptances'),
                     'icon': 'fas fa-user-tie',
                 },
             )

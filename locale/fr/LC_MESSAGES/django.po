@@ -19,8 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: asf_rm/settings.py:190
-msgid "Search Analysis..."
-msgstr "Rechercher une Analyse..."
+msgid "Search analysis..."
+msgstr "Rechercher une analyse..."
 
 #: asf_rm/settings.py:195
 msgid "Main"
@@ -44,9 +44,9 @@ msgstr ""
 
 #: asf_rm/settings.py:219
 #, fuzzy
-#| msgid "Risk Acceptances"
-msgid "Risk Acceptances"
-msgstr "Acceptations de Risques"
+#| msgid "Risk acceptances"
+msgid "Risk acceptances"
+msgstr "Acceptations de risque"
 
 #: asf_rm/settings.py:224
 msgid "Organization"
@@ -84,11 +84,11 @@ msgstr "Paramètres"
 
 #: asf_rm/settings.py:258
 msgid "Users and authorizations"
-msgstr "Utilisateurs et Autorisations"
+msgstr "Utilisateurs et autorisations"
 
 #: asf_rm/settings.py:262
-msgid "User Guide"
-msgstr "Guide Utilisateur"
+msgid "User guide"
+msgstr "Guide utilisateur"
 
 #: asf_rm/settings.py:264
 msgid "Staff"
@@ -111,9 +111,9 @@ msgid "Extra"
 msgstr ""
 
 #, fuzzy
-#~| msgid "Risk Acceptances"
-#~ msgid "Risk Acceptance"
-#~ msgstr "Acceptations de Risques"
+#~| msgid "Risk acceptances"
+#~ msgid "Risk acceptance"
+#~ msgstr "Acceptations de risque"
 
 #, fuzzy
 #~| msgid "Projects"

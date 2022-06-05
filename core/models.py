@@ -50,9 +50,9 @@ class Analysis(models.Model):
         errors_lst = list()
         warnings_lst = list()
         info_lst = list()
-        # --- check on the Risk Analysis:
+        # --- check on the risk analysis:
         if self.is_draft:
-            info_lst.append({"msg": _("Risk Analysis is still in Draft mode"), "obj_type": "Analysis", "object": self})
+            info_lst.append({"msg": _("Risk analysis is still in Draft mode"), "obj_type": "Analysis", "object": self})
         if not self.auditor:
             info_lst.append({"msg": _("No auditor assigned to this risk analysis yet"), "obj_type": "Analysis", "object": self})
         if not self.riskinstance_set.all():
@@ -231,8 +231,8 @@ class Mitigation(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
 
     class Meta:
-        verbose_name = _("Measure")
-        verbose_name_plural = _("Measures")
+        verbose_name = _("Security Measure")
+        verbose_name_plural = _("Security Measures")
 
     def parent_project(self):
         return self.risk_instance.parent_project()
@@ -268,8 +268,8 @@ class RiskAcceptance(models.Model):
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
-        verbose_name = _("Risk Acceptance")
-        verbose_name_plural = _("Risk Acceptances")
+        verbose_name = _("Risk acceptance")
+        verbose_name_plural = _("Risk acceptances")
 
     def __str__(self):
         return f"[{self.type}] {self.risk_instance}"

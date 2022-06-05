@@ -2,7 +2,7 @@
 {% load i18n static %}
 
 {% block content %}
-{% with page_title=_('Projects Domains') %}
+{% with page_title=_('Projects domains') %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div class="">
@@ -38,7 +38,7 @@
             <a id="modal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                 class="add-button">
                 <i class="fas fa-plus"></i>
-                {% trans "New Projects Domain" %}
+                {% trans "New projects domain" %}
             </a>
             {% include "back_office/snippets/projects_domain_create_modal.html" %}
         </div>

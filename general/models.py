@@ -20,9 +20,9 @@ class ProjectsGroup(models.Model):
 class Project(models.Model):
     PRJ_LC_STATUS = [
         ('undefined', _('--')),
-        ('in_design', _('In Design')),
-        ('in_dev', _('In Dev')),
-        ('in_prod', _('In Production')),
+        ('in_design', _('Design')),
+        ('in_dev', _('Development')),
+        ('in_prod', _('Production')),
         ('eol', _('End Of Life')),
         ('dropped', _('Dropped')),
 
@@ -30,7 +30,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200, default=_("<short project name>"), verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"), 
         null=True, blank=True, verbose_name=_("Internal ID"))
-    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Parent domain"))
+    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Domain"))
     lc_status = models.CharField(max_length=20, default='in_design', 
         choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True, 

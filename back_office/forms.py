@@ -43,7 +43,7 @@ class MeasureCreateForm(StyledModelForm):
         fields = '__all__'
         labels = {
             'risk_instance': _('Risk Scenario'),
-            'solution': _('Security Function'),
+            'solution': _('Security function'),
         }
         widgets = {
             'eta': DefaultDateInput()
@@ -135,7 +135,7 @@ class ProjectForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        labels = {'parent_group': _('Parent domain')}
+        labels = {'parent_group': _('Domain')}
 
 class AssetForm(StyledModelForm):
     class Meta:

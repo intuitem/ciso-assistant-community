@@ -108,7 +108,7 @@ def test_BO001(page):
 	page.click('id=analysis'+analysisId)
 	assert page.locator('id=page_title').inner_text() == "RA-"+ analysisId + ": " + analysisName, "Step "+str(step)+": not Ok"
 	page.click("id=newRiskScenario")
-	assert page.locator('id=page_title').inner_text() == "New Risk Scenario", "Step "+str(step)+": not Ok"
+	assert page.locator('id=page_title').inner_text() == "New risk scenario", "Step "+str(step)+": not Ok"
 	page.fill('id=id_riskinstance_title', 'Scenario Test')
 	page.select_option('id=id_riskinstance_parent_risk', label=threatName)
 	page.fill('id=id_riskinstance_scenario', 'scenario test')

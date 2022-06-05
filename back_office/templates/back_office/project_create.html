@@ -1,7 +1,7 @@
 {% extends 'back_office/base.html' %}
 {% load i18n %}
 {% block content %}
-{% with page_title=_("New Project") %}
+{% with page_title=_("New project") %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 
@@ -23,7 +23,7 @@
 
                 </div>
                 <div class="flex flex-col">
-                    <p class="text-sm font-semibold">{% trans "Parent Domain" %}</p>
+                    <p class="text-sm font-semibold">{% trans "Domain" %}</p>
                     {{ form.parent_group.errors }}
                     {{ form.parent_group }}
                 </div>

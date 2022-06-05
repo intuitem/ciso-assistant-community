@@ -299,7 +299,7 @@ msgid "Solutions in catalog"
 msgstr ""
 
 #: core/templates/core/analytics.html:52
-msgid "Risk Acceptances"
+msgid "Risk acceptances"
 msgstr ""
 
 #: core/templates/core/analytics.html:60
@@ -491,7 +491,7 @@ msgid "risk(s) accepted."
 msgstr ""
 
 #: core/templates/core/composer.html:62
-msgid "Risk Analysis status:"
+msgid "Risk analysis status:"
 msgstr ""
 
 #: core/templates/core/composer.html:62
@@ -563,7 +563,7 @@ msgid "Treatment Plan"
 msgstr ""
 
 #: core/templates/core/index.html:88 core/templates/snippets/ra_data.html:9
-msgid "Risk Analysis"
+msgid "Risk analysis"
 msgstr ""
 
 #: core/templates/core/index.html:90 core/templates/core/index.html:96
@@ -1137,7 +1137,7 @@ msgid "Treatment"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:53
-msgid "Risk Analysis is empty"
+msgid "Risk analysis is empty"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:88
