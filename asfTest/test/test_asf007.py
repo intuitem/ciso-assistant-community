@@ -46,7 +46,7 @@ def test_ASF007(page):
 	]
 	for tab in tabsfr:
 		assert tab in tabs, "Step "+str(step)+": not Ok"
-	assert title == "Registre d'analyses", "Step "+str(step)+": not Ok"
+	assert title == "Registre des analyses", "Step "+str(step)+": not Ok"
 	# 3 | Click on "More", and choose "English" in language | Loading of English traduction |
 	step = 3
 	page.click('id=more')
