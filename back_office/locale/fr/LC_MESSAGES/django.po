@@ -163,9 +163,10 @@ msgstr ""
 msgid "Search asset..."
 msgstr "Rechercher un bien sensible..."
 
+#: back_office/forms.py:132
 #: back_office/forms.py:45 back_office/templates/back_office/mtg_update.html:16
 #: back_office/templates/back_office/ri_update.html:106
-msgid "Risk Scenario"
+msgid "Risk scenario"
 msgstr "Scénario de risque"
 
 #: back_office/forms.py:46 back_office/templates/back_office/mtg_list.html:84
@@ -173,12 +174,6 @@ msgstr "Scénario de risque"
 #: back_office/templates/back_office/mtg_update.html:41
 msgid "Security function"
 msgstr "Fonction de sécurité"
-
-#: back_office/forms.py:132
-#, fuzzy
-#| msgid "Risk Scenario"
-msgid "Risk scenario"
-msgstr "Scénario de risque"
 
 #: back_office/forms.py:138
 #: back_office/templates/back_office/project_create.html:26
@@ -312,7 +307,7 @@ msgstr ""
 #: back_office/templates/back_office/analysis_list.html:126
 #: back_office/templates/back_office/base.html:107
 #: back_office/templates/back_office/ri_list.html:6 back_office/views.py:537
-msgid "Risk Scenarios"
+msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
 #: back_office/templates/back_office/analysis_list.html:127
@@ -413,8 +408,10 @@ msgstr "Vue d'ensemble"
 msgid "Switch to viewer"
 msgstr "Basculer vers le lecteur"
 
+#: back_office/templates/back_office/index.html:32
+#: back_office/templates/back_office/mtg_list.html:6
 #: back_office/templates/back_office/base.html:118
-msgid "Security Measures"
+msgid "Security measures"
 msgstr "Mesures de sécurité"
 
 #: back_office/templates/back_office/base.html:147
@@ -602,11 +599,6 @@ msgstr "Analyses"
 msgid "Scenarios"
 msgstr "Scénarios"
 
-#: back_office/templates/back_office/index.html:32
-#: back_office/templates/back_office/mtg_list.html:6
-msgid "Security measures"
-msgstr "Mesures de sécurité"
-
 #: back_office/templates/back_office/index.html:39
 msgid "My projects"
 msgstr "Mes projets"
@@ -655,13 +647,13 @@ msgstr "Exceptions à revoir"
 #: back_office/templates/back_office/mtg_list.html:123
 #: back_office/templates/back_office/ri_list.html:76
 #: back_office/templates/back_office/ri_list.html:122
-msgid "Parent Project"
-msgstr ""
+msgid "Parent project"
+msgstr "Projet parent"
 
 #: back_office/templates/back_office/mtg_list.html:113
 #: back_office/templates/back_office/ri_update.html:259
-msgid "New measure"
-msgstr "Nouvelle mesure"
+msgid "New security measure"
+msgstr "Nouvelle mesure de sécurité"
 
 #: back_office/templates/back_office/mtg_list.html:122
 #: back_office/templates/back_office/mtg_update.html:20
@@ -881,7 +873,7 @@ msgid "Version"
 msgstr ""
 
 #: back_office/templates/back_office/ra_update.html:62
-msgid "Associated Risk Scenarios"
+msgid "Associated risk scenarios"
 msgstr "Scénarios de risque associés"
 
 #: back_office/templates/back_office/ra_update.html:66
@@ -920,23 +912,23 @@ msgstr "Niveau de risque résiduel"
 
 #: back_office/templates/back_office/ri_create.html:47
 #: back_office/templates/back_office/ri_update.html:197
-msgid "Residual Probability"
+msgid "Residual probability"
 msgstr "Probabilité résiduelle"
 
 #: back_office/templates/back_office/ri_create.html:52
 #: back_office/templates/back_office/ri_update.html:205
-msgid "Residual Impact"
+msgid "Residual impact"
 msgstr "Impact résiduel"
 
 #: back_office/templates/back_office/ri_create.html:60
 #: back_office/templates/back_office/ri_update.html:234
-msgid "Follow up"
+msgid "Follow-up"
 msgstr "Suivi"
 
 #: back_office/templates/back_office/ri_create.html:61
 #: back_office/templates/back_office/ri_list.html:80
 #: back_office/templates/back_office/ri_update.html:235
-msgid "Treatment Status"
+msgid "Treatment status"
 msgstr "Statut du traitement"
 
 #: back_office/templates/back_office/ri_create.html:75
@@ -945,25 +937,26 @@ msgstr "Statut du traitement"
 msgid "Current risk level"
 msgstr "Niveau de risque courant"
 
+#: back_office/templates/back_office/snippets/ri_list_nested.html:16
 #: back_office/templates/back_office/ri_create.html:76
 #: back_office/templates/back_office/ri_update.html:146
-msgid "Existing Measures"
+msgid "Existing measures"
 msgstr "Mesures existantes"
 
 #: back_office/templates/back_office/ri_create.html:83
 #: back_office/templates/back_office/ri_update.html:154
-msgid "Current Probability"
+msgid "Current probability"
 msgstr "Probabilité courante"
 
 #: back_office/templates/back_office/ri_create.html:88
 #: back_office/templates/back_office/ri_update.html:162
-msgid "Current Impact"
+msgid "Current impact"
 msgstr "Impact courant"
 
 #: back_office/templates/back_office/ri_create.html:96
 #: back_office/templates/back_office/ri_update.html:255
-msgid "Associated Measures"
-msgstr "Mesures associées"
+msgid "Associated security measures"
+msgstr "Mesures de sécurité associées"
 
 #: back_office/templates/back_office/ri_list.html:195
 #: back_office/templates/back_office/snippets/ri_list_nested.html:86
@@ -1001,11 +994,11 @@ msgid "Subject"
 msgstr "Sujet"
 
 #: back_office/templates/back_office/ri_update.html:145
-msgid "Current Profile"
+msgid "Current profile"
 msgstr "Profil courant"
 
 #: back_office/templates/back_office/ri_update.html:151
-msgid "Current Indicator"
+msgid "Current indicator"
 msgstr "Indicateur courant"
 
 #: back_office/templates/back_office/ri_update.html:194
@@ -1070,8 +1063,8 @@ msgid "Home"
 msgstr "Accueil"
 
 #: back_office/templates/back_office/snippets/measure_create_modal.html:18
-msgid "Add Measure"
-msgstr "Ajouter une Mesure"
+msgid "Add security measure"
+msgstr "Ajouter une mesure de sécurité"
 
 #: back_office/templates/back_office/snippets/measure_delete_modal.html:22
 msgid "Delete security measure?"
@@ -1174,10 +1167,6 @@ msgid ""
 "as well as any child object. This includes: risk scenarios and security measures."
 msgstr ""
 "ainsi que tout objet enfant. Ceci inclut : scénarios de risque et mesures de sécurité."
-
-#: back_office/templates/back_office/snippets/ri_list_nested.html:16
-msgid "Existing measures"
-msgstr "Measures existantes"
 
 #: back_office/templates/back_office/snippets/ri_list_nested.html:22
 msgid "Suggested measures"
@@ -1282,9 +1271,6 @@ msgstr ""
 #: back_office/templates/back_office/user_list.html:41
 msgid "superuser"
 msgstr "super-utilisateur"
-
-#~ msgid "Parent project"
-#~ msgstr "Projet parent"
 
 #~ msgid "parent project"
 #~ msgstr "projet parent"

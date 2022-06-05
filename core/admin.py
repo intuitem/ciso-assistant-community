@@ -42,10 +42,10 @@ class RiskInstanceInline(admin.StackedInline):
     show_change_link = True
     fieldsets = [
         (None, {'fields': ['analysis', 'parent_risk']}),
-        (_('Threat Description'), {'fields': ['title', 'scenario']}),
-        (_('Current Level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
-        (_('Residual Level'), {'fields': ['associated_mitigations','residual_proba', 'residual_impact', 'residual_level']}),
-        (_('Follow up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
+        (_('Threat description'), {'fields': ['title', 'scenario']}),
+        (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
+        (_('Residual level'), {'fields': ['associated_mitigations','residual_proba', 'residual_impact', 'residual_level']}),
+        (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
     ]
 
     def associated_mitigations(self, obj):
@@ -69,11 +69,11 @@ class RiskInstanceAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionMo
 
     fieldsets_with_inlines = [
         (None, {'fields': ['analysis', 'parent_risk',]}),
-        (_('Threat Description'), {'fields': ['title', 'scenario']}),
-        (_('Current Level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
+        (_('Threat description'), {'fields': ['title', 'scenario']}),
+        (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
         MitigationInline,
-        (_('Residual Level'), {'fields': ['residual_proba', 'residual_impact', 'residual_level']}),
-        (_('Follow up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
+        (_('Residual level'), {'fields': ['residual_proba', 'residual_impact', 'residual_level']}),
+        (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
     ]
     inlines = [MitigationInline]
 

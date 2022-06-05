@@ -18,7 +18,7 @@
                     <div class="p-2">{% trans "Current risk level" %}</div>
 
                     <div class="items-center">
-                        {% trans "Current Risk" as cur_rsk_label %}
+                        {% trans "Current risk" as cur_rsk_label %}
                         {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=context.current_level %}
                     </div>
                 </div>
@@ -34,7 +34,7 @@
             <div class="w-1/3 ">
                 <div class="p-2">{% trans "Residual risk level" %}</div>
                 <div class="items-center">
-                    {% trans "Residual Risk" as rsd_rsk_label %}
+                    {% trans "Residual risk" as rsd_rsk_label %}
                     {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=context.residual_level %}
                 </div>
 

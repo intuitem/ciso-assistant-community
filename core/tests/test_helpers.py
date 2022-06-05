@@ -36,7 +36,7 @@ def test_risk_per_status(db, test_setUp):
                                 {'value': 0, 'itemStyle': {'color': '#ee6666'}}]}
 
 def test_mitigation_per_status(db, test_setUp):
-    assert mitigation_per_status() == {'labels': ['Open', 'In Progress', 'On Hold', 'Done'], 'values': [{'itemStyle': {'color': '#fac858'}, 'value': 1}, 
+    assert mitigation_per_status() == {'labels': ['Open', 'In progress', 'On hold', 'Done'], 'values': [{'itemStyle': {'color': '#fac858'}, 'value': 1}, 
                                       {'itemStyle': {'color': '#5470c6'}, 'value': 0}, {'itemStyle': {'color': '#ee6666'}, 'value': 0}, 
                                       {'itemStyle': {'color': '#91cc75'}, 'value': 0}]}
 

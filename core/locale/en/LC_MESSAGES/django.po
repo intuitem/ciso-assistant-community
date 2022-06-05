@@ -126,7 +126,7 @@ msgstr ""
 
 #: core/models.py:138
 msgid ""
-"The existing measures to manage this risk. Edit the risk instance to add "
+"The existing security measures to manage this risk. Edit the risk instance to add "
 "extra mitigations."
 msgstr ""
 
@@ -135,19 +135,19 @@ msgid "<we have solution A and Process B to handle this>"
 msgstr ""
 
 #: core/models.py:140
-msgid "Existing Measures"
+msgid "Existing measures"
 msgstr ""
 
 #: core/models.py:144
-msgid "Current Probability"
+msgid "Current probability"
 msgstr ""
 
 #: core/models.py:145
-msgid "Current Impact"
+msgid "Current impact"
 msgstr ""
 
 #: core/models.py:146
-msgid "Current Level"
+msgid "Current level"
 msgstr ""
 
 #: core/models.py:147
@@ -157,11 +157,11 @@ msgid ""
 msgstr ""
 
 #: core/models.py:151
-msgid "Residual Probability"
+msgid "Residual probability"
 msgstr ""
 
 #: core/models.py:152
-msgid "Residual Impact"
+msgid "Residual impact"
 msgstr ""
 
 #: core/models.py:154
@@ -171,7 +171,7 @@ msgid ""
 msgstr ""
 
 #: core/models.py:155
-msgid "Residual Level"
+msgid "Residual level"
 msgstr ""
 
 #: core/models.py:158
@@ -187,11 +187,11 @@ msgid "Updated at"
 msgstr ""
 
 #: core/models.py:185
-msgid "In Progress"
+msgid "In progress"
 msgstr ""
 
 #: core/models.py:186
-msgid "On Hold"
+msgid "On hold"
 msgstr ""
 
 #: core/models.py:187
@@ -312,8 +312,8 @@ msgstr ""
 
 #: core/templates/core/analytics.html:77
 msgid ""
-"Risks breakdown per level: current (with the existing measures) versus "
-"residual (once all mitigations implemented)"
+"Risks breakdown per level: current (with the existing security measures) versus "
+"residual (once all security measures implemented)"
 msgstr ""
 
 #: core/templates/core/analytics.html:95
@@ -1121,7 +1121,7 @@ msgid "Existing measures"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:43
-msgid "Current Risk"
+msgid "Current risk"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:44
@@ -1129,7 +1129,7 @@ msgid "Recommended mitigations"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:45
-msgid "Residual Risk"
+msgid "Residual risk"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:46

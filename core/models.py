@@ -139,24 +139,24 @@ class RiskInstance(models.Model):
     title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
-                                         help_text=_("The existing measures to manage this risk. Edit the risk scenario to add extra measures."),
+                                         help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra measures."),
                                          default=_("<we have solution A and Process B to handle this>"),
-                                         verbose_name=_("Existing Measures"))
+                                         verbose_name=_("Existing measures"))
 
     # current
     current_proba = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                     verbose_name=_("Current Probability"))
-    current_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current Impact"))
-    current_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current Level"),
+                                     verbose_name=_("Current probability"))
+    current_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current impact"))
+    current_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current level"),
                                      help_text=_('The risk level given the current measures. Automatically updated on Save, based on the chosen matrix'))
 
     # residual
     residual_proba = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                      verbose_name=_("Residual Probability"))
-    residual_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Residual Impact"))
+                                      verbose_name=_("Residual probability"))
+    residual_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Residual impact"))
     residual_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
                                       help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'),
-                                      verbose_name=_("Residual Level"))
+                                      verbose_name=_("Residual level"))
 
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
                                  verbose_name=_("Treatment status"))
@@ -166,12 +166,12 @@ class RiskInstance(models.Model):
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
-        verbose_name = _("Risk Scenario")
-        verbose_name_plural = _("Risk Scenarios")
+        verbose_name = _("Risk scenario")
+        verbose_name_plural = _("Risk scenarios")
 
     def parent_project(self):
         return self.analysis.project
-    parent_project.short_description = _("Parent Project")
+    parent_project.short_description = _("Parent project")
 
     def associated_mitigations(self):
         return self.mitigation_set.count()
@@ -191,8 +191,8 @@ class RiskInstance(models.Model):
 class Mitigation(models.Model):
     MITIGATION_STATUS = [
         ('open', _('Open')),
-        ('in_progress', _('In Progress')),
-        ('on_hold', _('On Hold')),
+        ('in_progress', _('In progress')),
+        ('on_hold', _('On hold')),
         ('done', _('Done')),
     ]
 
@@ -231,12 +231,12 @@ class Mitigation(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
 
     class Meta:
-        verbose_name = _("Security Measure")
-        verbose_name_plural = _("Security Measures")
+        verbose_name = _("Security measure")
+        verbose_name_plural = _("Security measures")
 
     def parent_project(self):
         return self.risk_instance.parent_project()
-    parent_project.short_description = _("Parent Project")
+    parent_project.short_description = _("Parent project")
 
     def __str__(self):
         return self.title

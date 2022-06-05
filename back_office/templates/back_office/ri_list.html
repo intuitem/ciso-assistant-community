@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="">
-    {% with page_title=_('Risk Scenarios') %}
+    {% with page_title=_('Risk scenarios') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
     <!-- Ordering, Searchbar and Dropdown Form -->
@@ -73,11 +73,11 @@
                                     {{ filter.form.parent_risk }}
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent Project" %}</p>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent project" %}</p>
                                     {{ filter.form.analysis__project }}
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Treatment Status" %}</p>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Treatment status" %}</p>
                                     {{ filter.form.treatment }}
                                 </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
@@ -119,8 +119,8 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Title" %}</th>
                 <th class="px-6 py-3">{% trans "Threat" %}</th>
-                <th class="px-6 py-3">{% trans "Parent Project" %}</th>
-                {% comment %} <th class="px-6 py-3">{% trans "Treatment Status" %}</th> {% endcomment %}
+                <th class="px-6 py-3">{% trans "Parent project" %}</th>
+                {% comment %} <th class="px-6 py-3">{% trans "Treatment status" %}</th> {% endcomment %}
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>

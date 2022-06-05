@@ -117,7 +117,7 @@ msgstr ""
 
 #, fuzzy
 #~| msgid "Projects"
-#~ msgid "Parent Project"
+#~ msgid "Parent project"
 #~ msgstr "Projets"
 
 #, fuzzy

@@ -534,7 +534,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mitigations'] = Mitigation.objects.filter(risk_instance=self.get_object())
-        context['crumbs'] = [_('Risk Scenarios')]
+        context['crumbs'] = [_('Risk scenarios')]
         context['measure_create_form'] = MeasureCreateForm(initial={'risk_instance': get_object_or_404(RiskInstance, id=self.kwargs['pk'])})
         return context
 

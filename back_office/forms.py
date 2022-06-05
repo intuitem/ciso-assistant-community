@@ -42,7 +42,7 @@ class MeasureCreateForm(StyledModelForm):
         model = Mitigation
         fields = '__all__'
         labels = {
-            'risk_instance': _('Risk Scenario'),
+            'risk_instance': _('Risk scenario'),
             'solution': _('Security function'),
         }
         widgets = {
