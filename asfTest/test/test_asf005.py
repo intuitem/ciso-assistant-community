@@ -29,7 +29,7 @@ def test_ASF005(page):
         page.click('id=analysis1')
         assert page.url == urlpatterns.ra + "1/", "Step "+str(step)+": not Ok"
         print(page.locator('id=analysis1'))
-        # 2 | Click on “ASF Risk Manager” | Come back on home page
+        # 2 | Click on MIRA | Come back on home page
         step = 2
         page.click("id=homepage")
         assert page.url == urlpatterns.url, "Step "+str(step)+": not Ok"
@@ -57,7 +57,7 @@ def test_ASF005(page):
                 next += 1
                 print(next)
                 assert page.url == urlpatterns.url + "?page=" + str(next), "Step "+str(step)+": not Ok"
-            # 4 | Click on “ASF Risk Manager” | Come back on home page
+            # 4 | Click on MIRA | Come back on home page
             else:
                 step = 4
                 next = 0

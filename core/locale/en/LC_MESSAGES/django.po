@@ -1045,7 +1045,7 @@ msgid "Hello there"
 msgstr ""
 
 #: core/templates/registration/login.html:13
-msgid "This is the ASF Risk Manager. Your streamlined"
+msgid "This is MIRA. Your streamlined"
 msgstr ""
 
 #: core/templates/registration/login.html:13

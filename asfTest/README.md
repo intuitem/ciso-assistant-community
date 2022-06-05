@@ -1,4 +1,4 @@
-# **Functional Test Book for ASF Risk Manager**
+# **Functional Test Book for MIRA**
 
 * This project is a [Django](https://docs.djangoproject.com/en/4.0/) web application for risk assessment and management.
 * The purpose of this test book is to delimit the functional test environment of this application.
@@ -101,11 +101,11 @@ Check out our [Running Test Guide](/asfTest/test/README.md) to see how to run te
   | Num | Action                                                        | Expected                   | Result |
   | :-: | :------------------------------------------------------------ | :------------------------- | :----: |
   |  1  | Go to the URL http://127.0.0.1:8000/, click on the first link | Opening of RA-1            |        |
-  |  2  | Click on "ASF Risk Manager"                                   | Come back on home page     |        |
+  |  2  | Click on "MIRA"                                               | Come back on home page     |        |
   | 3.1 | Click on the next link "id"                                   | Opening of RA-id           |        |
   | 3.2 | Go to the previous page "p"                                   | Opening of page number "p" |        |
   | 3.3 | Click on next page if necessary                               | Go to the next page        |        |
-  |  4  | Click on "ASF Risk Manager"                                   | Come back on home page     |        |
+  |  4  | Click on "MIRA"                                               | Come back on home page     |        |
   
 
 * **Test sheet 6**

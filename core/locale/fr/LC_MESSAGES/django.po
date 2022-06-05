@@ -727,8 +727,8 @@ msgid "Nothing to show here."
 msgstr "Rien à voir ici."
 
 #: core/templates/core/index.html:12
-msgid "Search risk scenario, measure, analysis ..."
-msgstr "Rechercher un scénario de risque, mesure, analyse ..."
+msgid "Search risk scenario, security measure, risk analysis..."
+msgstr "Rechercher un scénario de risque, une mesure de sécurité, une analyse de risque..."
 
 #: core/templates/core/index.html:32
 msgid "ID"
@@ -1315,8 +1315,8 @@ msgid "Hello there"
 msgstr "Bonjour"
 
 #: core/templates/registration/login.html:13
-msgid "This is the ASF Risk Manager. Your streamlined"
-msgstr "Bienvenue dans ASF Risk Manager. Votre "
+msgid "This is MIRA. Your streamlined"
+msgstr "Bienvenue dans MIRA. Votre "
 
 #: core/templates/registration/login.html:13
 msgid "one-stop shop"

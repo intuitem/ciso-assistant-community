@@ -1,6 +1,6 @@
-# ASF Risk Manager
+# MIRA
 
-ASF RM offers a straightforward solution to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
+MIRA offers a straightforward solution to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
 
 ## General
 
@@ -22,7 +22,7 @@ $ cd asf-rm
 
 2. Install docker and docker-compose if you don't have those.  [Read the official docs for your own OS/distro](https://docs.docker.com/get-docker/)
 
-3. Once that is done, you can simply start-up ASF Risk Manager by running
+3. Once that is done, you can simply start-up MIRA by running
 
 ```sh
 $ docker-compose up
@@ -30,7 +30,7 @@ $ docker-compose up
 
 ## Features
 
-## How to set up ASF Risk Manager for development?
+## How to set up MIRA for development?
 
 1. Clone the repository
 ```sh

@@ -169,8 +169,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BATON = {
     'SITE_HEADER': 'ASF RM',
-    'SITE_TITLE': 'ASF Risk Manager',
-    'INDEX_TITLE': 'ASF Risk Manager',
+    'SITE_TITLE': 'MIRA',
+    'INDEX_TITLE': 'MIRA',
     'SUPPORT_HREF': 'https://github.com/intuitem/asf-rm/issues',
     'COPYRIGHT': 'copyright © 2018-2021 <a href="https://intuitem.com">intuitem</a>',  # noqa
     'POWERED_BY': '<a href="https://intuitem.com">intuitem</a>',
