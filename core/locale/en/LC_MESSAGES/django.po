@@ -105,8 +105,8 @@ msgid "Very high"
 msgstr ""
 
 #: core/models.py:133
-msgid "Analysis_bo"
-msgstr "Analysis"
+msgid "Analysis"
+msgstr ""
 
 #: core/models.py:134
 msgid "Parent risk"

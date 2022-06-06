@@ -37,6 +37,7 @@ msgid "Follow-up"
 msgstr "Suivi"
 
 #: core/admin.py:92 core/models.py:31
+#: core/models.py:137
 msgid "Analysis"
 msgstr "Analyse"
 
@@ -214,10 +215,6 @@ msgstr "Élevé"
 #: core/templates/snippets/risk_matrix.html:67
 msgid "Very high"
 msgstr "Très élevé"
-
-#: core/models.py:137
-msgid "Analysis_bo"
-msgstr "Analyse"
 
 #: core/models.py:138 core/templates/snippets/ra_data.html:41
 #, fuzzy
