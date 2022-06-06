@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-06 14:26+0000\n"
+"POT-Creation-Date: 2022-06-06 14:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -269,7 +269,7 @@ msgid "Domain"
 msgstr "Domaine"
 
 #: back_office/templates/back_office/acceptance_list.html:6
-#: back_office/templates/back_office/base.html:129
+#: back_office/templates/back_office/base.html:129 back_office/views.py:330
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
@@ -388,7 +388,7 @@ msgstr ""
 
 #: back_office/templates/back_office/analysis_list.html:126
 #: back_office/templates/back_office/base.html:107
-#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:537
+#: back_office/templates/back_office/ri_list.html:6 back_office/views.py:545
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -409,7 +409,7 @@ msgstr "Aucune analyse n'a été trouvée."
 
 #: back_office/templates/back_office/asset_list.html:4
 #: back_office/templates/back_office/asset_list.html:9
-#: back_office/templates/back_office/base.html:169 back_office/views.py:645
+#: back_office/templates/back_office/base.html:169 back_office/views.py:668
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -496,7 +496,7 @@ msgstr ""
 
 #: back_office/templates/back_office/base.html:118
 #: back_office/templates/back_office/index.html:32
-#: back_office/templates/back_office/mtg_list.html:6
+#: back_office/templates/back_office/mtg_list.html:6 back_office/views.py:564
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -506,14 +506,14 @@ msgstr ""
 
 #: back_office/templates/back_office/base.html:147
 #: back_office/templates/back_office/project_domain_list.html:5
-#: back_office/views.py:596
+#: back_office/views.py:619
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
 #: back_office/templates/back_office/base.html:158
 #: back_office/templates/back_office/project_list.html:8
 #: back_office/templates/back_office/quick_start.html:16
-#: back_office/views.py:618
+#: back_office/views.py:641
 msgid "Projects"
 msgstr ""
 
@@ -521,12 +521,14 @@ msgstr ""
 #: back_office/templates/back_office/index.html:20
 #: back_office/templates/back_office/quick_start.html:40
 #: back_office/templates/back_office/threat_list.html:5
+#: back_office/views.py:600
 msgid "Threats"
 msgstr "Menaces"
 
 #: back_office/templates/back_office/base.html:190
 #: back_office/templates/back_office/quick_start.html:52
 #: back_office/templates/back_office/security_function_list.html:5
+#: back_office/views.py:582
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
@@ -681,7 +683,7 @@ msgstr ""
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: back_office/templates/back_office/index.html:24 back_office/views.py:432
+#: back_office/templates/back_office/index.html:24 back_office/views.py:440
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -1367,6 +1369,11 @@ msgstr ""
 #: back_office/templates/back_office/user_list.html:41
 msgid "superuser"
 msgstr "super-utilisateur"
+
+#, fuzzy
+#~| msgid "Measure"
+#~ msgid "Measures"
+#~ msgstr "Mesure"
 
 #~ msgid "parent project"
 #~ msgstr "projet parent"

@@ -325,6 +325,11 @@ class RiskAcceptanceUpdateView(PermissionRequiredMixin, UpdateView):
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['crumbs'] = [_('Risk acceptances')]
+        return context
+
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('acceptance-list')
@@ -553,6 +558,11 @@ class MitigationUpdateView(PermissionRequiredMixin, UpdateView):
     template_name = 'back_office/mtg_update.html'
     context_object_name = 'mitigation'
     form_class = MitigationUpdateForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['crumbs'] = [_('Security measures')]
+        return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
@@ -567,6 +577,11 @@ class SecurityFunctionUpdateView(PermissionRequiredMixin, UpdateView):
     context_object_name = 'function'
     form_class = SecurityFunctionUpdateForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['crumbs'] = [_('Security functions')]
+        return context
+
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('security-function-list')
@@ -579,6 +594,11 @@ class ThreatUpdateView(PermissionRequiredMixin, UpdateView):
     template_name = 'back_office/threat_update.html'
     context_object_name = 'threat'
     form_class = ThreatUpdateForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['crumbs'] = [_('Threats')]
+        return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
