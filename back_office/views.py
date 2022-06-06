@@ -296,7 +296,7 @@ class RiskAnalysisCreateView(PermissionRequiredMixin, CreateView):
     form_class = RiskAnalysisCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-list')
+        return self.request.POST.get('next', '/')
 
 class MeasureCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_mitigation'
@@ -357,6 +357,9 @@ class RiskAnalysisCreateViewModal(PermissionRequiredMixin, CreateView):
     template_name = 'back_office/snippets/analysis_create_modal.html'
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
+
+    def get_success_url(self) -> str:
+        return self.request.POST.get('next', '/')
 
 class RiskScenarioCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_analysis'
@@ -677,10 +680,7 @@ class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
     #     return redirect(next_url)
 
     def get_success_url(self):
-        next_url = self.request.GET.get('next')
-        print(next_url)
-        print(self.request.path)
-        return redirect(next_url) if next_url is not None else reverse_lazy('project-list')
+        return self.request.POST.get('next', '/')
 
 class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_asset'
@@ -690,7 +690,4 @@ class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
     form_class = AssetForm
 
     def get_success_url(self):
-        next_url = self.request.GET.get('next')
-        print(next_url)
-        print(self.request.path)
-        return redirect(next_url) if next_url is not None else reverse_lazy('asset-list')
+        return self.request.POST.get('next', '/')
