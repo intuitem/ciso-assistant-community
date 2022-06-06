@@ -82,8 +82,11 @@ class AnalysisFilter(GenericFilterSet):
         ),
         field_labels={
             'is_draft': _('draft'.capitalize()),
+            '-is_draft': _('Draft (descending)'),
             'auditor': _('auditor'.capitalize()),
-            'updated_at': _('updated at'.capitalize())
+            '-auditor': _('Auditor (descending)'),
+            'updated_at': _('updated at'.capitalize()),
+            '-updated_at': _('Updated at (descending)')
         }
     )
 
@@ -127,9 +130,13 @@ class RiskScenarioFilter(GenericFilterSet):
         ),
         field_labels={
             'title': _('title'.capitalize()),
+            '-title': _('Title (descending)'),
             'parent_risk': _('threat'.capitalize()),
+            '-parent_risk': _('Threat (descending)'),
             'analysis__project': _('parent'.capitalize() + ' project'),
+            '-analysis__project': _('Parent project (descending)'),
             'treatment': _('treatment'.capitalize()),
+            '-treatment': _('Treatment (descending)'),
         }
     )
 
@@ -159,10 +166,15 @@ class MeasureFilter(GenericFilterSet):
         ),
         field_labels={
             'status': _('status'.capitalize()),
+            '-status': _('Status (descending)'),
             'title': _('title'.capitalize()),
+            '-title': _('Title (descending)'),
             'type': _('type'.capitalize()),
+            '-type': _('Type (descending)'),
             'risk_instance__analysis__project': _('parent'.capitalize() + ' project'),
+            '-risk_instance__analysis__project': _('Parent project (descending)'),
             'solution': _('solution'.capitalize()),
+            '-solution': _('Solution (descending)'),
         }
     )
 
@@ -187,9 +199,13 @@ class RiskAcceptanceFilter(GenericFilterSet):
         ),
         field_labels={
             'risk_instance__title': _('title'.capitalize()),
+            '-risk_instance__title': _('Title (descending)'),
             'type': _('type'.capitalize()),
+            '-type': _('Type (descending)'),
             'expiry_date': _('expiry'.capitalize() + ' date'),
+            '-expiry_date': _('Expiry date (descending)'),
             'validator': _('validator'.capitalize()),
+            '-validator': _('Validator (descending)'),
         }
     )
 
@@ -211,7 +227,9 @@ class ProjectsDomainFilter(GenericFilterSet):
         ),
         field_labels={
             'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
             'department': _('department'.capitalize()),
+            '-department': _('Department (descending)'),
         }
     )
     class Meta:
@@ -235,8 +253,11 @@ class ProjectFilter(GenericFilterSet):
         ),
         field_labels={
             'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
             'lc_status': _('status'.capitalize()),
-            'parent_group': _('parent'.capitalize() + ' domain'),
+            '-lc_status': _('Status (descending)'),
+            'parent_group': _('Parent domain'),
+            '-parent_group': _('Parent domain (descending)'),
         }
     )
 
@@ -257,6 +278,7 @@ class ThreatFilter(GenericFilterSet):
         ),
         field_labels={
             'title': _('title'.capitalize()),
+            '-title': _('Title'),
         }
     )
 
@@ -279,8 +301,11 @@ class SecurityFunctionFilter(GenericFilterSet):
         ),
         field_labels={
             'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
             'provider': _('provider'.capitalize()),
+            '-provider': _('Provider (descending)'),
             'contact': _('contact'.capitalize()),
+            '-contact': _('Contact (descending)'),
         }
     )
 
@@ -301,6 +326,7 @@ class AssetFilter(GenericFilterSet):
         ),
         field_labels={
             'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
         }
     )
 

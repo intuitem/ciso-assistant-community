@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-03 22:08+0000\n"
+"POT-Creation-Date: 2022-06-06 14:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,13 +22,13 @@ msgstr ""
 msgid "Threat description"
 msgstr "Description de la menace"
 
-#: core/templates/core/browser.html:94
 #: core/admin.py:46 core/admin.py:73 core/models.py:150
+#: core/templates/core/browser.html:94
 msgid "Current level"
 msgstr "Niveau de risque courant"
 
-#: core/templates/core/browser.html:95
 #: core/admin.py:47 core/admin.py:75 core/models.py:159
+#: core/templates/core/browser.html:95
 msgid "Residual level"
 msgstr "Niveau de risque résiduel"
 
@@ -231,6 +231,7 @@ msgstr "<titre bref du scénario de risque>"
 
 #: core/models.py:139 core/models.py:218 core/templates/core/browser.html:93
 #: core/templates/core/browser.html:118 core/templates/snippets/mp_data.html:30
+#: core/templates/snippets/ra_data.html:42
 msgid "Title"
 msgstr "Titre"
 
@@ -244,19 +245,18 @@ msgstr "Scénario"
 
 #: core/models.py:142
 msgid ""
-"The existing security measures to manage this risk. Edit the risk scenario to add "
-"extra security measures."
+"The existing security measures to manage this risk. Edit the risk scenario "
+"to add extra security measures."
 msgstr ""
-"Les mesures de sécurité existantes pour gérer ce risque. Modifiez le scénario de risque "
-"pour y ajouter des mesures de sécurité supplémentaires."
+"Les mesures de sécurité existantes pour gérer ce risque. Modifiez le "
+"scénario de risque pour y ajouter des mesures de sécurité supplémentaires."
 
 #: core/models.py:143
 msgid "<we have solution A and Process B to handle this>"
 msgstr ""
 "<nous avons une solution A et un processus B pour faire face à ce risque>"
 
-#: core/templates/snippets/ra_data.html:44
-#: core/models.py:144
+#: core/models.py:144 core/templates/snippets/ra_data.html:44
 msgid "Existing measures"
 msgstr "Mesures existantes"
 
@@ -306,14 +306,13 @@ msgstr "Créé le"
 msgid "Updated at"
 msgstr "Mis à jour le"
 
-#: core/models.py:215 core/models.py:261
-#: core/models.py:169
+#: core/models.py:169 core/models.py:215 core/models.py:261
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 
-#: core/templates/core/analytics.html:14
+#: core/models.py:170 core/templates/core/analytics.html:14
 #: core/templates/core/search_results.html:21
-#: core/models.py:170 core/templates/snippets/ra_data.html:36
+#: core/templates/snippets/ra_data.html:36
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -407,9 +406,11 @@ msgstr "Effort relatif impliqué par la mesure"
 msgid "Effort"
 msgstr ""
 
-#: core/models.py:234 core/templates/core/my_projects.html:36
-msgid "Measure"
-msgstr ""
+#: core/models.py:234
+#, fuzzy
+#| msgid "Security measures"
+msgid "Security measure"
+msgstr "Mesures de sécurité"
 
 #: core/models.py:235 core/templates/core/analytics.html:20
 #: core/templates/core/search_results.html:34
@@ -467,21 +468,20 @@ msgstr "Scénarios de risque répartis par statut"
 
 #: core/templates/core/analytics.html:76
 msgid ""
-"Risk scenarios breakdown per level: current (with the existing security measures) versus "
-"residual (once all security measures implemented)"
+"Risk scenarios breakdown per level: current (with the existing security "
+"measures) versus residual (once all security measures implemented)"
 msgstr ""
-"Scénarios répartis par niveau de risque: actuel (avec les mesures de sécurité existantes) contre "
-"résiduel (une fois toutes les mesures de sécurité implémentées)"
+"Scénarios répartis par niveau de risque: actuel (avec les mesures de "
+"sécurité existantes) contre résiduel (une fois toutes les mesures de "
+"sécurité implémentées)"
 
-#: core/templates/core/composer.html:21
-#: core/templates/core/analytics.html:80
+#: core/templates/core/analytics.html:80 core/templates/core/composer.html:21
 #: core/templates/snippets/ra_data.html:45
 msgid "Current risk"
 msgstr "Risque courant"
 
-#: core/templates/core/analytics.html:86
+#: core/templates/core/analytics.html:86 core/templates/core/composer.html:37
 #: core/templates/snippets/ra_data.html:47
-#: core/templates/core/composer.html:37
 msgid "Residual risk"
 msgstr "Risque résiduel"
 
@@ -521,8 +521,7 @@ msgstr "2ème"
 msgid "3rd"
 msgstr "3ème"
 
-#: core/templates/core/scoring.html:506
-#: core/templates/core/analytics.html:159
+#: core/templates/core/analytics.html:159 core/templates/core/scoring.html:506
 msgid "Risk level"
 msgstr "Niveau de risque"
 
@@ -549,8 +548,7 @@ msgstr "Risque par domaine de projets (catégorie)"
 msgid "Current versus residual"
 msgstr "Courant contre résiduel"
 
-#: core/templates/core/index.html:23
-#: core/templates/core/base.html:100
+#: core/templates/core/base.html:100 core/templates/core/index.html:23
 msgid "Analysis registry"
 msgstr "Registre des analyses"
 
@@ -563,7 +561,9 @@ msgid "Analytics"
 msgstr "Analytique"
 
 #: core/templates/core/base.html:135
-msgid "My Projects"
+#, fuzzy
+#| msgid "My Projects"
+msgid "My projects"
 msgstr "Mes projets"
 
 #: core/templates/core/base.html:144
@@ -728,7 +728,9 @@ msgstr "Rien à voir ici."
 
 #: core/templates/core/index.html:12
 msgid "Search risk scenario, security measure, risk analysis..."
-msgstr "Rechercher un scénario de risque, une mesure de sécurité, une analyse de risque..."
+msgstr ""
+"Rechercher un scénario de risque, une mesure de sécurité, une analyse de "
+"risque..."
 
 #: core/templates/core/index.html:32
 msgid "ID"
@@ -816,6 +818,10 @@ msgstr "Vos mesures en attente"
 msgid "ordered by ranking score"
 msgstr "classées par évaluation"
 
+#: core/templates/core/my_projects.html:36
+msgid "Measure"
+msgstr ""
+
 #: core/templates/core/my_projects.html:37
 msgid "Ranking score"
 msgstr "Évaluation"
@@ -861,8 +867,8 @@ msgid ""
 "you are interested in the risk assessment of a specific system, for which "
 "you need the risk assessment of the underlying components"
 msgstr ""
-"vous voulez évaluer le risque d'un système spécifique, pour lequel vous "
-"avez besoin de l'évaluation du risque des composants sous-jacents"
+"vous voulez évaluer le risque d'un système spécifique, pour lequel vous avez "
+"besoin de l'évaluation du risque des composants sous-jacents"
 
 #: core/templates/core/project_select.html:56
 msgid "Select your targets"
