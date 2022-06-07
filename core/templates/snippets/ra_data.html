@@ -14,7 +14,7 @@
                 <div class="text-sm">
                     <ul class="">
                         <li class="pb-1"><span class="font-semibold">{% trans "Audited by:" %}</span> {{analysis.auditor}}</li>
-                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> <span class="bg-blue-100 py-1 px-2 rounded-lg">{% if analysis.is_draft %} {% trans "Draft" %}{% else %} {% trans "Ready" %} {% endif %}</span>
+                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> {% if analysis.is_draft %} <span class="bg-blue-200 py-1 px-2 rounded-lg">{% trans "Draft" %}</span> {% else %} <span class="bg-green-200 py-1 px-2 rounded-lg">{% trans "Ready" %} </span>{% endif %}
                         </li>
                         <li class="pb-1"><span class="font-semibold">{% trans "Created at:" %}</span> {{analysis.created_at|date}}</li>
                         <li class="pb-1"><span class="font-semibold">{% trans "Updated at:" %}</span> {{analysis.updated_at|date}}</li>
