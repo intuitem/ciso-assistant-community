@@ -30,7 +30,7 @@ def test_ASF004(page):
 	time.sleep(0.1)
 	message = page.locator('text=Hello, Root2')
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok" 
-	# 3 | Click on “Scoring Assistant” | Opening of “Scoring Assistant” page
+	# 3 | Click on “Scoring assistant” | Opening of “Scoring assistant” page
 	step = 3
 	page.click("id=scoring")
 	assert page.url == urlpatterns.scoringassistant, "Step "+str(step)+": not Ok"

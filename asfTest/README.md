@@ -87,7 +87,7 @@ Check out our [Running Test Guide](/asfTest/test/README.md) to see how to run te
   | :-: | :--------------------------------------------- | :-------------------------------------------------------- | :----: |
   |  1  | Go to the URL http://127.0.0.1:8000/ and login | Opening of home page                                      |        |
   |  2  | Click on the menu "More"                           | Opening of the menu with the message: "Hello, (username)" |        |
-  |  3  | Click on "Scoring Assistant"                   | Opening of "Scoring Assistant" page                       |        |
+  |  3  | Click on "Scoring assistant"                   | Opening of "Scoring assistant" page                       |        |
   |  4  | Click on "Risk matrix"                         | Opening of "Risk matrix" page                             |        |
   |  5  | Click on "Sign-out"                            | Go back on login page                                     |        |
   |  6  | Click on "X-Rays (my projects)"                | Opening of admin registration page                        |        |

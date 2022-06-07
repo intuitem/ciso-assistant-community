@@ -96,7 +96,7 @@ msgstr "brouillon"
 
 #: core/models.py:22
 #, fuzzy
-#| msgid "Rating Matrix"
+#| msgid "Rating matrix"
 msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
@@ -575,12 +575,8 @@ msgstr "Composition"
 msgid "Tools"
 msgstr "Outils"
 
-#: core/templates/core/base.html:170
-msgid "Rating Matrix"
-msgstr "Matrice d'évaluation"
-
 #: core/templates/core/base.html:189
-msgid "Scoring Assistant"
+msgid "Scoring assistant"
 msgstr "Assistant d'évaluation"
 
 #: core/templates/core/base.html:195

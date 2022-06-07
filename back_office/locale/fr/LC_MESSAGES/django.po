@@ -930,13 +930,8 @@ msgstr ""
 msgid "New Analysis"
 msgstr "Nouvelle analyse"
 
-#: back_office/templates/back_office/ra_create.html:28
-#: back_office/templates/back_office/ra_update.html:33
-msgid "Rating Matrix"
-msgstr ""
-
 #: back_office/templates/back_office/ra_create.html:33
-msgid "Is Draft"
+msgid "Is draft"
 msgstr "brouillon"
 
 #: back_office/templates/back_office/ra_create.html:40
