@@ -291,10 +291,6 @@ msgstr ""
 msgid "Show-stoppers"
 msgstr ""
 
-#: core/templates/core/analytics.html:40
-msgid "Analysis"
-msgstr ""
-
 #: core/templates/core/analytics.html:46
 msgid "Solutions in catalog"
 msgstr ""
@@ -1033,10 +1029,6 @@ msgstr ""
 msgid "Probability"
 msgstr ""
 
-#: core/templates/core/scoring.html:420
-msgid "Risk level"
-msgstr ""
-
 #: core/templates/core/scoring.html:426
 msgid "Impact"
 msgstr ""
@@ -1106,15 +1098,11 @@ msgid "Risk instances"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:39
-msgid "Parent Risk
+msgid "Parent Risk"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:41
 msgid "Scenario"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:42
-msgid "Existing measures"
 msgstr ""
 
 #: core/templates/snippets/ra_data.html:43
