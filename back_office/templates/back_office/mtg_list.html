@@ -143,7 +143,7 @@
                                 {% endif %}">{{ measure.get_status_display|lower}}
                                 </span>
                                 <div class="ml-3">
-                                    <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}"
+                                    <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ measure.title|capfirst }}
                                     </a>
