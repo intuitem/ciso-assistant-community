@@ -40,7 +40,7 @@
                     {{ measure.eta }}
                 </td>
                 <td class="px-3 py-4 text-right">
-                    <a href="{% url 'mtg-update' measure.id %}" class="font-medium text-blue-600 hover:underline">{% trans "Jump" %}</a>
+                    <a href="{% url 'mtg-update' measure.id %}?next={{ request.path|urlencode }}" class="font-medium text-blue-600 hover:underline">{% trans "Jump" %}</a>
                 </td>
             </tr>
             {% endfor %}

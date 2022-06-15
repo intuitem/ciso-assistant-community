@@ -327,7 +327,7 @@ class RiskAcceptanceUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['crumbs'] = [_('Risk acceptances')]
+        context["crumbs"] = {'acceptance-list': _('Risk acceptances')}
         return context
 
     def get_success_url(self) -> str:
@@ -437,7 +437,7 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
         context['risk_scenario_create_form'] = RiskScenarioCreateForm(initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['instances'] = RiskInstance.objects.filter(analysis=self.get_object()).order_by('id')
         context['suggested_measures'] = Mitigation.objects.all().order_by('id')
-        context['crumbs'] = [_('Analyses')]
+        context['crumbs'] = {'ra-list': _('Analyses')}
         return context
 
     def get_success_url(self) -> str:
@@ -542,7 +542,7 @@ class RiskInstanceUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['mitigations'] = Mitigation.objects.filter(risk_instance=self.get_object())
-        context['crumbs'] = [_('Risk scenarios')]
+        context['crumbs'] = {'ri-list': _('Risk scenarios')}
         context['measure_create_form'] = MeasureCreateForm(initial={'risk_instance': get_object_or_404(RiskInstance, id=self.kwargs['pk'])})
         return context
 
@@ -561,7 +561,7 @@ class MitigationUpdateView(PermissionRequiredMixin, UpdateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['crumbs'] = [_('Security measures')]
+        context['crumbs'] = {'mtg-list': _('Security measures')}
         return context
 
     def get_success_url(self) -> str:
@@ -579,7 +579,7 @@ class SecurityFunctionUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['crumbs'] = [_('Security functions')]
+        context['crumbs'] = {'security-function-list': _('Security functions')}
         return context
 
     def get_success_url(self) -> str:
@@ -597,7 +597,7 @@ class ThreatUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['crumbs'] = [_('Threats')]
+        context['crumbs'] = {'threat-list': _('Threats')}
         return context
 
     def get_success_url(self) -> str:
@@ -616,8 +616,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.filter(parent_group=self.get_object())
-        crumbs = [_('Projects domains')]
-        context['crumbs'] = crumbs
+        context['crumbs'] = {'pd-list': _('Projects domains')}
         context['project_create_form'] = ProjectForm(initial={'parent_group': get_object_or_404(ProjectsGroup, id=self.kwargs['pk'])})
         return context
 
@@ -638,8 +637,7 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['analyses'] = Analysis.objects.filter(project=self.get_object()).order_by('is_draft', 'id')
         context['analysis_create_form'] = RiskAnalysisCreateForm(initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
-        crumbs = [_('Projects')]
-        context['crumbs'] = crumbs
+        context['crumbs'] = {'project-list': _('Projects')}
         return context
     
     # def get_queryset(self):
@@ -665,8 +663,7 @@ class AssetUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        crumbs = [_('Assets')]
-        context['crumbs'] = crumbs
+        context['crumbs'] = {'asset-list': _('Assets')}
         return context
 
     def get_success_url(self) -> str:
