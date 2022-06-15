@@ -60,19 +60,19 @@
                                     <div class="ml-3">
                                         <a id="analysis{{analysis.id}}" href="{% url 'RA' analysis.id %}"
                                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                            {{analysis}}
+                                            {{ analysis }}
                                         </a>
                                     </div>
                                 </div>
                             </th>
                             <td class="px-6 py-4">
                                 <p class="text-gray-900 whitespace-no-wrap capitalize">
-                                    {%if analysis.auditor%}{{analysis.auditor}}{% else %}--{% endif %}
+                                    {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
                                 </p>
                             </td>
                             <td class="px-6 py-4">
                                 <p class="text-gray-900 whitespace-no-wrap">
-                                    {{analysis.updated_at|date}}
+                                    {{ analysis.updated_at|date }}
                                 </p>
                             </td>
                             <td class="px-6 py-4 text-center">
@@ -84,7 +84,7 @@
                                             <a href="{% url 'MP' analysis.id %}">
                                                 <span class="table-action" data-tooltip-target="tooltip-rp"><i class="fas fa-heartbeat"></i></span>
                                                 <div id="tooltip-rp" role="tooltip" class="inline-block absolute invisible z-10 p-2 text-2xs text-white bg-gray-600 rounded-xl shadow-sm opacity-0 transition-opacity duration-300 tooltip">
-                                                    Remediation Plan
+                                                    {% trans "Remediation Plan" %}
                                                     <div class="tooltip-arrow" data-popper-arrow></div>
                                                 </div>
                                             <a>
@@ -92,7 +92,7 @@
                                                 <button @click="dropdownOpen = !dropdownOpen" class="" data-tooltip-target="tooltip-export">
                                                     <span class="table-action"><i class="fas fa-download"></i></span>
                                                     <div id="tooltip-export" role="tooltip" class="inline-block absolute invisible z-10 p-2 text-2xs text-white bg-gray-600 rounded-xl shadow-sm opacity-0 transition-opacity duration-300 tooltip ">
-                                                        Export
+                                                        {% trans "Export" %}
                                                         <div class="tooltip-arrow" data-popper-arrow></div>
                                                     </div>
                                                     

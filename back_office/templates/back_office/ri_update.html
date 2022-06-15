@@ -106,15 +106,15 @@
                 <h2 class="text-lg font-semibold mb-4">{% trans "Risk scenario" %}</h2>
                 <section class="flex flex-col space-y-4">
                     <div class="flex flex-row space-x-6">
-                        <div class="flex flex-col">
+                        <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Project" %}</p>
                             <p class="text-xs font-semibold">{{ instance.analysis.project }}</p>
                         </div>
-                        <div class="flex flex-col">
+                        <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Auditor" %}</p>
                             <p class="text-xs font-semibold">{{ instance.analysis.auditor.get_full_name }}</p>
                         </div>
-                        <div class="flex flex-col">
+                        <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Version" %}</p>
                             <p class="text-xs font-semibold">{{ instance.analysis.version }}</p>
                         </div>
@@ -256,7 +256,7 @@
                         <div x-data="modal()" class="justify-self-end">
                             <a id="newMeasures" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
                             class="add-button">
-                            <i class="fas fa-plus mr-2"></i>{% trans "New security measure" %}</a>
+                            <i class="fas fa-plus mr-2 mt-4"></i>{% trans "New security measure" %}</a>
                             {% include "back_office/snippets/measure_create_modal.html" %}
                         </div>
                     </div>

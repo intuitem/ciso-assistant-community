@@ -12,8 +12,8 @@ urlpatterns = [
 
     # LIST VIEWS
     path('analyses-registry/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),
-    path('risk-instances/', login_required(views.RiskInstanceListView.as_view()), name='ri-list'),
-    path('mitigations/', login_required(views.MitigationListView.as_view()), name='mtg-list'),
+    path('risk-scenarios/', login_required(views.RiskInstanceListView.as_view()), name='ri-list'),
+    path('measures/', login_required(views.MitigationListView.as_view()), name='mtg-list'),
     path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
 
     path('projects-domains/', login_required(views.ProjectsGroupListView.as_view()), name='pd-list'),
@@ -37,8 +37,8 @@ urlpatterns = [
     
     path('TH/create_modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
 
-    path('RA/<int:parent_analysis>/RI/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
-    path('RI/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
+    path('RA/<int:parent_analysis>/RS/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
+    path('RS/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
 
     path('PD/create', login_required(views.ProjectsGroupCreateView.as_view()), name='pd-create'),
     path('PD/create_modal/', login_required(views.ProjectsGroupCreateViewModal.as_view()), name='pd-create-modal'),
@@ -50,12 +50,12 @@ urlpatterns = [
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
     
-    # path('RI/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
+    # path('RS/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
     
     # UPDATE VIEWS
     path('RA/<int:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
-    path('RI/<int:pk>', login_required(views.RiskInstanceUpdateView.as_view()), name='ri-update'),
-    path('MTG/<int:pk>', login_required(views.MitigationUpdateView.as_view()), name='mtg-update'),
+    path('RS/<int:pk>', login_required(views.RiskInstanceUpdateView.as_view()), name='ri-update'),
+    path('MSR/<int:pk>', login_required(views.MitigationUpdateView.as_view()), name='mtg-update'),
     path('RAC/<int:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
     path('TH/<int:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
     path('SF/<int:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
@@ -70,7 +70,7 @@ urlpatterns = [
     path('RAC/<int:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
     path('MSR/<int:pk>/delete/', login_required(views.MeasureDeleteView.as_view()), name='measure-delete'),
     path('PRJ/<int:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
-    path('asset/<int:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
+    path('AST/<int:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
     path('SF/<int:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
     path('PD/<int:pk>/delete/', login_required(views.ProjectsGroupDeleteView.as_view()), name='pd-delete'),
     path('TH/<int:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),

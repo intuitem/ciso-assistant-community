@@ -77,12 +77,15 @@ class AnalysisFilter(GenericFilterSet):
     orderby = GenericOrderingFilter(
         fields=(
             ('is_draft', 'is_draft'),
+            ('project', 'project'),
             ('auditor', 'auditor'),
             ('updated_at', 'updated_at'),
         ),
         field_labels={
             'is_draft': _('draft'.capitalize()),
             '-is_draft': _('Draft (descending)'),
+            'project': _('project'.capitalize()),
+            '-project': _('Project (descending)'),
             'auditor': _('auditor'.capitalize()),
             '-auditor': _('Auditor (descending)'),
             'updated_at': _('updated at'.capitalize()),
