@@ -15,8 +15,19 @@
             {% endif %}
             {% for instance in context %}
             <tr class="bg-gray-100">
-                <td class="text-lg p-3" colspan="9">{{instance.rid}}: {{instance.title}} <span
-                        class="bg-blue-600 text-white text-xs text-center p-1 mx-1 rounded"> {{instance.get_treatment_display}}</span>
+                <td class="text-lg p-3" colspan="9">
+                    <a class="hover:text-indigo-800" href="{% url 'ri-update' instance.id %}?next={{ request.path|urlencode }}">{{instance.rid}}: {{instance.title}}</a> 
+                    <span class="text-xs text-center p-1 mx-1 rounded
+                    {% if instance.treatment == 'open' %}
+                    bg-orange-200 
+                    {% elif instance.treatment == 'mitigated' %}
+                    bg-green-200 
+                    {% elif instance.treatment == 'accepted' %}
+                    bg-sky-200 
+                    {% else %}
+                    bg-red-300 
+                    {% endif %}">{{ instance.get_treatment_display|lower}}
+                    </span>
                 </td>
             </tr>
             {% if not instance.mitigation_set.all %}
@@ -39,8 +50,8 @@
             {% endif %}
             {% for mitigation in instance.mitigation_set.all %}
             <tr class="border-b text-sm">
-                <td class="p-2 text-center"><a id="{{mitigation.id}}" href="#{{mitigation.id}}">{{mitigation.id}}</a></td>
-                <td class="">{{mitigation.title}}</td>
+                <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{mitigation.id}}" href="{% url 'mtg-update' mitigation.id %}?next={{ request.path|urlencode }}">{{mitigation.id}}</a></td>
+                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' mitigation.id %}?next={{ request.path|urlencode }}">{{mitigation.title}}</a></td>
                 <td class="">{{mitigation.description}}</td>
                 <td class="">{{mitigation.get_type_display}}</td>
                 <td class="">{% if mitigation.solution %}{{mitigation.solution}}{% else %}--{% endif %}</td>
@@ -50,7 +61,17 @@
                                                                    class="hover:text-blue-400"><i
                         class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
                 </td>
-                <td class="text-center">{{mitigation.get_status_display}}</td>
+                <td class="text-center"><span class="text-xs text-center p-1 mx-1 rounded
+                    {% if mitigation.status == 'open' %}
+                    bg-orange-200 
+                    {% elif mitigation.status == 'in_progress' %}
+                    bg-blue-200 
+                    {% elif mitigation.status == 'on_hold' %}
+                    bg-red-300 
+                    {% else %}
+                    bg-green-200 
+                    {% endif %}">{{ mitigation.get_status_display|lower}} 
+                    </span></td>
             </tr>
             {% endfor %}
 
