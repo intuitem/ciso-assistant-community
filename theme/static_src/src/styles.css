@@ -68,6 +68,10 @@
         @apply flex items-center p-2 text-base font-normal text-gray-800 rounded-lg hover:bg-gray-100;
     }
 
+    .nav-link-active {
+        @apply flex items-center p-2 text-base font-normal text-black rounded-r-lg hover:bg-gray-100 border-l-4 border-indigo-800;
+    }
+
     .nav-link-icon {
         @apply text-gray-600 transition duration-75 ml-4;
     }

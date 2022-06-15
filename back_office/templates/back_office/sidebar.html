@@ -1,0 +1,257 @@
+{% load i18n static %}
+<aside aria-label="Sidebar" class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen left-0 z-10" :class="{ '-ml-66 ': !sidebarOpen }">
+    <nav class="flex-1 flex flex-col bg-gray-50 overflow-y-auto py-4 px-3">
+        <div class="bg-white rounded-xl shadow" aria-label="logo">
+            <div class="flex items-center justify-center p-3">
+                <svg height="128" width="128" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><style>.b,.c{fill:#694998;}.c{opacity:.15;}</style></defs><g><path class="b" d="M342.11,142.79l-11.34-59.33c-62.57,12.14-116.99,22.39-163.27,30.76-46.28,8.36-71.52,12.86-75.73,13.47l-5.2,60.77c2.73,1.12,21.87,8.86,57.43,23.23,35.56,14.37,68.89,27.94,99.99,40.7v1.49c-39.15,15.98-73.97,29.99-104.45,42-30.48,12.02-48.13,18.89-52.97,20.63l6.32,59.66c7.19,1.49,34.17,6.91,80.94,16.26,46.77,9.36,99.15,20.54,157.13,33.54l10.96-57.52c-36.57-6.42-72.15-13.14-106.73-20.18-34.58-7.03-54.85-11.17-60.81-12.4l.04-.94c6.2-2.6,23.21-9.85,51.03-21.75,27.82-11.9,56.98-23.61,87.47-35.14v-46.28c-30.53-11.66-59.35-23.21-86.47-34.63-27.12-11.42-44.52-18.8-52.21-22.15l.29-1,167.58-31.2Z"/><rect class="b" x="365.9" y="162.81" width="58.91" height="43.86"/><path class="b" d="M423.88,236.22h-57.05c.25,19.58,.4,37.17,.46,52.78,.06,15.61,.09,30.54,.09,44.79,0,16.85-.09,34.94-.28,54.27-.19,19.33-.28,31.97-.28,37.91h57.05c0-5.58-.12-15.7-.37-30.39-.25-14.68-.37-36.15-.37-64.4,0-17.72,.09-33.55,.28-47.48,.19-13.94,.34-29.76,.46-47.48Z"/></g><polygon class="c" points="480.91 253.74 68.58 15.68 68.58 491.8 480.91 253.74"/></svg>
+            </div>
+            <div class="flex items-center justify-center h-14 py-2">
+                <div id="title" class="text-xl text-indigo-900"><span class="font-semibold">MIRA</span> <i class="fas fa-circle-notch"></i> <span class="font-bold">Editor</span></div>
+            </div>
+        </div>
+        <div class="scrollbar overflow-x-hidden flex-grow mr-4" id="sidebar-scroll">
+            <ul class="flex flex-col py-4 space-y-2 pr-2" id="sidebar-items">
+                <li class="to-page">
+                    <a href="{% url 'index' %}" class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Overview" %}</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'analysis_list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-home"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Switch to viewer" %}</span>
+                    </a>
+                </li>
+                <li class="nav-seperator text-md">
+                    <div class="flex flex-row items-center h-8">
+                        <div class="">{% trans "Core" %}</div>
+                    </div>
+                </li>
+
+                {% if perms.core.view_analysis %}
+                <li class="to-page">
+                    <a id="analyses_registry" href="{% url 'ra-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-glasses"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk analyses" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.core.view_riskinstance %}
+                <li class="to-page">
+                    <a id="risk_scenarios" href="{% url 'ri-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-clone"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk scenarios" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.core.view_mitigation %}
+                <li class="to-page">
+                    <a id="security_measures" href="{% url 'mtg-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-fire-extinguisher"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security measures" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.core.view_riskacceptance %}
+                <li class="to-page">
+                    <a id="risk_acceptances" href="{% url 'acceptance-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk acceptances" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="nav-seperator text-md">
+                    <div class="flex flex-row items-center h-8">
+                        <div class="">{% trans "General" %}</div>
+                    </div>
+                </li>
+
+                {% if perms.general.view_projectsgroup %}
+                <li class="to-page">
+                    <a id="projectsdomains" href="{% url 'pd-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects domains" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.general.view_project %}
+                <li class="to-page">
+                    <a href="{% url 'project-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-cubes"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.general.view_project %}
+                <li class="to-page">
+                    <a href="{% url 'asset-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-gem"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.general.view_parentrisk %}
+                <li class="to-page">
+                    <a id="threats" href="{% url 'threat-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-biohazard"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Threats" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.general.view_solution %}
+                <li class="to-page">
+                    <a id="securityFunctions" href="{% url 'security-function-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
+                    <span class="nav-link-icon">
+                        <i class="fas fa-cogs"></i>
+                    </span>
+                    <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security functions" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-seperator text-md">
+                    <div class="flex flex-row items-center h-8">
+                        <div class="t">{% trans "Settings" %}</div>
+                    </div>
+                </li>
+                {% if perms.auth.view_group %}
+                <li class="to-page">
+                    <a href="{% url 'group-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if perms.auth.view_user %}
+                <li class="to-page">
+                    <a href="{% url 'user-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Users" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="to-page">
+                    <a href="{% url 'matrix' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-border-all"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrix" %}</span>
+                    </a>
+                </li>
+
+                <li class="nav-seperator text-md">
+                    <div class="flex flex-row items-center h-8">
+                        <div class="">{% trans "Extra" %}</div>
+                    </div>
+                </li>
+                <li class="to-page">
+                    <a href="{% url 'xrays' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-bolt"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">X-Rays</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a href="{% url 'quick_start' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-fighter-jet"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a href="{% url 'scoring' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-star-half-alt"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Scoring assistant" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a href="#"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "User guide" %}</span>
+                    </a>
+                </li>
+                <li>
+                    <a id="translation"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-language"></i>              
+                        </span>
+                        <form action="{% url 'set_language' %}" method="post">
+                            {% csrf_token %}
+                            <select id="language" class=" border-none focus:border-none block text-sm capitalize text-gray-700 bg-gray-50" name="language" onchange="this.form.submit();"> 
+                                {% get_current_language as LANGUAGE_CODE %} 
+                                {% get_available_languages as LANGUAGES %}
+                                {% get_language_info_list for LANGUAGES as languages %}
+                                {% for language in languages %}
+                                    <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
+                                        {{ language.name_local }} ({{ language.code }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Logout" %}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</aside>
+<!-- SIDEBAR TOGGLE -->
+<button class="fixed z-10 left-64 ml-5 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow shadow-blue-500/50 text-violet-900 hover:scale-105 hover:bg-violet-900 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-62': sidebarOpen == false }">
+    <i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
+</button>
