@@ -45,6 +45,27 @@
 			background: #563c81;
 		}
 	</style>
+	<script>
+		window.onload = function() {
+			if (sessionStorage.getItem('sidebar-yscroll')) {
+				document.getElementById('sidebar-scroll').scrollTop = sessionStorage.getItem('sidebar-yscroll');
+			}
+			document.getElementById('sidebar-scroll').addEventListener('scroll', debounce(function(){
+				yscroll = document.getElementById('sidebar-scroll').scrollTop;
+				console.log(yscroll);
+				sessionStorage.setItem('sidebar-yscroll', yscroll);
+			}, 500));
+		}
+		const debounce = (func, delay) => {
+			let debounceTimer;
+			return function() {
+				const context = this;
+				const args = arguments;
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => func.apply(context, args), delay);
+			}
+		} 
+	</script>
 </head>
 <body class="bg-gradient-to-br from-slate-200 h-full w-full max-w-screen bg-no-repeat m-0 bg-fixed">
 	<style>
@@ -61,7 +82,7 @@
 						<div id="title" class="text-xl text-indigo-900"><span class="font-semibold">MIRA</span> <i class="fas fa-circle-notch"></i> <span class="font-bold">Editor</span></div>
 					</div>
 				</div>
-				<div class="scrollbar overflow-x-hidden flex-grow mr-4">
+				<div class="scrollbar overflow-x-hidden flex-grow mr-4" id="sidebar-scroll">
 					<ul class="flex flex-col py-4 space-y-2">
 						<li>
 							<a href="{% url 'index' %}" class="relative flex flex-row items-center pr-6 nav-link">
