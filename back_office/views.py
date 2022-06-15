@@ -667,6 +667,27 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
         else:
           return self.request.POST.get('next', '/')
 
+
+class GroupDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'auth.delete_group'
+
+    model = Group
+    success_url = reverse_lazy('group-list')
+    template_name = 'back_office/snippets/group_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('group-list')
+
+class UserDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'auth.delete_user'
+
+    model = User
+    success_url = reverse_lazy('user-list')
+    template_name = 'back_office/snippets/user_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('user-list')
+
 class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_project'
     model = Project

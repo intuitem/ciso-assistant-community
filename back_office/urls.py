@@ -78,4 +78,7 @@ urlpatterns = [
     path('SF/<int:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
     path('PD/<int:pk>/delete/', login_required(views.ProjectsGroupDeleteView.as_view()), name='pd-delete'),
     path('TH/<int:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),
+
+    path('users/<int:pk>/delete', login_required(views.UserDeleteView.as_view()), name='user-delete'),
+    path('groups/<int:pk>/delete', login_required(views.GroupDeleteView.as_view()), name='group-delete'),
 ]

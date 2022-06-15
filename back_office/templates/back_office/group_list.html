@@ -1,35 +1,24 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
 <div class="">
     {% with page_title=_('Groups') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
-    <div class="flex flex-row">
-        <div class="bg-white rounded-lg shadow w-72 h-24 px-4 my-4">
-            <form action="" class="p-1">
-                <p class="text-sm font-semibold mb-2">Action</p>
-                <select name="action" id="action" class="rounded-md border-gray-400">
-                    <option>--</option>
-                    <option value="1">Option 1</option>
-                    <option value="2">Option 2</option>
-                </select>
-            </form>
-        </div>
-        <div class="my-auto mx-4">
+    <div class="grid mb-4 w-full">
             <a href="{% url 'group-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Group" %}</a>
-        </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Group Name" %}</th>
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>
                 {% for group in groups %}
                     <tr class="odd:bg-white even:bg-gray-50">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-0">
                                     <a id="group{{ group.id }}" href="{% url 'group-update' group.id %}"
@@ -38,14 +27,31 @@
                                     </a>
                                 </div>
                             </div>
-                        </th>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="">
+                                <span>
+                                    <a href="{% url 'group-update' group.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </span>
+
+                                <span x-data="modal()">
+                                    <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                {% include 'back_office/snippets/group_delete_modal.html' %}
+                                </span>  
+                                <script src="{% static 'js/modal.js' %}"></script>
+                            </div>
+                        </td>
                     </tr>
                 {% empty %}
                     <tr>
                         <td>
                             <div class="text-black p-4">
                                 <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">No group found. {{ model.verbose_name }}</p>
+                                <p class="inline test-gray-900">{% trans "No group found." %}</p>
                             </div>
                         </td>
                     </tr>

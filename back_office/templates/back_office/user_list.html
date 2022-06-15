@@ -1,25 +1,13 @@
 {% extends 'back_office/base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
 <div class="">
     {% with page_title='Users' %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
-    <div class="flex flex-row">
-        <div class="bg-white rounded-lg shadow w-72 h-24 px-4 my-4">
-            <form action="" class="p-1">
-                <p class="text-sm font-semibold mb-2">Action</p>
-                <select name="action" id="action" class="rounded-md border-gray-400">
-                    <option>--</option>
-                    <option value="1">Option 1</option>
-                    <option value="2">Option 2</option>
-                </select>
-            </form>
-        </div>
-        <div class="my-auto mx-4">
-            <a href="{% url 'user-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New user" %}</a>
-        </div>
+    <div class="grid mb-4 w-full">
+        <a href="{% url 'user-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New User" %}</a>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
@@ -61,13 +49,30 @@
                         <td class="px-6 py-4">
                             {{ user.email }}
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="">
+                                <span>
+                                    <a href="{% url 'user-update' user.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </span>
+
+                                <span x-data="modal()">
+                                    <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                {% include 'back_office/snippets/user_delete_modal.html' %}
+                                </span>  
+                                <script src="{% static 'js/modal.js' %}"></script>
+                            </div>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td>
                             <div class="text-black p-4">
                                 <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">No user found. {{ model.verbose_name }}</p>
+                                <p class="inline test-gray-900">{% trans "No user found." %}</p>
                             </div>
                         </td>
                     </tr>
