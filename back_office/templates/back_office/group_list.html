@@ -18,7 +18,7 @@
             </form>
         </div>
         <div class="my-auto mx-4">
-            <a href="{% url 'user-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Group" %}</a>
+            <a href="{% url 'group-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Group" %}</a>
         </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -32,9 +32,9 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-0">
-                                    <a id="group{{ group.id }}" href="{% url 'ra-update' group.id %}"
+                                    <a id="group{{ group.id }}" href="{% url 'group-update' group.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ group.name }}
+                                        {{ group.name|capfirst }}
                                     </a>
                                 </div>
                             </div>

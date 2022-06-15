@@ -1,11 +1,11 @@
 {% extends 'back_office/base.html' %}
 {% block content %}
 {% load i18n %}
-{% with page_title='New user' %}
+{% with page_title='Edit user' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div>
-    <form method="post" id="user_create_form">{% csrf_token %}
+    <form method="post" id="user_update_form">{% csrf_token %}
         <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
             <h2 class="text-xl font-semibold mb-4">User information</h2>
             <div class="flex flex-col space-y-4">
@@ -18,10 +18,10 @@
                             <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
                         {% endfor %}
                         {{ field }}
-                        <div class=" mt-1 text-xs text-gray-400">
+                        <div class=" mt-1 text-xs text-indigo-700">
                             {{ field.help_text|safe }}
                         </div>
-                      </div>
+                    </div>
                 </div>
                 {% endfor %}
             </div>

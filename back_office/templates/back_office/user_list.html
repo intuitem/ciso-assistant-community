@@ -41,7 +41,7 @@
                                 <span class="bg-red-300 p-1 rounded-lg text-xs">{% trans "superuser" %}</span>
                                 {% endif %}
                                 <div class="ml-3">
-                                    <a id="user{{ user.id }}" href="{% url 'ra-update' user.id %}"
+                                    <a id="user{{ user.id }}" href="{% url 'user-update' user.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ user.get_username }}
                                     </a>

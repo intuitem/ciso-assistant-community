@@ -1,6 +1,7 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
 from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
 from django.utils.translation import gettext_lazy as _
@@ -60,10 +61,23 @@ class ThreatCreateForm(StyledModelForm):
         model = ParentRisk
         fields = '__all__'
 
-class UserCreateForm(StyledModelForm):
+class UserCreateForm(UserCreationForm, StyledModelForm):
+    pass
+
+class UserUpdateForm(UserChangeForm, StyledModelForm):
     class Meta:
         model = User
-        fields = '__all__'
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined']
+
+class GroupCreateForm(StyledModelForm):
+    class Meta:
+        model = Group
+        fields = "__all__"
+
+class GroupUpdateForm(StyledModelForm):
+    class Meta:
+        model = Group
+        fields = "__all__"
 
 class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:

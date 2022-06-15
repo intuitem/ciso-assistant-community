@@ -49,6 +49,7 @@ urlpatterns = [
     path('AST/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
+    path('groups/create', login_required(views.GroupCreateView.as_view()), name='group-create'),
     
     # path('RS/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
     
@@ -63,6 +64,9 @@ urlpatterns = [
     path('PD/<int:pk>', login_required(views.ProjectsGroupUpdateView.as_view()), name='pd-update'),
     path('PRJ/<int:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
     path('AST/<int:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
+
+    path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
+    path('groups/<int:pk>', login_required(views.GroupUpdateView.as_view()), name='group-update'),
     
     # DELETE VIEWS
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),

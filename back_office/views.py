@@ -279,6 +279,22 @@ class UserCreateView(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
 
+class UserUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'auth.change_user'
+    template_name = 'back_office/user_update.html'
+    context_object_name = 'user'
+    form_class = UserUpdateForm
+
+    model = User
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'user-list': _('Users')}
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('user-list')
+
 class GroupListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_group'
     template_name = 'back_office/group_list.html'
@@ -287,6 +303,31 @@ class GroupListView(PermissionRequiredMixin, ListView):
     ordering = 'id'
     paginate_by = 10
     model = Group
+
+class GroupCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'auth.add_group'
+    template_name = 'back_office/group_create.html'
+    context_object_name = 'group'
+    form_class = GroupCreateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('group-list')
+
+class GroupUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'auth.change_group'
+    template_name = 'back_office/group_update.html'
+    context_object_name = 'group'
+    form_class = GroupUpdateForm
+
+    model = Group
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'group-list': _('Groups')}
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('group-list')
 
 class RiskAnalysisCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_analysis'

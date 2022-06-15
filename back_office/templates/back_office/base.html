@@ -55,7 +55,7 @@
 			document.getElementById('sidebar-scroll').addEventListener('scroll', debounce(function(){
 				yscroll = document.getElementById('sidebar-scroll').scrollTop;
 				sessionStorage.setItem('sidebar-yscroll', yscroll);
-			}, 500));
+			}, 50));
 
 			items = document.querySelectorAll("ul#sidebar-items li.to-page a");
 			items.forEach(function(element) {
