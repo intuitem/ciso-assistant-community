@@ -16,7 +16,7 @@
           <div class="flex items-start justify-between p-4 bg-indigo-700 text-white">
             <h5 class="mb-0 text-xl">
               <i class="fas fa-edit"></i>
-              Edit Acceptance
+              {% trans "Edit Acceptance" %}
             </h5>
             <button type="button" class="close" x-on:click="close()"><span class="text-lg">&times;</span></button>
           </div>
@@ -39,11 +39,11 @@
   
                   <section class="grid grid-cols-2 place-content-end">
                     <button x-on:click="close()" type="button"
-                      class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2">Cancel</button>
+                      class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400 mr-2">{% trans "Cancel" %}</button>
                     <input type="hidden" name="next" value="{{ request.path|urlencode }}">
                     <button type="submit"
                       class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500">
-                      Save
+                      {% trans "Save" %}
                     </button>
                   </section>
                 </section>
