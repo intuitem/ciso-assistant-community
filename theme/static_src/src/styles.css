@@ -112,6 +112,10 @@
         @apply bg-gray-50 text-gray-900 text-sm rounded-lg block w-full p-2.5;
     }
 
+    .help_text-link {
+        @apply font-normal text-indigo-600 hover:underline;
+    }
+
 
 
 
