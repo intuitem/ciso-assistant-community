@@ -129,9 +129,9 @@
             <tbody>
                 {% for measure in measures %}
                     <tr class="odd:bg-white even:bg-gray-50">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        <td scope="row" class="px-6 py-4 font-medium text-gray-900">
                             <div class="flex items-center">                           
-                                <span class=" p-1 rounded-lg text-xs
+                                <span class="whitespace-nowrap p-1 rounded-lg text-xs
                                 {% if measure.status == 'open' %}
                                 bg-orange-200 
                                 {% elif measure.status == 'in_progress' %}
@@ -149,7 +149,7 @@
                                     </a>
                                 </div>
                             </div>
-                        </th>
+                        </td>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">
                                 {{ measure.parent_project }}

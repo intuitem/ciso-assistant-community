@@ -3,11 +3,12 @@ from attr import fields
 from django.forms import CharField, CheckboxInput, ChoiceField, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from django_filters import *
 from django_filters.widgets import *
+from django.db.models import Q
 
 from core.models import Analysis, RiskInstance, Mitigation, Solution, RiskAcceptance
 from general.models import Asset, ProjectsGroup, Project, ParentRisk, Solution
 from general.models import ParentRisk, Project
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext_lazy as _
 
 class GenericFilterSet(FilterSet):
@@ -336,3 +337,72 @@ class AssetFilter(GenericFilterSet):
     class Meta:
         model = Asset
         fields = '__all__'
+
+class UserFilter(GenericFilterSet):
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+
+    def user_search(queryset, name, value):
+        return queryset.filter(
+            Q(username__icontains=value) | Q(first_name__icontains=value) | Q(last_name__icontains=value)
+        ).order_by('-is_active', '-is_superuser', 'username', 'id')
+
+    YES_NO_CHOICES = (
+        (True, _('Yes')),
+        (False, _('No')),
+    )
+
+    is_superuser = GenericChoiceFilter(choices=YES_NO_CHOICES)
+    is_active = GenericChoiceFilter(choices=YES_NO_CHOICES)
+
+    groups = GenericModelMultipleChoiceFilter(queryset=Group.objects.all())
+    
+    q = GenericCharFilter(method=user_search, label="Search", widget=TextInput(
+        attrs={
+                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+                'placeholder': _('Search user...')
+        }))
+
+    orderby = GenericOrderingFilter(
+        fields=(
+            ('username', 'username'),
+            ('first_name', 'first_name'),
+            ('last_name', 'last_name'),
+            ('email', 'email'),
+        ),
+        field_labels={
+            'username': _('username'.capitalize()),
+            '-username': _('Userame (descending)'),
+            'first_name': _('first name'.capitalize()),
+            '-first_name': _('First name (descending)'),
+            'last_name': _('last name'.capitalize()),
+            '-last_name': _('Last name (descending)'),
+            'email': _('email address'.capitalize()),
+            '-email': _('Email address (descending)'),
+        }
+    )
+
+class GroupFilter(GenericFilterSet):
+
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+    name = GenericCharFilter(widget=TextInput(
+        attrs={
+                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+                'placeholder': _('Search group...')
+        }
+    ))
+
+    orderby = GenericOrderingFilter(
+        fields=(
+            ('name', 'name'),
+        ),
+        field_labels={
+            'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
+        }
+    )

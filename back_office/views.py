@@ -271,6 +271,18 @@ class UserListView(PermissionRequiredMixin, ListView):
     paginate_by = 10
     model = User
 
+    def get_queryset(self):
+        qs = self.model.objects.all().order_by('-is_active', '-is_superuser', 'username', 'id')
+        filtered_list = UserFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = UserFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        return context
+
 class UserCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'auth.add_user'
     template_name = 'back_office/user_create.html'
@@ -310,6 +322,18 @@ class GroupListView(PermissionRequiredMixin, ListView):
     ordering = 'id'
     paginate_by = 10
     model = Group
+
+    def get_queryset(self):
+        qs = self.model.objects.all().order_by('name', 'id')
+        filtered_list = GroupFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = GroupFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        return context
 
 class GroupCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'auth.add_group'

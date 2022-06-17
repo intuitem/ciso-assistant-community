@@ -104,14 +104,13 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
-        <div class="grid mb-4 w-full"
-            x-data="modal()">
-            <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
+        <div class="grid mb-4 w-full" x-data="{ open: false }">
+            <a @click="open = ! open"
                    class="add-button">
                    <i class="fas fa-plus"></i>
                    {% trans "New risk analysis" %}
             </a>
-            {% include "back_office/snippets/analysis_create_modal.html" %}
+                {% include "back_office/snippets/analysis_create_modal.html" %}
         </div>
         <script src="{% static 'js/modal.js' %}"></script>
     

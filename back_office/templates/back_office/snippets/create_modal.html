@@ -38,15 +38,20 @@ x-transition:leave-end="opacity-0"
 
               {% comment %} {{ analysis_create_form }} {% endcomment %}
               <div class="" id="new_analysis-form">
+                
+                {% for field in analysis_create_form.fields %}
 
                 <div class="mb-6">
-                  <label class="form-label">{{ analysis_create_form.project.label|striptags }}</label>
+                  <label class="form-label">{{ field.label|striptags }}</label>
                   <div class="">
-                    {{ analysis_create_form.project.errors }}
-                    {{ analysis_create_form.project }}
+                    {{ field.errors }}
+                    {{ field }}
+                    {{ field.help_text }}
                   </div>
                 </div>
 
+                {% endfor %}
+                
                 <div class="mb-6">
                   <label class="form-label">{{ analysis_create_form.auditor.label|striptags }}</label>
                   <div class="">

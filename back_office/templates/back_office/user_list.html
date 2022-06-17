@@ -6,14 +6,109 @@
     {% with page_title='Users' %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
-    <div class="grid mb-4 w-full">
-        <a href="{% url 'user-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New User" %}</a>
+    <div class="flex flex-row justify-start space-x-4 h-fit">
+        <form method="get">
+            <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        {{ filter.form.q }}
+                </div>
+                <div class="flex justify-center">
+                    <div
+                        x-data="{
+                            open: false,
+                            toggle() {
+                                if (this.open) {
+                                    return this.close()
+                                }
+                    
+                                this.$refs.button.focus()
+                    
+                                this.open = true
+                            },
+                            close(focusAfter) {
+                                if (! this.open) return
+                    
+                                this.open = false
+                    
+                                focusAfter && focusAfter.focus()
+                            }
+                        }"
+                        x-on:keydown.escape.prevent.stop="close($refs.button)"
+                        x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                        x-id="['dropdown-button']"
+                        class="relative z-10"
+                    >
+                        <!-- Button -->
+                        <button
+                            x-ref="button"
+                            x-on:click="toggle()"
+                            :aria-expanded="open"
+                            :aria-controls="$id('dropdown-button')"
+                            type="button"
+                            class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
+                            :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
+                        >
+                            <i class="fas fa-filter"></i>
+                            <span>{% trans "Filters" %}</span>
+                        </button>
+                    
+                        <!-- Panel -->
+                        <div
+                            x-ref="panel"
+                            x-show="open"
+                            x-transition.origin.top.left
+                            x-on:click.outside="close($refs.button)"
+                            :id="$id('dropdown-button')"
+                            style="display: none;"
+                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                        >
+                    
+                            <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
+                                <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Superuser" %}</p>
+                                    {{ filter.form.is_superuser }}
+                                </div>
+                                <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Active" %}</p>
+                                    {{ filter.form.is_active }}
+                                </div>
+                                <div>
+                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Groups" %}</p>
+                                    {{ filter.form.groups }}
+                                </div>
+                                <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
+                </div>        
+            </div>
+        </form>
+        {% url 'user-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <div class="flex items-center h-10 w-full">
+            <a href="{% url 'user-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+                <span>{% trans "Clear Filters" %}</span>
+            </a>
+        </div>
+        {% endif %}
+        <div class="grid mb-4 w-full">
+            <a href="{% url 'user-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New User" %}</a>
+        </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Username" %}</th>
-                <th class="px-6 py-3">{% trans "Full Name" %}</th>
+                <th class="px-0 py-3">{% trans "Full Name" %}</th>
                 <th class="px-6 py-3">{% trans "Created At" %}</th>
                 <th class="px-6 py-3">{% trans "Email Address" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
@@ -21,22 +116,22 @@
             <tbody>
                 {% for user in users %}
                     <tr class="odd:bg-white even:bg-gray-50">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if not user.is_active %}
-                                <span class="bg-orange-300 p-1 rounded-lg text-xs">{% trans "inactive" %}</span>
+                                <span class="bg-orange-300 p-1 rounded-lg text-xs mr-2">{% trans "inactive" %}</span>
                                 {% endif %}
                                 {% if user.is_superuser %}
-                                <span class="bg-red-300 p-1 rounded-lg text-xs">{% trans "superuser" %}</span>
+                                <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "superuser" %}</span>
                                 {% endif %}
-                                <div class="ml-3">
+                                <div class="">
                                     <a id="user{{ user.id }}" href="{% url 'user-update' user.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ user.get_username }}
                                     </a>
                                 </div>
                             </div>
-                        </th>
+                        </td>
                         <td cclass="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
                                 {{ user.get_full_name }}

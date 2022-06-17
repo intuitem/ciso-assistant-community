@@ -18,9 +18,10 @@ class StyledModelForm(ModelForm):
         select_inputs = (Select, SelectMultiple, NullBooleanSelect)
         for fname, f in self.fields.items():
             input_type = f.widget.__class__
-            model_name = str(self.Meta.model).split('.')[-1].strip("'>").lower()
+            if self.Meta.model:
+                model_name = str(self.Meta.model).split('.')[-1].strip("'>").lower()
             if input_type in text_inputs:
-                f.widget.attrs['id'] = f'id_{model_name}_{fname}'
+                f.widget.attrs['id'] = f'id_{model_name}_{fname}' if model_name else f'id_{fname}'
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
             if input_type in select_inputs:
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
@@ -88,7 +89,13 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined']
 
 class AdminPasswordChangeForm(AdminPasswordChangeForm):
-    pass
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        for fname, f in self.fields.items():
+            f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+            print('FNAME:', fname)
+        self.fields.get('password1').widget.attrs['id'] = 'password1'
+        self.fields.get('password2').widget.attrs['id'] = 'password2'
 
 class GroupCreateForm(StyledModelForm):
     class Meta:
