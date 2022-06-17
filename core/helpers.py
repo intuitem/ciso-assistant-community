@@ -245,3 +245,8 @@ def measures_to_review():
     measures = Mitigation.objects.filter(eta__lte=date.today()+timedelta(days=30)).order_by('eta')
 
     return measures
+
+def acceptances_to_review():
+    acceptances = RiskAcceptance.objects.filter(expiry_date__lte=date.today()+timedelta(days=30)).order_by('expiry_date')
+    
+    return acceptances
