@@ -135,6 +135,7 @@ class RiskInstance(models.Model):
     ]
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
+    assets = models.ManyToManyField(Asset)
     parent_risk = models.ForeignKey(ParentRisk, on_delete=models.CASCADE, verbose_name=_("Threat"))
     title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
