@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
+from django.views.generic.edit import FormView
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import context, loader
 from django.utils.translation import gettext_lazy as _
@@ -10,6 +11,7 @@ from django.core.paginator import Paginator
 from datetime import date
 
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
 
@@ -17,18 +19,17 @@ from .forms import *
 
 from .filters import *
 
-from core.helpers import get_counters, risks_count_per_level, mitigation_per_status, measures_to_review
+from core.helpers import get_counters, risks_count_per_level, mitigation_per_status, measures_to_review, acceptances_to_review
 
 def index(request):
     template = loader.get_template('back_office/index.html')
-    _measures_to_review = measures_to_review()
-    mtr_paginator = Paginator(_measures_to_review, 5)
 
     context = {
         "counters": get_counters(),
         "risks_level": risks_count_per_level(),
         "mitigation_status": mitigation_per_status(),
-        "measures_to_review": _measures_to_review,
+        "measures_to_review": measures_to_review(),
+        "acceptances_to_review": acceptances_to_review(),
         "today": date.today()
     }
     return HttpResponse(template.render(context, request))
@@ -291,6 +292,12 @@ class UserUpdateView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {'user-list': _('Users')}
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = get_object_or_404(User, pk=self.kwargs['pk'])
+        print('DEBUG: User =', get_object_or_404(User, pk=self.kwargs['pk']))
+        return kwargs
 
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
@@ -770,3 +777,24 @@ class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self):
         return self.request.POST.get('next', '/')
+
+class AdminPasswordChangeView(PasswordChangeView):
+    template_name = 'back_office/password_change.html'
+    form_class = AdminPasswordChangeForm
+    model = User
+
+    def get_success_url(self) -> str:
+        return self.request.POST.get('next', '/')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['this_user'] = get_object_or_404(User, pk=self.kwargs['pk'])
+        context["crumbs"] = {'user-list': _('Users')}
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = get_object_or_404(User, pk=self.kwargs['pk'])
+        # print('DEBUG: User =', get_object_or_404(User, pk=self.kwargs['pk']))
+        return kwargs
+

@@ -66,6 +66,7 @@ urlpatterns = [
     path('AST/<int:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
 
     path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
+    path('users/<int:pk>/password', login_required(views.AdminPasswordChangeView.as_view()), name='admin-password-change'),
     path('groups/<int:pk>', login_required(views.GroupUpdateView.as_view()), name='group-update'),
     
     # DELETE VIEWS

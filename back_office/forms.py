@@ -1,7 +1,9 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 
 from django.contrib.auth.models import User, Group
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
+from django.shortcuts import get_object_or_404
+from django.urls import reverse, reverse_lazy
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
 from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
 from django.utils.translation import gettext_lazy as _
@@ -65,9 +67,28 @@ class UserCreateForm(UserCreationForm, StyledModelForm):
     pass
 
 class UserUpdateForm(UserChangeForm, StyledModelForm):
+    def __init__(self, *args, user, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        password = self.fields.get('password')
+        self.fields['password'].help_text=_(
+            'Raw passwords are not stored, so there is no way to see this '
+            'user’s password, but you can change the password using '
+            '<a class="help_text-link" href="{}">this form</a>.'
+        )
+        if password:
+            password.help_text = password.help_text.format(
+                reverse('admin-password-change', 
+                kwargs={'pk': user.pk}
+            ))
+
+
     class Meta:
         model = User
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined']
+
+class AdminPasswordChangeForm(AdminPasswordChangeForm):
+    pass
 
 class GroupCreateForm(StyledModelForm):
     class Meta:
