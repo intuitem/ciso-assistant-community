@@ -4,6 +4,7 @@
 <!-- {% block title %}{% trans "Risk analyses"|title %}{% endblock %} -->
 
 {% block content %}
+
 <div>
     {% with page_title=_('Risk analyses') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
@@ -42,7 +43,7 @@
                         x-on:keydown.escape.prevent.stop="close($refs.button)"
                         x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
                         x-id="['dropdown-button']"
-                        class="relative z-10"
+                        class="relative z-0"
                     >
                         <!-- Button -->
                         <button
@@ -66,7 +67,7 @@
                             x-on:click.outside="close($refs.button)"
                             :id="$id('dropdown-button')"
                             style="display: none;"
-                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                            class="absolute left-0 mt-2 z-10 w-64 bg-white rounded shadow-2xl overflow-hidden"
                         >
                     
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
@@ -110,9 +111,9 @@
                    <i class="fas fa-plus"></i>
                    {% trans "New risk analysis" %}
             </a>
-                {% include "back_office/snippets/analysis_create_modal.html" %}
+                {% include "back_office/snippets/modal.html" with form=analysis_create_form header=_("Add Analysis") modal_action="create" %}
         </div>
-        <script src="{% static 'js/modal.js' %}"></script>
+
     
     </div>
 
@@ -166,7 +167,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
 
-                            <div class="">
+                            <div class="w-full">
                                 <span><a href="{% url 'RA' analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
                                     <a href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
@@ -174,17 +175,16 @@
                                     </a>
                                 </span>
 
-                                <span x-data="modal()">
-                                    <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
+                                <span x-data="{ open: false }">
+                                    <a @click="open = ! open" type="button"
+                                    class="cursor-pointer table-action">
                                         <i class="fas fa-trash"></i>
                                         
                                     </a>
                                           
-                                {% include 'back_office/snippets/ra_delete_modal.html' %}
+                                    {% include 'back_office/snippets/modal.html' with modal_action="delete" header=_("Delete risk analysis?") object=analysis %}
                                 
                                 </span>
-                                          
-                                          <script src="{% static 'js/modal.js' %}"></script>
 
                             </div>
                         </td>

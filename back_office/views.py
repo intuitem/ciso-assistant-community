@@ -142,6 +142,7 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
         queryset = self.get_queryset()
         filter = AnalysisFilter(self.request.GET, queryset)
         context['filter'] = filter
+        context['model'] = self.model._meta.verbose_name
         context['analysis_create_form'] = RiskAnalysisCreateForm
         return context
 
