@@ -142,7 +142,7 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
         queryset = self.get_queryset()
         filter = AnalysisFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['model'] = self.model._meta.verbose_name
+        context['model'] = 'analysis' # self.model._meta.verbose_name # TODO: Find a way to get unlocalized model verbose_name, as localization may break stuff e.g. urls
         context['analysis_create_form'] = RiskAnalysisCreateForm
         return context
 
