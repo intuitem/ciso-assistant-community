@@ -1,0 +1,10 @@
+<span x-data="{ open: false }">
+    <a @click="open = ! open" type="button"
+    class="cursor-pointer table-action">
+        <i class="fas fa-trash"></i>
+        
+    </a>
+          
+    {% include 'back_office/snippets/modal.html' with modal_action="delete" %}
+
+</span>

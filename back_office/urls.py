@@ -70,7 +70,7 @@ urlpatterns = [
     path('groups/<int:pk>', login_required(views.GroupUpdateView.as_view()), name='group-update'),
     
     # DELETE VIEWS
-    path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='ra-delete'),
+    path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
     path('RS/<int:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='risk-scenario-delete'),
     path('RAC/<int:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
     path('MSR/<int:pk>/delete/', login_required(views.MeasureDeleteView.as_view()), name='measure-delete'),

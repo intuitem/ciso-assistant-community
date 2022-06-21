@@ -94,17 +94,9 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
-        <div class="grid mb-4 w-full"
-            x-data="modal()">
-            <a x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-            class="add-button">
-            <i class="fas fa-plus"></i>
-            {% trans "New risk acceptance" %}
-        </a>
-        {% include "back_office/snippets/risk_acceptance_create_modal.html" %}
-        </div>
+        {% include 'back_office/snippets/add_button_modal.html' with form=risk_acceptance_create_form header=_("Add Risk Acceptance") model="acceptance" content=_("New risk acceptance") %}
     </div>
-    <script src="{% static 'js/modal.js' %}"></script>
+
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -158,17 +150,8 @@
                                     </a>
                                 </span>
 
-                                <span x-data="modal()">
-                                    <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
-                                        <i class="fas fa-trash"></i>
-                                        
-                                    </a>
-                                        
-                                {% include 'back_office/snippets/risk_acceptance_delete_modal.html' %}
-                                
-                                </span>
-                                        
-                                        <script src="{% static 'js/modal.js' %}"></script>
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=acceptance header=_("Delete risk acceptance?") model='risk-acceptance' %}
+
 
                             </div>
                         </td>

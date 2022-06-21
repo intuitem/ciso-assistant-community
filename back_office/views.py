@@ -165,6 +165,7 @@ class RiskInstanceListView(PermissionRequiredMixin, ListView):
         queryset = self.get_queryset()
         filter = RiskScenarioFilter(self.request.GET, queryset)
         context['filter'] = filter
+        context['model'] = 'risk-scenario'
         context['risk_scenario_create_form'] = RiskScenarioCreateForm
         return context
 
