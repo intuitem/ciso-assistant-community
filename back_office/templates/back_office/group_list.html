@@ -62,13 +62,7 @@
                                     </a>
                                 </span>
 
-                                <span x-data="modal()">
-                                    <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                {% include 'back_office/snippets/group_delete_modal.html' %}
-                                </span>  
-                                <script src="{% static 'js/modal.js' %}"></script>
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=group header=_("Delete group?") model='group' %}
                             </div>
                         </td>
                     </tr>

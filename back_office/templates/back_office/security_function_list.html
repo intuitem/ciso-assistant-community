@@ -93,16 +93,7 @@
     </div>
     {% endif %}
     <!-- End Filters Dropdown Form -->
-    <div class="grid mb-4 w-full"
-    x-data="modal()">
-        <a id="newSecurityFunction" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-            class="add-button">
-            <i class="fas fa-plus"></i>
-            {% trans "New security function" %}
-        </a>
-        {% include "back_office/snippets/security_function_create_modal.html" %}
-        <script src="{% static 'js/modal.js' %}"></script>
-    </div>
+    {% include 'back_office/snippets/add_button_modal.html' with form=security_function_create_form header=_("Add Security Function") model="security-function" content=_("New security function") %}
 </div>
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
     <table class="w-full text-sm text-left text-gray-500">
@@ -149,17 +140,7 @@
                                 </a>
                             </span>
 
-                            <span x-data="modal()">
-                                <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
-                                    <i class="fas fa-trash"></i>
-                                    
-                                </a>
-                                    
-                            {% include 'back_office/snippets/security_function_delete_modal.html' %}
-                            
-                            </span>
-                                    
-                                    <script src="{% static 'js/modal.js' %}"></script>
+                            {% include 'back_office/snippets/delete_button_modal.html' with object=function header=_("Delete security function?") model='security-function' %}
 
                         </div>
                     </td>

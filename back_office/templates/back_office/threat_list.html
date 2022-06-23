@@ -33,16 +33,7 @@
     </div>
     {% endif %}
     <!-- End Filters Dropdown Form -->
-    <div class="grid mb-4 w-full"
-    x-data="modal()">
-        <a id="newThreat" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-            class="add-button">
-            <i class="fas fa-plus"></i>
-            {% trans "New threat" %}
-        </a>
-        {% include "back_office/snippets/threat_create_modal.html" %}
-        <script src="{% static 'js/modal.js' %}"></script>
-    </div>
+    {% include 'back_office/snippets/add_button_modal.html' with form=threat_create_form header=_("Add Threat") model="threat" content=_("New threat") %}
 </div>
         <div class="relative overflow-x-auto shadow-md rounded-l-lg rounded-r-lg border-none focus:ring-0">
     <table class="w-full text-sm text-left text-gray-500">
@@ -72,17 +63,7 @@
                                 </a>
                             </span>
 
-                            <span x-data="modal()">
-                                <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
-                                    <i class="fas fa-trash"></i>
-                                    
-                                </a>
-                                    
-                            {% include 'back_office/snippets/threat_delete_modal.html' %}
-                            
-                            </span>
-                                    
-                                    <script src="{% static 'js/modal.js' %}"></script>
+                            {% include 'back_office/snippets/delete_button_modal.html' with object=threat header=_("Delete threat?") model='threat' %}
 
                         </div>
                     </td>
