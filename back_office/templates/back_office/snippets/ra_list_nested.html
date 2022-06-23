@@ -45,25 +45,24 @@
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible">
-                    <div class="">
-                        <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span>
+                    <div class="w-full">
+                        <span><a href="{% url 'RA' analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                         <span>
                             <a href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </span>
 
-                        <span x-data="modal()">
-                            <a x-on:click="open()" type="button" class="cursor-pointer table-action" data-toggle="modal" data-target="#exampleModalTwo">
+                        <span x-data="{ open: false }">
+                            <a @click="open = ! open" type="button"
+                            class="cursor-pointer table-action">
                                 <i class="fas fa-trash"></i>
                                 
                             </a>
-                                    
-                        {% include 'back_office/snippets/ra_delete_modal.html' %}
+                                  
+                            {% include 'back_office/snippets/modal.html' with modal_action="delete" model="analysis" header=_("Delete risk analysis?") object=analysis %}
                         
                         </span>
-                                    
-                                    <script src="{% static 'js/modal.js' %}"></script>
 
                     </div>
                 </td>

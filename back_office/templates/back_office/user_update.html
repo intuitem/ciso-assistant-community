@@ -1,6 +1,7 @@
 {% extends 'back_office/base.html' %}
 {% block content %}
 {% load i18n %}
+{% load back_office_extras %}
 {% with page_title='Edit user' %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
@@ -11,18 +12,24 @@
             <div class="flex flex-col space-y-4">
                 {{ form.non_field_errors }}
                 {% for field in form %}
-                <div class="">
-                    <label class="text-sm font-semibold">{{ field.label|striptags }}</label>
-                    <div class="w-auto">
-                        {% for error in field.errors %}
-                            <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
-                        {% endfor %}
-                        {{ field }}
-                        <div class=" mt-1 text-xs text-gray-400">
-                            {{ field.help_text|safe }}
+                    {% if field.field.widget|class == "CheckboxInput" %}
+                        {% include 'back_office/snippets/form_field_row.html' %}
+                    {% else %}
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold">{{ field.label|striptags }}</label>
+                            <div class="w-auto">
+                                {% for error in field.errors %}
+                                    <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                                {% endfor %}
+                                {{ field }}
+                                
+                                
+                                <div class="help_text">
+                                    {{ field.help_text|safe }}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    {% endif %}
                 {% endfor %}
             </div>
             <div class="mt-4 flex space-x-2 justify-end">

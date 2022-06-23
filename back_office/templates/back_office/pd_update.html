@@ -32,14 +32,8 @@
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
         <div class="grid grid-rows-1 grid-cols-2 mb-2">
             <h2 class="text-xl font-semibold mb-4">{% trans "Associated Projects" %}</h2>
-            <div x-data="modal()" class="justify-self-end">
-                <a id="newProjectModal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-                class="add-button">
-                    <i class="fas fa-plus mr-2"></i>{% trans "New project" %}</a>
-                    {% include "back_office/snippets/project_create_modal.html" %}
-            </div>
+            {% include 'back_office/snippets/add_button_modal.html' with form=project_create_form header=_("Add Project") model="pd" content=_("New project") %}
         </div>
-        <script src="{% static 'js/modal.js' %}"></script>
         {% include 'back_office/snippets/project_list_nested.html' %}
     </div>
 </div>

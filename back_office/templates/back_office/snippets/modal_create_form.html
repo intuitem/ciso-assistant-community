@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n back_office_extras %}
 
 <!-- BEGIN CREATE FORM -->
 <form action="{% url model|lower|add:'-create-modal' %}" method="post"> {% csrf_token %}
@@ -7,15 +7,18 @@
     {{ form.errors }}
     <div id="new_analysis-form">
       {% for field in form %}
+      {% if field.field.widget|class == "CheckboxInput" %}
+        {% include 'back_office/snippets/form_field_row.html' %}
+      {% else %}
       <div class="mb-6">
         <label class="form-label">{{ field.label|striptags }}</label>
         <div>
           {{ field.errors }}
           {{ field }}
-          {{ field.help_text }}
+          <p class="help_text">{{ field.help_text }}</p>
         </div>
       </div>
-
+      {% endif %}
       {% endfor %}
 
       <section class="col-start-3 col-span-6 place-content-end">

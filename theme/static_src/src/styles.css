@@ -81,7 +81,7 @@
     }
 
     .table-action{
-        @apply text-xl text-slate-500 hover:text-indigo-900 m-2;
+        @apply text-xl text-slate-500 hover:text-indigo-900 mx-2;
     }
     
     .tooltip-custom {
@@ -113,10 +113,16 @@
     }
 
     .help_text-link {
-        @apply font-normal text-indigo-600 hover:underline;
+        @apply font-normal text-indigo-500 hover:underline;
     }
 
+    .help_text {
+        @apply mt-1 text-xs text-gray-400;
+    }
 
+    .password_update strong {
+        @apply font-medium;
+    }
 
 
 

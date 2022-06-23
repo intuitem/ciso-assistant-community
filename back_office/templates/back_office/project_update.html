@@ -50,16 +50,8 @@
 <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
     <div class="grid justify-items-stretch grid-cols-2 mb-2">
         <h2 class="text-xl font-semibold">{% trans "Associated risk analyses" %}</h2>
-        <div class="grid mb-4"
-        x-data="modal()">
-        <a id="newRiskAnalysisModal" x-on:click="open()" type="button" data-toggle="modal" data-target="#createModal"
-               class="add-button">
-               <i class="fas fa-plus"></i>
-               {% trans "New risk analysis" %}
-        </a>
-        {% include "back_office/snippets/analysis_create_modal.html" %}
+        {% include 'back_office/snippets/add_button_modal.html' with form=analysis_create_form header=_("Add Analysis") model="analysis" content=_("New risk analysis") %}
     </div>
-    <script src="{% static 'js/modal.js' %}"></script>
     </div>
     {% include 'back_office/snippets/ra_list_nested.html' %}
 </div>

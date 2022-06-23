@@ -8,6 +8,7 @@ from django.template import context, loader
 from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
 
+
 from datetime import date
 
 from django.contrib.auth.models import User, Group
