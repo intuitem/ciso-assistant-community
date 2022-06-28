@@ -16,11 +16,11 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: asf_rm/settings.py:190
 msgid "Search analysis..."
-msgstr "Rechercher une analyse..."
+msgstr ""
 
 #: asf_rm/settings.py:195
 msgid "Main"
@@ -32,65 +32,55 @@ msgstr ""
 
 #: asf_rm/settings.py:204
 msgid "Analysis registry"
-msgstr "Registre des analyses"
+msgstr ""
 
 #: asf_rm/settings.py:209
-#, fuzzy
-#| msgid "Risk acceptances"
 msgid "Risk instances"
-msgstr "Acceptations de risque"
+msgstr ""
 
 #: asf_rm/settings.py:214
 msgid "Mitigations"
 msgstr ""
 
 #: asf_rm/settings.py:219
-#, fuzzy
-#| msgid "Risk acceptances"
 msgid "Risk acceptances"
-msgstr "Acceptations de risque"
+msgstr ""
 
 #: asf_rm/settings.py:224
 msgid "Organization"
-msgstr "Organisation"
+msgstr ""
 
 #: asf_rm/settings.py:228
 msgid "General"
-msgstr "Général"
+msgstr ""
 
 #: asf_rm/settings.py:233
 msgid "Projects Hierarchy"
-msgstr "Hiérarchie des Projets"
+msgstr ""
 
 #: asf_rm/settings.py:238
-#, fuzzy
-#| msgid "Projects"
 msgid "Projects"
-msgstr "Projets"
+msgstr ""
 
 #: asf_rm/settings.py:243
-#, fuzzy
-#| msgid "Parent Risks"
 msgid "Parent Risks"
-msgstr "Risques Parents"
+msgstr ""
 
 #: asf_rm/settings.py:248
-#, fuzzy
-#| msgid "Solutions Catalog"
 msgid "Solutions Catalog"
-msgstr "Catalogue des Solutions"
+msgstr ""
 
 #: asf_rm/settings.py:254
 msgid "Settings"
-msgstr "Paramètres"
+msgstr ""
 
 #: asf_rm/settings.py:258
 msgid "Users and authorizations"
-msgstr "Utilisateurs et autorisations"
+msgstr ""
 
 #: asf_rm/settings.py:262
 msgid "User guide"
-msgstr "Guide utilisateur"
+msgstr ""
 
 #: asf_rm/settings.py:264
 msgid "Staff"
@@ -98,54 +88,16 @@ msgstr ""
 
 #: asf_rm/settings.py:265
 msgid "X-Rays (all)"
-msgstr "X-Rays (tous)"
+msgstr ""
 
 #: asf_rm/settings.py:266
 msgid "Rating matrix"
-msgstr "Matrice d'évaluation"
+msgstr ""
 
 #: asf_rm/settings.py:267
 msgid "Scoring assistant"
-msgstr "Assistant d'évaluation"
+msgstr ""
 
 #: asf_rm/settings.py:269
 msgid "Extra"
 msgstr ""
-
-#~ msgid "Risk scenarios"
-#~ msgstr "Scénarios de risque"
-
-#, fuzzy
-#~| msgid "Risk acceptances"
-#~ msgid "Risk acceptance"
-#~ msgstr "Acceptations de risque"
-
-#, fuzzy
-#~| msgid "Projects"
-#~ msgid "Parent project"
-#~ msgstr "Projets"
-
-#, fuzzy
-#~| msgid "Projects Hierarchy"
-#~ msgid "Project Name"
-#~ msgstr "Hiérarchie des Projets"
-
-#, fuzzy
-#~| msgid "Parent Risks"
-#~ msgid "Parent Domain"
-#~ msgstr "Risques Parents"
-
-#, fuzzy
-#~| msgid "Parent Risks"
-#~ msgid "Parent Risk"
-#~ msgstr "Risques Parents"
-
-#, fuzzy
-#~| msgid "Projects"
-#~ msgid "Parent function"
-#~ msgstr "Projets"
-
-#, fuzzy
-#~| msgid "Parent Risks"
-#~ msgid "Current risk level"
-#~ msgstr "Risques Parents"

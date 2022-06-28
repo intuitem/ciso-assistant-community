@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-20 12:59+0200\n"
+"POT-Creation-Date: 2022-06-28 21:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,44 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: core/admin.py:45 core/admin.py:72
+msgid "Threat description"
+msgstr ""
+
+#: core/admin.py:46 core/admin.py:73 core/models.py:151
+#: core/templates/core/browser.html:94
+msgid "Current level"
+msgstr ""
+
+#: core/admin.py:47 core/admin.py:75 core/models.py:160
+#: core/templates/core/browser.html:95
+msgid "Residual level"
+msgstr ""
+
+#: core/admin.py:48 core/admin.py:76
+msgid "Follow-up"
+msgstr ""
+
+#: core/admin.py:92 core/models.py:31 core/models.py:137
+msgid "Analysis"
+msgstr ""
+
+#: core/admin.py:93 core/models.py:32 core/templates/core/analytics.html:40
+msgid "Analyses"
+msgstr ""
+
+#: core/admin_config.py:6
+msgid "Editor"
+msgstr ""
+
+#: core/admin_config.py:7
+msgid "Menu"
+msgstr ""
+
+#: core/apps.py:7
+msgid "Core"
+msgstr ""
 
 #: core/forms.py:7
 msgid "Username"
@@ -30,7 +68,16 @@ msgstr ""
 msgid "Balanced (default)"
 msgstr ""
 
-#: core/models.py:18 core/templates/core/my_projects.html:191
+#: core/models.py:15
+msgid "Critical (FAIR-based)"
+msgstr ""
+
+#: core/models.py:16
+msgid "Custom (adjusted)"
+msgstr ""
+
+#: core/models.py:18 core/templates/core/browser.html:92
+#: core/templates/core/browser.html:117 core/templates/core/my_projects.html:35
 msgid "Project"
 msgstr ""
 
@@ -46,245 +93,334 @@ msgstr ""
 msgid "is a draft"
 msgstr ""
 
-#: core/models.py:22
+#: core/models.py:22 core/templates/core/base.html:171
 msgid "Rating matrix"
 msgstr ""
 
-#: core/models.py:25
-msgid "general comments that will help the reader"
-msgstr ""
-
-#: core/models.py:26 core/models.py:162
+#: core/models.py:25 core/models.py:167 core/models.py:269
 msgid "Comments"
 msgstr ""
 
-#: core/models.py:32 core/templates/core/index.html:10
-msgid "Analysis registry"
+#: core/models.py:55
+msgid "Risk analysis is still in Draft mode"
 msgstr ""
 
-#: core/models.py:33
-msgid "Analysis Registries"
+#: core/models.py:57
+msgid "No auditor assigned to this risk analysis yet"
 msgstr ""
 
-#: core/models.py:119 core/models.py:184
+#: core/models.py:59
+msgid "Analysis is empty. No risk scenario declared yet"
+msgstr ""
+
+#: core/models.py:66
+msgid "R#{} residual risk level is higher than the current one"
+msgstr ""
+
+#: core/models.py:68
+msgid "R#{} residual risk probability is higher than the current one"
+msgstr ""
+
+#: core/models.py:70
+msgid "R#{} residual risk impact is higher than the current one"
+msgstr ""
+
+#: core/models.py:76
+msgid "R#{}: residual risk level has been lowered without any specific measure"
+msgstr ""
+
+#: core/models.py:80
+msgid "R#{} risk accepted but no risk acceptance attached"
+msgstr ""
+
+#: core/models.py:86
+msgid "M#{} does not have an ETA"
+msgstr ""
+
+#: core/models.py:90
+msgid "M#{} ETA is in the past now. Consider updating its status or the date"
+msgstr ""
+
+#: core/models.py:93
+msgid ""
+"M#{} does not have an estimated effort. This will help you for prioritization"
+msgstr ""
+
+#: core/models.py:96
+msgid ""
+"M#{} does not have an external link attached. This will help you for follow-"
+"up"
+msgstr ""
+
+#: core/models.py:102
+msgid ""
+"R#{} has a risk acceptance that has expired. Consider updating the status or "
+"the date"
+msgstr ""
+
+#: core/models.py:123 core/models.py:194
 msgid "Open"
 msgstr ""
 
-#: core/models.py:120
+#: core/models.py:124
 msgid "Mitigated"
 msgstr ""
 
-#: core/models.py:121
+#: core/models.py:125
 msgid "Accepted"
 msgstr ""
 
-#: core/models.py:122
+#: core/models.py:126
 msgid "Show-stopper"
 msgstr ""
 
-#: core/models.py:126
+#: core/models.py:130 core/templates/snippets/risk_matrix.html:41
+#: core/templates/snippets/risk_matrix.html:50
+#: core/templates/snippets/risk_matrix.html:99
+#: core/templates/snippets/risk_matrix.html:108
 msgid "Very low"
 msgstr ""
 
-#: core/models.py:127
+#: core/models.py:131 core/templates/snippets/risk_matrix.html:33
+#: core/templates/snippets/risk_matrix.html:51
+#: core/templates/snippets/risk_matrix.html:91
+#: core/templates/snippets/risk_matrix.html:109
 msgid "Low"
 msgstr ""
 
-#: core/models.py:128 core/models.py:198
+#: core/models.py:132 core/models.py:208
+#: core/templates/snippets/risk_matrix.html:25
+#: core/templates/snippets/risk_matrix.html:83
 #, fuzzy
 #| msgid "Medium_f"
 msgid "Medium"
 msgstr "Medium"
 
-#: core/models.py:129
+#: core/models.py:133 core/templates/snippets/risk_matrix.html:17
+#: core/templates/snippets/risk_matrix.html:75
 msgid "High"
 msgstr ""
 
-#: core/models.py:130
+#: core/models.py:134 core/templates/snippets/risk_matrix.html:9
+#: core/templates/snippets/risk_matrix.html:67
 msgid "Very high"
 msgstr ""
 
-#: core/models.py:133
-msgid "Analysis"
-msgstr ""
-
-#: core/models.py:134
-msgid "Parent risk"
-msgstr ""
-
-#: core/models.py:135
-msgid "<risk instance short title>"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:40
-#: core/models.py:135 core/models.py:209
-msgid "Title"
-msgstr ""
-
-#: core/models.py:136
-msgid "<risk scenario and impact description>"
-msgstr ""
-
-#: core/models.py:138
-msgid ""
-"The existing security measures to manage this risk. Edit the risk scenario to add "
-"extra measures."
-msgstr ""
-
-#: core/models.py:139
-msgid "<we have solution A and Process B to handle this>"
+#: core/models.py:139 core/templates/snippets/ra_data.html:41
+msgid "Threat"
 msgstr ""
 
 #: core/models.py:140
-msgid "Existing measures"
+msgid "<risk scenario short title>"
+msgstr ""
+
+#: core/models.py:140 core/models.py:219 core/templates/core/browser.html:93
+#: core/templates/core/browser.html:118 core/templates/snippets/mp_data.html:41
+#: core/templates/snippets/ra_data.html:42
+msgid "Title"
+msgstr ""
+
+#: core/models.py:141
+msgid "<risk scenario and impact description>"
+msgstr ""
+
+#: core/models.py:141 core/templates/snippets/ra_data.html:43
+msgid "Scenario"
+msgstr ""
+
+#: core/models.py:143
+msgid ""
+"The existing security measures to manage this risk. Edit the risk scenario "
+"to add extra security measures."
 msgstr ""
 
 #: core/models.py:144
+msgid "<we have solution A and Process B to handle this>"
+msgstr ""
+
+#: core/models.py:145 core/templates/snippets/ra_data.html:44
+msgid "Existing measures"
+msgstr ""
+
+#: core/models.py:149
 msgid "Current probability"
 msgstr ""
 
-#: core/models.py:145
+#: core/models.py:150
 msgid "Current impact"
 msgstr ""
 
-#: core/models.py:146
-msgid "Current level"
-msgstr ""
-
-#: core/models.py:147
+#: core/models.py:152
 msgid ""
 "The risk level given the current measures. Automatically updated on Save, "
 "based on the chosen matrix"
 msgstr ""
 
-#: core/models.py:151
+#: core/models.py:156
 msgid "Residual probability"
 msgstr ""
 
-#: core/models.py:152
+#: core/models.py:157
 msgid "Residual impact"
 msgstr ""
 
-#: core/models.py:154
+#: core/models.py:159
 msgid ""
-"The risk level when all the extra mitigations are done. Automatically "
-"updated on Save, based on the chosen matrix"
+"The risk level when all the extra measures are done. Automatically updated "
+"on Save, based on the chosen matrix"
 msgstr ""
 
-#: core/models.py:155
-msgid "Residual level"
-msgstr ""
-
-#: core/models.py:158
+#: core/models.py:163 core/templates/core/browser.html:96
 msgid "Treatment status"
 msgstr ""
 
-#: core/models.py:160 core/models.py:221
+#: core/models.py:165 core/models.py:231 core/models.py:267
 msgid "Created at"
 msgstr ""
 
-#: core/models.py:161 core/models.py:222
+#: core/models.py:166 core/models.py:232 core/models.py:268
 msgid "Updated at"
 msgstr ""
 
-#: core/models.py:185
+#: core/models.py:170 core/models.py:216 core/models.py:262
+msgid "Risk scenario"
+msgstr ""
+
+#: core/models.py:171 core/templates/core/analytics.html:14
+#: core/templates/core/search_results.html:21
+#: core/templates/snippets/ra_data.html:36
+msgid "Risk scenarios"
+msgstr ""
+
+#: core/models.py:175 core/models.py:240
+msgid "Parent project"
+msgstr ""
+
+#: core/models.py:195
 msgid "In progress"
 msgstr ""
 
-#: core/models.py:186
+#: core/models.py:196
 msgid "On hold"
 msgstr ""
 
-#: core/models.py:187
+#: core/models.py:197
 msgid "Done"
 msgstr ""
 
-#: core/models.py:191
+#: core/models.py:201
 msgid "N/A"
 msgstr ""
 
-#: core/models.py:192
+#: core/models.py:202
 msgid "Technical"
 msgstr ""
 
-#: core/models.py:193
+#: core/models.py:203
 msgid "Organizational"
 msgstr ""
 
-#: core/models.py:197
+#: core/models.py:207
 msgid "Small"
 msgstr ""
 
-#: core/models.py:199
+#: core/models.py:209
 msgid "Large"
 msgstr ""
 
-#: core/models.py:200
+#: core/models.py:210
 msgid "Extra-Large"
 msgstr ""
 
-#: core/models.py:206
-msgid "Risk instance"
-msgstr ""
-
-#: core/models.py:207
+#: core/models.py:217
 msgid "Solution"
 msgstr ""
 
-#: core/models.py:209
-msgid "<short title for the mitigation>"
+#: core/models.py:219
+msgid "<short title for the measure>"
 msgstr ""
 
-#: core/models.py:210 core/templates/snippets/ra_data.html:26
+#: core/models.py:220 core/templates/snippets/mp_data.html:42
+#: core/templates/snippets/ra_data.html:28
 msgid "Description"
 msgstr ""
 
-#: core/models.py:211
+#: core/models.py:221 core/models.py:264
+#: core/templates/snippets/mp_data.html:43
 msgid "Type"
 msgstr ""
 
-#: core/models.py:212 core/templates/core/my_projects.html:194
+#: core/models.py:222 core/templates/core/browser.html:120
+#: core/templates/core/my_projects.html:38
+#: core/templates/snippets/mp_data.html:48
 msgid "Status"
 msgstr ""
 
-#: core/models.py:213
+#: core/models.py:223
 msgid "Estimated Time of Arrival"
 msgstr ""
 
-#: core/models.py:213 core/templates/core/my_projects.html:195
+#: core/models.py:223 core/templates/core/my_projects.html:39
+#: core/templates/snippets/mp_data.html:45
 msgid "ETA"
 msgstr ""
 
-#: core/models.py:215
+#: core/models.py:225
 msgid "External url for action follow-up (eg. Jira ticket)"
 msgstr ""
 
-#: core/models.py:216
+#: core/models.py:226 core/templates/snippets/mp_data.html:47
 msgid "Link"
 msgstr ""
 
-#: core/models.py:218
-msgid "Relative effort of the mitigation (using T-Shirt sizing)"
+#: core/models.py:228
+msgid "Relative effort of the measure (using T-Shirt sizing)"
 msgstr ""
 
-#: core/models.py:219 core/templates/core/analytics.html:135
+#: core/models.py:229 core/templates/core/analytics.html:140
+#: core/templates/snippets/mp_data.html:46
 msgid "Effort"
 msgstr ""
 
-#: core/models.py:248
+#: core/models.py:235
+msgid "Security measure"
+msgstr ""
+
+#: core/models.py:236 core/templates/core/analytics.html:20
+#: core/templates/core/search_results.html:34
+msgid "Security measures"
+msgstr ""
+
+#: core/models.py:259
+msgid "Temporary"
+msgstr ""
+
+#: core/models.py:260
+msgid "Permanent"
+msgstr ""
+
+#: core/models.py:263
 msgid "<Risk owner and validator identity>"
 msgstr ""
 
-#: core/models.py:250
+#: core/models.py:263
+msgid "Validator"
+msgstr ""
+
+#: core/models.py:265
 msgid "If temporary, specify when the risk acceptance will no longer apply"
 msgstr ""
 
-#: core/templates/core/analytics.html:14
-msgid "Risks instances"
+#: core/models.py:266
+msgid "Expiry date"
 msgstr ""
 
-#: core/templates/core/analytics.html:20
-msgid "Mitigations"
+#: core/models.py:272
+msgid "Risk acceptance"
+msgstr ""
+
+#: core/models.py:273 core/templates/core/analytics.html:52
+msgid "Risk acceptances"
 msgstr ""
 
 #: core/templates/core/analytics.html:34
@@ -292,146 +428,163 @@ msgid "Show-stoppers"
 msgstr ""
 
 #: core/templates/core/analytics.html:46
-msgid "Solutions in catalog"
-msgstr ""
-
-#: core/templates/core/analytics.html:52
-msgid "Risk acceptances"
+msgid "Security functions"
 msgstr ""
 
 #: core/templates/core/analytics.html:60
-msgid "Break down per Parent Risk"
+msgid "Risk scenarios broken down by threat"
 msgstr ""
 
 #: core/templates/core/analytics.html:68
-msgid "Risks status"
+msgid "Risk scenarios broken down by status"
 msgstr ""
 
-#: core/templates/core/analytics.html:77
+#: core/templates/core/analytics.html:76
 msgid ""
-"Risks breakdown per level: current (with the existing security measures) versus "
-"residual (once all security measures implemented)"
+"Risk scenarios breakdown per level: current (with the existing security "
+"measures) versus residual (once all security measures implemented)"
 msgstr ""
 
-#: core/templates/core/analytics.html:95
-msgid "Mitigations overview"
+#: core/templates/core/analytics.html:80 core/templates/core/composer.html:21
+#: core/templates/snippets/ra_data.html:45
+msgid "Current risk"
 msgstr ""
 
-#: core/templates/core/analytics.html:99
+#: core/templates/core/analytics.html:86 core/templates/core/composer.html:37
+#: core/templates/snippets/ra_data.html:47
+msgid "Residual risk"
+msgstr ""
+
+#: core/templates/core/analytics.html:97
+msgid "Measures overview"
+msgstr ""
+
+#: core/templates/core/analytics.html:102
 msgid "Breakdown per status"
 msgstr ""
 
-#: core/templates/core/analytics.html:103
-msgid "Pending mitigation per associated risk level (current)"
+#: core/templates/core/analytics.html:106
+msgid "Pending measures per associated risk level (current)"
 msgstr ""
 
-#: core/templates/core/analytics.html:107
-msgid "Breakdown per solution"
+#: core/templates/core/analytics.html:112
+msgid "Breakdown per security function"
 msgstr ""
 
-#: core/templates/core/analytics.html:119
-msgid "Mitigations priority quadrants"
+#: core/templates/core/analytics.html:113
+msgid "Measures per security function"
 msgstr ""
 
-#: core/templates/core/analytics.html:127
+#: core/templates/core/analytics.html:124
+msgid "Measures priority quadrants"
+msgstr ""
+
+#: core/templates/core/analytics.html:132
 msgid "4th"
 msgstr ""
 
-#: core/templates/core/analytics.html:136
+#: core/templates/core/analytics.html:141
 msgid "2nd"
 msgstr ""
 
-#: core/templates/core/analytics.html:146
+#: core/templates/core/analytics.html:151
 msgid "3rd"
 msgstr ""
 
-#: core/templates/core/analytics.html:154
+#: core/templates/core/analytics.html:159 core/templates/core/scoring.html:506
 msgid "Risk level"
 msgstr ""
 
-#: core/templates/core/analytics.html:155
+#: core/templates/core/analytics.html:160
 msgid "1st"
 msgstr ""
 
-#: core/templates/core/analytics.html:165
+#: core/templates/core/analytics.html:170
 msgid "Note"
 msgstr ""
 
-#: core/templates/core/analytics.html:165
+#: core/templates/core/analytics.html:170
 msgid ""
-"mitigation(s) have not been processed because the estimated effort is not "
-"set."
+"measure(s) have not been processed because the estimated effort is not set."
 msgstr ""
 
-#: core/templates/core/analytics.html:171
-msgid "Risks per project group (category)"
+#: core/templates/core/analytics.html:176
+msgid "Risk per project domain (category)"
 msgstr ""
 
-#: core/templates/core/analytics.html:172
+#: core/templates/core/analytics.html:177
 msgid "Current versus residual"
 msgstr ""
 
-#: core/templates/core/base.html:31
-msgid "Search risk scenario, security measure, analysis..."
+#: core/templates/core/base.html:101 core/templates/core/index.html:23
+msgid "Analysis registry"
 msgstr ""
 
-#: core/templates/core/base.html:43 core/templates/snippets/ra_data.html:7
-msgid "Edit"
+#: core/templates/core/base.html:109
+msgid "Switch to editor"
 msgstr ""
 
-#: core/templates/core/base.html:45
+#: core/templates/core/base.html:116 core/templates/core/base.html:127
 msgid "Analytics"
 msgstr ""
 
-#: core/templates/core/base.html:48
+#: core/templates/core/base.html:136
 msgid "My projects"
 msgstr ""
 
-#: core/templates/core/base.html:51
+#: core/templates/core/base.html:145
 msgid "Calendar"
 msgstr ""
 
-#: core/templates/core/base.html:54 core/templates/core/project_select.html:23
+#: core/templates/core/base.html:154 core/templates/core/project_select.html:16
 msgid "Composer"
 msgstr ""
 
-#: core/templates/core/base.html:62
-msgid "More"
+#: core/templates/core/base.html:161
+msgid "Tools"
 msgstr ""
 
-#: core/templates/core/base.html:74
-msgid "Hello"
-msgstr ""
-
-#: core/templates/core/base.html:76
-msgid "You're not logged in"
-msgstr ""
-
-#: core/templates/core/base.html:81
-msgid "X-Rays (my projects)"
-msgstr ""
-
-#: core/templates/core/base.html:85
+#: core/templates/core/base.html:190
 msgid "Scoring assistant"
 msgstr ""
 
-#: core/templates/core/base.html:89
-msgid "Risk matrix"
+#: core/templates/core/base.html:196
+msgid "Extra"
 msgstr ""
 
-#: core/templates/core/base.html:95
-msgid "Sign Out"
+#: core/templates/core/base.html:225
+msgid "User guide"
+msgstr ""
+
+#: core/templates/core/base.html:233
+msgid "Logout"
+msgstr ""
+
+#: core/templates/core/browser.html:86
+msgid "Browsing"
+msgstr ""
+
+#: core/templates/core/browser.html:86
+msgid "filtered to"
+msgstr ""
+
+#: core/templates/core/browser.html:97 core/templates/core/browser.html:121
+msgid "Locate"
+msgstr ""
+
+#: core/templates/core/browser.html:119
+msgid "Associated risk"
 msgstr ""
 
 #: core/templates/core/calendar.html:6
-msgid "Mitigation calendar"
+msgid "Measure calendar"
 msgstr ""
 
-#: core/templates/core/calendar.html:28
+#: core/templates/core/calendar.html:12
 msgid "Previous month"
 msgstr ""
 
-#: core/templates/core/calendar.html:29
+#: core/templates/core/calendar.html:13
 msgid "Next month"
 msgstr ""
 
@@ -452,207 +605,228 @@ msgid "selected projects"
 msgstr ""
 
 #: core/templates/core/composer.html:18
-msgid "Current risks levels"
+msgid "Current risk level"
 msgstr ""
 
-#: core/templates/core/composer.html:26
-msgid "Associated mitigations status"
+#: core/templates/core/composer.html:27
+msgid "Status of associated measures"
 msgstr ""
 
-#: core/templates/core/composer.html:34
-msgid "Residual risks levels"
-msgstr ""
-
-#: core/templates/core/composer.html:42
-msgid "For the selected scope, you have:"
+#: core/templates/core/composer.html:35
+msgid "Residual risk level"
 msgstr ""
 
 #: core/templates/core/composer.html:44
-msgid "untreated risk(s),"
+msgid "For the selected scope, you have:"
 msgstr ""
 
-#: core/templates/core/composer.html:45
+#: core/templates/core/composer.html:46
+msgid "untreated risk scenario(s),"
+msgstr ""
+
+#: core/templates/core/composer.html:47
 msgid "among which,"
 msgstr ""
 
-#: core/templates/core/composer.html:45
-msgid "are currently of level high or above,"
+#: core/templates/core/composer.html:47
+msgid "currently of level high or above,"
 msgstr ""
 
-#: core/templates/core/composer.html:46
+#: core/templates/core/composer.html:48
 msgid "and"
 msgstr ""
 
-#: core/templates/core/composer.html:46
-msgid "risk(s) accepted."
+#: core/templates/core/composer.html:48
+msgid "risk scenario(s) accepted."
 msgstr ""
 
-#: core/templates/core/composer.html:62
+#: core/templates/core/composer.html:64
 msgid "Risk analysis status:"
 msgstr ""
 
-#: core/templates/core/composer.html:62
+#: core/templates/core/composer.html:64
 msgid "Review needed"
 msgstr ""
 
-#: core/templates/core/composer.html:62
+#: core/templates/core/composer.html:64
 msgid "Found"
 msgstr ""
 
-#: core/templates/core/composer.html:63
+#: core/templates/core/composer.html:65
 msgid "inconsistencies that you need to check (use x-rays)."
 msgstr ""
 
-#: core/templates/core/composer.html:63
+#: core/templates/core/composer.html:65
 msgid "Ok"
 msgstr ""
 
-#: core/templates/core/composer.html:68 core/templates/snippets/ra_data.html:91
+#: core/templates/core/composer.html:70 core/templates/snippets/ra_data.html:93
 msgid "Current"
 msgstr ""
 
-#: core/templates/core/composer.html:69 core/templates/snippets/ra_data.html:95
+#: core/templates/core/composer.html:71 core/templates/snippets/ra_data.html:97
 msgid "Residual"
 msgstr ""
 
-#: core/templates/core/composer.html:84
+#: core/templates/core/composer.html:86
 msgid "Jump to full risk analysis"
 msgstr ""
 
-#: core/templates/core/composer.html:90
+#: core/templates/core/composer.html:92
 msgid "High or very high risk based on the"
 msgstr ""
 
-#: core/templates/core/composer.html:90
+#: core/templates/core/composer.html:92
 msgid "current level"
 msgstr ""
 
-#: core/templates/core/composer.html:98
+#: core/templates/core/composer.html:100
 msgid "Nothing to show here."
 msgstr ""
 
-#: core/templates/core/index.html:19
+#: core/templates/core/index.html:12
+msgid "Search risk scenario, security measure, risk analysis..."
+msgstr ""
+
+#: core/templates/core/index.html:32
 msgid "ID"
 msgstr ""
 
-#: core/templates/core/index.html:22
+#: core/templates/core/index.html:35
 msgid "Assignee"
 msgstr ""
 
-#: core/templates/core/index.html:25
+#: core/templates/core/index.html:38
 msgid "Last Update"
 msgstr ""
 
-#: core/templates/core/index.html:28 core/templates/core/my_projects.html:196
-msgid "Actions"
-msgstr ""
-
-#: core/templates/core/index.html:39
+#: core/templates/core/index.html:52
 msgid "draft"
 msgstr ""
 
-#: core/templates/core/index.html:42
+#: core/templates/core/index.html:55
 msgid "ready"
 msgstr ""
 
-#: core/templates/core/index.html:73 core/templates/core/index.html:94
-msgid "Treatment Plan"
+#: core/templates/core/index.html:87
+msgid "Remediation Plan"
 msgstr ""
 
-#: core/templates/core/index.html:88 core/templates/snippets/ra_data.html:9
+#: core/templates/core/index.html:95
+msgid "Export"
+msgstr ""
+
+#: core/templates/core/index.html:106 core/templates/core/search_results.html:8
+#: core/templates/snippets/ra_data.html:11
 msgid "Risk analysis"
 msgstr ""
 
-#: core/templates/core/index.html:90 core/templates/core/index.html:96
+#: core/templates/core/index.html:108 core/templates/core/index.html:113
 msgid "... as PDF"
 msgstr ""
 
-#: core/templates/core/index.html:92 core/templates/core/index.html:98
+#: core/templates/core/index.html:110 core/templates/core/index.html:115
 msgid "... as csv"
 msgstr ""
 
-#: core/templates/core/index.html:114
+#: core/templates/core/index.html:111
+msgid "Treatment Plan"
+msgstr ""
+
+#: core/templates/core/index.html:130 core/templates/core/review.html:59
+msgid "No analysis found."
+msgstr ""
+
+#: core/templates/core/index.html:140
 msgid "Showing Page"
 msgstr ""
 
-#: core/templates/core/index.html:120
+#: core/templates/core/index.html:140
+msgid "of"
+msgstr ""
+
+#: core/templates/core/index.html:147
 msgid "First"
 msgstr ""
 
-#: core/templates/core/index.html:122
+#: core/templates/core/index.html:150
 msgid "Prev"
 msgstr ""
 
-#: core/templates/core/index.html:125
+#: core/templates/core/index.html:155
 msgid "Next"
 msgstr ""
 
-#: core/templates/core/index.html:127
+#: core/templates/core/index.html:157
 msgid "Last"
-msgstr ""
-
-#: core/templates/core/index.html:144
-msgid "User guide"
 msgstr ""
 
 #: core/templates/core/my_projects.html:11
 msgid "My projects summary"
 msgstr ""
 
-#: core/templates/core/my_projects.html:16
+#: core/templates/core/my_projects.html:15
 msgid "Risk level overview"
 msgstr ""
 
-#: core/templates/core/my_projects.html:25
+#: core/templates/core/my_projects.html:23
 msgid "Treatment progress overview"
 msgstr ""
 
-#: core/templates/core/my_projects.html:186
-msgid "Your pending mitigation(s)"
+#: core/templates/core/my_projects.html:30
+msgid "Your pending measure(s)"
 msgstr ""
 
-#: core/templates/core/my_projects.html:187
+#: core/templates/core/my_projects.html:31
 msgid "ordered by ranking score"
 msgstr ""
 
-#: core/templates/core/my_projects.html:192
-msgid "Mitigation"
+#: core/templates/core/my_projects.html:36
+msgid "Measure"
 msgstr ""
 
-#: core/templates/core/my_projects.html:193
+#: core/templates/core/my_projects.html:37
 msgid "Ranking score"
 msgstr ""
 
-#: core/templates/core/my_projects.html:213
+#: core/templates/core/my_projects.html:40
+msgid "Actions"
+msgstr ""
+
+#: core/templates/core/my_projects.html:57
 msgid ""
 "Ranking score is an adaptive metric that combines the information of effort "
 "and current risk level, and crosses it with the other data to assist you for "
 "the prioritization."
 msgstr ""
 
-#: core/templates/core/project_select.html:25
+#: core/templates/core/my_projects.html:60
+msgid "Projects summary is empty."
+msgstr ""
+
+#: core/templates/core/project_select.html:23
 msgid ""
 "This will help you aggregate multiple components (projects) to get the "
 "compiled view on your risk. This is particularly useful for two use cases:"
 msgstr ""
 
-#: core/templates/core/project_select.html:27
+#: core/templates/core/project_select.html:25
 msgid ""
 "business intelligence approach to focus on a specific subset across "
-"different project groups (eg. across divisions)"
+"different project domains (eg. across divisions)"
 msgstr ""
 
-#: core/templates/core/project_select.html:28
+#: core/templates/core/project_select.html:26
 msgid ""
 "you are interested in the risk assessment of a specific system, for which "
 "you need the risk assessment of the underlying components"
 msgstr ""
 
-#: core/templates/core/project_select.html:58
+#: core/templates/core/project_select.html:56
 msgid "Select your targets"
 msgstr ""
 
-#: core/templates/core/project_select.html:111
+#: core/templates/core/project_select.html:110
 msgid "Process"
 msgstr ""
 
@@ -688,349 +862,393 @@ msgstr ""
 msgid "to consider"
 msgstr ""
 
-#: core/templates/core/scoring.html:157
+#: core/templates/core/risk_matrix.html:11
+msgid "Default"
+msgstr ""
+
+#: core/templates/core/risk_matrix.html:15
+msgid "Critical"
+msgstr ""
+
+#: core/templates/core/scoring.html:7
+msgid "'Very low'"
+msgstr ""
+
+#: core/templates/core/scoring.html:8
+msgid "'Low'"
+msgstr ""
+
+#: core/templates/core/scoring.html:9
+#, fuzzy
+#| msgid "Medium_f"
+msgid "'Medium'"
+msgstr "Medium"
+
+#: core/templates/core/scoring.html:10
+msgid "'High'"
+msgstr ""
+
+#: core/templates/core/scoring.html:11
+msgid "'Very high'"
+msgstr ""
+
+#: core/templates/core/scoring.html:230
 msgid "How technically skilled is this group of threat agents?"
 msgstr ""
 
-#: core/templates/core/scoring.html:160
+#: core/templates/core/scoring.html:233
 msgid "Security penetration skills"
 msgstr ""
 
-#: core/templates/core/scoring.html:162
+#: core/templates/core/scoring.html:235
 msgid "Network and programming skills"
 msgstr ""
 
-#: core/templates/core/scoring.html:164
+#: core/templates/core/scoring.html:237
 msgid "Advanced computer user"
 msgstr ""
 
-#: core/templates/core/scoring.html:165
+#: core/templates/core/scoring.html:238
 msgid "Some technical skills"
 msgstr ""
 
-#: core/templates/core/scoring.html:168
+#: core/templates/core/scoring.html:241
 msgid "No technical skills"
 msgstr ""
 
-#: core/templates/core/scoring.html:170
+#: core/templates/core/scoring.html:243
 msgid ""
 "How motivated is this group of threat agents to find and exploit this "
 "vulnerability?"
 msgstr ""
 
-#: core/templates/core/scoring.html:173
+#: core/templates/core/scoring.html:246
 msgid "Low or no reward"
 msgstr ""
 
-#: core/templates/core/scoring.html:176
+#: core/templates/core/scoring.html:249
 msgid "Possible reward"
 msgstr ""
 
-#: core/templates/core/scoring.html:181
+#: core/templates/core/scoring.html:254
 msgid "High reward"
 msgstr ""
 
-#: core/templates/core/scoring.html:183
+#: core/templates/core/scoring.html:256
 msgid ""
 "What resources and opportunities are required for this group of threat "
 "agents to find and exploit this vulnerability?"
 msgstr ""
 
-#: core/templates/core/scoring.html:185
+#: core/templates/core/scoring.html:258
 msgid "Full access or expensive resources required"
 msgstr ""
 
-#: core/templates/core/scoring.html:189
+#: core/templates/core/scoring.html:262
 msgid "Special access or resources required"
 msgstr ""
 
-#: core/templates/core/scoring.html:192
+#: core/templates/core/scoring.html:265
 msgid "Some access or resources required"
 msgstr ""
 
-#: core/templates/core/scoring.html:194
+#: core/templates/core/scoring.html:267
 msgid "No access or resources required"
 msgstr ""
 
-#: core/templates/core/scoring.html:196
+#: core/templates/core/scoring.html:269
 msgid "How large is this group of threat agents?"
 msgstr ""
 
-#: core/templates/core/scoring.html:200
+#: core/templates/core/scoring.html:273
 msgid "Developers or system administrators"
 msgstr ""
 
-#: core/templates/core/scoring.html:202
+#: core/templates/core/scoring.html:275
 msgid "Intranet users"
 msgstr ""
 
-#: core/templates/core/scoring.html:203
+#: core/templates/core/scoring.html:276
 msgid "Partners"
 msgstr ""
 
-#: core/templates/core/scoring.html:204
+#: core/templates/core/scoring.html:277
 msgid "Authenticated users"
 msgstr ""
 
-#: core/templates/core/scoring.html:207
+#: core/templates/core/scoring.html:280
 msgid "Anonymous Internet users"
 msgstr ""
 
-#: core/templates/core/scoring.html:212
+#: core/templates/core/scoring.html:285
 msgid "Threat Agent Factor"
 msgstr ""
 
-#: core/templates/core/scoring.html:220
-msgid "How much data could be disclosed and how sensitive is it?"
-msgstr ""
-
-#: core/templates/core/scoring.html:224
-msgid "Minimal non-sensitive data disclosed"
-msgstr ""
-
-#: core/templates/core/scoring.html:228
-msgid "Minimal critical data or extensive non-sensitive data disclosed"
-msgstr ""
-
-#: core/templates/core/scoring.html:229
-msgid "Extensive critical data disclosed"
-msgstr ""
-
-#: core/templates/core/scoring.html:231
-msgid "All data disclosed"
-msgstr ""
-
-#: core/templates/core/scoring.html:233
-msgid "How much data could be corrupted and how damaged is it?"
-msgstr ""
-
-#: core/templates/core/scoring.html:236
-msgid "Minimal slightly corrupt data"
-msgstr ""
-
-#: core/templates/core/scoring.html:238
-msgid "Minimal seriously corrupt data"
-msgstr ""
-
-#: core/templates/core/scoring.html:240
-msgid "Extensive slightly corrupt data"
-msgstr ""
-
-#: core/templates/core/scoring.html:242
-msgid "Extensive seriously corrupt data"
-msgstr ""
-
-#: core/templates/core/scoring.html:244
-msgid "All data totally corrupt"
-msgstr ""
-
-#: core/templates/core/scoring.html:246
-msgid "How much service could be lost and how vital is it?"
-msgstr ""
-
-#: core/templates/core/scoring.html:249
-msgid "Minimal secondary services interrupted"
-msgstr ""
-
-#: core/templates/core/scoring.html:253
-msgid "Minimal primary or extensive secondary services interrupted"
-msgstr ""
-
-#: core/templates/core/scoring.html:255
-msgid "Extensive primary services interrupted"
-msgstr ""
-
-#: core/templates/core/scoring.html:257
-msgid "All services completely lost"
-msgstr ""
-
-#: core/templates/core/scoring.html:259
-msgid "Are the threat agents' actions traceable to an individual?"
-msgstr ""
-
-#: core/templates/core/scoring.html:262
-msgid "Fully traceable"
-msgstr ""
-
-#: core/templates/core/scoring.html:266
-msgid "Possibly traceable"
-msgstr ""
-
-#: core/templates/core/scoring.html:270
-msgid "Completely anonymous"
-msgstr ""
-
-#: core/templates/core/scoring.html:275
-msgid "Technical Impact Factor"
-msgstr ""
-
-#: core/templates/core/scoring.html:285
+#: core/templates/core/scoring.html:293
 msgid ""
 "How easy is it for this group of threat agents to discover this "
 "vulnerability?"
 msgstr ""
 
-#: core/templates/core/scoring.html:288
+#: core/templates/core/scoring.html:296
 msgid "Practically impossible"
 msgstr ""
 
-#: core/templates/core/scoring.html:290 core/templates/core/scoring.html:303
+#: core/templates/core/scoring.html:298 core/templates/core/scoring.html:311
 msgid "Difficult"
 msgstr ""
 
-#: core/templates/core/scoring.html:294 core/templates/core/scoring.html:305
+#: core/templates/core/scoring.html:302 core/templates/core/scoring.html:313
 msgid "Easy"
 msgstr ""
 
-#: core/templates/core/scoring.html:296 core/templates/core/scoring.html:309
+#: core/templates/core/scoring.html:304 core/templates/core/scoring.html:317
 msgid "Automated tools available"
 msgstr ""
 
-#: core/templates/core/scoring.html:298
+#: core/templates/core/scoring.html:306
 msgid ""
 "How easy is it for this group of threat agents to actually exploit this "
 "vulnerability?"
 msgstr ""
 
-#: core/templates/core/scoring.html:301
+#: core/templates/core/scoring.html:309
 msgid "Theoretical"
 msgstr ""
 
-#: core/templates/core/scoring.html:311
+#: core/templates/core/scoring.html:319
 msgid "How well known is this vulnerability to this group of threat agents?"
 msgstr ""
 
-#: core/templates/core/scoring.html:314
+#: core/templates/core/scoring.html:322
 msgid "Unknown"
 msgstr ""
 
-#: core/templates/core/scoring.html:317
+#: core/templates/core/scoring.html:325
 msgid "Hidden"
 msgstr ""
 
-#: core/templates/core/scoring.html:319
+#: core/templates/core/scoring.html:327
 msgid "Obvious"
 msgstr ""
 
-#: core/templates/core/scoring.html:322
+#: core/templates/core/scoring.html:330
 msgid "Public knowledge"
 msgstr ""
 
-#: core/templates/core/scoring.html:324
+#: core/templates/core/scoring.html:332
 msgid "How likely is an exploit to be detected?"
 msgstr ""
 
-#: core/templates/core/scoring.html:327
+#: core/templates/core/scoring.html:335
 msgid "Active detection in application"
 msgstr ""
 
-#: core/templates/core/scoring.html:329
+#: core/templates/core/scoring.html:337
 msgid "Logged and reviewed"
 msgstr ""
 
-#: core/templates/core/scoring.html:334
+#: core/templates/core/scoring.html:342
 msgid "Logged without review"
 msgstr ""
 
-#: core/templates/core/scoring.html:335
+#: core/templates/core/scoring.html:343
 msgid "Not logged"
 msgstr ""
 
-#: core/templates/core/scoring.html:340
+#: core/templates/core/scoring.html:348
 msgid "Vulnerability Factor"
 msgstr ""
 
-#: core/templates/core/scoring.html:348
+#: core/templates/core/scoring.html:359
+msgid "How much data could be disclosed and how sensitive is it?"
+msgstr ""
+
+#: core/templates/core/scoring.html:363
+msgid "Minimal non-sensitive data disclosed"
+msgstr ""
+
+#: core/templates/core/scoring.html:367
+msgid "Minimal critical data or extensive non-sensitive data disclosed"
+msgstr ""
+
+#: core/templates/core/scoring.html:368
+msgid "Extensive critical data disclosed"
+msgstr ""
+
+#: core/templates/core/scoring.html:370
+msgid "All data disclosed"
+msgstr ""
+
+#: core/templates/core/scoring.html:372
+msgid "How much data could be corrupted and how damaged is it?"
+msgstr ""
+
+#: core/templates/core/scoring.html:375
+msgid "Minimal slightly corrupt data"
+msgstr ""
+
+#: core/templates/core/scoring.html:377
+msgid "Minimal seriously corrupt data"
+msgstr ""
+
+#: core/templates/core/scoring.html:379
+msgid "Extensive slightly corrupt data"
+msgstr ""
+
+#: core/templates/core/scoring.html:381
+msgid "Extensive seriously corrupt data"
+msgstr ""
+
+#: core/templates/core/scoring.html:383
+msgid "All data totally corrupt"
+msgstr ""
+
+#: core/templates/core/scoring.html:385
+msgid "How much service could be lost and how vital is it?"
+msgstr ""
+
+#: core/templates/core/scoring.html:388
+msgid "Minimal secondary services interrupted"
+msgstr ""
+
+#: core/templates/core/scoring.html:392
+msgid "Minimal primary or extensive secondary services interrupted"
+msgstr ""
+
+#: core/templates/core/scoring.html:394
+msgid "Extensive primary services interrupted"
+msgstr ""
+
+#: core/templates/core/scoring.html:396
+msgid "All services completely lost"
+msgstr ""
+
+#: core/templates/core/scoring.html:398
+msgid "Are the threat agents' actions traceable to an individual?"
+msgstr ""
+
+#: core/templates/core/scoring.html:401
+msgid "Fully traceable"
+msgstr ""
+
+#: core/templates/core/scoring.html:405
+msgid "Possibly traceable"
+msgstr ""
+
+#: core/templates/core/scoring.html:409
+msgid "Completely anonymous"
+msgstr ""
+
+#: core/templates/core/scoring.html:414
+msgid "Technical Impact Factor"
+msgstr ""
+
+#: core/templates/core/scoring.html:422
 msgid "How much financial damage will result from an exploit?"
 msgstr ""
 
-#: core/templates/core/scoring.html:351
+#: core/templates/core/scoring.html:425
 msgid "Less than the cost to fix the vulnerability"
 msgstr ""
 
-#: core/templates/core/scoring.html:353
+#: core/templates/core/scoring.html:427
 msgid "Minor effect on annual profit"
 msgstr ""
 
-#: core/templates/core/scoring.html:357
+#: core/templates/core/scoring.html:431
 msgid "Significant effect on annual profit"
 msgstr ""
 
-#: core/templates/core/scoring.html:359
+#: core/templates/core/scoring.html:433
 msgid "Bankruptcy"
 msgstr ""
 
-#: core/templates/core/scoring.html:361
+#: core/templates/core/scoring.html:435
 msgid ""
 "Would an exploit result in reputation damage that would harm the business?"
 msgstr ""
 
-#: core/templates/core/scoring.html:364
+#: core/templates/core/scoring.html:438
 msgid "Minimal damage"
 msgstr ""
 
-#: core/templates/core/scoring.html:367
+#: core/templates/core/scoring.html:441
 msgid "Loss of major accounts"
 msgstr ""
 
-#: core/templates/core/scoring.html:368
+#: core/templates/core/scoring.html:442
 msgid "Loss of goodwill"
 msgstr ""
 
-#: core/templates/core/scoring.html:372
+#: core/templates/core/scoring.html:446
 msgid "Brand damage"
 msgstr ""
 
-#: core/templates/core/scoring.html:374
+#: core/templates/core/scoring.html:448
 msgid "How much exposure does non-compliance introduce?"
 msgstr ""
 
-#: core/templates/core/scoring.html:378
+#: core/templates/core/scoring.html:452
 msgid "Minor violation"
 msgstr ""
 
-#: core/templates/core/scoring.html:381
+#: core/templates/core/scoring.html:455
 msgid "Clear violation"
 msgstr ""
 
-#: core/templates/core/scoring.html:383
+#: core/templates/core/scoring.html:457
 msgid "High profile violation"
 msgstr ""
 
-#: core/templates/core/scoring.html:387
+#: core/templates/core/scoring.html:461
 msgid "How much personally identifiable information could be disclosed?"
 msgstr ""
 
-#: core/templates/core/scoring.html:392
+#: core/templates/core/scoring.html:466
 msgid "One individual"
 msgstr ""
 
-#: core/templates/core/scoring.html:394
+#: core/templates/core/scoring.html:468
 msgid "Hundreds of people"
 msgstr ""
 
-#: core/templates/core/scoring.html:396
+#: core/templates/core/scoring.html:470
 msgid "Thousands of people"
 msgstr ""
 
-#: core/templates/core/scoring.html:398
+#: core/templates/core/scoring.html:472
 msgid "Millions of people"
 msgstr ""
 
-#: core/templates/core/scoring.html:403
+#: core/templates/core/scoring.html:477
 msgid "Business Impact Factor"
 msgstr ""
 
-#: core/templates/core/scoring.html:411
+#: core/templates/core/scoring.html:483
+msgid "Ignore"
+msgstr ""
+
+#: core/templates/core/scoring.html:493
 msgid "Assessment vector:"
 msgstr ""
 
-#: core/templates/core/scoring.html:415
+#: core/templates/core/scoring.html:498
+#: core/templates/snippets/risk_matrix.html:55
+#: core/templates/snippets/risk_matrix.html:113
 msgid "Probability"
 msgstr ""
 
-#: core/templates/core/scoring.html:426
+#: core/templates/core/scoring.html:515
+#: core/templates/snippets/risk_matrix.html:6
+#: core/templates/snippets/risk_matrix.html:64
 msgid "Impact"
+msgstr ""
+
+#: core/templates/core/search_results.html:10
+#: core/templates/core/search_results.html:23
+#: core/templates/core/search_results.html:36
+msgid "No results matched your query. Try something more specific."
 msgstr ""
 
 #: core/templates/registration/login.html:11
@@ -1065,68 +1283,156 @@ msgstr ""
 msgid "Login"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:14
+#: core/templates/snippets/dual_bar_stacked.html:6
+msgid " \"Current: Very low\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:7
+msgid " \"Current: Low\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:8
+msgid " \"Current: Medium\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:9
+msgid " \"Current: High\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:10
+msgid " \"Current: Very high\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:11
+msgid " \"Residual: Very low\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:12
+msgid " \"Residual: Low\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:13
+msgid " \"Residual: Medium\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:14
+msgid " \"Residual: High\" "
+msgstr ""
+
+#: core/templates/snippets/dual_bar_stacked.html:15
+msgid " \"Residual: Very high\" "
+msgstr ""
+
+#: core/templates/snippets/mp_data.html:12
+msgid "Risk analysis seems to be empty. Measure Plan cannot be generated."
+msgstr ""
+
+#: core/templates/snippets/mp_data.html:35
+msgid "No associated measure"
+msgstr ""
+
+#: core/templates/snippets/mp_data.html:44
+msgid "Security function"
+msgstr ""
+
+#: core/templates/snippets/ra_data.html:9
+msgid "Edit"
+msgstr ""
+
+#: core/templates/snippets/ra_data.html:16
 msgid "Audited by:"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:15
+#: core/templates/snippets/ra_data.html:17
 msgid "Status:"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:15
+#: core/templates/snippets/ra_data.html:17
 msgid "Draft"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:15
+#: core/templates/snippets/ra_data.html:17
 msgid "Ready"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:17
+#: core/templates/snippets/ra_data.html:19
 msgid "Created at:"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:18
+#: core/templates/snippets/ra_data.html:20
 msgid "Updated at:"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:23
+#: core/templates/snippets/ra_data.html:25
 msgid "Profile:"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:34
-msgid "Risk instances"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:39
-msgid "Parent Risk"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:41
-msgid "Scenario"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:43
-msgid "Current risk"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:44
-msgid "Recommended mitigations"
-msgstr ""
-
-#: core/templates/snippets/ra_data.html:45
-msgid "Residual risk"
-msgstr ""
-
 #: core/templates/snippets/ra_data.html:46
+msgid "Recommended measures"
+msgstr ""
+
+#: core/templates/snippets/ra_data.html:48
 msgid "Treatment"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:53
+#: core/templates/snippets/ra_data.html:55
 msgid "Risk analysis is empty"
 msgstr ""
 
-#: core/templates/snippets/ra_data.html:88
+#: core/templates/snippets/ra_data.html:90
 msgid "Matrix view"
+msgstr ""
+
+#: core/templates/snippets/risk_matrix.html:52
+#: core/templates/snippets/risk_matrix.html:110
+#, fuzzy
+#| msgid "Medium_f"
+msgctxt "Probability"
+msgid "Medium"
+msgstr "Medium"
+
+#: core/templates/snippets/risk_matrix.html:53
+#: core/templates/snippets/risk_matrix.html:111
+msgctxt "Probability"
+msgid "High"
+msgstr ""
+
+#: core/templates/snippets/risk_matrix.html:54
+#: core/templates/snippets/risk_matrix.html:112
+msgctxt "Probability"
+msgid "Very high"
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:6
+msgid " \"Risk: open\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:7
+msgid " \"Risk: mitigated\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:8
+msgid " \"Risk: accepted\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:9
+msgid " \"Risk: blocking\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:10
+msgid " \"Measure: open\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:11
+msgid " \"Measure: in progress\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:12
+msgid " \"Measure: on hold\" "
+msgstr ""
+
+#: core/templates/snippets/treatment_progress_dual_bar.html:13
+msgid " \"Measure: done\" "
 msgstr ""
 
 #~ msgid "Medium_m"
