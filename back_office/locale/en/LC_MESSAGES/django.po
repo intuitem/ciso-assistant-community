@@ -833,7 +833,7 @@ msgstr ""
 #: back_office/templates/back_office/project_domain_list.html:5
 #: back_office/templates/back_office/sidebar.html:95 back_office/views.py:694
 msgid "Projects domains"
-msgstr "FOOBar"
+msgstr ""
 
 #: back_office/templates/back_office/project_domain_list.html:36
 msgid "Add projects domain"
