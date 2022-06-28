@@ -908,8 +908,6 @@ msgid "Projects"
 msgstr ""
 
 #: back_office/templates/back_office/project_list.html:169
-#, fuzzy
-#| msgid "Delete the project?"
 msgid "Delete project?"
 msgstr "Supprimer le projet ?"
 
