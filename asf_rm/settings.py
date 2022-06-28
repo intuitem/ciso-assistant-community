@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'fieldsets_with_inlines',
     'tailwind',
     'theme',
-    'django_browser_reload',
+    # 'django_browser_reload',
     'core',
     'general',
     'back_office',
@@ -69,7 +69,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'django_browser_reload.middleware.BrowserReloadMiddleware',
+    # 'django_browser_reload.middleware.BrowserReloadMiddleware',
 ]
 
 ROOT_URLCONF = 'asf_rm.urls'
