@@ -11,7 +11,7 @@ TBD
 - Python 3.8+
 - pip 20.3+
 
-## Quick Start
+## Quick start
 
 1. Clone the repository
 
@@ -38,35 +38,41 @@ $ git clone https://github.com/intuitem/asf-rm.git
 $ cd asf-rm
 ```
 
+2. Create local secret variables in a script located in parent folder (e.g. ../myvars)
 
+```sh
+export DJANGO_SECRET_KEY=<XXX>
+export POSTGRES_NAME=asf
+export POSTGRES_USER=asfuser
+export POSTGRES_PASSWORD=<XXX>
+export DB_HOST=localhost
+```
 
-2. Create a virtual environment with the tool of your choice and activate it. For instance:
+3. Create a virtual environment with the tool of your choice and activate it. For instance:
 ```sh
 $ pip install virtualenv
 $ virtualenv venv
 $ source venv/bin/activate
+$ source ../myvars
 ```
 
-3. Install required dependencies
+4. Install required dependencies
 ```sh
 (venv)$ pip install -r requirements.txt
 ```
 
-4. Setup secrets (env variable):
+5. Setup Postgres database for development and provide the following env variables. Make sure to use a dedicated database as per Django recommendations:
 
-```sh
-export DJANGO_SECRET_KEY=<>
-```
-make sure to keep the same one for the dev cycle otherwise some data could be compromised.
 
-5. Setup Postgre database for development and provide the following env variables. Make sure to use a dedicated database as per Django recommendations:
+- Launch psql as superadmin
+    - sudo su postgres
+    - psql
+- Create the database "asf"
+    - create database asf;
+- Create user "asfuser" and grant it access
+    - create user asfuser with password '<POSTGRES_PASSWORD>';
+    - grant all privileges on database asf to asfuser;
 
-```sh
-export POSTGRES_NAME=<>
-export POSTGRES_USER=<>
-export POSTGRES_PASSWORD=<>
-export DB_HOST=<>
-```
 
 6. prepare migrations 
 
@@ -79,12 +85,23 @@ export DB_HOST=<>
 (venv)$ python manage.py migrate
 ```
 
-6. Create a development Django user
+8. Create a development Django user, that will be MIRA superuser
 ```sh
 (venv)$ python manage.py createsuperuser
 ```
 
-7. Run development server
+9. install Tailwind CSS
+
+- npm install tailwindcss postcss postcss-import
+- python manage.py tailwind install
+
+10. Compile strings
+
+- python3 manage.py compilemessages -l fr -i venv
+- python3 manage.py compilemessages -l en -i venv
+
+
+11. Run development server
 
 You may chose to run it dockerized or not.
 ```sh
