@@ -1,8 +1,6 @@
-from logging import critical
-from attr import fields
 from django.forms import CharField, CheckboxInput, ChoiceField, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
-from django_filters import *
-from django_filters.widgets import *
+from django_filters import FilterSet, OrderingFilter, ModelMultipleChoiceFilter, MultipleChoiceFilter, CharFilter, ChoiceFilter
+# from django_filters.widgets import *
 from django.db.models import Q
 
 from core.models import Analysis, RiskInstance, Mitigation, Solution, RiskAcceptance
@@ -71,8 +69,11 @@ class AnalysisFilter(GenericFilterSet):
     def get_full_names():
         full_names = ()
         users = User.objects.all()
-        for user in users:
-            full_names += (user.id, user.get_full_name),
+        try:
+            for user in users:
+                full_names += (user.id, user.get_full_name),
+        except Exception as e:
+            print(f"WORKAROUND: {e}")
         return full_names
 
     orderby = GenericOrderingFilter(

@@ -4,6 +4,7 @@ services:
   web:
     image: app
     restart: on-failure
+    env_file: .env
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - POSTGRES_NAME=${POSTGRES_NAME}
@@ -22,7 +23,7 @@ services:
   migration:
     build: .
     image: app
-    restart: on-failure
+    # restart: on-failure
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - POSTGRES_NAME=${POSTGRES_NAME}
