@@ -97,7 +97,8 @@ $ source ../myvars
 
 10. Compile strings
 
-- python3 manage.py compilemessages -i venv
+- python3 manage.py makemessages -i venv -l fr
+- python3 manage.py compilemessages -i venv -l fr
 
 
 11. Run development server
