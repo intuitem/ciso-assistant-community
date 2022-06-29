@@ -80,6 +80,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
         self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
         self.fields['user_permissions'].widget.attrs['class'] += ' h-72'
+        self.fields['user_permissions'].help_text += '<br>' + _("Hold down “Control”, or “⌘” on a Mac, to select more than one.")
         if password:
             password.help_text = password.help_text.format(
                 reverse('admin-password-change', 
@@ -109,6 +110,7 @@ class GroupCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['permissions'].widget.attrs['class'] += ' h-96'
+        self.fields['permissions'].help_text += '<br>' + _("Hold down “Control”, or “⌘” on a Mac, to select more than one.")
 
 class GroupUpdateForm(StyledModelForm):
     class Meta:
@@ -118,6 +120,8 @@ class GroupUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['permissions'].widget.attrs['class'] += ' h-96'
+        self.fields['permissions'].help_text += '<br>' + _("Hold down “Control”, or “⌘” on a Mac, to select more than one.")
+
 
 class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:
