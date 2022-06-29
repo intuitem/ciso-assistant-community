@@ -2,9 +2,12 @@
 <div class="space-y-4">
     <p class="relative whitespace-normal">{% trans "This action cannot be undone. This will permanently delete the following object: " %}<strong>{{ object }}</strong> 
     {% trans "as well as any child object." %}</p>
-    {% for item in object.item_set.all %}
+    {% comment %} {% for item in object.item_set.all %}
         {{ item }}
-    {% endfor %}
+    {% endfor %} {% endcomment %}
+    <div class="whitespace-normal">
+        {{ extra_text }}
+    </div>
     <div class="flex items-center justify-end">
         <button
         @click="open = ! open"

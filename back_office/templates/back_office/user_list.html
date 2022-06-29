@@ -153,7 +153,7 @@
                                     </a>
                                 </span>
 
-                                {% include 'back_office/snippets/delete_button_modal.html' with object=user header=_("Delete user?") model='user' %}
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=user header=_("Delete user?") model='user' extra_text=_("<strong>WARNING:</strong> It is <strong>STRONGLY</strong> recommended to set this user as inactive instead of deleting it, as it might break foreign-key relationship with risk analyses.") %}
                             </div>
                         </td>
                     </tr>
