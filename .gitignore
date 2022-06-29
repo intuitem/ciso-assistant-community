@@ -8,3 +8,4 @@ staticfiles/*
 *.env
 dump.json
 theme/static/css/dist/styles.css
+node_modules/
