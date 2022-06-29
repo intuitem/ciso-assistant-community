@@ -32,7 +32,7 @@
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full">
         <div class="grid grid-rows-1 grid-cols-2 mb-2">
             <h2 class="text-xl font-semibold mb-4">{% trans "Associated Projects" %}</h2>
-            {% include 'back_office/snippets/add_button_modal.html' with form=project_create_form header=_("Add Project") model="project" content=_("New project") %}
+            {% include 'back_office/snippets/add_button_modal.html' with form=project_create_form header=_("Add project") model="project" content=_("New project") %}
         </div>
         {% include 'back_office/snippets/project_list_nested.html' %}
     </div>
