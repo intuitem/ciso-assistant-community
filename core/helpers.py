@@ -242,11 +242,17 @@ def risks_levels_per_prj_grp():
     }
 
 def measures_to_review():
-    measures = Mitigation.objects.filter(eta__lte=date.today()+timedelta(days=30)).order_by('eta')
+    measures = Mitigation.objects.filter(
+        eta__lte=date.today()+timedelta(days=30)
+        ).exclude(status__iexact='done'
+        ).order_by('eta')
 
     return measures
 
 def acceptances_to_review():
-    acceptances = RiskAcceptance.objects.filter(expiry_date__lte=date.today()+timedelta(days=30)).order_by('expiry_date')
+    acceptances = RiskAcceptance.objects.filter(
+        expiry_date__lte=date.today()+timedelta(days=30)
+        ).exclude(type__iexact='permanent'
+        ).order_by('expiry_date')
     
     return acceptances
