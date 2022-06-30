@@ -105,7 +105,7 @@ $ source ../myvars
 
 You may chose to run it dockerized or not.
 ```sh
-(venv)$ docker-compose up
+$ docker-compose up
 ```
 **OR**
 ```sh
