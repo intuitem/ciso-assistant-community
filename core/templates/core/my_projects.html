@@ -3,16 +3,16 @@
 {% load i18n %}
 
 {% block head %}
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
 {% endblock %}
 {% block content %}
-<main class="p-2 bg-gray-50">
+<main class="p-2">
     <div class="">
-        <div id="message" class="p-2 m-2 text-lg">{% trans "My projects Summary" %}</div>
+        <div id="message" class="p-2 m-2 text-lg">{% trans "My projects summary" %}</div>
         {% if context.agg_data.names %}
         <div class="m-2 p-2 rounded shadow bg-white">
             <div>
-                <div>{% trans "Risks level Overview" %}</div>
+                <div>{% trans "Risk level overview" %}</div>
                 <div class="rounded items-center justify-center">
                     {% include 'snippets/dual_bar_stacked.html' with ch_context=context.agg_data %}
                 </div>
@@ -20,21 +20,21 @@
         </div>
         <div class="bg-white m-2 p-2 rounded shadow">
             <div>
-                <div>{% trans "Treatment Progress Overview" %}</div>
+                <div>{% trans "Treatment progress overview" %}</div>
                 <div class="rounded items-center justify-center">
                     {% include 'snippets/treatment_progress_dual_bar.html' %}
                 </div>
             </div>
         </div>
         <div class="p-4 m-2 shadow rounded bg-white">
-            <div class="text-lg font-semibold">{% trans "Your Pending mitigation(s)" %}:</div>
+            <div class="text-lg font-semibold">{% trans "Your pending measure(s)" %}:</div>
             <div class="text-sm pb-4">{% trans "ordered by ranking score" %}</div>
             <div class="flex items-center justify-center">
                 <table class="p-2 m-2 ">
                     <tr class="bg-gray-100">
                         <th class="text-left py-2 px-4">{% trans "Project" %}</th>
-                        <th class="text-left py-2 px-4">{% trans "Mitigation" %}</th>
-                        <th>{% trans "Ranking Score" %}</th>
+                        <th class="text-left py-2 px-4">{% trans "Measure" %}</th>
+                        <th>{% trans "Ranking score" %}</th>
                         <th>{% trans "Status" %}</th>
                         <th>{% trans "ETA" %}</th>
                         <th class="py-2 px-4">{% trans "Actions" %}</th>
@@ -48,7 +48,7 @@
                         <td class="text-center py-2 px-4">{{mtg.eta|date}}</td>
                         <td class="text-center py-2 px-4">
                             {% if mtg.link %}<a href="{{mtg.link}}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-external-link-square-alt"></i></a>{% endif %}
-                            <a href="{% url 'admin:core_mitigation_change' mtg.id %}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-pen-square"></i></a>
+                            <a href="{% url 'mtg-update' mtg.id %}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-pen-square"></i></a>
                         </td>
                     {% endfor %}
                     </tr>
@@ -57,7 +57,7 @@
             <div class="text-sm p-2 m-2"><i class="fas fa-info-circle"></i> {% trans "Ranking score is an adaptive metric that combines the information of effort and current risk level, and crosses it with the other data to assist you for the prioritization." %}</div>
         {% else %}
             <div class="bg-white shadow-md rounded-lg px-4 py-2 m-8">
-                <div>{% trans "Projects Summary is empty." %}</div>
+                <div>{% trans "Projects summary is empty." %}</div>
             </div>
         {% endif %}
         </div>

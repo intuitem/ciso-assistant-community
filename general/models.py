@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import Group
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 
 
 class ProjectsGroup(models.Model):
@@ -20,9 +20,9 @@ class ProjectsGroup(models.Model):
 class Project(models.Model):
     PRJ_LC_STATUS = [
         ('undefined', _('--')),
-        ('in_design', _('In Design')),
-        ('in_dev', _('In Dev')),
-        ('in_prod', _('In Production')),
+        ('in_design', _('Design')),
+        ('in_dev', _('Development')),
+        ('in_prod', _('Production')),
         ('eol', _('End Of Life')),
         ('dropped', _('Dropped')),
 
@@ -30,7 +30,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200, default=_("<short project name>"), verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"), 
         null=True, blank=True, verbose_name=_("Internal ID"))
-    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Parent group"))
+    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Domain"))
     lc_status = models.CharField(max_length=20, default='in_design', 
         choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True, 
@@ -51,14 +51,27 @@ class Project(models.Model):
 
 
 class ParentRisk(models.Model):
-    title = models.CharField(max_length=200, default=_("<parent risk short title>"), verbose_name=_("Title"))
+    title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
 
     class Meta:
-        verbose_name = _("Parent Risk")
-        verbose_name_plural = _("Parent Risks")
+        verbose_name = _("Threat")
+        verbose_name_plural = _("Threats")
 
     def __str__(self):
         return self.title
+
+
+class Asset(models.Model):
+    class Meta:
+        verbose_name_plural = _("Assets")
+        verbose_name = _("Asset")
+    
+    name = models.CharField(max_length=100, verbose_name=_('name'))
+    business_value = models.TextField(blank=True, verbose_name=_('business value'))
+    comments = models.TextField(blank=True, verbose_name=_('comments'))
+
+    def __str__(self):
+        return self.name
 
 
 class Solution(models.Model):

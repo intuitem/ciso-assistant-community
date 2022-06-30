@@ -7,9 +7,11 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from core.models import Analysis, RiskInstance, Mitigation
 from general.models import Project
+
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
 from django.db.models import Q
+
 from django.utils.translation import gettext_lazy as _
 
 from .helpers import (mitigation_per_status, risk_per_status, p_risks, p_risks_2,
@@ -135,7 +137,7 @@ class Browser(ListView):
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
-            return {"type": "Risk Instances", "filter": self.map_rsk[rsk], "items": RiskInstance.objects.filter(treatment=self.map_rsk[rsk])}
+            return {"type": "Risk instances", "filter": self.map_rsk[rsk], "items": RiskInstance.objects.filter(treatment=self.map_rsk[rsk])}
         if mtg:
             return {"type": "Mitigations", "filter": self.map_mtg[mtg], "items": Mitigation.objects.filter(status=self.map_mtg[mtg])}
 
@@ -261,8 +263,8 @@ def export_risks_csv(request, analysis):
     response['Content-Disposition'] = f'attachment; filename="RA-{ra.id}-{ra.project}-v-{ra.version}.csv"'
 
     writer = csv.writer(response, delimiter=';')
-    columns = ['rid', 'parent_risk', 'title', 'scenario',
-               'existing_measures', 'current_level', 'mitigations', 'residual_level',
+    columns = ['rid', 'threat', 'title', 'scenario',
+               'existing_measures', 'current_level', 'measures', 'residual_level',
                'treatment']
     writer.writerow(columns)
 
@@ -289,7 +291,7 @@ def export_mp_csv(request, analysis):
 
     writer = csv.writer(response, delimiter=';')
     columns = ['rid', 'risk_title',
-               'mtg_id', 'mtg_title', 'mtg_desc', 'type', 'solution', 'eta', 'effort', 'link', 'status',
+               'measure_id', 'measure_title', 'measure_desc', 'type', 'solution', 'eta', 'effort', 'link', 'status',
                ]
     writer.writerow(columns)
 

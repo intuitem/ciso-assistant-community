@@ -1,0 +1,97 @@
+{% extends 'back_office/base.html' %}
+{% load i18n static %}
+
+<!-- {% block title %}{% trans "Assets"|title %}{% endblock %} -->
+
+
+{% block content %}
+<div>
+    {% with page_title=_('Assets') %}
+    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <div class="flex flex-row justify-start space-x-4 h-fit">
+        <!-- Ordering, Searchbar and Dropdown Form -->
+        <form method="get">
+            <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        {{ filter.form.name }}
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
+                </div>        
+            </div>
+        </form>
+        {% url 'asset-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <div class="flex items-center h-10 w-full">
+            <a href="{% url 'asset-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+                <span>{% trans "Clear Filters" %}</span>
+            </a>
+        </div>
+        {% endif %}
+        <!-- End Filters Dropdown Form -->
+        {% include 'back_office/snippets/add_button_modal.html' with form=asset_create_form header=_("Add asset") model="asset" content=_("New asset") %}
+    
+    </div>
+
+    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <th class="px-6 py-3">{% trans "Name" %}</th>
+                <th class="px-6 py-3">{% trans "Business value" %}</th>
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                {% for asset in page_obj %}
+                    <tr class=" odd:bg-white even:bg-gray-50 ">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="ml-3">
+                                    <a id="asset{{ asset.id }}" href="{% url 'asset-update' asset.id %}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        {{ asset }}
+                                    </a>
+                                </div>
+                            </div>
+                        </th>
+                        <td class="px-6 py-4">
+                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                {{ asset.business_value }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+
+                            <div class="">
+                                <span>
+                                    <a href="{% url 'asset-update' asset.id %}" class="cursor-pointer table-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </span>
+
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=asset header=_("Delete asset?") model='asset' %}
+
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No asset found." %}</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'back_office/snippets/paginator.html' %}
+    </div>
+</div>
+
+
+{% endblock %}

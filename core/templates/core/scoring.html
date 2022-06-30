@@ -4,11 +4,42 @@
 
 {% block head %}
 <script>
-var label_very_low = {% blocktrans %}'Very Low'{% endblocktrans %};
+var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
 var label_low = {% blocktrans %}'Low'{% endblocktrans %};
 var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
 var label_high = {% blocktrans %}'High'{% endblocktrans %};
-var label_very_high = {% blocktrans %}'Very High'{% endblocktrans %};
+var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
+
+window.onload = function() {
+    BI_lbl = document.getElementById("BI");
+    TI_lbl = document.getElementById("TI");
+    var C = document.getElementById("C")
+    var A = document.getElementById("A")
+    var I = document.getElementById("I")
+    var T = document.getElementById("T")
+    var Fd = document.getElementById("fd");
+    var Rp = document.getElementById("rp");
+    var Cm = document.getElementById("cm");
+    var Pi = document.getElementById("pi");
+    var BIchecked = document.getElementById("ignoreBI");
+    var TIchecked = document.getElementById("ignoreTI");
+
+    BI_lbl.innerHTML = "--";
+    TI_lbl.innerHTML = "--";
+    C.disabled = true;
+    C.selectedIndex = 0;
+    A.disabled = true;
+    A.selectedIndex = 0;
+    I.disabled = true;
+    I.selectedIndex = 0;
+    T.disabled = true;
+    T.selectedIndex = 0;
+    Fd.disabled = false;
+    Rp.disabled = false;
+    Cm.disabled = false;
+    Pi.disabled = false;
+};
+
 function refresh() {
     //TA
   var sl = document.getElementById("sl").value;
@@ -60,13 +91,47 @@ function refresh() {
   IF_v = document.getElementById("IF_v");
   impact = 0;
 
-  if (BI>0) {
+  var C = document.getElementById("C")
+  var A = document.getElementById("A")
+  var I = document.getElementById("I")
+  var T = document.getElementById("T")
+  var Fd = document.getElementById("fd");
+  var Rp = document.getElementById("rp");
+  var Cm = document.getElementById("cm");
+  var Pi = document.getElementById("pi");
+  var BIchecked = document.getElementById("ignoreBI");
+  var TIchecked = document.getElementById("ignoreTI");
+  if (BIchecked.checked == false) {
       impact = BI;
-      TI_lbl.innerHTML = "-ignored-";
+      TI_lbl.innerHTML = "--";
+      C.disabled = true;
+      C.selectedIndex = 0;
+      A.disabled = true;
+      A.selectedIndex = 0;
+      I.disabled = true;
+      I.selectedIndex = 0;
+      T.disabled = true;
+      T.selectedIndex = 0;
+      Fd.disabled = false;
+      Rp.disabled = false;
+      Cm.disabled = false;
+      Pi.disabled = false;
   }
   else {
       impact = TI;
-      BI_lbl.innerHTML = "-ignored-";
+      BI_lbl.innerHTML = "--";
+      Fd.disabled = true;
+      Fd.selectedIndex = 0;
+      Rp.disabled = true;
+      Rp.selectedIndex = 0;
+      Cm.disabled = true;
+      Cm.selectedIndex = 0;
+      Pi.disabled = true;
+      Pi.selectedIndex = 0;
+      C.disabled = false;
+      A.disabled = false;
+      I.disabled = false;
+      T.disabled = false;
   }
 
   IF.innerHTML = getTextI(impact);
@@ -154,10 +219,10 @@ function rl_class(label) {
 {% endblock %}
 {% block content %}
 
-<main class="p-2 2xl:p-8 bg-gray-100 text-sm h-full flex flex-col overflow-y-scroll">
+<main class="text-sm h-full flex flex-col">
 
     <div class="mx-auto">
-        <div class="grid lg:grid-cols-2 mx-7">
+        <div class="grid lg:grid-cols-2">
             <div class="">
                 <!--Threat Agent Factors-->
                 <div id="ta_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
@@ -216,7 +281,7 @@ function rl_class(label) {
                         </select>
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
-                        <div class="shadow-lg bg-indigo-500 px-2 py-4 rounded-xl">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
                             <div class="text-gray-100 text-xs">{% trans "Threat Agent Factor" %}</div>
                             <div class="font-bold text-white text-lg" id="TA">--</div>
                         </div>
@@ -279,7 +344,7 @@ function rl_class(label) {
                         </select>
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
-                        <div class="shadow-lg bg-indigo-500 px-2 py-4 rounded-xl">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
                             <div class="text-gray-100 text-xs">{% trans "Vulnerability Factor" %}</div>
                             <div class="font-bold text-white text-lg" id="VF">--</div>
                         </div>
@@ -345,7 +410,7 @@ function rl_class(label) {
                         </select>
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
-                        <div class="shadow-lg bg-indigo-500 px-2 py-4 rounded-xl mx-auto">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
                             <div class="text-gray-100 text-xs">{% trans "Technical Impact Factor" %}</div>
                             <div class="font-bold text-white text-lg" id="TI">--</div>
                         </div>
@@ -408,16 +473,23 @@ function rl_class(label) {
                         </select>
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
-                        <div class="shadow-lg bg-indigo-500 px-2 py-4 rounded-xl">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
                             <div class="text-gray-100 text-xs">{% trans "Business Impact Factor" %}</div>
                             <div class="font-bold text-white text-lg" id="BI">--</div>
+                            <div class="flex flex-row space-x-2 items-center">
+                                <input onchange="refresh()" id="ignoreBI" type="checkbox" class="w-4 h-4 text-green-800 bg-gray-100 border-gray-300 rounded focus:ring-green-800 
+                                focus:ring-2">
+                                <label class="ml-2 text-sm font-medium text-gray-100">
+                                    {% trans "Ignore" %}
+                                  </label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="p-2 mx-8 my-8 bg-white rounded shadow">
+        <div class="p-2 my-8 bg-white rounded shadow">
             <div class="p-1 m-1 text-xs">{% trans "Assessment vector:" %} <span id="vector"></span></div>
             <div class="grid grid-cols-3 grid-rows-1 items-center justify-center">
         
@@ -431,7 +503,7 @@ function rl_class(label) {
                 </div>
         
                 <div class="text-2xl p-2 grid grid-rows-2 grid-cols-3 items-center text-center w-full mb-4" id="score">
-                    <div class="text-lg p-1 col-span-3">{% trans "Risk Level" %}</div>
+                    <div class="text-lg p-1 col-span-3">{% trans "Risk level" %}</div>
                     <i class="fas fa-arrow-alt-circle-right"></i>
                     <span class="py-2 px-0 font-semibold rounded shadow" id="risk_level">
                         <p class="overflow-clip">--</p></span>

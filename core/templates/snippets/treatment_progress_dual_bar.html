@@ -1,7 +1,16 @@
+{% load i18n %}
 <div id="progress_div" class="bg-white w-auto h-[600px]"></div>
 <script type="text/javascript">
 
         var progress_ch = echarts.init(document.getElementById('progress_div'), null, {renderer: 'svg'});
+        var risk_open = {% blocktrans %} "Risk: open" {% endblocktrans %};
+        var risk_mitigated = {% blocktrans %} "Risk: mitigated" {% endblocktrans %};
+        var risk_accepted = {% blocktrans %} "Risk: accepted" {% endblocktrans %};
+        var risk_blocking = {% blocktrans %} "Risk: blocking" {% endblocktrans %};
+        var measure_open = {% blocktrans %} "Measure: open" {% endblocktrans %};
+        var measure_progress = {% blocktrans %} "Measure: in progress" {% endblocktrans %};
+        var measure_hold = {% blocktrans %} "Measure: on hold" {% endblocktrans %};
+        var measure_done = {% blocktrans %} "Measure: done" {% endblocktrans %};
 
         // specify chart configuration item and data
         var option = {
@@ -27,14 +36,14 @@ toolbox: {
             },
             legend: {
                 data: [
-                    {name: 'Risk: open', 'itemStyle': {'color': '#fac858' }},
-                    {name: 'Risk: mitigated', 'itemStyle': {'color': '#91cc75' }},
-                    {name: 'Risk: accepted', 'itemStyle': {'color': '#73c0de' }},
-                    {name: 'Risk: blocking', 'itemStyle': {'color': '#ee6666' }},
-                    {name: 'Mitigation: open', 'itemStyle': {'color': '#fac858' }},
-                    {name: 'Mitigation: in progress', 'itemStyle': {'color': '#5470c6' }},
-                    {name: 'Mitigation: on hold', 'itemStyle': {'color': '#ee6666' }},
-                    {name: 'Mitigation: done', 'itemStyle': {'color': '#91cc75' }},
+                    {name: risk_open, 'itemStyle': {'color': '#fac858' }},
+                    {name: risk_mitigated, 'itemStyle': {'color': '#91cc75' }},
+                    {name: risk_accepted, 'itemStyle': {'color': '#73c0de' }},
+                    {name: risk_blocking, 'itemStyle': {'color': '#ee6666' }},
+                    {name: measure_open, 'itemStyle': {'color': '#fac858' }},
+                    {name: measure_progress, 'itemStyle': {'color': '#5470c6' }},
+                    {name: measure_hold, 'itemStyle': {'color': '#ee6666' }},
+                    {name: measure_done, 'itemStyle': {'color': '#91cc75' }},
 
                     ],
                 show: true
@@ -70,7 +79,7 @@ toolbox: {
             ],
             series: [
                 {
-                    name: 'Risk: open',
+                    name: risk_open,
                     type: 'bar',
                     stack: 'risks',
                     emphasis: {
@@ -79,7 +88,7 @@ toolbox: {
                     data: {{context.agg_data.rsk_status_out.open|safe}}
                 },
                 {
-                    name: 'Risk: mitigated',
+                    name: risk_mitigated,
                     type: 'bar',
                     stack: 'risks',
                     emphasis: {
@@ -88,7 +97,7 @@ toolbox: {
                     data: {{context.agg_data.rsk_status_out.mitigated|safe}}
                 },
                 {
-                    name: 'Risk: accepted',
+                    name: risk_accepted,
                     type: 'bar',
                     stack: 'risks',
                     emphasis: {
@@ -97,7 +106,7 @@ toolbox: {
                     data: {{context.agg_data.rsk_status_out.accepted|safe}}
                 },
                 {
-                    name: 'Risk: blocking',
+                    name: risk_blocking,
                     type: 'bar',
                     stack: 'risks',
                     emphasis: {
@@ -106,7 +115,7 @@ toolbox: {
                     data: {{context.agg_data.rsk_status_out.blocker|safe}}
                 },
                 {
-                    name: 'Mitigation: open',
+                    name: measure_open,
                     type: 'bar',
                     barWidth: 20,
                     stack: 'mitigations',
@@ -116,7 +125,7 @@ toolbox: {
                     data: {{context.agg_data.mtg_status_out.open|safe}}
                 },
                 {
-                    name: 'Mitigation: in progress',
+                    name: measure_progress,
                     type: 'bar',
                     barWidth: 20,
                     stack: 'mitigations',
@@ -126,7 +135,7 @@ toolbox: {
                     data: {{context.agg_data.mtg_status_out.in_progress|safe}}
                 },
                 {
-                    name: 'Mitigation: on hold',
+                    name: measure_hold,
                     type: 'bar',
                     barWidth: 20,
                     stack: 'mitigations',
@@ -136,7 +145,7 @@ toolbox: {
                     data: {{context.agg_data.mtg_status_out.on_hold|safe}}
                 },
                 {
-                    name: 'Mitigation: done',
+                    name: measure_done,
                     type: 'bar',
                     barWidth: 20,
                     stack: 'mitigations',

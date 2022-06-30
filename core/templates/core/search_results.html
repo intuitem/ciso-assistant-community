@@ -5,7 +5,7 @@
 {% block content %}
 <div class="bg-gray-50 w-screen h-screen px-4 py-10">
     <div class="px-2 py-4 m-2 bg-white rounded shadow">
-        <div class="text-lg font-black">{% trans "Risk Analysis" %} ({{context.Analysis|length}})</div>
+        <div class="text-lg font-black">{% trans "Risk analysis" %} ({{context.Analysis|length}})</div>
         {% if not context.Analysis %}
         <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
         {% endif %}
@@ -18,7 +18,7 @@
         </div>
     </div>
     <div class="px-2 py-4 m-2 bg-white rounded shadow">
-        <div class="text-lg font-black">{% trans "Risk instances" %} ({{context.RiskInstance|length}})</div>
+        <div class="text-lg font-black">{% trans "Risk scenarios" %} ({{context.RiskInstance|length}})</div>
         {% if not context.RiskInstance %}
         <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
         {% endif %}
@@ -31,7 +31,7 @@
         </div>
     </div>
     <div class="px-2 py-4 m-2 bg-white rounded shadow">
-        <div class="text-lg font-black">{% trans "Mitigations" %} ({{context.Mitigation|length}})</div>
+        <div class="text-lg font-black">{% trans "Security measures" %} ({{context.Mitigation|length}})</div>
         {% if not context.Mitigation %}
         <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
         {% endif %}

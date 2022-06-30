@@ -1,0 +1,53 @@
+{% extends 'back_office/base.html' %}
+{% load i18n %}
+{% block content %}
+{% with page_title=_("New Analysis") %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<div>
+    <form method="post" id="analysis_form">{% csrf_token %}
+        <div class="bg-white rounded-lg shadow">
+            <div class="flex flex-row space-x-4 mb-4 divide-x">
+                <div class="px-4 py-6">
+                    <h2 class="text-xl font-semibold mb-4">{% trans "Summary" %}</h2>
+                    <section class="flex flex-col space-y-4">
+                        <div class="flex flex-row space-x-6">
+                            <div class="flex flex-col">
+                                <p class="text-gray-400 text-sm">{% trans "Project" %}</p>
+                                {{ form.project.errors }}
+                                {{ form.project }}
+                            </div>
+                            <div class="flex flex-col">
+                                <p class="text-gray-400 text-sm">{% trans "Auditor" %}</p>
+                                {{ form.auditor.errors }}
+                                {{ form.auditor }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold">{% trans "Rating matrix" %}</p>
+                            {{ form.rating_matrix.errors }}
+                            {{ form.rating_matrix }}
+                        </div>
+                        <div class="flex flex-row space-x-2 items-center">
+                            <p class="text-sm font-semibold">{% trans "Is draft" %}</p>
+                            {{ form.is_draft.errors }}
+                            {{ form.is_draft }}
+                        </div>
+                    </section>
+                </div>
+                <div class="px-4 py-6 w-full">
+                    <h2 class="text-xl font-semibold mb-4">{% trans "Analysis" %}</h2>
+                    <p class="text-sm font-semibold">{% trans "Comments" %}</p>
+                    {{ form.comments.errors }}
+                    {{ form.comments }}
+                    <p class="text-xs text-gray-400">{{ form.comments.help_text|striptags|capfirst }}</p>
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'ra-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+        <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
+    </form>
+</div>
+
+{% endblock %}

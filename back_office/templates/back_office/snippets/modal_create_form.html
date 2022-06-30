@@ -1,0 +1,38 @@
+{% load static i18n back_office_extras %}
+
+<!-- BEGIN CREATE FORM -->
+<form action="{% url model|lower|add:'-create-modal' %}" method="post"> {% csrf_token %}
+
+    {{ form.non_field_errors }}
+    {{ form.errors }}
+    <div id="new_analysis-form">
+      {% for field in form %}
+      {% if field.field.widget|class == "CheckboxInput" %}
+        {% include 'back_office/snippets/form_field_row.html' %}
+      {% else %}
+      <div class="mb-6">
+        <label class="form-label">{{ field.label|striptags }}</label>
+        <div>
+          {{ field.errors }}
+          {{ field }}
+          <p class="help_text">{{ field.help_text }}</p>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+
+      <section class="col-start-3 col-span-6 place-content-end">
+
+        <section class="grid grid-cols-2 place-content-end">
+          <button id="cancel" @click="open = ! open" type="button"
+            class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
+          <input type="hidden" name="next" value="{{ request.path|urlencode }}">
+          <button id="{{ model }}_save" type="submit"
+            class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
+            {% trans "Save" %}
+          </button>
+        </section>
+      </section>
+    </div>
+  </form>
+  <!-- END CREATE FORM -->

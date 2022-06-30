@@ -3,6 +3,9 @@
 *.DS_Store
 *~$*
 staticfiles/*
+**/migrations/*
 *.mo
 *.env
 dump.json
+theme/static/css/dist/styles.css
+node_modules/

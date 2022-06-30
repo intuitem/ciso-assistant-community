@@ -1,0 +1,49 @@
+{% load i18n %}
+
+<div class="overflow-x-auto shadow-md sm:rounded-lg mt-2">
+    <table class="w-full text-sm text-left text-gray-500" id="acceptancesTable">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th data-sort="acceptance" scope="col" class="px-3 py-3">
+                    {% trans "Acceptance" %}
+                </th>
+                <th data-sort="parent_project" scope="col" class="px-3 py-3">
+                    {% trans "Project" %}
+                </th>
+                <th data-sort="status" scope="col" class="px-3 py-3">
+                    {% trans "Validator" %}
+                </th>
+                <th data-sort="eta" scope="col" class="px-3 py-3">
+                    {% trans "Expiry date" %}
+                </th>
+                <th scope="col" class="px-3 py-3">
+                    <span class="sr-only">{% trans "Jump" %}</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for acceptance in acceptances_to_review %}
+            <tr class="bg-white border-b">
+                <th scope="row" class="px-3 py-4 font-medium text-gray-900">
+                    {{ acceptance.risk_instance }}
+                </th>
+                <td class="px-3 py-4">
+                    {{ acceptance.risk_instance.parent_project }}
+                </td>
+                <td class="px-3 py-4">
+                    {{ acceptance.validator }}
+                </td>
+                <td class="px-3 py-4">
+                    {% if acceptance.expiry_date < today %}
+                        <span class="rounded bg-red-400 text-white p-1 text-xs mr-1">{% trans "expired" %}</span>
+                    {% endif %}
+                    {{ acceptance.expiry_date }}
+                </td>
+                <td class="px-3 py-4 text-right">
+                    <a href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="font-medium text-blue-600 hover:underline">{% trans "Jump" %}</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

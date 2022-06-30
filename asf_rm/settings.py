@@ -12,10 +12,15 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import json
 from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Get version from meta.json
+with open(BASE_DIR / 'asf_rm/meta.json') as f:
+    VERSION = json.load(f)['version']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -31,7 +36,7 @@ ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 # ASF RM settings
 
 ARM_SETTINGS = {
-    "MATRIX_PATH": "./matrix.xlsx",
+    "MATRIX_PATH": BASE_DIR / "matrix.xlsx",
 }
 
 # Application definition
@@ -48,9 +53,12 @@ INSTALLED_APPS = [
     'fieldsets_with_inlines',
     'tailwind',
     'theme',
+    # 'django_browser_reload',
     'core',
     'general',
+    'back_office',
     'cal',
+    'django_filters',
     'import_export',
     'reversion',
     'baton.autodiscover',
@@ -65,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # 'django_browser_reload.middleware.BrowserReloadMiddleware',
 ]
 
 ROOT_URLCONF = 'asf_rm.urls'
@@ -164,8 +174,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BATON = {
     'SITE_HEADER': 'ASF RM',
-    'SITE_TITLE': 'ASF Risk Manager',
-    'INDEX_TITLE': 'ASF Risk Manager',
+    'SITE_TITLE': 'MIRA',
+    'INDEX_TITLE': 'MIRA',
     'SUPPORT_HREF': 'https://github.com/intuitem/asf-rm/issues',
     'COPYRIGHT': 'copyright © 2018-2021 <a href="https://intuitem.com">intuitem</a>',  # noqa
     'POWERED_BY': '<a href="https://intuitem.com">intuitem</a>',
@@ -182,7 +192,7 @@ BATON = {
     'GRAVATAR_DEFAULT_IMG': 'wavatar',
     'LOGIN_SPLASH': '/static/core/img/login-splash.png',
     'SEARCH_FIELD': {
-        'label': _('Search Analysis...'),
+        'label': _('Search analysis...'),
         'url': '/admin/core/analysis/',
     },
     'MENU': (
@@ -196,12 +206,12 @@ BATON = {
             'models': (
                 {
                     'name': 'analysis',
-                    'label': _('Analysis Registry'),
+                    'label': _('Analysis registry'),
                     'icon': 'fas fa-glasses',
                 },
                 {
                     'name': 'riskinstance',
-                    'label': _('Risk Instances'),
+                    'label': _('Risk instances'),
                     'icon': 'fas fa-clone',
                 },
                 {
@@ -211,7 +221,7 @@ BATON = {
                 },
                 {
                     'name': 'riskacceptance',
-                    'label': _('Risk Acceptances'),
+                    'label': _('Risk acceptances'),
                     'icon': 'fas fa-user-tie',
                 },
             )
@@ -254,7 +264,7 @@ BATON = {
             'default_open': True, # For debug
             'icon': 'fas fa-users',
         },
-        {'type': 'free', 'label': _('User Guide'), 'icon': 'fas fa-question-circle', 'url': 'https://intuitem.com/'},
+        {'type': 'free', 'label': _('User guide'), 'icon': 'fas fa-question-circle', 'url': 'https://intuitem.com/'},
 
         {'type': 'title', 'label': _('Staff')},
         {'type': 'free', 'label': _('X-Rays (all)'), 'icon': 'fas fa-bolt', 'url': '/staff/x-rays?mode=all'},

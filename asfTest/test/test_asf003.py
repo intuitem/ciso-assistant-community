@@ -45,7 +45,7 @@ def test_ASF003(page):
     step = 4
     page.click("id=calendar")
     assert page.url == urlpatterns.calendar, "Step "+str(step)+": not Ok"
-    # 5 | Click on “My Projects” | Opening of "My Projects" |
+    # 5 | Click on “My projects” | Opening of "My projects" |
     step = 5
     page.click("id=myprojects") 
     assert page.url == urlpatterns.myprojects, "Step "+str(step)+": not Ok"

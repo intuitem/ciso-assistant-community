@@ -3,23 +3,23 @@
 {% load i18n %}
 
 {% block head %}
-<title>{% trans "X-Rays: Review engine" %}</title>
+<title>{% trans "X-Rays: review engine" %}</title>
 {% endblock %}
 {% block content %}
-<main class="p-2 2xl:p-8 bg-gray-100 text-sm h-full overflow-y-scroll">
+<main class="p-2 2xl:p-8 text-sm h-full">
     <div class="bg-white p-2 mx-auto shadow rounded">
 
         <div class="p-6 max-w-3xl">
 
             {% for analysis in context %}
             <div class="border-b mb-4">
-                <div class="text-lg font-semibold mb-2"><i class="far fa-lightbulb"></i> {{analysis}}</div>
+                <div class="text-lg font-semibold mb-2"><i class="far fa-lightbulb text-amber-400"></i> {{analysis}}</div>
                 {% if analysis.quality_check.count == 0 %}
                 <div class="py-2 mb-4 px-4"><i class="fas fa-check-square"></i> {% trans "All good" %}</div>
                 {% else %}
 
                 {% if analysis.quality_check.errors %}
-                <div class="text-white font-semibold bg-gradient-to-r from-red-400 to-red-200 px-4 py-1 m-1 rounded">
+                <div class="text-white font-semibold bg-gradient-to-r from-red-500 to-red-300 px-4 py-1 m-1 rounded">
                     {{analysis.quality_check.errors | length}} <span class="font-bold">{% trans "error(s)" %}</span> {% trans "found_f" %} </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.errors %}
@@ -30,7 +30,7 @@
                 </ul>
                 {% endif %}
                 {% if analysis.quality_check.warnings %}
-                <div class="text-white font-semibold bg-gradient-to-r from-orange-400 to-orange-200 px-4 py-1 m-1 rounded">
+                <div class="text-white font-semibold bg-gradient-to-r from-orange-500 to-orange-300 px-4 py-1 m-1 rounded">
                     {{analysis.quality_check.warnings | length}} <span class="font-bold">{% trans "warning(s)" %}</span> {% trans "found_m" %} </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.warnings %}
@@ -41,7 +41,7 @@
                 </ul>
                 {% endif %}
                 {% if analysis.quality_check.info %}
-                <div class="text-white font-semibold bg-gradient-to-r from-blue-400 to-blue-200 px-4 py-1 m-1 rounded">
+                <div class="text-white font-semibold bg-gradient-to-r from-blue-700 to-blue-500 px-4 py-1 m-1 rounded">
                     {{analysis.quality_check.info | length}} <span class="font-bold">{% trans "information" %}</span> {% trans "to consider" %} </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.info %}
@@ -53,6 +53,11 @@
                 {% endif %}
                 {% endif %}
             </div>
+            {% empty %}
+                <div class="text-black">
+                    <i class="inline fas fa-exclamation-triangle"></i>
+                    <p class="inline test-gray-900">{% trans "No analysis found." %} {{ model.verbose_name }}</p>
+                </div>
             {% endfor %}
 
 

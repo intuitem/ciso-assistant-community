@@ -1,21 +1,109 @@
-{% load static tailwind_tags %}
+{% load static tailwind_tags back_office_extras %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-    <title>Back Office</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
-		<meta http-equiv="X-UA-Compatible" content="ie=edge">
-		{% tailwind_css %}
-	</head>
+<html lang="{{ LANGUAGE_CODE }}">
 
-	<body class="bg-gray-100">
-            {% include 'back_office/sidebar.html' %}
-            <main class="ml-72 mr-8">
-                {% block content %}
-                {% endblock %}
-            </main>
-	</body>
+<head>
+	<title>{% block title %}MIRA Editor{% endblock title %}</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<script defer src="https://unpkg.com/alpinejs@3.9.2/dist/cdn.min.js"></script>
+	{% block head %}
+	{% endblock %}
+	{% tailwind_css %}
+	<style>
+		.scrollbar {
+			overflow-y: scroll;
+			scrollbar-color: #694998 transparent;
+			scrollbar-width: thin;
+		}
+		.scrollbar::-webkit-scrollbar {
+			margin-top: 22px;
+			margin-bottom: 22px;
+			width: 3px;
+			height: 20px;
+		}
+
+		.scrollbar::-webkit-scrollbar-track {
+			margin-top: 22px;
+			margin-bottom: 22px;
+			border-radius: 100vh;
+			background: transparent;
+		}
+
+		.scrollbar::-webkit-scrollbar-thumb {
+			margin-top: 22px;
+			margin-bottom: 22px;
+			background: #694998;
+			border-radius: 100vh;
+			borer: 10px solid red;
+		}
+
+		.scrollbar::-webkit-scrollbar-thumb:hover {
+			background: #563c81;
+		}
+	</style>
+	<script>
+		window.onload = function() {
+			if (sessionStorage.getItem('sidebar-yscroll')) {
+				document.getElementById('sidebar-scroll').scrollTop = sessionStorage.getItem('sidebar-yscroll');
+			}
+			document.getElementById('sidebar-scroll').addEventListener('scroll', debounce(function(){
+				yscroll = document.getElementById('sidebar-scroll').scrollTop;
+				sessionStorage.setItem('sidebar-yscroll', yscroll);
+			}, 50));
+
+			items = document.querySelectorAll("ul#sidebar-items li.to-page a");
+			items.forEach(function(element) {
+				if (element.getAttribute("href") == window.location.pathname) {
+					element.classList.remove("nav-link");
+					element.classList.add("nav-link-active");
+				}
+			});
+		}
+		const debounce = (func, delay) => {
+			let debounceTimer;
+			return function() {
+				const context = this;
+				const args = arguments;
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => func.apply(context, args), delay);
+			}
+		} 
+	</script>
+	{% comment %} <script>
+		window.onload = function() {
+			items = document.querySelectorAll("ul#sidebar-items li.to-page a");
+			console.log(window.location.pathname);
+			items.forEach(function(element) {
+				console.log(element.getAttribute("href"));
+				console.log((element.getAttribute("href") == window.location.pathname))
+				if (element.getAttribute("href") == window.location.pathname) {
+					element.classList.remove("nav-link");
+					element.classList.add("nav-link-active");
+				}
+			});
+		}
+	</script> {% endcomment %}
+</head>
+<body class="bg-gradient-to-br from-slate-200 h-full w-full max-w-screen bg-no-repeat m-0 bg-fixed">
+	<style>
+		[x-cloak] { display: none }
+	</style>
+	<div x-data="{ sidebarOpen: true }" class="flex h-screen">
+		{% include 'back_office/sidebar.html' %}
+		<div class="flex-1">
+			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-4' : 'ml-72'">
+			{% block content %}
+				{% comment %} {% include 'back_office/snippets/breadcrumbs.html' %} {% endcomment %}
+			{% endblock %}
+		</main>
+		</div>
+	</div>
+</body>
+
 </html>

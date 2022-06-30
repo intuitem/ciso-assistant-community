@@ -2,8 +2,8 @@
 from django.utils.translation import gettext_lazy as _
 
 config = {
-    'SITE_TITLE': 'ASF Risk Manager',
-    'INDEX_TITLE': _('Back office'),
+    'SITE_TITLE': 'MIRA',
+    'INDEX_TITLE': _('Editor'),
     'MENU_TITLE': _('Menu'),
 }
 
