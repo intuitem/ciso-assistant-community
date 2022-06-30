@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static back_office_extras %}
 <!-- MODAL CONTAINER WITH BACKDROP -->
 <div x-show="open" x-cloak
 >
@@ -43,6 +43,8 @@ x-transition:leave-end="opacity-0"
                 {% include 'back_office/snippets/modal_create_form.html' %}
             {% elif modal_action == "delete" %}
                 {% include 'back_office/snippets/modal_delete_form.html' %}
+            {% else %}
+                {% mira_version %}
             {% endif %}
 
           </div>
