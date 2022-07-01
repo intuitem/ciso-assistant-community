@@ -149,7 +149,7 @@ class RiskInstanceUpdateForm(StyledModelForm):
     class Meta:
         model = RiskInstance
         fields = '__all__'
-        exclude = ['current_level', 'residual_level']
+        exclude = ['current_level', 'residual_level', 'assets']
 
 class MitigationUpdateForm(StyledModelForm):
     class Meta:
