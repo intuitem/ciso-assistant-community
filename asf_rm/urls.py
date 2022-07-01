@@ -33,7 +33,7 @@ urlpatterns = [
     path('baton/', include('baton.urls')),
     path('search/', cv.SearchResults.as_view(), name='search'),
     path('', login_required(cv.AnalysisListView.as_view()), name='home'),
-    path('staff/x-rays', staff_member_required(gv.ReviewView.as_view()), name='xrays'),
+    path('staff/x-rays', login_required(gv.ReviewView.as_view()), name='xrays'),
 
     path("__reload__/", include("django_browser_reload.urls")),
 ]
