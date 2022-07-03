@@ -3,7 +3,7 @@ version: "3.9"
 services:
   web:
     image: app
-    restart: on-failure
+    restart: always
     env_file: .env
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
@@ -11,6 +11,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DB_HOST=${DB_HOST}
+      - ALLOWED_DJANGO_HOSTS=${ALLOWED_DJANGO_HOSTS}
     volumes:
       - static_volume:/code/static
     depends_on:
@@ -23,7 +24,7 @@ services:
   migration:
     build: .
     image: app
-    # restart: on-failure
+    # restart: always
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - POSTGRES_NAME=${POSTGRES_NAME}
@@ -40,7 +41,7 @@ services:
 
   nginx:
     image: nginx:1.21
-    restart: on-failure
+    restart: always
     ports:
       - 8000:80
     volumes:
@@ -53,7 +54,7 @@ services:
 
   db:
     image: postgres:14.1
-    restart: on-failure
+    restart: always
     volumes:
       - db_volume:/var/lib/postgresql/data
     environment:

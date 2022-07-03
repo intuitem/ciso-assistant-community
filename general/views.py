@@ -2,7 +2,6 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 import logging
 from django.core.exceptions import PermissionDenied
-from django.contrib.admin.views.decorators import staff_member_required
 from core.models import Analysis
 from general.models import *
 from django.views.generic import ListView

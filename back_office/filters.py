@@ -283,7 +283,7 @@ class ThreatFilter(GenericFilterSet):
         ),
         field_labels={
             'title': _('title'.capitalize()),
-            '-title': _('Title'),
+            '-title': _('Title (descending)'),
         }
     )
 
