@@ -375,7 +375,7 @@ class UserFilter(GenericFilterSet):
         ),
         field_labels={
             'username': _('username'.capitalize()),
-            '-username': _('Userame (descending)'),
+            '-username': _('Username (descending)'),
             'first_name': _('first name'.capitalize()),
             '-first_name': _('First name (descending)'),
             'last_name': _('last name'.capitalize()),

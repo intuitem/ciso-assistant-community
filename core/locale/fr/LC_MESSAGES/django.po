@@ -45,10 +45,8 @@ msgid "Analyses"
 msgstr "Analyses"
 
 #: core/admin_config.py:6
-#, fuzzy
-#| msgid "Edit"
 msgid "Editor"
-msgstr "Modifier"
+msgstr "Éditeur"
 
 #: core/admin_config.py:7
 msgid "Menu"
@@ -96,8 +94,6 @@ msgid "is a draft"
 msgstr "brouillon"
 
 #: core/models.py:22 core/templates/core/sidebar.html:116
-#, fuzzy
-#| msgid "Rating matrix"
 msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
@@ -218,10 +214,8 @@ msgid "Very high"
 msgstr "Très élevé"
 
 #: core/models.py:139 core/templates/snippets/ra_data.html:41
-#, fuzzy
-#| msgid "Treatment"
 msgid "Threat"
-msgstr "Traitement"
+msgstr "Menace"
 
 #: core/models.py:140
 msgid "<risk scenario short title>"
@@ -405,10 +399,8 @@ msgid "Effort"
 msgstr ""
 
 #: core/models.py:235
-#, fuzzy
-#| msgid "Security measures"
 msgid "Security measure"
-msgstr "Mesures de sécurité"
+msgstr "Mesure de sécurité"
 
 #: core/models.py:236 core/templates/core/analytics.html:20
 #: core/templates/core/search_results.html:34
@@ -1288,8 +1280,6 @@ msgid "Analytics"
 msgstr "Analytique"
 
 #: core/templates/core/sidebar.html:81
-#, fuzzy
-#| msgid "My Projects"
 msgid "My projects"
 msgstr "Mes projets"
 
@@ -1310,8 +1300,6 @@ msgid "Extra"
 msgstr ""
 
 #: core/templates/core/sidebar.html:170
-#, fuzzy
-#| msgid "User guide"
 msgid "User guide"
 msgstr "Guide utilisateur"
 

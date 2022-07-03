@@ -33,32 +33,24 @@ msgid "Draft (descending)"
 msgstr "Brouillon (descendant)"
 
 #: back_office/filters.py:89
-#, fuzzy
-#| msgid "projects"
 msgid "project"
-msgstr "projets"
+msgstr "projet"
 
 #: back_office/filters.py:90
-#, fuzzy
-#| msgid "Parent project (descending)"
 msgid "Project (descending)"
-msgstr "Projet parent (descendant)"
+msgstr "Projet (descendant)"
 
 #: back_office/filters.py:91
-#, fuzzy
-#| msgid "Auditor"
 msgid "auditor"
-msgstr "Auditeur"
+msgstr "auditeur"
 
 #: back_office/filters.py:92
 msgid "Auditor (descending)"
 msgstr "Auditeur (descendant)"
 
 #: back_office/filters.py:93
-#, fuzzy
-#| msgid "Created At"
 msgid "updated at"
-msgstr "Créé le"
+msgstr "mis à jour le"
 
 #: back_office/filters.py:94
 msgid "Updated at (descending)"
@@ -121,10 +113,8 @@ msgid "Search security measure..."
 msgstr "Rechercher une mesure..."
 
 #: back_office/filters.py:173 back_office/filters.py:262
-#, fuzzy
-#| msgid "Status"
 msgid "status"
-msgstr "Statut"
+msgstr "statut"
 
 #: back_office/filters.py:174 back_office/filters.py:263
 msgid "Status (descending)"
@@ -151,20 +141,16 @@ msgid "Search acceptance..."
 msgstr "Rechercher une acceptation..."
 
 #: back_office/filters.py:210
-#, fuzzy
-#| msgid "Expiry Date"
 msgid "expiry"
-msgstr "Date d'expiration"
+msgstr "expiration"
 
 #: back_office/filters.py:211
 msgid "Expiry date (descending)"
 msgstr "Date d'expiration (descendant)"
 
 #: back_office/filters.py:212
-#, fuzzy
-#| msgid "Validator"
 msgid "validator"
-msgstr "Validateur"
+msgstr "validateur"
 
 #: back_office/filters.py:213
 msgid "Validator (descending)"
@@ -177,10 +163,8 @@ msgstr "Rechercher un domaine..."
 #: back_office/filters.py:234 back_office/filters.py:260
 #: back_office/filters.py:308 back_office/filters.py:333
 #: back_office/filters.py:406
-#, fuzzy
-#| msgid "Username"
 msgid "name"
-msgstr "Nom d'utilisateur"
+msgstr "nom"
 
 #: back_office/filters.py:235 back_office/filters.py:261
 #: back_office/filters.py:309 back_office/filters.py:334
@@ -189,10 +173,8 @@ msgid "Name (descending)"
 msgstr "Nom (descendant)"
 
 #: back_office/filters.py:236
-#, fuzzy
-#| msgid "Department"
 msgid "department"
-msgstr "Departement"
+msgstr "departement"
 
 #: back_office/filters.py:237
 msgid "Department (descending)"
@@ -230,10 +212,8 @@ msgid "Search function..."
 msgstr "Rechercher une fonction..."
 
 #: back_office/filters.py:310
-#, fuzzy
-#| msgid "Provider"
 msgid "provider"
-msgstr "Fournisseur"
+msgstr "fournisseur"
 
 #: back_office/filters.py:311
 msgid "Provider (descending)"
@@ -252,62 +232,44 @@ msgid "Search asset..."
 msgstr "Rechercher un bien sensible..."
 
 #: back_office/filters.py:366
-#, fuzzy
-#| msgid "Search asset..."
 msgid "Search user..."
 msgstr "Rechercher un bien sensible..."
 
 #: back_office/filters.py:377
-#, fuzzy
-#| msgid "Username"
 msgid "username"
-msgstr "Nom d'utilisateur"
+msgstr "nom d'utilisateur"
 
 #: back_office/filters.py:378
-#, fuzzy
-#| msgid "Name (descending)"
-msgid "Userame (descending)"
-msgstr "Nom (descendant)"
+msgid "Username (descending)"
+msgstr "Nom d'utilisateur (descendant)"
 
 #: back_office/filters.py:379
 msgid "first name"
 msgstr ""
 
 #: back_office/filters.py:380
-#, fuzzy
-#| msgid "Name (descending)"
 msgid "First name (descending)"
-msgstr "Nom (descendant)"
+msgstr "Prénom (descendant)"
 
 #: back_office/filters.py:381
-#, fuzzy
-#| msgid "Username"
 msgid "last name"
-msgstr "Nom d'utilisateur"
+msgstr "nom de famille"
 
 #: back_office/filters.py:382
-#, fuzzy
-#| msgid "Name (descending)"
 msgid "Last name (descending)"
-msgstr "Nom (descendant)"
+msgstr "Nom de famille (descendant)"
 
 #: back_office/filters.py:383
-#, fuzzy
-#| msgid "Email Address"
 msgid "email address"
-msgstr "Adresse Mail"
+msgstr "adresse Mail"
 
 #: back_office/filters.py:384
-#, fuzzy
-#| msgid "Title (descending)"
 msgid "Email address (descending)"
-msgstr "Titre (descendant)"
+msgstr "Adresse Mail (descendant)"
 
 #: back_office/filters.py:397
-#, fuzzy
-#| msgid "Search project..."
 msgid "Search group..."
-msgstr "Rechercher un projet..."
+msgstr "Rechercher un groupe..."
 
 #: back_office/forms.py:49 back_office/forms.py:190
 #: back_office/templates/back_office/mtg_update.html:16
@@ -344,8 +306,6 @@ msgstr ""
 #: back_office/templates/back_office/project_list.html:74
 #: back_office/templates/back_office/project_list.html:110
 #: back_office/templates/back_office/project_update.html:27
-#, fuzzy
-#| msgid "Domain"
 msgid "Domain"
 msgstr "Domaine"
 
@@ -395,10 +355,8 @@ msgid "Clear Filters"
 msgstr "Effacer les Filtres"
 
 #: back_office/templates/back_office/acceptance_list.html:97
-#, fuzzy
-#| msgid "Add Acceptance"
 msgid "Add Risk Acceptance"
-msgstr "Ajouter une Acceptation"
+msgstr "Ajouter une Acceptation de risque"
 
 #: back_office/templates/back_office/acceptance_list.html:97
 msgid "New risk acceptance"
@@ -656,14 +614,10 @@ msgid " \"Dec\" "
 msgstr " \"Déc\" "
 
 #: back_office/templates/back_office/fragments/watchlist_exceptions.html:8
-#, fuzzy
-#| msgid "Add Acceptance"
 msgid "Acceptance"
-msgstr "Ajouter une acceptation"
+msgstr "Acceptation"
 
 #: back_office/templates/back_office/fragments/watchlist_exceptions.html:17
-#, fuzzy
-#| msgid "Expiry Date"
 msgid "Expiry date"
 msgstr "Date d'expiration"
 
@@ -721,16 +675,12 @@ msgid "Group Name"
 msgstr ""
 
 #: back_office/templates/back_office/group_list.html:65
-#, fuzzy
-#| msgid "Delete threat?"
 msgid "Delete group?"
-msgstr "Supprimer la menace ?"
+msgstr "Supprimer le groupe ?"
 
 #: back_office/templates/back_office/group_list.html:74
-#, fuzzy
-#| msgid "No project found."
 msgid "No group found."
-msgstr "Aucun projet n'a été trouvé"
+msgstr "Aucun groupe n'a été trouvé"
 
 #: back_office/templates/back_office/index.html:10
 #: back_office/templates/back_office/sidebar.html:19
@@ -1395,8 +1345,6 @@ msgid "Superuser"
 msgstr "Super-utilisateur"
 
 #: back_office/templates/back_office/user_list.html:75
-#, fuzzy
-#| msgid "Actions"
 msgid "Active"
 msgstr "Actif"
 
