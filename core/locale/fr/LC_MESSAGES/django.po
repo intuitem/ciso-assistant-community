@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-29 14:09+0000\n"
+"POT-Creation-Date: 2022-06-30 19:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,10 +45,8 @@ msgid "Analyses"
 msgstr "Analyses"
 
 #: core/admin_config.py:6
-#, fuzzy
-#| msgid "Edit"
 msgid "Editor"
-msgstr "Modifier"
+msgstr "Éditeur"
 
 #: core/admin_config.py:7
 msgid "Menu"
@@ -95,9 +93,7 @@ msgstr "Auditeur"
 msgid "is a draft"
 msgstr "brouillon"
 
-#: core/models.py:22 core/templates/core/base.html:171
-#, fuzzy
-#| msgid "Rating matrix"
+#: core/models.py:22 core/templates/core/sidebar.html:116
 msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
@@ -218,10 +214,8 @@ msgid "Very high"
 msgstr "Très élevé"
 
 #: core/models.py:139 core/templates/snippets/ra_data.html:41
-#, fuzzy
-#| msgid "Treatment"
 msgid "Threat"
-msgstr "Traitement"
+msgstr "Menace"
 
 #: core/models.py:140
 msgid "<risk scenario short title>"
@@ -405,10 +399,8 @@ msgid "Effort"
 msgstr ""
 
 #: core/models.py:235
-#, fuzzy
-#| msgid "Security measures"
 msgid "Security measure"
-msgstr "Mesures de sécurité"
+msgstr "Mesure de sécurité"
 
 #: core/models.py:236 core/templates/core/analytics.html:20
 #: core/templates/core/search_results.html:34
@@ -546,54 +538,6 @@ msgstr "Risque par domaine de projets (catégorie)"
 msgid "Current versus residual"
 msgstr "Courant contre résiduel"
 
-#: core/templates/core/base.html:101 core/templates/core/index.html:23
-msgid "Analysis registry"
-msgstr "Registre des analyses"
-
-#: core/templates/core/base.html:109
-msgid "Switch to editor"
-msgstr "Basculer vers l'éditeur"
-
-#: core/templates/core/base.html:116 core/templates/core/base.html:127
-msgid "Analytics"
-msgstr "Analytique"
-
-#: core/templates/core/base.html:136
-#, fuzzy
-#| msgid "My Projects"
-msgid "My projects"
-msgstr "Mes projets"
-
-#: core/templates/core/base.html:145
-msgid "Calendar"
-msgstr "Calendrier"
-
-#: core/templates/core/base.html:154 core/templates/core/project_select.html:16
-msgid "Composer"
-msgstr "Composition"
-
-#: core/templates/core/base.html:161
-msgid "Tools"
-msgstr "Outils"
-
-#: core/templates/core/base.html:190
-msgid "Scoring assistant"
-msgstr "Assistant d'évaluation"
-
-#: core/templates/core/base.html:196
-msgid "Extra"
-msgstr ""
-
-#: core/templates/core/base.html:225
-#, fuzzy
-#| msgid "User guide"
-msgid "User guide"
-msgstr "Guide utilisateur"
-
-#: core/templates/core/base.html:233
-msgid "Logout"
-msgstr "Déconnexion"
-
 #: core/templates/core/browser.html:86
 msgid "Browsing"
 msgstr "Vous parcourez"
@@ -726,6 +670,10 @@ msgstr ""
 "Rechercher un scénario de risque, une mesure de sécurité, une analyse de "
 "risque..."
 
+#: core/templates/core/index.html:23 core/templates/core/sidebar.html:46
+msgid "Analysis registry"
+msgstr "Registre des analyses"
+
 #: core/templates/core/index.html:32
 msgid "ID"
 msgstr "Identifiant"
@@ -845,6 +793,11 @@ msgstr ""
 #: core/templates/core/my_projects.html:60
 msgid "Projects summary is empty."
 msgstr "Le résumé des projets est vide."
+
+#: core/templates/core/project_select.html:16
+#: core/templates/core/sidebar.html:99
+msgid "Composer"
+msgstr "Composition"
 
 #: core/templates/core/project_select.html:23
 msgid ""
@@ -1317,6 +1270,46 @@ msgid "No results matched your query. Try something more specific."
 msgstr ""
 "Aucun résultat ne correspond à votre requête. Essayez quelque chose de plus "
 "spécifique."
+
+#: core/templates/core/sidebar.html:54
+msgid "Switch to editor"
+msgstr "Basculer vers l'éditeur"
+
+#: core/templates/core/sidebar.html:61 core/templates/core/sidebar.html:72
+msgid "Analytics"
+msgstr "Analytique"
+
+#: core/templates/core/sidebar.html:81
+msgid "My projects"
+msgstr "Mes projets"
+
+#: core/templates/core/sidebar.html:90
+msgid "Calendar"
+msgstr "Calendrier"
+
+#: core/templates/core/sidebar.html:106
+msgid "Tools"
+msgstr "Outils"
+
+#: core/templates/core/sidebar.html:135
+msgid "Scoring assistant"
+msgstr "Assistant d'évaluation"
+
+#: core/templates/core/sidebar.html:141
+msgid "Extra"
+msgstr ""
+
+#: core/templates/core/sidebar.html:170
+msgid "User guide"
+msgstr "Guide utilisateur"
+
+#: core/templates/core/sidebar.html:178 core/templates/core/sidebar.html:180
+msgid "About MIRA"
+msgstr "À propos de MIRA"
+
+#: core/templates/core/sidebar.html:187
+msgid "Logout"
+msgstr "Déconnexion"
 
 #: core/templates/registration/login.html:11
 msgid "Hello there"
