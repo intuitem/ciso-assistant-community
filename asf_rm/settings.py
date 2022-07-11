@@ -46,7 +46,6 @@ ARM_SETTINGS = {
 
 
 INSTALLED_APPS = [
-    'baton',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,7 +63,6 @@ INSTALLED_APPS = [
     'django_filters',
     'import_export',
     'reversion',
-    'baton.autodiscover',
 ]
 
 MIDDLEWARE = [
