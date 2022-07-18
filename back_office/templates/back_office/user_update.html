@@ -2,7 +2,7 @@
 {% block content %}
 {% load i18n %}
 {% load back_office_extras %}
-{% with page_title='Edit user' %}
+{% with page_title=_('Edit user') %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div>
@@ -33,8 +33,8 @@
                 {% endfor %}
             </div>
             <div class="mt-4 flex space-x-2 justify-end">
-                <a href="{% url 'user-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">Cancel</a>
-            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">Save</button>
+                <a href="{% url 'user-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
             </div>    
         </div>
     </form>

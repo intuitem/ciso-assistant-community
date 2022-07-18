@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-30 19:28+0000\n"
+"POT-Creation-Date: 2022-07-18 12:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -79,7 +79,7 @@ msgid "title"
 msgstr "titre"
 
 #: back_office/filters.py:138 back_office/filters.py:176
-#: back_office/filters.py:207
+#: back_office/filters.py:207 back_office/filters.py:286
 msgid "Title (descending)"
 msgstr "Titre (descendant)"
 
@@ -196,17 +196,6 @@ msgstr "Domaine parent (descendant)"
 msgid "Search threat..."
 msgstr "Rechercher une menace..."
 
-#: back_office/filters.py:286
-#: back_office/templates/back_office/mtg_list.html:116
-#: back_office/templates/back_office/mtg_update.html:20
-#: back_office/templates/back_office/ri_list.html:112
-#: back_office/templates/back_office/ri_update.html:133
-#: back_office/templates/back_office/snippets/mtg_list_nested.html:10
-#: back_office/templates/back_office/snippets/ri_list_nested.html:13
-#: back_office/templates/back_office/threat_update.html:13
-msgid "Title"
-msgstr "Titre"
-
 #: back_office/filters.py:298
 msgid "Search function..."
 msgstr "Rechercher une fonction..."
@@ -233,7 +222,7 @@ msgstr "Rechercher un bien sensible..."
 
 #: back_office/filters.py:366
 msgid "Search user..."
-msgstr "Rechercher un bien sensible..."
+msgstr "Rechercher un utilisateur..."
 
 #: back_office/filters.py:377
 msgid "username"
@@ -244,28 +233,28 @@ msgid "Username (descending)"
 msgstr "Nom d'utilisateur (descendant)"
 
 #: back_office/filters.py:379
-msgid "first name"
-msgstr ""
+msgid "First name"
+msgstr "Prénom"
 
 #: back_office/filters.py:380
 msgid "First name (descending)"
 msgstr "Prénom (descendant)"
 
 #: back_office/filters.py:381
-msgid "last name"
-msgstr "nom de famille"
+msgid "Last name"
+msgstr "Nom de famille"
 
 #: back_office/filters.py:382
 msgid "Last name (descending)"
 msgstr "Nom de famille (descendant)"
 
 #: back_office/filters.py:383
-msgid "email address"
-msgstr "adresse Mail"
+msgid "Email address"
+msgstr "Adresse mail"
 
 #: back_office/filters.py:384
 msgid "Email address (descending)"
-msgstr "Adresse Mail (descendant)"
+msgstr "Adresse mail (descendant)"
 
 #: back_office/filters.py:397
 msgid "Search group..."
@@ -524,6 +513,7 @@ msgstr "Aucun bien sensible n'a été trouvé"
 #: back_office/templates/back_office/snippets/create_modal.html:95
 #: back_office/templates/back_office/snippets/modal_create_form.html:28
 #: back_office/templates/back_office/threat_update.html:19
+#: back_office/templates/back_office/user_update.html:36
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -542,6 +532,7 @@ msgstr "Annuler"
 #: back_office/templates/back_office/snippets/create_modal.html:99
 #: back_office/templates/back_office/snippets/modal_create_form.html:32
 #: back_office/templates/back_office/threat_update.html:21
+#: back_office/templates/back_office/user_update.html:37
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -655,10 +646,15 @@ msgstr "Statut"
 msgid "ETA"
 msgstr ""
 
+#: back_office/templates/back_office/group_create.html:4
+#| msgid "New Group"
+msgid "New group"
+msgstr "Nouveau groupe"
+
 #: back_office/templates/back_office/group_create.html:10
 #: back_office/templates/back_office/group_update.html:10
 msgid "Group information"
-msgstr ""
+msgstr "Informations du groupe"
 
 #: back_office/templates/back_office/group_list.html:6
 #: back_office/templates/back_office/sidebar.html:154
@@ -672,7 +668,7 @@ msgstr "Nouveau groupe"
 
 #: back_office/templates/back_office/group_list.html:41
 msgid "Group Name"
-msgstr ""
+msgstr "Nom du groupe"
 
 #: back_office/templates/back_office/group_list.html:65
 msgid "Delete group?"
@@ -681,6 +677,10 @@ msgstr "Supprimer le groupe ?"
 #: back_office/templates/back_office/group_list.html:74
 msgid "No group found."
 msgstr "Aucun groupe n'a été trouvé"
+
+#: back_office/templates/back_office/group_update.html:4
+msgid "Edit group"
+msgstr "Éditer le groupe"
 
 #: back_office/templates/back_office/index.html:10
 #: back_office/templates/back_office/sidebar.html:19
@@ -776,6 +776,16 @@ msgstr "Ajouter une mesure de sécurité"
 #: back_office/templates/back_office/ri_update.html:256
 msgid "New security measure"
 msgstr "Nouvelle mesure de sécurité"
+
+#: back_office/templates/back_office/mtg_list.html:116
+#: back_office/templates/back_office/mtg_update.html:20
+#: back_office/templates/back_office/ri_list.html:112
+#: back_office/templates/back_office/ri_update.html:133
+#: back_office/templates/back_office/snippets/mtg_list_nested.html:10
+#: back_office/templates/back_office/snippets/ri_list_nested.html:13
+#: back_office/templates/back_office/threat_update.html:13
+msgid "Title"
+msgstr "Titre"
 
 #: back_office/templates/back_office/mtg_list.html:186
 msgid "Delete security measure?"
@@ -1231,7 +1241,8 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: back_office/templates/back_office/sidebar.html:165 back_office/views.py:308
+#: back_office/templates/back_office/sidebar.html:165
+#: back_office/templates/back_office/user_list.html:6 back_office/views.py:308
 #: back_office/views.py:819
 msgid "Users"
 msgstr "Utilisateurs"
@@ -1335,10 +1346,14 @@ msgstr "Supprimer la menace ?"
 msgid "No threat found."
 msgstr "Aucune menace n'a été trouvée"
 
+#: back_office/templates/back_office/user_create.html:4
+msgid "New user"
+msgstr "Nouvel utilisateur"
+
 #: back_office/templates/back_office/user_create.html:10
 #: back_office/templates/back_office/user_update.html:11
 msgid "User information"
-msgstr ""
+msgstr "Informations de l'utilisateur"
 
 #: back_office/templates/back_office/user_list.html:71
 msgid "Superuser"
@@ -1393,6 +1408,10 @@ msgstr ""
 #: back_office/templates/back_office/user_list.html:165
 msgid "No user found."
 msgstr "Aucun utilisateur n'a été trouvé"
+
+#: back_office/templates/back_office/user_update.html:5
+msgid "Edit user"
+msgstr "Éditer l'utilisateur"
 
 #~ msgid "Add %(model)s"
 #~ msgstr "Ajouter %(model)s"

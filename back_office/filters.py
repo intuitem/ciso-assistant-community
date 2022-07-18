@@ -376,11 +376,11 @@ class UserFilter(GenericFilterSet):
         field_labels={
             'username': _('username'.capitalize()),
             '-username': _('Username (descending)'),
-            'first_name': _('first name'.capitalize()),
+            'first_name': _('First name'),
             '-first_name': _('First name (descending)'),
-            'last_name': _('last name'.capitalize()),
+            'last_name': _('Last name'),
             '-last_name': _('Last name (descending)'),
-            'email': _('email address'.capitalize()),
+            'email': _('Email address'),
             '-email': _('Email address (descending)'),
         }
     )
