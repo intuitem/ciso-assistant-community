@@ -21,9 +21,7 @@
                                 {% for error in field.errors %}
                                     <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
                                 {% endfor %}
-                                {{ field }}
-                                
-                                
+                                {{ field }} 
                                 <div class="help_text">
                                     {{ field.help_text|safe }}
                                 </div>

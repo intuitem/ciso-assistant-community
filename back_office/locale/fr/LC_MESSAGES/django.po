@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-18 12:58+0000\n"
+"POT-Creation-Date: 2022-07-19 11:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -499,6 +499,8 @@ msgid "No asset found."
 msgstr "Aucun bien sensible n'a été trouvé"
 
 #: back_office/templates/back_office/asset_update.html:32
+#: back_office/templates/back_office/group_create.html:29
+#: back_office/templates/back_office/group_update.html:29
 #: back_office/templates/back_office/mtg_update.html:64
 #: back_office/templates/back_office/password_change.html:30
 #: back_office/templates/back_office/pd_update.html:25
@@ -513,11 +515,14 @@ msgstr "Aucun bien sensible n'a été trouvé"
 #: back_office/templates/back_office/snippets/create_modal.html:95
 #: back_office/templates/back_office/snippets/modal_create_form.html:28
 #: back_office/templates/back_office/threat_update.html:19
+#: back_office/templates/back_office/user_create.html:29
 #: back_office/templates/back_office/user_update.html:36
 msgid "Cancel"
 msgstr "Annuler"
 
 #: back_office/templates/back_office/asset_update.html:33
+#: back_office/templates/back_office/group_create.html:30
+#: back_office/templates/back_office/group_update.html:30
 #: back_office/templates/back_office/mtg_update.html:67
 #: back_office/templates/back_office/password_change.html:31
 #: back_office/templates/back_office/pd_update.html:27
@@ -532,6 +537,7 @@ msgstr "Annuler"
 #: back_office/templates/back_office/snippets/create_modal.html:99
 #: back_office/templates/back_office/snippets/modal_create_form.html:32
 #: back_office/templates/back_office/threat_update.html:21
+#: back_office/templates/back_office/user_create.html:30
 #: back_office/templates/back_office/user_update.html:37
 msgid "Save"
 msgstr "Enregistrer"
@@ -647,7 +653,6 @@ msgid "ETA"
 msgstr ""
 
 #: back_office/templates/back_office/group_create.html:4
-#| msgid "New Group"
 msgid "New group"
 msgstr "Nouveau groupe"
 
