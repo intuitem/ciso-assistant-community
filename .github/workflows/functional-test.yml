@@ -2,7 +2,7 @@ name: Functional test using Playwright
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, qa/groups-users ]
   pull_request:
     branches: [ main ]
 
