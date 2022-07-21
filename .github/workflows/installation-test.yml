@@ -57,4 +57,4 @@ jobs:
     - name: Run test
       run: | 
         export $(grep -v '^#' .env | xargs)
-        pytest asfTest --browser chromium --browser webkit --browser firefox --slowmo 100
+        pytest asfTest/test/test_installation.py --browser chromium --browser webkit --browser firefox
