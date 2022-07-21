@@ -1,6 +1,6 @@
 name: Installation test using Playwright
 
-on: push
+on: [push, pull_request]
 
 jobs:
   build:
