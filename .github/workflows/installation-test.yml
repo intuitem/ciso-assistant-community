@@ -1,0 +1,60 @@
+name: Installation test using Playwright
+
+on: push
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14.1
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.8"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install playwright
+        pip install pytest-playwright
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Ensure browsers are installed
+      run: python -m playwright install
+    - name: Install operating system dependencies
+      run: python -m playwright install-deps
+    - name: Create env variables
+      run: |
+        touch .env
+        echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
+        echo POSTGRES_NAME=postgres >> .env
+        echo POSTGRES_USER=postgres >> .env
+        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+        echo DB_HOST=localhost >> .env
+    - name: Setup environment
+      run: |
+        export $(grep -v '^#' .env | xargs)
+        python manage.py makemigrations core general cal
+        python manage.py migrate
+        sudo apt install gettext
+        python manage.py compilemessages
+        django-admin.py makemessages -l fr
+        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', '', 'root')" | python manage.py shell
+    - name: Run server
+      run: |
+        export $(grep -v '^#' .env | xargs)
+        python manage.py runserver &
+    - name: Run test
+      run: | 
+        export $(grep -v '^#' .env | xargs)
+        pytest asfTest --browser chromium --browser webkit --browser firefox --slowmo 100
