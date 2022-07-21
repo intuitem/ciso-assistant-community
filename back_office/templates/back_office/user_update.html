@@ -21,7 +21,14 @@
                                 {% for error in field.errors %}
                                     <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
                                 {% endfor %}
-                                {{ field }} 
+                                {% if field.field.widget|class == "ReadOnlyPasswordHashWidget" %}
+                                    {% if field.value == '' %}
+                                        {{ field }}
+                                    {% else %}
+                                    {% endif %}
+                                {% else %}
+                                    {{ field }} 
+                                {% endif %}
                                 <div class="help_text">
                                     {{ field.help_text|safe }}
                                 </div>
