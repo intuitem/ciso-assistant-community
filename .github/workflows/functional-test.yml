@@ -30,6 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        sudo apt install gettext
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Ensure browsers are installed
       run: python -m playwright install
@@ -46,11 +47,10 @@ jobs:
     - name: Setup environment
       run: |
         export $(grep -v '^#' .env | xargs)
-        python manage.py makemigrations core general cal
+        python manage.py makemigrations
         python manage.py migrate
-        sudo apt install gettext
         python manage.py compilemessages
-        django-admin.py makemessages -l fr
+        python manage.py makemessages -l fr
         python manage.py loaddata test-dump.json
         echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', '', 'root')" | python manage.py shell
         echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_user('root2', '', 'rootroot')" | python manage.py shell
