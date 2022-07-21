@@ -29,8 +29,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install playwright
-        pip install pytest-playwright
+        sudo apt install gettext
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Ensure browsers are installed
       run: python -m playwright install
@@ -49,9 +48,8 @@ jobs:
         export $(grep -v '^#' .env | xargs)
         python manage.py makemigrations core general cal
         python manage.py migrate
-        sudo apt install gettext
         python manage.py compilemessages
-        django-admin.py makemessages -l fr
+        python manage.py makemessages -l fr
         echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', '', 'root')" | python manage.py shell
     - name: Run server
       run: |
