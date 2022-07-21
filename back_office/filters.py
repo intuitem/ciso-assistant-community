@@ -69,12 +69,12 @@ class AnalysisFilter(GenericFilterSet):
     def get_full_names():
         full_names = ()
         users = User.objects.all()
-        # try:
-        for user in users:
-            full_names += (user.id, user.get_full_name),
-        # except Exception as e:
-        #     print(f"WORKAROUND: {e}")
-        # return full_names
+        try:
+            for user in users:
+                full_names += (user.id, user.get_full_name),
+        except Exception as e:
+            print(f"WORKAROUND: {e}")
+        return full_names
 
     orderby = GenericOrderingFilter(
         fields=(
