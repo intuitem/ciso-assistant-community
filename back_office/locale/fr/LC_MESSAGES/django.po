@@ -1406,7 +1406,7 @@ msgstr "Adresse Mail"
 
 #: back_office/templates/back_office/user_list.html:122
 msgid "inactive"
-msgstr ""
+msgstr "inactif"
 
 #: back_office/templates/back_office/user_list.html:125
 msgid "superuser"
