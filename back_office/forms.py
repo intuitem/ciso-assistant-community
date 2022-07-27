@@ -79,19 +79,17 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
         )
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
         self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
-        self.fields['user_permissions'].widget.attrs['class'] += ' h-72'
-        self.fields['user_permissions'].help_text += '<br>' + _("Hold down “Control”, or “⌘” on a Mac, to select more than one.")
         if password:
             password.help_text = password.help_text.format(
                 reverse('admin-password-change', 
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'groups', 'user_permissions']
+    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'groups']
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined']
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions']
 
 class AdminPasswordChangeForm(AdminPasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
@@ -105,22 +103,18 @@ class AdminPasswordChangeForm(AdminPasswordChangeForm):
 class GroupCreateForm(StyledModelForm):
     class Meta:
         model = Group
-        fields = "__all__"
+        exclude = ['permissions']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['permissions'].widget.attrs['class'] += ' h-96'
-        self.fields['permissions'].help_text += '<br>' + _("Hold down “Control”, or “⌘” on a Mac, to select more than one.")
 
 class GroupUpdateForm(StyledModelForm):
     class Meta:
         model = Group
-        fields = "__all__"
+        exclude = ['permissions']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['permissions'].widget.attrs['class'] += ' h-96'
-        self.fields['permissions'].help_text += '<br>' + _("Hold down “Control”, or “⌘” on a Mac, to select more than one.")
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):

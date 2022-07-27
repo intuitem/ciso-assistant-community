@@ -315,7 +315,7 @@ class UserUpdateView(PermissionRequiredMixin, UpdateView):
         return kwargs
 
     def get_success_url(self) -> str:
-        return reverse_lazy('user-list')
+        return self.request.POST.get('next', '/')
 
 class GroupListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_group'
@@ -357,6 +357,7 @@ class GroupUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["users"] = User.objects.filter(groups=self.get_object())
         context["crumbs"] = {'group-list': _('Groups')}
         return context
 
