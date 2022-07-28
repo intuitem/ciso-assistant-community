@@ -1,0 +1,10 @@
+{% extends 'back_office/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+<div class="">
+    {% with page_title=_('Role assignment') %}
+    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+</div>
+{% endblock %}

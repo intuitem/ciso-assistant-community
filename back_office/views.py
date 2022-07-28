@@ -338,6 +338,14 @@ class GroupListView(PermissionRequiredMixin, ListView):
         context['filter'] = filter
         return context
 
+class RoleListView(PermissionRequiredMixin, ListView):
+    permission_required = 'auth.view_role'
+    template_name = 'back_office/role_list.html'
+    context_object_name = 'role'
+
+    model = Group #Just to setup the page, Role model is not set yet.
+
+
 class GroupCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'auth.add_group'
     template_name = 'back_office/group_create.html'
