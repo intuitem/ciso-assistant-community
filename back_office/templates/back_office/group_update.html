@@ -32,10 +32,19 @@
         </div>
     </form>
 </div>
-<div class="bg-white rounded-lg shadow px-4 py-6 w-full">
-    <div class="grid justify-items-stretch grid-cols-2 mb-2">
-        <h2 class="text-xl font-semibold">{% trans "Associated users" %}</h2>
+<div class="flex flex-col w-full">
+    <div class="bg-white border mr-2 rounded-lg shadow px-4 py-6 w-full mb-4">
+        <div class="grid justify-items-stretch grid-cols-2 mb-2">
+            <h2 class="text-xl font-semibold">{% trans "Associated users" %}</h2>
+        </div>
+        {% include 'back_office/snippets/associated_users_list_nested.html' %}
     </div>
-    {% include 'back_office/snippets/users_list_nested.html' %}
+    <div class="bg-white border rounded-lg shadow px-4 py-6 w-full">
+        <div class="grid justify-items-stretch grid-cols-2 mb-2">
+            <h2 class="text-xl font-semibold">{% trans "List of users" %}</h2>
+        </div>
+        {% include 'back_office/snippets/users_list_nested.html' %}
+    </div>
 </div>
+
 {% endblock content %}

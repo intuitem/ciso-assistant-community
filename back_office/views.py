@@ -357,7 +357,8 @@ class GroupUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["users"] = User.objects.filter(groups=self.get_object())
+        context['users'] = User.objects.exclude(groups=self.get_object())
+        context["associated_users"] = User.objects.filter(groups=self.get_object())
         context["crumbs"] = {'group-list': _('Groups')}
         return context
 
