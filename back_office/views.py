@@ -11,7 +11,8 @@ from django.core.paginator import Paginator
 
 from datetime import date
 
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
+from .models import UserGroup, RoleAssignment
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
@@ -324,7 +325,7 @@ class GroupListView(PermissionRequiredMixin, ListView):
 
     ordering = 'id'
     paginate_by = 10
-    model = Group
+    model = UserGroup
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('name', 'id')
@@ -338,12 +339,12 @@ class GroupListView(PermissionRequiredMixin, ListView):
         context['filter'] = filter
         return context
 
-class RoleListView(PermissionRequiredMixin, ListView):
+class RoleAssignmentListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_role'
     template_name = 'back_office/role_list.html'
     context_object_name = 'role'
 
-    model = Group #Just to setup the page, Role model is not set yet.
+    model = RoleAssignment 
 
 
 class GroupCreateView(PermissionRequiredMixin, CreateView):
@@ -361,7 +362,7 @@ class GroupUpdateView(PermissionRequiredMixin, UpdateView):
     context_object_name = 'group'
     form_class = GroupUpdateForm
 
-    model = Group
+    model = UserGroup
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -715,7 +716,7 @@ class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
 class GroupDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'auth.delete_group'
 
-    model = Group
+    model = UserGroup
     success_url = reverse_lazy('group-list')
     template_name = 'back_office/snippets/group_delete_modal.html'
 

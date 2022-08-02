@@ -24,7 +24,7 @@ urlpatterns = [
 
     path('users/', login_required(views.UserListView.as_view()), name='user-list'),
     path('groups/', login_required(views.GroupListView.as_view()), name='group-list'),
-    path('roles/', login_required(views.RoleListView.as_view()), name='role-list'),
+    path('roles/', login_required(views.RoleAssignmentListView.as_view()), name='role-list'),
 
     # CREATE VIEWS
     path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='ra-create'),
