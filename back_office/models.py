@@ -20,9 +20,11 @@ class RoleAssignment(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
 
     def __str__(self):
-        return self.user.username + self.role
+        return "ra" + str(self.id)
 
-    # @classmethod
-    # def create(self):
-    #     if self.isUserGroup:
-    #         self.userGroup
+# Creation of a role assignment (only add)
+# Update of a role assignment = delete + create
+# Delete of a role assignment (only remove)
+
+# Add user to a usergroup (only add)
+# Remove user from a usergroup (only remove)
