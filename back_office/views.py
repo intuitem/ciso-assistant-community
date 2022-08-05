@@ -1,4 +1,5 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
@@ -12,7 +13,7 @@ from django.core.paginator import Paginator
 from datetime import date
 
 from django.contrib.auth.models import User
-from .models import UserGroup, RoleAssignment
+from .models import UserGroup, RoleAssignment, Role
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
 from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
@@ -54,7 +55,7 @@ class QuickStartView(PermissionRequiredMixin, ListView):
     def get_queryset(self):
         return True
 
-class ProjectListView(PermissionRequiredMixin, ListView):
+class ProjectListView(UserPassesTestMixin, ListView):
     permission_required = 'general.view_project'
     template_name = 'back_office/project_list.html'
     context_object_name = 'projects'
@@ -75,6 +76,12 @@ class ProjectListView(PermissionRequiredMixin, ListView):
         context['filter'] = filter
         context['project_create_form'] = ProjectForm
         return context
+
+    def test_func(self):
+        for ra in self.request.user.roleassignment_set.all():
+            if ra.has_perm(Permission.objects.get(codename="view_project")):
+                return True
+        return False
 
 class AssetListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_asset'
@@ -342,9 +349,23 @@ class GroupListView(PermissionRequiredMixin, ListView):
 class RoleAssignmentListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_role'
     template_name = 'back_office/role_list.html'
-    context_object_name = 'role'
+    context_object_name = 'roles'
 
-    model = RoleAssignment 
+    ordering = 'id'
+    paginate_by = 10
+    model = Role
+
+    def get_queryset(self):
+        qs = self.model.objects.all().order_by('name', 'id')
+        filtered_list = GroupFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = GroupFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        return context
 
 
 class GroupCreateView(PermissionRequiredMixin, CreateView):
@@ -373,6 +394,22 @@ class GroupUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
+
+class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'auth.change_role'
+    template_name = 'back_office/role_update.html'
+    context_object_name = 'role'
+    form_class = RoleAssignmentUpdateForm
+
+    model = Role
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'group-list': _('Groups')}
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('role-list')
 
 class RiskAnalysisCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_analysis'
@@ -733,7 +770,7 @@ class UserDeleteView(PermissionRequiredMixin, DeleteView):
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
 
-class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
+class ProjectUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'general.change_project'
     model = Project
     template_name = 'back_office/project_update.html'
@@ -759,6 +796,12 @@ class ProjectUpdateView(PermissionRequiredMixin, UpdateView):
             return reverse_lazy('project-list')
         else:
           return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        for ra in self.request.user.roleassignment_set.all():
+            if ra.has_domain_perm(Permission.objects.get(codename="change_project"), self.get_object().parent_group):
+                return True
+        return False
 
 
 class AssetUpdateView(PermissionRequiredMixin, UpdateView):

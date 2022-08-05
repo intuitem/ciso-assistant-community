@@ -6,5 +6,51 @@
     {% with page_title=_('Role assignment') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <th class="px-6 py-3">{% trans "Role Name" %}</th>
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                    <tr class="odd:bg-white even:bg-gray-50">
+                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="ml-0">
+                                    <a id="role{{ role.id }}" href="{% url 'role-update' role.id %}"
+                                    <a
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        {{ role.name|capfirst }}
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="">
+                                <span>
+                                    <a href="{% url 'role-update' role.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </span>
+
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=role header=_("Delete group?") model='group' %}
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td>
+                            <div class="text-black p-4">
+                                <i class="inline fas fa-exclamation-triangle"></i>
+                                <p class="inline test-gray-900">{% trans "No role found." %}</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'back_office/snippets/paginator.html' %}
+    </div>
 </div>
 {% endblock %}

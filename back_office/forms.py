@@ -1,6 +1,6 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from django.contrib.auth.models import User
-from .models import UserGroup
+from .models import UserGroup, Role
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -115,6 +115,15 @@ class GroupUpdateForm(StyledModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+class RoleAssignmentUpdateForm(StyledModelForm):
+    class Meta:
+        model = Role
+        fields = ['permissions']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['permissions'].widget.attrs['class'] += ' h-96'
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):

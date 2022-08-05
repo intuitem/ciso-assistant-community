@@ -69,6 +69,7 @@ urlpatterns = [
     path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
     path('users/<int:pk>/password', login_required(views.AdminPasswordChangeView.as_view()), name='admin-password-change'),
     path('groups/<int:pk>', login_required(views.GroupUpdateView.as_view()), name='group-update'),
+    path('roles/<int:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-update'),
     
     # DELETE VIEWS
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),

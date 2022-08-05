@@ -96,7 +96,7 @@
                     </a>
                 </li>
                 {% endif %}
-                {% if perms.general.view_project %}
+                {% comment %} {% if perms.general.view_project %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'project-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -106,7 +106,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects" %}</span>
                     </a>
                 </li>
-                {% endif %}
+                {% comment %} {% endif %} {% endcomment %}
                 {% if perms.general.view_project %}
                 <li class="to-page">
                     <a href="{% url 'asset-list' %}"
