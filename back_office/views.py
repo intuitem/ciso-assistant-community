@@ -65,7 +65,12 @@ class ProjectListView(UserPassesTestMixin, ListView):
     model = Project
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('lc_status', 'id')
+        projects_list = []
+        for ra in self.request.user.roleassignment_set.all():
+            for project in self.model.objects.all():
+                if project.parent_group in ra.domains.all():
+                    projects_list.append(project.name)
+        qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
