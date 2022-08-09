@@ -66,11 +66,14 @@ class ProjectListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         projects_list = []
-        for ra in self.request.user.roleassignment_set.all():
-            for project in self.model.objects.all():
-                if project.parent_group in ra.domains.all():
-                    projects_list.append(project.name)
-        qs = self.model.objects.filter(name__in=projects_list)
+        if self.request.user.is_superuser:
+            qs = self.model.objects.all()
+        else:
+            for ra in self.request.user.roleassignment_set.all():
+                for project in self.model.objects.all():
+                    if project.parent_group in ra.domains.all():
+                        projects_list.append(project.name)
+            qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -83,10 +86,10 @@ class ProjectListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        for ra in self.request.user.roleassignment_set.all():
-            if ra.has_perm(Permission.objects.get(codename="view_project")):
-                return True
-        return False
+        if self.request.user.is_superuser:
+            return True
+        else:
+            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="change_project"))
 
 class AssetListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_asset'
@@ -132,7 +135,7 @@ class ProjectsGroupListView(PermissionRequiredMixin, ListView):
         context['projects_domain_create_form'] = ProjectsGroupUpdateForm
         return context
 
-class RiskAnalysisListView(PermissionRequiredMixin, ListView):
+class RiskAnalysisListView(UserPassesTestMixin, ListView):
     permission_required = 'core.view_analysis'
     template_name = 'back_office/analysis_list.html'
     context_object_name = 'analyses'
@@ -142,7 +145,15 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
     model = Analysis
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('is_draft', 'id')
+        analyses_list = []
+        if self.request.user.is_superuser:
+            qs = self.model.objects.all()
+        else:
+            for ra in self.request.user.roleassignment_set.all():
+                for analysis in self.model.objects.all():
+                    if analysis.project.parent_group in ra.domains.all():
+                        analyses_list.append(analysis.project)
+            qs = self.model.objects.filter(project__in=analyses_list)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -159,6 +170,12 @@ class RiskAnalysisListView(PermissionRequiredMixin, ListView):
         context['model'] = 'analysis' # self.model._meta.verbose_name # TODO: Find a way to get unlocalized model verbose_name, as localization may break stuff e.g. urls
         context['analysis_create_form'] = RiskAnalysisCreateForm
         return context
+
+    def test_func(self):
+        if self.request.user.is_superuser:
+            return True
+        else:
+            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="view_analysis"))
 
 class RiskInstanceListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_riskinstance'
@@ -553,7 +570,7 @@ class RiskInstanceCreateViewModal(PermissionRequiredMixin, CreateView):
     context_object_name = 'instance'
     form_class = RiskInstanceCreateForm
 
-class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
+class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'core.change_analysis'
     model = Analysis
     template_name = 'back_office/ra_update.html'
@@ -573,6 +590,12 @@ class RiskAnalysisUpdateView(PermissionRequiredMixin, UpdateView):
             return reverse_lazy('ra-list')
         else:
           return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        if self.request.user.is_superuser:
+            return True
+        else:
+            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="change_analysis"), self.get_object().project.parent_group)
 
 class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_analysis'
@@ -803,10 +826,10 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        for ra in self.request.user.roleassignment_set.all():
-            if ra.has_domain_perm(Permission.objects.get(codename="change_project"), self.get_object().parent_group):
-                return True
-        return False
+        if self.request.user.is_superuser:
+            return True
+        else:
+            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="change_project"), self.get_object().parent_group)
 
 
 class AssetUpdateView(PermissionRequiredMixin, UpdateView):

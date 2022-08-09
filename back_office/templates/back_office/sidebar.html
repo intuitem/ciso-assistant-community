@@ -34,7 +34,7 @@
                     </div>
                 </li>
 
-                {% if perms.core.view_analysis %}
+                {% comment %} {% if perms.core.view_analysis %} {% endcomment %}
                 <li class="to-page">
                     <a id="analyses_registry" href="{% url 'ra-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -44,8 +44,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk analyses" %}</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if perms.core.view_riskinstance %}
+                {% comment %} {% endif %} {% endcomment %}
+                {% comment %} {% if perms.core.view_riskinstance %} {% endcomment %}
                 <li class="to-page">
                     <a id="risk_scenarios" href="{% url 'ri-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -55,8 +55,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk scenarios" %}</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if perms.core.view_mitigation %}
+                {% comment %} {% endif %} {% endcomment %}
+                {% comment %} {% if perms.core.view_mitigation %} {% endcomment %}
                 <li class="to-page">
                     <a id="security_measures" href="{% url 'mtg-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -66,8 +66,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security measures" %}</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if perms.core.view_riskacceptance %}
+                {% comment %} {% endif %}
+                {% if perms.core.view_riskacceptance %} {% endcomment %}
                 <li class="to-page">
                     <a id="risk_acceptances" href="{% url 'acceptance-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -77,7 +77,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk acceptances" %}</span>
                     </a>
                 </li>
-                {% endif %}
+                {% comment %} {% endif %} {% endcomment %}
 
                 <li class="nav-seperator text-md">
                     <div class="flex flex-row items-center h-8">
@@ -85,7 +85,7 @@
                     </div>
                 </li>
 
-                {% if perms.general.view_projectsgroup %}
+                {% comment %} {% if perms.general.view_projectsgroup %} {% endcomment %}
                 <li class="to-page">
                     <a id="projectsdomains" href="{% url 'pd-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -95,7 +95,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects domains" %}</span>
                     </a>
                 </li>
-                {% endif %}
+                {% comment %} {% endif %} {% endcomment %}
                 {% comment %} {% if perms.general.view_project %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'project-list' %}"
@@ -107,7 +107,7 @@
                     </a>
                 </li>
                 {% comment %} {% endif %} {% endcomment %}
-                {% if perms.general.view_project %}
+                {% comment %} {% if perms.general.view_project %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'asset-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -117,8 +117,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %}</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if perms.general.view_parentrisk %}
+                {% comment %} {% endif %}
+                {% if perms.general.view_parentrisk %} {% endcomment %}
                 <li class="to-page">
                     <a id="threats" href="{% url 'threat-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -128,8 +128,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Threats" %}</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if perms.general.view_solution %}
+                {% comment %} {% endif %}
+                {% if perms.general.view_solution %} {% endcomment %}
                 <li class="to-page">
                     <a id="securityFunctions" href="{% url 'security-function-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
                     <span class="nav-link-icon">
@@ -138,13 +138,13 @@
                     <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security functions" %}</span>
                     </a>
                 </li>
-                {% endif %}
+                {% comment %} {% endif %} {% endcomment %}
                 <li class="nav-seperator text-md">
                     <div class="flex flex-row items-center h-8">
                         <div class="t">{% trans "Settings" %}</div>
                     </div>
                 </li>
-                {% if perms.auth.view_user %}
+                {% comment %} {% if perms.auth.view_user %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'user-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -154,8 +154,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Users" %}</span>
                     </a>
                 </li>
-                {% endif %}
-                {% if perms.auth.view_group %}
+                {% comment %} {% endif %}
+                {% if perms.auth.view_group %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'group-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -165,7 +165,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
                     </a>
                 </li>
-                {% endif %}
+                {% comment %} {% endif %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'role-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">

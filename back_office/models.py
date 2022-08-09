@@ -20,22 +20,21 @@ class RoleAssignment(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
 
     def __str__(self):
-        return str(self.id)
+        if self.isUserGroup:
+            return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user group: " + str(self.userGroup.name)
+        else:
+            return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
 
-    def has_domain_perm(self, perms, domain):
-        if domain in self.domains.all() and perms in self.role.permissions.all():
-            return True
+    def is_access_allowed(user, perm, domain = False):
+        if not domain:
+            for ra in user.roleassignment_set.all():
+                if perm in ra.role.permissions.all():
+                    return True
         else:
-            return False
-    
-    def has_perm(self, perms):
-        if perms in self.role.permissions.all():
-            return True
-        else:
-            return False
-    
-    def gabarit_perm(self):
-        return True
+           for ra in user.roleassignment_set.all():
+                if domain in ra.domains.all() and perm in ra.role.permissions.all():
+                    return True
+        return False
 
 # Creation of a role assignment (only add)
 # Update of a role assignment = delete + create
