@@ -11,9 +11,8 @@ class Role(Group):
     pass
 
 class RoleAssignment(models.Model):
-
-    isUserGroup = models.BooleanField(_('is a User Group'),
-        default=False,)
+    
+    isUserGroup = models.BooleanField(_('is a User Group'), default=False,)
     domains = models.ManyToManyField(ProjectsGroup,verbose_name=_("Domain"))
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     userGroup = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
@@ -25,15 +24,28 @@ class RoleAssignment(models.Model):
         else:
             return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
 
-    def is_access_allowed(user, perm, domain = False):
-        if not domain:
-            for ra in user.roleassignment_set.all():
-                if perm in ra.role.permissions.all():
-                    return True
+    def is_access_allowed(user, perm, domain = None):
+        if user.is_superuser:
+            return True
         else:
-           for ra in user.roleassignment_set.all():
-                if domain in ra.domains.all() and perm in ra.role.permissions.all():
-                    return True
+            if not domain:
+                for ra in user.roleassignment_set.all():
+                    if perm in ra.role.permissions.all():
+                        return True
+                for userGroup in UserGroup.objects.all():
+                    if user in userGroup.user_set.all():
+                        for ra in userGroup.roleassignment_set.all():
+                            if perm in ra.role.permissions.all():
+                                return True
+            else:
+                for ra in user.roleassignment_set.all():
+                    if domain in ra.domains.all() and perm in ra.role.permissions.all():
+                        return True
+                for userGroup in UserGroup.objects.all():
+                    if user in userGroup.user_set.all():
+                        for ra in userGroup.roleassignment_set.all():
+                            if domain in ra.domains.all() and perm in ra.role.permissions.all():
+                                return True
         return False
 
 # Creation of a role assignment (only add)

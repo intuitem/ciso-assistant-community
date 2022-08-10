@@ -56,7 +56,6 @@ class QuickStartView(PermissionRequiredMixin, ListView):
         return True
 
 class ProjectListView(UserPassesTestMixin, ListView):
-    permission_required = 'general.view_project'
     template_name = 'back_office/project_list.html'
     context_object_name = 'projects'
 
@@ -73,6 +72,12 @@ class ProjectListView(UserPassesTestMixin, ListView):
                 for project in self.model.objects.all():
                     if project.parent_group in ra.domains.all():
                         projects_list.append(project.name)
+            for userGroup in UserGroup.objects.all():
+                    if self.request.user in userGroup.user_set.all():
+                        for ra in userGroup.roleassignment_set.all():
+                            for project in self.model.objects.all():
+                                if project.parent_group in ra.domains.all():
+                                    projects_list.append(project.name)
             qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -86,10 +91,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        if self.request.user.is_superuser:
-            return True
-        else:
-            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="change_project"))
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='view_project'))
 
 class AssetListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_asset'
@@ -172,10 +174,7 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        if self.request.user.is_superuser:
-            return True
-        else:
-            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="view_analysis"))
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_analysis"))
 
 class RiskInstanceListView(PermissionRequiredMixin, ListView):
     permission_required = 'core.view_riskinstance'
@@ -592,10 +591,7 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        if self.request.user.is_superuser:
-            return True
-        else:
-            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="change_analysis"), self.get_object().project.parent_group)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_analysis"), domain = self.get_object().project.parent_group)
 
 class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_analysis'
@@ -799,7 +795,6 @@ class UserDeleteView(PermissionRequiredMixin, DeleteView):
         return reverse_lazy('user-list')
 
 class ProjectUpdateView(UserPassesTestMixin, UpdateView):
-    permission_required = 'general.change_project'
     model = Project
     template_name = 'back_office/project_update.html'
     context_object_name = 'project'
@@ -826,11 +821,7 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        if self.request.user.is_superuser:
-            return True
-        else:
-            return RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="change_project"), self.get_object().parent_group)
-
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_project'), domain = self.get_object().parent_group)
 
 class AssetUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_asset'
@@ -847,8 +838,7 @@ class AssetUpdateView(PermissionRequiredMixin, UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('asset-list')
 
-class ProjectCreateView(PermissionRequiredMixin, CreateView):
-    permission_required = 'general.add_project'
+class ProjectCreateView(UserPassesTestMixin, CreateView):
     model = Project
     template_name = 'back_office/project_create.html'
     context_object_name = 'project'
@@ -857,8 +847,10 @@ class ProjectCreateView(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('project-list')
 
-class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
-    permission_required = 'general.add_project'
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().parent_group)
+
+class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
     template_name = 'back_office/snippets/project_create_modal.html'
     context_object_name = 'project'
@@ -876,6 +868,9 @@ class ProjectCreateViewModal(PermissionRequiredMixin, CreateView):
 
     def get_success_url(self):
         return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().parent_group)
 
 class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_asset'
@@ -906,4 +901,3 @@ class AdminPasswordChangeView(PasswordChangeView):
         kwargs["user"] = get_object_or_404(User, pk=self.kwargs['pk'])
         # print('DEBUG: User =', get_object_or_404(User, pk=self.kwargs['pk']))
         return kwargs
-
