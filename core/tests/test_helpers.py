@@ -10,8 +10,8 @@ risk = {}
 
 @pytest.fixture()
 def test_setUp(db):
-    risk["parentgroup"] = ProjectsGroup.objects.create(name = "Test ProjectsGroup")
-    risk["project"] = Project.objects.create(name = "Test project", parent_group = risk.get("parentgroup"))
+    risk["parentgroup"] = Folder.objects.create(name = "Test Folder")
+    risk["project"] = Project.objects.create(name = "Test project", folder = risk.get("folder"))
     risk["analysis"] = Analysis.objects.create(project = risk.get("project"))
     risk["parentrisk"] = ParentRisk.objects.create(title = "Test ParentRisk")
     risk["riskinstance"] = RiskInstance.objects.create(title = "Test Ri", analysis = risk.get("analysis"), 
@@ -61,8 +61,8 @@ def test_p_risks_2(db, test_setUp):
 def test_risks_per_project_groups(db, test_setUp): # Syntax problem, not good to compare strings, to review!
     list = [
         {
-            'prj_grp': ProjectsGroup.objects.get(name = "Test ProjectsGroup"),
-            'ri_level': RiskInstance.objects.filter(analysis__project__parent_group=ProjectsGroup.objects.get(name = "Test ProjectsGroup")).values(
+            'prj_grp': Folder.objects.get(name = "Test Folder"),
+            'ri_level': RiskInstance.objects.filter(analysis__project__parent_group=Folder.objects.get(name = "Test Folder")).values(
             'current_level').annotate(total=Count('current_level'))
         }
     ]
@@ -84,7 +84,7 @@ def test_risk_status(db, test_setUp):
                                  'y_max_rsk': 2}
 
 def test_risks_levels_per_prj_grp(db, test_setUp):
-    assert risks_levels_per_prj_grp() == {'names': ['Test ProjectsGroup'], 
+    assert risks_levels_per_prj_grp() == {'names': ['Test Folder'], 
                                           'current_out': {'VL': [{'value': 0, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 1, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
                                           'residual_out': {'VL': [{'value': 1, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 0, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
                                           'y_max_rsk': 2}

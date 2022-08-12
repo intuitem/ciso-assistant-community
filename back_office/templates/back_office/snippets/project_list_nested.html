@@ -14,7 +14,7 @@
         </th>
     </thead>
     <tbody>
-        {% for project in projects %}{% if project.parent_group == domain %}
+        {% for project in projects %}{% if project.folder == domain %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">

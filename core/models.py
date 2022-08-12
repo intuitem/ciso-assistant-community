@@ -8,7 +8,6 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from datetime import date
 
-
 class Analysis(models.Model):
     RATING_METHODS = [
         ('default', _('Balanced (default)')),

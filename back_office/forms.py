@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPas
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
-from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
+from general.models import Asset, ParentRisk, Project, Folder, Solution
 from django.utils.translation import gettext_lazy as _
 
 class DefaultDateInput(DateInput):
@@ -162,9 +162,9 @@ class MitigationUpdateForm(StyledModelForm):
             'eta': DefaultDateInput(format='%Y-%m-%d')
         }
 
-class ProjectsGroupUpdateForm(StyledModelForm):
+class FolderUpdateForm(StyledModelForm):
     class Meta:
-        model = ProjectsGroup
+        model = Folder
         fields = '__all__'
 
 class ProjectUpdateForm(StyledModelForm):
@@ -196,7 +196,7 @@ class ProjectForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        labels = {'parent_group': _('Domain')}
+        labels = {'domain': _('Domain')}
 
 class AssetForm(StyledModelForm):
     class Meta:

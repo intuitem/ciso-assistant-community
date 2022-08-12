@@ -72,7 +72,7 @@
                         <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                             <div>
                                 <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Domain" %}</p>
-                                {{ filter.form.parent_group }}
+                                {{ filter.form.folder }}
                             </div>
                             <div>
                                 <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Status" %}</p>
@@ -141,7 +141,7 @@
                     </th>
                     <td class="px-6 py-4">
                         <p class="text-gray-900 whitespace-no-wrap capitalize">
-                            {{ project.parent_group }}
+                            {{ project.folder }}
                         </p>
                     </td>
                     <td class="px-6 py-4">

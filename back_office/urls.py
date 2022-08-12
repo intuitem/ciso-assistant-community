@@ -16,7 +16,7 @@ urlpatterns = [
     path('measures/', login_required(views.MitigationListView.as_view()), name='mtg-list'),
     path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
 
-    path('projects-domains/', login_required(views.ProjectsGroupListView.as_view()), name='pd-list'),
+    path('projects-domains/', login_required(views.FolderListView.as_view()), name='pd-list'),
     path('projects/', login_required(views.ProjectListView.as_view()), name='project-list'),
     path('assets/', login_required(views.AssetListView.as_view()), name='asset-list'),
     path('threats/', login_required(views.ParentRiskListView.as_view()), name='threat-list'),
@@ -41,8 +41,8 @@ urlpatterns = [
     path('RA/<int:parent_analysis>/RS/create', login_required(views.RiskInstanceCreateView.as_view()), name='ri-create'),
     path('RS/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
 
-    path('PD/create', login_required(views.ProjectsGroupCreateView.as_view()), name='pd-create'),
-    path('PD/create_modal/', login_required(views.ProjectsGroupCreateViewModal.as_view()), name='pd-create-modal'),
+    path('PD/create', login_required(views.FolderCreateView.as_view()), name='pd-create'),
+    path('PD/create_modal/', login_required(views.FolderCreateViewModal.as_view()), name='pd-create-modal'),
 
     path('PRJ/create', login_required(views.ProjectCreateView.as_view()), name='project-create'),
     path('PRJ/create_modal/', login_required(views.ProjectCreateViewModal.as_view()), name='project-create-modal'),
@@ -62,7 +62,7 @@ urlpatterns = [
     path('TH/<int:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
     path('SF/<int:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
 
-    path('PD/<int:pk>', login_required(views.ProjectsGroupUpdateView.as_view()), name='pd-update'),
+    path('PD/<int:pk>', login_required(views.FolderUpdateView.as_view()), name='pd-update'),
     path('PRJ/<int:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
     path('AST/<int:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
 
@@ -79,7 +79,7 @@ urlpatterns = [
     path('PRJ/<int:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
     path('AST/<int:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
     path('SF/<int:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
-    path('PD/<int:pk>/delete/', login_required(views.ProjectsGroupDeleteView.as_view()), name='pd-delete'),
+    path('PD/<int:pk>/delete/', login_required(views.FolderDeleteView.as_view()), name='pd-delete'),
     path('TH/<int:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),
 
     path('users/<int:pk>/delete', login_required(views.UserDeleteView.as_view()), name='user-delete'),

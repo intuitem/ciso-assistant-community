@@ -4,7 +4,7 @@ from django_filters import FilterSet, OrderingFilter, ModelMultipleChoiceFilter,
 from django.db.models import Q
 
 from core.models import Analysis, RiskInstance, Mitigation, Solution, RiskAcceptance
-from general.models import Asset, ProjectsGroup, Project, ParentRisk, Solution
+from general.models import Asset, Folder, Project, ParentRisk, Solution
 from general.models import ParentRisk, Project
 from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext_lazy as _
@@ -238,7 +238,7 @@ class ProjectsDomainFilter(GenericFilterSet):
         }
     )
     class Meta:
-        model = ProjectsGroup
+        model = Folder
         fields = ['name', 'department']
 
 class ProjectFilter(GenericFilterSet):
@@ -248,21 +248,21 @@ class ProjectFilter(GenericFilterSet):
                 'placeholder': _('Search project...')
         }
     ))
-    parent_group = GenericModelMultipleChoiceFilter(queryset=ProjectsGroup.objects.all())
+    folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.all())
     lc_status = GenericMultipleChoiceFilter(choices=Project.PRJ_LC_STATUS)
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
             ('lc_status', 'lc_status'),
-            ('parent_group', 'parent_group'),
+            ('domain', 'domain'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
             'lc_status': _('status'.capitalize()),
             '-lc_status': _('Status (descending)'),
-            'parent_group': _('Parent domain'),
-            '-parent_group': _('Parent domain (descending)'),
+            'domain': _('Parent domain'),
+            '-domain': _('Parent domain (descending)'),
         }
     )
 

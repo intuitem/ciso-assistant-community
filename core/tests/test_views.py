@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser, User
 
 from core.models import Analysis, RiskInstance, Mitigation
 from core.views import *
-from general.models import ParentRisk, Project, ProjectsGroup
+from general.models import ParentRisk, Project, Folder
 from django.utils.translation import gettext_lazy as _
 
 import pytest
@@ -17,8 +17,8 @@ requestAnonym = factory.get('/core/analytics')
 
 @pytest.fixture
 def test_setUp(db):
-    list["parentgroup"] = ProjectsGroup.objects.create()
-    list["project"] = Project.objects.create(name="Test Project", parent_group = list.get("parentgroup"))
+    list["folder"] = Folder.objects.create()
+    list["project"] = Project.objects.create(name="Test Project", folder = list.get("folder"))
     list["analysis"] = Analysis.objects.create(project = list.get("project"))
     list["parentrisk"] = ParentRisk.objects.create()
     list["riskinstance"] = RiskInstance.objects.create(analysis = list.get("analysis"), parent_risk = list.get("parentrisk"), current_proba = "VL", current_impact="L")

@@ -3,8 +3,9 @@ from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
 
-class ProjectsGroup(models.Model):
+class Folder(models.Model):
     name = models.CharField(max_length=200, default=_("<Group title>"), verbose_name=_("Name"))
+    # childrenClassName
     department = models.CharField(
         max_length=100, default=_("<Internal organization division>"), 
         blank=True, null=True, verbose_name=_("Department"))
@@ -30,7 +31,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200, default=_("<short project name>"), verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"), 
         null=True, blank=True, verbose_name=_("Internal ID"))
-    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     lc_status = models.CharField(max_length=20, default='in_design', 
         choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True, 
@@ -43,7 +44,7 @@ class Project(models.Model):
         verbose_name_plural = _("Projects")
 
     def department(self):
-        return self.parent_group.department
+        return self.folder.department
     department.short_description = _("Department")
 
     def __str__(self):
@@ -99,7 +100,7 @@ class GroupExtra(models.Model):
     group_email = models.EmailField(max_length=70, blank=True, default="", 
         help_text=_("Group email for notifications"),
         verbose_name=_("Group email"))
-    prj_groups = models.ManyToManyField(ProjectsGroup, blank=True, 
+    prj_groups = models.ManyToManyField(Folder, blank=True, 
         verbose_name=_("Allowed Projects Groups"), 
         help_text=_("Project groups allowed for read access on the Portal. "))
 

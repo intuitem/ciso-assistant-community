@@ -11,8 +11,8 @@ from django.utils.translation import gettext_lazy as _
 # TODO: we could consider nested inlines at some point
 
 
-@admin.register(ProjectsGroup)
-class ProjectsGroupAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+@admin.register(Folder)
+class FolderAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
@@ -108,7 +108,7 @@ class MitigationAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdm
 class ProjectAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     model = Project
 
-    list_display = ('name', 'parent_group', 'department', 'lc_status')
+    list_display = ('name', 'folder', 'department', 'lc_status')
 
 
 

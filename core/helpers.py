@@ -124,7 +124,7 @@ def p_risks_2():
 
 def risks_per_project_groups():
     output = list()
-    for prj_grp in ProjectsGroup.objects.all().order_by('name'):
+    for prj_grp in Folder.objects.all().order_by('name'):
         ri_level = RiskInstance.objects.filter(analysis__project__parent_group=prj_grp).values(
             'current_level').annotate(total=Count('current_level'))
         output.append({"prj_grp": prj_grp, "ri_level": ri_level})
@@ -219,7 +219,7 @@ def risks_levels_per_prj_grp():
     residual_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
 
     max_tmp = list()
-    for grp in ProjectsGroup.objects.all():
+    for grp in Folder.objects.all():
 
         for lvl in RiskInstance.RATING_OPTIONS:
             cnt = RiskInstance.objects.filter(analysis__project__parent_group=grp, current_level=lvl[0]).count()

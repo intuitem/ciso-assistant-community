@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from .models import UserGroup, RoleAssignment, Role
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskInstance, Mitigation, RiskAcceptance
-from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
+from general.models import Asset, ParentRisk, Project, Folder, Solution
 
 from .forms import *
 
@@ -44,7 +44,7 @@ class QuickStartView(PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['projects_domain_create_form'] = ProjectsGroupUpdateForm
+        context['projects_domain_create_form'] = FolderUpdateForm
         context['project_create_form'] = ProjectForm
         context['analysis_create_form'] = RiskAnalysisCreateForm
         context['threat_create_form'] = ThreatCreateForm
@@ -70,12 +70,12 @@ class ProjectListView(UserPassesTestMixin, ListView):
         else:
             for ra in self.request.user.roleassignment_set.all():
                 for project in self.model.objects.all():
-                    if project.parent_group in ra.domains.all():
+                    if project.folder in ra.domains.all():
                         projects_list.append(project.name)
             for userGroup in UserGroup.get_userGroups(self.request.user):
                 for ra in userGroup.roleassignment_set.all():
                     for project in self.model.objects.all():
-                        if project.parent_group in ra.domains.all():
+                        if project.folder in ra.domains.all():
                             projects_list.append(project.name)
             qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
@@ -114,14 +114,14 @@ class AssetListView(PermissionRequiredMixin, ListView):
         context['asset_create_form'] = AssetForm
         return context
 
-class ProjectsGroupListView(PermissionRequiredMixin, ListView):
+class FolderListView(PermissionRequiredMixin, ListView):
     permission_required = 'general.view_projectsgroup'
     template_name = 'back_office/project_domain_list.html'
     context_object_name = 'domains'
 
     ordering = 'id'
     paginate_by = 10
-    model = ProjectsGroup
+    model = Folder
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
@@ -133,7 +133,7 @@ class ProjectsGroupListView(PermissionRequiredMixin, ListView):
         queryset = self.get_queryset()
         filter = ProjectsDomainFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['projects_domain_create_form'] = ProjectsGroupUpdateForm
+        context['projects_domain_create_form'] = FolderUpdateForm
         return context
 
 class RiskAnalysisListView(UserPassesTestMixin, ListView):
@@ -152,12 +152,12 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         else:
             for ra in self.request.user.roleassignment_set.all():
                 for analysis in self.model.objects.all():
-                    if analysis.project.parent_group in ra.domains.all():
+                    if analysis.project.folder in ra.domains.all():
                         analyses_list.append(analysis.project)
             for userGroup in UserGroup.get_userGroups(self.request.user):
                 for ra in userGroup.roleassignment_set.all():
                     for analysis in self.model.objects.all():
-                        if analysis.project.parent_group in ra.domains.all():
+                        if analysis.project.folder in ra.domains.all():
                             analyses_list.append(analysis.project)
             qs = self.model.objects.filter(project__in=analyses_list)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
@@ -525,22 +525,22 @@ class RiskScenarioCreateViewModal(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
 
-class ProjectsGroupCreateView(PermissionRequiredMixin, CreateView):
+class FolderCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_projectsgroup'
-    model = ProjectsGroup
+    model = Folder
     template_name = 'back_office/pd_update.html'
     context_object_name = 'domain'
-    form_class = ProjectsGroupUpdateForm
+    form_class = FolderUpdateForm
 
     def get_success_url(self) -> str:
         return reverse_lazy('pd-list')
 
-class ProjectsGroupCreateViewModal(PermissionRequiredMixin, CreateView):
+class FolderCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_projectsgroup'
-    model = ProjectsGroup
+    model = Folder
     template_name = 'back_office/snippets/projects_domain_create_modal.html'
     context_object_name = 'domain'
-    form_class = ProjectsGroupUpdateForm
+    form_class = FolderUpdateForm
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -595,7 +595,7 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_analysis"), domain = self.get_object().project.parent_group)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_analysis"), domain = self.get_object().project.folder)
 
 class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_analysis'
@@ -673,10 +673,10 @@ class AssetDeleteView(PermissionRequiredMixin, DeleteView):
     def get_success_url(self) -> str:
         return reverse_lazy('asset-list')
 
-class ProjectsGroupDeleteView(PermissionRequiredMixin, DeleteView):
+class FolderDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'general.delete_projectsgroup'
 
-    model = ProjectsGroup
+    model = Folder
     success_url = reverse_lazy('pd-list')
     template_name = 'back_office/snippets/projects_domain_delete_modal.html'
 
@@ -757,18 +757,18 @@ class ThreatUpdateView(PermissionRequiredMixin, UpdateView):
         else:
           return self.request.POST.get('next', '/')
 
-class ProjectsGroupUpdateView(PermissionRequiredMixin, UpdateView):
+class FolderUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_projectsgroup'
-    model = ProjectsGroup
+    model = Folder
     template_name = 'back_office/pd_update.html'
     context_object_name = 'domain'
-    form_class = ProjectsGroupUpdateForm
+    form_class = FolderUpdateForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['projects'] = Project.objects.filter(parent_group=self.get_object())
+        context['projects'] = Project.objects.filter(folder=self.get_object())
         context['crumbs'] = {'pd-list': _('Projects domains')}
-        context['project_create_form'] = ProjectForm(initial={'parent_group': get_object_or_404(ProjectsGroup, id=self.kwargs['pk'])})
+        context['project_create_form'] = ProjectForm(initial={'domain': get_object_or_404(Folder, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
@@ -825,7 +825,7 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_project'), domain = self.get_object().parent_group)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_project'), domain = self.get_object().folder)
 
 class AssetUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_asset'
@@ -852,7 +852,7 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().parent_group)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().folder)
 
 class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
@@ -874,7 +874,7 @@ class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().parent_group)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().folder)
 
 class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_asset'
