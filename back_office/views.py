@@ -72,12 +72,11 @@ class ProjectListView(UserPassesTestMixin, ListView):
                 for project in self.model.objects.all():
                     if project.parent_group in ra.domains.all():
                         projects_list.append(project.name)
-            for userGroup in UserGroup.objects.all():
-                    if self.request.user in userGroup.user_set.all():
-                        for ra in userGroup.roleassignment_set.all():
-                            for project in self.model.objects.all():
-                                if project.parent_group in ra.domains.all():
-                                    projects_list.append(project.name)
+            for userGroup in UserGroup.get_userGroups(self.request.user):
+                for ra in userGroup.roleassignment_set.all():
+                    for project in self.model.objects.all():
+                        if project.parent_group in ra.domains.all():
+                            projects_list.append(project.name)
             qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -155,6 +154,11 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
                 for analysis in self.model.objects.all():
                     if analysis.project.parent_group in ra.domains.all():
                         analyses_list.append(analysis.project)
+            for userGroup in UserGroup.get_userGroups(self.request.user):
+                for ra in userGroup.roleassignment_set.all():
+                    for analysis in self.model.objects.all():
+                        if analysis.project.parent_group in ra.domains.all():
+                            analyses_list.append(analysis.project)
             qs = self.model.objects.filter(project__in=analyses_list)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
