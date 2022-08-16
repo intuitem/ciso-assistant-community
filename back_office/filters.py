@@ -228,18 +228,18 @@ class ProjectsDomainFilter(GenericFilterSet):
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
-            ('department', 'department'),
+            ('description', 'description'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
-            'department': _('department'.capitalize()),
-            '-department': _('Department (descending)'),
+            'description': _('description'.capitalize()),
+            '-description': _('Description (descending)'),
         }
     )
     class Meta:
         model = Folder
-        fields = ['name', 'department']
+        fields = ['name', 'description']
 
 class ProjectFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(

@@ -7,7 +7,7 @@
             {% trans "Name" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Department" %}
+            {% trans "Description" %}
         </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Status" %}
@@ -29,7 +29,7 @@
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if project.department %}{{ project.department }}{% else %}--{% endif %}
+                        {% if project.description %}{{ project.description }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">

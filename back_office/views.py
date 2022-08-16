@@ -70,12 +70,12 @@ class ProjectListView(UserPassesTestMixin, ListView):
         else:
             for ra in self.request.user.roleassignment_set.all():
                 for project in self.model.objects.all():
-                    if project.folder in ra.domains.all():
+                    if project.folder in ra.folders.all():
                         projects_list.append(project.name)
             for userGroup in UserGroup.get_userGroups(self.request.user):
                 for ra in userGroup.roleassignment_set.all():
                     for project in self.model.objects.all():
-                        if project.folder in ra.domains.all():
+                        if project.folder in ra.folders.all():
                             projects_list.append(project.name)
             qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
@@ -152,12 +152,12 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         else:
             for ra in self.request.user.roleassignment_set.all():
                 for analysis in self.model.objects.all():
-                    if analysis.project.folder in ra.domains.all():
+                    if analysis.project.folder in ra.folders.all():
                         analyses_list.append(analysis.project)
             for userGroup in UserGroup.get_userGroups(self.request.user):
                 for ra in userGroup.roleassignment_set.all():
                     for analysis in self.model.objects.all():
-                        if analysis.project.folder in ra.domains.all():
+                        if analysis.project.folder in ra.folders.all():
                             analyses_list.append(analysis.project)
             qs = self.model.objects.filter(project__in=analyses_list)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
@@ -595,7 +595,7 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_analysis"), domain = self.get_object().project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_analysis"), folder = self.get_object().project.folder)
 
 class RiskAnalysisDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'core.delete_analysis'
@@ -825,7 +825,7 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
           return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_project'), domain = self.get_object().folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_project'), folder = self.get_object().folder)
 
 class AssetUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'general.change_asset'
@@ -852,7 +852,7 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), folder = self.get_object().folder)
 
 class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
@@ -874,7 +874,7 @@ class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), domain = self.get_object().folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'),folder = self.get_object().folder)
 
 class AssetCreateViewModal(PermissionRequiredMixin, CreateView):
     permission_required = 'general.add_asset'

@@ -108,7 +108,7 @@ class MitigationAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdm
 class ProjectAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     model = Project
 
-    list_display = ('name', 'folder', 'department', 'lc_status')
+    list_display = ('name', 'folder', 'description', 'lc_status')
 
 
 

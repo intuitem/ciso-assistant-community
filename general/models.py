@@ -6,13 +6,13 @@ from django.utils.translation import gettext_lazy as _
 class Folder(models.Model):
     name = models.CharField(max_length=200, default=_("<Group title>"), verbose_name=_("Name"))
     # childrenClassName
-    department = models.CharField(
-        max_length=100, default=_("<Internal organization division>"), 
-        blank=True, null=True, verbose_name=_("Department"))
+    description = models.CharField(
+        max_length=100, default=_("<Short description>"), 
+        blank=True, null=True, verbose_name=_("Description"))
 
     class Meta:
-        verbose_name = _("Projects Group")
-        verbose_name_plural = _("Projects Groups")
+        verbose_name = _("Domain")
+        verbose_name_plural = _("Domain")
 
     def __str__(self):
         return self.name
@@ -43,9 +43,9 @@ class Project(models.Model):
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
 
-    def department(self):
-        return self.folder.department
-    department.short_description = _("Department")
+    def description(self):
+        return self.folder.description
+    description.short_description = _("Description")
 
     def __str__(self):
         return self.name
