@@ -51,6 +51,8 @@ urlpatterns = [
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
     path('groups/create', login_required(views.GroupCreateView.as_view()), name='group-create'),
+
+    path('role-assignment/create', login_required(views.RoleAssignmentCreateView.as_view()), name='role-assignment-create'),
     
     # path('RS/create-modal', login_required(views.RiskInstanceCreateViewModal.as_view()), name='ri-create-modal'),
     
@@ -69,7 +71,7 @@ urlpatterns = [
     path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
     path('users/<int:pk>/password', login_required(views.AdminPasswordChangeView.as_view()), name='admin-password-change'),
     path('groups/<int:pk>', login_required(views.GroupUpdateView.as_view()), name='group-update'),
-    path('roles/<int:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-update'),
+    path('role-assignment/<int:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
     
     # DELETE VIEWS
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
@@ -84,4 +86,6 @@ urlpatterns = [
 
     path('users/<int:pk>/delete', login_required(views.UserDeleteView.as_view()), name='user-delete'),
     path('groups/<int:pk>/delete', login_required(views.GroupDeleteView.as_view()), name='group-delete'),
+
+    path('role-assignment/<int:pk>/delete', login_required(views.RoleAssignmentDeleteView.as_view()), name='role-assignment-delete'),
 ]

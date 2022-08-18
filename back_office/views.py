@@ -369,16 +369,16 @@ class GroupListView(PermissionRequiredMixin, ListView):
         return context
 
 class RoleAssignmentListView(PermissionRequiredMixin, ListView):
-    permission_required = 'auth.view_role'
+    permission_required = 'back_office.view_roleassignment'
     template_name = 'back_office/role_list.html'
-    context_object_name = 'roles'
+    context_object_name = 'assignments'
 
     ordering = 'id'
     paginate_by = 10
-    model = Role
+    model = RoleAssignment
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('name', 'id')
+        qs = self.model.objects.all().order_by('id')
         filtered_list = GroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -387,7 +387,47 @@ class RoleAssignmentListView(PermissionRequiredMixin, ListView):
         queryset = self.get_queryset()
         filter = GroupFilter(self.request.GET, queryset)
         context['filter'] = filter
+        context['roles'] = Role.objects.all().order_by('id')
         return context
+
+class RoleAssignmentCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'back_office.add_roleassignment'
+    template_name = 'back_office/role_assignment_create.html'
+    context_object_name = 'assignment'
+    form_class = RoleAssignmentForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('role-list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'role-list': _('Role assignment')}
+        return context
+
+class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'back_office.change_roleassignment'
+    template_name = 'back_office/role_assignment_update.html'
+    context_object_name = 'assignment'
+    model = RoleAssignment
+    form_class = RoleAssignmentForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('role-list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'role-list': _('Role assignment')}
+        return context
+
+class RoleAssignmentDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'back_office.delete_roleassignment'
+    model = RoleAssignment
+    success_url = reverse_lazy('role-list')
+    template_name = 'back_office/snippets/role_assignment_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('role-list')
+    
 
 
 class GroupCreateView(PermissionRequiredMixin, CreateView):
@@ -417,7 +457,7 @@ class GroupUpdateView(PermissionRequiredMixin, UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
 
-class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
+class RoleUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'auth.change_role'
     template_name = 'back_office/role_update.html'
     context_object_name = 'role'

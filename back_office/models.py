@@ -19,11 +19,11 @@ class RoleAssignment(models.Model):
     userGroup = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
 
-    def __str__(self):
-        if self.isUserGroup:
-            return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user group: " + str(self.userGroup.name)
-        else:
-            return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
+    # def __str__(self):
+    #     if self.isUserGroup:
+    #         return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user group: " + str(self.userGroup.name)
+    #     else:
+    #         return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
 
     def is_access_allowed(user, perm, domain = False):
         if not domain:

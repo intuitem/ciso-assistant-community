@@ -1,6 +1,6 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from django.contrib.auth.models import User
-from .models import UserGroup, Role
+from .models import RoleAssignment, UserGroup, Role
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -201,4 +201,9 @@ class ProjectForm(StyledModelForm):
 class AssetForm(StyledModelForm):
     class Meta:
         model = Asset
+        fields = '__all__'
+
+class RoleAssignmentForm(StyledModelForm):
+    class Meta:
+        model = RoleAssignment
         fields = '__all__'
