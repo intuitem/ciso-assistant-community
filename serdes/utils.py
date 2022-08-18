@@ -11,7 +11,7 @@ def serialize_objects(objects, path, format="json"):
     path: str
         Path to file to serialize to.
     format: str
-        Format to serialize to. e.g. json, yaml, xml.
+        Format to serialize to. This includes json, jsonl, yaml, xml.
 
     Returns:
     --------
