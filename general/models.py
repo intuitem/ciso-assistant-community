@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import Group
+from back_office.models import *
 from django.utils.translation import gettext_lazy as _
 
 
@@ -16,6 +17,13 @@ class Folder(models.Model):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def create(cls, name):
+        UserGroup.objects.create(name= name + " Auditors")
+        UserGroup.objects.create(name= name + " Analysts")
+        UserGroup.objects.create(name= name + " Domain Managers")
+        return cls(name=name)
 
 
 class Project(models.Model):
