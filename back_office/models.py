@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import Group, User
 from django.utils.translation import gettext_lazy as _
 
-from general.models import Folder
-
 class UserGroup(Group):
     
     def get_userGroups(user):
@@ -21,7 +19,7 @@ class RoleAssignment(models.Model):
     # isMainFolderVisible = models.BooleanField(_('top folder are visible'), default=True)
     # isSubFolderVisible = models.BooleanField(_('sub folders are visible'), default=False)
     isUserGroup = models.BooleanField(_('is a User Group'), default=False)
-    folders = models.ManyToManyField(Folder,verbose_name=_("Domain"))
+    folders = models.ManyToManyField("general.Folder",verbose_name=_("Domain"))
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     userGroup = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
