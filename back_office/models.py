@@ -26,9 +26,9 @@ class RoleAssignment(models.Model):
 
     def __str__(self):
         if self.isUserGroup:
-            return "id=" + str(self.id) + ", domains: " + str(list(self.folders.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user group: " + str(self.userGroup.name)
+            return "id=" + str(self.id) + ", folders: " + str(list(self.folders.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user group: " + str(self.userGroup.name)
         else:
-            return "id=" + str(self.id) + ", domains: " + str(list(self.folders.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
+            return "id=" + str(self.id) + ", folders: " + str(list(self.folders.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
 
     def is_access_allowed(user, perm, folder = None):
         if user.is_superuser:
