@@ -350,8 +350,7 @@ class UserUpdateView(PermissionRequiredMixin, UpdateView):
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
 
-class GroupListView(PermissionRequiredMixin, ListView):
-    permission_required = 'auth.view_group'
+class GroupListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/group_list.html'
     context_object_name = 'groups'
 
@@ -360,7 +359,10 @@ class GroupListView(PermissionRequiredMixin, ListView):
     model = UserGroup
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('name', 'id')
+        if self.request.user.is_superuser:
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(name__in=UserGroup.get_manager_userGroups(self.request.user))
         filtered_list = GroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -370,6 +372,9 @@ class GroupListView(PermissionRequiredMixin, ListView):
         filter = GroupFilter(self.request.GET, queryset)
         context['filter'] = filter
         return context
+    
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='view_usergroup'))
 
 class RoleAssignmentListView(PermissionRequiredMixin, ListView):
     permission_required = 'auth.view_role'

@@ -11,6 +11,23 @@ class UserGroup(Group):
                     l.append(userGroup)
         return l
 
+    def get_manager_userGroups(manager):
+        l = []
+        folders = []
+        for userGroup in UserGroup.get_userGroups(manager):
+            for ra in userGroup.roleassignment_set.all():
+                if  ra.role.name == "Domain Manager":
+                    for folder in ra.folders.all():
+                        folders.append(folder)
+        for userGroup in UserGroup.objects.all():
+            for ra in userGroup.roleassignment_set.all():
+                for folder in folders:
+                    if folder in ra.folders.all():
+                        l.append(userGroup)
+        return l
+
+
+
 class Role(Group):
     pass
 
