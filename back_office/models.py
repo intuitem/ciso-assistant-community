@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class UserGroup(Group):
     
+    folder = models.ForeignKey("general.Folder",verbose_name=_("Domain"), on_delete=models.CASCADE, default=None)
     def get_userGroups(user):
         l = []
         for userGroup in UserGroup.objects.all():
@@ -20,10 +21,8 @@ class UserGroup(Group):
                     for folder in ra.folders.all():
                         folders.append(folder)
         for userGroup in UserGroup.objects.all():
-            for ra in userGroup.roleassignment_set.all():
-                for folder in folders:
-                    if folder in ra.folders.all():
-                        l.append(userGroup)
+            if userGroup.folder in folders:
+                l.append(userGroup)
         return l
 
 

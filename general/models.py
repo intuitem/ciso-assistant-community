@@ -21,9 +21,9 @@ class Folder(models.Model):
     @classmethod
     def create(cls, name):
         folder = Folder.objects.create(name=name)
-        auditors = UserGroup.objects.create(name= name + " Auditors")
-        analysts = UserGroup.objects.create(name= name + " Analysts")
-        managers = UserGroup.objects.create(name= name + " Domain Managers")
+        auditors = UserGroup.objects.create(name= name + " Auditors", folder = folder)
+        analysts = UserGroup.objects.create(name= name + " Analysts", folder = folder)
+        managers = UserGroup.objects.create(name= name + " Domain Managers", folder = folder)
         ra1 = RoleAssignment.objects.create(isUserGroup = True, userGroup = auditors, role = Role.objects.get(name="Auditor"))
         ra1.folders.add(folder)
         ra2 = RoleAssignment.objects.create(isUserGroup = True, userGroup = analysts, role = Role.objects.get(name="Analyst"))

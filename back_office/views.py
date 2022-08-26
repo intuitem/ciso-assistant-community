@@ -407,8 +407,7 @@ class GroupCreateView(PermissionRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
 
-class GroupUpdateView(PermissionRequiredMixin, UpdateView):
-    permission_required = 'auth.change_group'
+class GroupUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/group_update.html'
     context_object_name = 'group'
     form_class = GroupUpdateForm
@@ -424,6 +423,9 @@ class GroupUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_usergroup'), folder=self.get_object().folder)
 
 class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'auth.change_role'
