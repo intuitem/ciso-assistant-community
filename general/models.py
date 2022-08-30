@@ -1,3 +1,4 @@
+from tkinter import CASCADE
 from django.db import models
 from django.contrib.auth.models import Group
 from back_office.models import *
@@ -5,22 +6,27 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Folder(models.Model):
+    class ContentType(models.TextChoices):
+        ROOT = "GL", _("GLOBAL")
+        DOMAIN = "DO", _("DOMAIN")
     name = models.CharField(max_length=200, default=_("<Group title>"), verbose_name=_("Name"))
     # childrenClassName
     description = models.CharField(
         max_length=100, default=_("<Short description>"), 
         blank=True, null=True, verbose_name=_("Description"))
+    content_type = models.CharField(max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
+    parent_folder = models.ForeignKey("self", null=True, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = _("Domain")
-        verbose_name_plural = _("Domain")
+        verbose_name = _("Folder")
+        verbose_name_plural = _("Folders")
 
     def __str__(self):
         return self.name
 
     @classmethod
     def create(cls, name):
-        folder = Folder.objects.create(name=name)
+        folder = Folder.objects.create(name=name, parent_folder=Folder.objects.get(name="root"))
         auditors = UserGroup.objects.create(name= name + " Auditors", folder = folder)
         analysts = UserGroup.objects.create(name= name + " Analysts", folder = folder)
         managers = UserGroup.objects.create(name= name + " Domain Managers", folder = folder)
