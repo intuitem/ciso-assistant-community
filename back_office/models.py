@@ -67,6 +67,17 @@ class RoleAssignment(models.Model):
                             return True
         return False
 
+    def get_accessible_folders(user):
+        folders_dict = {}
+        for ra in user.roleassignment_set.all():
+            for folder in ra.folders.all():
+                folders_dict[folder] = ra.role.name
+        for userGroup in UserGroup.get_userGroups(user):
+            for ra in userGroup.roleassignment_set.all():
+                for folder in ra.folders.all():
+                    folders_dict[folder] = ra.role.name
+        return folders_dict
+
 # Creation of a role assignment (only add)
 # Update of a role assignment = delete + create
 # Delete of a role assignment (only remove)
