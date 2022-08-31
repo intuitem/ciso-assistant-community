@@ -533,7 +533,7 @@ class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"), folder = self.get_object().project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"))
 
 class MeasureCreateViewModal(UserPassesTestMixin, CreateView):
     permission_required = 'core.add_mitigation'
@@ -558,7 +558,7 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskacceptance"), folder = self.get_object().risk_instance.analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskacceptance"))
 
 class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'core.change_riskacceptance'
@@ -615,7 +615,7 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"), folder = self.get_object().project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"))
 
 class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskInstance
@@ -628,7 +628,7 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"), folder = self.get_object().analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"))
 
 class FolderCreateView(UserPassesTestMixin, CreateView):
     model = Folder
@@ -675,7 +675,7 @@ class RiskInstanceCreateView(UserPassesTestMixin, CreateView):
         return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['parent_analysis']).id})
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskinstance"), folder = self.get_object().analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskinstance"))
 
 class RiskInstanceCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskInstance
@@ -684,7 +684,7 @@ class RiskInstanceCreateViewModal(UserPassesTestMixin, CreateView):
     form_class = RiskInstanceCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskinstance"), folder = self.get_object().analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskinstance"))
 
 class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'core.change_analysis'
@@ -770,7 +770,7 @@ class ThreatDeleteView(UserPassesTestMixin, DeleteView):
     template_name = 'back_office/snippets/threat_delete_modal.html'
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_threat"))
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_parentrisk"))
 
 class ProjectDeleteView(UserPassesTestMixin, DeleteView):
     model = Project
@@ -987,7 +987,7 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'), folder = self.get_object().folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'))
 
 class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
@@ -1009,7 +1009,7 @@ class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'),folder = self.get_object().folder)
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'))
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateView):
     model = Asset

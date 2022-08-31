@@ -26,6 +26,11 @@
                         {{ form.comments.errors }}
                         {{ form.comments }}
                     </div>
+                    <div class="flex flex-row w-full">
+                        <p class="text-sm font-semibold">{{ form.isPublished.label }}</p>
+                        <p class="ml-2"> {{ form.isPublished }}</p>
+                        {{ form.isPublished.errors }}
+                    </div>
                 </div>
             </section>
             <div class="flex justify-end space-x-2">

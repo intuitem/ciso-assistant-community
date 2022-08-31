@@ -74,6 +74,8 @@ class Project(models.Model):
 
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, default=Folder.objects.get(content_type="GL").pk)
+    isPublished = models.BooleanField(_('published'), default=False)
 
     class Meta:
         verbose_name = _("Threat")
@@ -91,6 +93,8 @@ class Asset(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'))
     business_value = models.TextField(blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, default=Folder.objects.get(content_type="GL").pk)
+    isPublished = models.BooleanField(_('published'), default=False)
 
     def __str__(self):
         return self.name
@@ -100,6 +104,8 @@ class Solution(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, default=Folder.objects.get(content_type="GL").pk)
+    isPublished = models.BooleanField(_('published'), default=False)
 
     class Meta:
         verbose_name = _("Solution")
