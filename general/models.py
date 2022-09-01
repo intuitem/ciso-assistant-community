@@ -59,7 +59,7 @@ class Project(models.Model):
 
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -89,7 +89,7 @@ class Solution(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:

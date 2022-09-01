@@ -56,18 +56,22 @@ class MeasureCreateForm(StyledModelForm):
 
         
 class SecurityFunctionCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
 
     class Meta:
         model = Solution
         fields = '__all__'
-        exclude = ['folder']
 
 class ThreatCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ThreatCreateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
 
     class Meta:
         model = ParentRisk
         fields = '__all__'
-        exclude = ['folder']
 
 class UserCreateForm(UserCreationForm, StyledModelForm):
     pass
@@ -168,13 +172,17 @@ class MitigationUpdateForm(StyledModelForm):
         }
 
 class FolderUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FolderUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['parent_folder'].queryset = Folder.objects.filter(content_type="GL")
 
     class Meta:
         model = Folder
         fields = '__all__'
-        exclude = ['parent_folder']
+        exclude = ['content_type']
 
 class ProjectUpdateForm(StyledModelForm):
+
     class Meta:
         model = Project
         fields = '__all__'
@@ -201,6 +209,10 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         labels = {'risk_instance': _('Risk scenario')}
 
 class ProjectForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="DO")
+
     class Meta:
         model = Project
         fields = '__all__'
