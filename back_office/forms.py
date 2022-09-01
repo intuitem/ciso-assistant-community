@@ -1,6 +1,7 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from django.contrib.auth.models import User
 from .models import UserGroup, Role
+from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
@@ -55,11 +56,17 @@ class MeasureCreateForm(StyledModelForm):
 
         
 class SecurityFunctionCreateForm(StyledModelForm):
+    folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
+    folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
+
     class Meta:
         model = Solution
         fields = '__all__'
 
 class ThreatCreateForm(StyledModelForm):
+    folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
+    folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
+
     class Meta:
         model = ParentRisk
         fields = '__all__'
@@ -163,6 +170,9 @@ class MitigationUpdateForm(StyledModelForm):
         }
 
 class FolderUpdateForm(StyledModelForm):
+    folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
+    parent_folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
+
     class Meta:
         model = Folder
         fields = '__all__'
@@ -179,6 +189,7 @@ class SecurityFunctionUpdateForm(StyledModelForm):
         fields = '__all__'
 
 class ThreatUpdateForm(StyledModelForm):
+
     class Meta:
         model = ParentRisk
         fields = '__all__'
@@ -199,6 +210,9 @@ class ProjectForm(StyledModelForm):
         labels = {'domain': _('Domain')}
 
 class AssetForm(StyledModelForm):
+    folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
+    folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
+
     class Meta:
         model = Asset
         fields = '__all__'
