@@ -432,12 +432,12 @@ class GroupListView(UserPassesTestMixin, ListView):
     model = UserGroup
 
     def get_queryset(self):
-        root = False
+        admin = False
         for userGroup in UserGroup.get_userGroups(self.request.user):
             for ra in userGroup.roleassignment_set.all():
-                if Folder.objects.get(content_type="GL") in ra.folders.all():
-                    root=True
-        if root:
+                if Folder.objects.get(content_type="GL") in ra.folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
+                    admin=True
+        if admin:
             qs = self.model.objects.all()
         else:
             qs = self.model.objects.filter(name__in=UserGroup.get_manager_userGroups(self.request.user))
