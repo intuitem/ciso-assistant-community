@@ -649,6 +649,16 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
     form_class = FolderUpdateForm
 
     def get_success_url(self) -> str:
+        folder = Folder.objects.latest("id")
+        auditors = UserGroup.objects.create(name= folder.name + " Auditors", folder = folder)
+        analysts = UserGroup.objects.create(name= folder.name + " Analysts", folder = folder)
+        managers = UserGroup.objects.create(name= folder.name + " Domain Managers", folder = folder)
+        ra1 = RoleAssignment.objects.create(isUserGroup = True, userGroup = auditors, role = Role.objects.get(name="Auditor"))
+        ra1.folders.add(folder)
+        ra2 = RoleAssignment.objects.create(isUserGroup = True, userGroup = analysts, role = Role.objects.get(name="Analyst"))
+        ra2.folders.add(folder)
+        ra3 = RoleAssignment.objects.create(isUserGroup = True, userGroup = managers, role = Role.objects.get(name="Domain Manager"))
+        ra3.folders.add(folder)
         return self.request.POST.get('next', '/')
 
     def test_func(self):

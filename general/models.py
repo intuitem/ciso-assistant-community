@@ -5,7 +5,6 @@ from django.contrib.auth.models import Group
 from back_office.models import *
 from django.utils.translation import gettext_lazy as _
 
-
 class Folder(models.Model):
     class ContentType(models.TextChoices):
         ROOT = "GL", _("GLOBAL")
@@ -24,21 +23,6 @@ class Folder(models.Model):
 
     def __str__(self):
         return self.name
-
-    @classmethod
-    def create(cls, name):
-        folder = Folder.objects.create(name=name, parent_folder=Folder.objects.get(name="root"))
-        auditors = UserGroup.objects.create(name= name + " Auditors", folder = folder)
-        analysts = UserGroup.objects.create(name= name + " Analysts", folder = folder)
-        managers = UserGroup.objects.create(name= name + " Domain Managers", folder = folder)
-        ra1 = RoleAssignment.objects.create(isUserGroup = True, userGroup = auditors, role = Role.objects.get(name="Auditor"))
-        ra1.folders.add(folder)
-        ra2 = RoleAssignment.objects.create(isUserGroup = True, userGroup = analysts, role = Role.objects.get(name="Analyst"))
-        ra2.folders.add(folder)
-        ra3 = RoleAssignment.objects.create(isUserGroup = True, userGroup = managers, role = Role.objects.get(name="Domain Manager"))
-        ra3.folders.add(folder)
-        return cls(name=name)
-
 
 class Project(models.Model):
     PRJ_LC_STATUS = [
@@ -76,7 +60,7 @@ class Project(models.Model):
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True)
-    isPublished = models.BooleanField(_('published'), default=False)
+    isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:
         verbose_name = _("Threat")
@@ -95,7 +79,7 @@ class Asset(models.Model):
     business_value = models.TextField(blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True)
-    isPublished = models.BooleanField(_('published'), default=False)
+    isPublished = models.BooleanField(_('published'), default=True)
 
     def __str__(self):
         return self.name
@@ -106,7 +90,7 @@ class Solution(models.Model):
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True)
-    isPublished = models.BooleanField(_('published'), default=False)
+    isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:
         verbose_name = _("Solution")
