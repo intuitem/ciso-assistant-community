@@ -207,9 +207,10 @@ class ProjectForm(StyledModelForm):
         labels = {'domain': _('Domain')}
 
 class AssetForm(StyledModelForm):
-    folder = Folder.objects.get(name="Global")
+    def __init__(self, *args, **kwargs):
+        super(AssetForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
 
     class Meta:
         model = Asset
         fields = '__all__'
-        exclude = ['folder']
