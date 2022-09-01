@@ -1,4 +1,4 @@
-name: Installation test using Playwright
+name: Startup test using Playwright
 
 on: 
   push:
@@ -50,6 +50,7 @@ jobs:
         python manage.py migrate
         python manage.py compilemessages
         python manage.py makemessages -l fr
+        bash built-in.sh
         echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', '', 'root')" | python manage.py shell
     - name: Run server
       run: |
