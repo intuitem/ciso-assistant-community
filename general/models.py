@@ -59,7 +59,7 @@ class Project(models.Model):
 
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True, default=Folder.objects.all().first())
     isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:

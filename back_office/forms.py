@@ -56,20 +56,18 @@ class MeasureCreateForm(StyledModelForm):
 
         
 class SecurityFunctionCreateForm(StyledModelForm):
-    # folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
-    # folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
 
     class Meta:
         model = Solution
         fields = '__all__'
+        exclude = ['folder']
 
 class ThreatCreateForm(StyledModelForm):
-    # folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
-    # folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
 
     class Meta:
         model = ParentRisk
         fields = '__all__'
+        exclude = ['folder']
 
 class UserCreateForm(UserCreationForm, StyledModelForm):
     pass
@@ -170,12 +168,11 @@ class MitigationUpdateForm(StyledModelForm):
         }
 
 class FolderUpdateForm(StyledModelForm):
-    # folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
-    # parent_folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
 
     class Meta:
         model = Folder
         fields = '__all__'
+        exclude = ['parent_folder']
 
 class ProjectUpdateForm(StyledModelForm):
     class Meta:
@@ -210,9 +207,9 @@ class ProjectForm(StyledModelForm):
         labels = {'domain': _('Domain')}
 
 class AssetForm(StyledModelForm):
-    # folders = [str(folder) for folder in Folder.objects.filter(content_type="GL")]
-    # folder = forms.ChoiceField(choices=([(folder, folder) for folder in folders]))
+    folder = Folder.objects.get(name="Global")
 
     class Meta:
         model = Asset
         fields = '__all__'
+        exclude = ['folder']
