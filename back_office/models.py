@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group, User, Permission
 from django.utils.translation import gettext_lazy as _
 
 class UserGroup(Group):
@@ -67,16 +67,23 @@ class RoleAssignment(models.Model):
                             return True
         return False
 
-    def get_accessible_folders(user):
-        folders_dict = {}
+    def get_accessible_folders(folder, user, contentType):
+        folders_list= list()
         for ra in user.roleassignment_set.all():
-            for folder in ra.folders.all():
-                folders_dict[folder] = ra.role.name
+            for scope in ra.folders.all():
+                if scope.content_type == contentType and scope.parent_folder == folder and Permission.objects.get(codename = "view_folder") in ra.role.permissions.all():
+                    folders_list.append(scope)
+                elif scope.content_type == "GL" and Permission.objects.get(codename = "view_folder"):
+                    return True
         for userGroup in UserGroup.get_userGroups(user):
             for ra in userGroup.roleassignment_set.all():
-                for folder in ra.folders.all():
-                    folders_dict[folder] = ra.role.name
-        return folders_dict
+                for scope in ra.folders.all():
+                    if scope.content_type == contentType and scope.parent_folder == folder and Permission.objects.get(codename = "view_folder") in ra.role.permissions.all():
+                        folders_list.append(scope)
+                    elif scope.content_type == "GL" and Permission.objects.get(codename = "view_folder"):
+                        return True
+        return folders_list
+
 
 # Creation of a role assignment (only add)
 # Update of a role assignment = delete + create

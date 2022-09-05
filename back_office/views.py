@@ -127,17 +127,10 @@ class FolderListView(UserPassesTestMixin, ListView):
     model = Folder
 
     def get_queryset(self):
-        folders_list = []
-        root = False
-        for userGroup in UserGroup.get_userGroups(self.request.user):
-            for ra in userGroup.roleassignment_set.all():
-                if Folder.objects.get(content_type="GL") in ra.folders.all():
-                    root=True
-        if root:
+        folders_list =  RoleAssignment.get_accessible_folders(Folder.objects.get(name="Global"), self.request.user, "DO")
+        if folders_list == True:
             qs = self.model.objects.filter(content_type="DO")
         else:
-            for userGroup in UserGroup.get_manager_userGroups(self.request.user):
-                folders_list.append(UserGroup.objects.get(name=userGroup).folder.name)
             qs = self.model.objects.filter(name__in=folders_list)
         filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
