@@ -124,10 +124,10 @@ def p_risks_2():
 
 def risks_per_project_groups():
     output = list()
-    for prj_grp in Folder.objects.all().order_by('name'):
-        ri_level = RiskInstance.objects.filter(analysis__project__parent_group=prj_grp).values(
+    for folder in Folder.objects.all().order_by('name'):
+        ri_level = RiskInstance.objects.filter(analysis__project__folder=folder).values(
             'current_level').annotate(total=Count('current_level'))
-        output.append({"prj_grp": prj_grp, "ri_level": ri_level})
+        output.append({"folder": folder, "ri_level": ri_level})
     return output
 
 
@@ -219,18 +219,18 @@ def risks_levels_per_prj_grp():
     residual_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
 
     max_tmp = list()
-    for grp in Folder.objects.all():
+    for folder in Folder.objects.all():
 
         for lvl in RiskInstance.RATING_OPTIONS:
-            cnt = RiskInstance.objects.filter(analysis__project__parent_group=grp, current_level=lvl[0]).count()
+            cnt = RiskInstance.objects.filter(analysis__project__folder=folder, current_level=lvl[0]).count()
             current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            cnt = RiskInstance.objects.filter(analysis__project__parent_group=grp, residual_level=lvl[0]).count()
+            cnt = RiskInstance.objects.filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
             residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            max_tmp.append(RiskInstance.objects.filter(analysis__project__parent_group=grp).count())
+            max_tmp.append(RiskInstance.objects.filter(analysis__project__folder=folder).count())
 
-        names.append(str(grp))
+        names.append(str(folder))
 
     y_max_rsk = max(max_tmp, default=0) + 1
 
