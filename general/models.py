@@ -2,7 +2,6 @@ from tkinter import CASCADE
 from django.db import models
 from django.db.models import When, Exists
 from django.contrib.auth.models import Group
-from back_office.models import *
 from django.utils.translation import gettext_lazy as _
 
 class Folder(models.Model):
@@ -23,6 +22,14 @@ class Folder(models.Model):
 
     def __str__(self):
         return self.name
+
+    def sub_folders(self):
+        def sub_folders_in(f, sub_folder_list):
+            for sub_folder in f.folder_set.all():
+                sub_folder_list.append(sub_folder)
+                sub_folders_in(sub_folder, sub_folder_list)
+            return sub_folder_list
+        return sub_folders_in(self, [])
 
 class Project(models.Model):
     PRJ_LC_STATUS = [

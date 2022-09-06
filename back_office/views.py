@@ -74,8 +74,8 @@ class ProjectListView(UserPassesTestMixin, ListView):
                 for project in self.model.objects.all():
                     if project.folder in ra.folders.all():
                         projects_list.append(project.name)
-            for userGroup in UserGroup.get_userGroups(self.request.user):
-                for ra in userGroup.roleassignment_set.all():
+            for user_group in UserGroup.get_user_groups(self.request.user):
+                for ra in user_group.roleassignment_set.all():
                     for project in self.model.objects.all():
                         if project.folder in ra.folders.all():
                             projects_list.append(project.name)
@@ -163,8 +163,8 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
                 for analysis in self.model.objects.all():
                     if analysis.project.folder in ra.folders.all():
                         analyses_list.append(analysis.project)
-            for userGroup in UserGroup.get_userGroups(self.request.user):
-                for ra in userGroup.roleassignment_set.all():
+            for user_group in UserGroup.get_user_groups(self.request.user):
+                for ra in user_group.roleassignment_set.all():
                     for analysis in self.model.objects.all():
                         if analysis.project.folder in ra.folders.all():
                             analyses_list.append(analysis.project)
@@ -207,8 +207,8 @@ class RiskInstanceListView(UserPassesTestMixin, ListView):
                 for ri in self.model.objects.all():
                     if ri.analysis.project.folder in ra.folders.all():
                         ri_list.append(ri.analysis)
-            for userGroup in UserGroup.get_userGroups(self.request.user):
-                for ra in userGroup.roleassignment_set.all():
+            for user_group in UserGroup.get_user_groups(self.request.user):
+                for ra in user_group.roleassignment_set.all():
                     for ri in self.model.objects.all():
                         if ri.analysis.project.folder in ra.folders.all():
                             ri_list.append(ri.analysis)
@@ -253,8 +253,8 @@ class MitigationListView(UserPassesTestMixin, ListView):
                 for mitigation in self.model.objects.all():
                     if mitigation.risk_instance.analysis.project.folder in ra.folders.all():
                         mitigation_list.append(mitigation.risk_instance)
-            for userGroup in UserGroup.get_userGroups(self.request.user):
-                for ra in userGroup.roleassignment_set.all():
+            for user_group in UserGroup.get_user_groups(self.request.user):
+                for ra in user_group.roleassignment_set.all():
                     for mitigation in self.model.objects.all():
                         if mitigation.risk_instance.analysis.project.folder in ra.folders.all():
                             mitigation_list.append(mitigation.risk_instance)
@@ -345,8 +345,8 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
                 for risk_acceptance in self.model.objects.all():
                     if risk_acceptance.risk_instance.analysis.project.folder in ra.folders.all():
                         risk_acceptance_list.append(risk_acceptance.risk_instance)
-            for userGroup in UserGroup.get_userGroups(self.request.user):
-                for ra in userGroup.roleassignment_set.all():
+            for user_group in UserGroup.get_user_groups(self.request.user):
+                for ra in user_group.roleassignment_set.all():
                     for risk_acceptance in self.model.objects.all():
                         if risk_acceptance.risk_instance.analysis.project.folder in ra.folders.all():
                             risk_acceptance_list.append(risk_acceptance.risk_instance)
@@ -426,14 +426,14 @@ class GroupListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         admin = False
-        for userGroup in UserGroup.get_userGroups(self.request.user):
-            for ra in userGroup.roleassignment_set.all():
+        for user_group in UserGroup.get_user_groups(self.request.user):
+            for ra in user_group.roleassignment_set.all():
                 if Folder.objects.get(content_type="GL") in ra.folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
                     admin=True
         if admin:
             qs = self.model.objects.all()
         else:
-            qs = self.model.objects.filter(name__in=UserGroup.get_manager_userGroups(self.request.user))
+            qs = self.model.objects.filter(name__in=UserGroup.get_manager_user_groups(self.request.user))
         filtered_list = GroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -646,11 +646,11 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
         auditors = UserGroup.objects.create(name= folder.name + " Auditors", folder = folder)
         analysts = UserGroup.objects.create(name= folder.name + " Analysts", folder = folder)
         managers = UserGroup.objects.create(name= folder.name + " Domain Managers", folder = folder)
-        ra1 = RoleAssignment.objects.create(isUserGroup = True, userGroup = auditors, role = Role.objects.get(name="Auditor"))
+        ra1 = RoleAssignment.objects.create(isUserGroup = True, user_group = auditors, role = Role.objects.get(name="Auditor"))
         ra1.folders.add(folder)
-        ra2 = RoleAssignment.objects.create(isUserGroup = True, userGroup = analysts, role = Role.objects.get(name="Analyst"))
+        ra2 = RoleAssignment.objects.create(isUserGroup = True, user_group = analysts, role = Role.objects.get(name="Analyst"))
         ra2.folders.add(folder)
-        ra3 = RoleAssignment.objects.create(isUserGroup = True, userGroup = managers, role = Role.objects.get(name="Domain Manager"))
+        ra3 = RoleAssignment.objects.create(isUserGroup = True, user_group = managers, role = Role.objects.get(name="Domain Manager"))
         ra3.folders.add(folder)
         return self.request.POST.get('next', '/')
 
