@@ -1,4 +1,3 @@
-from tkinter import CASCADE
 from django.db import models
 from django.db.models import When, Exists
 from django.contrib.auth.models import Group
