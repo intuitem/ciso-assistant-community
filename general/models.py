@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import When, Exists
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
@@ -43,7 +42,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200, default=_("<short project name>"), verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"), 
         null=True, blank=True, verbose_name=_("Internal ID"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"), null=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     lc_status = models.CharField(max_length=20, default='in_design', 
         choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True, 
@@ -65,7 +64,7 @@ class Project(models.Model):
 
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -84,7 +83,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'))
     business_value = models.TextField(blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     isPublished = models.BooleanField(_('published'), default=True)
 
     def __str__(self):
@@ -95,7 +94,7 @@ class Solution(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     isPublished = models.BooleanField(_('published'), default=True)
 
     class Meta:

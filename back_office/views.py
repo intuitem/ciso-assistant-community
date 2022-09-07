@@ -67,19 +67,10 @@ class ProjectListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         projects_list = []
-        if self.request.user.is_superuser:
-            qs = self.model.objects.all()
-        else:
-            for ra in self.request.user.roleassignment_set.all():
-                for project in self.model.objects.all():
-                    if project.folder in ra.folders.all():
-                        projects_list.append(project.name)
-            for user_group in UserGroup.get_user_groups(self.request.user):
-                for ra in user_group.roleassignment_set.all():
-                    for project in self.model.objects.all():
-                        if project.folder in ra.folders.all():
-                            projects_list.append(project.name)
-            qs = self.model.objects.filter(name__in=projects_list)
+        for object in RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project):
+            if object[1]:
+                projects_list.append(object[0])
+        qs = self.model.objects.filter(name__in=projects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -127,7 +118,7 @@ class FolderListView(UserPassesTestMixin, ListView):
     model = Folder
 
     def get_queryset(self):
-        folders_list =  RoleAssignment.get_accessible_folders(Folder.objects.get(name="Global"), self.request.user, "DO")
+        folders_list = RoleAssignment.get_accessible_folders(Folder.objects.get(name="Global"), self.request.user, "DO")
         if folders_list == True:
             qs = self.model.objects.filter(content_type="DO")
         else:

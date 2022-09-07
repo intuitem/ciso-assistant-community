@@ -27,8 +27,6 @@ class UserGroup(Group):
                 l.append(user_group)
         return l
 
-
-
 class Role(Group):
     pass
 
@@ -41,10 +39,16 @@ class RoleAssignment(models.Model):
     is_recursive = models.BooleanField(_('sub folders are visible'), default=False)
 
     def __str__(self):
-        return "id=" + str(self.id) + \
-            ", folders: " + str(list(self.folders.values_list('name',flat=True))) + \
-            ", role: " + str(self.role.name) + \
-            ", user group: " + str(self.user_group.name) + ", user: " + str(self.user.username)
+        if not self.user: 
+            return "id=" + str(self.id) + \
+                ", folders: " + str(list(self.folders.values_list('name',flat=True))) + \
+                ", role: " + str(self.role.name) + \
+                ", user group: " + str(self.user_group.name)
+        else:
+            return "id=" + str(self.id) + \
+                ", folders: " + str(list(self.folders.values_list('name',flat=True))) + \
+                ", role: " + str(self.role.name) + \
+                ", user: " + str(self.user.username)
 
     def is_access_allowed(user, perm, folder = None):
         """Determines if a user has specified permission on a specified folder
@@ -63,7 +67,7 @@ class RoleAssignment(models.Model):
         ref_permission = Permission.objects.get(codename = "view_folder")
         # first get all accessible folders, independently of contentType
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
-            for f in ra.folders:
+            for f in ra.folders.all():
                 folders_set.add(f)
                 folders_set.update(f.sub_folders())
         # return filtered result
@@ -86,14 +90,16 @@ class RoleAssignment(models.Model):
         permissions_per_object = defaultdict(set)
         ref_permission = Permission.objects.get(codename = "view_folder")
         all_objects = object_type.objects.all()
+        perimeter = set()
+        perimeter.add(folder)
+        perimeter.update(folder.sub_folders())
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
             ra_permissions = ra.role.permissions.all()
-            for f in ra.folders:
+            for f in perimeter & set(ra.folders.all()):
                 for p in [p for p in permissions if p in ra_permissions]:
-                    folder_and_subfolders = [f] + f.sub_folders()
-                    for object in [x for x in all_objects if x.folder in folder_and_subfolders]:
+                    target_folders = [f] + f.sub_folders() if ra.is_recursive else [f]
+                    for object in [x for x in all_objects if x.folder in target_folders]:
                         permissions_per_object[object].add(p)
-        print(permissions_per_object)
         return [(x, permissions[0] in permissions_per_object[x], permissions[1] in permissions_per_object[x],  permissions[2] in permissions_per_object[x]) for x in permissions_per_object]
 
 
@@ -103,9 +109,9 @@ class RoleAssignment(models.Model):
 
     def get_role_assignments(user):
         """ get all role assignments attached to a user directly or indirectly"""
-        assignments = user.roleassignment_set.all()
+        assignments = list(user.roleassignment_set.all())
         for user_group in UserGroup.get_user_groups(user):
-            assignments += user_group.roleassignment_set.all()
+            assignments += list(user_group.roleassignment_set.all())
         return assignments
 
 

@@ -1,6 +1,7 @@
 from back_office.models import *
 from general.models import *
 from django.contrib.auth.models import Permission
+from django.db import transaction
 
 auditor_permissions = Permission.objects.filter(codename__in=["view_analysis", 
 "view_mitigation", 
@@ -9,7 +10,8 @@ auditor_permissions = Permission.objects.filter(codename__in=["view_analysis",
 "view_asset",
 "view_parentrisk",
 "view_project",
-"view_solution"])
+"view_solution",
+"view_folder"])
 
 analyst_permissions = Permission.objects.filter(codename__in=["change_analysis",
 "view_analysis",
@@ -23,7 +25,8 @@ analyst_permissions = Permission.objects.filter(codename__in=["change_analysis",
 "view_parentrisk",
 "change_project",
 "view_project",
-"view_solution"])
+"view_solution", 
+"view_folder"])
 
 domain_manager_permissions = Permission.objects.filter(codename__in=["change_usergroup",
 "view_usergroup",
@@ -85,20 +88,21 @@ administrator_permissions = Permission.objects.filter(codename__in=["add_user",
 "delete_solution",
 "view_solution"])
 
-root = Folder.objects.create(name="Global", content_type="GL")
-
-auditor = Role.objects.create(name="Auditor")
-auditor.permissions.set(auditor_permissions)
-analyst= Role.objects.create(name="Analyst")
-analyst.permissions.set(analyst_permissions)
-domain_manager = Role.objects.create(name="Domain Manager")
-domain_manager.permissions.set(domain_manager_permissions)
-administrator = Role.objects.create(name="Administrator")
-administrator.permissions.set(administrator_permissions)
-
-administrators = UserGroup.objects.create(name="Administrators", folder = root)
-global_auditors = UserGroup.objects.create(name="Global auditors", folder = root)
-ra1 = RoleAssignment.objects.create(user_group=administrators, role=administrator)
-ra1.folders.add(root)
-ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=auditor)
-ra2.folders.add(root)
+@transaction.atomic
+def initialize():
+    if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
+        root = Folder.objects.create(name="Global", content_type=Folder.ContentType.ROOT)
+        auditor = Role.objects.create(name="Auditor")
+        auditor.permissions.set(auditor_permissions)
+        analyst= Role.objects.create(name="Analyst")
+        analyst.permissions.set(analyst_permissions)
+        domain_manager = Role.objects.create(name="Domain Manager")
+        domain_manager.permissions.set(domain_manager_permissions)
+        administrator = Role.objects.create(name="Administrator")
+        administrator.permissions.set(administrator_permissions)
+        administrators = UserGroup.objects.create(name="Administrators", folder = root)
+        global_auditors = UserGroup.objects.create(name="Global auditors", folder = root)
+        ra1 = RoleAssignment.objects.create(user_group=administrators, role=administrator)
+        ra1.folders.add(root)
+        ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=auditor, is_recursive=True)
+        ra2.folders.add(root)
