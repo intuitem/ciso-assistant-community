@@ -83,6 +83,7 @@ class Project(models.Model):
         return self.name
 
 
+# todo: rename to Threat
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
