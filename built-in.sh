@@ -1,1 +1,0 @@
-python manage.py shell < built-in.py
