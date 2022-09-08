@@ -78,8 +78,9 @@ class RoleAssignment(models.Model):
     def get_accessible_objects(folder, user, object_type):
         """ Gets all objects of a specified type that a user can reach in a given folder
             Only accessible folders are considered
-            Returns a list containing following elements: (object, is_view, is_change, is_delete)
+            Returns a triplet: (view_objects_list, change_object_list, delete_object_list)
             Assumes that ojbect type follows Dhango conventions for permissions
+            Also retrieve published objects in view
         """
         class_name = object_type.__name__.lower()
         permissions = [
@@ -88,9 +89,11 @@ class RoleAssignment(models.Model):
                 Permission.objects.get(codename="delete_" + class_name)
         ]
 
+        folders_with_local_view = set()
         permissions_per_object = defaultdict(set)
         ref_permission = Permission.objects.get(codename = "view_folder")
         all_objects = object_type.objects.all()
+        folder_for_object = {Folder.get_folder(x) for x in all_objects}
         perimeter = set()
         perimeter.add(folder)
         perimeter.update(folder.sub_folders())
@@ -98,10 +101,23 @@ class RoleAssignment(models.Model):
             ra_permissions = ra.role.permissions.all()
             for f in perimeter & set(ra.folders.all()):
                 for p in [p for p in permissions if p in ra_permissions]:
+                    if p == permissions[0]: 
+                        folders_with_local_view.add(f)
                     target_folders = [f] + f.sub_folders() if ra.is_recursive else [f]
-                    for object in [x for x in all_objects if Folder.get_folder(x) in target_folders]:
+                    for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
                         permissions_per_object[object].add(p)
-        return [(x, permissions[0] in permissions_per_object[x], permissions[1] in permissions_per_object[x],  permissions[2] in permissions_per_object[x]) for x in permissions_per_object]
+
+        if hasattr(object_type, "is_published"):
+            for f in folders_with_local_view:
+                parent_folders = f.get_parents()
+                for object in [x for x in all_objects if folder_for_object{x} in parent_folders]:
+                    permissions_per_object[object].add(permissions[0])
+
+        return (
+            [x for x in permissions_per_object if permissions[0] in permissions_per_object[x]],
+            [x for x in permissions_per_object if permissions[1] in permissions_per_object[x]],
+            [x for x in permissions_per_object if permissions[2] in permissions_per_object[x]],
+        )
 
 
     def is_user_assigned(self, user):
