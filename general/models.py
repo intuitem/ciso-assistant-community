@@ -86,7 +86,7 @@ class Project(models.Model):
 class ParentRisk(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
-    isPublished = models.BooleanField(_('published'), default=True)
+    is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
         verbose_name = _("Threat")
@@ -105,7 +105,7 @@ class Asset(models.Model):
     business_value = models.TextField(blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
-    isPublished = models.BooleanField(_('published'), default=True)
+    is_published = models.BooleanField(_('published'), default=True)
 
     def __str__(self):
         return self.name
@@ -116,7 +116,7 @@ class Solution(models.Model):
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
-    isPublished = models.BooleanField(_('published'), default=True)
+    is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
         verbose_name = _("Solution")

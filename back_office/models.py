@@ -37,6 +37,7 @@ class RoleAssignment(models.Model):
     user_group = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(_('sub folders are visible'), default=False)
+    # todo: add folder like any object, rename folders to perimeter_folders
 
     def __str__(self):
         if not self.user: 
