@@ -73,6 +73,11 @@ $ source ../myvars
     - create user asfuser with password '<POSTGRES_PASSWORD>';
     - grant all privileges on database asf to asfuser;
 
+- Note: to clean existing migrations, type:
+```sh
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find . -path "*/migrations/*.pyc"  -delete
+```
 
 6. prepare migrations 
 

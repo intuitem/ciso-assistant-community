@@ -2,8 +2,7 @@ from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
 def startup():
-    """Implement Mira 1.0 default Roles and User Groups
-    """
+    """Implement Mira 1.0 default Roles and User Groups"""
     import os
     if os.environ.get('RUN_MAIN'):
         from .models import Folder

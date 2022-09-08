@@ -110,7 +110,7 @@ class RoleAssignment(models.Model):
         if hasattr(object_type, "is_published"):
             for f in folders_with_local_view:
                 parent_folders = f.get_parents()
-                for object in [x for x in all_objects if folder_for_object{x} in parent_folders]:
+                for object in [x for x in all_objects if folder_for_object[x] in parent_folders]:
                     permissions_per_object[object].add(permissions[0])
 
         return (
