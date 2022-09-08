@@ -98,7 +98,7 @@ class RoleAssignment(models.Model):
             for f in perimeter & set(ra.folders.all()):
                 for p in [p for p in permissions if p in ra_permissions]:
                     target_folders = [f] + f.sub_folders() if ra.is_recursive else [f]
-                    for object in [x for x in all_objects if x.folder in target_folders]:
+                    for object in [x for x in all_objects if Folder.get_folder(x) in target_folders]:
                         permissions_per_object[object].add(p)
         return [(x, permissions[0] in permissions_per_object[x], permissions[1] in permissions_per_object[x],  permissions[2] in permissions_per_object[x]) for x in permissions_per_object]
 

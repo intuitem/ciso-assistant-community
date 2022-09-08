@@ -22,13 +22,34 @@ class Folder(models.Model):
         return self.name
 
     def sub_folders(self):
+        """
+        Return a list of the sub folders
+        """
         def sub_folders_in(f, sub_folder_list):
             for sub_folder in f.folder_set.all():
                 sub_folder_list.append(sub_folder)
                 sub_folders_in(sub_folder, sub_folder_list)
             return sub_folder_list
         return sub_folders_in(self, [])
-
+    
+    def get_folder(object):
+        """
+        Return the folder of an object
+        """
+        try:
+            return object.folder
+        except:
+            try:
+                return object.project.folder
+            except:
+                try: 
+                    return object.analysis.project.folder
+                except:
+                    try:
+                        return object.risk_instance.analysis.project.folder
+                    except:
+                        pass
+        
 class Project(models.Model):
     PRJ_LC_STATUS = [
         ('undefined', _('--')),

@@ -55,7 +55,10 @@ class QuickStartView(UserPassesTestMixin, ListView):
         return True
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_folder"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class ProjectListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/project_list.html'
@@ -66,11 +69,9 @@ class ProjectListView(UserPassesTestMixin, ListView):
     model = Project
 
     def get_queryset(self):
-        projects_list = []
-        for object in RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project):
-            if object[1]:
-                projects_list.append(object[0])
-        qs = self.model.objects.filter(name__in=projects_list)
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
+        objects_list = [x[0] for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(name__in=objects_list)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -83,7 +84,10 @@ class ProjectListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='view_project'))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class AssetListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/asset_list.html'
@@ -94,7 +98,9 @@ class AssetListView(UserPassesTestMixin, ListView):
     model = Asset
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('id')
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
+        objects_list = [x[0] for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(name__in=objects_list)
         filtered_list = AssetFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -107,7 +113,10 @@ class AssetListView(UserPassesTestMixin, ListView):
         return context
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_asset"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class FolderListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/project_domain_list.html'
@@ -119,10 +128,7 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(Folder.objects.get(name="Global"), self.request.user, "DO")
-        if folders_list == True:
-            qs = self.model.objects.filter(content_type="DO")
-        else:
-            qs = self.model.objects.filter(name__in=folders_list)
+        qs = self.model.objects.filter(name__in=folders_list)
         filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -135,7 +141,10 @@ class FolderListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_folder"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class RiskAnalysisListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/analysis_list.html'
@@ -146,20 +155,9 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
     model = Analysis
 
     def get_queryset(self):
-        analyses_list = []
-        if self.request.user.is_superuser:
-            qs = self.model.objects.all()
-        else:
-            for ra in self.request.user.roleassignment_set.all():
-                for analysis in self.model.objects.all():
-                    if analysis.project.folder in ra.folders.all():
-                        analyses_list.append(analysis.project)
-            for user_group in UserGroup.get_user_groups(self.request.user):
-                for ra in user_group.roleassignment_set.all():
-                    for analysis in self.model.objects.all():
-                        if analysis.project.folder in ra.folders.all():
-                            analyses_list.append(analysis.project)
-            qs = self.model.objects.filter(project__in=analyses_list)
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        objects_list = [x[0].project for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(project__in=objects_list)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -178,7 +176,10 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_analysis"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class RiskInstanceListView(UserPassesTestMixin, ListView):
     permission_required = 'core.view_riskinstance'
@@ -190,20 +191,9 @@ class RiskInstanceListView(UserPassesTestMixin, ListView):
     model = RiskInstance
 
     def get_queryset(self):
-        ri_list = []
-        if self.request.user.is_superuser:
-            qs = self.model.objects.all().order_by('treatment', 'id')
-        else:
-            for ra in self.request.user.roleassignment_set.all():
-                for ri in self.model.objects.all():
-                    if ri.analysis.project.folder in ra.folders.all():
-                        ri_list.append(ri.analysis)
-            for user_group in UserGroup.get_user_groups(self.request.user):
-                for ra in user_group.roleassignment_set.all():
-                    for ri in self.model.objects.all():
-                        if ri.analysis.project.folder in ra.folders.all():
-                            ri_list.append(ri.analysis)
-            qs = self.model.objects.filter(analysis__in=ri_list).order_by('treatment', 'id')
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskInstance)
+        objects_list = [x[0].analysis for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(analysis__in=objects_list)
         filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -217,7 +207,10 @@ class RiskInstanceListView(UserPassesTestMixin, ListView):
         return context
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_riskinstance"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class MitigationListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/mtg_list.html'
@@ -236,20 +229,9 @@ class MitigationListView(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
-        mitigation_list = []
-        if self.request.user.is_superuser:
-            qs = self.model.objects.all().order_by('status', 'id')
-        else:
-            for ra in self.request.user.roleassignment_set.all():
-                for mitigation in self.model.objects.all():
-                    if mitigation.risk_instance.analysis.project.folder in ra.folders.all():
-                        mitigation_list.append(mitigation.risk_instance)
-            for user_group in UserGroup.get_user_groups(self.request.user):
-                for ra in user_group.roleassignment_set.all():
-                    for mitigation in self.model.objects.all():
-                        if mitigation.risk_instance.analysis.project.folder in ra.folders.all():
-                            mitigation_list.append(mitigation.risk_instance)
-            qs = self.model.objects.filter(risk_instance__in=mitigation_list).order_by('status', 'id')
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Mitigation)
+        objects_list = [x[0].risk_instance for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(risk_instance__in=objects_list)
         filtered_list = MeasureFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -259,7 +241,10 @@ class MitigationListView(UserPassesTestMixin, ListView):
         # return agg_data
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_mitigation"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class SecurityFunctionListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/security_function_list.html'
@@ -270,7 +255,9 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
     model = Solution
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('id')
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Solution)
+        objects_list = [x[0] for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(name__in=objects_list)
         filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -283,7 +270,10 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_solution"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 
 class ParentRiskListView(UserPassesTestMixin, ListView):
@@ -295,7 +285,9 @@ class ParentRiskListView(UserPassesTestMixin, ListView):
     model = ParentRisk
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('id')
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, ParentRisk)
+        objects_list = [x[0] for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(title__in=objects_list)
         filtered_list = ThreatFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -308,7 +300,10 @@ class ParentRiskListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_parentrisk"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class RiskAcceptanceListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/acceptance_list.html'
@@ -328,26 +323,17 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
-        risk_acceptance_list = []
-        if self.request.user.is_superuser:
-            qs = self.model.objects.all().order_by('type', 'id')
-        else:
-            for ra in self.request.user.roleassignment_set.all():
-                for risk_acceptance in self.model.objects.all():
-                    if risk_acceptance.risk_instance.analysis.project.folder in ra.folders.all():
-                        risk_acceptance_list.append(risk_acceptance.risk_instance)
-            for user_group in UserGroup.get_user_groups(self.request.user):
-                for ra in user_group.roleassignment_set.all():
-                    for risk_acceptance in self.model.objects.all():
-                        if risk_acceptance.risk_instance.analysis.project.folder in ra.folders.all():
-                            risk_acceptance_list.append(risk_acceptance.risk_instance)
-            qs = self.model.objects.filter(risk_instance__in=risk_acceptance_list).order_by('type', 'id')
-        
+        objects_list = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
+        objects_list = [x[0].risk_instance for x in objects_list if x[1]] # x[1] is the "is_view" boolean
+        qs = self.model.objects.filter(risk_instance__in=objects_list)
         filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_riskacceptance"))
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
 
 class UserListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/user_list.html'
