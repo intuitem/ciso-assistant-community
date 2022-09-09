@@ -69,8 +69,8 @@ class ProjectListView(UserPassesTestMixin, ListView):
     model = Project
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -97,8 +97,8 @@ class AssetListView(UserPassesTestMixin, ListView):
     model = Asset
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = AssetFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -153,8 +153,8 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
     model = Analysis
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -188,8 +188,8 @@ class RiskInstanceListView(UserPassesTestMixin, ListView):
     model = RiskInstance
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskInstance)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskInstance)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -225,8 +225,8 @@ class MitigationListView(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Mitigation)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Mitigation)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = MeasureFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -250,8 +250,8 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
     model = Solution
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Solution)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Solution)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -279,8 +279,8 @@ class ParentRiskListView(UserPassesTestMixin, ListView):
     model = ParentRisk
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, ParentRisk)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, ParentRisk)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = ThreatFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -316,8 +316,8 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
-        (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
-        qs = self.model.objects.filter(id__in=objects_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -396,6 +396,7 @@ class GroupListView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         admin = False
         for user_group in UserGroup.get_user_groups(self.request.user):
+            print("hello", user_group)
             for ra in user_group.roleassignment_set.all():
                 if Folder.objects.get(content_type="GL") in ra.folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
                     admin=True
@@ -612,9 +613,9 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("id")
-        auditors = UserGroup.objects.create(name= folder.name + " Auditors", folder = folder)
-        analysts = UserGroup.objects.create(name= folder.name + " Analysts", folder = folder)
-        managers = UserGroup.objects.create(name= folder.name + " Domain Managers", folder = folder)
+        auditors = UserGroup.objects.create(name= folder.name + " - Auditors", folder = folder)
+        analysts = UserGroup.objects.create(name= folder.name + " - Analysts", folder = folder)
+        managers = UserGroup.objects.create(name= folder.name + " - Domain Managers", folder = folder)
         ra1 = RoleAssignment.objects.create(user_group = auditors, role = Role.objects.get(name="Auditor"))
         ra1.folders.add(folder)
         ra2 = RoleAssignment.objects.create(user_group = analysts, role = Role.objects.get(name="Analyst"))

@@ -9,90 +9,126 @@ def startup():
         from back_office.models import Role, UserGroup, RoleAssignment
         from django.contrib.auth.models import Permission
 
-        auditor_permissions = Permission.objects.filter(codename__in=["view_analysis", 
-        "view_mitigation", 
-        "view_riskacceptance",
-        "view_riskinstance",
-        "view_asset",
-        "view_parentrisk",
-        "view_project",
-        "view_solution",
-        "view_folder"])
+        auditor_permissions = Permission.objects.filter(codename__in=[
+            "view_project",
+            "view_analysis",
+            "view_mitigation",
+            "view_riskinstance",
+            "view_riskacceptance",
+            "view_asset",
+            "view_parentrisk",
+            "view_solution",
+            "view_folder",
+        ])
 
-        analyst_permissions = Permission.objects.filter(codename__in=["change_analysis",
-        "view_analysis",
-        "change_mitigation",
-        "view_mitigation",
-        "change_riskacceptance",
-        "view_riskacceptance",
-        "change_riskinstance",
-        "view_riskinstance",
-        "view_asset",
-        "view_parentrisk",
-        "change_project",
-        "view_project",
-        "view_solution", 
-        "view_folder"])
+        analyst_permissions = Permission.objects.filter(codename__in=[
+            "add_project",
+            "view_project",
+            "change_project",
+            "delete_project",
 
-        domain_manager_permissions = Permission.objects.filter(codename__in=["change_usergroup",
-        "view_usergroup",
-        "add_analysis",
-        "change_analysis",
-        "delete_analysis",
-        "view_analysis",
-        "add_mitigation",
-        "change_mitigation",
-        "delete_mitigation",
-        "view_mitigation",
-        "add_riskacceptance",
-        "change_riskacceptance",
-        "delete_riskacceptance",
-        "view_riskacceptance",
-        "add_riskinstance",
-        "change_riskinstance",
-        "delete_riskinstance",
-        "view_riskinstance",
-        "view_asset",
-        "change_folder",
-        "view_folder",
-        "view_parentrisk",
-        "add_project",
-        "change_project",
-        "delete_project",
-        "view_project",
-        "view_solution"])
+            "add_analysis",
+            "view_analysis",
+            "change_analysis",
+            "delete_analysis"
 
-        administrator_permissions = Permission.objects.filter(codename__in=["add_user",
-        "change_user",
-        "delete_user",
-        "view_user",
-        "add_roleassignment",
-        "change_roleassignment",
-        "delete_roleassignment",
-        "view_roleassignment",
-        "add_usergroup",
-        "change_usergroup",
-        "delete_usergroup",
-        "view_usergroup",
-        "add_event",
-        "change_event",
-        "delete_event",
-        "view_event",
-        "add_asset",
-        "change_asset",
-        "delete_asset",
-        "view_asset",
-        "add_folder",
-        "delete_folder",
-        "view_folder",
-        "add_parentrisk",
-        "change_parentrisk",
-        "delete_parentrisk",
-        "view_parentrisk",
-        "add_solution",
-        "change_solution",
-        "delete_solution",
-        "view_solution"])
+            "add_mitigation",
+            "view_mitigation",
+            "change_mitigation",
+            "delete_mitigation",
+
+            "add_riskinstance",
+            "view_riskinstance",
+            "change_riskinstance",
+            "delete_riskinstance",
+
+            "add_riskacceptance",
+            "view_riskacceptance",
+            "change_riskacceptance",
+            "delete_riskacceptance",
+
+            "view_asset",
+            "view_parentrisk",
+            "view_solution",
+            "view_folder",
+        ])
+
+        domain_manager_permissions = Permission.objects.filter(codename__in=[
+            "change_usergroup",
+            "view_usergroup",
+
+            "add_project",
+            "change_project",
+            "delete_project",
+            "view_project",
+
+            "add_analysis",
+            "view_analysis",
+            "change_analysis",
+            "delete_analysis",
+
+            "add_mitigation",
+            "view_mitigation",
+            "change_mitigation",
+            "delete_mitigation",
+
+            "add_riskinstance",
+            "view_riskinstance",
+            "change_riskinstance",
+            "delete_riskinstance",
+
+            "add_riskacceptance",
+            "view_riskacceptance",
+            "change_riskacceptance",
+            "delete_riskacceptance",
+
+            "view_asset",
+            "view_parentrisk",
+            "view_solution",
+            "view_folder",
+            "change_folder",
+        ])
+
+        administrator_permissions = Permission.objects.filter(codename__in=[
+            "add_user",
+            "view_user",
+            "change_user",
+            "delete_user",
+
+            "add_roleassignment",
+            "view_roleassignment",
+            "change_roleassignment",
+            "delete_roleassignment",
+
+            "add_usergroup",
+            "view_usergroup",
+            "change_usergroup",
+            "delete_usergroup",
+
+            "add_event",
+            "view_event",
+            "change_event",
+            "delete_event",
+
+            "add_asset",
+            "view_asset",
+            "change_asset",
+            "delete_asset",
+
+            "add_parentrisk",
+            "view_parentrisk",
+            "change_parentrisk",
+            "delete_parentrisk",
+
+            "add_solution",
+            "view_solution",
+            "change_solution",
+            "delete_solution",
+
+            "add_folder",
+            "view_folder",
+            "delete_folder",
+        ])
 
         if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
             Folder.objects.create(name="Global", content_type=Folder.ContentType.ROOT)
