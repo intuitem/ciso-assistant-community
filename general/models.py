@@ -105,6 +105,7 @@ class Asset(models.Model):
         return self.name
 
 
+# todo: rename to SecurityFunction
 class Solution(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
@@ -120,6 +121,7 @@ class Solution(models.Model):
         return self.name
 
 
+# todo: remove useless constructs or comment them
 class GroupExtra(models.Model):
     """
     Overwrites original Django Group.
