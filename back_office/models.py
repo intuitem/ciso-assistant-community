@@ -72,7 +72,7 @@ class RoleAssignment(models.Model):
                 folders_set.add(f)
                 folders_set.update(f.sub_folders())
         # return filtered result
-        return [x for x in folders_set if x.content_type == content_type]
+        return [x.id for x in folders_set if x.content_type == content_type]
 
 
     def get_accessible_objects(folder, user, object_type):
@@ -93,7 +93,7 @@ class RoleAssignment(models.Model):
         permissions_per_object = defaultdict(set)
         ref_permission = Permission.objects.get(codename = "view_folder")
         all_objects = object_type.objects.all()
-        folder_for_object = {Folder.get_folder(x) for x in all_objects}
+        folder_for_object = {x: Folder.get_folder(x) for x in all_objects}
         perimeter = set()
         perimeter.add(folder)
         perimeter.update(folder.sub_folders())
@@ -105,13 +105,13 @@ class RoleAssignment(models.Model):
                         folders_with_local_view.add(f)
                     target_folders = [f] + f.sub_folders() if ra.is_recursive else [f]
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
-                        permissions_per_object[object].add(p)
+                        permissions_per_object[object.id].add(p)
 
         if hasattr(object_type, "is_published"):
             for f in folders_with_local_view:
-                parent_folders = f.get_parents()
+                parent_folders = f.get_parent_folders()
                 for object in [x for x in all_objects if folder_for_object[x] in parent_folders]:
-                    permissions_per_object[object].add(permissions[0])
+                    permissions_per_object[object.id].add(permissions[0])
 
         return (
             [x for x in permissions_per_object if permissions[0] in permissions_per_object[x]],

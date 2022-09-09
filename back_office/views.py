@@ -70,7 +70,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
-        qs = self.model.objects.filter(name__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -98,7 +98,7 @@ class AssetListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
-        qs = self.model.objects.filter(name__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = AssetFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -126,7 +126,7 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(Folder.objects.get(name="Global"), self.request.user, "DO")
-        qs = self.model.objects.filter(name__in=folders_list)
+        qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -154,7 +154,7 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        qs = self.model.objects.filter(project__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -189,7 +189,7 @@ class RiskInstanceListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskInstance)
-        qs = self.model.objects.filter(analysis__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -226,7 +226,7 @@ class MitigationListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Mitigation)
-        qs = self.model.objects.filter(risk_instance__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = MeasureFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -251,7 +251,7 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Solution)
-        qs = self.model.objects.filter(name__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -280,7 +280,7 @@ class ParentRiskListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, ParentRisk)
-        qs = self.model.objects.filter(title__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = ThreatFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -317,7 +317,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (objects_view, object_change, object_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
-        qs = self.model.objects.filter(risk_instance__in=objects_view)
+        qs = self.model.objects.filter(id__in=objects_view)
         filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 

@@ -30,9 +30,9 @@ class Folder(models.Model):
             return sub_folder_list
         return sub_folders_in(self, [])
     
-    def parent_folders(self):
+    def get_parent_folders(self):
         """Return the list of parent folders"""
-        return [self.parent_folder] + Folder.parent_folders(self.parent_folder) if self.parent_folder else []
+        return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
 
 
     def get_folder(object):
