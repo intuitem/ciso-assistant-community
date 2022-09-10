@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-27 12:08+0000\n"
+"POT-Creation-Date: 2022-09-10 17:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -111,9 +111,6 @@ msgstr "Assistant d'évaluation"
 #: asf_rm/settings.py:275
 msgid "Extra"
 msgstr ""
-
-#~ msgid "Risk scenarios"
-#~ msgstr "Scénarios de risque"
 
 #, fuzzy
 #~| msgid "Risk acceptances"

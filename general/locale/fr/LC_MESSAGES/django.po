@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-27 12:08+0000\n"
+"POT-Creation-Date: 2022-09-10 17:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,176 +18,200 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: general/admin.py:19 general/admin.py:20
+#: general/admin.py:21 general/admin.py:22
 msgid "Portal access and Extra settings"
 msgstr "Accès portail et paramètres supplémentaires"
 
-#: general/apps.py:9
+#: general/apps.py:155
 msgid "General"
 msgstr "Général"
 
 #: general/models.py:7
+msgid "GLOBAL"
+msgstr ""
+
+#: general/models.py:8
+msgid "DOMAIN"
+msgstr ""
+
+#: general/models.py:9
 msgid "<Group title>"
 msgstr "<Titre du groupe>"
 
-#: general/models.py:7 general/models.py:78
+#: general/models.py:9 general/models.py:110
 msgid "Name"
 msgstr "Nom"
 
-#: general/models.py:9
-msgid "<Internal organization division>"
-msgstr "<Division interne de l'organisation>"
+#: general/models.py:12
+msgid "<Short description>"
+msgstr ""
 
-#: general/models.py:10 general/models.py:47
-msgid "Department"
-msgstr "Département"
+#: general/models.py:13 general/models.py:73
+msgid "Description"
+msgstr ""
 
-#: general/models.py:13
-msgid "Projects Group"
-msgstr "<Groupe de Projets>"
+#: general/models.py:18
+msgid "Folder"
+msgstr ""
 
-#: general/models.py:14
-msgid "Projects Groups"
-msgstr "Groupes de Projets"
+#: general/models.py:19
+msgid "Folders"
+msgstr ""
 
-#: general/models.py:22
+#: general/models.py:48
 msgid "--"
 msgstr ""
 
-#: general/models.py:23
+#: general/models.py:49
 msgid "Design"
 msgstr "Conception"
 
-#: general/models.py:24
+#: general/models.py:50
 msgid "Development"
 msgstr "Développement"
 
-#: general/models.py:25
+#: general/models.py:51
 msgid "Production"
 msgstr "Production"
 
-#: general/models.py:26
+#: general/models.py:52
 msgid "End Of Life"
 msgstr "Fin de vie"
 
-#: general/models.py:27
+#: general/models.py:53
 msgid "Dropped"
 msgstr "Abandonné"
 
-#: general/models.py:30
+#: general/models.py:56
 msgid "<short project name>"
 msgstr "<court nom de projet>"
 
-#: general/models.py:30
+#: general/models.py:56
 msgid "Project Name"
 msgstr "Nom du projet"
 
-#: general/models.py:31
+#: general/models.py:57
 msgid "<if an internal reference applies>"
 msgstr "<si une référence interne s'applique>"
 
-#: general/models.py:32
+#: general/models.py:58
 msgid "Internal ID"
 msgstr "Identifiant interne"
 
-#: general/models.py:33
+#: general/models.py:59
 msgid "Domain"
 msgstr "Domaine"
 
-#: general/models.py:35
+#: general/models.py:61
 msgid "Status"
 msgstr "Statut"
 
-#: general/models.py:37
+#: general/models.py:63
 msgid "<brief summary of the project>"
 msgstr "<bref résumé du projet>"
 
-#: general/models.py:38
+#: general/models.py:64
 msgid ""
 "This summary is optional and will appear in the risk analysis for context"
 msgstr ""
 "Ce résumé est optionnel et apparaîtra dans l'analyse de risque pour la "
 "contextualiser"
 
-#: general/models.py:39
+#: general/models.py:65
 msgid "Summary"
 msgstr "Résumé"
 
-#: general/models.py:42
+#: general/models.py:68
 msgid "Project"
 msgstr "Projet"
 
-#: general/models.py:43
+#: general/models.py:69
 msgid "Projects"
 msgstr "Projets"
 
-#: general/models.py:54
+#: general/models.py:81
 msgid "<threat short title>"
 msgstr "<court titre de la menace>"
 
-#: general/models.py:54
+#: general/models.py:81
 msgid "Title"
 msgstr "Titre"
 
-#: general/models.py:57
+#: general/models.py:83 general/models.py:102 general/models.py:114
+msgid "published"
+msgstr ""
+
+#: general/models.py:86
 msgid "Threat"
 msgstr ""
 
-#: general/models.py:58
+#: general/models.py:87
 msgid "Threats"
 msgstr ""
 
-#: general/models.py:66
+#: general/models.py:95
 msgid "Assets"
 msgstr ""
 
-#: general/models.py:67
+#: general/models.py:96
 msgid "Asset"
 msgstr ""
 
-#: general/models.py:69
+#: general/models.py:98
 msgid "name"
 msgstr "nom"
 
-#: general/models.py:70
+#: general/models.py:99
 msgid "business value"
 msgstr "valeur commerciale"
 
-#: general/models.py:71
+#: general/models.py:100
 msgid "comments"
 msgstr "commentaires"
 
-#: general/models.py:79
+#: general/models.py:111
 msgid "Provider"
 msgstr "Fournisseur"
 
-#: general/models.py:80
+#: general/models.py:112
 msgid "Contact"
 msgstr ""
 
-#: general/models.py:83
+#: general/models.py:117
 msgid "SecurityFunction"
 msgstr ""
 
-#: general/models.py:84
+#: general/models.py:118
 msgid "SecurityFunctions"
 msgstr ""
 
-#: general/models.py:100
+#: general/models.py:135
 msgid "Group email for notifications"
 msgstr "E-mail de groupe pour les notifications"
 
-#: general/models.py:101
+#: general/models.py:136
 msgid "Group email"
 msgstr "E-mail de groupe"
 
-#: general/models.py:103
+#: general/models.py:138
 msgid "Allowed Projects Groups"
 msgstr "Groupes de Projets Autorisés"
 
-#: general/models.py:104
+#: general/models.py:139
 msgid "Project groups allowed for read access on the Portal. "
 msgstr "Groupes de projets autorisés à accéder en lecture au Portail. "
+
+#~ msgid "<Internal organization division>"
+#~ msgstr "<Division interne de l'organisation>"
+
+#~ msgid "Department"
+#~ msgstr "Département"
+
+#~ msgid "Projects Group"
+#~ msgstr "<Groupe de Projets>"
+
+#~ msgid "Projects Groups"
+#~ msgstr "Groupes de Projets"
 
 #~ msgid "Parent group"
 #~ msgstr "Groupe parent"
