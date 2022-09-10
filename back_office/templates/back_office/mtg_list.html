@@ -74,7 +74,7 @@
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent project" %}</p>
-                                    {{ filter.form.risk_instance__analysis__project }}
+                                    {{ filter.form.risk_scenario__analysis__project }}
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Type" %}</p>
@@ -82,7 +82,7 @@
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Security function" %}</p>
-                                    {{ filter.form.solution }}
+                                    {{ filter.form.security_function }}
                                 </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>
@@ -167,8 +167,8 @@
                         </td>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">       
-                            {% if measure.solution %}
-                            {{ measure.solution }}
+                            {% if measure.security_function %}
+                            {{ measure.security_function }}
                             {% else %}
                                 --
                             {% endif %}
@@ -176,7 +176,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'MP' measure.risk_instance.analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'MP' measure.risk_scenario.analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 <span>
                                     <a href="{% url 'mtg-update' measure.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>

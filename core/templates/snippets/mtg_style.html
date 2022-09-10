@@ -1,9 +1,9 @@
-{% if mitigation.status == 'open' %}
+{% if security_measure.status == 'open' %}
 bg-amber-400 text-black
 {% endif %}
-{% if mitigation.status == 'in_progress' %}
+{% if security_measure.status == 'in_progress' %}
 bg-blue-400 text-white
 {% endif %}
-{% if mitigation.status == 'on_hold' %}
+{% if security_measure.status == 'on_hold' %}
 bg-red-400 text-white
 {% endif %}

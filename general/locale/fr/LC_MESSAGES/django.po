@@ -166,11 +166,11 @@ msgid "Contact"
 msgstr ""
 
 #: general/models.py:83
-msgid "Solution"
+msgid "SecurityFunction"
 msgstr ""
 
 #: general/models.py:84
-msgid "Solutions"
+msgid "SecurityFunctions"
 msgstr ""
 
 #: general/models.py:100

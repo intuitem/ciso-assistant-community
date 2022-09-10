@@ -85,7 +85,7 @@
     <div class="bg-white rounded p-2 m-2 shadow">
         <div class="text-lg py-2"><i class="fab fa-searchengin"></i> {% trans "Browsing" %} {{ context.type }} {% trans "filtered to" %} <b>{{ context.filter }}</b></div>
 
-    {% if context.type == "Risk instances" %}
+    {% if context.type == "Risk scenarios" %}
         <table id="mytable" class="hover w-full p-2 m-2" >
             <thead>
             <tr>
@@ -124,9 +124,9 @@
             <tbody>
                 {% for item in context.items %}
                   <tr class="p-1">
-                    <td class=" px-1 py-2">{{ item.risk_instance.analysis.project }}</td>
+                    <td class=" px-1 py-2">{{ item.risk_scenario.analysis.project }}</td>
                     <td class="">{{ item.title }}</td>
-                      <td class="">{{ item.risk_instance.title }}</td>
+                      <td class="">{{ item.risk_scenario.title }}</td>
                       <td class="">{{ item.get_status_display }}</td>
                       <td class=" text-center"><a href="#"><i class="fas fa-external-link-square-alt"></i></a></td>
                   </tr>

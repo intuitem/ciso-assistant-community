@@ -16,13 +16,13 @@ class FolderAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
-@admin.register(ParentRisk)
-class ParentRiskAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+@admin.register(Threat)
+class ThreatAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
-@admin.register(Solution)
-class SolutionAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+@admin.register(SecurityFunction)
+class SecurityFunctionAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
@@ -31,59 +31,59 @@ class RiskAcceptanceAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.Mode
     list_display = ('__str__', 'type', 'validator', 'expiry_date')
 
 
-class MitigationInline(admin.StackedInline):
-    model = Mitigation
+class SecurityMeasureInline(admin.StackedInline):
+    model = SecurityMeasure
     extra = 0
 
 
-class RiskInstanceInline(admin.StackedInline):
-    model = RiskInstance
+class RiskScenarioInline(admin.StackedInline):
+    model = RiskScenario
     extra = 0
     show_change_link = True
     fieldsets = [
-        (None, {'fields': ['analysis', 'parent_risk']}),
+        (None, {'fields': ['analysis', 'threat']}),
         (_('Threat description'), {'fields': ['title', 'scenario']}),
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
-        (_('Residual level'), {'fields': ['associated_mitigations','residual_proba', 'residual_impact', 'residual_level']}),
+        (_('Residual level'), {'fields': ['associated_security_measures','residual_proba', 'residual_impact', 'residual_level']}),
         (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
     ]
 
-    def associated_mitigations(self, obj):
-        return obj.associated_mitigations()
+    def associated_security_measures(self, obj):
+        return obj.associated_security_measures()
 
-    associated_mitigations.short_description = 'Associated Mitigations (Click CHANGE next to the instance title to Edit)'
-    readonly_fields = ('current_level', 'residual_level', 'created_at', 'updated_at', 'associated_mitigations')
+    associated_security_measures.short_description = 'Associated SecurityMeasures (Click CHANGE next to the scenario title to Edit)'
+    readonly_fields = ('current_level', 'residual_level', 'created_at', 'updated_at', 'associated_security_measures')
 
 
-class RiskInstanceResource(resources.ModelResource):
+class RiskScenarioResource(resources.ModelResource):
 
     class Meta:
-        model = RiskInstance
+        model = RiskScenario
 
 
-@admin.register(RiskInstance)
-class RiskInstanceAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionModelAdmin, admin.ModelAdmin):
-    model = RiskInstance
+@admin.register(RiskScenario)
+class RiskScenarioAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionModelAdmin, admin.ModelAdmin):
+    model = RiskScenario
 
-    list_display = ('__str__', 'parent_risk', 'parent_project', 'treatment')
+    list_display = ('__str__', 'threat', 'parent_project', 'treatment')
 
     fieldsets_with_inlines = [
-        (None, {'fields': ['analysis', 'parent_risk',]}),
+        (None, {'fields': ['analysis', 'threat',]}),
         (_('Threat description'), {'fields': ['title', 'scenario']}),
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
-        MitigationInline,
+        SecurityMeasureInline,
         (_('Residual level'), {'fields': ['residual_proba', 'residual_impact', 'residual_level']}),
         (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
     ]
-    inlines = [MitigationInline]
+    inlines = [SecurityMeasureInline]
 
     readonly_fields = ('current_level', 'residual_level', 'created_at', 'updated_at')
-    list_filter = ('parent_risk', 'treatment', 'current_level', 'residual_level', 'analysis__project__name')
+    list_filter = ('threat', 'treatment', 'current_level', 'residual_level', 'analysis__project__name')
 
 @admin.register(Analysis)
 class AnalysisAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     model = Analysis
-    inlines = [RiskInstanceInline]
+    inlines = [RiskScenarioInline]
 
     list_display = ('__str__', 'project', 'auditor', 'is_draft')
     list_filter = ('project', 'auditor', 'is_draft')
@@ -96,12 +96,12 @@ class AnalysisAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin
         return self.Meta.verbose_name
 
 
-@admin.register(Mitigation)
-class MitigationAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
-    model = Mitigation
+@admin.register(SecurityMeasure)
+class SecurityMeasureAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+    model = SecurityMeasure
 
-    list_display = ('title', 'parent_project', 'type', 'solution', 'effort', 'status')
-    list_filter = ('type', 'solution', 'effort', 'status', 'eta')
+    list_display = ('title', 'parent_project', 'type', 'security_function', 'effort', 'status')
+    list_filter = ('type', 'security_function', 'effort', 'status', 'eta')
 
 
 @admin.register(Project)

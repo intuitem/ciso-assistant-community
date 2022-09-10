@@ -244,9 +244,9 @@ msgstr ""
 "scénario de risque pour y ajouter des mesures de sécurité supplémentaires."
 
 #: core/models.py:144
-msgid "<we have solution A and Process B to handle this>"
+msgid "<we have security_function A and Process B to handle this>"
 msgstr ""
-"<nous avons une solution A et un processus B pour faire face à ce risque>"
+"<nous avons une security_function A et un processus B pour faire face à ce risque>"
 
 #: core/models.py:145 core/templates/snippets/ra_data.html:44
 msgid "Existing measures"
@@ -349,7 +349,7 @@ msgid "Extra-Large"
 msgstr "Très Important"
 
 #: core/models.py:217
-msgid "Solution"
+msgid "SecurityFunction"
 msgstr ""
 
 #: core/models.py:219
@@ -1321,7 +1321,7 @@ msgstr "Bienvenue dans MIRA. Votre "
 
 #: core/templates/registration/login.html:13
 msgid "one-stop shop"
-msgstr "solution complète"
+msgstr "security_function complète"
 
 #: core/templates/registration/login.html:14
 msgid "for risk assessment and management."
@@ -1500,8 +1500,8 @@ msgstr " \"Mesure: terminée\" "
 #~ msgid "Break down per threat"
 #~ msgstr "Répartition par menace"
 
-#~ msgid "Solutions in catalog"
-#~ msgstr "Solutions dans le catalogue"
+#~ msgid "SecurityFunctions in catalog"
+#~ msgstr "SecurityFunctions dans le catalogue"
 
 #~ msgid "Parent Risk"
 #~ msgstr "Risque Parent"

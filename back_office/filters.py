@@ -3,9 +3,9 @@ from django_filters import FilterSet, OrderingFilter, ModelMultipleChoiceFilter,
 # from django_filters.widgets import *
 from django.db.models import Q
 
-from core.models import Analysis, RiskInstance, Mitigation, Solution, RiskAcceptance
-from general.models import Asset, Folder, Project, ParentRisk, Solution
-from general.models import ParentRisk, Project
+from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance
+from general.models import Asset, Folder, Project, Threat, SecurityFunction
+from general.models import Threat, Project
 from django.contrib.auth.models import User, Group
 from django.utils.translation import gettext_lazy as _
 
@@ -122,22 +122,22 @@ class RiskScenarioFilter(GenericFilterSet):
                 'placeholder': _('Search scenario...')
         }
     ))
-    parent_risk = GenericModelMultipleChoiceFilter(queryset=ParentRisk.objects.all())
+    threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
     analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
-    treatment = GenericMultipleChoiceFilter(choices=RiskInstance.TREATMENT_OPTIONS)
+    treatment = GenericMultipleChoiceFilter(choices=RiskScenario.TREATMENT_OPTIONS)
 
     orderby = GenericOrderingFilter(
         fields=(
             ('title', 'title'),
-            ('parent_risk', 'parent_risk'),
+            ('threat', 'threat'),
             ('analysis__project', 'analysis__project'),
             ('treatment', 'treatment'),
         ),
         field_labels={
             'title': _('title'.capitalize()),
             '-title': _('Title (descending)'),
-            'parent_risk': _('threat'.capitalize()),
-            '-parent_risk': _('Threat (descending)'),
+            'threat': _('threat'.capitalize()),
+            '-threat': _('Threat (descending)'),
             'analysis__project': _('parent'.capitalize() + ' project'),
             '-analysis__project': _('Parent project (descending)'),
             'treatment': _('treatment'.capitalize()),
@@ -146,8 +146,8 @@ class RiskScenarioFilter(GenericFilterSet):
     )
 
     class Meta:
-        model = RiskInstance
-        fields = ['title', 'parent_risk', 'analysis__project', 'treatment']
+        model = RiskScenario
+        fields = ['title', 'threat', 'analysis__project', 'treatment']
 
 class MeasureFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
@@ -156,18 +156,18 @@ class MeasureFilter(GenericFilterSet):
                 'placeholder': _('Search security measure...')
         }
     ))
-    risk_instance__analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
-    type=GenericMultipleChoiceFilter(choices=Mitigation.MITIGATION_TYPE)
-    status=GenericMultipleChoiceFilter(choices=Mitigation.MITIGATION_STATUS)
-    solution=GenericModelMultipleChoiceFilter(queryset=Solution.objects.all())
+    risk_scenario__analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
+    type=GenericMultipleChoiceFilter(choices=SecurityMeasure.MITIGATION_TYPE)
+    status=GenericMultipleChoiceFilter(choices=SecurityMeasure.MITIGATION_STATUS)
+    security_function=GenericModelMultipleChoiceFilter(queryset=SecurityFunction.objects.all())
 
     orderby = GenericOrderingFilter(
         fields=(
             ('status', 'status'),
             ('title', 'title'),
             ('type', 'type'),
-            ('risk_instance__analysis__project', 'risk_instance__analysis__project'),
-            ('solution', 'solution'),
+            ('risk_scenario__analysis__project', 'risk_scenario__analysis__project'),
+            ('security_function', 'security_function'),
         ),
         field_labels={
             'status': _('status'.capitalize()),
@@ -176,19 +176,19 @@ class MeasureFilter(GenericFilterSet):
             '-title': _('Title (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
-            'risk_instance__analysis__project': _('parent'.capitalize() + ' project'),
-            '-risk_instance__analysis__project': _('Parent project (descending)'),
-            'solution': _('solution'.capitalize()),
-            '-solution': _('Solution (descending)'),
+            'risk_scenario__analysis__project': _('parent'.capitalize() + ' project'),
+            '-risk_scenario__analysis__project': _('Parent project (descending)'),
+            'security_function': _('security_function'.capitalize()),
+            '-security_function': _('SecurityFunction (descending)'),
         }
     )
 
     class Meta:
-        model = Mitigation
-        fields = ['title', 'type', 'risk_instance__analysis__project', 'solution']
+        model = SecurityMeasure
+        fields = ['title', 'type', 'risk_scenario__analysis__project', 'security_function']
 
 class RiskAcceptanceFilter(GenericFilterSet):
-    risk_instance__title = GenericCharFilter(widget=TextInput(
+    risk_scenario__title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
                 'placeholder': _('Search acceptance...')
@@ -197,14 +197,14 @@ class RiskAcceptanceFilter(GenericFilterSet):
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
     orderby = GenericOrderingFilter(
         fields=(
-            ('risk_instance__title', 'risk_instance__title'),
+            ('risk_scenario__title', 'risk_scenario__title'),
             ('type', 'type'),
             ('expiry_date', 'expiry_date'),
             ('validator', 'validator'),
         ),
         field_labels={
-            'risk_instance__title': _('title'.capitalize()),
-            '-risk_instance__title': _('Title (descending)'),
+            'risk_scenario__title': _('title'.capitalize()),
+            '-risk_scenario__title': _('Title (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
             'expiry_date': _('expiry'.capitalize() + ' date'),
@@ -216,7 +216,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ['risk_instance__title', 'type']
+        fields = ['risk_scenario__title', 'type']
 
 class ProjectsDomainFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -288,7 +288,7 @@ class ThreatFilter(GenericFilterSet):
     )
 
     class Meta:
-        model = ParentRisk
+        model = Threat
         fields = '__all__'
 
 class SecurityFunctionFilter(GenericFilterSet):
@@ -315,7 +315,7 @@ class SecurityFunctionFilter(GenericFilterSet):
     )
 
     class Meta:
-        model = Solution
+        model = SecurityFunction
         fields = '__all__'
 
 class AssetFilter(GenericFilterSet):

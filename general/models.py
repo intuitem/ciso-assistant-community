@@ -41,7 +41,7 @@ class Folder(models.Model):
         if hasattr(object, 'folder'): return object.folder
         if hasattr(object, 'project'): return object.project.folder
         if hasattr(object, 'analysis'): return object.analysis.project.folder
-        if hasattr(object, 'risk_instance'): return object.risk_instance.analysis.project.folder
+        if hasattr(object, 'risk_scenario'): return object.risk_scenario.analysis.project.folder
         
 class Project(models.Model):
     PRJ_LC_STATUS = [
@@ -77,7 +77,7 @@ class Project(models.Model):
 
 
 # todo: rename to Threat
-class ParentRisk(models.Model):
+class Threat(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     is_published = models.BooleanField(_('published'), default=True)
@@ -106,7 +106,7 @@ class Asset(models.Model):
 
 
 # todo: rename to SecurityFunction
-class Solution(models.Model):
+class SecurityFunction(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
@@ -114,8 +114,8 @@ class Solution(models.Model):
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
-        verbose_name = _("Solution")
-        verbose_name_plural = _("Solutions")
+        verbose_name = _("SecurityFunction")
+        verbose_name_plural = _("SecurityFunctions")
 
     def __str__(self):
         return self.name

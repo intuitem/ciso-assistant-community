@@ -70,7 +70,7 @@
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Threat" %}</p>
-                                    {{ filter.form.parent_risk }}
+                                    {{ filter.form.threat }}
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent project" %}</p>
@@ -141,7 +141,7 @@
                         </th>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
-                                {% if scenario.parent_risk %}{{ scenario.parent_risk }}{% else %}--{% endif %}
+                                {% if scenario.threat %}{{ scenario.threat }}{% else %}--{% endif %}
                             </p>
                         </td>
                         <td class="px-6 py-4">

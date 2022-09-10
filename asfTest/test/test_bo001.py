@@ -31,28 +31,28 @@ def test_BO001(page):
 	# 3 | Create a threat and a security function
 	step = 3
 	threatName = 'Threat Test'
-	solutionName = 'Solution Test'
+	security_functionName = 'SecurityFunction Test'
 	page.click('id=threats')
 	page.click('id=newThreat')
-	page.fill('id=id_parentrisk_title', threatName)
+	page.fill('id=id_threat_title', threatName)
 	page.click('id=save_threat')
-	threats = re.findall(r'id="instance([0-9]+)"', page.content(), re.MULTILINE)
+	threats = re.findall(r'id="scenario([0-9]+)"', page.content(), re.MULTILINE)
 	for threatId in threats:		
-		threat = page.locator('id=instance'+threatId).inner_text()
+		threat = page.locator('id=scenario'+threatId).inner_text()
 		if threat == threatName:
 			break
 	assert threat == threatName, "Step "+str(step)+": not Ok"
 	page.click('id=securityFunctions')
 	page.click('id=newSecurityFunction')
-	page.fill('id=id_solution_name', solutionName)
-	page.fill('id=id_solution_provider', 'us')
+	page.fill('id=id_security_function_name', security_functionName)
+	page.fill('id=id_security_function_provider', 'us')
 	page.click('id=save')
 	functions = re.findall(r'id="function([0-9]+)"', page.content(), re.MULTILINE)
 	for functionId in functions:		
 		function = page.locator('id=function'+functionId).inner_text()
-		if function == solutionName:
+		if function == security_functionName:
 			break
-	assert function == solutionName, "Step "+str(step)+": not Ok"
+	assert function == security_functionName, "Step "+str(step)+": not Ok"
 	# 4 | Create a project domain
 	step = 4
 	domainName = 'Domain Test'
@@ -109,36 +109,36 @@ def test_BO001(page):
 	assert page.locator('id=page_title').inner_text() == "RA-"+ analysisId + ": " + analysisName, "Step "+str(step)+": not Ok"
 	page.click("id=newRiskScenario")
 	assert page.locator('id=page_title').inner_text() == "New risk scenario", "Step "+str(step)+": not Ok"
-	page.fill('id=id_riskinstance_title', 'Scenario Test')
-	page.select_option('id=id_riskinstance_parent_risk', label=threatName)
-	page.fill('id=id_riskinstance_scenario', 'scenario test')
-	page.select_option('id=id_riskinstance_current_impact', 'M')
-	page.select_option('id=id_riskinstance_current_proba', 'L')
-	page.fill('id=id_riskinstance_existing_measures', 'test measures')
-	page.select_option('id=id_riskinstance_residual_proba', 'VL')
-	page.select_option('id=id_riskinstance_residual_impact', 'M')
-	page.select_option('id=id_riskinstance_treatment', 'mitigated')
-	page.fill('id=id_riskinstance_comments', 'test comments')
+	page.fill('id=id_riskscenario_title', 'Scenario Test')
+	page.select_option('id=id_riskscenario_threat', label=threatName)
+	page.fill('id=id_riskscenario_scenario', 'scenario test')
+	page.select_option('id=id_riskscenario_current_impact', 'M')
+	page.select_option('id=id_riskscenario_current_proba', 'L')
+	page.fill('id=id_riskscenario_existing_measures', 'test measures')
+	page.select_option('id=id_riskscenario_residual_proba', 'VL')
+	page.select_option('id=id_riskscenario_residual_impact', 'M')
+	page.select_option('id=id_riskscenario_treatment', 'mitigated')
+	page.fill('id=id_riskscenario_comments', 'test comments')
 	page.click('id=submit')
-	instanceName = 'Scenario Test'
-	instances = re.findall(r'id="instance([0-9]+)"', page.content(), re.MULTILINE)
-	for instanceId in instances:		
-		instance = page.locator('id=instance'+instanceId).inner_text()
-		if instanceName in instance:
+	scenarioName = 'Scenario Test'
+	scenarios = re.findall(r'id="scenario([0-9]+)"', page.content(), re.MULTILINE)
+	for scenarioId in scenarios:		
+		scenario = page.locator('id=scenario'+scenarioId).inner_text()
+		if scenarioName in scenario:
 			break
-	assert instanceName in instance, "Step "+str(step)+": not Ok"
+	assert scenarioName in scenario, "Step "+str(step)+": not Ok"
 	# 8 | Create a mesure in side the test scenario
 	step = 8
-	page.click('id=instance'+instanceId)
+	page.click('id=scenario'+scenarioId)
 	assert page.locator('id=page_title').inner_text() == "Project Test: Scenario Test", "Step "+str(step)+": not Ok"
 	page.click('id=newMeasures')
-	page.select_option('id=id_mitigation_risk_instance', label='Project Test: Scenario Test')
-	page.select_option('id=id_mitigation_solution', label='Solution Test')
-	page.fill('id=id_mitigation_description', 'test description')
-	page.select_option('id=id_mitigation_type', 'technical')
-	page.select_option('id=id_mitigation_status', 'in_progress')
-	page.type('id=id_mitigation_eta', '01012023')
-	page.select_option('id=id_mitigation_effort', 'M')
+	page.select_option('id=id_security_function_risk_scenario', label='Project Test: Scenario Test')
+	page.select_option('id=id_security_function_security_function', label='SecurityFunction Test')
+	page.fill('id=id_security_function_description', 'test description')
+	page.select_option('id=id_security_function_type', 'technical')
+	page.select_option('id=id_security_function_status', 'in_progress')
+	page.type('id=id_security_function_eta', '01012023')
+	page.select_option('id=id_security_function_effort', 'M')
 	page.click('id=save')
 	# clear |
 	page.click('id=projectsdomains')

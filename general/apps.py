@@ -12,12 +12,12 @@ def startup():
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
             "view_analysis",
-            "view_mitigation",
-            "view_riskinstance",
+            "view_security_measure",
+            "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
-            "view_parentrisk",
-            "view_solution",
+            "view_threat",
+            "view_security_function",
             "view_folder",
         ])
 
@@ -32,15 +32,15 @@ def startup():
             "change_analysis",
             "delete_analysis"
 
-            "add_mitigation",
-            "view_mitigation",
-            "change_mitigation",
-            "delete_mitigation",
+            "add_security_measure",
+            "view_security_measure",
+            "change_security_measure",
+            "delete_security_measure",
 
-            "add_riskinstance",
-            "view_riskinstance",
-            "change_riskinstance",
-            "delete_riskinstance",
+            "add_riskscenario",
+            "view_riskscenario",
+            "change_riskscenario",
+            "delete_riskscenario",
 
             "add_riskacceptance",
             "view_riskacceptance",
@@ -48,8 +48,8 @@ def startup():
             "delete_riskacceptance",
 
             "view_asset",
-            "view_parentrisk",
-            "view_solution",
+            "view_threat",
+            "view_security_function",
             "view_folder",
         ])
 
@@ -67,15 +67,15 @@ def startup():
             "change_analysis",
             "delete_analysis",
 
-            "add_mitigation",
-            "view_mitigation",
-            "change_mitigation",
-            "delete_mitigation",
+            "add_security_measure",
+            "view_security_measure",
+            "change_security_measure",
+            "delete_security_measure",
 
-            "add_riskinstance",
-            "view_riskinstance",
-            "change_riskinstance",
-            "delete_riskinstance",
+            "add_riskscenario",
+            "view_riskscenario",
+            "change_riskscenario",
+            "delete_riskscenario",
 
             "add_riskacceptance",
             "view_riskacceptance",
@@ -83,8 +83,8 @@ def startup():
             "delete_riskacceptance",
 
             "view_asset",
-            "view_parentrisk",
-            "view_solution",
+            "view_threat",
+            "view_security_function",
             "view_folder",
             "change_folder",
         ])
@@ -115,15 +115,15 @@ def startup():
             "change_asset",
             "delete_asset",
 
-            "add_parentrisk",
-            "view_parentrisk",
-            "change_parentrisk",
-            "delete_parentrisk",
+            "add_threat",
+            "view_threat",
+            "change_threat",
+            "delete_threat",
 
-            "add_solution",
-            "view_solution",
-            "change_solution",
-            "delete_solution",
+            "add_security_function",
+            "view_security_function",
+            "change_security_function",
+            "delete_security_function",
 
             "add_folder",
             "view_folder",

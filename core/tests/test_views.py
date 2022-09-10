@@ -3,9 +3,9 @@ from django.shortcuts import get_object_or_404, render
 from django.test.client import RequestFactory
 from django.contrib.auth.models import AnonymousUser, User
 
-from core.models import Analysis, RiskInstance, Mitigation
+from core.models import Analysis, RiskScenario, SecurityMeasure
 from core.views import *
-from general.models import ParentRisk, Project, Folder
+from general.models import Threat, Project, Folder
 from django.utils.translation import gettext_lazy as _
 
 import pytest
@@ -20,8 +20,8 @@ def test_setUp(db):
     list["folder"] = Folder.objects.create()
     list["project"] = Project.objects.create(name="Test Project", folder = list.get("folder"))
     list["analysis"] = Analysis.objects.create(project = list.get("project"))
-    list["parentrisk"] = ParentRisk.objects.create()
-    list["riskinstance"] = RiskInstance.objects.create(analysis = list.get("analysis"), parent_risk = list.get("parentrisk"), current_proba = "VL", current_impact="L")
+    list["threat"] = Threat.objects.create()
+    list["riskscenario"] = RiskScenario.objects.create(analysis = list.get("analysis"), threat = list.get("threat"), current_proba = "VL", current_impact="L")
 
 @pytest.fixture
 def create_user(db, django_user_model):

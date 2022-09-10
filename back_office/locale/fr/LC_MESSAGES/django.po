@@ -129,12 +129,12 @@ msgid "Type (descending)"
 msgstr "Type (descendant)"
 
 #: back_office/filters.py:181
-msgid "solution"
+msgid "security_function"
 msgstr ""
 
 #: back_office/filters.py:182
-msgid "Solution (descending)"
-msgstr "Solution (descendant)"
+msgid "SecurityFunction (descending)"
+msgstr "SecurityFunction (descendant)"
 
 #: back_office/filters.py:194
 msgid "Search acceptance..."

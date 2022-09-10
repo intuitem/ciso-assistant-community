@@ -1,6 +1,6 @@
 # MIRA
 
-MIRA offers a straightforward solution to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
+MIRA offers a straightforward security_function to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
 
 ## General
 
@@ -48,7 +48,7 @@ export POSTGRES_PASSWORD=<XXX>
 export DB_HOST=localhost
 ```
 
-3. Create a virtual environment with the tool of your choice and activate it. For instance:
+3. Create a virtual environment with the tool of your choice and activate it. For scenario:
 ```sh
 $ pip install virtualenv
 $ virtualenv venv

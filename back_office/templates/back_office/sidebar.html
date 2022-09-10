@@ -45,7 +45,7 @@
                     </a>
                 </li>
                 {% comment %} {% endif %} {% endcomment %}
-                {% comment %} {% if perms.core.view_riskinstance %} {% endcomment %}
+                {% comment %} {% if perms.core.view_riskscenario %} {% endcomment %}
                 <li class="to-page">
                     <a id="risk_scenarios" href="{% url 'ri-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -56,7 +56,7 @@
                     </a>
                 </li>
                 {% comment %} {% endif %} {% endcomment %}
-                {% comment %} {% if perms.core.view_mitigation %} {% endcomment %}
+                {% comment %} {% if perms.core.view_security_measure %} {% endcomment %}
                 <li class="to-page">
                     <a id="security_measures" href="{% url 'mtg-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -118,7 +118,7 @@
                     </a>
                 </li>
                 {% comment %} {% endif %}
-                {% if perms.general.view_parentrisk %} {% endcomment %}
+                {% if perms.general.view_threat %} {% endcomment %}
                 <li class="to-page">
                     <a id="threats" href="{% url 'threat-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -129,7 +129,7 @@
                     </a>
                 </li>
                 {% comment %} {% endif %}
-                {% if perms.general.view_solution %} {% endcomment %}
+                {% if perms.general.view_security_function %} {% endcomment %}
                 <li class="to-page">
                     <a id="securityFunctions" href="{% url 'security-function-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
                     <span class="nav-link-icon">

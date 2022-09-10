@@ -17,32 +17,32 @@
         </th>
     </thead>
     <tbody>
-        {% for mitigation in mitigations %}
+        {% for security_measure in security_measures %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {{ mitigation.id }}
+                        {{ security_measure.id }}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
                         <div class="">
-                            <a id="mitigation{{ mitigation.id }}" href="{% url 'mtg-update' mitigation.id %}?next={{ request.path|urlencode }}"
+                            <a id="security_measure{{ security_measure.id }}" href="{% url 'mtg-update' security_measure.id %}?next={{ request.path|urlencode }}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                {{ mitigation.title }}
+                                {{ security_measure.title }}
                             </a>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if mitigation.solution %}{{ mitigation.solution }}{% else %}--{% endif %}
+                        {% if security_measure.security_function %}{{ security_measure.security_function }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {{ mitigation.get_status_display }}
+                        {{ security_measure.get_status_display }}
                     </p>
                 </td>
             </tr>

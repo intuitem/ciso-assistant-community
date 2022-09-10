@@ -37,11 +37,11 @@ msgstr "Registre des analyses"
 #: asf_rm/settings.py:215
 #, fuzzy
 #| msgid "Risk acceptances"
-msgid "Risk instances"
+msgid "Risk scenarios"
 msgstr "Acceptations de risque"
 
 #: asf_rm/settings.py:220
-msgid "Mitigations"
+msgid "SecurityFunctions"
 msgstr ""
 
 #: asf_rm/settings.py:225
@@ -76,9 +76,9 @@ msgstr "Risques Parents"
 
 #: asf_rm/settings.py:254
 #, fuzzy
-#| msgid "Solutions Catalog"
-msgid "Solutions Catalog"
-msgstr "Catalogue des Solutions"
+#| msgid "SecurityFunctions Catalog"
+msgid "SecurityFunctions Catalog"
+msgstr "Catalogue des SecurityFunctions"
 
 #: asf_rm/settings.py:260
 msgid "Settings"

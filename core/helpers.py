@@ -18,7 +18,7 @@ def risk_matrix():
                        [0, 0, 0, 0, 0]]
     map_impact = {'VH': 0, 'H': 1, 'M': 2, 'L': 3, 'VL': 4}
     map_proba = {'VL': 0, 'L': 1, 'M': 2, 'H': 3, 'VH': 4}
-    for ri in RiskInstance.objects.all():
+    for ri in RiskScenario.objects.all():
         matrix_current[map_impact[ri.current_impact]][map_proba[ri.current_proba]] += 1
         matrix_residual[map_impact[ri.residual_impact]][map_proba[ri.residual_proba]] += 1
     return {'current': matrix_current, 'residual': matrix_residual}
@@ -27,7 +27,7 @@ def risk_matrix():
 def risk_per_status():
     # NOTE: if we want to skip empty values, we could just use the group by using annotation
     # rs_groups =
-    # RiskInstance.objects.all().values('treatment').annotate(total=Count('treatment')).order_by('treatment')
+    # RiskScenario.objects.all().values('treatment').annotate(total=Count('treatment')).order_by('treatment')
 
     labels = list()
     values = list()
@@ -37,8 +37,8 @@ def risk_per_status():
     # this formatting is a constraint from eCharts
     color_map = {"open": "#fac858", "mitigated": "#91cc75", "accepted": "#73c0de", "blocker": "#ee6666"}
 
-    for st in RiskInstance.TREATMENT_OPTIONS:
-        count = RiskInstance.objects.filter(treatment=st[0]).count()
+    for st in RiskScenario.TREATMENT_OPTIONS:
+        count = RiskScenario.objects.filter(treatment=st[0]).count()
         v = {
             "value": count,
             "itemStyle": {"color": color_map[st[0]]}
@@ -49,12 +49,12 @@ def risk_per_status():
     return {"labels": labels, "values": values}
 
 
-def mitigation_per_status():
+def security_measure_per_status():
     values = list()
     labels = list()
     color_map = {"open": "#fac858", "in_progress": "#5470c6", "on_hold": "#ee6666", "done": "#91cc75"}
-    for st in Mitigation.MITIGATION_STATUS:
-        count = Mitigation.objects.filter(status=st[0]).count()
+    for st in SecurityMeasure.MITIGATION_STATUS:
+        count = SecurityMeasure.objects.filter(status=st[0]).count()
         v = {
             "value": count,
             "itemStyle": {"color": color_map[st[0]]}
@@ -64,22 +64,22 @@ def mitigation_per_status():
     return {"labels": labels, "values": values}
 
 
-def mitigation_per_cur_risk():
+def security_measure_per_cur_risk():
     output = list()
-    for lvl in RiskInstance.RATING_OPTIONS:
-        cnt = Mitigation.objects.exclude(status='done').filter(risk_instance__current_level=lvl[0]).count()
+    for lvl in RiskScenario.RATING_OPTIONS:
+        cnt = SecurityMeasure.objects.exclude(status='done').filter(risk_scenario__current_level=lvl[0]).count()
         output.append({"name": lvl[1], "value": cnt})
 
     return {"values": output}
 
 
-def mitigation_per_solution():
+def security_measure_per_security_function():
     indicators = list()
     values = list()
 
-    tmp = Mitigation.objects.all().values('solution__name').annotate(total=Count('solution')).order_by('solution')
+    tmp = SecurityMeasure.objects.all().values('security_function__name').annotate(total=Count('security_function')).order_by('security_function')
     for entry in tmp:
-        indicators.append(entry['solution__name'])
+        indicators.append(entry['security_function__name'])
         values.append(entry['total'])
 
     return {"indicators": indicators, "values": values, "min": min(values, default=0) - 1, "max": max(values, default=0) + 1}
@@ -89,9 +89,9 @@ def risks_count_per_level():
     current_level = list()
     residual_level = list()
 
-    for lvl in RiskInstance.RATING_OPTIONS:
-        count_c = RiskInstance.objects.filter(current_level=lvl[0]).count()
-        count_r = RiskInstance.objects.filter(residual_level=lvl[0]).count()
+    for lvl in RiskScenario.RATING_OPTIONS:
+        count_c = RiskScenario.objects.filter(current_level=lvl[0]).count()
+        count_r = RiskScenario.objects.filter(residual_level=lvl[0]).count()
         current_level.append({'name': lvl[1], 'value': count_c})
         residual_level.append({'name': lvl[1], 'value': count_r})
 
@@ -101,9 +101,9 @@ def risks_count_per_level():
 def p_risks():
     p_risks_labels = list()
     p_risks_counts = list()
-    for p_risk in ParentRisk.objects.order_by('title'):
+    for p_risk in Threat.objects.order_by('title'):
         p_risks_labels.append(p_risk.title)
-        p_risks_counts.append(RiskInstance.objects.filter(parent_risk=p_risk).count())
+        p_risks_counts.append(RiskScenario.objects.filter(threat=p_risk).count())
 
     return {
         "indicators": p_risks_labels,
@@ -114,10 +114,10 @@ def p_risks():
 
 def p_risks_2():
     data = list()
-    for p_risk in ParentRisk.objects.order_by('title'):
-        cnt = RiskInstance.objects.filter(parent_risk=p_risk).count()
+    for p_risk in Threat.objects.order_by('title'):
+        cnt = RiskScenario.objects.filter(threat=p_risk).count()
         if cnt > 0:
-            data.append({"value": RiskInstance.objects.filter(parent_risk=p_risk).count(), "name": p_risk.title})
+            data.append({"value": RiskScenario.objects.filter(threat=p_risk).count(), "name": p_risk.title})
     return data
 
 
@@ -125,7 +125,7 @@ def p_risks_2():
 def risks_per_project_groups():
     output = list()
     for folder in Folder.objects.all().order_by('name'):
-        ri_level = RiskInstance.objects.filter(analysis__project__folder=folder).values(
+        ri_level = RiskScenario.objects.filter(analysis__project__folder=folder).values(
             'current_level').annotate(total=Count('current_level'))
         output.append({"folder": folder, "ri_level": ri_level})
     return output
@@ -133,38 +133,38 @@ def risks_per_project_groups():
 
 def get_counters():
     output = {
-        "RiskInstance": RiskInstance.objects.count(),   # TODO: Update Name
-        "Mitigation": Mitigation.objects.count(),   # TODO: Update Name
+        "RiskScenario": RiskScenario.objects.count(),   # TODO: Update Name
+        "SecurityMeasure": SecurityMeasure.objects.count(),   # TODO: Update Name
         "Analysis": Analysis.objects.count(),   # TODO: Update Name
         "Project": Project.objects.count(), # TODO: Update Name
-        "Solution": Solution.objects.count(),   # TODO: Update Name
+        "SecurityFunction": SecurityFunction.objects.count(),   # TODO: Update Name
         "RiskAcceptance": RiskAcceptance.objects.count(),   # TODO: Update Name
-        "ShowStopper": RiskInstance.objects.filter(treatment="blocker").count(),    # TODO: Update Name
-        "Threat": ParentRisk.objects.count(),
+        "ShowStopper": RiskScenario.objects.filter(treatment="blocker").count(),    # TODO: Update Name
+        "Threat": Threat.objects.count(),
     }
     return output
 
 
-def mitigation_priority():
-    def get_quadrant(mitigation):
-        if mitigation.risk_instance.current_level in ['M', 'H', 'VH']:
-            if mitigation.effort in ['S', 'M']:
+def security_measure_priority():
+    def get_quadrant(security_measure):
+        if security_measure.risk_scenario.current_level in ['M', 'H', 'VH']:
+            if security_measure.effort in ['S', 'M']:
                 return "1st"
-            elif mitigation.effort in ['L', 'XL']:
+            elif security_measure.effort in ['L', 'XL']:
                 return "2nd"
             else:
                 return "undefined"
         else:
-            if mitigation.effort in ['S', 'M']:
+            if security_measure.effort in ['S', 'M']:
                 return "3rd"
-            elif mitigation.effort in ['L', 'XL']:
+            elif security_measure.effort in ['L', 'XL']:
                 return "4th"
             else:
                 return "undefined"
 
     clusters = {"1st": list(), "2nd": list(), "3rd": list(), "4th": list(), "undefined": list()}
 
-    for mtg in Mitigation.objects.all():
+    for mtg in SecurityMeasure.objects.all():
         clusters[get_quadrant(mtg)].append(mtg)
 
     return clusters
@@ -181,21 +181,21 @@ def risk_status(analysis_list):
     max_tmp = list()
     for analysis in analysis_list:
 
-        for lvl in RiskInstance.RATING_OPTIONS:
-            cnt = RiskInstance.objects.filter(analysis=analysis, current_level=lvl[0]).count()
+        for lvl in RiskScenario.RATING_OPTIONS:
+            cnt = RiskScenario.objects.filter(analysis=analysis, current_level=lvl[0]).count()
             current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            cnt = RiskInstance.objects.filter(analysis=analysis, residual_level=lvl[0]).count()
+            cnt = RiskScenario.objects.filter(analysis=analysis, residual_level=lvl[0]).count()
             residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            max_tmp.append(RiskInstance.objects.filter(analysis=analysis).count())
+            max_tmp.append(RiskScenario.objects.filter(analysis=analysis).count())
 
-        for option in RiskInstance.TREATMENT_OPTIONS:
-            cnt = RiskInstance.objects.filter(analysis=analysis, treatment=option[0]).count()
+        for option in RiskScenario.TREATMENT_OPTIONS:
+            cnt = RiskScenario.objects.filter(analysis=analysis, treatment=option[0]).count()
             rsk_status_out[option[0]].append({'value': cnt, 'itemStyle': {'color': STATUS_COLOR_MAP[option[0]]}})
 
-        for status in Mitigation.MITIGATION_STATUS:
-            cnt = Mitigation.objects.filter(risk_instance__analysis=analysis, status=status[0]).count()
+        for status in SecurityMeasure.MITIGATION_STATUS:
+            cnt = SecurityMeasure.objects.filter(risk_scenario__analysis=analysis, status=status[0]).count()
             mtg_status_out[status[0]].append({'value': cnt, 'itemStyle': {'color': STATUS_COLOR_MAP[status[0]]}})
 
         names.append(str(analysis.project) + ' ' + str(analysis.version))
@@ -221,14 +221,14 @@ def risks_levels_per_prj_grp():
     max_tmp = list()
     for folder in Folder.objects.all():
 
-        for lvl in RiskInstance.RATING_OPTIONS:
-            cnt = RiskInstance.objects.filter(analysis__project__folder=folder, current_level=lvl[0]).count()
+        for lvl in RiskScenario.RATING_OPTIONS:
+            cnt = RiskScenario.objects.filter(analysis__project__folder=folder, current_level=lvl[0]).count()
             current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            cnt = RiskInstance.objects.filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
+            cnt = RiskScenario.objects.filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
             residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            max_tmp.append(RiskInstance.objects.filter(analysis__project__folder=folder).count())
+            max_tmp.append(RiskScenario.objects.filter(analysis__project__folder=folder).count())
 
         names.append(str(folder))
 
@@ -242,7 +242,7 @@ def risks_levels_per_prj_grp():
     }
 
 def measures_to_review():
-    measures = Mitigation.objects.filter(
+    measures = SecurityMeasure.objects.filter(
         eta__lte=date.today()+timedelta(days=30)
         ).exclude(status__iexact='done'
         ).order_by('eta')

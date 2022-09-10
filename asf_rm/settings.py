@@ -211,13 +211,13 @@ BATON = {
                     'icon': 'fas fa-glasses',
                 },
                 {
-                    'name': 'riskinstance',
-                    'label': _('Risk instances'),
+                    'name': 'riskscenario',
+                    'label': _('Risk scenarios'),
                     'icon': 'fas fa-clone',
                 },
                 {
-                    'name': 'mitigation',
-                    'label': _('Mitigations'),
+                    'name': 'security_function',
+                    'label': _('SecurityFunctions'),
                     'icon': 'fas fa-fire-extinguisher',
                 },
                 {
@@ -245,13 +245,13 @@ BATON = {
                     'icon': 'fas fa-cubes',
                 },
                 {
-                    'name': 'parentrisk',
+                    'name': 'threat',
                     'label': _('Parent Risks'),
                     'icon': 'fas fa-folder',
                 },
                 {
-                    'name': 'solution',
-                    'label': _('Solutions Catalog'),
+                    'name': 'security_function',
+                    'label': _('SecurityFunctions Catalog'),
                     'icon': 'fas fa-cogs',
                 },
             )

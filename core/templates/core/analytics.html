@@ -12,13 +12,13 @@
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
             <span class="text-sm font-semibold text-gray-400">{% trans "Risk scenarios" %}</span>
-            <h1 id="riskinstances" class="text-2xl font-bold text-orange-400">{{counters.RiskInstance}}</h1>
+            <h1 id="riskscenarios" class="text-2xl font-bold text-orange-400">{{counters.RiskScenario}}</h1>
           </div>
         </div>
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
             <span class="text-sm font-semibold text-gray-400">{% trans "Security measures" %}</span>
-            <h1 id="mitigations" class="text-2xl font-bold text-green-600">{{counters.Mitigation}}</h1>
+            <h1 id="security_measures" class="text-2xl font-bold text-green-600">{{counters.SecurityMeasure}}</h1>
           </div>
         </div>
         <!--
@@ -44,7 +44,7 @@
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
           <div>
             <span class="text-sm font-semibold text-gray-400">{% trans "Security functions" %}</span>
-            <h1 class="text-2xl font-bold">{{counters.Solution}}</h1>
+            <h1 class="text-2xl font-bold">{{counters.SecurityFunction}}</h1>
           </div>
         </div>
         <div class="flex items-center p-6 bg-white rounded-xl mt-10 shadow-lg w-1/6">
@@ -59,7 +59,7 @@
         <div class="w-1/2 rounded-lg shadow p-2 content-center">
             <div class="text-xl">{% trans "Risk scenarios broken down by threat" %}</div>
             <div class="p-2">
-                {% include 'snippets/rose_chart.html' with name='instance_per_parent_risk' data=rose %}
+                {% include 'snippets/rose_chart.html' with name='scenario_per_threat' data=rose %}
 
             </div>
         </div>
@@ -100,18 +100,18 @@
             <div class="px-4 m-2 flex space-x-2 w-auto">
                 <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
                     <div>{% trans "Breakdown per status" %}</div>
-                    {% include 'snippets/bar_chart.html' with name='mtg' labels=mitigation_status.labels values=mitigation_status.values %}
+                    {% include 'snippets/bar_chart.html' with name='mtg' labels=security_measure_status.labels values=security_measure_status.values %}
                 </div>
                 <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
                     <div>{% trans "Pending measures per associated risk level (current)" %}</div>
-                    {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=mitigation_per_cur_risk.values %}
+                    {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=security_measure_per_cur_risk.values %}
                 </div>
             </div>
             <div class="px-4 m-2 space-x-2">
                 <div class="rounded-lg shadow p-2 items-center justify-center"> 
                     {% trans "Breakdown per security function" %}
-                    {% trans "Measures per security function" as mitigations_per_solution_label %}
-                    {% include 'snippets/radar_chart.html' with name='mtg_sol' s_label=mitigations_per_solution_label data=mitigation_per_solution %}
+                    {% trans "Measures per security function" as security_measures_per_security_function_label %}
+                    {% include 'snippets/radar_chart.html' with name='mtg_sol' s_label=security_measures_per_security_function_label data=security_measure_per_security_function %}
                 </div>            
             </div>
         </div>
@@ -131,7 +131,7 @@
                         <td class="p-2 m-2 w-96 h-96 border">
                             <span class="text-lg font-semibold p-1 bg-green-500 text-white rounded">{% trans "4th" %}</span>
                             <div class="text-xs">
-                                <ul>{% for mtg in mitigation_priority.4th %}
+                                <ul>{% for mtg in security_measure_priority.4th %}
                                     <li><a class="text-indigo-500 hover:text-indigo-300" href="#"><span class="font-semibold">[{{mtg.parent_project}}]</span> {{mtg}}</a></li>
                                     {% endfor %}</ul>
                             </div>
@@ -140,7 +140,7 @@
                             <div class="absolute top-0 -left-2 bg-white"><i class="fas fa-arrow-up"></i> {% trans "Effort" %}</div>
                             <span class="text-lg font-semibold p-1 bg-green-500 text-white rounded">{% trans "2nd" %}</span>
                             <div class="text-xs">
-                                <ul>{% for mtg in mitigation_priority.2nd %}
+                                <ul>{% for mtg in security_measure_priority.2nd %}
                                     <li><a class="text-indigo-500 hover:text-indigo-300" href="#"><span class="font-semibold">[{{mtg.parent_project}}]</span> {{mtg}}</a></li>
                                     {% endfor %}</ul>
                             </div>
@@ -150,7 +150,7 @@
                         <td class="p-2 m-2 w-96 h-96 border">
                             <span class="text-lg font-semibold p-1 bg-green-500 text-white rounded">{% trans "3rd" %}</span>
                             <div class="text-xs">
-                                <ul>{% for mtg in mitigation_priority.3rd %}
+                                <ul>{% for mtg in security_measure_priority.3rd %}
                                     <li><a class="text-indigo-500 hover:text-indigo-300" href="#"><span class="font-semibold">[{{mtg.parent_project}}]</span> {{mtg}}</a></li>
                                     {% endfor %}</ul>
                             </div>
@@ -159,7 +159,7 @@
                             <div class="absolute -top-3 -right-0 bg-white"> {% trans "Risk level" %} <i class="fas fa-arrow-right"></i> </div>
                             <span class="text-lg font-semibold p-1 bg-green-500 text-white rounded">{% trans "1st" %}</span>
                             <div class="text-xs">
-                                <ul>{% for mtg in mitigation_priority.1st %}
+                                <ul>{% for mtg in security_measure_priority.1st %}
                                     <li><a class="text-indigo-500 hover:text-indigo-300" href="#"><span class="font-semibold">[{{mtg.parent_project}}]</span> {{mtg}}</a></li>
                                     {% endfor %}</ul>
                             </div>
@@ -167,7 +167,7 @@
                     </tr>
                 </table>
             </div>
-            <div class="p-2 m-2 text-md"><i class="fas fa-info-circle"></i> {% trans "Note" %}: <b>{{mitigation_priority.undefined|length}}</b> {% trans "measure(s) have not been processed because the estimated effort is not set." %}</div>
+            <div class="p-2 m-2 text-md"><i class="fas fa-info-circle"></i> {% trans "Note" %}: <b>{{security_measure_priority.undefined|length}}</b> {% trans "measure(s) have not been processed because the estimated effort is not set." %}</div>
 
         </div>
     </div>
