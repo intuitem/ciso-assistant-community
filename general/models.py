@@ -39,6 +39,7 @@ class Folder(models.Model):
         """Return the folder of an object"""
         # todo: add a folder attribute to all objects to avoid introspection
         if hasattr(object, 'folder'): return object.folder
+        if hasattr(object, 'parent_folder'): return object.parent_folder
         if hasattr(object, 'project'): return object.project.folder
         if hasattr(object, 'analysis'): return object.analysis.project.folder
         if hasattr(object, 'risk_scenario'): return object.risk_scenario.analysis.project.folder
