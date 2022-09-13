@@ -39,13 +39,6 @@ class RoleAssignment(models.Model):
     is_recursive = models.BooleanField(_('sub folders are visible'), default=False)
     # todo: add folder like any object, rename folders to perimeter_folders
 
-<<<<<<< HEAD
-    # def __str__(self):
-    #     if self.isUserGroup:
-    #         return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user group: " + str(self.userGroup.name)
-    #     else:
-    #         return "id=" + str(self.id) + ", domains: " + str(list(self.domains.values_list('name',flat=True))) + ", role: " + str(self.role.name) + ", user: " + str(self.user.username)
-=======
     def __str__(self):
         if not self.user: 
             return "id=" + str(self.id) + \
@@ -57,7 +50,7 @@ class RoleAssignment(models.Model):
                 ", folders: " + str(list(self.folders.values_list('name',flat=True))) + \
                 ", role: " + str(self.role.name) + \
                 ", user: " + str(self.user.username)
->>>>>>> qa/groups-users
+
 
     def is_access_allowed(user, perm, folder = None):
         """Determines if a user has specified permission on a specified folder
@@ -88,7 +81,7 @@ class RoleAssignment(models.Model):
         """ Gets all objects of a specified type that a user can reach in a given folder
             Only accessible folders are considered
             Returns a triplet: (view_objects_list, change_object_list, delete_object_list)
-            Assumes that object type follows Dhango conventions for permissions
+            Assumes that object type follows Django conventions for permissions
             Also retrieve published objects in view
         """
         class_name = object_type.__name__.lower()
