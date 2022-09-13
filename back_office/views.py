@@ -24,6 +24,7 @@ from .filters import *
 
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
 
+
 def index(request):
     template = loader.get_template('back_office/index.html')
 
@@ -37,6 +38,7 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
+
 class QuickStartView(UserPassesTestMixin, ListView):
     template_name = 'back_office/quick_start.html'
     context_object_name = 'quick-start'
@@ -48,17 +50,18 @@ class QuickStartView(UserPassesTestMixin, ListView):
         context['analysis_create_form'] = RiskAnalysisCreateForm
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
-        context['asset_create_form']= AssetForm
+        context['asset_create_form'] = AssetForm
         return context
 
     def get_queryset(self):
         return True
-    
+
     def test_func(self):
         """
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+
 
 class ProjectListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/project_list.html'
@@ -69,7 +72,8 @@ class ProjectListView(UserPassesTestMixin, ListView):
     model = Project
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -88,6 +92,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
         """
         return True
 
+
 class AssetListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/asset_list.html'
     context_object_name = 'assets'
@@ -97,7 +102,8 @@ class AssetListView(UserPassesTestMixin, ListView):
     model = Asset
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = AssetFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -109,12 +115,13 @@ class AssetListView(UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['asset_create_form'] = AssetForm
         return context
-    
+
     def test_func(self):
         """
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+
 
 class FolderListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/project_domain_list.html'
@@ -125,7 +132,8 @@ class FolderListView(UserPassesTestMixin, ListView):
     model = Folder
 
     def get_queryset(self):
-        folders_list = RoleAssignment.get_accessible_folders(Folder.objects.get(name="Global"), self.request.user, "DO")
+        folders_list = RoleAssignment.get_accessible_folders(
+            Folder.objects.get(name="Global"), self.request.user, "DO")
         qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -144,6 +152,7 @@ class FolderListView(UserPassesTestMixin, ListView):
         """
         return True
 
+
 class RiskAnalysisListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/analysis_list.html'
     context_object_name = 'analyses'
@@ -153,8 +162,9 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
     model = Analysis
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
         # if not self.request.user.is_superuser:
@@ -168,7 +178,8 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         queryset = self.get_queryset()
         filter = AnalysisFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['model'] = 'analysis' # self.model._meta.verbose_name # TODO: Find a way to get unlocalized model verbose_name, as localization may break stuff e.g. urls
+        # self.model._meta.verbose_name # TODO: Find a way to get unlocalized model verbose_name, as localization may break stuff e.g. urls
+        context['model'] = 'analysis'
         context['analysis_create_form'] = RiskAnalysisCreateForm
         return context
 
@@ -177,6 +188,7 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+
 
 class RiskScenarioListView(UserPassesTestMixin, ListView):
     permission_required = 'core.view_riskscenario'
@@ -188,7 +200,8 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
     model = RiskScenario
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -201,12 +214,13 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
         context['model'] = 'risk-scenario'
         context['risk_scenario_create_form'] = RiskScenarioCreateForm
         return context
-    
+
     def test_func(self):
         """
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+
 
 class SecurityMeasureListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/mtg_list.html'
@@ -225,7 +239,8 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = MeasureFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -241,6 +256,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         """
         return True
 
+
 class SecurityFunctionListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/security_function_list.html'
     context_object_name = 'functions'
@@ -250,7 +266,8 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
     model = SecurityFunction
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -279,7 +296,8 @@ class ThreatListView(UserPassesTestMixin, ListView):
     model = Threat
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = ThreatFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -297,6 +315,7 @@ class ThreatListView(UserPassesTestMixin, ListView):
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+
 
 class RiskAcceptanceListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/acceptance_list.html'
@@ -316,7 +335,8 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         return context
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -327,6 +347,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         """
         return True
 
+
 class UserListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/user_list.html'
     context_object_name = 'users'
@@ -336,7 +357,8 @@ class UserListView(UserPassesTestMixin, ListView):
     model = User
 
     def get_queryset(self):
-        qs = self.model.objects.all().order_by('-is_active', '-is_superuser', 'username', 'id')
+        qs = self.model.objects.all().order_by(
+            '-is_active', '-is_superuser', 'username', 'id')
         filtered_list = UserFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -348,7 +370,8 @@ class UserListView(UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="view_user"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user"))
+
 
 class UserCreateView(UserPassesTestMixin, CreateView):
     template_name = 'back_office/user_create.html'
@@ -359,7 +382,8 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('user-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_user"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_user"))
+
 
 class UserUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/user_update.html'
@@ -381,9 +405,10 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_user"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user"))
+
 
 class GroupListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/group_list.html'
@@ -399,11 +424,12 @@ class GroupListView(UserPassesTestMixin, ListView):
             print("hello", user_group)
             for ra in user_group.roleassignment_set.all():
                 if Folder.objects.get(content_type="GL") in ra.folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
-                    admin=True
+                    admin = True
         if admin:
             qs = self.model.objects.all()
         else:
-            qs = self.model.objects.filter(name__in=UserGroup.get_manager_user_groups(self.request.user))
+            qs = self.model.objects.filter(
+                name__in=UserGroup.get_manager_user_groups(self.request.user))
         filtered_list = GroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -413,9 +439,10 @@ class GroupListView(UserPassesTestMixin, ListView):
         filter = GroupFilter(self.request.GET, queryset)
         context['filter'] = filter
         return context
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='view_usergroup'))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='view_usergroup'))
+
 
 class RoleAssignmentListView(PermissionRequiredMixin, ListView):
     permission_required = 'back_office.view_roleassignment'
@@ -439,6 +466,7 @@ class RoleAssignmentListView(PermissionRequiredMixin, ListView):
         context['roles'] = Role.objects.all().order_by('id')
         return context
 
+
 class RoleAssignmentCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'back_office.add_roleassignment'
     template_name = 'back_office/role_assignment_create.html'
@@ -452,6 +480,7 @@ class RoleAssignmentCreateView(PermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {'role-list': _('Role assignment')}
         return context
+
 
 class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'back_office.change_roleassignment'
@@ -468,6 +497,7 @@ class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
         context["crumbs"] = {'role-list': _('Role assignment')}
         return context
 
+
 class RoleAssignmentDeleteView(PermissionRequiredMixin, DeleteView):
     permission_required = 'back_office.delete_roleassignment'
     model = RoleAssignment
@@ -476,7 +506,6 @@ class RoleAssignmentDeleteView(PermissionRequiredMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('role-list')
-    
 
 
 class GroupCreateView(UserPassesTestMixin, CreateView):
@@ -488,7 +517,8 @@ class GroupCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('group-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_group"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_group"))
+
 
 class GroupUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/group_update.html'
@@ -500,7 +530,8 @@ class GroupUpdateView(UserPassesTestMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.exclude(groups=self.get_object())
-        context["associated_users"] = User.objects.filter(groups=self.get_object())
+        context["associated_users"] = User.objects.filter(
+            groups=self.get_object())
         context["crumbs"] = {'group-list': _('Groups')}
         return context
 
@@ -524,6 +555,7 @@ class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('role-list')
 
+
 class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
     model = Analysis
     template_name = 'back_office/ra_create.html'
@@ -534,7 +566,8 @@ class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"))
+
 
 class MeasureCreateViewModal(UserPassesTestMixin, CreateView):
     permission_required = 'core.add_security_measure'
@@ -547,7 +580,8 @@ class MeasureCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_security_measure"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_security_measure"))
+
 
 class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskAcceptance
@@ -557,9 +591,10 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskacceptance"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskacceptance"))
+
 
 class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'core.change_riskacceptance'
@@ -577,10 +612,11 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('acceptance-list')
         else:
-          return self.request.POST.get('next', '/')
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_riskacceptance"), folder = self.get_object().risk_scenario.analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().risk_scenario.analysis.project.folder)
+
 
 class ThreatCreateViewModal(UserPassesTestMixin, CreateView):
     model = Threat
@@ -590,9 +626,10 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_threat"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"))
+
 
 class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateView):
     model = SecurityFunction
@@ -604,7 +641,8 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_security_function"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_security_function"))
+
 
 class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
     model = Analysis
@@ -616,7 +654,8 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"))
+
 
 class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskScenario
@@ -624,12 +663,12 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     context_object_name = 'scenario'
     form_class = RiskScenarioCreateForm
 
-
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"))
+
 
 class FolderCreateView(UserPassesTestMixin, CreateView):
     model = Folder
@@ -641,7 +680,8 @@ class FolderCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('pd-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_folder"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
+
 
 class FolderCreateViewModal(UserPassesTestMixin, CreateView):
     model = Folder
@@ -651,19 +691,26 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("id")
-        auditors = UserGroup.objects.create(name= folder.name + " - Auditors", folder = folder)
-        analysts = UserGroup.objects.create(name= folder.name + " - Analysts", folder = folder)
-        managers = UserGroup.objects.create(name= folder.name + " - Domain Managers", folder = folder)
-        ra1 = RoleAssignment.objects.create(user_group = auditors, role = Role.objects.get(name="Auditor"))
+        auditors = UserGroup.objects.create(
+            name=folder.name + " - Auditors", folder=folder)
+        analysts = UserGroup.objects.create(
+            name=folder.name + " - Analysts", folder=folder)
+        managers = UserGroup.objects.create(
+            name=folder.name + " - Domain Managers", folder=folder)
+        ra1 = RoleAssignment.objects.create(
+            user_group=auditors, role=Role.objects.get(name="Auditor"))
         ra1.folders.add(folder)
-        ra2 = RoleAssignment.objects.create(user_group = analysts, role = Role.objects.get(name="Analyst"))
+        ra2 = RoleAssignment.objects.create(
+            user_group=analysts, role=Role.objects.get(name="Analyst"))
         ra2.folders.add(folder)
-        ra3 = RoleAssignment.objects.create(user_group = managers, role = Role.objects.get(name="Domain Manager"))
+        ra3 = RoleAssignment.objects.create(
+            user_group=managers, role=Role.objects.get(name="Domain Manager"))
         ra3.folders.add(folder)
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_folder"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
+
 
 class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
     model = RiskScenario
@@ -673,20 +720,23 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['analysis'] = get_object_or_404(Analysis, id=self.kwargs['parent_analysis'])
+        context['analysis'] = get_object_or_404(
+            Analysis, id=self.kwargs['parent_analysis'])
 
         return context
 
     def form_valid(self, form: RiskScenarioCreateForm) -> HttpResponse:
         if form.is_valid():
-            form.scenario.analysis = get_object_or_404(Analysis, id=self.kwargs['parent_analysis'])
+            form.scenario.analysis = get_object_or_404(
+                Analysis, id=self.kwargs['parent_analysis'])
             return super().form_valid(form)
 
     def get_success_url(self) -> str:
         return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['parent_analysis']).id})
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskscenario"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
+
 
 class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskScenario
@@ -695,7 +745,8 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     form_class = RiskScenarioCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_riskscenario"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
+
 
 class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'core.change_analysis'
@@ -706,8 +757,10 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['risk_scenario_create_form'] = RiskScenarioCreateForm(initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
-        context['scenarios'] = RiskScenario.objects.filter(analysis=self.get_object()).order_by('id')
+        context['risk_scenario_create_form'] = RiskScenarioCreateForm(
+            initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
+        context['scenarios'] = RiskScenario.objects.filter(
+            analysis=self.get_object()).order_by('id')
         context['suggested_measures'] = SecurityMeasure.objects.all().order_by('id')
         context['crumbs'] = {'ra-list': _('Analyses')}
         return context
@@ -716,10 +769,14 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('ra-list')
         else:
-          return self.request.POST.get('next', '/')
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_analysis"), folder = self.get_object().project.folder)
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="change_analysis"),
+            folder=Folder.get_folder(self.get_object()))
+
 
 class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
     model = Analysis
@@ -730,7 +787,8 @@ class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('ra-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_analysis"))
+
 
 class RiskScenarioDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskScenario
@@ -739,9 +797,10 @@ class RiskScenarioDeleteView(UserPassesTestMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('ri-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_riskscenario"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskscenario"))
+
 
 class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskAcceptance
@@ -751,7 +810,8 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('acceptance-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_riskacceptance"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
+
 
 class MeasureDeleteView(UserPassesTestMixin, DeleteView):
     model = SecurityMeasure
@@ -760,9 +820,10 @@ class MeasureDeleteView(UserPassesTestMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('mtg-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_security_measure"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_security_measure"))
+
 
 class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
     model = SecurityFunction
@@ -771,9 +832,10 @@ class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('security-function-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_security_function"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_security_function"))
+
 
 class ThreatDeleteView(UserPassesTestMixin, DeleteView):
     model = Threat
@@ -781,7 +843,8 @@ class ThreatDeleteView(UserPassesTestMixin, DeleteView):
     template_name = 'back_office/snippets/threat_delete_modal.html'
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_threat"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_threat"))
+
 
 class ProjectDeleteView(UserPassesTestMixin, DeleteView):
     model = Project
@@ -792,7 +855,8 @@ class ProjectDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_project"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_project"))
+
 
 class AssetDeleteView(UserPassesTestMixin, DeleteView):
     model = Asset
@@ -803,7 +867,8 @@ class AssetDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_asset"))
+
 
 class FolderDeleteView(UserPassesTestMixin, DeleteView):
     model = Folder
@@ -812,10 +877,11 @@ class FolderDeleteView(UserPassesTestMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('pd-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_folder"))
-   
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_folder"))
+
+
 class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
     model = RiskScenario
     template_name = 'back_office/ri_update.html'
@@ -824,26 +890,29 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['security_measures'] = SecurityMeasure.objects.filter(risk_scenario=self.get_object())
+        context['security_measures'] = SecurityMeasure.objects.filter(
+            risk_scenario=self.get_object())
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
-        context['measure_create_form'] = MeasureCreateForm(initial={'risk_scenario': get_object_or_404(RiskScenario, id=self.kwargs['pk'])})
+        context['measure_create_form'] = MeasureCreateForm(
+            initial={'risk_scenario': get_object_or_404(RiskScenario, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('ri-list')
         else:
-          return self.request.POST.get('next', '/')
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_riskscenario"), folder = self.get_object().analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskscenario"), folder=self.get_object().analysis.project.folder)
+
 
 class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
     model = SecurityMeasure
     template_name = 'back_office/mtg_update.html'
     context_object_name = 'security_measure'
     form_class = SecurityMeasureUpdateForm
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['crumbs'] = {'mtg-list': _('Security measures')}
@@ -853,10 +922,11 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('mtg-list')
         else:
-          return self.request.POST.get('next', '/')
-    
+            return self.request.POST.get('next', '/')
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_security_measure"), folder = self.get_object().risk_scenario.analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_security_measure"), folder=self.get_object().risk_scenario.analysis.project.folder)
+
 
 class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
     model = SecurityFunction
@@ -873,10 +943,11 @@ class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('security-function-list')
         else:
-          return self.request.POST.get('next', '/')
-    
+            return self.request.POST.get('next', '/')
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_security_function"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_security_function"))
+
 
 class ThreatUpdateView(UserPassesTestMixin, UpdateView):
     model = Threat
@@ -893,10 +964,11 @@ class ThreatUpdateView(UserPassesTestMixin, UpdateView):
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('threat-list')
         else:
-          return self.request.POST.get('next', '/')
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_threat"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_threat"))
+
 
 class FolderUpdateView(UserPassesTestMixin, UpdateView):
     model = Folder
@@ -908,17 +980,19 @@ class FolderUpdateView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.filter(folder=self.get_object())
         context['crumbs'] = {'pd-list': _('Projects domains')}
-        context['project_create_form'] = ProjectForm(initial={'domain': get_object_or_404(Folder, id=self.kwargs['pk'])})
+        context['project_create_form'] = ProjectForm(
+            initial={'domain': get_object_or_404(Folder, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('pd-list')
         else:
-          return self.request.POST.get('next', '/')
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_folder"), folder = self.get_object())
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_folder"), folder=self.get_object())
+
 
 class GroupDeleteView(UserPassesTestMixin, DeleteView):
     model = UserGroup
@@ -927,9 +1001,10 @@ class GroupDeleteView(UserPassesTestMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_group"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_group"))
+
 
 class UserDeleteView(UserPassesTestMixin, DeleteView):
     model = User
@@ -938,9 +1013,10 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_user"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_user"))
+
 
 class ProjectUpdateView(UserPassesTestMixin, UpdateView):
     model = Project
@@ -950,11 +1026,13 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['analyses'] = Analysis.objects.filter(project=self.get_object()).order_by('is_draft', 'id')
-        context['analysis_create_form'] = RiskAnalysisCreateForm(initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
+        context['analyses'] = Analysis.objects.filter(
+            project=self.get_object()).order_by('is_draft', 'id')
+        context['analysis_create_form'] = RiskAnalysisCreateForm(
+            initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
         context['crumbs'] = {'project-list': _('Projects')}
         return context
-    
+
     # def get_queryset(self):
     #     if not self.request.user.is_superuser:
     #         agg_data = Analysis.objects.filter(auditor=self.request.user).order_by('is_draft', 'id')
@@ -966,10 +1044,11 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('project-list')
         else:
-          return self.request.POST.get('next', '/')
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='change_project'), folder = self.get_object().folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='change_project'), folder=self.get_object().folder)
+
 
 class AssetUpdateView(UserPassesTestMixin, UpdateView):
     model = Asset
@@ -984,9 +1063,10 @@ class AssetUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('asset-list')
-    
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_asset"))
+
 
 class ProjectCreateView(UserPassesTestMixin, CreateView):
     model = Project
@@ -998,7 +1078,8 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'))
+
 
 class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
@@ -1020,7 +1101,8 @@ class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename='add_project'))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'))
+
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateView):
     model = Asset
@@ -1032,7 +1114,8 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"))
+
 
 class AdminPasswordChangeView(PasswordChangeView):
     template_name = 'back_office/password_change.html'
