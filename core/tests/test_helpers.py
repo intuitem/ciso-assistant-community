@@ -10,16 +10,16 @@ risk = {}
 
 @pytest.fixture()
 def test_setUp(db):
-    risk["parentgroup"] = ProjectsGroup.objects.create(name = "Test ProjectsGroup")
-    risk["project"] = Project.objects.create(name = "Test project", parent_group = risk.get("parentgroup"))
+    risk["parentgroup"] = Folder.objects.create(name = "Test Folder")
+    risk["project"] = Project.objects.create(name = "Test project", folder = risk.get("folder"))
     risk["analysis"] = Analysis.objects.create(project = risk.get("project"))
-    risk["parentrisk"] = ParentRisk.objects.create(title = "Test ParentRisk")
-    risk["riskinstance"] = RiskInstance.objects.create(title = "Test Ri", analysis = risk.get("analysis"), 
-                           parent_risk = risk.get("parentrisk"), current_proba = "H", current_impact="L"),
-    risk["solution_one"] = Solution.objects.create(name = "Test SolutionOne")
-    risk["solution_two"] = Solution.objects.create(name = "Test SolutionTwo")
-    risk["mitigation"] = Mitigation.objects.create(title = "Test Mitigation", risk_instance = RiskInstance.objects.get(title = "Test Ri"), 
-                         solution = Solution.objects.get(name = "Test SolutionOne"), effort = 'L')
+    risk["threat"] = Threat.objects.create(title = "Test Threat")
+    risk["riskscenario"] = RiskScenario.objects.create(title = "Test Ri", analysis = risk.get("analysis"), 
+                           threat = risk.get("threat"), current_proba = "H", current_impact="L"),
+    risk["security_function_one"] = SecurityFunction.objects.create(name = "Test SecurityFunctionOne")
+    risk["security_function_two"] = SecurityFunction.objects.create(name = "Test SecurityFunctionTwo")
+    risk["security_measure"] = SecurityMeasure.objects.create(title = "Test SecurityMeasure", risk_scenario = RiskScenario.objects.get(title = "Test Ri"), 
+                         security_function = SecurityFunction.objects.get(name = "Test SecurityFunctionOne"), effort = 'L')
 
 def test_risk_matrix(db, test_setUp):
     matrix_current = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], 
@@ -35,17 +35,17 @@ def test_risk_per_status(db, test_setUp):
                                 {'value': 0, 'itemStyle': {'color': '#91cc75'}}, {'value': 0, 'itemStyle': {'color': '#73c0de'}}, 
                                 {'value': 0, 'itemStyle': {'color': '#ee6666'}}]}
 
-def test_mitigation_per_status(db, test_setUp):
-    assert mitigation_per_status() == {'labels': ['Open', 'In progress', 'On hold', 'Done'], 'values': [{'itemStyle': {'color': '#fac858'}, 'value': 1}, 
+def test_security_measure_per_status(db, test_setUp):
+    assert security_measure_per_status() == {'labels': ['Open', 'In progress', 'On hold', 'Done'], 'values': [{'itemStyle': {'color': '#fac858'}, 'value': 1}, 
                                       {'itemStyle': {'color': '#5470c6'}, 'value': 0}, {'itemStyle': {'color': '#ee6666'}, 'value': 0}, 
                                       {'itemStyle': {'color': '#91cc75'}, 'value': 0}]}
 
-def test_mitigation_per_cur_risk(db, test_setUp):
-    assert mitigation_per_cur_risk() == {'values': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
+def test_security_measure_per_cur_risk(db, test_setUp):
+    assert security_measure_per_cur_risk() == {'values': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
                                         {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}]}
 
-def test_mitigation_per_solution(db, test_setUp):
-    assert mitigation_per_solution() == {'indicators': ['Test SolutionOne'], 'values': [1], 'min': 0, 'max': 2}
+def test_security_measure_per_security_function(db, test_setUp):
+    assert security_measure_per_security_function() == {'indicators': ['Test SecurityFunctionOne'], 'values': [1], 'min': 0, 'max': 2}
 
 def test_risks_count_per_level(db, test_setUp):
     assert risks_count_per_level() == {'current': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
@@ -53,26 +53,26 @@ def test_risks_count_per_level(db, test_setUp):
                                       {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 0}, {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}]}
 
 def test_p_risks(db, test_setUp):
-    assert p_risks() == {'indicators': ['Test ParentRisk'], 'values': [1], 'min': 0, 'max': 2}
+    assert p_risks() == {'indicators': ['Test Threat'], 'values': [1], 'min': 0, 'max': 2}
 
 def test_p_risks_2(db, test_setUp):
-    assert p_risks_2() == [{'value': 1, 'name': 'Test ParentRisk'}]
+    assert p_risks_2() == [{'value': 1, 'name': 'Test Threat'}]
 
 def test_risks_per_project_groups(db, test_setUp): # Syntax problem, not good to compare strings, to review!
     list = [
         {
-            'prj_grp': ProjectsGroup.objects.get(name = "Test ProjectsGroup"),
-            'ri_level': RiskInstance.objects.filter(analysis__project__parent_group=ProjectsGroup.objects.get(name = "Test ProjectsGroup")).values(
+            'prj_grp': Folder.objects.get(name = "Test Folder"),
+            'ri_level': RiskScenario.objects.filter(analysis__project__parent_group=Folder.objects.get(name = "Test Folder")).values(
             'current_level').annotate(total=Count('current_level'))
         }
     ]
     assert str(risks_per_project_groups()) == str(list)
 
 def test_get_counters(db, test_setUp):
-    assert get_counters() == {'RiskInstance': 1, 'Mitigation': 1, 'Analysis': 1, 'Project': 1, 'Solution': 2, 'RiskAcceptance': 0, 'ShowStopper': 0}
+    assert get_counters() == {'RiskScenario': 1, 'SecurityMeasure': 1, 'Analysis': 1, 'Project': 1, 'SecurityFunction': 2, 'RiskAcceptance': 0, 'ShowStopper': 0}
 
-def test_mitigation_priority(db, test_setUp): # Syntax problem, not good to compare strings, to review!
-    assert str(mitigation_priority()) == "{'1st': [], '2nd': [<Mitigation: Test Mitigation>], '3rd': [], '4th': [], 'undefined': []}"
+def test_security_measure_priority(db, test_setUp): # Syntax problem, not good to compare strings, to review!
+    assert str(security_measure_priority()) == "{'1st': [], '2nd': [<SecurityMeasure: Test SecurityMeasure>], '3rd': [], '4th': [], 'undefined': []}"
 
 def test_risk_status(db, test_setUp):
     list = [risk.get('analysis')]
@@ -84,7 +84,7 @@ def test_risk_status(db, test_setUp):
                                  'y_max_rsk': 2}
 
 def test_risks_levels_per_prj_grp(db, test_setUp):
-    assert risks_levels_per_prj_grp() == {'names': ['Test ProjectsGroup'], 
+    assert risks_levels_per_prj_grp() == {'names': ['Test Folder'], 
                                           'current_out': {'VL': [{'value': 0, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 1, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
                                           'residual_out': {'VL': [{'value': 1, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 0, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
                                           'y_max_rsk': 2}

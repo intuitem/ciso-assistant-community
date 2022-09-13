@@ -13,24 +13,24 @@
                 </td>
             </tr>
             {% endif %}
-            {% for instance in context %}
+            {% for scenario in context %}
             <tr class="bg-gray-100">
                 <td class="text-lg p-3" colspan="9">
-                    <a class="hover:text-indigo-800" href="{% url 'ri-update' instance.id %}?next={{ request.path|urlencode }}">{{instance.rid}}: {{instance.title}}</a> 
+                    <a class="hover:text-indigo-800" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}">{{scenario.rid}}: {{scenario.title}}</a> 
                     <span class="text-xs text-center p-1 mx-1 rounded
-                    {% if instance.treatment == 'open' %}
+                    {% if scenario.treatment == 'open' %}
                     bg-orange-200 
-                    {% elif instance.treatment == 'mitigated' %}
+                    {% elif scenario.treatment == 'mitigated' %}
                     bg-green-200 
-                    {% elif instance.treatment == 'accepted' %}
+                    {% elif scenario.treatment == 'accepted' %}
                     bg-sky-200 
                     {% else %}
                     bg-red-300 
-                    {% endif %}">{{ instance.get_treatment_display|lower}}
+                    {% endif %}">{{ scenario.get_treatment_display|lower}}
                     </span>
                 </td>
             </tr>
-            {% if not instance.mitigation_set.all %}
+            {% if not scenario.security_measure_set.all %}
             <tr>
                 <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated measure" %}
                 </td>
@@ -48,29 +48,29 @@
                 <td class="font-semibold text-center">{% trans "Status" %}</td>
             </tr>
             {% endif %}
-            {% for mitigation in instance.mitigation_set.all %}
+            {% for security_measure in scenario.security_measure_set.all %}
             <tr class="border-b text-sm">
-                <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{mitigation.id}}" href="{% url 'mtg-update' mitigation.id %}?next={{ request.path|urlencode }}">{{mitigation.id}}</a></td>
-                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' mitigation.id %}?next={{ request.path|urlencode }}">{{mitigation.title}}</a></td>
-                <td class="">{{mitigation.description}}</td>
-                <td class="">{{mitigation.get_type_display}}</td>
-                <td class="">{% if mitigation.solution %}{{mitigation.solution}}{% else %}--{% endif %}</td>
-                <td class="">{% if mitigation.eta %}{{mitigation.eta}}{% else %}--{%endif%}</td>
-                <td class="">{%if mitigation.effort%}{{mitigation.effort}}{% else %}--{%endif%}</td>
-                <td class="text-center">{% if mitigation.link %}<a href="{{mitigation.link}}"
+                <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{security_measure.id}}" href="{% url 'mtg-update' security_measure.id %}?next={{ request.path|urlencode }}">{{security_measure.id}}</a></td>
+                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' security_measure.id %}?next={{ request.path|urlencode }}">{{security_measure.title}}</a></td>
+                <td class="">{{security_measure.description}}</td>
+                <td class="">{{security_measure.get_type_display}}</td>
+                <td class="">{% if security_measure.security_function %}{{security_measure.security_function}}{% else %}--{% endif %}</td>
+                <td class="">{% if security_measure.eta %}{{security_measure.eta}}{% else %}--{%endif%}</td>
+                <td class="">{%if security_measure.effort%}{{security_measure.effort}}{% else %}--{%endif%}</td>
+                <td class="text-center">{% if security_measure.link %}<a href="{{security_measure.link}}"
                                                                    class="hover:text-blue-400"><i
                         class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
                 </td>
                 <td class="text-center"><span class="text-xs text-center p-1 mx-1 rounded
-                    {% if mitigation.status == 'open' %}
+                    {% if security_measure.status == 'open' %}
                     bg-orange-200 
-                    {% elif mitigation.status == 'in_progress' %}
+                    {% elif security_measure.status == 'in_progress' %}
                     bg-blue-200 
-                    {% elif mitigation.status == 'on_hold' %}
+                    {% elif security_measure.status == 'on_hold' %}
                     bg-red-300 
                     {% else %}
                     bg-green-200 
-                    {% endif %}">{{ mitigation.get_status_display|lower}} 
+                    {% endif %}">{{ security_measure.get_status_display|lower}} 
                     </span></td>
             </tr>
             {% endfor %}

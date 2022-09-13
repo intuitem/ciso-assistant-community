@@ -60,7 +60,7 @@
             <tr class="border-b tr-hover">
                 <td class="py-2 px-2 text-center text-xs font-bold" id="{{RI.id}}"><a class=""
                                                                href="#{{RI.id}}">{{RI.rid}}</a></td>
-                <td class="p-2 capitalize">{{RI.parent_risk}}</td>
+                <td class="p-2 capitalize">{{RI.threat}}</td>
                 <td class="p-2">{{RI.title}}</td>
                 <td class="text-xs p-2">{{RI.scenario|linebreaksbr}}</td>
                 <td class="text-xs p-2">{{RI.existing_measures|linebreaksbr}}</td>
@@ -69,8 +69,8 @@
                 </td>
                 <td class="text-xs p-1">
                     <ul class="pl-3 ml-3 list-disc">
-                        {% for mitigation in RI.mitigation_set.all %}
-                        <li> {{mitigation}}</li>
+                        {% for security_measure in RI.security_measure_set.all %}
+                        <li> {{security_measure}}</li>
                         {% endfor %}
                     </ul>
 

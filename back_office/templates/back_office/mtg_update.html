@@ -1,7 +1,7 @@
 {% extends 'back_office/base.html' %}
 {% load i18n %}
 {% block content %}
-{% with page_title=mitigation %}
+{% with page_title=security_measure %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 
@@ -14,7 +14,7 @@
         <section class="flex flex-col space-y-4">
             <div class="flex flex-col">
                 <p class="text-gray-400 text-xs">{% trans "Risk scenario" %}</p>
-                <p class="text-black text-sm font-semibold antialiased">{{ mitigation.risk_instance }}</p>
+                <p class="text-black text-sm font-semibold antialiased">{{ security_measure.risk_scenario }}</p>
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Title" %}</p>
@@ -39,8 +39,8 @@
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Security function" %}</p>
-                {{ form.solution.errors }}
-                {{ form.solution }}
+                {{ form.security_function.errors }}
+                {{ form.security_function }}
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Description" %}</p>

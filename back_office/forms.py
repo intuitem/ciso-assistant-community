@@ -4,8 +4,8 @@ from .models import RoleAssignment, UserGroup, Role
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
-from core.models import Analysis, Mitigation, RiskAcceptance, RiskInstance
-from general.models import Asset, ParentRisk, Project, ProjectsGroup, Solution
+from core.models import Analysis, SecurityMeasure, RiskAcceptance, RiskScenario
+from general.models import Asset, Threat, Project, Folder, SecurityFunction
 from django.utils.translation import gettext_lazy as _
 
 class DefaultDateInput(DateInput):
@@ -43,11 +43,11 @@ class RiskAnalysisCreateForm(StyledModelForm):
 
 class MeasureCreateForm(StyledModelForm):
     class Meta:
-        model = Mitigation
+        model = SecurityMeasure
         fields = '__all__'
         labels = {
-            'risk_instance': _('Risk scenario'),
-            'solution': _('Security function'),
+            'risk_scenario': _('Risk scenario'),
+            'security_function': _('Security function'),
         }
         widgets = {
             'eta': DefaultDateInput()
@@ -55,13 +55,21 @@ class MeasureCreateForm(StyledModelForm):
 
         
 class SecurityFunctionCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+
     class Meta:
-        model = Solution
+        model = SecurityFunction
         fields = '__all__'
 
 class ThreatCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ThreatCreateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+
     class Meta:
-        model = ParentRisk
+        model = Threat
         fields = '__all__'
 
 class UserCreateForm(UserCreationForm, StyledModelForm):
@@ -131,17 +139,17 @@ class RiskAnalysisUpdateForm(StyledModelForm):
         model = Analysis
         fields = ['project', 'auditor', 'version', 'is_draft', 'rating_matrix', 'comments']
 
-class RiskInstanceCreateForm(StyledModelForm):
+class RiskScenarioCreateForm(StyledModelForm):
     class Meta:
-        model = RiskInstance
+        model = RiskScenario
         exclude = ['analysis', 'residual_level', 'current_level']
 
 class RiskScenarioCreateForm(StyledModelForm):
     class Meta:
-        model = RiskInstance
-        fields = ['analysis', 'parent_risk', 'title', 'scenario']
+        model = RiskScenario
+        fields = ['analysis', 'threat', 'title', 'scenario']
 
-class RiskInstanceUpdateForm(StyledModelForm):
+class RiskScenarioUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['current_proba'].widget.attrs['onchange'] = 'refresh();'
@@ -150,24 +158,30 @@ class RiskInstanceUpdateForm(StyledModelForm):
         self.fields['residual_impact'].widget.attrs['onchange'] = 'refresh();'
 
     class Meta:
-        model = RiskInstance
+        model = RiskScenario
         fields = '__all__'
         exclude = ['current_level', 'residual_level', 'assets']
 
-class MitigationUpdateForm(StyledModelForm):
+class SecurityMeasureUpdateForm(StyledModelForm):
     class Meta:
-        model = Mitigation
-        exclude = ['risk_instance']
+        model = SecurityMeasure
+        exclude = ['risk_scenario']
         widgets = {
             'eta': DefaultDateInput(format='%Y-%m-%d')
         }
 
-class ProjectsGroupUpdateForm(StyledModelForm):
+class FolderUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FolderUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['parent_folder'].queryset = Folder.objects.filter(content_type="GL")
+
     class Meta:
-        model = ProjectsGroup
+        model = Folder
         fields = '__all__'
+        exclude = ['content_type']
 
 class ProjectUpdateForm(StyledModelForm):
+
     class Meta:
         model = Project
         fields = '__all__'
@@ -175,12 +189,13 @@ class ProjectUpdateForm(StyledModelForm):
 
 class SecurityFunctionUpdateForm(StyledModelForm):
     class Meta:
-        model = Solution
+        model = SecurityFunction
         fields = '__all__'
 
 class ThreatUpdateForm(StyledModelForm):
+
     class Meta:
-        model = ParentRisk
+        model = Threat
         fields = '__all__'
 
 class RiskAcceptanceCreateUpdateForm(StyledModelForm):
@@ -190,15 +205,23 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         widgets = {
             'expiry_date': DefaultDateInput(format='%Y-%m-%d')
         }
-        labels = {'risk_instance': _('Risk scenario')}
+        labels = {'risk_scenario': _('Risk scenario')}
 
 class ProjectForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="DO")
+
     class Meta:
         model = Project
         fields = '__all__'
-        labels = {'parent_group': _('Domain')}
+        labels = {'domain': _('Domain')}
 
 class AssetForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AssetForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+
     class Meta:
         model = Asset
         fields = '__all__'

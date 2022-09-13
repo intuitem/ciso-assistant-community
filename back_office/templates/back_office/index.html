@@ -25,11 +25,11 @@
             </div>
             <div class="w-1/4 p-2 m-2  flex content-center bg-white">
                 <div class="text-5xl text-green-500 mr-2"><i class="fas fa-clone"></i></div>
-                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.RiskInstance }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Scenarios" %}</div></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.RiskScenario }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Scenarios" %}</div></div>
             </div>
             <div class="w-1/4 p-2 m-2  flex content-center bg-white">
                 <div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher"></i></div>
-                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Mitigation }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Security measures" %}</div></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.SecurityMeasure }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Security measures" %}</div></div>
             </div>
         </div>
     </section>
@@ -48,7 +48,7 @@
             </div>
             <div class="p-2 m-2 w-1/2">
                 <span class="text-sm font-semibold">{% trans "Security measures status" %}</span>
-                {% include 'back_office/fragments/measures_status.html' with name='security_measures_status' labels=mitigation_status.labels values=mitigation_status.values %}
+                {% include 'back_office/fragments/measures_status.html' with name='security_measures_status' labels=security_measure_status.labels values=security_measure_status.values %}
             </div>
         </div>
     </section>

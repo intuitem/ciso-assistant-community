@@ -29,39 +29,39 @@
         </th>
     </thead>
     <tbody>
-        {% for instance in instances %}
+        {% for scenario in scenarios %}
             <tr>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.id }}
+                    {{ scenario.id }}
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                        {% if instance.parent_risk %}{{ instance.parent_risk }}{% else %}--{% endif %}
+                        {% if scenario.threat %}{{ scenario.threat }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
                         <div class="ml-0">
-                            <a id="instance{{ instance.id }}" href="{% url 'ri-update' instance.id %}?next={{ request.path|urlencode }}"
+                            <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                {{ instance.title }}
+                                {{ scenario.title }}
                             </a>
                         </div>
                     </div>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="max-h-64 max-w-full box overflow-hidden">{{ instance.existing_measures }}</p>
+                    <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_measures }}</p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="text-gray-900 whitespace-no-wrap">
-                        {{ instance.get_current_level_display }}
+                        {{ scenario.get_current_level_display }}
                     </p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
                     <ul class="list-disc space-y-4">
                         {% for measure in suggested_measures  %}
-                            {% if measure.risk_instance == instance %}
+                            {% if measure.risk_scenario == scenario %}
                             <li>
                                 <a href="{% url 'mtg-update' measure.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
@@ -73,10 +73,10 @@
                     </ul>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.get_residual_level_display }}
+                    {{ scenario.get_residual_level_display }}
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 bg-white text-sm">
-                    {{ instance.get_treatment_display }}
+                    {{ scenario.get_treatment_display }}
                 </td>
             </tr>
             {% empty %}

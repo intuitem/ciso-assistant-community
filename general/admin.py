@@ -6,6 +6,8 @@ from django.forms import models
 from django.utils.translation import gettext_lazy as _
 
 
+# todo: remove useless constructs or comment them
+
 class MyInline(models.BaseInlineFormSet):
     def __init__(self, *args, **kwargs):
         super(MyInline, self).__init__(*args, **kwargs)

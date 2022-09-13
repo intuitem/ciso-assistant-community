@@ -25,10 +25,10 @@
             {% for acceptance in acceptances_to_review %}
             <tr class="bg-white border-b">
                 <th scope="row" class="px-3 py-4 font-medium text-gray-900">
-                    {{ acceptance.risk_instance }}
+                    {{ acceptance.risk_scenario }}
                 </th>
                 <td class="px-3 py-4">
-                    {{ acceptance.risk_instance.parent_project }}
+                    {{ acceptance.risk_scenario.parent_project }}
                 </td>
                 <td class="px-3 py-4">
                     {{ acceptance.validator }}

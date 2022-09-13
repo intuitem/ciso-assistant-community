@@ -14,7 +14,7 @@
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
-                        {{ filter.form.risk_instance__title }}
+                        {{ filter.form.risk_scenario__title }}
                 </div>
                 <div class="flex justify-center">
                     <div
@@ -121,7 +121,7 @@
                                 <div class="ml-3">
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ acceptance.risk_instance }}
+                                        {{ acceptance.risk_scenario }}
                                     </a>
                                 </div>
                             </div>

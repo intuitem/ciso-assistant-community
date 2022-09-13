@@ -1,7 +1,7 @@
 {% extends 'back_office/base.html' %}
 {% load i18n static %}
 {% block content %}
-{% with page_title=instance %}
+{% with page_title=scenario %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <script>
@@ -12,18 +12,18 @@
     var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
     
     window.onload = function() {
-        var current_proba = document.getElementById("id_riskinstance_current_proba").value;
-        var current_impact = document.getElementById("id_riskinstance_current_impact").value;
+        var current_proba = document.getElementById("id_riskscenario_current_proba").value;
+        var current_impact = document.getElementById("id_riskscenario_current_impact").value;
         var current_level = document.getElementById("current_risk_level").value;
 
-        var residual_proba = document.getElementById("id_riskinstance_residual_proba").value;
-        var residual_impact = document.getElementById("id_riskinstance_residual_impact").value;
+        var residual_proba = document.getElementById("id_riskscenario_residual_proba").value;
+        var residual_impact = document.getElementById("id_riskscenario_residual_impact").value;
         var residual_level = document.getElementById("residual_risk_level").value;
     };
     
     function refresh() {
-        var current_proba = document.getElementById("id_riskinstance_current_proba").value;
-        var current_impact = document.getElementById("id_riskinstance_current_impact").value;
+        var current_proba = document.getElementById("id_riskscenario_current_proba").value;
+        var current_impact = document.getElementById("id_riskscenario_current_impact").value;
         var current_level = document.getElementById("current_risk_level").value;
         CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
         CRL_lbl = document.getElementById("current_risk_level");
@@ -32,8 +32,8 @@
         CRL_lbl.classList.remove('VL','L','M','H','VH');
         CRL_lbl.classList.add(rl_class(CRL));
 
-        var residual_proba = document.getElementById("id_riskinstance_residual_proba").value;
-        var residual_impact = document.getElementById("id_riskinstance_residual_impact").value;
+        var residual_proba = document.getElementById("id_riskscenario_residual_proba").value;
+        var residual_impact = document.getElementById("id_riskscenario_residual_impact").value;
         var residual_level = document.getElementById("residual_risk_level").value;
         RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
         RRL_lbl = document.getElementById("residual_risk_level");
@@ -97,7 +97,7 @@
     
     </script>
 <div>
-    <form method="post" id="instance_update_form">{% csrf_token %}
+    <form method="post" id="scenario_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.errors }}
     <div class="flex flex-col space-y-8">
@@ -108,15 +108,15 @@
                     <div class="flex flex-row space-x-6">
                         <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Project" %}</p>
-                            <p class="text-xs font-semibold">{{ instance.analysis.project }}</p>
+                            <p class="text-xs font-semibold">{{ scenario.analysis.project }}</p>
                         </div>
                         <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Auditor" %}</p>
-                            <p class="text-xs font-semibold">{{ instance.analysis.auditor.get_full_name }}</p>
+                            <p class="text-xs font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
                         </div>
                         <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Version" %}</p>
-                            <p class="text-xs font-semibold">{{ instance.analysis.version }}</p>
+                            <p class="text-xs font-semibold">{{ scenario.analysis.version }}</p>
                         </div>
                     </div>
                     <div class="flex flex-col">
@@ -126,8 +126,8 @@
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">{% trans "Threat" %}</p>
-                        {{ form.parent_risk.errors }}
-                        {{ form.parent_risk }}
+                        {{ form.threat.errors }}
+                        {{ form.threat }}
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">{% trans "Title" %}</p>
@@ -170,17 +170,17 @@
                             <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
                             <div class="">
                                 <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
-                                    {% if instance.current_level == 'VL' %}
+                                    {% if scenario.current_level == 'VL' %}
                                         VL 
-                                    {% elif instance.current_level == 'L' %}
+                                    {% elif scenario.current_level == 'L' %}
                                         L
-                                    {% elif instance.current_level == 'M' %}
+                                    {% elif scenario.current_level == 'M' %}
                                         M
-                                    {% elif instance.current_level == 'H' %}
+                                    {% elif scenario.current_level == 'H' %}
                                         H
-                                    {% elif instance.current_level == 'VH' %}
+                                    {% elif scenario.current_level == 'VH' %}
                                         VH
-                                    {% endif %}" style="margin-bottom: 10px">{{ instance.get_current_level_display }}
+                                    {% endif %}" style="margin-bottom: 10px">{{ scenario.get_current_level_display }}
                                 </span>
                             </div>
                         </div>
@@ -213,17 +213,17 @@
                             <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
                             <div class="">
                                 <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
-                                    {% if instance.residual_level == 'VL' %}
+                                    {% if scenario.residual_level == 'VL' %}
                                         VL 
-                                    {% elif instance.residual_level == 'L' %}
+                                    {% elif scenario.residual_level == 'L' %}
                                         L
-                                    {% elif instance.residual_level == 'M' %}
+                                    {% elif scenario.residual_level == 'M' %}
                                         M
-                                    {% elif instance.residual_level == 'H' %}
+                                    {% elif scenario.residual_level == 'H' %}
                                         H
-                                    {% elif instance.residual_level == 'VH' %}
+                                    {% elif scenario.residual_level == 'VH' %}
                                         VH
-                                    {% endif %}" style="margin-bottom: 10px">{{ instance.get_residual_level_display }}
+                                    {% endif %}" style="margin-bottom: 10px">{{ scenario.get_residual_level_display }}
                                 </span>
                             </div>
                         </div>
@@ -262,8 +262,8 @@
         <div class="flex space-x-2 justify-end"> 
             <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
             <input
-                type="hidden" form="instance_update_form" name="next" value={{ request.GET.next }}>
-            <button action="submit" form="instance_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
+                type="hidden" form="scenario_update_form" name="next" value={{ request.GET.next }}>
+            <button action="submit" form="scenario_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
         </div>
     </div>
 </div>

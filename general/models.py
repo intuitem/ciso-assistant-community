@@ -2,21 +2,47 @@ from django.db import models
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
-
-class ProjectsGroup(models.Model):
+class Folder(models.Model):
+    class ContentType(models.TextChoices):
+        ROOT = "GL", _("GLOBAL")
+        DOMAIN = "DO", _("DOMAIN")
     name = models.CharField(max_length=200, default=_("<Group title>"), verbose_name=_("Name"))
-    department = models.CharField(
-        max_length=100, default=_("<Internal organization division>"), 
-        blank=True, null=True, verbose_name=_("Department"))
+    # childrenClassName
+    description = models.CharField(
+        max_length=100, default=_("<Short description>"), 
+        blank=True, null=True, verbose_name=_("Description"))
+    content_type = models.CharField(max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
+    parent_folder = models.ForeignKey("self", null=True, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = _("Projects Group")
-        verbose_name_plural = _("Projects Groups")
+        verbose_name = _("Folder")
+        verbose_name_plural = _("Folders")
 
     def __str__(self):
         return self.name
 
+    def sub_folders(self):
+        """Return the list of subfolders"""
+        def sub_folders_in(f, sub_folder_list):
+            for sub_folder in f.folder_set.all():
+                sub_folder_list.append(sub_folder)
+                sub_folders_in(sub_folder, sub_folder_list)
+            return sub_folder_list
+        return sub_folders_in(self, [])
+    
+    def get_parent_folders(self):
+        """Return the list of parent folders"""
+        return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
 
+
+    def get_folder(object):
+        """Return the folder of an object"""
+        # todo: add a folder attribute to all objects to avoid introspection
+        if hasattr(object, 'folder'): return object.folder
+        if hasattr(object, 'project'): return object.project.folder
+        if hasattr(object, 'analysis'): return object.analysis.project.folder
+        if hasattr(object, 'risk_scenario'): return object.risk_scenario.analysis.project.folder
+        
 class Project(models.Model):
     PRJ_LC_STATUS = [
         ('undefined', _('--')),
@@ -30,7 +56,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200, default=_("<short project name>"), verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"), 
         null=True, blank=True, verbose_name=_("Internal ID"))
-    parent_group = models.ForeignKey(ProjectsGroup, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     lc_status = models.CharField(max_length=20, default='in_design', 
         choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True, 
@@ -42,16 +68,19 @@ class Project(models.Model):
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
 
-    def department(self):
-        return self.parent_group.department
-    department.short_description = _("Department")
+    def description(self):
+        return self.folder.description
+    description.short_description = _("Description")
 
     def __str__(self):
         return self.name
 
 
-class ParentRisk(models.Model):
+# todo: rename to Threat
+class Threat(models.Model):
     title = models.CharField(max_length=200, default=_("<threat short title>"), verbose_name=_("Title"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+    is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
         verbose_name = _("Threat")
@@ -69,24 +98,30 @@ class Asset(models.Model):
     name = models.CharField(max_length=100, verbose_name=_('name'))
     business_value = models.TextField(blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+    is_published = models.BooleanField(_('published'), default=True)
 
     def __str__(self):
         return self.name
 
 
-class Solution(models.Model):
+# todo: rename to SecurityFunction
+class SecurityFunction(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
     provider = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(max_length=200, blank=True, null=True, verbose_name=_("Contact"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+    is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
-        verbose_name = _("Solution")
-        verbose_name_plural = _("Solutions")
+        verbose_name = _("SecurityFunction")
+        verbose_name_plural = _("SecurityFunctions")
 
     def __str__(self):
         return self.name
 
 
+# todo: remove useless constructs or comment them
 class GroupExtra(models.Model):
     """
     Overwrites original Django Group.
@@ -99,7 +134,7 @@ class GroupExtra(models.Model):
     group_email = models.EmailField(max_length=70, blank=True, default="", 
         help_text=_("Group email for notifications"),
         verbose_name=_("Group email"))
-    prj_groups = models.ManyToManyField(ProjectsGroup, blank=True, 
+    prj_groups = models.ManyToManyField(Folder, blank=True, 
         verbose_name=_("Allowed Projects Groups"), 
         help_text=_("Project groups allowed for read access on the Portal. "))
 

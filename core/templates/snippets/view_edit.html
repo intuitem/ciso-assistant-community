@@ -2,10 +2,10 @@
 <a class="text-violet-800 hover:text-gray-400" href="{% url 'RA' item.object.id %}"> <i class="far fa-eye"></i> </a> | <a class="text-violet-800 hover:text-gray-400" href="{% url 'ra-update' item.object.id %}"> <i class="far fa-edit"></i> </a>
 {% endif %}
 
-{% if item.obj_type == 'RiskInstance' %}
+{% if item.obj_type == 'RiskScenario' %}
 <a class="text-violet-800 hover:text-gray-400" href="{% url 'RA' item.object.analysis.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-violet-800 hover:text-gray-400" href="{% url 'ri-update' item.object.id %}"> <i class="far fa-edit"></i> </a>
 {% endif %}
 
-{% if item.obj_type == 'Mitigation' %}
-<a class="text-violet-800 hover:text-gray-400" href="{% url 'MP' item.object.risk_instance.analysis.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-violet-800 hover:text-gray-400" href="{% url 'mtg-update' item.object.id %}"> <i class="far fa-edit"></i> </a>
+{% if item.obj_type == 'SecurityMeasure' %}
+<a class="text-violet-800 hover:text-gray-400" href="{% url 'MP' item.object.risk_scenario.analysis.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-violet-800 hover:text-gray-400" href="{% url 'mtg-update' item.object.id %}"> <i class="far fa-edit"></i> </a>
 {% endif %}

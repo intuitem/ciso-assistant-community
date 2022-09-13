@@ -14,6 +14,11 @@
                     {{ form.title.errors }}
                     {{ form.title }}
                 </div>
+                <div class="flex flex-row">
+                    <p class="text-sm font-semibold">{{ form.is_published.label }}</p>
+                    <p class="ml-2"> {{ form.is_published }}</p>
+                    {{ form.is_published.errors }}
+                </div>
             </section>
             <div class="flex justify-end space-x-2">
                 <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>

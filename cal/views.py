@@ -10,7 +10,7 @@ import calendar
 from .models import *
 from .utils import Calendar
 from .forms import EventForm
-from core.models import Mitigation
+from core.models import SecurityMeasure
 
 
 def index(request):
@@ -18,14 +18,14 @@ def index(request):
 
 
 class CalendarView(generic.ListView):
-    model = Mitigation
+    model = SecurityMeasure
     template_name = 'core/calendar.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         d = get_date(self.request.GET.get('month', None))
 
-        # TODO: implement a more elegant solution
+        # TODO: implement a more elegant security_function
         cal_lang = get_language()
         cal_country = 'US' if (cal_lang == 'en') else cal_lang.split('-')[0].upper()
         cal_locale = cal_lang + '_' + cal_country + '.UTF-8'

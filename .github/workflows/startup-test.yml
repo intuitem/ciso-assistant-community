@@ -1,4 +1,4 @@
-name: Installation test using Playwright
+name: Startup test using Playwright
 
 on: 
   push:
