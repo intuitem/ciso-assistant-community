@@ -1,6 +1,7 @@
 from django.core import serializers
 import django.apps
 
+
 def get_all_objects():
     '''
     Get all objects in the database.
@@ -16,7 +17,8 @@ def get_all_objects():
             objects.extend(model.objects.all())
     return objects
 
-def serialize_objects(objects, format="json"):
+
+def serialize_objects(objects, format='json'):
     '''
     Serialize objects to chosen format.
 
@@ -34,7 +36,8 @@ def serialize_objects(objects, format="json"):
     '''
     return serializers.serialize(format, objects)
 
-def deserialize_objects(path, format="json"):
+
+def deserialize_objects(path, format='json'):
     '''
     Deserialize objects from a file.
 
@@ -56,7 +59,8 @@ def deserialize_objects(path, format="json"):
             objects.append(object)
     return objects
 
-def create_backup(path, format="json"):
+
+def create_backup(path, format='json'):
     '''
     Create a backup of the current state of the database.
 
