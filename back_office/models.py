@@ -74,7 +74,7 @@ class RoleAssignment(models.Model):
     def get_accessible_folders(folder, user, content_type):
         """Gets the list of folders with specified contentType that can be viewed by a user
            Returns the list of the ids of the matching folders"""
-        (folders_set, _, _) = Folder.get_accessible_objects(folder, user, Folder)
+        (folders_set, _, _) = RoleAssignment.get_accessible_objects(folder, user, Folder)
         return [x.id for x in folders_set if x.content_type == content_type]
 
     def get_accessible_objects(folder, user, object_type):
