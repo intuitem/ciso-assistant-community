@@ -95,9 +95,9 @@ class RoleAssignment(models.Model):
     def get_accessible_folders(folder, user, content_type):
         """Gets the list of folders with specified contentType that can be viewed by a user
            Returns the list of the ids of the matching folders"""
-        (folders_set, _, _) = RoleAssignment.get_accessible_objects(
-            folder, user, Folder)
-        return [x.id for x in folders_set if x.content_type == content_type]
+        (folder_ids_set, _, _) = RoleAssignment.get_accessible_objects(folder, user, Folder)
+        print(folder_ids_set)
+        return [x for x in folder_ids_set if Folder.objects.get(id=x).content_type == content_type]
 
     def get_accessible_objects(folder, user, object_type):
         """ Gets all objects of a specified type that a user can reach in a given folder
@@ -130,7 +130,7 @@ class RoleAssignment(models.Model):
                     target_folders = [f] + \
                         f.sub_folders() if ra.is_recursive else [f]
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
-                        if not (object.hasattr("builtin") and object.builtin and p != permissions[0]):
+                        if not (hasattr(object, "builtin") and object.builtin and p != permissions[0]):
                             permissions_per_object_id[object.id].add(p)
 
         if hasattr(object_type, "is_published"):

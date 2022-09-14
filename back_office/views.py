@@ -538,6 +538,11 @@ class GroupUpdateView(UserPassesTestMixin, UpdateView):
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
 
+    def test_func(self):
+        group = self.get_object()
+        return not(group.builtin) and RoleAssignment.is_access_allowed(user=self.request.user, 
+                perm=Permission.objects.get(codename="change_group"), folder=Folder.get_folder(group))
+
 
 class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'auth.change_role'
@@ -554,6 +559,11 @@ class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('role-list')
+
+    def test_func(self):
+        ra = self.get_object()
+        return not(ra.builtin) and RoleAssignment.is_access_allowed(user=self.request.user, 
+                perm=Permission.objects.get(codename="change_roleassignment"), folder=Folder.get_folder(ra))
 
 
 class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
@@ -691,19 +701,16 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("id")
         auditors = UserGroup.objects.create(
-            name=folder.name + " - Auditors", folder=folder)
+            name=folder.name + " - Auditors", folder=folder, builtin=True)
         analysts = UserGroup.objects.create(
-            name=folder.name + " - Analysts", folder=folder)
+            name=folder.name + " - Analysts", folder=folder, builtin=True)
         managers = UserGroup.objects.create(
-            name=folder.name + " - Domain Managers", folder=folder)
-        ra1 = RoleAssignment.objects.create(
-            user_group=auditors, role=Role.objects.get(name="Auditor"))
+            name=folder.name + " - Domain Managers", folder=folder, builtin=True)
+        ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(name="Auditor"), builtin=True)
         ra1.folders.add(folder)
-        ra2 = RoleAssignment.objects.create(
-            user_group=analysts, role=Role.objects.get(name="Analyst"))
+        ra2 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(name="Analyst"), builtin=True)
         ra2.folders.add(folder)
-        ra3 = RoleAssignment.objects.create(
-            user_group=managers, role=Role.objects.get(name="Domain Manager"))
+        ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(name="Domain Manager"), builtin=True)
         ra3.folders.add(folder)
         return self.request.POST.get('next', '/')
 
