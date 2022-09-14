@@ -131,22 +131,22 @@ def startup():
         ])
 
         if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
-            Folder.objects.create(name="Global", content_type=Folder.ContentType.ROOT)
-            auditor = Role.objects.create(name="Auditor")
+            Folder.objects.create(name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
+            auditor = Role.objects.create(name="Auditor", builtin=True)
             auditor.permissions.set(auditor_permissions)
-            analyst= Role.objects.create(name="Analyst")
+            analyst= Role.objects.create(name="Analyst", builtin=True)
             analyst.permissions.set(analyst_permissions)
-            domain_manager = Role.objects.create(name="Domain Manager")
+            domain_manager = Role.objects.create(name="Domain Manager", builtin=True)
             domain_manager.permissions.set(domain_manager_permissions)
-            administrator = Role.objects.create(name="Administrator")
+            administrator = Role.objects.create(name="Administrator", builtin=True)
             administrator.permissions.set(administrator_permissions)
         if not UserGroup.objects.filter(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            administrators = UserGroup.objects.create(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT))
-            ra1 = RoleAssignment.objects.create(user_group=administrators, role=Role.objects.get(name="Administrator"))
+            administrators = UserGroup.objects.create(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
+            ra1 = RoleAssignment.objects.create(user_group=administrators, role=Role.objects.get(name="Administrator"), builtin=True)
             ra1.folders.add(administrators.folder)
         if not UserGroup.objects.filter(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            global_auditors = UserGroup.objects.create(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT))
-            ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(name="Auditor"), is_recursive=True)
+            global_auditors = UserGroup.objects.create(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
+            ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(name="Auditor"), is_recursive=True, builtin=True)
             ra2.folders.add(global_auditors.folder)
 
 class GeneralConfig(AppConfig):

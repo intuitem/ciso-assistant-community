@@ -17,6 +17,7 @@ class Folder(models.Model):
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
         "self", null=True, on_delete=models.CASCADE)
+    builtin = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Folder")

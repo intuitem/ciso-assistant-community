@@ -6,9 +6,18 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserGroup(Group):
-
+    BUILTINS = {
+        'Administrators': _('Administrators'),
+        'Global auditors': _('Global auditors'),
+    } 
     folder = models.ForeignKey("general.Folder", verbose_name=_(
         "Domain"), on_delete=models.CASCADE, default=None)
+    builtin = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        if self.builtin:
+            return f"{self.BUILTINS.get(self.name)}"
+        return self.name
 
     def get_user_groups(user):
         l = []
@@ -32,7 +41,18 @@ class UserGroup(Group):
 
 
 class Role(Group):
-    pass
+    BUILTINS = {
+        "Administrator": _("Administrator"),
+        "Domain Manager": _("Domain Manager"),
+        "Analyst": _("Analyst"),
+        "Auditor": _("Auditor"),
+    }
+    builtin = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        if self.builtin:
+            return f"{self.BUILTINS.get(self.name)}"
+        return self.name
 
 
 class RoleAssignment(models.Model):
@@ -46,6 +66,7 @@ class RoleAssignment(models.Model):
         Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(
         _('sub folders are visible'), default=False)
+    builtin = models.BooleanField(default=False)
     # todo: add folder like any object, rename folders to perimeter_folders
 
     def __str__(self):
@@ -74,7 +95,8 @@ class RoleAssignment(models.Model):
     def get_accessible_folders(folder, user, content_type):
         """Gets the list of folders with specified contentType that can be viewed by a user
            Returns the list of the ids of the matching folders"""
-        (folders_set, _, _) = RoleAssignment.get_accessible_objects(folder, user, Folder)
+        (folders_set, _, _) = RoleAssignment.get_accessible_objects(
+            folder, user, Folder)
         return [x.id for x in folders_set if x.content_type == content_type]
 
     def get_accessible_objects(folder, user, object_type):
@@ -108,7 +130,8 @@ class RoleAssignment(models.Model):
                     target_folders = [f] + \
                         f.sub_folders() if ra.is_recursive else [f]
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
-                        permissions_per_object_id[object.id].add(p)
+                        if not (object.hasattr("builtin") and object.builtin and p != permissions[0]):
+                            permissions_per_object_id[object.id].add(p)
 
         if hasattr(object_type, "is_published"):
             for f in folders_with_local_view:
