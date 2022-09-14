@@ -309,7 +309,7 @@ msgstr "Administrateur"
 
 #: back_office/models.py:46
 msgid "Domain Manager"
-msgstr "Gérant de domaine"
+msgstr "Responsable de domaine"
 
 #: back_office/models.py:47
 msgid "Analyst"
