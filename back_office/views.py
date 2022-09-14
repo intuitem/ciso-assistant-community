@@ -641,8 +641,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_security_function"))
-
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="add_securityfunction"))
 
 class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
     model = Analysis
@@ -834,8 +833,7 @@ class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('security-function-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_security_function"))
-
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="delete_securityfunction"))
 
 class ThreatDeleteView(UserPassesTestMixin, DeleteView):
     model = Threat
@@ -946,8 +944,7 @@ class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_security_function"))
-
+        return RoleAssignment.is_access_allowed(user = self.request.user, perm = Permission.objects.get(codename="change_securityfunction"))
 
 class ThreatUpdateView(UserPassesTestMixin, UpdateView):
     model = Threat
