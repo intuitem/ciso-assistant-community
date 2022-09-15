@@ -3,20 +3,17 @@ from django.db import models
 from django.contrib.auth.models import Group, User, Permission
 from general.models import *
 from django.utils.translation import gettext_lazy as _
+from general.utils import *
 
 
 class UserGroup(Group):
-    BUILTINS = {
-        'Administrators': _('Administrators'),
-        'Global auditors': _('Global auditors'),
-    } 
     folder = models.ForeignKey("general.Folder", verbose_name=_(
         "Domain"), on_delete=models.CASCADE, default=None)
     builtin = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{self.BUILTINS.get(self.name)}"
+            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
         return self.name
 
     def get_user_groups(user):
@@ -41,17 +38,11 @@ class UserGroup(Group):
 
 
 class Role(Group):
-    BUILTINS = {
-        "Administrator": _("Administrator"),
-        "Domain Manager": _("Domain Manager"),
-        "Analyst": _("Analyst"),
-        "Auditor": _("Auditor"),
-    }
     builtin = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         if self.builtin:
-            return f"{self.BUILTINS.get(self.name)}"
+            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
 
 

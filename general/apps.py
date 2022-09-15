@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
+
 def startup():
     """Implement Mira 1.0 default Roles and User Groups"""
     import os
@@ -131,23 +132,29 @@ def startup():
         ])
 
         if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
-            Folder.objects.create(name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
-            auditor = Role.objects.create(name="Auditor", builtin=True)
+            Folder.objects.create(
+                name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
+            auditor = Role.objects.create(name="BI-RL-AUD", builtin=True)
             auditor.permissions.set(auditor_permissions)
-            analyst = Role.objects.create(name="Analyst", builtin=True)
+            analyst = Role.objects.create(name="BI-RL-ANA", builtin=True)
             analyst.permissions.set(analyst_permissions)
-            domain_manager = Role.objects.create(name="Domain Manager", builtin=True)
+            domain_manager = Role.objects.create(
+                name="BI-RL-DMA", builtin=True)
             domain_manager.permissions.set(domain_manager_permissions)
-            administrator = Role.objects.create(name="Administrator", builtin=True)
+            administrator = Role.objects.create(name="BI-RL-ADM", builtin=True)
             administrator.permissions.set(administrator_permissions)
-        if not UserGroup.objects.filter(name="Administrators", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            administrators = UserGroup.objects.create(name="Administrators", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
-            ra1 = RoleAssignment.objects.create(user_group=administrators, role=Role.objects.get(name="Administrator"), builtin=True)
-            ra1.perimeter_folders.add(administrators.folder)
-        if not UserGroup.objects.filter(name="Global auditors", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            global_auditors = UserGroup.objects.create(name="Global auditors", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
-            ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(name="Auditor"), is_recursive=True, builtin=True)
-            ra2.perimeter_folders.add(global_auditors.folder)
+        if not UserGroup.objects.filter(name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            administrators = UserGroup.objects.create(
+                name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
+            ra1 = RoleAssignment.objects.create(
+                user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True)
+            ra1.folders.add(administrators.folder)
+        if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
+                content_type=Folder.ContentType.ROOT), builtin=True)
+            ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(
+                name="BI-RL-AUD"), is_recursive=True, builtin=True)
+            ra2.folders.add(global_auditors.folder)
 
 
 class GeneralConfig(AppConfig):
