@@ -212,7 +212,7 @@ class SecurityMeasure(models.Model):
     MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
     MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"), null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     risk_scenario = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenario"))
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
 
@@ -236,8 +236,7 @@ class SecurityMeasure(models.Model):
         verbose_name_plural = _("Security measures")
 
     def parent_project(self):
-        return self.risk_scenario.parent_project()
-    parent_project.short_description = _("Parent project")
+        return self.project
 
     def __str__(self):
         return self.title
