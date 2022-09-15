@@ -143,11 +143,11 @@ def startup():
         if not UserGroup.objects.filter(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             administrators = UserGroup.objects.create(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra1 = RoleAssignment.objects.create(user_group=administrators, role=Role.objects.get(name="Administrator"), builtin=True)
-            ra1.folders.add(administrators.folder)
+            ra1.perimeter_folders.add(administrators.folder)
         if not UserGroup.objects.filter(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             global_auditors = UserGroup.objects.create(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(name="Auditor"), is_recursive=True, builtin=True)
-            ra2.folders.add(global_auditors.folder)
+            ra2.perimeter_folders.add(global_auditors.folder)
 
 class GeneralConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

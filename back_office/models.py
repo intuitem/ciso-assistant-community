@@ -32,7 +32,7 @@ class UserGroup(Group):
         for user_group in UserGroup.get_user_groups(manager):
             for ra in user_group.roleassignment_set.all():
                 if ra.role.name == "Domain Manager":
-                    for folder in ra.folders.all():
+                    for folder in ra.perimeter_folders.all():
                         folders.append(folder)
         for user_group in UserGroup.objects.all():
             if user_group.folder in folders:
@@ -57,8 +57,8 @@ class Role(Group):
 
 class RoleAssignment(models.Model):
 
-    folders = models.ManyToManyField(
-        "general.Folder", verbose_name=_("Domain"))
+    perimeter_folders = models.ManyToManyField(
+        "general.Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
     user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     user_group = models.ForeignKey(
         UserGroup, null=True, on_delete=models.CASCADE)
@@ -67,7 +67,7 @@ class RoleAssignment(models.Model):
     is_recursive = models.BooleanField(
         _('sub folders are visible'), default=False)
     builtin = models.BooleanField(default=False)
-    # todo: add folder like any object, rename folders to perimeter_folders
+    folder = models.ForeignKey("general.Folder", on_delete=models.CASCADE, verbose_name=_("Folder"), default=Folder.objects.get(content_type=Folder.ContentType.ROOT).id)
 
     def __str__(self):
         if not self.user:
@@ -88,7 +88,7 @@ class RoleAssignment(models.Model):
         if user.is_superuser:
             return True
         for ra in RoleAssignment.get_role_assignments(user):
-            if (not folder or folder in ra.folders.all()) and perm in ra.role.permissions.all():
+            if (not folder or folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
                 return True
         return False
 
@@ -123,7 +123,7 @@ class RoleAssignment(models.Model):
         perimeter.update(folder.sub_folders())
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
             ra_permissions = ra.role.permissions.all()
-            for f in perimeter & set(ra.folders.all()):
+            for f in perimeter & set(ra.perimeter_folders.all()):
                 for p in [p for p in permissions if p in ra_permissions]:
                     if p == permissions[0]:
                         folders_with_local_view.add(f)
