@@ -8,7 +8,7 @@ def startup():
     if os.environ.get('RUN_MAIN'):
         from .models import Folder
         from back_office.models import Role, UserGroup, RoleAssignment
-        from django.contrib.auth.models import Permission
+        from django.contrib.auth.models import Permission, User
 
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
@@ -150,6 +150,8 @@ def startup():
                 user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra1.perimeter_folders.add(administrators.folder)
+            for superuser in User.objects.filter(is_superuser=True):
+                administrators.user_set.add(superuser)
         if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)

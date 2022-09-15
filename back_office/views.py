@@ -303,11 +303,11 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
             name="BI-UG-ANA", folder=folder, builtin=True)
         managers = UserGroup.objects.create(
             name="BI-UG-DMA", folder=folder, builtin=True)
-        ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(name="BI-RL-AUD"), builtin=True)
+        ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(name="BI-RL-AUD"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra1.folders.add(folder)
-        ra2 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(name="BI-RL-ANA"), builtin=True)
+        ra2 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(name="BI-RL-ANA"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra2.folders.add(folder)
-        ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(name="BI-RL-DMA"), builtin=True)
+        ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(name="BI-RL-DMA"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra3.folders.add(folder)
         return self.request.POST.get('next', '/')
 
