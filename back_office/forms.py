@@ -97,7 +97,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'groups']
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions']
 
 class AdminPasswordChangeForm(AdminPasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
