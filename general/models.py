@@ -132,8 +132,8 @@ class SecurityFunction(models.Model):
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
-        verbose_name = _("SecurityFunction")
-        verbose_name_plural = _("SecurityFunctions")
+        verbose_name = _("Security function")
+        verbose_name_plural = _("Security functions")
 
     def __str__(self):
         return self.name
