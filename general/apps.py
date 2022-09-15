@@ -18,7 +18,7 @@ def startup():
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_security_function",
+            "view_securityfunction",
             "view_folder",
         ])
 
@@ -50,7 +50,7 @@ def startup():
 
             "view_asset",
             "view_threat",
-            "view_security_function",
+            "view_securityfunction",
             "view_folder",
         ])
 
@@ -85,7 +85,7 @@ def startup():
 
             "view_asset",
             "view_threat",
-            "view_security_function",
+            "view_securityfunction",
             "view_folder",
             "change_folder",
         ])
@@ -121,10 +121,10 @@ def startup():
             "change_threat",
             "delete_threat",
 
-            "add_security_function",
-            "view_security_function",
-            "change_security_function",
-            "delete_security_function",
+            "add_securityfunction",
+            "view_securityfunction",
+            "change_securityfunction",
+            "delete_securityfunction",
 
             "add_folder",
             "view_folder",
@@ -147,14 +147,16 @@ def startup():
             administrators = UserGroup.objects.create(
                 name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra1 = RoleAssignment.objects.create(
-                user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True)
-            ra1.folders.add(administrators.folder)
+                user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True,
+                folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            ra1.perimeter_folders.add(administrators.folder)
         if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)
             ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(
-                name="BI-RL-AUD"), is_recursive=True, builtin=True)
-            ra2.folders.add(global_auditors.folder)
+                name="BI-RL-AUD"), is_recursive=True, builtin=True,
+                folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            ra2.perimeter_folders.add(global_auditors.folder)
 
 
 class GeneralConfig(AppConfig):
