@@ -93,11 +93,11 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'groups']
+    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active']
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions']
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'groups']
 
 class AdminPasswordChangeForm(AdminPasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
@@ -111,7 +111,7 @@ class AdminPasswordChangeForm(AdminPasswordChangeForm):
 class GroupCreateForm(StyledModelForm):
     class Meta:
         model = UserGroup
-        exclude = ['permissions']
+        exclude = ['permissions', 'builtin']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -119,7 +119,7 @@ class GroupCreateForm(StyledModelForm):
 class GroupUpdateForm(StyledModelForm):
     class Meta:
         model = UserGroup
-        exclude = ['permissions']
+        exclude = ['permissions', 'builtin']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -229,4 +229,4 @@ class AssetForm(StyledModelForm):
 class RoleAssignmentForm(StyledModelForm):
     class Meta:
         model = RoleAssignment
-        fields = '__all__'
+        exclude = ['builtin']
