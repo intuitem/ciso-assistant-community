@@ -631,7 +631,7 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securitymeasure"), folder=self.get_object().project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securitymeasure"), folder=self.get_object().risk_scenario.analysis.project.folder)
 
 
 class SecurityMeasureDeleteView(UserPassesTestMixin, DeleteView):
