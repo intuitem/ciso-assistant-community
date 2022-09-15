@@ -126,14 +126,14 @@
                 </thead>
                 <tbody>
                     {% for assignment in assignments %}
-                        {% if assignment.userGroup %}
+                        {% if assignment.user_group %}
                         <tr class="odd:bg-white even:bg-gray-50">
                             <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="ml-0">
                                         <a id="assignment{{ assignment.id }}" href="#"
                                         class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                            {{ assignment.userGroup|capfirst }}
+                                            {{ assignment.user_group|capfirst }}
                                         </a>
                                     </div>
                                 </div>
