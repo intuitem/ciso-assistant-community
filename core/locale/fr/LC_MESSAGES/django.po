@@ -1322,7 +1322,7 @@ msgstr "Bienvenue dans MIRA. Votre "
 
 #: core/templates/registration/login.html:13
 msgid "one-stop shop"
-msgstr "security_function complète"
+msgstr "solution complète"
 
 #: core/templates/registration/login.html:14
 msgid "for risk assessment and management."
