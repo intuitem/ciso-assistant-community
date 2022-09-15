@@ -63,12 +63,12 @@ class RoleAssignment(models.Model):
     def __str__(self):
         if not self.user:
             return "id=" + str(self.id) + \
-                ", folders: " + str(list(self.folders.values_list('name', flat=True))) + \
+                ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
                 ", role: " + str(self.role.name) + \
                 ", user group: " + str(self.user_group.name)
         else:
             return "id=" + str(self.id) + \
-                ", folders: " + str(list(self.folders.values_list('name', flat=True))) + \
+                ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
                 ", role: " + str(self.role.name) + \
                 ", user: " + str(self.user.username)
 
