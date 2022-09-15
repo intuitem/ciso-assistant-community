@@ -58,7 +58,7 @@ class RoleAssignment(models.Model):
     is_recursive = models.BooleanField(
         _('sub folders are visible'), default=False)
     builtin = models.BooleanField(default=False)
-    folder = models.ForeignKey("general.Folder", on_delete=models.CASCADE, verbose_name=_("Folder"), default=Folder.objects.get(content_type=Folder.ContentType.ROOT).id)
+    folder = models.ForeignKey("general.Folder", on_delete=models.CASCADE, verbose_name=_("Folder"))
 
     def __str__(self):
         if not self.user:
