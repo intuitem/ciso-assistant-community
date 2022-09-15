@@ -477,7 +477,7 @@ msgid "Residual risk"
 msgstr "Risque résiduel"
 
 #: core/templates/core/analytics.html:97
-msgid "Measures overview"
+msgid "SecurityMeasures overview"
 msgstr "Aperçu des mesures"
 
 #: core/templates/core/analytics.html:102
@@ -493,11 +493,11 @@ msgid "Breakdown per security function"
 msgstr "Répartition par fonction de sécurité"
 
 #: core/templates/core/analytics.html:113
-msgid "Measures per security function"
+msgid "SecurityMeasures per security function"
 msgstr "Mesures par fonction de sécurité"
 
 #: core/templates/core/analytics.html:124
-msgid "Measures priority quadrants"
+msgid "SecurityMeasures priority quadrants"
 msgstr "Quadrant des priorités des mesures"
 
 #: core/templates/core/analytics.html:132
@@ -556,7 +556,7 @@ msgid "Associated risk"
 msgstr "Risque associé"
 
 #: core/templates/core/calendar.html:6
-msgid "Measure calendar"
+msgid "SecurityMeasure calendar"
 msgstr "Calendrier des Mesures"
 
 #: core/templates/core/calendar.html:12
@@ -770,7 +770,7 @@ msgid "ordered by ranking score"
 msgstr "classées par évaluation"
 
 #: core/templates/core/my_projects.html:36
-msgid "Measure"
+msgid "SecurityMeasure"
 msgstr ""
 
 #: core/templates/core/my_projects.html:37
@@ -1387,7 +1387,7 @@ msgid " \"Residual: Very high\" "
 msgstr " \"Résiduel: Très élevé\" "
 
 #: core/templates/snippets/mp_data.html:12
-msgid "Risk analysis seems to be empty. Measure Plan cannot be generated."
+msgid "Risk analysis seems to be empty. SecurityMeasure Plan cannot be generated."
 msgstr ""
 "L'analyse de risque semble être vide. Le Plan de Mesure ne peut pas être "
 "généré."
@@ -1483,19 +1483,19 @@ msgid " \"Risk: blocking\" "
 msgstr " \"Risque: bloquant\" "
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:10
-msgid " \"Measure: open\" "
+msgid " \"SecurityMeasure: open\" "
 msgstr " \"Mesure: ouverte\" "
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:11
-msgid " \"Measure: in progress\" "
+msgid " \"SecurityMeasure: in progress\" "
 msgstr " \"Mesure: en cours\" "
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:12
-msgid " \"Measure: on hold\" "
+msgid " \"SecurityMeasure: on hold\" "
 msgstr " \"Mesure: en attente\" "
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:13
-msgid " \"Measure: done\" "
+msgid " \"SecurityMeasure: done\" "
 msgstr " \"Mesure: terminée\" "
 
 #~ msgid "Break down per threat"

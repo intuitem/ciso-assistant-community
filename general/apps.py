@@ -12,7 +12,7 @@ def startup():
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
             "view_analysis",
-            "view_security_measure",
+            "view_securitymeasure",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
@@ -32,10 +32,10 @@ def startup():
             "change_analysis",
             "delete_analysis"
 
-            "add_security_measure",
-            "view_security_measure",
-            "change_security_measure",
-            "delete_security_measure",
+            "add_securitymeasure",
+            "view_securitymeasure",
+            "change_securitymeasure",
+            "delete_securitymeasure",
 
             "add_riskscenario",
             "view_riskscenario",
@@ -67,10 +67,10 @@ def startup():
             "change_analysis",
             "delete_analysis",
 
-            "add_security_measure",
-            "view_security_measure",
-            "change_security_measure",
-            "delete_security_measure",
+            "add_securitymeasure",
+            "view_securitymeasure",
+            "change_securitymeasure",
+            "delete_securitymeasure",
 
             "add_riskscenario",
             "view_riskscenario",
@@ -134,24 +134,26 @@ def startup():
             Folder.objects.create(name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
             auditor = Role.objects.create(name="Auditor", builtin=True)
             auditor.permissions.set(auditor_permissions)
-            analyst= Role.objects.create(name="Analyst", builtin=True)
+            analyst = Role.objects.create(name="Analyst", builtin=True)
             analyst.permissions.set(analyst_permissions)
             domain_manager = Role.objects.create(name="Domain Manager", builtin=True)
             domain_manager.permissions.set(domain_manager_permissions)
             administrator = Role.objects.create(name="Administrator", builtin=True)
             administrator.permissions.set(administrator_permissions)
-        if not UserGroup.objects.filter(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            administrators = UserGroup.objects.create(name="Administrators", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
+        if not UserGroup.objects.filter(name="Administrators", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            administrators = UserGroup.objects.create(name="Administrators", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra1 = RoleAssignment.objects.create(user_group=administrators, role=Role.objects.get(name="Administrator"), builtin=True)
             ra1.perimeter_folders.add(administrators.folder)
-        if not UserGroup.objects.filter(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            global_auditors = UserGroup.objects.create(name="Global auditors", folder = Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
+        if not UserGroup.objects.filter(name="Global auditors", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            global_auditors = UserGroup.objects.create(name="Global auditors", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(name="Auditor"), is_recursive=True, builtin=True)
             ra2.perimeter_folders.add(global_auditors.folder)
+
 
 class GeneralConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'general'
     verbose_name = _("General")
+
     def ready(self):
         startup()

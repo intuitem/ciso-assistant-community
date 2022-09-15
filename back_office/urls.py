@@ -30,7 +30,7 @@ urlpatterns = [
     path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='ra-create'),
     path('RA/create_modal/', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create-modal'),
     
-    path('MSR/create_modal/', login_required(views.MeasureCreateViewModal.as_view()), name='measure-create-modal'),
+    path('MSR/create_modal/', login_required(views.SecurityMeasureCreateViewModal.as_view()), name='measure-create-modal'),
     
     path('RAC/create_modal/', login_required(views.RiskAcceptanceCreateViewModal.as_view()), name='acceptance-create-modal'),
     
@@ -77,7 +77,7 @@ urlpatterns = [
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
     path('RS/<int:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='risk-scenario-delete'),
     path('RAC/<int:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
-    path('MSR/<int:pk>/delete/', login_required(views.MeasureDeleteView.as_view()), name='measure-delete'),
+    path('MSR/<int:pk>/delete/', login_required(views.SecurityMeasureDeleteView.as_view()), name='measure-delete'),
     path('PRJ/<int:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
     path('AST/<int:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
     path('SF/<int:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),

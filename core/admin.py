@@ -31,9 +31,9 @@ class RiskAcceptanceAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.Mode
     list_display = ('__str__', 'type', 'validator', 'expiry_date')
 
 
-class SecurityMeasureInline(admin.StackedInline):
-    model = SecurityMeasure
-    extra = 0
+# class SecurityMeasureInline(admin.StackedInline):
+#     model = SecurityMeasure
+#     extra = 0
 
 
 class RiskScenarioInline(admin.StackedInline):
@@ -71,11 +71,11 @@ class RiskScenarioAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionMo
         (None, {'fields': ['analysis', 'threat',]}),
         (_('Threat description'), {'fields': ['title', 'scenario']}),
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
-        SecurityMeasureInline,
+        # SecurityMeasureInline,
         (_('Residual level'), {'fields': ['residual_proba', 'residual_impact', 'residual_level']}),
         (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
     ]
-    inlines = [SecurityMeasureInline]
+    # inlines = [SecurityMeasureInline]
 
     readonly_fields = ('current_level', 'residual_level', 'created_at', 'updated_at')
     list_filter = ('threat', 'treatment', 'current_level', 'residual_level', 'analysis__project__name')

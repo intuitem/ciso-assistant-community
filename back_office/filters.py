@@ -149,7 +149,7 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         fields = ['title', 'threat', 'analysis__project', 'treatment']
 
-class MeasureFilter(GenericFilterSet):
+class SecurityMeasureFilter(GenericFilterSet):
     title = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',

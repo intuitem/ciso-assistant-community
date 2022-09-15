@@ -666,7 +666,7 @@ msgid "expired"
 msgstr "expiré"
 
 #: back_office/templates/back_office/fragments/watchlist_measures.html:8
-msgid "Measure"
+msgid "SecurityMeasure"
 msgstr "Mesure"
 
 #: back_office/templates/back_office/fragments/watchlist_measures.html:14
@@ -808,7 +808,7 @@ msgid "Items that have expired or with close ETA"
 msgstr "Objets expirés ou dont l'échéance est proche"
 
 #: back_office/templates/back_office/index.html:74
-msgid "Measures to review"
+msgid "SecurityMeasures to review"
 msgstr "Mesures à revoir"
 
 #: back_office/templates/back_office/index.html:78
@@ -851,7 +851,7 @@ msgid "No measure found."
 msgstr "Aucune mesure n'a été trouvée"
 
 #: back_office/templates/back_office/mtg_update.html:13
-msgid "Measure summary"
+msgid "SecurityMeasure summary"
 msgstr "Résumé de la mesure"
 
 #: back_office/templates/back_office/mtg_update.html:46
@@ -1595,8 +1595,8 @@ msgstr "Éditer l'utilisateur"
 #~ msgstr "Ajouter une Acceptation"
 
 #, fuzzy
-#~| msgid "Measure"
-#~ msgid "Measures"
+#~| msgid "SecurityMeasure"
+#~ msgid "SecurityMeasures"
 #~ msgstr "Mesure"
 
 #~ msgid "parent project"

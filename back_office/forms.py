@@ -41,7 +41,7 @@ class RiskAnalysisCreateForm(StyledModelForm):
         model = Analysis
         fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
 
-class MeasureCreateForm(StyledModelForm):
+class SecurityMeasureCreateForm(StyledModelForm):
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -180,12 +180,13 @@ class FolderUpdateForm(StyledModelForm):
         fields = '__all__'
         exclude = ['content_type']
 
+
 class ProjectUpdateForm(StyledModelForm):
 
     class Meta:
         model = Project
         fields = '__all__'
-        
+
 
 class SecurityFunctionUpdateForm(StyledModelForm):
     class Meta:
