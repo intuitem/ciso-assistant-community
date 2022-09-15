@@ -256,7 +256,7 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(
-            Folder.objects.get(name="Global"), self.request.user, "DO")
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)
         qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
@@ -304,11 +304,11 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
         managers = UserGroup.objects.create(
             name="BI-UG-DMA", folder=folder, builtin=True)
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(name="BI-RL-AUD"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
-        ra1.folders.add(folder)
+        ra1.perimeter_folders.add(folder)
         ra2 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(name="BI-RL-ANA"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
-        ra2.folders.add(folder)
+        ra2.perimeter_folders.add(folder)
         ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(name="BI-RL-DMA"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
-        ra3.folders.add(folder)
+        ra3.perimeter_folders.add(folder)
         return self.request.POST.get('next', '/')
 
     def test_func(self):
@@ -631,7 +631,7 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securitymeasure"), folder=self.get_object().risk_scenario.analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securitymeasure"), folder=self.get_object().project.folder)
 
 
 class SecurityMeasureDeleteView(UserPassesTestMixin, DeleteView):

@@ -63,12 +63,12 @@ class RoleAssignment(models.Model):
     def __str__(self):
         if not self.user:
             return "id=" + str(self.id) + \
-                ", folders: " + str(list(self.folders.values_list('name', flat=True))) + \
+                ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
                 ", role: " + str(self.role.name) + \
                 ", user group: " + str(self.user_group.name)
         else:
             return "id=" + str(self.id) + \
-                ", folders: " + str(list(self.folders.values_list('name', flat=True))) + \
+                ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
                 ", role: " + str(self.role.name) + \
                 ", user: " + str(self.user.username)
 
@@ -86,9 +86,15 @@ class RoleAssignment(models.Model):
     def get_accessible_folders(folder, user, content_type):
         """Gets the list of folders with specified contentType that can be viewed by a user
            Returns the list of the ids of the matching folders"""
-        (folder_ids_set, _, _) = RoleAssignment.get_accessible_objects(folder, user, Folder)
-        print(folder_ids_set)
-        return [x for x in folder_ids_set if Folder.objects.get(id=x).content_type == content_type]
+        folders_set=set()
+        ref_permission = Permission.objects.get(codename = "view_folder")
+        # first get all accessible folders, independently of contentType
+        for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
+            for f in ra.folders.all():
+                folders_set.add(f)
+                folders_set.update(f.sub_folders())
+        # return filtered result
+        return [x.id for x in folders_set if x.content_type == content_type]
 
     def get_accessible_objects(folder, user, object_type):
         """ Gets all objects of a specified type that a user can reach in a given folder
@@ -121,6 +127,7 @@ class RoleAssignment(models.Model):
                     target_folders = [f] + \
                         f.sub_folders() if ra.is_recursive else [f]
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
+                        print(object)
                         if not (hasattr(object, "builtin") and object.builtin and p != permissions[0]):
                             permissions_per_object_id[object.id].add(p)
 
