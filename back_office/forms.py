@@ -165,7 +165,7 @@ class RiskScenarioUpdateForm(StyledModelForm):
 class SecurityMeasureUpdateForm(StyledModelForm):
     class Meta:
         model = SecurityMeasure
-        exclude = ['risk_scenario']
+        fields = '__all__'
         widgets = {
             'eta': DefaultDateInput(format='%Y-%m-%d')
         }

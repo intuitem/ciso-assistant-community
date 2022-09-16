@@ -213,7 +213,7 @@ class SecurityMeasure(models.Model):
     MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
-    risk_scenario = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenario"))
+    risk_scenario = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenario"), blank=True)
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
 
     title = models.CharField(max_length=200, default=_("<short title for the measure>"), verbose_name=_("Title"))

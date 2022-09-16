@@ -30,7 +30,7 @@
                     </span>
                 </td>
             </tr>
-            {% if not scenario.security_measure_set.all %}
+            {% if not scenario.securitymeasure_set.all %}
             <tr>
                 <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated measure" %}
                 </td>
@@ -48,29 +48,29 @@
                 <td class="font-semibold text-center">{% trans "Status" %}</td>
             </tr>
             {% endif %}
-            {% for security_measure in scenario.security_measure_set.all %}
+            {% for securitymeasure in scenario.securitymeasure_set.all %}
             <tr class="border-b text-sm">
-                <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{security_measure.id}}" href="{% url 'mtg-update' security_measure.id %}?next={{ request.path|urlencode }}">{{security_measure.id}}</a></td>
-                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' security_measure.id %}?next={{ request.path|urlencode }}">{{security_measure.title}}</a></td>
-                <td class="">{{security_measure.description}}</td>
-                <td class="">{{security_measure.get_type_display}}</td>
-                <td class="">{% if security_measure.security_function %}{{security_measure.security_function}}{% else %}--{% endif %}</td>
-                <td class="">{% if security_measure.eta %}{{security_measure.eta}}{% else %}--{%endif%}</td>
-                <td class="">{%if security_measure.effort%}{{security_measure.effort}}{% else %}--{%endif%}</td>
-                <td class="text-center">{% if security_measure.link %}<a href="{{security_measure.link}}"
+                <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{securitymeasure.id}}" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.id}}</a></td>
+                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.title}}</a></td>
+                <td class="">{{securitymeasure.description}}</td>
+                <td class="">{{securitymeasure.get_type_display}}</td>
+                <td class="">{% if securitymeasure.security_function %}{{securitymeasure.security_function}}{% else %}--{% endif %}</td>
+                <td class="">{% if securitymeasure.eta %}{{securitymeasure.eta}}{% else %}--{%endif%}</td>
+                <td class="">{%if securitymeasure.effort%}{{securitymeasure.effort}}{% else %}--{%endif%}</td>
+                <td class="text-center">{% if securitymeasure.link %}<a href="{{securitymeasure.link}}"
                                                                    class="hover:text-blue-400"><i
                         class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
                 </td>
                 <td class="text-center"><span class="text-xs text-center p-1 mx-1 rounded
-                    {% if security_measure.status == 'open' %}
+                    {% if securitymeasure.status == 'open' %}
                     bg-orange-200 
-                    {% elif security_measure.status == 'in_progress' %}
+                    {% elif securitymeasure.status == 'in_progress' %}
                     bg-blue-200 
-                    {% elif security_measure.status == 'on_hold' %}
+                    {% elif securitymeasure.status == 'on_hold' %}
                     bg-red-300 
                     {% else %}
                     bg-green-200 
-                    {% endif %}">{{ security_measure.get_status_display|lower}} 
+                    {% endif %}">{{ securitymeasure.get_status_display|lower}} 
                     </span></td>
             </tr>
             {% endfor %}

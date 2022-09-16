@@ -6,20 +6,23 @@
 {% endwith %}
 
 <form method="post" id="mtg_update_form">{% csrf_token %}
-{{ form.non_field_errors }}
-{{ form.errors }}
 <div class="flex flex-col space-y-4">
     <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-4">{% trans "Measure summary" %}</h2>
         <section class="flex flex-col space-y-4">
             <div class="flex flex-col">
-                <p class="text-gray-400 text-xs">{% trans "Risk scenario" %}</p>
-                <p class="text-black text-sm font-semibold antialiased">{{ security_measure.risk_scenario }}</p>
+                <p class="text-gray-400 text-xs">{% trans "Project" %}</p>
+                <p class="text-black text-sm font-semibold antialiased">{{ security_measure.project }}</p>
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Title" %}</p>
                 {{ form.title.errors }}
                 {{ form.title }}
+            </div>
+            <div class="flex flex-col">
+                <p class="text-sm font-semibold">{% trans "Risk Scenarios" %}</p>
+                {{ form.risk_scenario.errors }}
+                {{ form.risk_scenario }}
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Type" %}</p>

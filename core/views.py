@@ -45,8 +45,9 @@ class SecurityMeasurePlanView(ListView):
     context_object_name = 'context'
 
     def get_queryset(self):
-        self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
-        return RiskScenario.objects.filter(analysis=self.analysis).order_by('id')
+        self.project = get_object_or_404(Project, id=self.kwargs['project'])
+        analysis = Analysis.objects.get(project=self.project)
+        return RiskScenario.objects.filter(analysis=analysis).order_by('id')
 
 
 def build_ri_clusters(analysis: Analysis):

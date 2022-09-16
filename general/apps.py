@@ -150,8 +150,6 @@ def startup():
                 user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra1.perimeter_folders.add(administrators.folder)
-            for superuser in User.objects.filter(is_superuser=True):
-                administrators.user_set.add(superuser)
         if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)
@@ -159,7 +157,9 @@ def startup():
                 name="BI-RL-AUD"), is_recursive=True, builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra2.perimeter_folders.add(global_auditors.folder)
-
+        for superuser in User.objects.filter(is_superuser=True):
+                UserGroup.objects.get(
+                name="BI-UG-ADM").user_set.add(superuser)
 
 class GeneralConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
