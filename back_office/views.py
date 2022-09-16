@@ -535,11 +535,32 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['security_measures'] = SecurityMeasure.objects.filter(
-            risk_scenario=self.get_object())
+        context['security_measures'] = self.get_object().security_measures.all()
+        context['existing_security_measures'] = SecurityMeasure.objects.filter(project=self.get_object().analysis.project)
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateForm(
             initial={'risk_scenario': get_object_or_404(RiskScenario, id=self.kwargs['pk'])})
+        return context
+
+    def get_success_url(self) -> str:
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('ri-list')
+        else:
+            return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskscenario"), folder=self.get_object().analysis.project.folder)
+
+
+class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
+    model = RiskScenario
+    template_name = 'back_office/ri_update_modal.html'
+    context_object_name = 'scenario'
+    form_class = RiskScenarioModalUpdateForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['crumbs'] = {'ri-list': _('Risk scenarios')}
         return context
 
     def get_success_url(self) -> str:

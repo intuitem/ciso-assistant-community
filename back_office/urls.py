@@ -59,6 +59,7 @@ urlpatterns = [
     # UPDATE VIEWS
     path('RA/<int:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
     path('RS/<int:pk>', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
+    path('RS/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='ri-update-modal'),
     path('MSR/<int:pk>', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
     path('RAC/<int:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
     path('TH/<int:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),

@@ -117,6 +117,70 @@ def risk_scoring(proba, impact, matrix):
     return focus[(focus.proba == proba) & (focus.impact == impact)].level.values[0]
 
 
+class SecurityMeasure(models.Model):
+    MITIGATION_STATUS = [
+        ('open', _('Open')),
+        ('in_progress', _('In progress')),
+        ('on_hold', _('On hold')),
+        ('done', _('Done')),
+    ]
+
+    MITIGATION_TYPE = [
+        ('n/a', _('N/A')),
+        ('technical', _('Technical')),
+        ('organizational', _('Organizational')),
+    ]
+
+    EFFORT = [
+        ('S', _('Small')),
+        ('M', _('Medium')),
+        ('L', _('Large')),
+        ('XL', _('Extra-Large')),
+    ]
+
+    MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
+    MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
+    security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
+
+    title = models.CharField(max_length=200, default=_("<short title for the measure>"), verbose_name=_("Title"))
+    description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
+    type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
+    status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
+    eta = models.DateField(blank=True, null=True, help_text=_("Estimated Time of Arrival"), verbose_name=_("ETA"))
+    link = models.CharField(null=True, blank=True, max_length=1000,
+                            help_text=_("External url for action follow-up (eg. Jira ticket)"),
+                            verbose_name=_("Link"))
+    effort = models.CharField(null=True, blank=True, max_length=2, choices=EFFORT,
+                              help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
+                              verbose_name=_("Effort"))
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+
+    class Meta:
+        verbose_name = _("Security measure")
+        verbose_name_plural = _("Security measures")
+
+    def parent_project(self):
+        return self.project
+
+    def __str__(self):
+        return self.title
+
+    def get_ranking_score(self):
+        if self.effort:
+            return round(self.MAP_RISK_LEVEL[self.risk_scenario.current_level]/self.MAP_EFFORT[self.effort], 4)
+        else:
+            return 0
+
+    @property
+    def get_html_url(self):
+        url = reverse('MP', args=(self.risk_scenario.analysis.id,))
+        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.risk_scenario.analysis.project.name}: {self.title} </a>'
+
+
 class RiskScenario(models.Model):
     TREATMENT_OPTIONS = [
         ('open', _('Open')),
@@ -135,6 +199,7 @@ class RiskScenario(models.Model):
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
     assets = models.ManyToManyField(Asset)
+    security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
     title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
@@ -186,71 +251,6 @@ class RiskScenario(models.Model):
         self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
         self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
         super(RiskScenario, self).save(*args, **kwargs)
-
-
-class SecurityMeasure(models.Model):
-    MITIGATION_STATUS = [
-        ('open', _('Open')),
-        ('in_progress', _('In progress')),
-        ('on_hold', _('On hold')),
-        ('done', _('Done')),
-    ]
-
-    MITIGATION_TYPE = [
-        ('n/a', _('N/A')),
-        ('technical', _('Technical')),
-        ('organizational', _('Organizational')),
-    ]
-
-    EFFORT = [
-        ('S', _('Small')),
-        ('M', _('Medium')),
-        ('L', _('Large')),
-        ('XL', _('Extra-Large')),
-    ]
-
-    MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
-    MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
-
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
-    risk_scenario = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenario"), blank=True)
-    security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
-
-    title = models.CharField(max_length=200, default=_("<short title for the measure>"), verbose_name=_("Title"))
-    description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
-    type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
-    status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
-    eta = models.DateField(blank=True, null=True, help_text=_("Estimated Time of Arrival"), verbose_name=_("ETA"))
-    link = models.CharField(null=True, blank=True, max_length=1000,
-                            help_text=_("External url for action follow-up (eg. Jira ticket)"),
-                            verbose_name=_("Link"))
-    effort = models.CharField(null=True, blank=True, max_length=2, choices=EFFORT,
-                              help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
-                              verbose_name=_("Effort"))
-
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-
-    class Meta:
-        verbose_name = _("Security measure")
-        verbose_name_plural = _("Security measures")
-
-    def parent_project(self):
-        return self.project
-
-    def __str__(self):
-        return self.title
-
-    def get_ranking_score(self):
-        if self.effort:
-            return round(self.MAP_RISK_LEVEL[self.risk_scenario.current_level]/self.MAP_EFFORT[self.effort], 4)
-        else:
-            return 0
-
-    @property
-    def get_html_url(self):
-        url = reverse('MP', args=(self.risk_scenario.analysis.id,))
-        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.risk_scenario.analysis.project.name}: {self.title} </a>'
 
 
 class RiskAcceptance(models.Model):
