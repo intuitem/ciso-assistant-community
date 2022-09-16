@@ -90,7 +90,7 @@ class RoleAssignment(models.Model):
         ref_permission = Permission.objects.get(codename = "view_folder")
         # first get all accessible folders, independently of contentType
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
-            for f in ra.folders.all():
+            for f in ra.perimeter_folders.all():
                 folders_set.add(f)
                 folders_set.update(f.sub_folders())
         # return filtered result
