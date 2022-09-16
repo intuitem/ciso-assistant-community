@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from asf_rm import settings
 from general.models import *
 from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
@@ -16,7 +17,7 @@ class Analysis(models.Model):
     ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     version = models.CharField(max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
-    auditor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
+    auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
     rating_matrix = models.CharField(choices=RATING_METHODS, default='default', max_length=20, verbose_name=_("Rating matrix"))
 

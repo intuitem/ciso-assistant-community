@@ -1,6 +1,7 @@
 from collections import defaultdict
 from django.db import models
 from django.contrib.auth.models import Group, User, Permission
+from asf_rm import settings
 from general.models import *
 from django.utils.translation import gettext_lazy as _
 from general.utils import *
@@ -50,7 +51,7 @@ class RoleAssignment(models.Model):
 
     perimeter_folders = models.ManyToManyField(
         "general.Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     user_group = models.ForeignKey(
         UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(
