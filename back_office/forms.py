@@ -177,8 +177,7 @@ class FolderUpdateForm(StyledModelForm):
 
     class Meta:
         model = Folder
-        fields = '__all__'
-        exclude = ['content_type']
+        exclude = ['content_type', 'builtin']
 
 
 class ProjectUpdateForm(StyledModelForm):
