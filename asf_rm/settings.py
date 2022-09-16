@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     # 'django_browser_reload',
+    'iam',
     'core',
     'general',
     'back_office',
@@ -116,6 +117,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+AUTH_USER_MODEL = 'iam.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
