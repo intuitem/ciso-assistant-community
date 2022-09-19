@@ -139,11 +139,6 @@
                         {{ form.scenario.errors }}
                         {{ form.scenario }}
                     </div>
-                    <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Security Measures" %}</p>
-                        {{ form.security_measures.errors }}
-                        {{ form.security_measures }}
-                    </div>
                 </section>
             </div>
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
@@ -258,7 +253,7 @@
                 <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-lg shadow w-full">
                     <div class="flex flex-row">
                         <h2 class="text-lg font-semibold mb-4">{% trans "Select security measures" %}</h2>
-                        {% include 'back_office/snippets/update_button_modal.html' with form=scenario header=_("Select Security Measure") model="ri" content=_("Select security measure") %}
+                        {% include 'back_office/snippets/update_button_modal.html' with form=form header=_("Select Security Measure") model="ri" content=_("Select security measure") %}
                     </div>
                     {% include 'back_office/snippets/mtg_list_nested.html' %}
                 </div>

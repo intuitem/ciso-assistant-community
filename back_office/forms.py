@@ -165,7 +165,7 @@ class RiskScenarioUpdateForm(StyledModelForm):
 class RiskScenarioModalUpdateForm(StyledModelForm):
     class Meta:
         model = RiskScenario
-        fields = ['security_measures']
+        fields = '__all__'
 
 class SecurityMeasureUpdateForm(StyledModelForm):
     class Meta:
