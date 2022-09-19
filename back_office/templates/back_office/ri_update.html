@@ -250,10 +250,13 @@
                 </div>
             </div>
             <div class="mb-4 mr-1 w-full">
-                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-lg shadow w-full">
+                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-t-lg shadow w-full">
+                    <h2 class="text-lg font-semibold mb-4">{% trans "Select or create security measures" %}</h2>
                     <div class="flex flex-row">
-                        <h2 class="text-lg font-semibold mb-4">{% trans "Select security measures" %}</h2>
-                        {% include 'back_office/snippets/update_button_modal.html' with form=form header=_("Select Security Measure") model="ri" content=_("Select security measure") %}
+                        <div class="flex">
+                            {% include 'back_office/snippets/update_button_modal.html' with form=form header=_("Select Security Measures") model="ri" content=_("Select security measures") %}
+                            {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
+                        </div>
                     </div>
                     {% include 'back_office/snippets/mtg_list_nested.html' %}
                 </div>

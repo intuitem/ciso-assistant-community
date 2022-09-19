@@ -2,10 +2,11 @@
 
 <!-- BEGIN UPDATE FORM -->
 <form action="{% url model|lower|add:'-update-modal' %}" method="post"> {% csrf_token %}
-    <div class="flex flex-row">
-      {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
-    </div>
     <div>
+      <div class="flex-row hidden">
+            {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
+      </div>
+    </div>
       <div class="mb-6">
         <label class="form-label">{{ form.label|striptags }}</label>
         <div>
@@ -20,7 +21,7 @@
         <section class="grid grid-cols-2 place-content-end">
           <button id="cancel" @click="open = ! open" type="button"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
-            <input type="hidden" name="next" value="{{ request.path|urlencode }}">
+          <input type="hidden" name="next" value="{{ request.path|urlencode }}">
           <button id="{{ model }}_save" type="submit"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
             {% trans "Save" %}

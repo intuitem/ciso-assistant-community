@@ -558,11 +558,6 @@ class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
     context_object_name = 'scenario'
     form_class = RiskScenarioModalUpdateForm
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['crumbs'] = {'ri-list': _('Risk scenarios')}
-        return context
-
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
             return reverse_lazy('ri-list')
