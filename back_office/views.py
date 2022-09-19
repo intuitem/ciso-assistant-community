@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
 from datetime import date
 from .models import RoleAssignment
-from iam.models import Group, Role
+from iam.models import UserGroup, Role
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
 from general.models import Asset, Threat, Project, Folder, SecurityFunction
@@ -296,11 +296,11 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("id")
-        auditors = Group.objects.create(
+        auditors = UserGroup.objects.create(
             name="BI-UG-AUD", folder=folder, builtin=True)
-        analysts = Group.objects.create(
+        analysts = UserGroup.objects.create(
             name="BI-UG-ANA", folder=folder, builtin=True)
-        managers = Group.objects.create(
+        managers = UserGroup.objects.create(
             name="BI-UG-DMA", folder=folder, builtin=True)
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(name="BI-RL-AUD"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra1.perimeter_folders.add(folder)
@@ -961,40 +961,40 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_user"))
 
 
-class GroupListView(UserPassesTestMixin, ListView):
+class UserGroupListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/group_list.html'
     context_object_name = 'groups'
 
     ordering = 'id'
     paginate_by = 10
-    model = Group
+    model = UserGroup
 
     def get_queryset(self):
-        # admin = True
-        # for user_group in Group.get_user_groups(self.request.user):
-        #     print("hello", user_group)
-        #     for ra in user_group.roleassignment_set.all():
-        #         if Folder.objects.get(content_type=Folder.ContentType.ROOT) in ra.perimeter_folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
-        #             admin = True
-        # if admin:
-        #     qs = self.model.objects.all()
-        # else:
-        #     qs = self.model.objects.filter(
-        #         name__in=Group.get_manager_user_groups(self.request.user))
-            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
-                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Group
-            )
-            qs = self.model.objects.filter(id__in=object_ids_view)
-            filtered_list = GroupFilter(self.request.GET, queryset=qs)
-            return filtered_list.qs
+        admin = True
+        for user_group in UserGroup.get_user_groups(self.request.user):
+            print("hello", user_group)
+            for ra in user_group.roleassignment_set.all():
+                if Folder.objects.get(content_type=Folder.ContentType.ROOT) in ra.perimeter_folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
+                    admin = True
+        if admin:
+            qs = self.model.objects.all()
+        else:
+            qs = self.model.objects.filter(
+                name__in=UserGroup.get_manager_user_groups(self.request.user))
+        # (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        #     Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
+        # )
+        # qs = self.model.objects.filter(id__in=object_ids_view)
+        filtered_list = UserGroupFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = GroupFilter(self.request.GET, queryset)
+        filter = UserGroupFilter(self.request.GET, queryset)
         context['filter'] = filter
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_objects(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Group
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
         )
         return context
 
@@ -1002,31 +1002,31 @@ class GroupListView(UserPassesTestMixin, ListView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='view_usergroup'))
 
 
-class GroupCreateView(UserPassesTestMixin, CreateView):
+class UserGroupCreateView(UserPassesTestMixin, CreateView):
     template_name = 'back_office/group_create.html'
     context_object_name = 'group'
-    form_class = GroupCreateForm
+    form_class = UserGroupCreateForm
 
     def get_success_url(self) -> str:
         return reverse_lazy('group-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_group"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"))
 
 
-class GroupUpdateView(UserPassesTestMixin, UpdateView):
+class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/group_update.html'
     context_object_name = 'group'
-    form_class = GroupUpdateForm
+    form_class = UserGroupUpdateForm
 
-    model = Group
+    model = UserGroup
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['users'] = User.objects.exclude(groups=self.get_object())
         context["associated_users"] = User.objects.filter(
             groups=self.get_object())
-        context["crumbs"] = {'group-list': _('Groups')}
+        context["crumbs"] = {'group-list': _('UserGroups')}
         return context
 
     def get_success_url(self) -> str:
@@ -1035,12 +1035,12 @@ class GroupUpdateView(UserPassesTestMixin, UpdateView):
     def test_func(self):
         group = self.get_object()
         return not (group.builtin) and RoleAssignment.is_access_allowed(user=self.request.user,
-                                                                        perm=Permission.objects.get(codename="change_group"),
+                                                                        perm=Permission.objects.get(codename="change_usergroup"),
                                                                         folder=Folder.get_folder(group))
 
 
-class GroupDeleteView(UserPassesTestMixin, DeleteView):
-    model = Group
+class UserGroupDeleteView(UserPassesTestMixin, DeleteView):
+    model = UserGroup
     success_url = reverse_lazy('group-list')
     template_name = 'back_office/snippets/group_delete_modal.html'
 
@@ -1048,7 +1048,7 @@ class GroupDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('group-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_group"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_usergroup"))
 
 
 class RoleAssignmentListView(PermissionRequiredMixin, ListView):
@@ -1062,13 +1062,13 @@ class RoleAssignmentListView(PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
-        filtered_list = GroupFilter(self.request.GET, queryset=qs)
+        filtered_list = UserGroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = GroupFilter(self.request.GET, queryset)
+        filter = UserGroupFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['roles'] = Role.objects.all().order_by('id')
         return context
@@ -1109,7 +1109,7 @@ class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["crumbs"] = {'group-list': _('Groups')}
+        context["crumbs"] = {'group-list': _('UserGroups')}
         return context
 
     def get_success_url(self) -> str:

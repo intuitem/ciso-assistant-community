@@ -1,12 +1,12 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from .models import RoleAssignment
-from iam.models import Group, Role
+from iam.models import UserGroup, Role, UserCreationForm
 from django.urls import reverse
 from core.models import Analysis, SecurityMeasure, RiskAcceptance, RiskScenario
 from general.models import Asset, Threat, Project, Folder, SecurityFunction
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
+from django.contrib.auth.forms import UserChangeForm, AdminPasswordChangeForm
 
 
 User = get_user_model()
@@ -81,7 +81,7 @@ class UserCreateForm(UserCreationForm, StyledModelForm):
 
 
 class UserUpdateForm(UserChangeForm, StyledModelForm):
-    def __init__(self, *args, user, **kwargs):
+    def __init__(self, *args, user,**kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
         password = self.fields.get('password')
@@ -113,17 +113,17 @@ class AdminPasswordChangeForm(AdminPasswordChangeForm):
         self.fields.get('password1').widget.attrs['id'] = 'password1'
         self.fields.get('password2').widget.attrs['id'] = 'password2'
 
-class GroupCreateForm(StyledModelForm):
+class UserGroupCreateForm(StyledModelForm):
     class Meta:
-        model = Group
+        model = UserGroup
         exclude = ['permissions', 'builtin']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-class GroupUpdateForm(StyledModelForm):
+class UserGroupUpdateForm(StyledModelForm):
     class Meta:
-        model = Group
+        model = UserGroup
         exclude = ['permissions', 'builtin']
 
     def __init__(self, *args, **kwargs):

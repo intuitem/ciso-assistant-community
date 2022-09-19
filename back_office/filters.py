@@ -6,7 +6,7 @@ from django.db.models import Q
 from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance
 from general.models import Asset, Folder, Project, Threat, SecurityFunction
 from general.models import Threat, Project
-from iam.models import User, Group
+from iam.models import User, UserGroup
 from django.utils.translation import gettext_lazy as _
 
 class GenericFilterSet(FilterSet):
@@ -358,7 +358,7 @@ class UserFilter(GenericFilterSet):
     is_superuser = GenericChoiceFilter(choices=YES_NO_CHOICES)
     is_active = GenericChoiceFilter(choices=YES_NO_CHOICES)
 
-    groups = GenericModelMultipleChoiceFilter(queryset=Group.objects.all())
+    groups = GenericModelMultipleChoiceFilter(queryset=UserGroup.objects.all())
     
     q = GenericCharFilter(method=user_search, label="Search", widget=TextInput(
         attrs={
@@ -385,10 +385,10 @@ class UserFilter(GenericFilterSet):
         }
     )
 
-class GroupFilter(GenericFilterSet):
+class UserGroupFilter(GenericFilterSet):
 
     class Meta:
-        model = Group
+        model = UserGroup
         fields = '__all__'
 
     name = GenericCharFilter(widget=TextInput(

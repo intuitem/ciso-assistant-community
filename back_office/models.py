@@ -6,7 +6,7 @@ from general.models import *
 from django.utils.translation import gettext_lazy as _
 from general.utils import *
 from django.contrib.auth import get_user_model
-from iam.models import Group, Role
+from iam.models import UserGroup, Role
 
 
 User = get_user_model()
@@ -18,7 +18,7 @@ class RoleAssignment(models.Model):
         "general.Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     user_group = models.ForeignKey(
-        Group, null=True, on_delete=models.CASCADE)
+        UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(
         Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(
@@ -114,12 +114,12 @@ class RoleAssignment(models.Model):
 
     def is_user_assigned(self, user):
         """ Determines if a user is assigned to the role assignment"""
-        return user == self.user or (self.user_group and self.user_group in Group.get_user_groups(user))
+        return user == self.user or (self.user_group and self.user_group in UserGroup.get_user_groups(user))
 
     def get_role_assignments(user):
         """ get all role assignments attached to a user directly or indirectly"""
         assignments = list(user.roleassignment_set.all())
-        for user_group in Group.get_user_groups(user):
+        for user_group in UserGroup.get_user_groups(user):
             assignments += list(user_group.roleassignment_set.all())
         return assignments
 
@@ -128,5 +128,5 @@ class RoleAssignment(models.Model):
 # Update of a role assignment = delete + create
 # Delete of a role assignment (only remove)
 
-# Add user to a usergroup (only add)
-# Remove user from a usergroup (only remove)
+# Add user to a group (only add)
+# Remove user from a group (only remove)
