@@ -1,12 +1,15 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
-from django.contrib.auth.models import User
-from .models import RoleAssignment, UserGroup, Role
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
-from django.shortcuts import get_object_or_404
-from django.urls import reverse, reverse_lazy
+from .models import RoleAssignment
+from iam.models import Group, Role
+from django.urls import reverse
 from core.models import Analysis, SecurityMeasure, RiskAcceptance, RiskScenario
 from general.models import Asset, Threat, Project, Folder, SecurityFunction
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
+
+
+User = get_user_model()
 
 class DefaultDateInput(DateInput):
     input_type = 'date'
@@ -72,8 +75,10 @@ class ThreatCreateForm(StyledModelForm):
         model = Threat
         fields = '__all__'
 
+
 class UserCreateForm(UserCreationForm, StyledModelForm):
     pass
+
 
 class UserUpdateForm(UserChangeForm, StyledModelForm):
     def __init__(self, *args, user, **kwargs):
@@ -93,7 +98,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active']
+    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'groups']
 
     class Meta:
         model = User
@@ -110,7 +115,7 @@ class AdminPasswordChangeForm(AdminPasswordChangeForm):
 
 class GroupCreateForm(StyledModelForm):
     class Meta:
-        model = UserGroup
+        model = Group
         exclude = ['permissions', 'builtin']
 
     def __init__(self, *args, **kwargs):
@@ -118,7 +123,7 @@ class GroupCreateForm(StyledModelForm):
 
 class GroupUpdateForm(StyledModelForm):
     class Meta:
-        model = UserGroup
+        model = Group
         exclude = ['permissions', 'builtin']
 
     def __init__(self, *args, **kwargs):

@@ -1,58 +1,24 @@
 from collections import defaultdict
 from django.db import models
-from django.contrib.auth.models import Group, User, Permission
+from django.contrib.auth.models import Permission
+from asf_rm import settings
 from general.models import *
 from django.utils.translation import gettext_lazy as _
 from general.utils import *
+from django.contrib.auth import get_user_model
+from iam.models import Group, Role
 
 
-class UserGroup(Group):
-    folder = models.ForeignKey("general.Folder", verbose_name=_(
-        "Domain"), on_delete=models.CASCADE, default=None)
-    builtin = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        if self.builtin:
-            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
-
-    def get_user_groups(user):
-        l = []
-        for user_group in UserGroup.objects.all():
-            if user in user_group.user_set.all():
-                l.append(user_group)
-        return l
-
-    def get_manager_user_groups(manager):
-        l = []
-        folders = []
-        for user_group in UserGroup.get_user_groups(manager):
-            for ra in user_group.roleassignment_set.all():
-                if ra.role.name == "Domain Manager":
-                    for folder in ra.perimeter_folders.all():
-                        folders.append(folder)
-        for user_group in UserGroup.objects.all():
-            if user_group.folder in folders:
-                l.append(user_group)
-        return l
-
-
-class Role(Group):
-    builtin = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
-        return self.name
+User = get_user_model()
 
 
 class RoleAssignment(models.Model):
 
     perimeter_folders = models.ManyToManyField(
         "general.Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
-    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     user_group = models.ForeignKey(
-        UserGroup, null=True, on_delete=models.CASCADE)
+        Group, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(
         Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(
@@ -148,12 +114,12 @@ class RoleAssignment(models.Model):
 
     def is_user_assigned(self, user):
         """ Determines if a user is assigned to the role assignment"""
-        return user == self.user or (self.user_group and self.user_group in UserGroup.get_user_groups(user))
+        return user == self.user or (self.user_group and self.user_group in Group.get_user_groups(user))
 
     def get_role_assignments(user):
         """ get all role assignments attached to a user directly or indirectly"""
         assignments = list(user.roleassignment_set.all())
-        for user_group in UserGroup.get_user_groups(user):
+        for user_group in Group.get_user_groups(user):
             assignments += list(user_group.roleassignment_set.all())
         return assignments
 

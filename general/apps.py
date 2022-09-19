@@ -7,8 +7,10 @@ def startup():
     import os
     if os.environ.get('RUN_MAIN'):
         from .models import Folder
-        from back_office.models import Role, UserGroup, RoleAssignment
-        from django.contrib.auth.models import Permission, User
+        from back_office.models import RoleAssignment
+        from iam.models import Group, Role
+        from django.contrib.auth.models import Permission
+        from iam.models import User
 
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
@@ -143,22 +145,22 @@ def startup():
             domain_manager.permissions.set(domain_manager_permissions)
             administrator = Role.objects.create(name="BI-RL-ADM", builtin=True)
             administrator.permissions.set(administrator_permissions)
-        if not UserGroup.objects.filter(name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            administrators = UserGroup.objects.create(
+        if not Group.objects.filter(name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            administrators = Group.objects.create(
                 name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra1 = RoleAssignment.objects.create(
                 user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra1.perimeter_folders.add(administrators.folder)
-        if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
-            global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
+        if not Group.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            global_auditors = Group.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)
             ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(
                 name="BI-RL-AUD"), is_recursive=True, builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra2.perimeter_folders.add(global_auditors.folder)
         for superuser in User.objects.filter(is_superuser=True):
-                UserGroup.objects.get(
+                Group.objects.get(
                 name="BI-UG-ADM").user_set.add(superuser)
 
 class GeneralConfig(AppConfig):

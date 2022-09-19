@@ -8,12 +8,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import context, loader
 from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
-
-
 from datetime import date
-
-from django.contrib.auth.models import User
-from .models import UserGroup, RoleAssignment, Role
+from .models import RoleAssignment
+from iam.models import Group, Role
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
 from general.models import Asset, Threat, Project, Folder, SecurityFunction
@@ -23,7 +20,9 @@ from .forms import *
 from .filters import *
 
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 def index(request):
     template = loader.get_template('back_office/index.html')
@@ -297,11 +296,11 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("id")
-        auditors = UserGroup.objects.create(
+        auditors = Group.objects.create(
             name="BI-UG-AUD", folder=folder, builtin=True)
-        analysts = UserGroup.objects.create(
+        analysts = Group.objects.create(
             name="BI-UG-ANA", folder=folder, builtin=True)
-        managers = UserGroup.objects.create(
+        managers = Group.objects.create(
             name="BI-UG-DMA", folder=folder, builtin=True)
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(name="BI-RL-AUD"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra1.perimeter_folders.add(folder)
@@ -968,11 +967,11 @@ class GroupListView(UserPassesTestMixin, ListView):
 
     ordering = 'id'
     paginate_by = 10
-    model = UserGroup
+    model = Group
 
     def get_queryset(self):
         # admin = True
-        # for user_group in UserGroup.get_user_groups(self.request.user):
+        # for user_group in Group.get_user_groups(self.request.user):
         #     print("hello", user_group)
         #     for ra in user_group.roleassignment_set.all():
         #         if Folder.objects.get(content_type=Folder.ContentType.ROOT) in ra.perimeter_folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
@@ -981,9 +980,9 @@ class GroupListView(UserPassesTestMixin, ListView):
         #     qs = self.model.objects.all()
         # else:
         #     qs = self.model.objects.filter(
-        #         name__in=UserGroup.get_manager_user_groups(self.request.user))
+        #         name__in=Group.get_manager_user_groups(self.request.user))
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
-                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
+                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Group
             )
             qs = self.model.objects.filter(id__in=object_ids_view)
             filtered_list = GroupFilter(self.request.GET, queryset=qs)
@@ -995,7 +994,7 @@ class GroupListView(UserPassesTestMixin, ListView):
         filter = GroupFilter(self.request.GET, queryset)
         context['filter'] = filter
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_objects(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Group
         )
         return context
 
@@ -1020,7 +1019,7 @@ class GroupUpdateView(UserPassesTestMixin, UpdateView):
     context_object_name = 'group'
     form_class = GroupUpdateForm
 
-    model = UserGroup
+    model = Group
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1041,7 +1040,7 @@ class GroupUpdateView(UserPassesTestMixin, UpdateView):
 
 
 class GroupDeleteView(UserPassesTestMixin, DeleteView):
-    model = UserGroup
+    model = Group
     success_url = reverse_lazy('group-list')
     template_name = 'back_office/snippets/group_delete_modal.html'
 
