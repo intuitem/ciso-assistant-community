@@ -970,21 +970,10 @@ class UserGroupListView(UserPassesTestMixin, ListView):
     model = UserGroup
 
     def get_queryset(self):
-        admin = True
-        for user_group in UserGroup.get_user_groups(self.request.user):
-            print("hello", user_group)
-            for ra in user_group.roleassignment_set.all():
-                if Folder.objects.get(content_type=Folder.ContentType.ROOT) in ra.perimeter_folders.all() and Permission.objects.get(codename="view_usergroup") in ra.role.permissions.all():
-                    admin = True
-        if admin:
-            qs = self.model.objects.all()
-        else:
-            qs = self.model.objects.filter(
-                name__in=UserGroup.get_manager_user_groups(self.request.user))
-        # (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
-        #     Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
-        # )
-        # qs = self.model.objects.filter(id__in=object_ids_view)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
+        )
+        qs = self.model.objects.filter(id__in=object_ids_view)
         filtered_list = UserGroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
