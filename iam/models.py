@@ -18,18 +18,10 @@ from asf_rm import settings
 from general.utils import *
 
 
-class AbstractGroup(models.Model):
-    """ TODO: why do we need this class? """
+class UserGroup(models.Model):
+    folder = models.ForeignKey("Folder", verbose_name=_("Domain"), on_delete=models.CASCADE, default=None)
     name = models.CharField(_('name'), max_length=150, unique=False)
     builtin = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class UserGroup(AbstractGroup):
-    folder = models.ForeignKey("general.Folder", verbose_name=_(
-        "Domain"), on_delete=models.CASCADE, default=None)
 
     class Meta:
         verbose_name = _('user_group')
@@ -61,12 +53,14 @@ class UserGroup(AbstractGroup):
         return l
 
 
-class Role(AbstractGroup):
+class Role(models.Model):
     permissions = models.ManyToManyField(
         Permission,
         verbose_name=_('permissions'),
         blank=True,
     )
+    name = models.CharField(_('name'), max_length=150, unique=False)
+    builtin = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         if self.builtin:
@@ -74,17 +68,71 @@ class Role(AbstractGroup):
         return self.name
         
 
+class Folder(models.Model):
+    """ A folder is a container for other folders or any object
+        Folders are organized in a tree structure, with a single root folder
+        Folders are the base perimeter for role assignments
+        """
+    class ContentType(models.TextChoices):
+        ROOT = "GL", _("GLOBAL")
+        DOMAIN = "DO", _("DOMAIN")
+    name = models.CharField(max_length=200, default=_(
+        "<Group title>"), verbose_name=_("Name"))
+    # childrenClassName
+    description = models.CharField(
+        max_length=100, default=_("<Short description>"),
+        blank=True, null=True, verbose_name=_("Description"))
+    content_type = models.CharField(
+        max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
+    parent_folder = models.ForeignKey(
+        "self", null=True, on_delete=models.CASCADE)
+    builtin = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = _("Folder")
+        verbose_name_plural = _("Folders")
+
+    def __str__(self):
+        return self.name
+
+    def sub_folders(self):
+        """Return the list of subfolders"""
+        def sub_folders_in(f, sub_folder_list):
+            for sub_folder in f.folder_set.all():
+                sub_folder_list.append(sub_folder)
+                sub_folders_in(sub_folder, sub_folder_list)
+            return sub_folder_list
+        return sub_folders_in(self, [])
+
+    def get_parent_folders(self):
+        """Return the list of parent folders"""
+        return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
+
+    def get_folder(object):
+        """Return the folder of an object"""
+        # todo: add a folder attribute to all objects to avoid introspection
+        if hasattr(object, 'folder'):
+            return object.folder
+        if hasattr(object, 'parent_folder'):
+            return object.parent_folder
+        if hasattr(object, 'project'):
+            return object.project.folder
+        if hasattr(object, 'analysis'):
+            return object.analysis.project.folder
+        if hasattr(object, 'risk_scenario'):
+            return object.risk_scenario.analysis.project.folder
+
 
 class RoleAssignment(models.Model):
     """ fundamental class for MIRA RBAC model, similar to Azure IAM model """
     perimeter_folders = models.ManyToManyField(
-        "general.Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
+        "Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     user_group = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(_('sub folders are visible'), default=False)
     builtin = models.BooleanField(default=False)
-    folder = models.ForeignKey("general.Folder", on_delete=models.CASCADE, verbose_name=_("Folder"))
+    folder = models.ForeignKey("Folder", on_delete=models.CASCADE, verbose_name=_("Folder"))
 
     def __str__(self):
         # pragma pylint: disable=no-member
