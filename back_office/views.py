@@ -9,8 +9,7 @@ from django.template import context, loader
 from django.utils.translation import gettext_lazy as _
 from django.core.paginator import Paginator
 from datetime import date
-from .models import RoleAssignment
-from iam.models import UserGroup, Role
+from iam.models import UserGroup, Role, RoleAssignment
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
 from general.models import Asset, Threat, Project, Folder, SecurityFunction

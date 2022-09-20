@@ -4,11 +4,11 @@ from django.utils.translation import gettext_lazy as _
 
 def startup():
     """Implement Mira 1.0 default Roles and User Groups"""
+    """Only called in main, not during makemigrations or migrate"""
     import os
     if os.environ.get('RUN_MAIN'):
         from .models import Folder
-        from back_office.models import RoleAssignment
-        from iam.models import UserGroup, Role
+        from iam.models import UserGroup, Role, RoleAssignment
         from django.contrib.auth.models import Permission
         from iam.models import User
 
@@ -133,6 +133,7 @@ def startup():
             "delete_folder",
         ])
 
+        # if root folder does not exist, then create it
         if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
             Folder.objects.create(
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
@@ -145,6 +146,7 @@ def startup():
             domain_manager.permissions.set(domain_manager_permissions)
             administrator = Role.objects.create(name="BI-RL-ADM", builtin=True)
             administrator.permissions.set(administrator_permissions)
+        # if global administrators user group does not exist, then create it
         if not UserGroup.objects.filter(name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             administrators = UserGroup.objects.create(
                 name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
@@ -152,6 +154,7 @@ def startup():
                 user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra1.perimeter_folders.add(administrators.folder)
+        # if global auditors user group does not exist, then create it
         if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
             global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)
@@ -159,9 +162,10 @@ def startup():
                 name="BI-RL-AUD"), is_recursive=True, builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra2.perimeter_folders.add(global_auditors.folder)
+        # add any superuser to the global administrors group, in case it is not yet done
         for superuser in User.objects.filter(is_superuser=True):
-                UserGroup.objects.get(
-                name="BI-UG-ADM").user_set.add(superuser)
+                UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
+
 
 class GeneralConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

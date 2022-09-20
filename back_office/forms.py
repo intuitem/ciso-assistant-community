@@ -1,6 +1,5 @@
 from django.forms import CharField, CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
-from .models import RoleAssignment
-from iam.models import UserGroup, Role, UserCreationForm
+from iam.models import UserGroup, Role, RoleAssignment, UserCreationForm
 from django.urls import reverse
 from core.models import Analysis, SecurityMeasure, RiskAcceptance, RiskScenario
 from general.models import Asset, Threat, Project, Folder, SecurityFunction
