@@ -1,58 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
-
-
-class Folder(models.Model):
-    class ContentType(models.TextChoices):
-        ROOT = "GL", _("GLOBAL")
-        DOMAIN = "DO", _("DOMAIN")
-    name = models.CharField(max_length=200, default=_(
-        "<Group title>"), verbose_name=_("Name"))
-    # childrenClassName
-    description = models.CharField(
-        max_length=100, default=_("<Short description>"),
-        blank=True, null=True, verbose_name=_("Description"))
-    content_type = models.CharField(
-        max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
-    parent_folder = models.ForeignKey(
-        "self", null=True, on_delete=models.CASCADE)
-    builtin = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = _("Folder")
-        verbose_name_plural = _("Folders")
-
-    def __str__(self):
-        return self.name
-
-    def sub_folders(self):
-        """Return the list of subfolders"""
-        def sub_folders_in(f, sub_folder_list):
-            for sub_folder in f.folder_set.all():
-                sub_folder_list.append(sub_folder)
-                sub_folders_in(sub_folder, sub_folder_list)
-            return sub_folder_list
-        return sub_folders_in(self, [])
-
-    def get_parent_folders(self):
-        """Return the list of parent folders"""
-        return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
-
-    def get_folder(object):
-        """Return the folder of an object"""
-        # todo: add a folder attribute to all objects to avoid introspection
-        if hasattr(object, 'folder'):
-            return object.folder
-        if hasattr(object, 'parent_folder'):
-            return object.parent_folder
-        if hasattr(object, 'project'):
-            return object.project.folder
-        if hasattr(object, 'analysis'):
-            return object.analysis.project.folder
-        if hasattr(object, 'risk_scenario'):
-            return object.risk_scenario.analysis.project.folder
-
+from iam.models import Folder
 
 class Project(models.Model):
     PRJ_LC_STATUS = [
