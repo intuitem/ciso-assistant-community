@@ -227,7 +227,7 @@ function rl_class(label) {
                 <!--Threat Agent Factors-->
                 <div id="ta_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
-                        <div>{% trans "How technically skilled is this group of threat agents?" %}</div>
+                        <div>{% trans "How technically skilled is this user_group of threat agents?" %}</div>
                         <select class="my-select w-full" id="sl" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Security penetration skills" %}</option>
@@ -240,7 +240,7 @@ function rl_class(label) {
                             <option class="text-8" value="8">8</option>
                             <option class="text-9" value="9">9 - {% trans "No technical skills" %}</option>
                         </select>
-                        <div>{% trans "How motivated is this group of threat agents to find and exploit this vulnerability?" %}</div>
+                        <div>{% trans "How motivated is this user_group of threat agents to find and exploit this vulnerability?" %}</div>
                         <select class="my-select w-full" id="mo" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Low or no reward" %}</option>
@@ -253,7 +253,7 @@ function rl_class(label) {
                             <option class="text-8" value="8">8</option>
                             <option class="text-9" value="9">9 - {% trans "High reward" %}</option>
                         </select>
-                        <div>{% trans "What resources and opportunities are required for this group of threat agents to find and exploit this vulnerability?" %}</div>
+                        <div>{% trans "What resources and opportunities are required for this user_group of threat agents to find and exploit this vulnerability?" %}</div>
                         <select class="my-select w-full" id="op" onchange="refresh()">
                             <option class="text-0" value="0">0 - {% trans "Full access or expensive resources required" %}</option>
                             <option class="text-1" value="1">1</option>
@@ -266,7 +266,7 @@ function rl_class(label) {
                             <option class="text-8" value="8">8</option>
                             <option class="text-9" value="9">9 - {% trans "No access or resources required" %}</option>
                         </select>
-                        <div>{% trans "How large is this group of threat agents?" %}</div>
+                        <div>{% trans "How large is this user_group of threat agents?" %}</div>
                         <select class="my-select w-full" id="sc" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1</option>
@@ -290,7 +290,7 @@ function rl_class(label) {
                 <!--Vulnerability Factor-->
                 <div id="vf_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
-                        <div>{% trans "How easy is it for this group of threat agents to discover this vulnerability?" %}</div>
+                        <div>{% trans "How easy is it for this user_group of threat agents to discover this vulnerability?" %}</div>
                         <select class="my-select w-full" id="di" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Practically impossible" %}</option>
@@ -303,7 +303,7 @@ function rl_class(label) {
                             <option class="text-8" value="8">8</option>
                             <option class="text-9" value="9">9 - {% trans "Automated tools available" %}</option>
                         </select>
-                        <div>{% trans "How easy is it for this group of threat agents to actually exploit this vulnerability?" %}</div>
+                        <div>{% trans "How easy is it for this user_group of threat agents to actually exploit this vulnerability?" %}</div>
                         <select class="my-select w-full" id="ex" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Theoretical" %}</option>
@@ -316,7 +316,7 @@ function rl_class(label) {
                             <option class="text-8" value="8">8</option>
                             <option class="text-9" value="9">9 - {% trans "Automated tools available" %}</option>
                         </select>
-                        <div>{% trans "How well known is this vulnerability to this group of threat agents?" %}</div>
+                        <div>{% trans "How well known is this vulnerability to this user_group of threat agents?" %}</div>
                         <select class="my-select w-full" id="kn" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Unknown" %}</option>

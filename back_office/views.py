@@ -963,7 +963,7 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
 
 class UserGroupListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/group_list.html'
-    context_object_name = 'groups'
+    context_object_name = 'user_groups'
 
     ordering = 'id'
     paginate_by = 10
@@ -1004,11 +1004,11 @@ class UserGroupListView(UserPassesTestMixin, ListView):
 
 class UserGroupCreateView(UserPassesTestMixin, CreateView):
     template_name = 'back_office/group_create.html'
-    context_object_name = 'group'
+    context_object_name = 'user_group'
     form_class = UserGroupCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('group-list')
+        return reverse_lazy('user_group-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"))
@@ -1016,42 +1016,42 @@ class UserGroupCreateView(UserPassesTestMixin, CreateView):
 
 class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/group_update.html'
-    context_object_name = 'group'
+    context_object_name = 'user_group'
     form_class = UserGroupUpdateForm
 
     model = UserGroup
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['users'] = User.objects.exclude(groups=self.get_object())
+        context['users'] = User.objects.exclude(user_groups=self.get_object())
         context["associated_users"] = User.objects.filter(
-            groups=self.get_object())
-        context["crumbs"] = {'group-list': _('UserGroups')}
+            user_groups=self.get_object())
+        context["crumbs"] = {'user_group-list': _('UserGroups')}
         return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('group-list')
+        return reverse_lazy('user_group-list')
 
     def test_func(self):
-        group = self.get_object()
-        return not (group.builtin) and RoleAssignment.is_access_allowed(user=self.request.user,
+        user_group = self.get_object()
+        return not (user_group.builtin) and RoleAssignment.is_access_allowed(user=self.request.user,
                                                                         perm=Permission.objects.get(codename="change_usergroup"),
-                                                                        folder=Folder.get_folder(group))
+                                                                        folder=Folder.get_folder(user_group))
 
 
 class UserGroupDeleteView(UserPassesTestMixin, DeleteView):
     model = UserGroup
-    success_url = reverse_lazy('group-list')
+    success_url = reverse_lazy('user_group-list')
     template_name = 'back_office/snippets/group_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('group-list')
+        return reverse_lazy('user_group-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_usergroup"))
 
 
-class RoleAssignmentListView(PermissionRequiredMixin, ListView):
+class RoleAssignmentListView(UserPassesTestMixin, ListView):
     permission_required = 'back_office.view_roleassignment'
     template_name = 'back_office/role_list.html'
     context_object_name = 'assignments'
@@ -1073,8 +1073,11 @@ class RoleAssignmentListView(PermissionRequiredMixin, ListView):
         context['roles'] = Role.objects.all().order_by('id')
         return context
 
+    def test_func(self):
+        return True
 
-class RoleAssignmentCreateView(PermissionRequiredMixin, CreateView):
+
+class RoleAssignmentCreateView(UserPassesTestMixin, CreateView):
     permission_required = 'back_office.add_roleassignment'
     template_name = 'back_office/role_assignment_create.html'
     context_object_name = 'assignment'
@@ -1087,9 +1090,12 @@ class RoleAssignmentCreateView(PermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {'role-list': _('Role assignment')}
         return context
+    
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_roleassignment"))
 
 
-class RoleAssignmentDeleteView(PermissionRequiredMixin, DeleteView):
+class RoleAssignmentDeleteView(UserPassesTestMixin, DeleteView):
     permission_required = 'back_office.delete_roleassignment'
     model = RoleAssignment
     success_url = reverse_lazy('role-list')
@@ -1097,9 +1103,12 @@ class RoleAssignmentDeleteView(PermissionRequiredMixin, DeleteView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('role-list')
+    
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_roleassignment"))
 
 
-class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
+class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
     permission_required = 'auth.change_role'
     template_name = 'back_office/role_update.html'
     context_object_name = 'role'
@@ -1109,7 +1118,7 @@ class RoleAssignmentUpdateView(PermissionRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["crumbs"] = {'group-list': _('UserGroups')}
+        context["crumbs"] = {'user_group-list': _('UserGroups')}
         return context
 
     def get_success_url(self) -> str:

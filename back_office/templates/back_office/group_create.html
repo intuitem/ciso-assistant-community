@@ -1,7 +1,7 @@
 {% extends 'back_office/base.html' %}
 {% block content %}
 {% load i18n %}
-{% with page_title=_('New group') %}
+{% with page_title=_('New user_group') %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <div>
@@ -26,7 +26,7 @@
                 {% endfor %}
             </div>
             <div class="mt-4 flex space-x-2 justify-end">
-                <a href="{% url 'group-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
+                <a href="{% url 'user_group-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
             <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
             </div>    
         </div>

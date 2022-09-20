@@ -23,7 +23,7 @@ urlpatterns = [
     path('security-functions/', login_required(views.SecurityFunctionListView.as_view()), name='security-function-list'),
 
     path('users/', login_required(views.UserListView.as_view()), name='user-list'),
-    path('groups/', login_required(views.UserGroupListView.as_view()), name='group-list'),
+    path('user_groups/', login_required(views.UserGroupListView.as_view()), name='user_group-list'),
     path('roles/', login_required(views.RoleAssignmentListView.as_view()), name='role-list'),
 
     # CREATE VIEWS
@@ -50,7 +50,7 @@ urlpatterns = [
     path('AST/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
-    path('groups/create', login_required(views.UserGroupCreateView.as_view()), name='group-create'),
+    path('user_groups/create', login_required(views.UserGroupCreateView.as_view()), name='user_group-create'),
 
     path('role-assignment/create', login_required(views.RoleAssignmentCreateView.as_view()), name='role-assignment-create'),
     
@@ -71,7 +71,7 @@ urlpatterns = [
 
     path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
     path('users/<int:pk>/password', login_required(views.AdminPasswordChangeView.as_view()), name='admin-password-change'),
-    path('groups/<int:pk>', login_required(views.UserGroupUpdateView.as_view()), name='group-update'),
+    path('user_groups/<int:pk>', login_required(views.UserGroupUpdateView.as_view()), name='user_group-update'),
     path('role-assignment/<int:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
     
     # DELETE VIEWS
@@ -86,7 +86,7 @@ urlpatterns = [
     path('TH/<int:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),
 
     path('users/<int:pk>/delete', login_required(views.UserDeleteView.as_view()), name='user-delete'),
-    path('groups/<int:pk>/delete', login_required(views.UserGroupDeleteView.as_view()), name='group-delete'),
+    path('user_groups/<int:pk>/delete', login_required(views.UserGroupDeleteView.as_view()), name='user_group-delete'),
 
     path('role-assignment/<int:pk>/delete', login_required(views.RoleAssignmentDeleteView.as_view()), name='role-assignment-delete'),
 ]

@@ -23,16 +23,16 @@
                 </div>        
             </div>
         </form>
-        {% url 'group-list' as short_path %}
+        {% url 'user_group-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <div class="flex items-center h-10 w-full">
-            <a href="{% url 'group-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+            <a href="{% url 'user_group-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
                 <span>{% trans "Clear Filters" %}</span>
             </a>
         </div>
         {% endif %}
         <div class="grid mb-4 w-full">
-                <a href="{% url 'group-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Group" %}</a>
+                <a href="{% url 'user_group-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Group" %}</a>
         </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -42,29 +42,29 @@
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>
-                {% for group in groups %}
+                {% for user_group in user_groups %}
                     <tr class="odd:bg-white even:bg-gray-50">
                         <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-0">
-                                    <a id="group{{ group.id }}" href="{% url 'group-update' group.id %}"
+                                    <a id="user_group{{ user_group.id }}" href="{% url 'user_group-update' user_group.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ group|capfirst }}
+                                        {{ user_group|capfirst }}
                                     </a>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div>
-                            {% if group.id in object_ids_change %}
+                            {% if user_group.id in object_ids_change %}
                                 <span>
-                                    <a href="{% url 'group-update' group.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                    <a href="{% url 'user_group-update' user_group.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
                             {% endif %}
-                            {% if group.id in object_ids_delete %}
-                                {% include 'back_office/snippets/delete_button_modal.html' with object=group header=_("Delete group?") model='group' %}
+                            {% if user_group.id in object_ids_delete %}
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=user_group header=_("Delete user_group?") model='user_group' %}
                             {% endif %}
                             </div>
                         </td>
@@ -74,7 +74,7 @@
                         <td>
                             <div class="text-black p-4">
                                 <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">{% trans "No group found." %}</p>
+                                <p class="inline test-gray-900">{% trans "No user_group found." %}</p>
                             </div>
                         </td>
                     </tr>

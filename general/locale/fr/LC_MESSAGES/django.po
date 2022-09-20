@@ -198,7 +198,7 @@ msgid "Allowed Projects Groups"
 msgstr "Groupes de Projets Autorisés"
 
 #: general/models.py:160
-msgid "Project groups allowed for read access on the Portal. "
+msgid "Project user_groups allowed for read access on the Portal. "
 msgstr "Groupes de projets autorisés à accéder en lecture au Portail. "
 
 #: general/utils.py:4
@@ -249,5 +249,5 @@ msgstr "Auditeurs"
 #~ msgid "Projects Groups"
 #~ msgstr "Groupes de Projets"
 
-#~ msgid "Parent group"
+#~ msgid "Parent user_group"
 #~ msgstr "Groupe parent"

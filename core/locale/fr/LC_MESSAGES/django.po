@@ -897,7 +897,7 @@ msgstr "'Très élevé'"
 # OWASP Methodology translations taken from 
 # https://cours.etsmtl.ca/mgr850/documents/cours/Hiv2013/MGR850_H13_Cours-05_Analyse2Risques.pdf
 #: core/templates/core/scoring.html:230
-msgid "How technically skilled is this group of threat agents?"
+msgid "How technically skilled is this user_group of threat agents?"
 msgstr "Quel est le niveau de qualification de l'attaquant ?"
 
 #: core/templates/core/scoring.html:233
@@ -922,7 +922,7 @@ msgstr "Pas de compétence technique"
 
 #: core/templates/core/scoring.html:243
 msgid ""
-"How motivated is this group of threat agents to find and exploit this "
+"How motivated is this user_group of threat agents to find and exploit this "
 "vulnerability?"
 msgstr "Quels sont les bénéfices espérés de l'attaquant ?"
 
@@ -940,7 +940,7 @@ msgstr "Bénéfice important"
 
 #: core/templates/core/scoring.html:256
 msgid ""
-"What resources and opportunities are required for this group of threat "
+"What resources and opportunities are required for this user_group of threat "
 "agents to find and exploit this vulnerability?"
 msgstr ""
 "Quelles sont les ressources et opportunités requises par l'attaquant pour "
@@ -963,7 +963,7 @@ msgid "No access or resources required"
 msgstr "Aucun droit d'accès et aucune ressource"
 
 #: core/templates/core/scoring.html:269
-msgid "How large is this group of threat agents?"
+msgid "How large is this user_group of threat agents?"
 msgstr "Quelle est l'étendue potentielle du groupe d'attaquants ?"
 
 #: core/templates/core/scoring.html:273
@@ -992,7 +992,7 @@ msgstr "Facteur Attaquant"
 
 #: core/templates/core/scoring.html:293
 msgid ""
-"How easy is it for this group of threat agents to discover this "
+"How easy is it for this user_group of threat agents to discover this "
 "vulnerability?"
 msgstr "Avec quelle facilité l'attaquant peut-il découvrir la vulnérabilité ?"
 
@@ -1014,7 +1014,7 @@ msgstr "Outils automatiques disponible"
 
 #: core/templates/core/scoring.html:306
 msgid ""
-"How easy is it for this group of threat agents to actually exploit this "
+"How easy is it for this user_group of threat agents to actually exploit this "
 "vulnerability?"
 msgstr "Avec quelle facilité l'attaquant peut-il exploiter la vulnérabilité ?"
 
@@ -1023,7 +1023,7 @@ msgid "Theoretical"
 msgstr "Théoriquement"
 
 #: core/templates/core/scoring.html:319
-msgid "How well known is this vulnerability to this group of threat agents?"
+msgid "How well known is this vulnerability to this user_group of threat agents?"
 msgstr "Dans quelle mesure la vulnérabilité est-elle connue de l'attaquant ?"
 
 #: core/templates/core/scoring.html:322

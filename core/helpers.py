@@ -25,7 +25,7 @@ def risk_matrix():
 
 
 def risk_per_status():
-    # NOTE: if we want to skip empty values, we could just use the group by using annotation
+    # NOTE: if we want to skip empty values, we could just use the user_group by using annotation
     # rs_groups =
     # RiskScenario.objects.all().values('treatment').annotate(total=Count('treatment')).order_by('treatment')
 

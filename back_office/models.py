@@ -128,5 +128,5 @@ class RoleAssignment(models.Model):
 # Update of a role assignment = delete + create
 # Delete of a role assignment (only remove)
 
-# Add user to a group (only add)
-# Remove user from a group (only remove)
+# Add user to a user_group (only add)
+# Remove user from a user_group (only remove)

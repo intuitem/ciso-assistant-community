@@ -98,7 +98,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'groups']
+    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'user_groups']
 
     class Meta:
         model = User

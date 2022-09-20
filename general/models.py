@@ -146,9 +146,9 @@ class GroupExtra(models.Model):
     """
 
     def __str__(self):
-        return "{}".format(self.group.name)
+        return "{}".format(self.user_group.name)
 
-    group = models.OneToOneField(
+    user_group = models.OneToOneField(
         'auth.Group', unique=True, on_delete=models.CASCADE)
     group_email = models.EmailField(max_length=70, blank=True, default="",
                                     help_text=_(
@@ -157,4 +157,4 @@ class GroupExtra(models.Model):
     prj_groups = models.ManyToManyField(Folder, blank=True,
                                         verbose_name=_(
                                             "Allowed Projects Groups"),
-                                        help_text=_("Project groups allowed for read access on the Portal. "))
+                                        help_text=_("Project user_groups allowed for read access on the Portal. "))

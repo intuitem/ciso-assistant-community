@@ -260,7 +260,7 @@ msgid "Email address (descending)"
 msgstr "Adresse mail (descendant)"
 
 #: back_office/filters.py:397
-msgid "Search group..."
+msgid "Search user_group..."
 msgstr "Rechercher un groupe..."
 
 #: back_office/forms.py:49 back_office/forms.py:208
@@ -667,7 +667,7 @@ msgid "ETA"
 msgstr ""
 
 #: back_office/templates/back_office/group_create.html:4
-msgid "New group"
+msgid "New user_group"
 msgstr "Nouveau groupe"
 
 #: back_office/templates/back_office/group_create.html:10
@@ -691,16 +691,16 @@ msgid "Group Name"
 msgstr "Nom du groupe"
 
 #: back_office/templates/back_office/group_list.html:65
-msgid "Delete group?"
+msgid "Delete user_group?"
 msgstr "Supprimer le groupe ?"
 
 #: back_office/templates/back_office/group_list.html:74
-msgid "No group found."
+msgid "No user_group found."
 msgstr "Aucun groupe n'a été trouvé"
 
 #: back_office/templates/back_office/group_update.html:4
 #: back_office/templates/back_office/role_update.html:4
-msgid "Edit group"
+msgid "Edit user_group"
 msgstr "Éditer le groupe"
 
 #: back_office/templates/back_office/group_update.html:38
@@ -1293,10 +1293,8 @@ msgid "No assignment found."
 msgstr "Aucun bien sensible n'a été trouvé"
 
 #: back_office/templates/back_office/role_list.html:122
-#, fuzzy
-#| msgid "New group"
 msgid "User group"
-msgstr "Nouveau groupe"
+msgstr "Group utilisateur"
 
 #: back_office/templates/back_office/role_update.html:10
 #, fuzzy

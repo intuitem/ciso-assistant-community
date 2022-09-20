@@ -358,7 +358,7 @@ class UserFilter(GenericFilterSet):
     is_superuser = GenericChoiceFilter(choices=YES_NO_CHOICES)
     is_active = GenericChoiceFilter(choices=YES_NO_CHOICES)
 
-    groups = GenericModelMultipleChoiceFilter(queryset=UserGroup.objects.all())
+    user_groups = GenericModelMultipleChoiceFilter(queryset=UserGroup.objects.all())
     
     q = GenericCharFilter(method=user_search, label="Search", widget=TextInput(
         attrs={
@@ -394,7 +394,7 @@ class UserGroupFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search group...')
+                'placeholder': _('Search user_group...')
         }
     ))
 

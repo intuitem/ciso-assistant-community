@@ -27,8 +27,8 @@ class UserGroup(AbstractGroup):
         "Domain"), on_delete=models.CASCADE, default=None)
 
     class Meta:
-        verbose_name = _('group')
-        verbose_name_plural = _('groups')
+        verbose_name = _('user_group')
+        verbose_name_plural = _('user_groups')
 
     def __str__(self) -> str:
         if self.builtin:
@@ -80,13 +80,13 @@ class PermissionsMixin(models.Model):
             'explicitly assigning them.'
         ),
     )
-    groups = models.ManyToManyField(
+    user_groups = models.ManyToManyField(
         UserGroup,
-        verbose_name=_('groups'),
+        verbose_name=_('user groups'),
         blank=True,
         help_text=_(
-            'The groups this user belongs to. A user will get all permissions '
-            'granted to each of their groups.'
+            'The user_groups this user belongs to. A user will get all permissions '
+            'granted to each of their user_groups.'
         ),
         related_name="user_set",
         related_query_name="user",
