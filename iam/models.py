@@ -302,7 +302,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # and is required by Django to be set to a non-empty value.
     # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
     USERNAME_FIELD = 'username'
-    # REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['email']
 
     class Meta:
         verbose_name = _('user')
