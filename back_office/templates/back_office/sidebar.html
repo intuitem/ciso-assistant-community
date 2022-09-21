@@ -30,7 +30,7 @@
                 </li>
                 <li class="nav-seperator text-md">
                     <div class="flex flex-row items-center h-8">
-                        <div class="">{% trans "Core" %}</div>
+                        <div class="">{% trans "Risk management" %}</div>
                     </div>
                 </li>
 
@@ -138,10 +138,19 @@
                     <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security functions" %}</span>
                     </a>
                 </li>
+                <li class="to-page">
+                    <a href="{% url 'matrix' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-border-all"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrix" %}</span>
+                    </a>
+                </li>
                 {% comment %} {% endif %} {% endcomment %}
                 <li class="nav-seperator text-md">
                     <div class="flex flex-row items-center h-8">
-                        <div class="t">{% trans "Settings" %}</div>
+                        <div class="t">{% trans "IAM" %}</div>
                     </div>
                 </li>
                 {% comment %} {% if perms.auth.view_user %} {% endcomment %}
@@ -173,15 +182,6 @@
                             <i class="fas fa-sitemap"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Role assignment" %}</span>
-                    </a>
-                </li>
-                <li class="to-page">
-                    <a href="{% url 'matrix' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-border-all"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrix" %}</span>
                     </a>
                 </li>
 

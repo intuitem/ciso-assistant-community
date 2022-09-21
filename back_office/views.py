@@ -413,7 +413,6 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
 
 
 class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
-    permission_required = 'core.change_analysis'
     model = Analysis
     template_name = 'back_office/ra_update.html'
     context_object_name = 'analysis'
@@ -635,6 +634,7 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['risk_scenarios'] = RiskScenario.objects.filter(security_measures=self.get_object())
         context['crumbs'] = {'mtg-list': _('Security measures')}
         return context
 

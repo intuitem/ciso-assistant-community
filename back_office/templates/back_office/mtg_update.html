@@ -5,8 +5,8 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<form method="post" id="mtg_update_form">{% csrf_token %}
 <div class="flex flex-col space-y-4">
+    <form method="post" id="mtg_update_form">{% csrf_token %}
     <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-4">{% trans "Measure summary" %}</h2>
         <section class="flex flex-col space-y-4">
@@ -19,9 +19,13 @@
                 {{ form.title.errors }}
                 {{ form.title }}
             </div>
-            <div class="flex flex-col">
+            {% comment %} <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Risk Scenarios" %}</p>
-            </div>
+                {% for rs in risk_scenarios %}
+                    {{ rs.errors }}
+                    {{ rs.title }}
+                {% endfor %}
+            </div> {% endcomment %}
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Type" %}</p>
                 {{ form.type.errors }}
@@ -63,13 +67,10 @@
         </section>
         <div class="mt-4 flex space-x-2 justify-end">
             <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
-            <input
-                type="hidden" name="next" value={{ request.GET.next }}>
+            <input type="hidden" name="next" value={{ request.GET.next }}>
             <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
         </div>
     </div>
+    </form>
 </div>
-
-</form>
-
 {% endblock %}
