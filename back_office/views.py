@@ -12,9 +12,7 @@ from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
 from iam.forms import *
 from core.forms import *
-
 from .forms import *
-
 from .filters import *
 
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
@@ -1091,7 +1089,7 @@ class RoleAssignmentCreateView(UserPassesTestMixin, CreateView):
     permission_required = 'back_office.add_roleassignment'
     template_name = 'back_office/role_assignment_create.html'
     context_object_name = 'assignment'
-    form_class = RoleAssignmentForm
+    form_class = RoleAssignmentCreateForm
 
     def get_success_url(self) -> str:
         return reverse_lazy('role-list')
@@ -1140,9 +1138,10 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
                 perm=Permission.objects.get(codename="change_roleassignment"), folder=Folder.get_folder(ra))
 
 
-class AdminPasswordChangeView(PasswordChangeView):
+class UserPasswordChangeView(PasswordChangeView):
+    """ view to change user password """
     template_name = 'back_office/password_change.html'
-    form_class = AdminPasswordChangeForm
+    form_class = PasswordChangeForm
     model = User
 
     def get_success_url(self) -> str:

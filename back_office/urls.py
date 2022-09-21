@@ -71,7 +71,7 @@ urlpatterns = [
 
     path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
     path('me/<int:pk>', login_required(views.MeView.as_view()), name='me-update'),
-    path('users/<int:pk>/password', login_required(views.AdminPasswordChangeView.as_view()), name='admin-password-change'),
+    path('users/<int:pk>/password', login_required(views.UserPasswordChangeView.as_view()), name='password-change'),
     path('user_groups/<int:pk>', login_required(views.UserGroupUpdateView.as_view()), name='user_group-update'),
     path('role-assignment/<int:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
     

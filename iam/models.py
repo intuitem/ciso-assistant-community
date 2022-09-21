@@ -1,29 +1,26 @@
 """ IAM model for MIRA 
     Inspired from Azure IAM model """
 
-import unicodedata
 from collections import defaultdict
+from typing import Any, Tuple
 from django.utils import timezone
 from django.db import models
-from django import forms
-from django.contrib.auth import password_validation
-from django.core.exceptions import ValidationError
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import Permission, UserManager
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from asf_rm import settings
-
-
-from back_office.utils import *
+from back_office.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
 
 
 class UserGroup(models.Model):
+    """ UserGroup objects contain users and can be used as principals in role assignments """
     folder = models.ForeignKey("Folder", verbose_name=_("Domain"), on_delete=models.CASCADE, default=None)
     name = models.CharField(_('name'), max_length=150, unique=False)
     builtin = models.BooleanField(default=False)
 
     class Meta:
+        """ for Model """
         verbose_name = _('user group')
         verbose_name_plural = _('user groups')
 
@@ -32,28 +29,19 @@ class UserGroup(models.Model):
             return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
         return self.name
 
+    @staticmethod
     def get_user_groups(user):
+        # pragma pylint: disable=no-member
+        """ get the list of user groups containing the user given in parameter """
         l = []
         for user_group in UserGroup.objects.all():
             if user in user_group.user_set.all():
                 l.append(user_group)
         return l
 
-    def get_manager_user_groups(manager):
-        l = []
-        folders = []
-        for user_group in UserGroup.get_user_groups(manager):
-            for ra in user_group.roleassignment_set.all():
-                if ra.role.name == "BI-RL-DMA":
-                    for folder in ra.perimeter_folders.all():
-                        folders.append(folder)
-        for user_group in UserGroup.objects.all():
-            if user_group.folder in folders:
-                l.append(user_group)
-        return l
-
 
 class Role(models.Model):
+    """ A role is a list of permissions """
     permissions = models.ManyToManyField(
         Permission,
         verbose_name=_('permissions'),
@@ -74,6 +62,7 @@ class Folder(models.Model):
         Folders are the base perimeter for role assignments
         """
     class ContentType(models.TextChoices):
+        """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
     name = models.CharField(max_length=200, default=_(
@@ -89,13 +78,14 @@ class Folder(models.Model):
     builtin = models.BooleanField(default=False)
 
     class Meta:
+        """ for Model """
         verbose_name = _("Folder")
         verbose_name_plural = _("Folders")
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return self.name.__str__()
 
-    def sub_folders(self):
+    def sub_folders(self) -> 'Self':  # type annotation Self to come in Python 3.11
         """Return the list of subfolders"""
         def sub_folders_in(f, sub_folder_list):
             for sub_folder in f.folder_set.all():
@@ -104,23 +94,123 @@ class Folder(models.Model):
             return sub_folder_list
         return sub_folders_in(self, [])
 
-    def get_parent_folders(self):
+    def get_parent_folders(self) -> 'Self':  # type annotation Self to come in Python 3.11
         """Return the list of parent folders"""
         return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
 
-    def get_folder(object):
+    @staticmethod
+    def get_folder(obj: Any) -> 'Self':  # type annotation Self to come in Python 3.11
         """Return the folder of an object"""
         # todo: add a folder attribute to all objects to avoid introspection
-        if hasattr(object, 'folder'):
-            return object.folder
-        if hasattr(object, 'parent_folder'):
-            return object.parent_folder
-        if hasattr(object, 'project'):
-            return object.project.folder
-        if hasattr(object, 'analysis'):
-            return object.analysis.project.folder
-        if hasattr(object, 'risk_scenario'):
-            return object.risk_scenario.analysis.project.folder
+        if hasattr(obj, 'folder'):
+            return obj.folder
+        if hasattr(obj, 'parent_folder'):
+            return obj.parent_folder
+        if hasattr(obj, 'project'):
+            return obj.project.folder
+        if hasattr(obj, 'analysis'):
+            return obj.analysis.project.folder
+        if hasattr(obj, 'risk_scenario'):
+            return obj.risk_scenario.analysis.project.folder
+
+
+class PermissionsMixin(models.Model):
+    """ is_superuser is not used in this project, it was kept for simplicity's
+    sake and to avoid having to rewrite the UserManager. It will be removed. """
+    is_superuser = models.BooleanField(
+        _('superuser status'),
+        default=False,
+        help_text=_(
+            'Designates that this user has all permissions without '
+            'explicitly assigning them.'
+        ),
+    )
+    user_groups = models.ManyToManyField(
+        UserGroup,
+        verbose_name=_('user groups'),
+        blank=True,
+        help_text=_(
+            'The user_groups this user belongs to. A user will get all permissions '
+            'granted to each of their user_groups.'
+        ),
+        related_name="user_set",
+        related_query_name="user",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_('user permissions'),
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        related_name="user_set",
+        related_query_name="user",
+    )
+
+    class Meta:
+        """ for Model """
+        abstract = True
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    """ a user is a principal corresponding to a human """
+    username_validator = UnicodeUsernameValidator()
+
+    username = models.CharField(
+        _('username'),
+        max_length=150,
+        unique=True,
+        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
+        validators=[username_validator],
+    )
+    first_name = models.CharField(_('first name'), max_length=150, blank=True)
+    last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    email = models.EmailField(_('email address'), blank=True, unique=True, null=True)
+    # is_staff won't be used, but is required by Django's UserManager()
+    # We might ditch the UserManager() and use our own, but for now, we'll
+    # just set is_staff to False.
+    is_staff = models.BooleanField(
+        default=False,
+    )
+    is_active = models.BooleanField(
+        _('active'),
+        default=True,
+        help_text=_(
+            'Designates whether this user should be treated as active. '
+            'Unselect this instead of deleting accounts.'
+        ),
+    )
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+
+    objects = UserManager()
+
+    EMAIL_FIELD = 'email'
+
+    # USERNAME_FIELD is used as the unique identifier for the user
+    # and is required by Django to be set to a non-empty value.
+    # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
+
+    class Meta:
+        """ for Model """
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+        swappable = 'AUTH_USER_MODEL'
+
+    def clean(self) -> None:
+        super().clean()
+        self.email = self.__class__.objects.normalize_email(self.email)
+
+    def get_full_name(self) -> str:
+        """ get user's full name """
+        full_name = f'{self.first_name} {self.last_name}'
+        return full_name.strip()
+
+    def get_short_name(self) -> str:
+        """ get user's short name """
+        return self.first_name
+
+    def get_username(self) -> str:
+        return self.username
 
 
 class RoleAssignment(models.Model):
@@ -134,7 +224,7 @@ class RoleAssignment(models.Model):
     builtin = models.BooleanField(default=False)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
 
-    def __str__(self):
+    def __str__(self) -> str:
         # pragma pylint: disable=no-member
         return "id=" + str(self.id) + \
             ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
@@ -143,7 +233,7 @@ class RoleAssignment(models.Model):
             ", user group: " + (str(self.user_group.name) if self.user_group else "/")  
 
     @staticmethod
-    def is_access_allowed(user, perm, folder=None):
+    def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
         """Determines if a user has specified permission on a specified folder
            Note: the None value for folder is a kludge for the time being, an existing folder should be specified
         """
@@ -153,8 +243,8 @@ class RoleAssignment(models.Model):
         return False
 
     @staticmethod
-    def get_accessible_folders(folder, user, content_type):
-        """Gets the list of folders with specified contentType that can be viewed by a user
+    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType) -> 'list[Folder]':
+        """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
            Returns the list of the ids of the matching folders"""
         folders_set=set()
         ref_permission = Permission.objects.get(codename = "view_folder")
@@ -163,11 +253,15 @@ class RoleAssignment(models.Model):
             for f in ra.perimeter_folders.all():
                 folders_set.add(f)
                 folders_set.update(f.sub_folders())
+        # calculate perimeter
+        perimeter = set()
+        perimeter.add(folder)
+        perimeter.update(folder.sub_folders())
         # return filtered result
-        return [x.id for x in folders_set if x.content_type == content_type]
+        return [x.id for x in folders_set if x.content_type == content_type and x in perimeter]
 
     @staticmethod
-    def get_accessible_objects(folder, user, object_type):
+    def get_accessible_objects(folder: Folder, user: User, object_type: Any) -> Tuple['list[Any]', 'list[Any]', 'list[Any]']:
         """ Gets all objects of a specified type that a user can reach in a given folder
             Only accessible folders are considered
             Returns a triplet: (view_objects_list, change_object_list, delete_object_list)
@@ -216,7 +310,7 @@ class RoleAssignment(models.Model):
                 in permissions_per_object_id[x]],
         )
 
-    def is_user_assigned(self, user):
+    def is_user_assigned(self, user) -> bool:
         """ Determines if a user is assigned to the role assignment"""
         return user == self.user or (self.user_group and self.user_group in UserGroup.get_user_groups(user))
 
@@ -227,98 +321,3 @@ class RoleAssignment(models.Model):
         for user_group in UserGroup.get_user_groups(user):
             assignments += list(user_group.roleassignment_set.all())
         return assignments
-
-
-class PermissionsMixin(models.Model):
-    # is_superuser is not used in this project, it was kept for simplicity's
-    # sake and to avoid having to rewrite the UserManager. It will be removed.
-    is_superuser = models.BooleanField(
-        _('superuser status'),
-        default=False,
-        help_text=_(
-            'Designates that this user has all permissions without '
-            'explicitly assigning them.'
-        ),
-    )
-    user_groups = models.ManyToManyField(
-        UserGroup,
-        verbose_name=_('user groups'),
-        blank=True,
-        help_text=_(
-            'The user_groups this user belongs to. A user will get all permissions '
-            'granted to each of their user_groups.'
-        ),
-        related_name="user_set",
-        related_query_name="user",
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        verbose_name=_('user permissions'),
-        blank=True,
-        help_text=_('Specific permissions for this user.'),
-        related_name="user_set",
-        related_query_name="user",
-    )
-
-    class Meta:
-        abstract = True
-
-        
-
-class User(AbstractBaseUser, PermissionsMixin):
-    username_validator = UnicodeUsernameValidator()
-
-    username = models.CharField(
-        _('username'),
-        max_length=150,
-        unique=True,
-        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
-        validators=[username_validator],
-    )
-    first_name = models.CharField(_('first name'), max_length=150, blank=True)
-    last_name = models.CharField(_('last name'), max_length=150, blank=True)
-    email = models.EmailField(_('email address'), blank=True, unique=True, null=True)
-    # is_staff won't be used, but is required by Django's UserManager()
-    # We might ditch the UserManager() and use our own, but for now, we'll
-    # just set is_staff to False.
-    is_staff = models.BooleanField(
-        default=False,
-    )
-    is_active = models.BooleanField(
-        _('active'),
-        default=True,
-        help_text=_(
-            'Designates whether this user should be treated as active. '
-            'Unselect this instead of deleting accounts.'
-        ),
-    )
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-
-    objects = UserManager()
-
-    EMAIL_FIELD = 'email'
-
-    # USERNAME_FIELD is used as the unique identifier for the user
-    # and is required by Django to be set to a non-empty value.
-    # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
-
-    class Meta:
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
-        swappable = 'AUTH_USER_MODEL'
-
-    def clean(self):
-        super().clean()
-        self.email = self.__class__.objects.normalize_email(self.email)
-
-    def get_full_name(self):
-        full_name = f'{self.first_name} {self.last_name}'
-        return full_name.strip()
-
-    def get_short_name(self):
-        return self.first_name
-
-    def get_username(self) -> str:
-        return self.username

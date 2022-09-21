@@ -1,16 +1,26 @@
-from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput
-from .models import *
+""" this module contains forms related to iam app
+"""
+import unicodedata
+from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, \
+    HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, \
+    SelectMultiple, TextInput, Textarea, TimeInput, URLInput, ValidationError
 from django.contrib.auth.forms import UserChangeForm, AdminPasswordChangeForm
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import password_validation
+from django import forms
+from .models import Folder, User, UserGroup, RoleAssignment, Role
 
 
 class DefaultDateInput(DateInput):
+    """ default date for input """
     input_type = 'date'
 
 
 class StyledModelForm(ModelForm):
+    """ a nice ModelForm """
     def __init__(self, *args, **kwargs):
+        # pragma pylint: disable=no-member
         super(__class__, self).__init__(*args, **kwargs)
         text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput)
         select_inputs = (Select, SelectMultiple, NullBooleanSelect)
@@ -35,16 +45,20 @@ class StyledModelForm(ModelForm):
 
 
 class FolderUpdateForm(StyledModelForm):
+    """ form to update a folder """
+    # pragma pylint: disable=no-member
     def __init__(self, *args, **kwargs):
         super(FolderUpdateForm, self).__init__(*args, **kwargs)
         self.fields['parent_folder'].queryset = Folder.objects.filter(content_type="GL")
 
     class Meta:
+        """ for Model """
         model = Folder
         exclude = ['content_type', 'builtin']
 
 
 class UsernameField(forms.CharField):
+    """ enhanced username field """
     def to_python(self, value):
         return unicodedata.normalize('NFKC', super().to_python(value))
 
@@ -78,6 +92,7 @@ class UserCreationForm(forms.ModelForm):
     )
 
     class Meta:
+        """ for Model """
         model = User
         fields = ('username', 'email')
         field_classes = {'username': UsernameField}
@@ -88,6 +103,7 @@ class UserCreationForm(forms.ModelForm):
             self.fields[self._meta.model.USERNAME_FIELD].widget.attrs['autofocus'] = True
 
     def clean_password2(self):
+        """ get checked password """
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
@@ -117,10 +133,12 @@ class UserCreationForm(forms.ModelForm):
 
 
 class UserCreateForm(UserCreationForm, StyledModelForm):
+    """ form to create user """
     pass
 
 
 class UserUpdateForm(UserChangeForm, StyledModelForm):
+    """ form to update user """ 
     def __init__(self, *args, user,**kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
@@ -134,18 +152,21 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
         self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
         if password:
             password.help_text = password.help_text.format(
-                reverse('admin-password-change', 
+                reverse('password-change', 
                 kwargs={'pk': user.pk}
             ))
 
     field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active']
 
     class Meta:
+        """ for Model """
         model = User
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions']
 
 
 class MeUpdateForm(UserChangeForm, StyledModelForm):
+    """ form for logged user """
+    # TODO: not sure this section is useful, self user could be in user list with a mention "me"
     def __init__(self, *args, user,**kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
@@ -159,7 +180,7 @@ class MeUpdateForm(UserChangeForm, StyledModelForm):
         self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
         if password:
             password.help_text = password.help_text.format(
-                reverse('admin-password-change', 
+                reverse('password-change', 
                 kwargs={'pk': user.pk}
             ))
 
@@ -170,7 +191,9 @@ class MeUpdateForm(UserChangeForm, StyledModelForm):
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'user_groups']
 
 
-class AdminPasswordChangeForm(AdminPasswordChangeForm):
+class PasswordChangeForm(AdminPasswordChangeForm):
+    """ change user password form """
+    # TODO: remove the "Admin" prefix
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
         for fname, f in self.fields.items():
@@ -180,30 +203,32 @@ class AdminPasswordChangeForm(AdminPasswordChangeForm):
         self.fields.get('password2').widget.attrs['id'] = 'password2'
 
 class UserGroupCreateForm(StyledModelForm):
+    """ form to create a user group """
     class Meta:
+        """ for Model """
         model = UserGroup
         exclude = ['permissions', 'builtin']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 class UserGroupUpdateForm(StyledModelForm):
+    """ form to update a user group """
     class Meta:
+        """ for Model """
         model = UserGroup
         exclude = ['permissions', 'builtin']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-
-class RoleAssignmentForm(StyledModelForm):
+class RoleAssignmentCreateForm(StyledModelForm):
+    """ form to create a RoleAssigment """
     class Meta:
+        """ for Model """
         model = RoleAssignment
         exclude = ['builtin']
 
 
 class RoleAssignmentUpdateForm(StyledModelForm):
+    """ form to update a RoleAssigment """
     class Meta:
+        """ for Model """
         model = Role
         fields = ['permissions']
 
