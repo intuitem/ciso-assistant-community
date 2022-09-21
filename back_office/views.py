@@ -885,7 +885,7 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
 
 
-class MeView(UpdateView):
+class MeView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/user_update.html'
     context_object_name = 'user'
     form_class = MeUpdateForm
@@ -904,6 +904,9 @@ class MeView(UpdateView):
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
+    
+    def test_func(self):
+        return self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
 
 class UserListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/user_list.html'
