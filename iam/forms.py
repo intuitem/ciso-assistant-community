@@ -191,9 +191,8 @@ class MeUpdateForm(UserChangeForm, StyledModelForm):
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'user_groups']
 
 
-class PasswordChangeForm(AdminPasswordChangeForm):
+class UserPasswordChangeForm(AdminPasswordChangeForm):
     """ change user password form """
-    # TODO: remove the "Admin" prefix
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
         for fname, f in self.fields.items():
