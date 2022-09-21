@@ -22,8 +22,7 @@ def startup():
             "view_threat",
             "view_securityfunction",
             "view_folder",
-            "view_usergroup",
-            "view_user"
+            "view_usergroup"
         ])
 
         analyst_permissions = Permission.objects.filter(codename__in=[
@@ -56,7 +55,6 @@ def startup():
             "view_threat",
             "view_securityfunction",
             "view_folder",
-            "view_user",
             "view_usergroup"
         ])
 

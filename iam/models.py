@@ -148,7 +148,7 @@ class RoleAssignment(models.Model):
            Note: the None value for folder is a kludge for the time being, an existing folder should be specified
         """
         for ra in RoleAssignment.get_role_assignments(user):
-            if (not folder or folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
+            if (not folder or folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
                 return True
         return False
 

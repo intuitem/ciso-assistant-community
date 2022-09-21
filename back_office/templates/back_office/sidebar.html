@@ -155,6 +155,15 @@
                 </li>
                 {% comment %} {% if perms.auth.view_user %} {% endcomment %}
                 <li class="to-page">
+                    <a href="{% url 'me-update' user.id%}?next={{ request.path|urlencode }}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-info"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Me" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
                     <a href="{% url 'user-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">

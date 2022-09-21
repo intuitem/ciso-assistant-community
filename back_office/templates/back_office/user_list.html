@@ -148,10 +148,6 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 <span>
-                                    <a href="?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
-                                        <i class="fas fa-info"></i>
-                                    </a>
-                                <span>
                                     <a href="{% url 'user-update' user.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>

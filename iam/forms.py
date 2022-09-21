@@ -138,11 +138,37 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active', 'user_groups']
+    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active']
 
     class Meta:
         model = User
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions']
+
+
+class MeUpdateForm(UserChangeForm, StyledModelForm):
+    def __init__(self, *args, user,**kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        password = self.fields.get('password')
+        self.fields['password'].help_text=_(
+            'Raw passwords are not stored, so there is no way to see this '
+            'user’s password, but you can change the password using '
+            '<a class="help_text-link" href="{}">this form</a>.'
+        )
+        self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
+        self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
+        if password:
+            password.help_text = password.help_text.format(
+                reverse('admin-password-change', 
+                kwargs={'pk': user.pk}
+            ))
+
+    field_order = ['username', 'password', 'first_name', 'last_name', 'is_active']
+
+    class Meta:
+        model = User
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'user_groups']
+
 
 class AdminPasswordChangeForm(AdminPasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
