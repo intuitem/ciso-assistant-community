@@ -19,13 +19,13 @@
                 {{ form.title.errors }}
                 {{ form.title }}
             </div>
-            {% comment %} <div class="flex flex-col">
+            <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Risk Scenarios" %}</p>
                 {% for rs in risk_scenarios %}
                     {{ rs.errors }}
                     {{ rs.title }}
                 {% endfor %}
-            </div> {% endcomment %}
+            </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Type" %}</p>
                 {{ form.type.errors }}

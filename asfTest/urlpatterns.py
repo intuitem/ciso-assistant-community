@@ -3,7 +3,6 @@
 url = "http://0.0.0.0:8000/"
 core = url + "core/"
 composer = core + "composer/"
-general = url + "general/"
 admin = url + "admin/"
 adminregistration = admin + "login/?next=/admin/"
 login = url + "accounts/login/"

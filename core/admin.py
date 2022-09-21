@@ -1,8 +1,8 @@
 from django.contrib import admin
 from .models import *
+from iam.models import Folder
 from reversion.admin import VersionAdmin
 from fieldsets_with_inlines import FieldsetsInlineMixin
-from import_export.admin import ImportExportModelAdmin
 from import_export.admin import ImportExportActionModelAdmin
 from import_export import resources
 from django.utils.translation import gettext_lazy as _

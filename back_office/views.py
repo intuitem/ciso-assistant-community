@@ -1,18 +1,17 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView
-from django.views.generic.edit import FormView
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template import context, loader
+from django.http import HttpResponse
+from django.template import loader
 from django.utils.translation import gettext_lazy as _
-from django.core.paginator import Paginator
 from datetime import date
 from iam.models import UserGroup, Role, RoleAssignment
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
-from general.models import Asset, Threat, Project, Folder, SecurityFunction
+from iam.forms import *
+from core.forms import *
 
 from .forms import *
 

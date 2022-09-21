@@ -4,8 +4,7 @@ from django_filters import FilterSet, OrderingFilter, ModelMultipleChoiceFilter,
 from django.db.models import Q
 
 from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance
-from general.models import Asset, Folder, Project, Threat, SecurityFunction
-from general.models import Threat, Project
+from back_office.models import Asset, Folder, Project, Threat, SecurityFunction
 from iam.models import User, UserGroup
 from django.utils.translation import gettext_lazy as _
 

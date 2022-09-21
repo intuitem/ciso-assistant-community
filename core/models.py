@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
 from asf_rm import settings
-from general.models import *
+from back_office.models import Project, SecurityFunction, Asset, Threat
 from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd

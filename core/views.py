@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 
 from django.views.generic import ListView
 from core.models import Analysis, RiskScenario, SecurityMeasure
-from general.models import Project
+from back_office.models import Project
 
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
@@ -315,3 +315,16 @@ def show_risk_matrix(request):
     template = 'core/risk_matrix.html'
     context = {}
     return render(request, template, context)
+
+
+class ReviewView(ListView):
+    template_name = 'core/review.html'
+    context_object_name = 'context'
+    model = Analysis
+    ordering = 'id'
+
+    def get_queryset(self):
+        mode = self.request.GET.get('mode')
+        if mode == "all":
+            return Analysis.objects.all()
+        return Analysis.objects.filter(auditor=self.request.user)
