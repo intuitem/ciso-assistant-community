@@ -128,7 +128,7 @@ def startup():
             "delete_securityfunction",
 
             "add_folder",
-            "change_folder"
+            "change_folder",
             "view_folder",
             "delete_folder",
         ])

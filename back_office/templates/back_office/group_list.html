@@ -64,7 +64,7 @@
                                 </span>
                             {% endif %}
                             {% if user_group.id in object_ids_delete %}
-                                {% include 'back_office/snippets/delete_button_modal.html' with object=user_group header=_("Delete user_group?") model='user_group' %}
+                                {% include 'back_office/snippets/delete_button_modal.html' with object=user_group header=_("Delete user group?") model='user_group' %}
                             {% endif %}
                             </div>
                         </td>
@@ -74,7 +74,7 @@
                         <td>
                             <div class="text-black p-4">
                                 <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">{% trans "No user_group found." %}</p>
+                                <p class="inline test-gray-900">{% trans "No user group found." %}</p>
                             </div>
                         </td>
                     </tr>

@@ -24,8 +24,8 @@ class UserGroup(models.Model):
     builtin = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = _('user_group')
-        verbose_name_plural = _('user_groups')
+        verbose_name = _('user group')
+        verbose_name_plural = _('user groups')
 
     def __str__(self) -> str:
         if self.builtin:
@@ -132,7 +132,7 @@ class RoleAssignment(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(_('sub folders are visible'), default=False)
     builtin = models.BooleanField(default=False)
-    folder = models.ForeignKey("Folder", on_delete=models.CASCADE, verbose_name=_("Folder"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
 
     def __str__(self):
         # pragma pylint: disable=no-member
@@ -198,7 +198,6 @@ class RoleAssignment(models.Model):
                     target_folders = [f] + \
                         f.sub_folders() if ra.is_recursive else [f]
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
-                        print(object)
                         if not (hasattr(object, "builtin") and object.builtin and p != permissions[0]):
                             permissions_per_object_id[object.id].add(p)
 

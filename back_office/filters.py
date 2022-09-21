@@ -393,7 +393,7 @@ class UserGroupFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search user_group...')
+                'placeholder': _('Search user group...')
         }
     ))
 

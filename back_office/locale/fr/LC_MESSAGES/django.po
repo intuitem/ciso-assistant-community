@@ -695,7 +695,7 @@ msgid "Delete user_group?"
 msgstr "Supprimer le groupe ?"
 
 #: back_office/templates/back_office/group_list.html:74
-msgid "No user_group found."
+msgid "No user group found."
 msgstr "Aucun groupe n'a été trouvé"
 
 #: back_office/templates/back_office/group_update.html:4
