@@ -38,7 +38,7 @@
         <div>
             <ul class="pl-3 ml-3 list-disc">
                 {% for entry in context.SecurityMeasure %}
-                <li><a id="security_measure" href="{% url 'MP' entry.risk_scenario.analysis.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
+                <li><a id="security_measure" href="{% url 'MP' entry.project.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
                 {% endfor %}
             </ul>
         </div>

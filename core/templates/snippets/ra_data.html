@@ -69,7 +69,7 @@
                 </td>
                 <td class="text-xs p-1">
                     <ul class="pl-3 ml-3 list-disc">
-                        {% for security_measure in RI.security_measure_set.all %}
+                        {% for security_measure in RI.security_measures.all %}
                         <li> {{security_measure}}</li>
                         {% endfor %}
                     </ul>

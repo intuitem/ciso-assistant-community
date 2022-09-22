@@ -33,11 +33,11 @@ class UserGroup(models.Model):
     def get_user_groups(user):
         # pragma pylint: disable=no-member
         """ get the list of user groups containing the user given in parameter """
-        l = []
+        user_group_list = []
         for user_group in UserGroup.objects.all():
             if user in user_group.user_set.all():
-                l.append(user_group)
-        return l
+                user_group_list.append(user_group)
+        return user_group_list
 
 
 class Role(models.Model):

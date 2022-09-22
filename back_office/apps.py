@@ -129,6 +129,31 @@ def startup():
             "change_folder",
             "view_folder",
             "delete_folder",
+
+            "add_project",
+            "change_project",
+            "delete_project",
+            "view_project",
+
+            "add_analysis",
+            "view_analysis",
+            "change_analysis",
+            "delete_analysis",
+
+            "add_securitymeasure",
+            "view_securitymeasure",
+            "change_securitymeasure",
+            "delete_securitymeasure",
+
+            "add_riskscenario",
+            "view_riskscenario",
+            "change_riskscenario",
+            "delete_riskscenario",
+
+            "add_riskacceptance",
+            "view_riskacceptance",
+            "change_riskacceptance",
+            "delete_riskacceptance",
         ])
 
         # if root folder does not exist, then create it

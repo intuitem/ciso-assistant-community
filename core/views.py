@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import Permission
 
 from django.views.generic import ListView
 from core.models import Analysis, RiskScenario, SecurityMeasure
@@ -47,14 +49,21 @@ class UserLogin(LoginView):
 
 
 @method_decorator(login_required, name='dispatch')
-class SecurityMeasurePlanView(ListView):
+class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
     context_object_name = 'context'
 
+    ordering = 'id'
+    model = RiskScenario
+
     def get_queryset(self):
-        self.project = get_object_or_404(Project, id=self.kwargs['project'])
-        analysis = Analysis.objects.get(project=self.project)
-        return RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
+        return qs
+    
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_securitymeasure"), folder=get_object_or_404(Project, id=self.kwargs['project']).folder)
 
 
 def build_ri_clusters(analysis: Analysis):
@@ -74,13 +83,19 @@ def build_ri_clusters(analysis: Analysis):
 
 
 @method_decorator(login_required, name='dispatch')
-class RiskAnalysisView(ListView):
+class RiskAnalysisView(UserPassesTestMixin, ListView):
     template_name = 'core/ra.html'
     context_object_name = 'context'
 
+    model = RiskScenario
+    ordering = 'id'
+
     def get_queryset(self):
         self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
-        return RiskScenario.objects.filter(analysis=self.analysis).order_by('id')
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
+        return qs 
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -89,6 +104,9 @@ class RiskAnalysisView(ListView):
         context['analysis'] = self.analysis
         context['ri_clusters'] = build_ri_clusters(self.analysis)
         return context
+    
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_analysis"), folder= get_object_or_404(Analysis, id=self.kwargs['analysis']).project.folder)
 
 
 @login_required
@@ -126,9 +144,15 @@ class SearchResults(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        ri_list = RiskScenario.objects.filter(Q(title__icontains=query) | Q(threat__title__icontains=query))[:10]
-        mtg_list = SecurityMeasure.objects.filter(Q(title__icontains=query) | Q(security_function__name__icontains=query))[:10]
-        ra_list = Analysis.objects.filter(Q(project__name__icontains=query))[:10]
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+        ri_list = RiskScenario.objects.filter(Q(title__icontains=query) | Q(threat__title__icontains=query)).filter(id__in=object_ids_view)[:10]
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+        mtg_list = SecurityMeasure.objects.filter(Q(title__icontains=query) | Q(security_function__name__icontains=query)).filter(id__in=object_ids_view)[:10]
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        ra_list = Analysis.objects.filter(Q(project__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
 
 
@@ -145,9 +169,13 @@ class Browser(ListView):
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
-            return {"type": "Risk scenarios", "filter": self.map_rsk[rsk], "items": RiskScenario.objects.filter(treatment=self.map_rsk[rsk])}
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            return {"type": "Risk scenarios", "filter": self.map_rsk[rsk], "items": RiskScenario.objects.filter(treatment=self.map_rsk[rsk]).filter(id__in=object_ids_view)}
         if mtg:
-            return {"type": "SecurityMeasures", "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg])}
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+            return {"type": "SecurityMeasures", "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
 
 
 
@@ -254,7 +282,9 @@ class ComposerListView(ListView):
             context = {'context': compile_analysis_for_composer(data)}
             return render(request, 'core/composer.html', context)
         else:
-            context = {'context': Analysis.objects.all()}
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            context = {'context': Analysis.objects.filter(id__in=object_ids_view)}
             return render(request, 'core/project_select.html', context)
 
 
