@@ -1,7 +1,6 @@
 """ this module contains forms related to iam app
 """
-import unicodedata
-from django.forms import CheckboxInput, EmailField, DateInput, DateTimeInput, EmailInput, \
+from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, \
     HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, \
     SelectMultiple, TextInput, Textarea, TimeInput, URLInput, ValidationError
 from django.contrib.auth.forms import UserChangeForm, AdminPasswordChangeForm
@@ -57,25 +56,13 @@ class FolderUpdateForm(StyledModelForm):
         exclude = ['content_type', 'builtin']
 
 
-class UsernameField(forms.CharField):
-    """ enhanced username field """
-    def to_python(self, value):
-        return unicodedata.normalize('NFKC', super().to_python(value))
-
-    def widget_attrs(self, widget):
-        return {
-            **super().widget_attrs(widget),
-            'autocapitalize': 'none',
-            'autocomplete': 'username',
-        }
-
-
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
     error_messages = {
         'password_mismatch': _('The two password fields didn’t match.'),
     }
+    email = forms.EmailField(max_length=100)
     password1 = forms.CharField(
         label=_("Password"),
         strip=False,
@@ -152,7 +139,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
     class Meta:
         """ for Model """
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'username']
+        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions']
 
 
 class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
@@ -161,16 +148,16 @@ class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
     def __init__(self, *args, user,**kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs['readonly'] = True
+        self.fields['email'].help_text=_(
+            'To change your email address, please contact your administrator.'
+        )
+        self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
         password = self.fields.get('password')
         self.fields['password'].help_text=_(
             'Raw passwords are not stored, so there is no way to see this '
             'user’s password, but you can change the password using '
             '<a class="help_text-link" href="{}">this form</a>.'
-        )
-        self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
-        self.fields['email'].widget.attrs['readonly'] = True
-        self.fields['email'].help_text=_(
-            'To change your email address, please contact your administrator.'
         )
         if password:
             password.help_text = password.help_text.format(
@@ -182,7 +169,7 @@ class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'user_groups', 'username', 'is_active']
+        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions', 'user_groups', 'is_active']
 
 
 class UserPasswordChangeForm(AdminPasswordChangeForm):

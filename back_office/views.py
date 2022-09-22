@@ -916,7 +916,7 @@ class UserListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by(
-            '-is_active', '-is_superuser', 'username', 'id')
+            '-is_active', '-is_superuser', 'email', 'id')
         filtered_list = UserFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 

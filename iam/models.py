@@ -5,10 +5,10 @@ from collections import defaultdict
 from typing import Any, Tuple
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import Permission, UserManager
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.validators import UnicodeUsernameValidator
 from asf_rm import settings
 from back_office.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
 
@@ -150,20 +150,41 @@ class PermissionsMixin(models.Model):
         abstract = True
 
 
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def _create_user(self, email, password, **extra_fields):
+        """
+        Create and save a user with the given email, and password.
+        """
+        if not email:
+            raise ValueError("The email must be set")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.password = make_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_superuser", False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_superuser", True)
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError("Superuser must have is_superuser=True.")
+
+        return self._create_user(email, password, **extra_fields)
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     """ a user is a principal corresponding to a human """
     # we will need to delete username in the future but for now we should keep it to don't break the model
+    # let's use username=email (should be manually enforced for createsuperuser)
 
-    username =  models.CharField(max_length=30, null=True, blank=True)
+    email =  models.CharField(max_length=100, unique=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
-    email = models.EmailField(_('email address'), blank=True, unique=True, null=True)
-    # is_staff won't be used, but is required by Django's UserManager()
-    # We might ditch the UserManager() and use our own, but for now, we'll
-    # just set is_staff to False.
-    is_staff = models.BooleanField(
-        default=False,
-    )
     is_active = models.BooleanField(
         _('active'),
         default=True,
@@ -176,8 +197,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    EMAIL_FIELD = 'email'
-
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
     # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
@@ -188,11 +207,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         """ for Model """
         verbose_name = _('user')
         verbose_name_plural = _('users')
-        swappable = 'AUTH_USER_MODEL'
-
-    def clean(self) -> None:
-        super().clean()
-        self.email = self.__class__.objects.normalize_email(self.email)
+#        swappable = 'AUTH_USER_MODEL'
 
     def get_full_name(self) -> str:
         """ get user's full name """
@@ -202,9 +217,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self) -> str:
         """ get user's short name """
         return self.first_name
-
-    def get_email(self) -> str:
-        return self.email
 
 
 class RoleAssignment(models.Model):

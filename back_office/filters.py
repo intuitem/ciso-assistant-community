@@ -342,7 +342,7 @@ class UserFilter(GenericFilterSet):
 
     class Meta:
         model = User
-        fields = ['username', 'first_name', 'last_name', 'email']
+        fields = ['email', 'first_name', 'last_name']
 
     def user_search(queryset, name, value):
         return queryset.filter(
@@ -370,7 +370,6 @@ class UserFilter(GenericFilterSet):
             ('username', 'username'),
             ('first_name', 'first_name'),
             ('last_name', 'last_name'),
-            ('email', 'email'),
         ),
         field_labels={
             'username': _('username'.capitalize()),
@@ -379,8 +378,6 @@ class UserFilter(GenericFilterSet):
             '-first_name': _('First name (descending)'),
             'last_name': _('Last name'),
             '-last_name': _('Last name (descending)'),
-            'email': _('Email address'),
-            '-email': _('Email address (descending)'),
         }
     )
 
