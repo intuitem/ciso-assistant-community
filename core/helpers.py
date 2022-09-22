@@ -1,6 +1,7 @@
 from datetime import timedelta
 import logging
 from .models import *
+from iam.models import Folder
 from django.db.models import Count
 from collections import Counter
 
@@ -67,7 +68,7 @@ def security_measure_per_status():
 def security_measure_per_cur_risk():
     output = list()
     for lvl in RiskScenario.RATING_OPTIONS:
-        cnt = SecurityMeasure.objects.exclude(status='done').filter(risk_scenario__current_level=lvl[0]).count()
+        cnt = SecurityMeasure.objects.exclude(status='done').filter(riskscenario__current_level=lvl[0]).count()
         output.append({"name": lvl[1], "value": cnt})
 
     return {"values": output}
