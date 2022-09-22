@@ -1,7 +1,7 @@
 """ this module contains forms related to iam app
 """
 import unicodedata
-from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, \
+from django.forms import CheckboxInput, EmailField, DateInput, DateTimeInput, EmailInput, \
     HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, \
     SelectMultiple, TextInput, Textarea, TimeInput, URLInput, ValidationError
 from django.contrib.auth.forms import UserChangeForm, AdminPasswordChangeForm
@@ -71,10 +71,8 @@ class UsernameField(forms.CharField):
 
 
 class UserCreationForm(forms.ModelForm):
-    """
-    A form that creates a user, with no privileges, from the given username and
-    password.
-    """
+    """A form for creating new users. Includes all the required
+    fields, plus a repeated password."""
     error_messages = {
         'password_mismatch': _('The two password fields didn’t match.'),
     }
@@ -92,18 +90,10 @@ class UserCreationForm(forms.ModelForm):
     )
 
     class Meta:
-        """ for Model """
         model = User
-        fields = ('username', 'email')
-        field_classes = {'username': UsernameField}
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self._meta.model.USERNAME_FIELD in self.fields:
-            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs['autofocus'] = True
+        fields = ('email',)
 
     def clean_password2(self):
-        """ get checked password """
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
@@ -125,6 +115,7 @@ class UserCreationForm(forms.ModelForm):
                 self.add_error('password2', error)
 
     def save(self, commit=True):
+        # Save the provided password in hashed format
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
@@ -156,12 +147,12 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active']
+    field_order = ['email', 'password', 'first_name', 'last_name', 'is_active']
 
     class Meta:
         """ for Model """
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions']
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'username']
 
 
 class MeUpdateForm(UserChangeForm, StyledModelForm):
@@ -177,18 +168,17 @@ class MeUpdateForm(UserChangeForm, StyledModelForm):
             '<a class="help_text-link" href="{}">this form</a>.'
         )
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
-        self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
         if password:
             password.help_text = password.help_text.format(
                 reverse('password-change', 
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['username', 'password', 'first_name', 'last_name', 'is_active']
+    field_order = ['email', 'password', 'first_name', 'last_name']
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'user_groups']
+        exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'user_groups', 'username', 'is_active']
 
 
 class UserPasswordChangeForm(AdminPasswordChangeForm):

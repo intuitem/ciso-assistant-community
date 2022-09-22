@@ -107,10 +107,9 @@
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                <th class="px-6 py-3">{% trans "Username" %}</th>
+                <th class="px-6 py-3">{% trans "Email Address" %}</th>
                 <th class="px-0 py-3">{% trans "Full Name" %}</th>
                 <th class="px-6 py-3">{% trans "Created At" %}</th>
-                <th class="px-6 py-3">{% trans "Email Address" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>
@@ -127,7 +126,7 @@
                                 <div class="">
                                     <a id="user{{ user.id }}" href="{% url 'user-update' user.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ user.get_username }}
+                                        {{ user.email }}
                                     </a>
                                 </div>
                             </div>
@@ -141,9 +140,6 @@
                             <p class="text-gray-900 whitespace-no-wrap">
                                 {{ user.date_joined|date }}
                             </p>
-                        </td>
-                        <td class="px-6 py-4">
-                            {{ user.email }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">

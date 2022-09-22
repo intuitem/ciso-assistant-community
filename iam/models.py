@@ -152,15 +152,10 @@ class PermissionsMixin(models.Model):
 
 class User(AbstractBaseUser, PermissionsMixin):
     """ a user is a principal corresponding to a human """
+    # we will need to delete username in the future but for now we should keep it to don't break the model
     username_validator = UnicodeUsernameValidator()
 
-    username = models.CharField(
-        _('username'),
-        max_length=150,
-        unique=True,
-        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
-        validators=[username_validator],
-    )
+    username =  models.CharField(max_length=30, null=True, blank=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     email = models.EmailField(_('email address'), blank=True, unique=True, null=True)
@@ -187,8 +182,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
     # See https://docs.djangoproject.com/en/3.2/topics/auth/customizing/#django.contrib.auth.models.CustomUser.USERNAME_FIELD
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     class Meta:
         """ for Model """
@@ -209,8 +204,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         """ get user's short name """
         return self.first_name
 
-    def get_username(self) -> str:
-        return self.username
+    def get_email(self) -> str:
+        return self.email
 
 
 class RoleAssignment(models.Model):
