@@ -168,6 +168,10 @@ class MeUpdateForm(UserChangeForm, StyledModelForm):
             '<a class="help_text-link" href="{}">this form</a>.'
         )
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
+        self.fields['email'].widget.attrs['readonly'] = True
+        self.fields['email'].help_text=_(
+            'To change your email address, please contact your administrator.'
+        )
         if password:
             password.help_text = password.help_text.format(
                 reverse('password-change', 

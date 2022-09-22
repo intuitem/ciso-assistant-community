@@ -153,7 +153,6 @@ class PermissionsMixin(models.Model):
 class User(AbstractBaseUser, PermissionsMixin):
     """ a user is a principal corresponding to a human """
     # we will need to delete username in the future but for now we should keep it to don't break the model
-    username_validator = UnicodeUsernameValidator()
 
     username =  models.CharField(max_length=30, null=True, blank=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
