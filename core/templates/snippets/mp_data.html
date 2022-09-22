@@ -30,7 +30,7 @@
                     </span>
                 </td>
             </tr>
-            {% if not scenario.securitymeasure_set.all %}
+            {% if not scenario.security_measures.all %}
             <tr>
                 <td colspan="9" class="p-2 text-left"><i class="fas fa-exclamation-circle"></i> {% trans "No associated measure" %}
                 </td>
@@ -48,7 +48,7 @@
                 <td class="font-semibold text-center">{% trans "Status" %}</td>
             </tr>
             {% endif %}
-            {% for securitymeasure in scenario.securitymeasure_set.all %}
+            {% for securitymeasure in scenario.security_measures.all %}
             <tr class="border-b text-sm">
                 <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{securitymeasure.id}}" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.id}}</a></td>
                 <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.title}}</a></td>

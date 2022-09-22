@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 from core.models import Analysis, RiskScenario, SecurityMeasure
 from back_office.models import Project
+from iam.models import Folder, RoleAssignment
 
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
@@ -32,6 +33,12 @@ class AnalysisListView(ListView):
     ordering = 'id'
     paginate_by = 10
     model = Analysis
+
+    def get_queryset(self):
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
+        return qs
 
 
 class UserLogin(LoginView):
@@ -174,7 +181,7 @@ class MyProjectsListView(ListView):
 
     def get_queryset(self):
         agg_data = risk_status(Analysis.objects.filter(auditor=self.request.user))
-        _tmp = SecurityMeasure.objects.filter(risk_scenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
+        _tmp = SecurityMeasure.objects.filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
         ord_security_measures = sorted(_tmp, key=lambda mtg: mtg.get_ranking_score(), reverse=True)
         # TODO: add date sorting as well
         return {'agg_data': agg_data,
@@ -206,7 +213,7 @@ def compile_analysis_for_composer(analysis_list: list):
     labels = list()
     color_map = {"open": "#fac858", "in_progress": "#5470c6", "on_hold": "#ee6666", "done": "#91cc75"}
     for st in SecurityMeasure.MITIGATION_STATUS:
-        count = SecurityMeasure.objects.filter(status=st[0]).filter(risk_scenario__analysis__in=analysis_list).count()
+        count = SecurityMeasure.objects.filter(status=st[0]).filter(riskscenario__analysis__in=analysis_list).count()
         v = {
             "value": count,
             "itemStyle": {"color": color_map[st[0]]}
@@ -296,7 +303,7 @@ def export_mp_csv(request, analysis):
                ]
     writer.writerow(columns)
 
-    for mtg in SecurityMeasure.objects.filter(risk_scenario__analysis=analysis):
+    for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=analysis):
         row = [mtg.risk_scenario.rid(), mtg.risk_scenario.title,
                mtg.id, mtg.title, mtg.description, mtg.type, mtg.security_function, mtg.eta, mtg.effort, mtg.link, mtg.status,
                ]

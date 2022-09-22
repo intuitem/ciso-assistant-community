@@ -148,20 +148,21 @@ def get_counters():
 
 def security_measure_priority():
     def get_quadrant(security_measure):
-        if security_measure.risk_scenario.current_level in ['M', 'H', 'VH']:
-            if security_measure.effort in ['S', 'M']:
-                return "1st"
-            elif security_measure.effort in ['L', 'XL']:
-                return "2nd"
+        for risk_scenario in security_measure.riskscenario_set.all():
+            if risk_scenario.current_level in ['M', 'H', 'VH']:
+                if security_measure.effort in ['S', 'M']:
+                    return "1st"
+                elif security_measure.effort in ['L', 'XL']:
+                    return "2nd"
+                else:
+                    return "undefined"
             else:
-                return "undefined"
-        else:
-            if security_measure.effort in ['S', 'M']:
-                return "3rd"
-            elif security_measure.effort in ['L', 'XL']:
-                return "4th"
-            else:
-                return "undefined"
+                if security_measure.effort in ['S', 'M']:
+                    return "3rd"
+                elif security_measure.effort in ['L', 'XL']:
+                    return "4th"
+                else:
+                    return "undefined"
 
     clusters = {"1st": list(), "2nd": list(), "3rd": list(), "4th": list(), "undefined": list()}
 
@@ -196,7 +197,7 @@ def risk_status(analysis_list):
             rsk_status_out[option[0]].append({'value': cnt, 'itemStyle': {'color': STATUS_COLOR_MAP[option[0]]}})
 
         for status in SecurityMeasure.MITIGATION_STATUS:
-            cnt = SecurityMeasure.objects.filter(risk_scenario__analysis=analysis, status=status[0]).count()
+            cnt = SecurityMeasure.objects.filter(riskscenario__analysis=analysis, status=status[0]).count()
             mtg_status_out[status[0]].append({'value': cnt, 'itemStyle': {'color': STATUS_COLOR_MAP[status[0]]}})
 
         names.append(str(analysis.project) + ' ' + str(analysis.version))

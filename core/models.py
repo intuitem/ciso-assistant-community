@@ -70,7 +70,7 @@ class Analysis(models.Model):
 
             if ri_value[ri.residual_level] < ri_value[ri.current_level] or ri_value[ri.residual_proba] < ri_value[
                 ri.current_proba] or ri_value[ri.residual_impact] < ri_value[ri.current_impact]:
-                if ri.associated_security_measures() == 0:
+                if ri.security_measures.count() == 0:
                     errors_lst.append(
                         {"msg": _("R#{}: residual risk level has been lowered without any specific measure").format(ri.id), "obj_type": "RiskScenario", "object": ri})
 
@@ -80,7 +80,7 @@ class Analysis(models.Model):
         # ---
 
         # --- checks on the security_measures
-        for mtg in SecurityMeasure.objects.filter(risk_scenario__analysis=self):
+        for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=self):
             if not mtg.eta:
                 warnings_lst.append({"msg": _("M#{} does not have an ETA").format(mtg.id), "obj_type": "SecurityMeasure", "object": mtg})
             else:
@@ -171,14 +171,17 @@ class SecurityMeasure(models.Model):
 
     def get_ranking_score(self):
         if self.effort:
-            return round(self.MAP_RISK_LEVEL[self.risk_scenario.current_level]/self.MAP_EFFORT[self.effort], 4)
+            mean = 0
+            for risk_scenario in self.riskscenario_set.all():
+                mean += self.MAP_RISK_LEVEL[risk_scenario.current_level]
+            return round(int(mean/len(self.riskscenario_set.all()))/self.MAP_EFFORT[self.effort], 4)
         else:
             return 0
 
     @property
     def get_html_url(self):
-        url = reverse('MP', args=(self.risk_scenario.analysis.id,))
-        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.risk_scenario.analysis.project.name}: {self.title} </a>'
+        url = reverse('MP', args=(self.project.id,))
+        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.project.name}: {self.title} </a>'
 
 
 class RiskScenario(models.Model):
@@ -238,9 +241,6 @@ class RiskScenario(models.Model):
         return self.analysis.project
     parent_project.short_description = _("Parent project")
 
-    def associated_security_measures(self):
-        return self.security_measure_set.count()
-
     def __str__(self):
         return str(self.parent_project()) + ': ' + str(self.title)
 
@@ -272,10 +272,10 @@ class RiskAcceptance(models.Model):
         verbose_name_plural = _("Risk acceptances")
 
     def __str__(self):
-        return f"[{self.type}] {self.risk_scenario}"
+        return f"[{self.type}] {self.riskscenario}"
 
     @property
     def get_html_url(self):
-        url = reverse('RA', args=(self.risk_scenario.analysis.id,))
-        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_scenario} </a>'
+        url = reverse('RA', args=(self.riskscenario.analysis.id,))
+        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.riskscenario} </a>'
 # you can consider nested inlines at some points
