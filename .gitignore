@@ -1,4 +1,5 @@
-*initial.py
+*migrations/
+!__init__.py
 *.pyc
 *.DS_Store
 *~$*
