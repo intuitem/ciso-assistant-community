@@ -155,7 +155,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
         exclude = ['last_login', 'is_superuser', 'is_staff', 'date_joined', 'user_permissions', 'username']
 
 
-class MeUpdateForm(UserChangeForm, StyledModelForm):
+class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
     """ form for logged user """
     # TODO: not sure this section is useful, self user could be in user list with a mention "me"
     def __init__(self, *args, user,**kwargs):

@@ -883,10 +883,10 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
 
 
-class MeView(UserPassesTestMixin, UpdateView):
+class MyProfileView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/user_update.html'
     context_object_name = 'user'
-    form_class = MeUpdateForm
+    form_class = MyProfileUpdateForm
 
     model = User
 
@@ -1146,7 +1146,7 @@ class UserPasswordChangeView(PasswordChangeView):
     model = User
 
     def get_success_url(self) -> str:
-        return self.request.POST.get('next', '/')
+        return reverse_lazy("me-update", kwargs = {'pk': self.request.user.id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
