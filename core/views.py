@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
+from django.core.exceptions import PermissionDenied
 
 from django.views.generic import ListView
 from core.models import Analysis, RiskScenario, SecurityMeasure
@@ -111,30 +112,36 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
 
 @login_required
 def generate_ra_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
-    ra = get_object_or_404(Analysis, pk=analysis)
-    context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
-    data = {'context': context, 'analysis': ra, 'ri_clusters': build_ri_clusters(ra)}
-
-    html = render_to_string('core/ra_pdf.html', data)
-    pdf_file = HTML(string=html).write_pdf()
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'filename="RA-{ra.id}-{ra.project}-v-{ra.version}.pdf"'
-
-    return response
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+    if int(analysis) in object_ids_view:
+        ra = get_object_or_404(Analysis, pk=analysis)
+        context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        data = {'context': context, 'analysis': ra, 'ri_clusters': build_ri_clusters(ra)}
+        html = render_to_string('core/ra_pdf.html', data)
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'filename="RA-{ra.id}-{ra.project}-v-{ra.version}.pdf"'
+        return response
+    else:
+        raise PermissionDenied()
 
 
 @login_required
 def generate_mp_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
-    ra = get_object_or_404(Analysis, pk=analysis)
-    context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
-    data = {'context': context, 'analysis': ra}
-
-    html = render_to_string('core/mp_pdf.html', data)
-    pdf_file = HTML(string=html).write_pdf()
-    response = HttpResponse(pdf_file, content_type='application/pdf')
-    response['Content-Disposition'] = f'filename="MP-{ra.id}-{ra.project}-v-{ra.version}.pdf"'
-
-    return response
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+    if int(analysis) in object_ids_view:
+        ra = get_object_or_404(Analysis, pk=analysis)
+        context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        data = {'context': context, 'analysis': ra}
+        html = render_to_string('core/mp_pdf.html', data)
+        pdf_file = HTML(string=html).write_pdf()
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = f'filename="MP-{ra.id}-{ra.project}-v-{ra.version}.pdf"'
+        return response
+    else:
+        raise PermissionDenied()
 
 
 @method_decorator(login_required, name='dispatch')
@@ -294,52 +301,63 @@ def index(request):
 
 @login_required
 def export_risks_csv(request, analysis):
-    ra = get_object_or_404(Analysis, pk=analysis)
-    # TODO: check permissions
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+    if int(analysis) in object_ids_view:
+        ra = get_object_or_404(Analysis, pk=analysis)
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="RA-{ra.id}-{ra.project}-v-{ra.version}.csv"'
 
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="RA-{ra.id}-{ra.project}-v-{ra.version}.csv"'
+        writer = csv.writer(response, delimiter=';')
+        columns = ['rid', 'threat', 'title', 'scenario',
+                'existing_measures', 'current_level', 'measures', 'residual_level',
+                'treatment']
+        writer.writerow(columns)
 
-    writer = csv.writer(response, delimiter=';')
-    columns = ['rid', 'threat', 'title', 'scenario',
-               'existing_measures', 'current_level', 'measures', 'residual_level',
-               'treatment']
-    writer.writerow(columns)
+        for ri in ra.riskscenario_set.all():
+            security_measures = ''
+            for mtg in ri.security_measures.all():
+                security_measures += f"[{mtg.status}]{mtg.title} \n"
+            row = [ri.rid(), ri.threat, ri.title, ri.scenario,
+                ri.existing_measures, ri.get_current_level_display(),
+                security_measures, ri.get_residual_level_display(), ri.treatment,
+                ]
+            writer.writerow(row)
 
-    for ri in ra.riskscenario_set.all():
-        security_measures = ''
-        for mtg in ri.security_measure_set.all():
-            security_measures += f"[{mtg.status}]{mtg.title} \n"
-        row = [ri.rid(), ri.threat, ri.title, ri.scenario,
-               ri.existing_measures, ri.get_current_level_display(),
-               security_measures, ri.get_residual_level_display(), ri.treatment,
-               ]
-        writer.writerow(row)
-
-    return response
+        return response
+    else:
+        raise PermissionDenied()
 
 
 @login_required
 def export_mp_csv(request, analysis):
-    ra = get_object_or_404(Analysis, pk=analysis)
-    # TODO: check permissions
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+    if int(analysis) in object_ids_view:
+        ra = get_object_or_404(Analysis, pk=analysis)
 
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="MP-{ra.id}-{ra.project}-v-{ra.version}.csv"'
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="MP-{ra.id}-{ra.project}-v-{ra.version}.csv"'
 
-    writer = csv.writer(response, delimiter=';')
-    columns = ['rid', 'risk_title',
-               'measure_id', 'measure_title', 'measure_desc', 'type', 'security_function', 'eta', 'effort', 'link', 'status',
-               ]
-    writer.writerow(columns)
+        writer = csv.writer(response, delimiter=';')
+        columns = ['risk_scenario',
+                'measure_id', 'measure_title', 'measure_desc', 'type', 'security_function', 'eta', 'effort', 'link', 'status',
+                ]
+        writer.writerow(columns)
 
-    for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=analysis):
-        row = [mtg.risk_scenario.rid(), mtg.risk_scenario.title,
-               mtg.id, mtg.title, mtg.description, mtg.type, mtg.security_function, mtg.eta, mtg.effort, mtg.link, mtg.status,
-               ]
-        writer.writerow(row)
+        for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=analysis):
+            risk_scenarios = []
+            for rs in mtg.riskscenario_set.all():
+                risk_scenarios.append(str(rs.rid()) + ": " + rs.title)
+            row = [risk_scenarios,
+                mtg.id, mtg.title, mtg.description, mtg.type, mtg.security_function, mtg.eta, mtg.effort, mtg.link, mtg.status,
+                ]
+            writer.writerow(row)
 
-    return response
+        return response
+    else:
+        raise PermissionDenied()
 
 
 def scoring_assistant(request):

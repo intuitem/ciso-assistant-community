@@ -1140,7 +1140,6 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
 
 class UserPasswordChangeView(PasswordChangeView):
     """ view to change user password """
-    # TODO: get out of form after apply, currently there is a problem
     template_name = 'back_office/password_change.html'
     form_class = UserPasswordChangeForm
     model = User

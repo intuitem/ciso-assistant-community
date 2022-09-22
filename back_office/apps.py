@@ -174,7 +174,7 @@ def startup():
             administrators = UserGroup.objects.create(
                 name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
             ra1 = RoleAssignment.objects.create(
-                user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), builtin=True,
+                user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), is_recursive=True, builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra1.perimeter_folders.add(administrators.folder)
         # if global auditors user group does not exist, then create it
