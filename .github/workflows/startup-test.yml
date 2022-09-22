@@ -50,7 +50,7 @@ jobs:
         python manage.py migrate
         python manage.py compilemessages
         python manage.py makemessages -l fr
-        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root@gamil.com', 'root')" | python manage.py shell
+        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root@gmail.com', 'root')" | python manage.py shell
     - name: Run server
       run: |
         export $(grep -v '^#' .env | xargs)
