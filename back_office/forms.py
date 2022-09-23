@@ -59,6 +59,7 @@ class ThreatCreateForm(StyledModelForm):
     class Meta:
         model = Threat
         fields = '__all__'
+        exclude = ['is_published']
 
 
 class ThreatUpdateForm(StyledModelForm):
@@ -66,6 +67,7 @@ class ThreatUpdateForm(StyledModelForm):
     class Meta:
         model = Threat
         fields = '__all__'
+        exclude = ['is_published']
 
 
 class AssetForm(StyledModelForm):
@@ -76,6 +78,7 @@ class AssetForm(StyledModelForm):
     class Meta:
         model = Asset
         fields = '__all__'
+        exclude = ['is_published']
 
 
 class SecurityFunctionCreateForm(StyledModelForm):
@@ -86,9 +89,11 @@ class SecurityFunctionCreateForm(StyledModelForm):
     class Meta:
         model = SecurityFunction
         fields = '__all__'
+        exclude = ['is_published']
 
 
 class SecurityFunctionUpdateForm(StyledModelForm):
     class Meta:
         model = SecurityFunction
         fields = '__all__'
+        exclude = ['is_published']
