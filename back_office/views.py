@@ -537,10 +537,13 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
-        if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('ri-list')
+        if "select_measures" in self.request.POST:
+            return reverse_lazy('ri-update', kwargs={'pk': self.kwargs['pk']})
         else:
-            return self.request.POST.get('next', '/')
+            if (self.request.POST.get('next', '/') == ""):
+                return reverse_lazy('ri-list')
+            else:
+                return self.request.POST.get('next', '/')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskscenario"), folder=self.get_object().analysis.project.folder)
