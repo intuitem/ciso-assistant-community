@@ -10,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import ListView
 from core.models import Analysis, RiskScenario, SecurityMeasure
 from back_office.models import Project
-from iam.models import Folder, RoleAssignment
+from iam.models import Folder, RoleAssignment, User
 
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
@@ -215,8 +215,12 @@ class MyProjectsListView(ListView):
     model = SecurityMeasure
 
     def get_queryset(self):
-        agg_data = risk_status(Analysis.objects.filter(auditor=self.request.user))
-        _tmp = SecurityMeasure.objects.filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        agg_data = risk_status(Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user))
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+        _tmp = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
         ord_security_measures = sorted(_tmp, key=lambda mtg: mtg.get_ranking_score(), reverse=True)
         # TODO: add date sorting as well
         return {'agg_data': agg_data,
@@ -225,8 +229,10 @@ class MyProjectsListView(ListView):
         # return risk_status(Analysis.objects.all())
 
 
-def compile_analysis_for_composer(analysis_list: list):
-    analysis_objects = Analysis.objects.filter(id__in=analysis_list)
+def compile_analysis_for_composer(user: User, analysis_list: list):
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Analysis)
+    analysis_objects = Analysis.objects.filter(id__in=object_ids_view).filter(id__in=analysis_list)
 
     current_level = list()
     residual_level = list()
@@ -286,7 +292,7 @@ class ComposerListView(ListView):
             request_list = request.GET.getlist('analysis')[0]
             data = [int(item) for item in request_list.split(',')]
             # debug print(f"got {len(data)} analysis in {data}")
-            context = {'context': compile_analysis_for_composer(data)}
+            context = {'context': compile_analysis_for_composer(self.request.user, data)}
             return render(request, 'core/composer.html', context)
         else:
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
@@ -345,8 +351,9 @@ def export_mp_csv(request, analysis):
                 'measure_id', 'measure_title', 'measure_desc', 'type', 'security_function', 'eta', 'effort', 'link', 'status',
                 ]
         writer.writerow(columns)
-
-        for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=analysis):
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)
+        for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis=analysis):
             risk_scenarios = []
             for rs in mtg.riskscenario_set.all():
                 risk_scenarios.append(str(rs.rid()) + ": " + rs.title)
@@ -379,7 +386,9 @@ class ReviewView(ListView):
     ordering = 'id'
 
     def get_queryset(self):
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         mode = self.request.GET.get('mode')
         if mode == "all":
-            return Analysis.objects.all()
-        return Analysis.objects.filter(auditor=self.request.user)
+            return Analysis.objects.filter(id__in=object_ids_view)
+        return Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user)
