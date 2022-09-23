@@ -208,7 +208,7 @@ class RiskScenario(models.Model):
     scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
-                                         default=_("<we have security_function A and Process B to handle this>"),
+                                         default=_("<we have security function A and Process B to handle this>"),
                                          verbose_name=_("Existing measures"))
 
     # current

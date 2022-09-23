@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 12:30+0000\n"
+"POT-Creation-Date: 2022-09-23 13:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,98 +18,243 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: asf_rm/settings.py:196
+#: asf_rm/settings.py:197
 msgid "Search analysis..."
 msgstr "Rechercher une analyse..."
 
-#: asf_rm/settings.py:201
+#: asf_rm/settings.py:202
 msgid "Main"
 msgstr ""
 
-#: asf_rm/settings.py:205
+#: asf_rm/settings.py:206
 msgid "Core"
 msgstr ""
 
-#: asf_rm/settings.py:210
+#: asf_rm/settings.py:211
 msgid "Analysis registry"
 msgstr "Registre des analyses"
 
-#: asf_rm/settings.py:215
+#: asf_rm/settings.py:216
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk scenarios"
 msgstr "Acceptations de risque"
 
-#: asf_rm/settings.py:220
+#: asf_rm/settings.py:221
 msgid "SecurityFunctions"
 msgstr ""
 
-#: asf_rm/settings.py:225
+#: asf_rm/settings.py:226
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
-#: asf_rm/settings.py:230
+#: asf_rm/settings.py:231
 msgid "Organization"
 msgstr "Organisation"
 
-#: asf_rm/settings.py:234
+#: asf_rm/settings.py:235
 msgid "General"
 msgstr "Général"
 
-#: asf_rm/settings.py:239
+#: asf_rm/settings.py:240
 msgid "Projects Hierarchy"
 msgstr "Hiérarchie des Projets"
 
-#: asf_rm/settings.py:244
+#: asf_rm/settings.py:245
 #, fuzzy
 #| msgid "Projects"
 msgid "Projects"
 msgstr "Projets"
 
-#: asf_rm/settings.py:249
+#: asf_rm/settings.py:250
 #, fuzzy
 #| msgid "Parent Risks"
 msgid "Parent Risks"
 msgstr "Risques Parents"
 
-#: asf_rm/settings.py:254
+#: asf_rm/settings.py:255
 #, fuzzy
 #| msgid "SecurityFunctions Catalog"
 msgid "SecurityFunctions Catalog"
 msgstr "Catalogue des SecurityFunctions"
 
-#: asf_rm/settings.py:260
+#: asf_rm/settings.py:261
 msgid "Settings"
 msgstr "Paramètres"
 
-#: asf_rm/settings.py:264
+#: asf_rm/settings.py:265
 msgid "Users and authorizations"
 msgstr "Utilisateurs et autorisations"
 
-#: asf_rm/settings.py:268
+#: asf_rm/settings.py:269
 msgid "User guide"
 msgstr "Guide utilisateur"
 
-#: asf_rm/settings.py:270
+#: asf_rm/settings.py:271
 msgid "Staff"
 msgstr ""
 
-#: asf_rm/settings.py:271
+#: asf_rm/settings.py:272
 msgid "X-Rays (all)"
 msgstr "X-Rays (tous)"
 
-#: asf_rm/settings.py:272
+#: asf_rm/settings.py:273
 msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
-#: asf_rm/settings.py:273
+#: asf_rm/settings.py:274
 msgid "Scoring assistant"
 msgstr "Assistant d'évaluation"
 
-#: asf_rm/settings.py:275
+#: asf_rm/settings.py:276
 msgid "Extra"
+msgstr ""
+
+#: iam/forms.py:63
+msgid "The two password fields didn’t match."
+msgstr ""
+
+#: iam/forms.py:67
+msgid "Password"
+msgstr ""
+
+#: iam/forms.py:73
+msgid "Password confirmation"
+msgstr ""
+
+#: iam/forms.py:76
+msgid "Enter the same password as before, for verification."
+msgstr ""
+
+#: iam/forms.py:125 iam/forms.py:158
+msgid ""
+"Raw passwords are not stored, so there is no way to see this user’s "
+"password, but you can change the password using <a class=\"help_text-link\" "
+"href=\"{}\">this form</a>."
+msgstr ""
+
+#: iam/forms.py:153
+msgid "To change your email address, please contact your administrator."
+msgstr ""
+
+#: iam/models.py:18 iam/models.py:225
+#, fuzzy
+#| msgid "Parent Risks"
+msgid "Domain"
+msgstr "Risques Parents"
+
+#: iam/models.py:19 iam/models.py:50
+msgid "name"
+msgstr ""
+
+#: iam/models.py:24
+#, fuzzy
+#| msgid "User guide"
+msgid "user group"
+msgstr "Guide utilisateur"
+
+#: iam/models.py:25 iam/models.py:130
+msgid "user groups"
+msgstr ""
+
+#: iam/models.py:47
+msgid "permissions"
+msgstr ""
+
+#: iam/models.py:66
+msgid "GLOBAL"
+msgstr ""
+
+#: iam/models.py:67
+msgid "DOMAIN"
+msgstr ""
+
+#: iam/models.py:69
+msgid "<Group title>"
+msgstr ""
+
+#: iam/models.py:69
+msgid "Name"
+msgstr ""
+
+#: iam/models.py:72
+msgid "<Short description>"
+msgstr ""
+
+#: iam/models.py:73
+msgid "Description"
+msgstr ""
+
+#: iam/models.py:82 iam/models.py:231
+msgid "Folder"
+msgstr ""
+
+#: iam/models.py:83
+msgid "Folders"
+msgstr ""
+
+#: iam/models.py:121
+msgid "superuser status"
+msgstr ""
+
+#: iam/models.py:124
+msgid ""
+"Designates that this user has all permissions without explicitly assigning "
+"them."
+msgstr ""
+
+#: iam/models.py:133
+msgid ""
+"The user_groups this user belongs to. A user will get all permissions "
+"granted to each of their user_groups."
+msgstr ""
+
+#: iam/models.py:141
+msgid "user permissions"
+msgstr ""
+
+#: iam/models.py:143
+msgid "Specific permissions for this user."
+msgstr ""
+
+#: iam/models.py:186
+msgid "first name"
+msgstr ""
+
+#: iam/models.py:187
+msgid "last name"
+msgstr ""
+
+#: iam/models.py:189
+msgid "active"
+msgstr ""
+
+#: iam/models.py:192
+msgid ""
+"Designates whether this user should be treated as active. Unselect this "
+"instead of deleting accounts."
+msgstr ""
+
+#: iam/models.py:196
+msgid "date joined"
+msgstr ""
+
+#: iam/models.py:208
+msgid "user"
+msgstr ""
+
+#: iam/models.py:209
+msgid "users"
+msgstr ""
+
+#: iam/models.py:228
+msgid "Role"
+msgstr ""
+
+#: iam/models.py:229
+msgid "sub folders are visible"
 msgstr ""
 
 #, fuzzy
@@ -126,11 +271,6 @@ msgstr ""
 #~| msgid "Projects Hierarchy"
 #~ msgid "Project Name"
 #~ msgstr "Hiérarchie des Projets"
-
-#, fuzzy
-#~| msgid "Parent Risks"
-#~ msgid "Parent Domain"
-#~ msgstr "Risques Parents"
 
 #, fuzzy
 #~| msgid "Parent Risks"
