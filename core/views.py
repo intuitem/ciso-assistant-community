@@ -191,18 +191,18 @@ def global_analytics(request):
     template = 'core/analytics.html'
 
     context = {
-        "break_by_p_risks": p_risks(),
-        "rose": p_risks_2(),
-        "risks_level": risks_count_per_level(),
-        "risk_status": risk_per_status(),
-        "security_measure_status": security_measure_per_status(),
-        "security_measure_per_cur_risk": security_measure_per_cur_risk(),
-        "security_measure_per_security_function": security_measure_per_security_function(),
-        "security_measure_priority": security_measure_priority(),
-        "risk_matrix": risk_matrix(),
-        "risks_per_project_groups": risks_per_project_groups(),
-        "extra": risks_levels_per_prj_grp(),
-        "counters": get_counters(),
+        "break_by_p_risks": p_risks(request.user),
+        "rose": p_risks_2(request.user),
+        "risks_level": risks_count_per_level(request.user),
+        "risk_status": risk_per_status(request.user),
+        "security_measure_status": security_measure_per_status(request.user),
+        "security_measure_per_cur_risk": security_measure_per_cur_risk(request.user),
+        "security_measure_per_security_function": security_measure_per_security_function(request.user),
+        "security_measure_priority": security_measure_priority(request.user),
+        "risk_matrix": risk_matrix(request.user),
+        "risks_per_project_groups": risks_per_project_groups(request.user),
+        "extra": risks_levels_per_prj_grp(request.user),
+        "counters": get_counters(request.user),
     }
 
     return render(request, template, context)

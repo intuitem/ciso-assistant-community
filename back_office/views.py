@@ -24,11 +24,11 @@ def index(request):
     template = loader.get_template('back_office/index.html')
 
     context = {
-        "counters": get_counters(),
-        "risks_level": risks_count_per_level(),
-        "security_measure_status": security_measure_per_status(),
-        "measures_to_review": measures_to_review(),
-        "acceptances_to_review": acceptances_to_review(),
+        "counters": get_counters(request.user),
+        "risks_level": risks_count_per_level(request.user),
+        "security_measure_status": security_measure_per_status(request.user),
+        "measures_to_review": measures_to_review(request.user),
+        "acceptances_to_review": acceptances_to_review(request.user),
         "today": date.today()
     }
     return HttpResponse(template.render(context, request))
@@ -553,10 +553,7 @@ class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
     form_class = RiskScenarioModalUpdateForm
 
     def get_success_url(self) -> str:
-        if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('ri-list')
-        else:
-            return self.request.POST.get('next', '/')
+        return reverse_lazy('ri-update', kwargs={'pk': self.kwargs['pk']})
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskscenario"), folder=self.get_object().analysis.project.folder)
