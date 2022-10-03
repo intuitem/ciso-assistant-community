@@ -6,36 +6,30 @@
 {% endwith %}
 
 <div class="mb-4">
-    <form method="post" id="analysis_form">{% csrf_token %}
-        <div class="bg-white rounded-lg shadow px-8 py-6">
-            <section class="flex flex-col space-y-4 mb-2">
-                <div class="flex flex-col space-y-4">
-                    <div class="flex flex-col w-full">
-                        <div class="inline"></div>
-                        <p class="text-sm font-semibold">{{ form.name.label }}</p>
-                        {{ form.name.errors }}
-                        {{ form.name }}
-                    </div>
-                    <div class="flex flex-col w-full">
-                        <p class="text-sm font-semibold">{{ form.business_value.label }}</p>
-                        {{ form.business_value.errors }}
-                        {{ form.business_value }}
-                    </div>
-                    <div class="flex flex-col w-full">
-                        <p class="text-sm font-semibold">{{ form.comments.label }}</p>
-                        {{ form.comments.errors }}
-                        {{ form.comments }}
-                    </div>
-                    <div class="flex flex-row w-full">
-                        <p class="text-sm font-semibold">{{ form.is_published.label }}</p>
-                        <p class="ml-2"> {{ form.is_published }}</p>
-                        {{ form.is_published.errors }}
+    <form method="post" id="analysis_form" x-data="{ submitDisabled: true }" @change="submitDisabled = !submitDisabled">{% csrf_token %}
+        <div class="bg-white rounded-lg shadow px-4 py-6 w-full mb-4">
+            <div class="flex flex-col space-y-4">
+                {{ form.non_field_errors }}
+                {% for field in form %}
+                <div class="">
+                    <label class="text-sm font-semibold">{{ field.label|striptags }}</label>
+                    <div class="w-auto">
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                        {% endfor %}
+                        {{ field }}
+                        <div class="mt-1 text-xs text-gray-400">
+                            {{ field.help_text|safe }}
+                        </div>
                     </div>
                 </div>
-            </section>
-            <div class="flex justify-end space-x-2">
-                <a href="{% url 'asset-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
-                <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
+                {% endfor %}
+            </div>
+            <div class="flex space-x-2 mt-4 justify-end">
+                <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
+                <input type="hidden" name="next" value={{ request.GET.next }}>
+                <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
+                :disabled="submitDisabled"">{% trans "Save" %}</button>
             </div>
         </div>
     </form>
