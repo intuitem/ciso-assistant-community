@@ -6,7 +6,7 @@
 {% endwith %}
 
 <div class="mb-4">
-    <form method="post" id="acceptance_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = !submitDisabled">{% csrf_token %}
+    <form method="post" id="acceptance_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
         <div class="bg-white rounded-lg shadow px-8 py-6">
             <section class="flex flex-col space-y-4 mb-2">
                 {% for field in form %}

@@ -6,7 +6,7 @@
 {% endwith %}
 
 <div class="flex flex-col space-y-4">
-    <form method="post" id="mtg_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = !submitDisabled">{% csrf_token %}
+    <form method="post" id="mtg_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
     <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-4">{% trans "Measure summary" %}</h2>
         <section class="flex flex-col space-y-4">

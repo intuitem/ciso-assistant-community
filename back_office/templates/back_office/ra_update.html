@@ -7,7 +7,7 @@
 
 <div class="flex flex-col lg:flex-row lg:space-x-4">
     <div>
-        <form method="post" id="analysis_form" x-data="{ submitDisabled: true }" @change="submitDisabled = !submitDisabled">{% csrf_token %}
+        <form method="post" id="analysis_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
         {{ form.non_field_errors }}
         <div class="bg-white rounded-lg shadow mb-4 px-4">
             <div class="flex flex-col mb-4">
