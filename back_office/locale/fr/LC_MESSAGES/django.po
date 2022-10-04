@@ -1441,10 +1441,8 @@ msgid "IAM"
 msgstr ""
 
 #: back_office/templates/back_office/sidebar.html:179
-#, fuzzy
-#| msgid "My projects"
 msgid "My profile"
-msgstr "Mes projets"
+msgstr "Mon profil"
 
 #: back_office/templates/back_office/sidebar.html:188
 #: back_office/templates/back_office/user_list.html:6 back_office/views.py:952
