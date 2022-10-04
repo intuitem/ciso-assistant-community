@@ -38,7 +38,7 @@ class AnalysisListView(ListView):
     model = Analysis
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         return qs
@@ -58,7 +58,7 @@ class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
     model = RiskScenario
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
         qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         return qs
@@ -93,7 +93,7 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
         qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         return qs 
@@ -112,7 +112,7 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
 
 @login_required
 def generate_ra_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if int(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
@@ -129,7 +129,7 @@ def generate_ra_pdf(request, analysis): # analysis parameter is the id of the ch
 
 @login_required
 def generate_mp_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if int(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
@@ -151,13 +151,13 @@ class SearchResults(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get('q')
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
         ri_list = RiskScenario.objects.filter(Q(title__icontains=query) | Q(threat__title__icontains=query)).filter(id__in=object_ids_view)[:10]
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         mtg_list = SecurityMeasure.objects.filter(Q(title__icontains=query) | Q(security_function__name__icontains=query)).filter(id__in=object_ids_view)[:10]
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         ra_list = Analysis.objects.filter(Q(project__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
@@ -176,11 +176,11 @@ class Browser(ListView):
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
-            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
             return {"type": "Risk scenarios", "filter": self.map_rsk[rsk], "items": RiskScenario.objects.filter(treatment=self.map_rsk[rsk]).filter(id__in=object_ids_view)}
         if mtg:
-            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
             return {"type": "SecurityMeasures", "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
 
@@ -215,10 +215,10 @@ class MyProjectsListView(ListView):
     model = SecurityMeasure
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         agg_data = risk_status(Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user))
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         _tmp = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
         ord_security_measures = sorted(_tmp, key=lambda mtg: mtg.get_ranking_score(), reverse=True)
@@ -230,7 +230,7 @@ class MyProjectsListView(ListView):
 
 
 def compile_analysis_for_composer(user: User, analysis_list: list):
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Analysis)
     analysis_objects = Analysis.objects.filter(id__in=object_ids_view).filter(id__in=analysis_list)
 
@@ -295,7 +295,7 @@ class ComposerListView(ListView):
             context = {'context': compile_analysis_for_composer(self.request.user, data)}
             return render(request, 'core/composer.html', context)
         else:
-            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
             context = {'context': Analysis.objects.filter(id__in=object_ids_view)}
             return render(request, 'core/project_select.html', context)
@@ -307,7 +307,7 @@ def index(request):
 
 @login_required
 def export_risks_csv(request, analysis):
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if int(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
@@ -338,7 +338,7 @@ def export_risks_csv(request, analysis):
 
 @login_required
 def export_mp_csv(request, analysis):
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if int(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
@@ -351,7 +351,7 @@ def export_mp_csv(request, analysis):
                 'measure_id', 'measure_title', 'measure_desc', 'type', 'security_function', 'eta', 'effort', 'link', 'status',
                 ]
         writer.writerow(columns)
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)
         for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis=analysis):
             risk_scenarios = []
@@ -386,7 +386,7 @@ class ReviewView(ListView):
     ordering = 'id'
 
     def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_objects(
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         mode = self.request.GET.get('mode')
         if mode == "all":
