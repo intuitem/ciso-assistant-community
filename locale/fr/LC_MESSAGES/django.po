@@ -114,19 +114,19 @@ msgstr ""
 
 #: iam/forms.py:63
 msgid "The two password fields didn’t match."
-msgstr ""
+msgstr "Les deux champs de mot de passe ne correspondent pas."
 
 #: iam/forms.py:67
 msgid "Password"
-msgstr ""
+msgstr "Mot de passe"
 
 #: iam/forms.py:73
 msgid "Password confirmation"
-msgstr ""
+msgstr "Confirmation du mot de passe"
 
 #: iam/forms.py:76
 msgid "Enter the same password as before, for verification."
-msgstr ""
+msgstr "Entrez le même mot de passe que précédemment, pour vérification."
 
 #: iam/forms.py:125 iam/forms.py:158
 msgid ""
@@ -134,30 +134,29 @@ msgid ""
 "password, but you can change the password using <a class=\"help_text-link\" "
 "href=\"{}\">this form</a>."
 msgstr ""
+"Les mots de passe bruts ne sont pas stockés, il n'y a donc aucun moyen de "
+"voir le mot de passe de cet utilisateur, mais vous pouvez modifier le mot de "
+"passe en utilisant <a class=\"help_text-link\" href=\"{}\">ce formulaire</a>."
 
 #: iam/forms.py:153
 msgid "To change your email address, please contact your administrator."
-msgstr ""
+msgstr "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
 #: iam/models.py:18 iam/models.py:225
-#, fuzzy
-#| msgid "Parent Risks"
 msgid "Domain"
-msgstr "Risques Parents"
+msgstr "Domaine"
 
 #: iam/models.py:19 iam/models.py:50
 msgid "name"
-msgstr ""
+msgstr "nom"
 
 #: iam/models.py:24
-#, fuzzy
-#| msgid "User guide"
 msgid "user group"
-msgstr "Guide utilisateur"
+msgstr "groupes d'utilisateurs"
 
 #: iam/models.py:25 iam/models.py:130
 msgid "user groups"
-msgstr ""
+msgstr "groupes d'utilisateurs"
 
 #: iam/models.py:47
 msgid "permissions"
@@ -169,19 +168,19 @@ msgstr ""
 
 #: iam/models.py:67
 msgid "DOMAIN"
-msgstr ""
+msgstr "DOMAINE"
 
 #: iam/models.py:69
 msgid "<Group title>"
-msgstr ""
+msgstr "<Titre du groupe>"
 
 #: iam/models.py:69
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: iam/models.py:72
 msgid "<Short description>"
-msgstr ""
+msgstr "<Description courte>"
 
 #: iam/models.py:73
 msgid "Description"
@@ -197,57 +196,64 @@ msgstr ""
 
 #: iam/models.py:121
 msgid "superuser status"
-msgstr ""
+msgstr "statut superutilisateur"
 
 #: iam/models.py:124
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
+"Désigne que cet utilisateur a toutes les autorisations sans les assigner "
+"explicitement."
 
 #: iam/models.py:133
 msgid ""
 "The user_groups this user belongs to. A user will get all permissions "
 "granted to each of their user_groups."
 msgstr ""
+"Les groupes d'utilisateurs auxquels cet utilisateur appartient. Un utilisateur "
+"obtiendra toutes les autorisations accordées à chacun de ses groupes "
+"d'utilisateurs."
 
 #: iam/models.py:141
 msgid "user permissions"
-msgstr ""
+msgstr "permissions utilisateur"
 
 #: iam/models.py:143
 msgid "Specific permissions for this user."
-msgstr ""
+msgstr "Permissions spécifiques pour cet utilisateur."
 
 #: iam/models.py:186
 msgid "first name"
-msgstr ""
+msgstr "prénom"
 
 #: iam/models.py:187
 msgid "last name"
-msgstr ""
+msgstr "nom"
 
 #: iam/models.py:189
 msgid "active"
-msgstr ""
+msgstr "actif"
 
 #: iam/models.py:192
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
+"Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
+"au lieu de supprimer les comptes."
 
 #: iam/models.py:196
 msgid "date joined"
-msgstr ""
+msgstr "date d'inscription"
 
 #: iam/models.py:208
 msgid "user"
-msgstr ""
+msgstr "utilisateur"
 
 #: iam/models.py:209
 msgid "users"
-msgstr ""
+msgstr "utilisateurs"
 
 #: iam/models.py:228
 msgid "Role"
@@ -255,7 +261,7 @@ msgstr ""
 
 #: iam/models.py:229
 msgid "sub folders are visible"
-msgstr ""
+msgstr "les sous-dossiers sont visibles"
 
 #, fuzzy
 #~| msgid "Risk acceptances"

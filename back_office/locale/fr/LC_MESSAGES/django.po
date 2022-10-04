@@ -308,7 +308,7 @@ msgstr ""
 #: back_office/templates/back_office/project_list.html:109
 #: back_office/templates/back_office/project_update.html:15
 msgid "Project Name"
-msgstr ""
+msgstr "Nom du projet"
 
 #: back_office/models.py:18
 msgid "<if an internal reference applies>"
@@ -318,7 +318,7 @@ msgstr ""
 #: back_office/templates/back_office/project_create.html:19
 #: back_office/templates/back_office/project_update.html:20
 msgid "Internal ID"
-msgstr ""
+msgstr "ID interne"
 
 #: back_office/models.py:23
 #: back_office/templates/back_office/fragments/watchlist_measures.html:14
@@ -425,16 +425,12 @@ msgid "Asset"
 msgstr "Biens sensibles"
 
 #: back_office/models.py:63
-#, fuzzy
-#| msgid "Business value"
 msgid "business value"
 msgstr "valeur commerciale"
 
 #: back_office/models.py:64
-#, fuzzy
-#| msgid "Comments"
 msgid "comments"
-msgstr "Commentaires"
+msgstr "commentaires"
 
 #: back_office/models.py:73
 #: back_office/templates/back_office/asset_list.html:46
@@ -958,14 +954,12 @@ msgid "Measure summary"
 msgstr "Résumé de la mesure"
 
 #: back_office/templates/back_office/mtg_update.html:23
-#, fuzzy
-#| msgid "Risk scenarios"
 msgid "Risk Scenarios"
 msgstr "Scénarios de risque"
 
 #: back_office/templates/back_office/mtg_update.html:56
 msgid "Link"
-msgstr ""
+msgstr "Lien"
 
 #: back_office/templates/back_office/mtg_update.html:62
 msgid "Effort"
@@ -1447,10 +1441,8 @@ msgid "IAM"
 msgstr ""
 
 #: back_office/templates/back_office/sidebar.html:179
-#, fuzzy
-#| msgid "My projects"
 msgid "My profile"
-msgstr "Mes projets"
+msgstr "Mon profil"
 
 #: back_office/templates/back_office/sidebar.html:188
 #: back_office/templates/back_office/user_list.html:6 back_office/views.py:952

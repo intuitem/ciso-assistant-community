@@ -36,7 +36,9 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
-        {% include 'back_office/snippets/add_button_modal.html' with form=asset_create_form header=_("Add asset") model="asset" content=_("New asset") %}
+        <div class="grid mb-4 w-full">
+            <a href="{% url 'asset-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Asset" %}</a>
+        </div>
     
     </div>
 

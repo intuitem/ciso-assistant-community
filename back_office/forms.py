@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput
 from .models import *
 from django.utils.translation import gettext_lazy as _
@@ -74,6 +75,16 @@ class AssetForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(AssetForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+
+    def clean(self) -> Optional[Dict[str, Any]]:
+        super().clean()
+        content_type = self.cleaned_data.get('content_type')
+        parent_asset = self.cleaned_data.get('parent_asset')
+        if content_type == 'SP' and parent_asset is None:
+            self.add_error('parent_asset', 'A support asset must have a parent asset.')
+        if content_type == 'PR' and parent_asset is not None:
+            self.add_error('parent_asset', 'A primary asset cannot have a parent asset.')
+        return self.cleaned_data
 
     class Meta:
         model = Asset

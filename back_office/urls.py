@@ -47,7 +47,7 @@ urlpatterns = [
     path('PRJ/create', login_required(views.ProjectCreateView.as_view()), name='project-create'),
     path('PRJ/create_modal/', login_required(views.ProjectCreateViewModal.as_view()), name='project-create-modal'),
     
-    path('AST/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
+    path('AST/create/', login_required(views.AssetCreateView.as_view()), name='asset-create'),
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
     path('user_groups/create', login_required(views.UserGroupCreateView.as_view()), name='user_group-create'),

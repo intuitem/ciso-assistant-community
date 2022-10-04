@@ -15,7 +15,8 @@ from back_office.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAME
 
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
-    folder = models.ForeignKey("Folder", verbose_name=_("Domain"), on_delete=models.CASCADE, default=None)
+    folder = models.ForeignKey("Folder", verbose_name=_(
+        "Domain"), on_delete=models.CASCADE, default=None)
     name = models.CharField(_('name'), max_length=150, unique=False)
     builtin = models.BooleanField(default=False)
 
@@ -54,7 +55,7 @@ class Role(models.Model):
         if self.builtin:
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
-        
+
 
 class Folder(models.Model):
     """ A folder is a container for other folders or any object
@@ -94,7 +95,8 @@ class Folder(models.Model):
             return sub_folder_list
         return sub_folders_in(self, [])
 
-    def get_parent_folders(self) -> 'Self':  # type annotation Self to come in Python 3.11
+    # type annotation Self to come in Python 3.11
+    def get_parent_folders(self) -> 'Self':
         """Return the list of parent folders"""
         return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
 
@@ -146,7 +148,7 @@ class User(AbstractBaseUser):
     # we will need to delete username in the future but for now we should keep it to don't break the model
     # let's use username=email (should be manually enforced for createsuperuser)
 
-    email =  models.CharField(max_length=100, unique=True)
+    email = models.CharField(max_length=100, unique=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     is_active = models.BooleanField(
@@ -204,12 +206,17 @@ class RoleAssignment(models.Model):
     """ fundamental class for MIRA RBAC model, similar to Azure IAM model """
     perimeter_folders = models.ManyToManyField(
         "Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
-    user_group = models.ForeignKey(UserGroup, null=True, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
-    is_recursive = models.BooleanField(_('sub folders are visible'), default=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             null=True, on_delete=models.CASCADE)
+    user_group = models.ForeignKey(
+        UserGroup, null=True, on_delete=models.CASCADE)
+    role = models.ForeignKey(
+        Role, on_delete=models.CASCADE, verbose_name=_("Role"))
+    is_recursive = models.BooleanField(
+        _('sub folders are visible'), default=False)
     builtin = models.BooleanField(default=False)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
+    folder = models.ForeignKey(
+        Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
 
     def __str__(self) -> str:
         # pragma pylint: disable=no-member
@@ -217,7 +224,8 @@ class RoleAssignment(models.Model):
             ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
             ", role: " + str(self.role.name) + \
             ", user: " + (str(self.user.username) if self.user else "/") + \
-            ", user group: " + (str(self.user_group.name) if self.user_group else "/")  
+            ", user group: " + (str(self.user_group.name)
+                                if self.user_group else "/")
 
     @staticmethod
     def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
@@ -233,8 +241,8 @@ class RoleAssignment(models.Model):
     def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType) -> 'list[Folder]':
         """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
            Returns the list of the ids of the matching folders"""
-        folders_set=set()
-        ref_permission = Permission.objects.get(codename = "view_folder")
+        folders_set = set()
+        ref_permission = Permission.objects.get(codename="view_folder")
         # first get all accessible folders, independently of contentType
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
             for f in ra.perimeter_folders.all():
@@ -248,7 +256,7 @@ class RoleAssignment(models.Model):
         return [x.id for x in folders_set if x.content_type == content_type and x in perimeter]
 
     @staticmethod
-    def get_accessible_objects(folder: Folder, user: User, object_type: Any) -> Tuple['list[Any]', 'list[Any]', 'list[Any]']:
+    def get_accessible_object_ids(folder: Folder, user: User, object_type: Any) -> Tuple['list[Any]', 'list[Any]', 'list[Any]']:
         """ Gets all objects of a specified type that a user can reach in a given folder
             Only accessible folders are considered
             Returns a triplet: (view_objects_list, change_object_list, delete_object_list)
@@ -273,12 +281,13 @@ class RoleAssignment(models.Model):
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
             ra_permissions = ra.role.permissions.all()
             for f in perimeter & set(ra.perimeter_folders.all()):
+                target_folders = [f] + \
+                    f.sub_folders() if ra.is_recursive else [f]
                 for p in [p for p in permissions if p in ra_permissions]:
                     if p == permissions[0]:
                         folders_with_local_view.add(f)
-                    target_folders = [f] + \
-                        f.sub_folders() if ra.is_recursive else [f]
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
+                        # builtins objects cannot be edited or deleted
                         if not (hasattr(object, "builtin") and object.builtin and p != permissions[0]):
                             permissions_per_object_id[object.id].add(p)
 

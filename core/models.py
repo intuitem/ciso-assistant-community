@@ -33,11 +33,6 @@ class Analysis(models.Model):
     def __str__(self):
         return 'RA-' + str(self.id) + ': ' + str(self.project) + ', version ' + str(self.version)
 
-    def save(self, *args, **kwargs):
-        for ri in self.riskscenario_set.all():
-            ri.save()
-        super(Analysis, self).save(*args, **kwargs)
-
     def get_scenario_count(self):
         count = RiskScenario.objects.filter(analysis=self.id).count()
         scenario_count = count
@@ -201,7 +196,7 @@ class RiskScenario(models.Model):
     ]
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
-    assets = models.ManyToManyField(Asset)
+    assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
     security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
     title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
@@ -272,7 +267,7 @@ class RiskAcceptance(models.Model):
         verbose_name_plural = _("Risk acceptances")
 
     def __str__(self):
-        return f"[{self.type}] {self.riskscenario}"
+        return f"[{self.type}] {self.risk_scenario}"
 
     @property
     def get_html_url(self):
