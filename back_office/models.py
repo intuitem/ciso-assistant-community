@@ -1,5 +1,7 @@
+from typing import Iterable, Optional
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from iam.models import Folder
 
 
@@ -54,19 +56,45 @@ class Threat(models.Model):
 
 
 class Asset(models.Model):
-    class Meta:
-        verbose_name_plural = _("Assets")
-        verbose_name = _("Asset")
+    class ContentType(models.TextChoices):
+        """
+        The content type of the asset.
+
+        An asset can either be a primary or a support asset.
+        A support asset must be linked to another "parent" asset.
+        """
+        PRIMARY = 'PR', _('Primary')
+        SUPPORT = 'SP', _('Support')
 
     name = models.CharField(max_length=100, verbose_name=_('name'))
     business_value = models.TextField(
         blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
+    content_type = models.CharField(
+        max_length=2, choices=ContentType.choices, default=ContentType.PRIMARY, verbose_name=_('content type'))
+    parent_asset = models.ForeignKey(
+        'self', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('parent asset'))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     is_published = models.BooleanField(_('published'), default=True)
 
+    class Meta:
+        verbose_name_plural = _("Assets")
+        verbose_name = _("Asset")
+
     def __str__(self):
         return self.name
+
+    def is_primary(self):
+        return self.content_type == 'PR'
+
+    def is_support(self):
+        return self.content_type == 'SP'
+
+    def get_parent_asset(self):
+        return self.parent_asset
+
+    def get_sub_assets(self):
+        return Asset.objects.filter(parent_asset=self)
 
 
 class SecurityFunction(models.Model):
