@@ -114,42 +114,6 @@ class Folder(models.Model):
             return obj.risk_scenario.analysis.project.folder
 
 
-class PermissionsMixin(models.Model):
-    """ is_superuser is not used in this project, it was kept for simplicity's
-    sake and to avoid having to rewrite the UserManager. It will be removed. """
-    is_superuser = models.BooleanField(
-        _('superuser status'),
-        default=False,
-        help_text=_(
-            'Designates that this user has all permissions without '
-            'explicitly assigning them.'
-        ),
-    )
-    user_groups = models.ManyToManyField(
-        UserGroup,
-        verbose_name=_('user groups'),
-        blank=True,
-        help_text=_(
-            'The user_groups this user belongs to. A user will get all permissions '
-            'granted to each of their user_groups.'
-        ),
-        related_name="user_set",
-        related_query_name="user",
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        verbose_name=_('user permissions'),
-        blank=True,
-        help_text=_('Specific permissions for this user.'),
-        related_name="user_set",
-        related_query_name="user",
-    )
-
-    class Meta:
-        """ for Model """
-        abstract = True
-
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -177,7 +141,7 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser):
     """ a user is a principal corresponding to a human """
     # we will need to delete username in the future but for now we should keep it to don't break the model
     # let's use username=email (should be manually enforced for createsuperuser)
@@ -194,7 +158,24 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-
+    is_superuser = models.BooleanField(
+        _('superuser status'),
+        default=False,
+        help_text=_(
+            'Designates that this user has all permissions without explicitly assigning them.'
+        ),
+    )
+    user_groups = models.ManyToManyField(
+        UserGroup,
+        verbose_name=_('user groups'),
+        blank=True,
+        help_text=_(
+            'The user_groups this user belongs to. A user will get all permissions '
+            'granted to each of their user_groups.'
+        ),
+        related_name="user_set",
+        related_query_name="user",
+    )
     objects = UserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
