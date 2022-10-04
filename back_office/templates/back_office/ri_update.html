@@ -96,8 +96,8 @@
     }
     
     </script>
-<div>
-    <form method="post" id="scenario_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
+<div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
+    <form method="post" id="scenario_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.errors }}
     <div class="flex flex-col space-y-8">
@@ -138,6 +138,13 @@
                         <p class="text-sm font-semibold">{% trans "Scenario" %}</p>
                         {{ form.scenario.errors }}
                         {{ form.scenario }}
+                        <p class="help_text">{{ form.scenario.help_text }}</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="text-sm font-semibold">{% trans "Assets" %}</p>
+                        {{ form.assets.errors }}
+                        {{ form.assets }}
+                        <p class="help_text">{{ form.assets.help_text }}</p>
                     </div>
                 </section>
             </div>
@@ -266,7 +273,8 @@
             <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
             <input
                 type="hidden" form="scenario_update_form" name="next" value={{ request.GET.next }}>
-            <button action="submit" form="scenario_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
+            <button action="submit" form="scenario_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-400"
+            :disabled="submitDisabled">{% trans "Save" %}</button>
         </div>
     </div>
 </div>
