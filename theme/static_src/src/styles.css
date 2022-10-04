@@ -61,7 +61,7 @@
     }
 
     .my-select {
-        @apply my-2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm;
+        @apply my-2 block rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm  disabled:bg-gray-50 disabled:text-gray-400;
     }
 
     .nav-link {

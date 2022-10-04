@@ -101,6 +101,8 @@ function refresh() {
   var Pi = document.getElementById("pi");
   var BIchecked = document.getElementById("ignoreBI");
   var TIchecked = document.getElementById("ignoreTI");
+  var BI_div = document.getElementById("bi_div");
+  var TI_div = document.getElementById("ti_div");
   if (BIchecked.checked == false) {
       impact = BI;
       TI_lbl.innerHTML = "--";
@@ -116,6 +118,14 @@ function refresh() {
       Rp.disabled = false;
       Cm.disabled = false;
       Pi.disabled = false;
+      BI_div.classList.remove("bg-gray-100");
+      BI_div.classList.remove("text-gray-400");
+      BI_div.classList.add("bg-white");
+      BI_div.classList.add("text-black");
+      TI_div.classList.remove("bg-white");
+      TI_div.classList.remove("text-black");
+      TI_div.classList.add("bg-gray-100");
+      TI_div.classList.add("text-gray-400");
   }
   else {
       impact = TI;
@@ -132,6 +142,14 @@ function refresh() {
       A.disabled = false;
       I.disabled = false;
       T.disabled = false;
+      TI_div.classList.remove("bg-gray-100");
+      TI_div.classList.remove("text-gray-400");
+      TI_div.classList.add("bg-white");
+      TI_div.classList.add("text-black");
+      BI_div.classList.remove("bg-white");
+      BI_div.classList.remove("text-black");
+      BI_div.classList.add("bg-gray-100");
+      BI_div.classList.add("text-gray-400");
   }
 
   IF.innerHTML = getTextI(impact);
@@ -352,7 +370,7 @@ function rl_class(label) {
                 </div>       
             </div>
         
-            <div class="my-4 lg:my-0">
+            <div class="my-4 lg:my-0" x-data="{ isTechnical = true }">
                 <!--Technical Impact Factor-->
                 <div id="ti_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
@@ -417,7 +435,7 @@ function rl_class(label) {
                     </div>
                 </div>
                 <!--Business Impact Factor-->
-                <div id="bi_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
+                <div id="bi_div" class="px-4 py-2 mx-1 my-2 shadow rounded h-1/2 grid grid-cols-5 bg-white">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How much financial damage will result from an exploit?" %} </div>
                         <select class="my-select w-full" id="fd" onchange="refresh()">
@@ -477,7 +495,7 @@ function rl_class(label) {
                             <div class="text-gray-100 text-xs">{% trans "Business Impact Factor" %}</div>
                             <div class="font-bold text-white text-lg" id="BI">--</div>
                             <div class="flex flex-row space-x-2 items-center">
-                                <input onchange="refresh()" id="ignoreBI" type="checkbox" class="w-4 h-4 text-green-800 bg-gray-100 border-gray-300 rounded focus:ring-green-800 
+                                <input onchange="refresh()" id="ignoreBI" type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded
                                 focus:ring-2">
                                 <label class="ml-2 text-sm font-medium text-gray-100">
                                     {% trans "Ignore" %}
