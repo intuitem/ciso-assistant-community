@@ -248,15 +248,15 @@ function rl_class(label) {
                         <div>{% trans "How technically skilled is this group of threat agents?" %}</div>
                         <select class="my-select w-full" id="sl" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
-                            <option class="text-1" value="1">1 - {% trans "Security penetration skills" %}</option>
+                            <option class="text-1" value="1">1 - {% trans "No technical skills" %}</option>
                             <option class="text-2" value="2">2</option>
-                            <option class="text-3" value="3">3 - {% trans "Network and programming skills" %}</option>
+                            <option class="text-3" value="3">3 - {% trans "Some technical skills" %}</option>
                             <option class="text-4" value="4">4</option>
                             <option class="text-5" value="5">5 - {% trans "Advanced computer user" %}</option>
-                            <option class="text-6" value="6">6 - {% trans "Some technical skills" %}</option>
+                            <option class="text-6" value="6">6 - {% trans "Network and programming skills" %}</option>
                             <option class="text-7" value="7">7</option>
                             <option class="text-8" value="8">8</option>
-                            <option class="text-9" value="9">9 - {% trans "No technical skills" %}</option>
+                            <option class="text-9" value="9">9 - {% trans "Security penetration skills" %}</option>
                         </select>
                         <div>{% trans "How motivated is this group of threat agents to find and exploit this vulnerability?" %}</div>
                         <select class="my-select w-full" id="mo" onchange="refresh()">
@@ -300,12 +300,12 @@ function rl_class(label) {
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-                            <div class="text-gray-100 text-xs">{% trans "Threat Agent Factor" %}</div>
+                            <div class="text-gray-100 text-xs">{% trans "Threat Agent Factors" %}</div>
                             <div class="font-bold text-white text-lg" id="TA">--</div>
                         </div>
                     </div>
                 </div>
-                <!--Vulnerability Factor-->
+                <!--Vulnerability Factors-->
                 <div id="vf_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How easy is it for this group of threat agents to discover this vulnerability?" %}</div>
@@ -363,7 +363,7 @@ function rl_class(label) {
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-                            <div class="text-gray-100 text-xs">{% trans "Vulnerability Factor" %}</div>
+                            <div class="text-gray-100 text-xs">{% trans "Vulnerability Factors" %}</div>
                             <div class="font-bold text-white text-lg" id="VF">--</div>
                         </div>
                     </div>
@@ -371,7 +371,7 @@ function rl_class(label) {
             </div>
         
             <div class="my-4 lg:my-0" x-data="{ isTechnical = true }">
-                <!--Technical Impact Factor-->
+                <!--Technical Impact Factors-->
                 <div id="ti_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How much data could be disclosed and how sensitive is it?" %}</div>
@@ -420,21 +420,21 @@ function rl_class(label) {
                             <option class="text-2" value="2">2</option>
                             <option class="text-3" value="3">3</option>
                             <option class="text-4" value="4">4</option>
-                            <option class="text-5" value="5">5 - {% trans "Possibly traceable" %}</option>
+                            <option class="text-5" value="5">5</option>
                             <option class="text-6" value="6">6</option>
-                            <option class="text-7" value="7">7</option>
+                            <option class="text-7" value="7">7 - {% trans "Possibly traceable" %}</option>
                             <option class="text-8" value="8">8</option>
                             <option class="text-9" value="9">9 - {% trans "Completely anonymous" %}</option>
                         </select>
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
-                            <div class="text-gray-100 text-xs">{% trans "Technical Impact Factor" %}</div>
+                            <div class="text-gray-100 text-xs">{% trans "Technical Impact Factors" %}</div>
                             <div class="font-bold text-white text-lg" id="TI">--</div>
                         </div>
                     </div>
                 </div>
-                <!--Business Impact Factor-->
+                <!--Business Impact Factors-->
                 <div id="bi_div" class="px-4 py-2 mx-1 my-2 shadow rounded h-1/2 grid grid-cols-5 bg-white">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How much financial damage will result from an exploit?" %} </div>
@@ -492,7 +492,7 @@ function rl_class(label) {
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-                            <div class="text-gray-100 text-xs">{% trans "Business Impact Factor" %}</div>
+                            <div class="text-gray-100 text-xs">{% trans "Business Impact Factors" %}</div>
                             <div class="font-bold text-white text-lg" id="BI">--</div>
                             <div class="flex flex-row space-x-2 items-center">
                                 <input onchange="refresh()" id="ignoreBI" type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded
