@@ -33,11 +33,6 @@ class Analysis(models.Model):
     def __str__(self):
         return 'RA-' + str(self.id) + ': ' + str(self.project) + ', version ' + str(self.version)
 
-    def save(self, *args, **kwargs):
-        for ri in self.riskscenario_set.all():
-            ri.save()
-        super(Analysis, self).save(*args, **kwargs)
-
     def get_scenario_count(self):
         count = RiskScenario.objects.filter(analysis=self.id).count()
         scenario_count = count
