@@ -56,9 +56,9 @@ class Threat(models.Model):
 
 
 class Asset(models.Model):
-    class ContentType(models.TextChoices):
+    class Type(models.TextChoices):
         """
-        The content type of the asset.
+        The type of the asset.
 
         An asset can either be a primary or a support asset.
         A support asset must be linked to another "parent" asset.
@@ -70,8 +70,8 @@ class Asset(models.Model):
     business_value = models.TextField(
         blank=True, verbose_name=_('business value'))
     comments = models.TextField(blank=True, verbose_name=_('comments'))
-    content_type = models.CharField(
-        max_length=2, choices=ContentType.choices, default=ContentType.PRIMARY, verbose_name=_('content type'))
+    type = models.CharField(
+        max_length=2, choices=Type.choices, default=Type.PRIMARY, verbose_name=_('type'))
     parent_asset = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('parent asset'))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
@@ -85,10 +85,10 @@ class Asset(models.Model):
         return self.name
 
     def is_primary(self):
-        return self.content_type == 'PR'
+        return self.type == 'PR'
 
     def is_support(self):
-        return self.content_type == 'SP'
+        return self.type == 'SP'
 
     def get_parent_asset(self):
         return self.parent_asset
