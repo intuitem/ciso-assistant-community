@@ -81,19 +81,31 @@ class Asset(models.Model):
         verbose_name_plural = _("Assets")
         verbose_name = _("Asset")
 
-    def __str__(self):
-        return self.name
+    def __str__(self) -> str:
+        return str(self.name)
 
-    def is_primary(self):
-        return self.type == 'PR'
+    def is_primary(self) -> bool:
+        """
+        Returns True if the asset is a primary asset.
+        """
+        return self.type == Asset.Type.PRIMARY
 
-    def is_support(self):
-        return self.type == 'SP'
+    def is_support(self) -> bool:
+        """
+        Returns True if the asset is a support asset.
+        """
+        return self.type == Asset.Type.SUPPORT
 
-    def get_parent_asset(self):
+    def get_parent_asset(self) -> Optional['Asset']:
+        """
+        Returns the parent asset if the current asset is a support asset.
+        """
         return self.parent_asset
 
     def get_sub_assets(self):
+        """
+        Returns all the sub assets.
+        """
         return Asset.objects.filter(parent_asset=self)
 
 
