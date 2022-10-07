@@ -8,6 +8,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from datetime import date
 
+from iam.models import Folder
+
 class Analysis(models.Model):
     RATING_METHODS = [
         ('default', _('Balanced (default)')),
@@ -274,3 +276,10 @@ class RiskAcceptance(models.Model):
         url = reverse('RA', args=(self.riskscenario.analysis.id,))
         return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.riskscenario} </a>'
 # you can consider nested inlines at some points
+
+
+class RiskMatrix(models.Model):
+    name = models.CharField(max_length=200, default=_("<Risk matrix name>"), verbose_name=_("Name"))
+    json_definition = models.JSONField(verbose_name=_("JSON definition"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
+    
