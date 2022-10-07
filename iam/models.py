@@ -1,4 +1,4 @@
-""" IAM model for MIRA 
+""" IAM model for MIRA
     Inspired from Azure IAM model """
 
 from collections import defaultdict
@@ -77,6 +77,10 @@ class Folder(models.Model):
     parent_folder = models.ForeignKey(
         "self", null=True, on_delete=models.CASCADE)
     builtin = models.BooleanField(default=False)
+    block_published_asset = models.BooleanField(default=False)
+    block_published_matrix = models.BooleanField(default=False)
+    block_published_threat = models.BooleanField(default=False)
+    block_published_security_function = models.BooleanField(default=False)
 
     class Meta:
         """ for Model """
@@ -280,21 +284,26 @@ class RoleAssignment(models.Model):
         perimeter.update(folder.sub_folders())
         for ra in [x for x in RoleAssignment.get_role_assignments(user) if ref_permission in x.role.permissions.all()]:
             ra_permissions = ra.role.permissions.all()
-            for f in perimeter & set(ra.perimeter_folders.all()):
-                target_folders = [f] + \
-                    f.sub_folders() if ra.is_recursive else [f]
+            for my_folder in perimeter & set(ra.perimeter_folders.all()):
+                target_folders = [my_folder] + \
+                    my_folder.sub_folders() if ra.is_recursive else [my_folder]
                 for p in [p for p in permissions if p in ra_permissions]:
                     if p == permissions[0]:
-                        folders_with_local_view.add(f)
+                        folders_with_local_view.add(my_folder)
                     for object in [x for x in all_objects if folder_for_object[x] in target_folders]:
                         # builtins objects cannot be edited or deleted
                         if not (hasattr(object, "builtin") and object.builtin and p != permissions[0]):
                             permissions_per_object_id[object.id].add(p)
 
         if hasattr(object_type, "is_published"):
-            for f in folders_with_local_view:
-                parent_folders = f.get_parent_folders()
-                for object in [x for x in all_objects if folder_for_object[x] in parent_folders and x.is_published]:
+            for my_folder in folders_with_local_view:
+                target_folders = []
+                my_folder2 = my_folder
+                while my_folder2 and not getattr(my_folder2, f"block_published_{class_name}", False):
+                    if my_folder2 != my_folder:
+                        target_folders.append(my_folder2)
+                    my_folder2 = my_folder2.parent_folder
+                for object in [x for x in all_objects if folder_for_object[x] in target_folders and x.is_published]:
                     permissions_per_object_id[object.id].add(permissions[0])
 
         return (
