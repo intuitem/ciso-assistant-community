@@ -48,7 +48,8 @@ class FolderUpdateForm(StyledModelForm):
     # pragma pylint: disable=no-member
     def __init__(self, *args, **kwargs):
         super(FolderUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['parent_folder'].queryset = Folder.objects.filter(content_type="GL")
+        self.fields['parent_folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        
 
     class Meta:
         """ for Model """
