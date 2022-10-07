@@ -1,9 +1,14 @@
 {% extends 'core/base.html' %}
 
-{% load i18n %}
+{% load i18n static %}
 
 {% block head %}
+{% endblock %}
+
+{% block content %}
+<script src="{% static 'js/risk.js' %}" type="module"></script>
 <script>
+
 var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
 var label_low = {% blocktrans %}'Low'{% endblocktrans %};
 var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
@@ -160,8 +165,6 @@ function refresh() {
   RL_lbl.innerHTML = `${RL}`;
   RL_lbl.classList.remove('VL','L','M','H','VH');
   RL_lbl.classList.add(rl_class(RL));
-
-
 }
 
 function getTextP(score) {
@@ -189,7 +192,7 @@ function getLabelIndex(label) {
 }
 
 function riskLevel(p, i) {
-    var matrix = [];
+    const matrix = [];
     matrix[0] = [];
     matrix[1] = [];
     matrix[2] = [];
@@ -234,8 +237,7 @@ function rl_class(label) {
 
 </script>
 
-{% endblock %}
-{% block content %}
+
 
 <main class="text-sm h-full flex flex-col">
 
@@ -370,7 +372,7 @@ function rl_class(label) {
                 </div>       
             </div>
         
-            <div class="my-4 lg:my-0" x-data="{ isTechnical = true }">
+            <div class="my-4 lg:my-0" x-data="{ isTechnical: true }">
                 <!--Technical Impact Factors-->
                 <div id="ti_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
