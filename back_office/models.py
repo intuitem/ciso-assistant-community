@@ -44,6 +44,7 @@ class Project(models.Model):
 class Threat(models.Model):
     title = models.CharField(max_length=200, default=_(
         "<threat short title>"), verbose_name=_("Title"))
+    description = models.TextField(max_length=1000, blank=True, null=True)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     is_published = models.BooleanField(_('published'), default=True)
 
