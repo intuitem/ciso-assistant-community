@@ -101,7 +101,7 @@
                 {% for item in context.items %}
                   <tr class="p-1">
                     <td class=" px-1 py-2">{{ item.analysis.project }}</td>
-                    <td class="">{{ item.title }}</td>
+                    <td class="">{{ item.name }}</td>
                       <td class="">{{ item.get_current_level_display }}</td>
                       <td class="">{{ item.get_residual_level_display }}</td>
                       <td class="">{{ item.get_treatment_display }}</td>
@@ -125,8 +125,8 @@
                 {% for item in context.items %}
                   <tr class="p-1">
                     <td class=" px-1 py-2">{{ item.risk_scenario.analysis.project }}</td>
-                    <td class="">{{ item.title }}</td>
-                      <td class="">{{ item.risk_scenario.title }}</td>
+                    <td class="">{{ item.name }}</td>
+                      <td class="">{{ item.risk_scenario.name }}</td>
                       <td class="">{{ item.get_status_display }}</td>
                       <td class=" text-center"><a href="#"><i class="fas fa-external-link-square-alt"></i></a></td>
                   </tr>

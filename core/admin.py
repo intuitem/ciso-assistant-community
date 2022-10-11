@@ -42,7 +42,7 @@ class RiskScenarioInline(admin.StackedInline):
     show_change_link = True
     fieldsets = [
         (None, {'fields': ['analysis', 'threat']}),
-        (_('Threat description'), {'fields': ['title', 'scenario']}),
+        (_('Threat description'), {'fields': ['name', 'scenario']}),
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
         (_('Residual level'), {'fields': ['associated_security_measures','residual_proba', 'residual_impact', 'residual_level']}),
         (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
@@ -51,7 +51,7 @@ class RiskScenarioInline(admin.StackedInline):
     def associated_security_measures(self, obj):
         return obj.associated_security_measures()
 
-    associated_security_measures.short_description = 'Associated SecurityMeasures (Click CHANGE next to the scenario title to Edit)'
+    associated_security_measures.short_description = 'Associated SecurityMeasures (Click CHANGE next to the scenario name to Edit)'
     readonly_fields = ('current_level', 'residual_level', 'created_at', 'updated_at', 'associated_security_measures')
 
 
@@ -69,7 +69,7 @@ class RiskScenarioAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionMo
 
     fieldsets_with_inlines = [
         (None, {'fields': ['analysis', 'threat',]}),
-        (_('Threat description'), {'fields': ['title', 'scenario']}),
+        (_('Threat description'), {'fields': ['name', 'scenario']}),
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
         # SecurityMeasureInline,
         (_('Residual level'), {'fields': ['residual_proba', 'residual_impact', 'residual_level']}),
@@ -100,7 +100,7 @@ class AnalysisAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin
 class SecurityMeasureAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
     model = SecurityMeasure
 
-    list_display = ('title', 'parent_project', 'type', 'security_function', 'effort', 'status')
+    list_display = ('name', 'parent_project', 'type', 'security_function', 'effort', 'status')
     list_filter = ('type', 'security_function', 'effort', 'status', 'eta')
 
 

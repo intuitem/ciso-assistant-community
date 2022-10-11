@@ -16,7 +16,7 @@
             {% for scenario in context %}
             <tr class="bg-gray-100">
                 <td class="text-lg p-3" colspan="9">
-                    <a class="hover:text-indigo-800" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}">{{scenario.rid}}: {{scenario.title}}</a> 
+                    <a class="hover:text-indigo-800" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}">{{scenario.rid}}: {{scenario.name}}</a> 
                     <span class="text-xs text-center p-1 mx-1 rounded
                     {% if scenario.treatment == 'open' %}
                     bg-orange-200 
@@ -51,7 +51,7 @@
             {% for securitymeasure in scenario.security_measures.all %}
             <tr class="border-b text-sm">
                 <td class="p-2 text-center"><a class="hover:text-indigo-800" id="{{securitymeasure.id}}" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.id}}</a></td>
-                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.title}}</a></td>
+                <td class=""><a class="hover:text-indigo-800" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{securitymeasure.name}}</a></td>
                 <td class="">{{securitymeasure.description}}</td>
                 <td class="">{{securitymeasure.get_type_display}}</td>
                 <td class="">{% if securitymeasure.security_function %}{{securitymeasure.security_function}}{% else %}--{% endif %}</td>

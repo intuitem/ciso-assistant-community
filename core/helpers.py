@@ -116,8 +116,8 @@ def p_risks(user: User):
     p_risks_counts = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Threat)
-    for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by('title'):
-        p_risks_labels.append(p_risk.title)
+    for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by('name'):
+        p_risks_labels.append(p_risk.name)
         p_risks_counts.append(RiskScenario.objects.filter(threat=p_risk).count())
 
     return {
@@ -131,10 +131,10 @@ def p_risks_2(user: User):
     data = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Threat)
-    for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by('title'):
+    for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by('name'):
         cnt = RiskScenario.objects.filter(threat=p_risk).count()
         if cnt > 0:
-            data.append({"value": RiskScenario.objects.filter(threat=p_risk).count(), "name": p_risk.title})
+            data.append({"value": RiskScenario.objects.filter(threat=p_risk).count(), "name": p_risk.name})
     return data
 
 

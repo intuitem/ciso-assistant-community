@@ -14,7 +14,7 @@
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
-                        {{ filter.form.title }}
+                        {{ filter.form.name }}
                 </div>
                 <div class="flex justify-center">
                     <div
@@ -134,7 +134,7 @@
                                 <div class="ml-3">
                                     <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ scenario.title|capfirst }}
+                                        {{ scenario.name|capfirst }}
                                     </a>
                                 </div>
                             </div>

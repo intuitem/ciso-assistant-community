@@ -13,12 +13,12 @@ class test_Calendar(LocaleHTMLCalendar):
 
 @pytest.mark.django_db
 def test_formatday():
-        Event.objects.create(title="Event", description="A simple event", start_time="2022-1-20", end_time="2022-1-27")
-        Event.objects.create(title="SecondEvent", description="A second event", start_time="2022-1-20", end_time="2022-1-27")
+        Event.objects.create(name="Event", description="A simple event", start_time="2022-1-20", end_time="2022-1-27")
+        Event.objects.create(name="SecondEvent", description="A second event", start_time="2022-1-20", end_time="2022-1-27")
         calendar = Calendar(LocaleHTMLCalendar)
         list = {
-        "mtg":Event.objects.get(title="Event"),
-        "ra":Event.objects.get(title="SecondEvent")
+        "mtg":Event.objects.get(name="Event"),
+        "ra":Event.objects.get(name="SecondEvent")
         }
         day = '2022-1-24'
         print(Calendar.formatday(calendar, day, list))

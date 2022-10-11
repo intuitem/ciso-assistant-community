@@ -40,8 +40,8 @@ class Project(models.Model):
 
 
 class Threat(models.Model):
-    title = models.CharField(max_length=200, default=_(
-        "<threat short title>"), verbose_name=_("Title"))
+    name = models.CharField(max_length=200, default=_(
+        "<threat short name>"), verbose_name=_("Name"))
     description = models.TextField(max_length=1000, blank=True, null=True)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     is_published = models.BooleanField(_('published'), default=True)
@@ -51,7 +51,7 @@ class Threat(models.Model):
         verbose_name_plural = _("Threats")
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Asset(models.Model):

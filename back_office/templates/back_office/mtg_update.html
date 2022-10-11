@@ -17,8 +17,8 @@
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Title" %}</p>
-                {{ form.title.errors }}
-                {{ form.title }}
+                {{ form.name.errors }}
+                {{ form.name }}
             </div>
             <div class="flex flex-col">
                 <p class="text-sm font-semibold">{% trans "Risk Scenarios" %}</p>
@@ -26,7 +26,7 @@
                 {% for rs in risk_scenarios %}
                     <li class="text-sm list-disc list-inside">
                         {{ rs.errors }}
-                        {{ rs.title }}
+                        {{ rs.name }}
                     </li>
                 {% endfor %}
                 </ul>

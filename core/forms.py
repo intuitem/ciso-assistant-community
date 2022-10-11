@@ -75,7 +75,7 @@ class SecurityMeasureUpdateForm(StyledModelForm):
 class RiskScenarioCreateForm(StyledModelForm):
     class Meta:
         model = RiskScenario
-        fields = ['analysis', 'threat', 'title', 'scenario']
+        fields = ['analysis', 'threat', 'name', 'scenario']
 
 
 class RiskScenarioUpdateForm(StyledModelForm):

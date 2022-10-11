@@ -153,10 +153,10 @@ class SearchResults(ListView):
         query = self.request.GET.get('q')
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
-        ri_list = RiskScenario.objects.filter(Q(title__icontains=query) | Q(threat__title__icontains=query)).filter(id__in=object_ids_view)[:10]
+        ri_list = RiskScenario.objects.filter(Q(name__icontains=query) | Q(threat__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
-        mtg_list = SecurityMeasure.objects.filter(Q(title__icontains=query) | Q(security_function__name__icontains=query)).filter(id__in=object_ids_view)[:10]
+        mtg_list = SecurityMeasure.objects.filter(Q(name__icontains=query) | Q(security_function__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         ra_list = Analysis.objects.filter(Q(project__name__icontains=query)).filter(id__in=object_ids_view)[:10]
@@ -316,7 +316,7 @@ def export_risks_csv(request, analysis):
         response['Content-Disposition'] = f'attachment; filename="RA-{ra.id}-{ra.project}-v-{ra.version}.csv"'
 
         writer = csv.writer(response, delimiter=';')
-        columns = ['rid', 'threat', 'title', 'scenario',
+        columns = ['rid', 'threat', 'name', 'scenario',
                 'existing_measures', 'current_level', 'measures', 'residual_level',
                 'treatment']
         writer.writerow(columns)
@@ -324,8 +324,8 @@ def export_risks_csv(request, analysis):
         for ri in ra.riskscenario_set.all():
             security_measures = ''
             for mtg in ri.security_measures.all():
-                security_measures += f"[{mtg.status}]{mtg.title} \n"
-            row = [ri.rid(), ri.threat, ri.title, ri.scenario,
+                security_measures += f"[{mtg.status}]{mtg.name} \n"
+            row = [ri.rid(), ri.threat, ri.name, ri.scenario,
                 ri.existing_measures, ri.get_current_level_display(),
                 security_measures, ri.get_residual_level_display(), ri.treatment,
                 ]
@@ -348,7 +348,7 @@ def export_mp_csv(request, analysis):
 
         writer = csv.writer(response, delimiter=';')
         columns = ['risk_scenario',
-                'measure_id', 'measure_title', 'measure_desc', 'type', 'security_function', 'eta', 'effort', 'link', 'status',
+                'measure_id', 'measure_name', 'measure_desc', 'type', 'security_function', 'eta', 'effort', 'link', 'status',
                 ]
         writer.writerow(columns)
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
@@ -356,9 +356,9 @@ def export_mp_csv(request, analysis):
         for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis=analysis):
             risk_scenarios = []
             for rs in mtg.riskscenario_set.all():
-                risk_scenarios.append(str(rs.rid()) + ": " + rs.title)
+                risk_scenarios.append(str(rs.rid()) + ": " + rs.name)
             row = [risk_scenarios,
-                mtg.id, mtg.title, mtg.description, mtg.type, mtg.security_function, mtg.eta, mtg.effort, mtg.link, mtg.status,
+                mtg.id, mtg.name, mtg.description, mtg.type, mtg.security_function, mtg.eta, mtg.effort, mtg.link, mtg.status,
                 ]
             writer.writerow(row)
 

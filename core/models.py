@@ -141,7 +141,7 @@ class SecurityMeasure(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
 
-    title = models.CharField(max_length=200, verbose_name=_("Title"))
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
     description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
     type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
     status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
@@ -164,7 +164,7 @@ class SecurityMeasure(models.Model):
         return self.project
 
     def __str__(self):
-        return self.title
+        return self.name
 
     def get_ranking_score(self):
         if self.effort:
@@ -178,7 +178,7 @@ class SecurityMeasure(models.Model):
     @property
     def get_html_url(self):
         url = reverse('MP', args=(self.project.id,))
-        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.project.name}: {self.title} </a>'
+        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.project.name}: {self.name} </a>'
 
 
 class RiskScenario(models.Model):
@@ -201,7 +201,7 @@ class RiskScenario(models.Model):
     assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
     security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
-    title = models.CharField(max_length=200, verbose_name=_("Title"))
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
     scenario = models.TextField(max_length=2000, help_text=_("Risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
@@ -238,7 +238,7 @@ class RiskScenario(models.Model):
     parent_project.short_description = _("Parent project")
 
     def __str__(self):
-        return str(self.parent_project()) + ': ' + str(self.title)
+        return str(self.parent_project()) + ': ' + str(self.name)
 
     def rid(self):
         return 'R.' + str(self.id)

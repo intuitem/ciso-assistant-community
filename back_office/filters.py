@@ -115,7 +115,7 @@ class AnalysisFilter(GenericFilterSet):
         fields = ['is_draft', 'auditor', 'project']
 
 class RiskScenarioFilter(GenericFilterSet):
-    title = GenericCharFilter(widget=TextInput(
+    name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
                 'placeholder': _('Search scenario...')
@@ -127,14 +127,14 @@ class RiskScenarioFilter(GenericFilterSet):
 
     orderby = GenericOrderingFilter(
         fields=(
-            ('title', 'title'),
+            ('name', 'name'),
             ('threat', 'threat'),
             ('analysis__project', 'analysis__project'),
             ('treatment', 'treatment'),
         ),
         field_labels={
-            'title': _('title'.capitalize()),
-            '-title': _('Title (descending)'),
+            'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
             'threat': _('threat'.capitalize()),
             '-threat': _('Threat (descending)'),
             'analysis__project': _('parent'.capitalize() + ' project'),
@@ -146,10 +146,10 @@ class RiskScenarioFilter(GenericFilterSet):
 
     class Meta:
         model = RiskScenario
-        fields = ['title', 'threat', 'analysis__project', 'treatment']
+        fields = ['name', 'threat', 'analysis__project', 'treatment']
 
 class SecurityMeasureFilter(GenericFilterSet):
-    title = GenericCharFilter(widget=TextInput(
+    name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
                 'placeholder': _('Search security measure...')
@@ -163,7 +163,7 @@ class SecurityMeasureFilter(GenericFilterSet):
     orderby = GenericOrderingFilter(
         fields=(
             ('status', 'status'),
-            ('title', 'title'),
+            ('name', 'name'),
             ('type', 'type'),
             ('risk_scenario__analysis__project', 'risk_scenario__analysis__project'),
             ('security_function', 'security_function'),
@@ -171,8 +171,8 @@ class SecurityMeasureFilter(GenericFilterSet):
         field_labels={
             'status': _('status'.capitalize()),
             '-status': _('Status (descending)'),
-            'title': _('title'.capitalize()),
-            '-title': _('Title (descending)'),
+            'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
             'risk_scenario__analysis__project': _('parent'.capitalize() + ' project'),
@@ -184,10 +184,10 @@ class SecurityMeasureFilter(GenericFilterSet):
 
     class Meta:
         model = SecurityMeasure
-        fields = ['title', 'type', 'risk_scenario__analysis__project', 'security_function']
+        fields = ['name', 'type', 'risk_scenario__analysis__project', 'security_function']
 
 class RiskAcceptanceFilter(GenericFilterSet):
-    risk_scenario__title = GenericCharFilter(widget=TextInput(
+    risk_scenario__name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
                 'placeholder': _('Search acceptance...')
@@ -196,14 +196,14 @@ class RiskAcceptanceFilter(GenericFilterSet):
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
     orderby = GenericOrderingFilter(
         fields=(
-            ('risk_scenario__title', 'risk_scenario__title'),
+            ('risk_scenario__name', 'risk_scenario__name'),
             ('type', 'type'),
             ('expiry_date', 'expiry_date'),
             ('validator', 'validator'),
         ),
         field_labels={
-            'risk_scenario__title': _('title'.capitalize()),
-            '-risk_scenario__title': _('Title (descending)'),
+            'risk_scenario__name': _('name'.capitalize()),
+            '-risk_scenario__name': _('Name (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
             'expiry_date': _('expiry'.capitalize() + ' date'),
@@ -215,7 +215,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ['risk_scenario__title', 'type']
+        fields = ['risk_scenario__name', 'type']
 
 class ProjectsDomainFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -270,7 +270,7 @@ class ProjectFilter(GenericFilterSet):
         fields = '__all__'
 
 class ThreatFilter(GenericFilterSet):
-    title = GenericCharFilter(widget=TextInput(
+    name = GenericCharFilter(widget=TextInput(
         attrs={
                 'class': 'h-10 rounded-r-lg border-none focus:ring-0',
                 'placeholder': _('Search threat...')
@@ -278,11 +278,11 @@ class ThreatFilter(GenericFilterSet):
     ))
     orderby = GenericOrderingFilter(
         fields=(
-            ('title', 'title'),
+            ('name', 'name'),
         ),
         field_labels={
-            'title': _('title'.capitalize()),
-            '-title': _('Title (descending)'),
+            'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
         }
     )
 
