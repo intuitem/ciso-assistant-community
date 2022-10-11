@@ -37,11 +37,11 @@ const m2 = '{\
      {"abbreviation": "VH", "label": "Very High", "description": ">1000k$"}\
     ],\
     "risk": [\
-     {"abbreviation": "VL", "label": "Very Low", "description": "acceptable risk"},\
-     {"abbreviation": "L", "label": "Low", "description": "acceptable risk"},\
-     {"abbreviation": "M", "label": "Medium", "description": "risk requiring mitigation within 2 years"},\
-     {"abbreviation": "H", "label": "High", "description": "unacceptable risk"},\
-     {"abbreviation": "VH", "label": "Very High", "description": "unacceptable risk"}\
+     {"abbreviation": "VL", "label": "Very Low", "description": "acceptable risk", "rgb": "#BBF7D0"},\
+     {"abbreviation": "L", "label": "Low", "description": "acceptable risk", "rgb": "#BEF264"},\
+     {"abbreviation": "M", "label": "Medium", "description": "risk requiring mitigation within 2 years", "rgb": "#FEF08A"},\
+     {"abbreviation": "H", "label": "High", "description": "unacceptable risk", "rgb": "#FBBF24"},\
+     {"abbreviation": "VH", "label": "Very High", "description": "unacceptable risk", "rgb": "#F87171"}\
     ],\
     "grid": [\
         [0, 0, 1, 1, 2],\
@@ -260,6 +260,7 @@ function renderLabels(labels) {
     document.getElementById("probability_label").innerHTML = labels['probability'] === -1 ? '--' : labels['probability']['label'];
     document.getElementById("impact_label").innerHTML = labels['impact'] === -1 ? '--' : labels['impact']['label'];
     document.getElementById("risk_label").innerHTML = labels['risk'] === -1 ? '--' : labels['risk']['label'];
+    document.getElementById("risk_label").style.backgroundColor = labels['risk'] === -1 ? 'white' : labels['risk']['rgb'];
 }
 
 function isBusinessImpactIgnored() {
