@@ -24,7 +24,7 @@ class StyledModelForm(ModelForm):
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
             if input_type in select_inputs:
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
-                f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+                f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
             if input_type == Textarea:
                 f.widget.attrs['class'] = 'block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500'
             if input_type == CheckboxInput:
@@ -43,7 +43,18 @@ class ProjectForm(StyledModelForm):
     class Meta:
         model = Project
         fields = '__all__'
-        labels = {'domain': _('Domain')}
+        labels = {'folder': _('Domain')}
+
+class ProjectFormInherited(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProjectFormInherited, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
+
+    class Meta:
+        model = Project
+        fields = '__all__'
+        labels = {'folder': _('Domain')}
 
 class ProjectUpdateForm(StyledModelForm):
 

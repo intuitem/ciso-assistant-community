@@ -23,7 +23,7 @@ class StyledModelForm(ModelForm):
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
             if input_type in select_inputs:
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
-                f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+                f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
             if input_type == Textarea:
                 f.widget.attrs['class'] = 'block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500'
             if input_type == CheckboxInput:
@@ -42,6 +42,15 @@ class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:
         model = Analysis
         fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
+        
+class RiskAnalysisCreateFormInherited(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['project'].widget.attrs['select_disabled'] = True
+        
+    class Meta:
+        model = Analysis
+        fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
@@ -54,10 +63,18 @@ class SecurityMeasureCreateForm(StyledModelForm):
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
-        labels = {
-            'risk_scenario': _('Risk scenario'),
-            'security_function': _('Security function'),
+        widgets = {
+            'eta': DefaultDateInput()
         }
+
+class SecurityMeasureCreateFormInherited(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['project'].widget.attrs['select_disabled'] = True
+
+    class Meta:
+        model = SecurityMeasure
+        fields = '__all__'
         widgets = {
             'eta': DefaultDateInput()
         }
@@ -73,6 +90,9 @@ class SecurityMeasureUpdateForm(StyledModelForm):
 
 
 class RiskScenarioCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['analysis'].widget.attrs['select_disabled'] = True
     class Meta:
         model = RiskScenario
         fields = ['analysis', 'threat', 'name', 'scenario']
