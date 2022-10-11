@@ -52,73 +52,60 @@ const m2 = '{\
     ]\
 }'; // DEBUG, used to test the functions below
 
-function getArray(matrix) {
-    const parsed_matrix = JSON.parse(matrix);
-    var array = new Array();
-    for (var i = 0; i < parsed_matrix.probability.length; i++) {
-        array[i] = new Array();
-        for (var j = 0; j < parsed_matrix.impact.length; j++) {
-            array[i][j] = parsed_matrix.grid[i][j];
-        }
+class RiskEngine {
+    constructor(matrix) {
+        this.matrix = JSON.parse(matrix);
     }
-    return array;
-}
-
-function getLabel(matrix, index) {
-    const parsed_matrix = JSON.parse(matrix);
-    return parsed_matrix.risk[index].name;
-}
-
-function getLabelsArray(array) {
-    var labels = new Array();
-    for (var i = 0; i < array.length; i++) {
-        labels[i] = new Array();
-        for (var j = 0; j < array[i].length; j++) {
-            labels[i][j] = getLabel(m, array[i][j]);
-        }
+    get grid() {
+        return this.matrix.grid;
     }
-    return labels;
-}
-
-function getMatrixFields(matrix) {
-    const parsed_matrix = JSON.parse(matrix);
-    var array = new Array();
-    for (var i = 0; i < parsed_matrix.probability.length; i++) {
-        array[i] = new Array();
-        for (var j = 0; j < parsed_matrix.impact.length; j++) {
-            var dict = new Object();
-            dict["probability"] = parsed_matrix.probability[i];
-            dict["impact"] = parsed_matrix.impact[j];
-            dict["risk"] = parsed_matrix.risk[parsed_matrix.grid[i][j]];
-            array[i][j] = dict;
-        }
+    getRiskIndex(probability, impact) {
+        return this.grid[probability][impact];
     }
-    return array;
-}
-
-function renderMatrix(matrix) {
-    const array = getMatrixFields(matrix);
-    var table = document.getElementById("matrix");
-    for (var i = 0; i < array.length; i++) {
-        var row = table.insertRow(i);
-        for (var j = 0; j < array[i].length; j++) {
-            var cell = row.insertCell(j);
-            cell.innerHTML = array[i][j].risk.abbreviation; // DEBUG
-        }
+    getRisk(probability, impact) {
+        return this.matrix.risk[this.getRiskIndex(probability, impact)];
     }
 }
+
+// function getMatrixFields(matrix) {
+//     const parsed_matrix = JSON.parse(matrix);
+//     var array = new Array();
+//     for (var i = 0; i < parsed_matrix.probability.length; i++) {
+//         array[i] = new Array();
+//         for (var j = 0; j < parsed_matrix.impact.length; j++) {
+//             var dict = new Object();
+//             dict["probability"] = parsed_matrix.probability[i];
+//             dict["impact"] = parsed_matrix.impact[j];
+//             dict["risk"] = parsed_matrix.risk[parsed_matrix.grid[i][j]];
+//             array[i][j] = dict;
+//         }
+//     }
+//     return array;
+// }
+
+// function renderMatrix(matrix) {
+//     const array = getMatrixFields(matrix);
+//     var table = document.getElementById("matrix");
+//     for (var i = 0; i < array.length; i++) {
+//         var row = table.insertRow(i);
+//         for (var j = 0; j < array[i].length; j++) {
+//             var cell = row.insertCell(j);
+//             cell.innerHTML = array[i][j].risk.abbreviation; // DEBUG
+//         }
+//     }
+// }
 
 function getScoringFromVector(matrix, vectorString) { // Consider splititng this function
     const parsed_matrix = JSON.parse(matrix);
     const vector = vectorString.replace(/[^0-9a-z]/gi, '').split("");
 
-    console.debug(vector); // DEBUG
+    // console.debug(vector); // DEBUG
 
     const probabilityVector = vector.slice(0, vector.length / 2);
     const impactVector = vector.slice(vector.length / 2, vector.length);
     
-    console.debug(impactVector); // DEBUG
-    console.debug(probabilityVector); // DEBUG
+    // console.debug(impactVector); // DEBUG
+    // console.debug(probabilityVector); // DEBUG
 
     var score = new Object();
 
@@ -255,8 +242,8 @@ function scoreToRating(matrix, score) {
 }
 
 function renderLabels(labels) {
-    console.debug('labels: '); // DEBUG
-    console.debug(labels); // DEBUG
+    // console.debug('labels: '); // DEBUG
+    // console.debug(labels); // DEBUG
     document.getElementById("probability_label").innerHTML = labels['probability'] === -1 ? '--' : labels['probability']['label'];
     document.getElementById("impact_label").innerHTML = labels['impact'] === -1 ? '--' : labels['impact']['label'];
     document.getElementById("risk_label").innerHTML = labels['risk'] === -1 ? '--' : labels['risk']['label'];
@@ -339,7 +326,7 @@ function renderIgnoredFactors() {
 
 function refresh() {
     const ignoreBusinessImpact = isBusinessImpactIgnored();
-    console.debug(ignoreBusinessImpact); // DEBUG
+    // console.debug(ignoreBusinessImpact); // DEBUG
 
     const factors = getFactorsValues();
     const vector = buildVector(factors);
