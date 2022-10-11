@@ -27,7 +27,7 @@ urlpatterns = [
     path('roles/', login_required(views.RoleAssignmentListView.as_view()), name='role-list'),
 
     # CREATE VIEWS
-    path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='ra-create'),
+    path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create'),
     path('RA/create_modal/', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create-modal'),
     
     path('MSR/create_modal/', login_required(views.SecurityMeasureCreateViewModal.as_view()), name='measure-create-modal'),
@@ -38,7 +38,7 @@ urlpatterns = [
     
     path('TH/create_modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
 
-    path('RA/<int:parent_analysis>/RS/create', login_required(views.RiskScenarioCreateView.as_view()), name='ri-create'),
+    path('RA/<int:parent_analysis>/RS/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
     path('RS/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
 
     path('PD/create', login_required(views.FolderCreateView.as_view()), name='pd-create'),
@@ -48,6 +48,8 @@ urlpatterns = [
     path('PRJ/create_modal/', login_required(views.ProjectCreateViewModal.as_view()), name='project-create-modal'),
     
     path('AST/create/', login_required(views.AssetCreateView.as_view()), name='asset-create'),
+    path('AST/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
+
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
     path('user_groups/create', login_required(views.UserGroupCreateView.as_view()), name='user_group-create'),

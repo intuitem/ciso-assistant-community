@@ -15,8 +15,7 @@ class Project(models.Model):
         ('dropped', _('Dropped')),
 
     ]
-    name = models.CharField(max_length=200, default=_(
-        "<short project name>"), verbose_name=_("Project Name"))
+    name = models.CharField(max_length=200, verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, help_text=_("If an internal reference applies"),
                                    null=True, blank=True, verbose_name=_("Internal ID"))
     folder = models.ForeignKey(
@@ -24,7 +23,6 @@ class Project(models.Model):
     lc_status = models.CharField(max_length=20, default='in_design',
                                  choices=PRJ_LC_STATUS, verbose_name=_("Status"))
     summary = models.TextField(max_length=1000, blank=True, null=True,
-                               default=_("<brief summary of the project>"),
                                help_text=_(
                                    "This summary is optional and will appear in the risk analysis for context"),
                                verbose_name=_("Summary"))

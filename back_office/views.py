@@ -211,6 +211,18 @@ class AssetCreateView(UserPassesTestMixin, CreateView):
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"))
 
+class AssetCreateViewModal(UserPassesTestMixin, CreateView):
+    model = Asset
+    template = 'back_office/snippets/asset_create.html'
+    context_object_name = 'asset'
+    form_class = AssetForm
+
+    def get_success_url(self):
+        return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"))
+
 
 class AssetUpdateView(UserPassesTestMixin, UpdateView):
     model = Asset
