@@ -88,7 +88,6 @@ class SecurityMeasureUpdateForm(StyledModelForm):
             'eta': DefaultDateInput(format='%Y-%m-%d')
         }
 
-
 class RiskScenarioCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -105,6 +104,7 @@ class RiskScenarioUpdateForm(StyledModelForm):
         self.fields['current_impact'].widget.attrs['onchange'] = 'refresh();'
         self.fields['residual_proba'].widget.attrs['onchange'] = 'refresh();'
         self.fields['residual_impact'].widget.attrs['onchange'] = 'refresh();'
+        self.fields['security_measures'].queryset = SecurityMeasure.objects.filter(project=self.instance.analysis.project)
 
     class Meta:
         model = RiskScenario
