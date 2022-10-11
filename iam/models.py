@@ -66,12 +66,10 @@ class Folder(models.Model):
         """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
-    name = models.CharField(max_length=200, default=_(
-        "<Group title>"), verbose_name=_("Name"))
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
     # childrenClassName
     description = models.CharField(
-        max_length=100, default=_("<Short description>"),
-        blank=True, null=True, verbose_name=_("Description"))
+        max_length=100, blank=True, null=True, verbose_name=_("Description"))
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(

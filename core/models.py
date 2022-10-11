@@ -141,7 +141,7 @@ class SecurityMeasure(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
 
-    title = models.CharField(max_length=200, default=_("<short title for the measure>"), verbose_name=_("Title"))
+    title = models.CharField(max_length=200, verbose_name=_("Title"))
     description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
     type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
     status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
@@ -201,11 +201,10 @@ class RiskScenario(models.Model):
     assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
     security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
-    title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
-    scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
+    title = models.CharField(max_length=200, verbose_name=_("Title"))
+    scenario = models.TextField(max_length=2000, help_text=_("Risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
-                                         default=_("<we have security function A and Process B to handle this>"),
                                          verbose_name=_("Existing measures"))
 
     # current
@@ -256,7 +255,7 @@ class RiskAcceptance(models.Model):
         ('permanent', _('Permanent')),
     ]
     risk_scenario = models.ForeignKey(RiskScenario, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
-    validator = models.CharField(max_length=200, default=_("<Risk owner and validator identity>"), verbose_name=_("Validator"))
+    validator = models.CharField(max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"))
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
     expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
                                    blank=True, null=True, verbose_name=_("Expiry date"))
@@ -279,7 +278,7 @@ class RiskAcceptance(models.Model):
 
 
 class RiskMatrix(models.Model):
-    name = models.CharField(max_length=200, default=_("<Risk matrix name>"), verbose_name=_("Name"))
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
     json_definition = models.JSONField(verbose_name=_("JSON definition"))
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
     

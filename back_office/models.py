@@ -17,7 +17,7 @@ class Project(models.Model):
     ]
     name = models.CharField(max_length=200, default=_(
         "<short project name>"), verbose_name=_("Project Name"))
-    internal_id = models.CharField(max_length=100, default=_("<if an internal reference applies>"),
+    internal_id = models.CharField(max_length=100, help_text=_("If an internal reference applies"),
                                    null=True, blank=True, verbose_name=_("Internal ID"))
     folder = models.ForeignKey(
         Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))

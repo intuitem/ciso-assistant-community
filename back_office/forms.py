@@ -38,7 +38,7 @@ class StyledModelForm(ModelForm):
 class ProjectForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type="DO")
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
 
     class Meta:
         model = Project
