@@ -95,7 +95,7 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
         self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
-        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
+        qs = self.model.objects.filter(id__in=object_ids_view).filter(analysis=self.analysis).order_by(self.ordering)
         return qs 
 
     def get_context_data(self, **kwargs):
