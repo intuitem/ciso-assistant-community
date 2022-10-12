@@ -135,7 +135,7 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['analyses'] = Analysis.objects.filter(
             project=self.get_object()).order_by('is_draft', 'id')
-        context['analysis_create_form'] = RiskAnalysisCreateForm(
+        context['analysis_create_form'] = RiskAnalysisCreateFormInherited(
             initial={'project': get_object_or_404(Project, id=self.kwargs['pk']), 'auditor': self.request.user})
         context['crumbs'] = {'project-list': _('Projects')}
         return context
@@ -336,8 +336,8 @@ class FolderUpdateView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['projects'] = Project.objects.filter(folder=self.get_object())
         context['crumbs'] = {'pd-list': _('Projects domains')}
-        context['project_create_form'] = ProjectForm(
-            initial={'domain': get_object_or_404(Folder, id=self.kwargs['pk'])})
+        context['project_create_form'] = ProjectFormInherited(
+            initial={'folder': get_object_or_404(Folder, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
@@ -550,8 +550,8 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         context['existing_security_measures'] = SecurityMeasure.objects.filter(
             project=self.get_object().analysis.project)
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
-        context['measure_create_form'] = SecurityMeasureCreateForm(
-            initial={'risk_scenario': get_object_or_404(RiskScenario, id=self.kwargs['pk'])})
+        context['measure_create_form'] = SecurityMeasureCreateFormInherited(
+            initial={'project': get_object_or_404(Project, id=self.get_object().analysis.project.id)})
         return context
 
     def get_success_url(self) -> str:
