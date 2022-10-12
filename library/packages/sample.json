@@ -1,0 +1,68 @@
+{
+    "name": "Sample",
+    "description": "Sample library",
+    "format_version": "1.0",
+    "objects": [
+        {
+            "type": "matrix",
+            "fields": {
+                "name": "balanced",
+                "description": "inspired from FAIR",
+                "probability" : [
+                    {"abbreviation": "L", "name": "Low", "description": "Unfrequent event"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Occasional event"},
+                    {"abbreviation": "H", "name": "High", "description": "Frequent event"}
+                ],
+                "impact": [
+                    {"abbreviation": "L", "name": "Low", "description": "<100k$"},
+                    {"abbreviation": "M", "name": "Medium", "description": "between 100 to 1000k$"},
+                    {"abbreviation": "H", "name": "High", "description": ">1000k$"}
+                ],
+                "risk": [
+                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "rgb": "#00FF00"},
+                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years","rgb": "#FFFF00"},
+                    {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "rgb": "#FF0000"}
+                ],
+                "grid": [
+                    [1, 2, 2], 
+                    [0, 1, 2],
+                    [0, 0, 1]
+                ]
+            }
+        },
+        {
+            "type": "matrix",
+            "fields": {
+                "name": "critical",
+                "description": "critical matrix",
+                "probability" : [
+                    {"abbreviation": "L", "name": "Low", "description": "Unfrequent event"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Occasional event"},
+                    {"abbreviation": "H", "name": "High", "description": "Frequent event"}
+                ],
+                "impact": [
+                    {"abbreviation": "L", "name": "Low", "description": "<100k$"},
+                    {"abbreviation": "M", "name": "Medium", "description": "between 100 to 1000k$"},
+                    {"abbreviation": "H", "name": "High", "description": ">1000k$"}
+                ],
+                "risk": [
+                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "rgb": "#00FF00"},
+                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years", "rgb": "#FFFF00"},
+                    {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "rgb": "#FF0000"}
+                ],
+                "grid": [
+                    [1, 2, 3], 
+                    [0, 1, 2],
+                    [0, 0, 1]
+                ]
+            }
+        },
+        {
+            "type": "threat",
+            "fields": {
+                "name": "sample threat",
+                "description": "sample threat description"
+            }
+        }
+    ]
+}

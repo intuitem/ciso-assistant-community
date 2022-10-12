@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'back_office',
     'cal',
     'django_filters',
+    'library',
     'import_export',
     'reversion',
 ]

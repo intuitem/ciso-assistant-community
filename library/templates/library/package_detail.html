@@ -1,0 +1,38 @@
+{% extends 'back_office/base.html' %}
+
+{% load i18n static %}
+
+<!-- {% block title %}{{ package.name }}{% endblock %} -->
+
+{% block content %}
+
+<div>
+    {% with page_title=package.name %}
+    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <div class="relative overflow-x-auto overflow-y-auto shadow-md rounded-lg bg-white">
+        <div class="py-5 px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                {{ package.name }}
+            </h3>
+            <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+                {{ package.description }}
+            </p>
+            <table class="w-full text-sm text-left text-gray-500 ">
+                <tr class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <th class="px-6 py-3">Threat name</th>
+                    <th class="px-6 py-3">Description</th>
+                </tr>
+                {% for object in package.objects %}
+                    <tr>
+                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
+                        <td class="px-6 py-3">{{ object.fields.description }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

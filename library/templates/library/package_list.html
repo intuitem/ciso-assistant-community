@@ -1,0 +1,68 @@
+{% extends 'back_office/base.html' %}
+
+{% load i18n static %}
+
+<!-- {% block title %}{% trans "Packages"|title %}{% endblock %} -->
+
+{% block content %}
+
+<div>
+    {% with page_title=_('Packages') %}
+    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <th class="px-6 py-3">{% trans "Package name" %}</th>
+                <th class="px-6 py-3">{% trans "Description" %}</th>
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                {% for package in packages %}
+                    <tr class=" odd:bg-white even:bg-gray-50 ">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="ml-3">
+                                    <a id="package{{ package.name }}" href="#?next={{ request.path|urlencode }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        {{ package.name }}
+                                    </a>
+                                </div>
+                            </div>
+                        </th>
+                        <td class="px-6 py-4">
+                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                {{ package.description }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+
+                            <div class="w-full">
+                                <span x-data="{ open : false }">
+                                    <a href="{% url 'package-detail' package.name %}" class="table-action"><i class="far fa-eye"></i></a>
+                                </span>
+                                <span>
+                                    <a href="#?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <i class="fas fa-file-import"></i>
+                                    </a>
+                                </span>
+
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No package found." %}</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'back_office/snippets/paginator.html' %}
+    </div>
+</div>
+
+
+{% endblock %}
