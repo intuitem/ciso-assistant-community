@@ -279,6 +279,8 @@ class RiskAcceptance(models.Model):
 
 class RiskMatrix(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
-    json_definition = models.JSONField(verbose_name=_("JSON definition"))
+    description = models.TextField(max_length=2000, verbose_name=_("Description"), blank=True, null=True)
+    json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
+        See the documentation for more information."), default=dict)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
     
