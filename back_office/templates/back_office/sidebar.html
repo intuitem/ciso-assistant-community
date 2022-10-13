@@ -139,7 +139,7 @@
                     </a>
                 </li>
                 <li class="to-page">
-                    <a href="{% url 'matrix' %}"
+                    <a href="{% url 'matrix-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-border-all"></i>
@@ -235,7 +235,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Packages" %}</span>
                     </a>
                 </li>
-                <li class="to-page">
+                {% comment %} <li class="to-page">
                     <a href="#"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
@@ -243,7 +243,7 @@
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "User guide" %}</span>
                     </a>
-                </li>
+                </li> {% endcomment %}
                 <li class="to-page" x-data="{ open : false }">
                     <a @click="open = !open" class="relative flex flex-row items-center pr-6 nav-link cursor-pointer">
                         <span class="nav-link-icon">

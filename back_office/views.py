@@ -18,6 +18,8 @@ from .filters import *
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
 from django.contrib.auth import get_user_model
 
+import json
+
 User = get_user_model()
 
 
@@ -377,11 +379,6 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
-        # if not self.request.user.is_superuser:
-        #     agg_data = Analysis.objects.filter(auditor=self.request.user).order_by('is_draft', 'id')
-        # else:
-        #     agg_data = Analysis.objects.all().order_by('is_draft', 'id')
-        # return agg_data
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1181,3 +1178,32 @@ class UserPasswordChangeView(PasswordChangeView):
         kwargs["user"] = get_object_or_404(User, pk=self.kwargs['pk'])
         # print('DEBUG: User =', get_object_or_404(User, pk=self.kwargs['pk']))
         return kwargs
+
+class RiskMatrixListView(UserPassesTestMixin, ListView):
+    template_name = 'back_office/risk_matrix_list.html'
+    context_object_name = 'matrices'
+
+    ordering = 'id'
+    paginate_by = 10
+    model = RiskMatrix
+
+    def get_queryset(self):
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)
+        qs = self.model.objects.all().order_by('id')
+        filtered_list = RiskMatrixFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = self.get_queryset()
+        filter = RiskMatrixFilter(self.request.GET, queryset)
+        context['filter'] = filter
+        return context
+
+
+    def test_func(self):
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True

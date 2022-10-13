@@ -11,28 +11,124 @@
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
     <div class="relative overflow-x-auto overflow-y-auto shadow-md rounded-lg bg-white">
-        <div class="py-5 px-6">
-            <h3 class="text-lg leading-6 font-medium text-gray-900">
-                {{ package.name }}
-            </h3>
-            <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-                {{ package.description }}
-            </p>
-            <table class="w-full text-sm text-left text-gray-500 ">
-                <tr class="text-xs text-gray-700 uppercase bg-gray-50">
-                    <th class="px-6 py-3">Threat name</th>
-                    <th class="px-6 py-3">Description</th>
-                </tr>
-                {% for object in package.objects %}
-                    <tr>
-                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
-                        <td class="px-6 py-3">{{ object.fields.description }}</td>
-                    </tr>
+        <div class="py-5 px-6 flex flex-col space-y-2">
+            <div>
+                <div class="flex flex-col">
+                    <div class="flex justify-between w-full">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">
+                            {{ package.name }}
+                        </h3>
+                        <form action="{% url 'import-default-package' package.name %}" method="POST" c>
+                            {% csrf_token %}
+                            <button type="submit" class="text-2xl text-gray-700 hover:text-indigo-800 cursor-pointer w-fit">
+                                <i class="fas fa-file-import"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+                        {{ package.description }}
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-col space-y-4">
+                {% for type in types %}
+                <div class="bg-white shadow border border-gray-100 text-left p-4 font-semibold rounded">
+                    <h2>Objects of type: {{ type|upper }}</h2>
+                    <table class="w-full text-sm text-left text-gray-500">
+                        {% if type == "threat" %}
+                            <tr class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <th class="px-6 py-3">{% trans "Threat name" %}</th>
+                                <th class="px-6 py-3">{% trans "Description" %}</th>
+                            </tr>
+                            {% for object in package.objects %}
+                                {% if object.type == type %}
+                                    <tr>
+                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name|capfirst }}</td>
+                                        <td class="px-6 py-3">{{ object.fields.description|capfirst }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% elif type == "matrix" %}
+                            <tr class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <th class="px-6 py-3">{% trans "Matrix name" %}</th>
+                                <th class="px-6 py-3">{% trans "Description" %}</th>
+                                <th class="px-6 py-3">{% trans "Probability" %}</th>
+                                <th class="px-6 py-3">{% trans "Impact" %}</th>
+                                <th class="px-6 py-3">{% trans "Risk" %}</th>
+                            </tr>
+                            {% for object in package.objects %}
+                                {% if object.type == type %}
+                                    <tr class="even:bg-white odd:bg-gray-50">
+                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name|capfirst }}</td>
+                                        <td class="px-6 py-3">{{ object.fields.description|capfirst }}</td>
+                                        <td class="px-6 py-3">
+                                            {% for probability in object.fields.probability %}
+                                                <div class="flex flex-row space-x-2">
+                                                    <div class="">{{ probability.abbreviation|capfirst }}</div>
+                                                    <div class="">{{ probability.name|capfirst }}</div>
+                                                    <div class="">{{ probability.description|capfirst }}</div>
+                                                </div>
+                                            {% endfor %}
+                                        </td>
+                                        <td class="px-6 py-3">
+                                        {% for impact in object.fields.impact %}
+                                            <div class="flex flex-row space-x-2">
+                                                <div class="">{{ impact.abbreviation|capfirst }}</div>
+                                                <div class="">{{ impact.name|capfirst }}</div>
+                                                <div class="">{{ impact.description|capfirst }}</div>
+                                            </div>
+                                        {% endfor %}
+                                        </td>
+                                        <td class="px-6 py-3">
+                                            <div class="flex flex-row space-x-4">
+                                                <div class="flex flex-col">
+                                                {% for risk in object.fields.risk %}
+                                                    <div class="flex flex-row space-x-2">
+                                                        <div class="w-fit p-1 rounded" style="background-color: {{ risk.rgb }};"></div>
+                                                        <div class="w-fit">{{ risk.abbreviation|capfirst }}</div>
+                                                        <div class="w-fit">{{ risk.name|capfirst }}</div>
+                                                        <div class="w-fit">{{ risk.description|capfirst }}</div>
+                                                    </div>
+                                                {% endfor %}
+                                                </div>
+                                                {% comment %} <div>
+                                                    {% for row in object.fields.grid %}
+                                                    <div class="grid grid-flow-col space-x-2">
+                                                        {% for item in row %}
+                                                            <div>{{ item }}</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endfor %}
+                                                </div> {% endcomment %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% elif type == "security_function" %}
+                        <tr class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <th class="px-6 py-3">{% trans "Security function name" %}</th>
+                            <th class="px-6 py-3">{% trans "Description" %}</th>
+                            <th class="px-6 py-3">{% trans "Provider" %}</th>
+                            <th class="px-6 py-3">{% trans "Contact" %}</th>
+                        </tr>
+                        {% for object in package.objects %}
+                            {% if object.type == type %}
+                                <tr class="even:bg-white odd:bg-gray-50">
+                                    <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name|capfirst }}</td>
+                                    <td class="px-6 py-3">{{ object.fields.description|capfirst }}</td>
+                                    <td class="px-6 py-3">{{ object.fields.provider|capfirst }}</td>
+                                    <td class="px-6 py-3">{{ object.fields.contact|capfirst }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                    </table>
+                </div>
                 {% endfor %}
-            </table>
+            </div>
         </div>
     </div>
 </div>
-
 
 {% endblock %}

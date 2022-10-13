@@ -4,6 +4,7 @@ from back_office.models import Project, SecurityFunction, Asset, Threat
 from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd
+import json
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from datetime import date
@@ -283,4 +284,23 @@ class RiskMatrix(models.Model):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
-    
+
+    def parse_json(self):
+        return json.loads(self.json_definition)
+
+    def get_detailed_grid(self):
+        matrix = self.parse_json()
+        grid = []
+        for row in matrix['grid']:
+            grid.append([item for item in row])
+
+
+    def render_grid_as_colors(self):
+        matrix = self.parse_json()
+        grid = matrix['grid']
+        res = [[matrix['risk'][i] for i in row] for row in grid]
+
+        return res
+
+    def __str__(self):
+        return self.name

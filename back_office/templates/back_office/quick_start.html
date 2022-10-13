@@ -73,7 +73,7 @@
                 <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 4</div>
                     <div class="font-semibold mb-4">{% trans "Risk analyses" %}</div>
-                    <div class="text-sm mb-2 rounded">{% trans "You need to define a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or use a preset. Now you can start a new" %} 
+                    <div class="text-sm mb-2 rounded">{% trans "You need to select a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or import a new one with the package manager. Now you can start a new" %} 
                         <span x-data="modal()">
                             <div class="inline" x-data="{ open: false }">
                                 <a @click="open = ! open"

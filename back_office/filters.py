@@ -3,10 +3,11 @@ from django_filters import FilterSet, OrderingFilter, ModelMultipleChoiceFilter,
 # from django_filters.widgets import *
 from django.db.models import Q
 
-from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance
+from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance, RiskMatrix
 from back_office.models import Asset, Folder, Project, Threat, SecurityFunction
 from iam.models import User, UserGroup
 from django.utils.translation import gettext_lazy as _
+
 
 class GenericFilterSet(FilterSet):
     def __init__(self, data=None, queryset=None, *, request=None, prefix=None):
@@ -15,54 +16,62 @@ class GenericFilterSet(FilterSet):
         #     print(f[0], f[1].field.widget)
     pass
 
+
 class GenericOrderingFilter(OrderingFilter):
     def __init__(self, *args, empty_label=_("Order by"), **kwargs):
         super().__init__(self, *args, empty_label=_("Order by"), widget=Select, **kwargs)
-        self.field.widget.attrs={
+        self.field.widget.attrs = {
             'class': 'h-10 rounded-r-lg border-none focus:ring-0',
             'onchange': 'this.form.submit();'
         }
 
+
 class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
-    widget=SelectMultiple(
+    widget = SelectMultiple(
         attrs={
             'class': 'rounded-lg w-full',
         }
     )
+
     def __init__(self, *args, widget=widget, **kwargs):
         super().__init__(*args, widget=widget, **kwargs)
+
 
 class GenericMultipleChoiceFilter(MultipleChoiceFilter):
-    widget=SelectMultiple(
+    widget = SelectMultiple(
         attrs={
             'class': 'rounded-lg w-full',
         }
     )
+
     def __init__(self, *args, widget=widget, **kwargs):
         super().__init__(*args, widget=widget, **kwargs)
 
+
 class GenericCharFilter(CharFilter):
-    widget=TextInput(
+    widget = TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0'
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0'
         }
     )
-    def __init__(self, field_name=None, lookup_expr='icontains', *, label=None, method=None, 
-                distinct=False, exclude=False, widget=widget, search_term=None, **kwargs):
-        super().__init__(field_name, lookup_expr='icontains', label=label, method=method, 
-                        distinct=distinct, exclude=exclude, widget=widget, **kwargs)
+    def __init__(self, field_name=None, lookup_expr='icontains', *, label=None, method=None,
+                 distinct=False, exclude=False, widget=widget, search_term=None, **kwargs):
+        super().__init__(field_name, lookup_expr='icontains', label=label, method=method,
+                         distinct=distinct, exclude=exclude, widget=widget, **kwargs)
         placeholder = f"Search {search_term if search_term else ''}..."
         self.widget.attrs['placeholder'] = placeholder
 
+
 class GenericChoiceFilter(ChoiceFilter):
-    widget=Select(
+    widget = Select(
         attrs={
-                'class': 'rounded-lg w-full'
+            'class': 'rounded-lg w-full'
         }
     )
+
     def __init__(self, *args, widget=widget, **kwargs):
         super().__init__(*args, widget=widget, **kwargs)
-        
+
 
 class AnalysisFilter(GenericFilterSet):
     def get_full_names():
@@ -101,12 +110,13 @@ class AnalysisFilter(GenericFilterSet):
 
     project__name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search analysis...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search analysis...')
         }
     ))
     is_draft = GenericChoiceFilter(choices=STATUS_CHOICES)
-    auditor = GenericMultipleChoiceFilter(choices=get_full_names(),label=('Auditor'))
+    auditor = GenericMultipleChoiceFilter(
+        choices=get_full_names(), label=('Auditor'))
 
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
 
@@ -114,16 +124,19 @@ class AnalysisFilter(GenericFilterSet):
         model = Analysis
         fields = ['is_draft', 'auditor', 'project']
 
+
 class RiskScenarioFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search scenario...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search scenario...')
         }
     ))
     threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
-    analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
-    treatment = GenericMultipleChoiceFilter(choices=RiskScenario.TREATMENT_OPTIONS)
+    analysis__project = GenericModelMultipleChoiceFilter(
+        queryset=Project.objects.all())
+    treatment = GenericMultipleChoiceFilter(
+        choices=RiskScenario.TREATMENT_OPTIONS)
 
     orderby = GenericOrderingFilter(
         fields=(
@@ -148,24 +161,29 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         fields = ['name', 'threat', 'analysis__project', 'treatment']
 
+
 class SecurityMeasureFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search security measure...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search security measure...')
         }
     ))
-    risk_scenario__analysis__project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
-    type=GenericMultipleChoiceFilter(choices=SecurityMeasure.MITIGATION_TYPE)
-    status=GenericMultipleChoiceFilter(choices=SecurityMeasure.MITIGATION_STATUS)
-    security_function=GenericModelMultipleChoiceFilter(queryset=SecurityFunction.objects.all())
+    risk_scenario__analysis__project = GenericModelMultipleChoiceFilter(
+        queryset=Project.objects.all())
+    type = GenericMultipleChoiceFilter(choices=SecurityMeasure.MITIGATION_TYPE)
+    status = GenericMultipleChoiceFilter(
+        choices=SecurityMeasure.MITIGATION_STATUS)
+    security_function = GenericModelMultipleChoiceFilter(
+        queryset=SecurityFunction.objects.all())
 
     orderby = GenericOrderingFilter(
         fields=(
             ('status', 'status'),
             ('name', 'name'),
             ('type', 'type'),
-            ('risk_scenario__analysis__project', 'risk_scenario__analysis__project'),
+            ('risk_scenario__analysis__project',
+             'risk_scenario__analysis__project'),
             ('security_function', 'security_function'),
         ),
         field_labels={
@@ -184,13 +202,15 @@ class SecurityMeasureFilter(GenericFilterSet):
 
     class Meta:
         model = SecurityMeasure
-        fields = ['name', 'type', 'risk_scenario__analysis__project', 'security_function']
+        fields = ['name', 'type',
+                  'risk_scenario__analysis__project', 'security_function']
+
 
 class RiskAcceptanceFilter(GenericFilterSet):
     risk_scenario__name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search acceptance...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search acceptance...')
         }
     ))
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
@@ -217,11 +237,12 @@ class RiskAcceptanceFilter(GenericFilterSet):
         model = RiskAcceptance
         fields = ['risk_scenario__name', 'type']
 
+
 class ProjectsDomainFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search domain...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search domain...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -236,15 +257,41 @@ class ProjectsDomainFilter(GenericFilterSet):
             '-description': _('Description (descending)'),
         }
     )
+
     class Meta:
         model = Folder
         fields = ['name', 'description']
 
+class RiskMatrixFilter(GenericFilterSet):
+    name = GenericCharFilter(widget=TextInput(
+        attrs={
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search matrices...')
+        }
+    ))
+    orderby = GenericOrderingFilter(
+        fields=(
+            ('name', 'name'),
+            ('description', 'description'),
+        ),
+        field_labels={
+            'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
+            'description': _('description'.capitalize()),
+            '-description': _('Description (descending)'),
+        }
+    )
+
+    class Meta:
+        model = RiskMatrix
+        fields = ['name', 'description']
+
+
 class ProjectFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search project...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search project...')
         }
     ))
     folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.all())
@@ -269,11 +316,12 @@ class ProjectFilter(GenericFilterSet):
         model = Project
         fields = '__all__'
 
+
 class ThreatFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search threat...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search threat...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -290,11 +338,12 @@ class ThreatFilter(GenericFilterSet):
         model = Threat
         fields = '__all__'
 
+
 class SecurityFunctionFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search function...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search function...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -317,11 +366,12 @@ class SecurityFunctionFilter(GenericFilterSet):
         model = SecurityFunction
         fields = '__all__'
 
+
 class AssetFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search asset...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search asset...')
         }
     ))
     orderby = GenericOrderingFilter(
@@ -338,6 +388,7 @@ class AssetFilter(GenericFilterSet):
         model = Asset
         fields = '__all__'
 
+
 class UserFilter(GenericFilterSet):
 
     class Meta:
@@ -346,7 +397,8 @@ class UserFilter(GenericFilterSet):
 
     def user_search(queryset, name, value):
         return queryset.filter(
-            Q(username__icontains=value) | Q(first_name__icontains=value) | Q(last_name__icontains=value)
+            Q(username__icontains=value) | Q(
+                first_name__icontains=value) | Q(last_name__icontains=value)
         ).order_by('-is_active', '-is_superuser', 'username', 'id')
 
     YES_NO_CHOICES = (
@@ -357,12 +409,13 @@ class UserFilter(GenericFilterSet):
     is_superuser = GenericChoiceFilter(choices=YES_NO_CHOICES)
     is_active = GenericChoiceFilter(choices=YES_NO_CHOICES)
 
-    user_groups = GenericModelMultipleChoiceFilter(queryset=UserGroup.objects.all())
-    
+    user_groups = GenericModelMultipleChoiceFilter(
+        queryset=UserGroup.objects.all())
+
     q = GenericCharFilter(method=user_search, label="Search", widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search user...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search user...')
         }))
 
     orderby = GenericOrderingFilter(
@@ -381,6 +434,7 @@ class UserFilter(GenericFilterSet):
         }
     )
 
+
 class UserGroupFilter(GenericFilterSet):
 
     class Meta:
@@ -389,8 +443,8 @@ class UserGroupFilter(GenericFilterSet):
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
-                'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-                'placeholder': _('Search user group...')
+            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
+            'placeholder': _('Search user group...')
         }
     ))
 

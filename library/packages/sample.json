@@ -24,9 +24,9 @@
                     {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "rgb": "#FF0000"}
                 ],
                 "grid": [
-                    [1, 2, 2], 
-                    [0, 1, 2],
-                    [0, 0, 1]
+                    [0, 0, 1],
+                    [0, 1, 1],
+                    [1, 1, 2]
                 ]
             }
         },
@@ -51,9 +51,44 @@
                     {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "rgb": "#FF0000"}
                 ],
                 "grid": [
-                    [1, 2, 3], 
-                    [0, 1, 2],
-                    [0, 0, 1]
+                    [0, 1, 1],
+                    [1, 1, 2],
+                    [1, 2, 2]
+                ]
+            }
+        },
+        {
+            "type": "matrix",
+            "fields": {
+                "name": "default_5x5",
+                "description": "critical matrix",
+                "probability" : [
+                    {"abbreviation": "VL", "name": "Very Low", "description": "Very unfrequent event"},
+                    {"abbreviation": "L", "name": "Low", "description": "Unfrequent event"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Occasional event"},
+                    {"abbreviation": "H", "name": "High", "description": "Frequent event"},
+                    {"abbreviation": "VH", "name": "Very High", "description": "Very frequent event"}
+                ],
+                "impact": [
+                    {"abbreviation": "VL", "name": "Very Low", "description": "<10k$"},
+                    {"abbreviation": "L", "name": "Low", "description": "<100k$"},
+                    {"abbreviation": "M", "name": "Medium", "description": "between 100 to 1000k$"},
+                    {"abbreviation": "H", "name": "High", "description": ">1000k$"},
+                    {"abbreviation": "VH", "name": "Very High", "description": ">10000k$"}
+                ],
+                "risk": [
+                    {"abbreviation": "VL", "name": "Very Low", "description": "negligible risk", "rgb": "#BBF7D0"},
+                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "rgb": "#BEF264"},
+                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years", "rgb": "#FEF08A"},
+                    {"abbreviation": "H", "name": "High", "description": "risk requiring mitigation within 6 months", "rgb": "#FBBF24"},
+                    {"abbreviation": "VH", "name": "Very High", "description": "unacceptable risk", "rgb": "#F87171"}
+                ],
+                "grid": [
+                    [0, 0, 1, 1, 2],
+                    [0, 1, 1, 2, 2],
+                    [1, 1, 2, 2, 3],
+                    [1, 2, 2, 3, 4],
+                    [2, 2, 3, 4, 4]
                 ]
             }
         },
@@ -62,6 +97,15 @@
             "fields": {
                 "name": "sample threat",
                 "description": "sample threat description"
+            }
+        },
+        {
+            "type": "security_function",
+            "fields": {
+                "name": "sample security function",
+                "description": "sample security function description",
+                "provider": "sample provider",
+                "contact": "sample contact"
             }
         }
     ]

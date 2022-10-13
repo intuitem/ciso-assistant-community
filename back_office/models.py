@@ -110,6 +110,7 @@ class Asset(models.Model):
 
 class SecurityFunction(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("Name"))
+    description = models.TextField(max_length=1000, blank=True, null=True)
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(

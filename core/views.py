@@ -8,7 +8,7 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 
 from django.views.generic import ListView
-from core.models import Analysis, RiskScenario, SecurityMeasure
+from core.models import Analysis, RiskScenario, SecurityMeasure, RiskMatrix
 from back_office.models import Project
 from iam.models import Folder, RoleAssignment, User
 
@@ -108,7 +108,6 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
     
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_analysis"), folder= get_object_or_404(Analysis, id=self.kwargs['analysis']).project.folder)
-
 
 @login_required
 def generate_ra_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
