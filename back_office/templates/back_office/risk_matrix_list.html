@@ -140,7 +140,7 @@
                             <div class="flex flex-row">
                                 {% for row in matrix.render_grid_as_colors %}
                                 <div class="flex flex-col">
-                                    {% for item in row %}
+                                    {% for item in row reversed %}
                                         <div class="w-8 h-4" style="background-color: {{ item.rgb }}">&nbsp;</div>
                                     {% endfor %}
                                 </div>
