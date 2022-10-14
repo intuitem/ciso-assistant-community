@@ -11,17 +11,46 @@ from datetime import date
 
 from iam.models import Folder
 
+
+class RiskMatrix(models.Model):
+    name = models.CharField(max_length=200, verbose_name=_("Name"))
+    description = models.TextField(max_length=2000, verbose_name=_("Description"), blank=True, null=True)
+    json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
+        See the documentation for more information."), default=dict)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
+
+    def parse_json(self):
+        return json.loads(self.json_definition)
+
+    def get_detailed_grid(self):
+        matrix = self.parse_json()
+        grid = []
+        for row in matrix['grid']:
+            grid.append([item for item in row])
+
+
+    def render_grid_as_colors(self):
+        matrix = self.parse_json()
+        grid = matrix['grid']
+        res = [[matrix['risk'][i] for i in row] for row in grid]
+
+        return res
+
+    def __str__(self):
+        return self.name
+
+
 class Analysis(models.Model):
-    RATING_METHODS = [
-        ('default', _('Balanced (default)')),
-        ('critical', _('Critical (FAIR-based)')),
-        ('custom', _('Custom (adjusted)')),
-    ]
+    # RATING_METHODS = [
+    #     ('default', _('Balanced (default)')),
+    #     ('critical', _('Critical (FAIR-based)')),
+    #     ('custom', _('Custom (adjusted)')),
+    # ]
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     version = models.CharField(max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
     auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
-    rating_matrix = models.CharField(choices=RATING_METHODS, default='default', max_length=20, verbose_name=_("Rating matrix"))
+    rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, verbose_name=_("Rating matrix"))
 
     comments = models.TextField(max_length=1000, blank=True, null=True,
                                 verbose_name=_("Comments"))
@@ -107,12 +136,10 @@ class Analysis(models.Model):
         return findings
 
 
-def risk_scoring(proba, impact, matrix):
-    matrix_path = ARM_SETTINGS["MATRIX_PATH"]
-    df = pd.read_excel(matrix_path, None)
-    # None in read_excel allow to read all sheets, TODO move this elsewhere to avoid multiple IOs
-    focus = df[matrix]
-    return focus[(focus.proba == proba) & (focus.impact == impact)].level.values[0]
+def risk_scoring(probability, impact, matrix: RiskMatrix):
+    fields = json.loads(matrix.json_definition)
+    risk_index = fields['grid'][probability][impact]
+    return risk_index
 
 
 class SecurityMeasure(models.Model):
@@ -189,14 +216,6 @@ class RiskScenario(models.Model):
         ('accepted', _('Accepted')),
         ('blocker', _('Show-stopper')),
     ]
-    # 1 very low, 2 low, 3 medium, 4 high, 5 very high
-    RATING_OPTIONS = [
-        ('VL', _('Very low')),
-        ('L', _('Low')),
-        ('M', _('Medium')),
-        ('H', _('High')),
-        ('VH', _('Very high')),
-    ]
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
     assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
@@ -209,19 +228,16 @@ class RiskScenario(models.Model):
                                          verbose_name=_("Existing measures"))
 
     # current
-    current_proba = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                     verbose_name=_("Current probability"))
-    current_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current impact"))
-    current_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current level"),
+    current_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current probability"))
+    current_impact = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current impact"))
+    current_level = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current level"),
                                      help_text=_('The risk level given the current measures. Automatically updated on Save, based on the chosen matrix'))
 
     # residual
-    residual_proba = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                      verbose_name=_("Residual probability"))
-    residual_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Residual impact"))
-    residual_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                      help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'),
-                                      verbose_name=_("Residual level"))
+    residual_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual probability"))
+    residual_impact = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual impact"))
+    residual_level = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual level"),
+                                      help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'))
 
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
                                  verbose_name=_("Treatment status"))
@@ -234,9 +250,24 @@ class RiskScenario(models.Model):
         verbose_name = _("Risk scenario")
         verbose_name_plural = _("Risk scenarios")
 
+    # def get_rating_options(self, field: str) -> list[tuple]:
+    #     matrix = self.analysis.rating_matrix.parse_json()
+    #     return [(k, v) for k, v in matrix.fields[field].items()]
+        
     def parent_project(self):
         return self.analysis.project
     parent_project.short_description = _("Parent project")
+
+    def get_matrix(self):
+        return self.analysis.rating_matrix.parse_json()
+
+    def get_current_risk(self):
+        matrix = self.get_matrix()
+        return matrix['risk'][self.current_level]
+
+    def get_residual_risk(self):
+        matrix = self.get_matrix()
+        return matrix['risk'][self.residual_level]
 
     def __str__(self):
         return str(self.parent_project()) + ': ' + str(self.name)
@@ -276,31 +307,3 @@ class RiskAcceptance(models.Model):
         url = reverse('RA', args=(self.riskscenario.analysis.id,))
         return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.riskscenario} </a>'
 # you can consider nested inlines at some points
-
-
-class RiskMatrix(models.Model):
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(max_length=2000, verbose_name=_("Description"), blank=True, null=True)
-    json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
-        See the documentation for more information."), default=dict)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
-
-    def parse_json(self):
-        return json.loads(self.json_definition)
-
-    def get_detailed_grid(self):
-        matrix = self.parse_json()
-        grid = []
-        for row in matrix['grid']:
-            grid.append([item for item in row])
-
-
-    def render_grid_as_colors(self):
-        matrix = self.parse_json()
-        grid = matrix['grid']
-        res = [[matrix['risk'][i] for i in row] for row in grid]
-
-        return res
-
-    def __str__(self):
-        return self.name

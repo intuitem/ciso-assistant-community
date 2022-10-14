@@ -95,7 +95,6 @@ def security_measure_per_security_function(user: User):
 
     return {"indicators": indicators, "values": values, "min": min(values, default=0) - 1, "max": max(values, default=0) + 1}
 
-
 def risks_count_per_level(user: User):
     current_level = list()
     residual_level = list()

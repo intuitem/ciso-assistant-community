@@ -435,7 +435,6 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
             initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['scenarios'] = RiskScenario.objects.filter(
             analysis=self.get_object()).order_by('id')
-        context['suggested_measures'] = SecurityMeasure.objects.all().order_by('id')
         context['crumbs'] = {'ra-list': _('Analyses')}
         return context
 

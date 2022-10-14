@@ -4,98 +4,15 @@
 {% with page_title=scenario %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
+<script src="{% static 'js/risk.js' %}"></script>
 <script>
-    var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
-    var label_low = {% blocktrans %}'Low'{% endblocktrans %};
-    var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
-    var label_high = {% blocktrans %}'High'{% endblocktrans %};
-    var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
-    
-    window.onload = function() {
-        var current_proba = document.getElementById("id_riskscenario_current_proba").value;
-        var current_impact = document.getElementById("id_riskscenario_current_impact").value;
-        var current_level = document.getElementById("current_risk_level").value;
 
-        var residual_proba = document.getElementById("id_riskscenario_residual_proba").value;
-        var residual_impact = document.getElementById("id_riskscenario_residual_impact").value;
-        var residual_level = document.getElementById("residual_risk_level").value;
-    };
-    
-    function refresh() {
-        var current_proba = document.getElementById("id_riskscenario_current_proba").value;
-        var current_impact = document.getElementById("id_riskscenario_current_impact").value;
-        var current_level = document.getElementById("current_risk_level").value;
-        CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
-        CRL_lbl = document.getElementById("current_risk_level");
-        CRL_lbl.innerHTML = `${CRL}`;
-        CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
-        CRL_lbl.classList.remove('VL','L','M','H','VH');
-        CRL_lbl.classList.add(rl_class(CRL));
+window.onload = function() {
+    refresh();
+};
 
-        var residual_proba = document.getElementById("id_riskscenario_residual_proba").value;
-        var residual_impact = document.getElementById("id_riskscenario_residual_impact").value;
-        var residual_level = document.getElementById("residual_risk_level").value;
-        RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
-        RRL_lbl = document.getElementById("residual_risk_level");
-        RRL_lbl.innerHTML = `${RRL}`;
-        RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
-        RRL_lbl.classList.remove('VL','L','M','H','VH');
-        RRL_lbl.classList.add(rl_class(RRL));
-    }
+</script>
 
-    function getValueIndex(label) {
-      if (label == 'VL') return 0;
-      if (label == 'L') return 1;
-      if (label == 'M') return 2;
-      if (label == 'H') return 3;
-      if (label == 'VH') return 4;
-    }
-    
-    function riskLevel(p, i) {
-        var matrix = [];
-        matrix[0] = [];
-        matrix[1] = [];
-        matrix[2] = [];
-        matrix[3] = [];
-        matrix[4] = [];
-        matrix[0][0] = label_very_low;
-        matrix[1][0] = label_very_low;
-        matrix[2][0] = label_low;
-        matrix[3][0] = label_low;
-        matrix[4][0] = label_medium;
-        matrix[0][1] = label_very_low;
-        matrix[1][1] = label_low;
-        matrix[2][1] = label_low;
-        matrix[3][1] = label_medium;
-        matrix[4][1] = label_medium;
-        matrix[0][2] = label_low;
-        matrix[1][2] = label_low;
-        matrix[2][2] = label_medium;
-        matrix[3][2] = label_medium;
-        matrix[4][2] = label_high;
-        matrix[0][3] = label_low;
-        matrix[1][3] = label_medium;
-        matrix[2][3] = label_medium;
-        matrix[3][3] = label_high;
-        matrix[4][3] = label_very_high;
-        matrix[0][4] = label_medium;
-        matrix[1][4] = label_medium;
-        matrix[2][4] = label_high;
-        matrix[3][4] = label_very_high;
-        matrix[4][4] = label_very_high;
-        console.log(i);
-        return matrix[p][i];
-    }
-    
-    function rl_class(label) {
-        if (label == label_very_low) return 'VL';
-        if (label == label_low) return 'L';
-        if (label == label_medium) return 'M';
-        if (label == label_high) return 'H';
-        if (label == label_very_high) return 'VH';
-    }
-    
-    </script>
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
     <form method="post" id="scenario_update_form">{% csrf_token %}
     {{ form.non_field_errors }}
@@ -176,18 +93,9 @@
                         <div class=""> 
                             <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
                             <div class="">
-                                <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
-                                    {% if scenario.current_level == 'VL' %}
-                                        VL 
-                                    {% elif scenario.current_level == 'L' %}
-                                        L
-                                    {% elif scenario.current_level == 'M' %}
-                                        M
-                                    {% elif scenario.current_level == 'H' %}
-                                        H
-                                    {% elif scenario.current_level == 'VH' %}
-                                        VH
-                                    {% endif %}" style="margin-bottom: 10px">{{ scenario.get_current_level_display }}
+                                <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
+                                    style="background-color: {{ scenario.get_current_risk.rgb }};">
+                                    {{ scenario.get_current_risk.name }}
                                 </span>
                             </div>
                         </div>
@@ -209,7 +117,7 @@
                             <i class="fas fa-times"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold">{% trans "Residual impact" %}</p>
+                            <p class="text-sm font-semibold white">{% trans "Residual impact" %}</p>
                             {{ form.residual_impact.errors }}
                             {{ form.residual_impact }}
                         </div>
@@ -219,18 +127,9 @@
                         <div class=""> 
                             <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
                             <div class="">
-                                <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
-                                    {% if scenario.residual_level == 'VL' %}
-                                        VL 
-                                    {% elif scenario.residual_level == 'L' %}
-                                        L
-                                    {% elif scenario.residual_level == 'M' %}
-                                        M
-                                    {% elif scenario.residual_level == 'H' %}
-                                        H
-                                    {% elif scenario.residual_level == 'VH' %}
-                                        VH
-                                    {% endif %}" style="margin-bottom: 10px">{{ scenario.get_residual_level_display }}
+                                <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
+                                    style="background-color: {{ scenario.get_residual_risk.rgb }}">
+                                    {{ scenario.get_residual_risk.name }}
                                 </span>
                             </div>
                         </div>
