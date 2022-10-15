@@ -325,7 +325,6 @@
         matrices[i] = JSON.parse(matrices[i]);
     }
     
-    // html select input for the matrices
     var matrixSelect = document.getElementById("matrixSelect");
     for (var i = 0; i < matrices.length; i++) {
         var option = document.createElement("option");
@@ -345,14 +344,12 @@
     
     function refresh() {
         const ignoreBusinessImpact = isBusinessImpactIgnored();
-        // console.debug(ignoreBusinessImpact); // DEBUG
 
         const factors = getFactorsValues();
         const vector = buildVector(factors);
         const scores = computeFactorsScores(factors, ignoreBusinessImpact);
         const matrix = getSelectedMatrix();
         const labels = scoreToRating(matrix, scores);
-        console.debug(labels); // DEBUG
 
 
         renderVector(vector);
