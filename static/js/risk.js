@@ -1,57 +1,3 @@
-const m = '{\
-    "probability" : [\
-     {"abbreviation": "L", "label": "Low", "description": "Unfrequent event"},\
-     {"abbreviation": "M", "label": "Medium", "description": "Occasional event"},\
-     {"abbreviation": "H", "label": "High", "description": "Frequent event"}\
-    ],\
-    "impact": [\
-     {"abbreviation": "L", "label": "Low", "description": "<100k$"},\
-     {"abbreviation": "M", "label": "Medium", "description": "between 100 to 1000k$"},\
-     {"abbreviation": "H", "label": "High", "description": ">1000k$"}\
-    ],\
-    "risk": [\
-     {"abbreviation": "L", "label": "Low", "description": "acceptable risk", "rgb": "#BBF7D0"},\
-     {"abbreviation": "M", "label": "Medium", "description": "risk requiring mitigation within 2 years", "rgb": "#BEF264"},\
-     {"abbreviation": "H", "label": "High", "description": "unacceptable risk", "rgb": "#F87171"}\
-    ],\
-    "grid": [\
-            [0, 0, 1],\
-            [0, 1, 2],\
-            [1, 2, 2]\
-        ]\
-}'; // DEBUG, used to test the functions below
-
-const m2 = '{\
-    "probability" : [\
-     {"abbreviation": "VL", "label": "Very Low", "description": "Unfrequent event"},\
-     {"abbreviation": "L", "label": "Low", "description": "Unfrequent event"},\
-     {"abbreviation": "M", "label": "Medium", "description": "Occasional event"},\
-     {"abbreviation": "H", "label": "High", "description": "Frequent event"},\
-     {"abbreviation": "VH", "label": "Very High", "description": "Frequent event"}\
-    ],\
-    "impact": [\
-     {"abbreviation": "VL", "label": "Very Low", "description": "<100k$"},\
-     {"abbreviation": "L", "label": "Low", "description": "<100k$"},\
-     {"abbreviation": "M", "label": "Medium", "description": "between 100 to 1000k$"},\
-     {"abbreviation": "H", "label": "High", "description": ">1000k$"},\
-     {"abbreviation": "VH", "label": "Very High", "description": ">1000k$"}\
-    ],\
-    "risk": [\
-     {"abbreviation": "VL", "label": "Very Low", "description": "acceptable risk", "rgb": "#BBF7D0"},\
-     {"abbreviation": "L", "label": "Low", "description": "acceptable risk", "rgb": "#BEF264"},\
-     {"abbreviation": "M", "label": "Medium", "description": "risk requiring mitigation within 2 years", "rgb": "#FEF08A"},\
-     {"abbreviation": "H", "label": "High", "description": "unacceptable risk", "rgb": "#FBBF24"},\
-     {"abbreviation": "VH", "label": "Very High", "description": "unacceptable risk", "rgb": "#F87171"}\
-    ],\
-    "grid": [\
-        [0, 0, 1, 1, 2],\
-        [0, 1, 1, 2, 2],\
-        [1, 1, 2, 2, 3],\
-        [1, 2, 2, 3, 4],\
-        [2, 2, 3, 4, 4]\
-    ]\
-}'; // DEBUG, used to test the functions below
-
 class RiskEngine {
     constructor(matrix) {
         this.matrix = JSON.parse(matrix);
@@ -67,36 +13,7 @@ class RiskEngine {
     }
 }
 
-// function getMatrixFields(matrix) {
-//     const parsed_matrix = JSON.parse(matrix);
-//     var array = new Array();
-//     for (var i = 0; i < parsed_matrix.probability.length; i++) {
-//         array[i] = new Array();
-//         for (var j = 0; j < parsed_matrix.impact.length; j++) {
-//             var dict = new Object();
-//             dict["probability"] = parsed_matrix.probability[i];
-//             dict["impact"] = parsed_matrix.impact[j];
-//             dict["risk"] = parsed_matrix.risk[parsed_matrix.grid[i][j]];
-//             array[i][j] = dict;
-//         }
-//     }
-//     return array;
-// }
-
-// function renderMatrix(matrix) {
-//     const array = getMatrixFields(matrix);
-//     var table = document.getElementById("matrix");
-//     for (var i = 0; i < array.length; i++) {
-//         var row = table.insertRow(i);
-//         for (var j = 0; j < array[i].length; j++) {
-//             var cell = row.insertCell(j);
-//             cell.innerHTML = array[i][j].risk.abbreviation; // DEBUG
-//         }
-//     }
-// }
-
 function getScoringFromVector(matrix, vectorString) { // Consider splititng this function
-    const parsed_matrix = JSON.parse(matrix);
     const vector = vectorString.replace(/[^0-9a-z]/gi, '').split("");
 
     // console.debug(vector); // DEBUG
@@ -217,7 +134,6 @@ function renderScores(scores, isBusinessImpactIgnored) {
 }
 
 function scoreToRating(matrix, score) {
-    const parsedMatrix = JSON.parse(matrix);
     const probability = score['probability'];
     const impact = score['impact'];
     const risk = score['risk'];
@@ -225,28 +141,28 @@ function scoreToRating(matrix, score) {
     // console.debug(probability); // DEBUG
     // console.debug(impact); // DEBUG
     
-    const probabilityPartitionSize = 10 / parsedMatrix['probability'].length;
-    const impactPartitionSize = 10 / parsedMatrix['impact'].length;
-    const riskPartitionSize = 10 / parsedMatrix['risk'].length;
+    const probabilityPartitionSize = 10 / matrix['probability'].length;
+    const impactPartitionSize = 10 / matrix['impact'].length;
+    const riskPartitionSize = 10 / matrix['risk'].length;
     
     const probabilityIndex = Math.floor(probability / probabilityPartitionSize);
     const impactIndex = Math.floor(impact / impactPartitionSize);
     const riskIndex = Math.floor(risk / riskPartitionSize);
     
     var rating = new Object();
-    rating['probability'] = score['probability'] === 0 ? -1 : parsedMatrix.probability[probabilityIndex];
-    rating['impact'] = score['impact'] === 0 ? -1 : parsedMatrix.impact[impactIndex];
-    rating['risk'] = score['risk'] === 0 ? -1 : parsedMatrix.risk[riskIndex];
+    rating['probability'] = score['probability'] === 0 ? -1 : matrix.probability[probabilityIndex];
+    rating['impact'] = score['impact'] === 0 ? -1 : matrix.impact[impactIndex];
+    rating['risk'] = score['risk'] === 0 ? -1 : matrix.risk[riskIndex];
 
     return rating;
 }
 
 function renderLabels(labels) {
-    // console.debug('labels: '); // DEBUG
-    // console.debug(labels); // DEBUG
-    document.getElementById("probability_label").innerHTML = labels['probability'] === -1 ? '--' : labels['probability']['label'];
-    document.getElementById("impact_label").innerHTML = labels['impact'] === -1 ? '--' : labels['impact']['label'];
-    document.getElementById("risk_label").innerHTML = labels['risk'] === -1 ? '--' : labels['risk']['label'];
+    console.debug('labels: '); // DEBUG
+    console.debug(labels); // DEBUG
+    document.getElementById("probability_label").innerHTML = labels['probability'] === -1 ? '--' : labels['probability']['name'];
+    document.getElementById("impact_label").innerHTML = labels['impact'] === -1 ? '--' : labels['impact']['name'];
+    document.getElementById("risk_label").innerHTML = labels['risk'] === -1 ? '--' : labels['risk']['name'];
     document.getElementById("risk_label").style.backgroundColor = labels['risk'] === -1 ? 'white' : labels['risk']['rgb'];
 }
 
@@ -322,20 +238,4 @@ function renderIgnoredFactors() {
         BI_div.classList.add("bg-white");
         BI_div.classList.add("text-black");
     }
-}
-
-function refresh() {
-    const ignoreBusinessImpact = isBusinessImpactIgnored();
-    // console.debug(ignoreBusinessImpact); // DEBUG
-
-    const factors = getFactorsValues();
-    const vector = buildVector(factors);
-    const scores = computeFactorsScores(factors, ignoreBusinessImpact);
-    const labels = scoreToRating(m2, scores);
-
-
-    renderVector(vector);
-    renderScores(scores, ignoreBusinessImpact);
-    renderLabels(labels);
-    renderIgnoredFactors();
 }

@@ -7,33 +7,14 @@
 
 {% block content %}
 <script src="{% static 'js/risk.js' %}"></script>
-<script>
-
-var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
-var label_low = {% blocktrans %}'Low'{% endblocktrans %};
-var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
-var label_high = {% blocktrans %}'High'{% endblocktrans %};
-var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
-
-window.onload = function() {
-    refresh();
-};
-
-{% comment %} function rl_class(label) {
-    if (label == label_very_low) return 'VL';
-    if (label == label_low) return 'L';
-    if (label == label_medium) return 'M';
-    if (label == label_high) return 'H';
-    if (label == label_very_high) return 'VH';
-} {% endcomment %}
-
-</script>
-
-
 
 <main class="text-sm h-full flex flex-col">
 
-    <div class="mx-auto">
+    <div class="mx-auto mt-4">
+        <div class="flex flex-col">
+            <p class="text-sm">{% trans "Risk matrix" %}</p>
+            <select id="matrixSelect" class="form-input w-fit pr-8 capitalize" onchange="refresh()"></select>
+        </div>
         <div class="grid lg:grid-cols-2">
             <div class="">
                 <!--Threat Agent Factors-->
@@ -338,5 +319,51 @@ window.onload = function() {
 
 </main>
 
+<script>
+    matrices = {{ matrices|safe }}
+    for (var i = 0; i < matrices.length; i++) {
+        matrices[i] = JSON.parse(matrices[i]);
+    }
+    
+    // html select input for the matrices
+    var matrixSelect = document.getElementById("matrixSelect");
+    for (var i = 0; i < matrices.length; i++) {
+        var option = document.createElement("option");
+        option.text = matrices[i].name;
+        option.value = i;
+        matrixSelect.add(option);
+    }
+
+    function getSelectedMatrix() {
+        var matrix_id = matrixSelect.options[matrixSelect.selectedIndex].value;
+        for (var i = 0; i < matrices.length; i++) {
+            if (i == matrix_id) {
+                return matrices[i];
+            }
+        }
+    }
+    
+    function refresh() {
+        const ignoreBusinessImpact = isBusinessImpactIgnored();
+        // console.debug(ignoreBusinessImpact); // DEBUG
+
+        const factors = getFactorsValues();
+        const vector = buildVector(factors);
+        const scores = computeFactorsScores(factors, ignoreBusinessImpact);
+        const matrix = getSelectedMatrix();
+        const labels = scoreToRating(matrix, scores);
+        console.debug(labels); // DEBUG
+
+
+        renderVector(vector);
+        renderScores(scores, ignoreBusinessImpact);
+        renderLabels(labels);
+        renderIgnoredFactors();
+    }
+
+    window.onload = function() {
+        refresh();
+    };
+</script>
 
 {% endblock %}
