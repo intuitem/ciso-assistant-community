@@ -548,6 +548,7 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateFormInherited(
             initial={'project': get_object_or_404(Project, id=self.get_object().analysis.project.id)})
+        context['matrix'] = self.get_object().get_matrix()
         return context
 
     def get_success_url(self) -> str:

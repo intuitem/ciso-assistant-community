@@ -5,13 +5,6 @@
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
 <script src="{% static 'js/risk.js' %}"></script>
-<script>
-
-window.onload = function() {
-    refresh();
-};
-
-</script>
 
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
     <form method="post" id="scenario_update_form">{% csrf_token %}
@@ -177,4 +170,31 @@ window.onload = function() {
         </div>
     </div>
 </div>
+
+<script>
+    matrix = {{ matrix|safe }}
+    
+    function refresh() {
+        const current_proba = document.getElementById("id_current_proba").value;
+        const current_impact = document.getElementById("id_current_impact").value;
+        const residual_proba = document.getElementById("id_residual_proba").value;
+        const residual_impact = document.getElementById("id_residual_impact").value;
+
+        const current_risk = matrix.grid[current_proba][current_impact];
+        const residual_risk = matrix.grid[residual_proba][residual_impact];
+
+        console.debug("current_risk", current_risk);
+        console.debug("residual_risk", residual_risk);
+
+        document.getElementById("current_risk_level").innerHTML = matrix.risk[current_risk].name;
+        document.getElementById("current_risk_level").style.backgroundColor = matrix.risk[current_risk].rgb;;
+        document.getElementById("residual_risk_level").innerHTML = matrix.risk[residual_risk].name;
+        document.getElementById("residual_risk_level").style.backgroundColor = matrix.risk[residual_risk].rgb;;
+    }
+
+    window.onload = function() {
+        refresh();
+    };
+</script>
+
 {% endblock %}
