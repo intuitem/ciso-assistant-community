@@ -72,7 +72,6 @@ class Analysis(models.Model):
 
     def quality_check(self) -> dict:
 
-        ri_value = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
         errors_lst = list()
         warnings_lst = list()
         info_lst = list()
@@ -88,15 +87,14 @@ class Analysis(models.Model):
         # --- checks on the risk scenarios
         for ri in self.riskscenario_set.all().order_by('id'):
 
-            if ri_value[ri.residual_level] > ri_value[ri.current_level]:
+            if ri.residual_level > ri.current_level:
                 errors_lst.append({"msg": _("R#{} residual risk level is higher than the current one").format(ri.id), "obj_type": "RiskScenario", "object": ri})
-            if ri_value[ri.residual_proba] > ri_value[ri.current_proba]:
+            if ri.residual_proba > ri.current_proba:
                 errors_lst.append({"msg": _("R#{} residual risk probability is higher than the current one").format(ri.id), "obj_type": "RiskScenario", "object": ri})
-            if ri_value[ri.residual_impact] > ri_value[ri.current_impact]:
+            if ri.residual_impact > ri.current_impact:
                 errors_lst.append({"msg": _("R#{} residual risk impact is higher than the current one").format(ri.id), "obj_type": "RiskScenario", "object": ri})
 
-            if ri_value[ri.residual_level] < ri_value[ri.current_level] or ri_value[ri.residual_proba] < ri_value[
-                ri.current_proba] or ri_value[ri.residual_impact] < ri_value[ri.current_impact]:
+            if ri.residual_level < ri.current_level or ri.residual_proba < ri.current_proba or ri.residual_impact < ri.current_impact:
                 if ri.security_measures.count() == 0:
                     errors_lst.append(
                         {"msg": _("R#{}: residual risk level has been lowered without any specific measure").format(ri.id), "obj_type": "RiskScenario", "object": ri})
