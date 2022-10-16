@@ -1,12 +1,12 @@
 <div id="{{name}}_div" class="bg-white w-auto h-[600px]" ></div>
 <script type="text/javascript">
 
-        var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
 
-        // specify chart configuration item and data
-        var option = {
-    tooltip: {
-        trigger: 'item'
+    // specify chart configuration item and data
+    var option = {
+        tooltip: {
+            trigger: 'item'
     },
     toolbox: {
         show: true,
@@ -45,11 +45,12 @@
             labelLine: {
                 show: false
             },
-            data: {{values|safe}},
+            data: {{ values|safe }},
             color:["#BBF7D0","#BEF264","#FEF08A","#FBBF24","#F87171"],
         }
     ]
 };
+console.debug(option);
 
         // use configuration item and data specified to show chart
         {{name}}_ch.setOption(option);

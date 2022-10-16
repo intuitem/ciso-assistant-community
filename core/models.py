@@ -265,9 +265,25 @@ class RiskScenario(models.Model):
         matrix = self.get_matrix()
         return matrix['risk'][self.current_level]
 
+    def get_current_impact(self):
+        matrix = self.get_matrix()
+        return matrix['impact'][self.current_impact]
+
+    def get_current_proba(self):
+        matrix = self.get_matrix()
+        return matrix['probability'][self.current_proba]
+
     def get_residual_risk(self):
         matrix = self.get_matrix()
         return matrix['risk'][self.residual_level]
+
+    def get_residual_impact(self):
+        matrix = self.get_matrix()
+        return matrix['impact'][self.residual_impact]
+
+    def get_residual_proba(self):
+        matrix = self.get_matrix()
+        return matrix['probability'][self.residual_proba]
 
     def __str__(self):
         return str(self.parent_project()) + ': ' + str(self.name)

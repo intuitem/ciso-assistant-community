@@ -1,12 +1,40 @@
-{% load i18n %}
+{% load i18n back_office_extras %}
 
-{% if matrix == 'default' %}
+<table class="w-full p-2">
+    {% for row in matrix.render_grid_as_colors reversed %}
+        {% with row_index=forloop.revcounter0 %}
+            <tr class="w-full">
+                <td class="w-8 text-right pr-2">
+                    {% with impact=matrix.parse_json.impact|index:row_index %}
+                    {{ impact.name }}
+                    {% endwith %}
+                </td>
+                {% for item in row %}
+                    <td class="w-8 h-16 text-center" style="background-color: {{ item.rgb }}">
+                        {{ data|index:row_index|index:forloop.counter0|join:", " }}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endwith %}
+    {% endfor %}
+    <tr>
+        <td></td>
+        {% for probability in matrix.parse_json.probability %}
+            <td class="w-8 h-16 text-center">
+                {{ probability.name }}
+            </td>
+        {% endfor %}
+    </tr>
+</table>
+
+{% comment %} {% if matrix == 'default' %}
+
 <table class="w-full p-2">
     <tr>
         <td class="text-right font-semibold px-2">{% trans "Impact" %}</td>
     </tr>
     <tr>
-        <td class=" text-right h-16 px-2">{% trans "Very high" %}</td>
+        <td class="text-right h-16 px-2">{% trans "Very high" %}</td>
         <td class="w-1/6 text-center M">{% if data.0.0 %}{{data.0.0|join:", "}}{% endif %}</td>
         <td class="w-1/6 text-center M">{% if data.0.1 %}{{data.0.1|join:", "}}{% endif %}</td>
         <td class="w-1/6 text-center H">{% if data.0.2 %}{{data.0.2|join:", "}}{% endif %}</td>
@@ -118,4 +146,4 @@
 
 {% if matrix == 'custom' %}
 Coming soon
-{% endif %}
+{% endif %} {% endcomment %}

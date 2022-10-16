@@ -68,17 +68,13 @@ class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
 
 
 def build_ri_clusters(analysis: Analysis):
-    matrix_current = [[set(), set(), set(), set(), set()], [set(), set(), set(), set(), set()],
-                      [set(), set(), set(), set(), set()], [set(), set(), set(), set(), set()],
-                      [set(), set(), set(), set(), set()]]
-    matrix_residual = [[set(), set(), set(), set(), set()], [set(), set(), set(), set(), set()],
-                       [set(), set(), set(), set(), set()], [set(), set(), set(), set(), set()],
-                       [set(), set(), set(), set(), set()]]
-    map_impact = {'VH': 0, 'H': 1, 'M': 2, 'L': 3, 'VL': 4}
-    map_proba = {'VL': 0, 'L': 1, 'M': 2, 'H': 3, 'VH': 4}
+    matrix = analysis.rating_matrix.parse_json()
+    grid = matrix['grid']
+    matrix_current = [[set() for _ in range(len(grid[0]))] for _ in range(len(grid))]
+    matrix_residual = [[set() for _ in range(len(grid[0]))] for _ in range(len(grid))]
     for ri in RiskScenario.objects.filter(analysis=analysis).order_by('id'):
-        matrix_current[map_impact[ri.current_impact]][map_proba[ri.current_proba]].add(ri.rid())
-        matrix_residual[map_impact[ri.residual_impact]][map_proba[ri.residual_proba]].add(ri.rid())
+        matrix_current[ri.current_proba][ri.current_impact].add(ri.rid())
+        matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid())
 
     return {'current': matrix_current, 'residual': matrix_residual}
 
@@ -104,19 +100,20 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
         # then Add in
         context['analysis'] = self.analysis
         context['ri_clusters'] = build_ri_clusters(self.analysis)
+        context['matrix'] = self.analysis.rating_matrix
         return context
     
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_analysis"), folder= get_object_or_404(Analysis, id=self.kwargs['analysis']).project.folder)
 
 @login_required
-def generate_ra_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
+def generate_ra_pdf(request, analysis: Analysis): # analysis parameter is the id of the choosen Analysis
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if int(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
-        data = {'context': context, 'analysis': ra, 'ri_clusters': build_ri_clusters(ra)}
+        data = {'context': context, 'analysis': ra, 'ri_clusters': build_ri_clusters(ra), 'matrix': ra.rating_matrix}
         html = render_to_string('core/ra_pdf.html', data)
         pdf_file = HTML(string=html).write_pdf()
         response = HttpResponse(pdf_file, content_type='application/pdf')
@@ -369,6 +366,9 @@ def export_mp_csv(request, analysis):
 def scoring_assistant(request):
     template = 'core/scoring.html'
     context = {}
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
+    context['matrices'] = list(RiskMatrix.objects.all().values_list('json_definition', flat=True))
     return render(request, template, context)
 
 

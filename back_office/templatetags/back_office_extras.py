@@ -11,3 +11,11 @@ def mira_version():
 @register.filter('class')
 def _class(obj):
     return obj.__class__.__name__ if obj else ''
+
+@register.filter
+def index(List, i):
+    return List[int(i)]
+
+@register.filter
+def entry_num_array(List):
+    return range(len(List))

@@ -64,8 +64,8 @@
                 <td class="p-2">{{RI.name}}</td>
                 <td class="text-xs p-2">{{RI.scenario|linebreaksbr}}</td>
                 <td class="text-xs p-2">{{RI.existing_measures|linebreaksbr}}</td>
-                <td class="text-center p-1 {{RI.current_level}}"><span class="font-semibold">{{RI.get_current_level_display}}</span><br>
-                    <span class="text-xs">I={{RI.get_current_impact_display}}, P={{RI.get_current_proba_display}}</span>
+                <td class="text-center p-1 {{RI.current_level}}"><span class="font-semibold">{{RI.get_current_risk.name}}</span><br>
+                    <span class="text-xs">I={{RI.get_current_impact.name}}, P={{RI.get_current_proba.name}}</span>
                 </td>
                 <td class="text-xs p-1">
                     <ul class="pl-3 ml-3 list-disc">
@@ -75,8 +75,8 @@
                     </ul>
 
                 </td>
-                <td class="text-center p-1 {{RI.residual_level}}"><span class="font-semibold">{{RI.get_residual_level_display}}</span><br>
-                    <span class="text-xs">I={{RI.get_residual_impact_display}}, P={{RI.get_residual_proba_display}}</span>
+                <td class="text-center p-1 {{RI.residual_level}}"><span class="font-semibold">{{RI.get_residual_risk.name}}</span><br>
+                    <span class="text-xs">I={{RI.get_residual_impact.name}}, P={{RI.get_residual_proba.name}}</span>
                 </td>
                 <td class="text-center">{{RI.get_treatment_display}}</td>
             </tr>
@@ -89,13 +89,13 @@
     <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break">
         <div class="text-xl pb-4">{% trans "Matrix view" %}</div>
         <div class="flex space-x-3">
-            <div class="w-1/2 shadow rounded-lg relative">
+            <div class="w-1/2 shadow rounded-lg p-6">
                 <h3 class="font-bold p-2 m-2 text-lg">{% trans "Current" %}</h3>
-                {% include 'snippets/risk_matrix.html' with matrix=analysis.rating_matrix data=ri_clusters.current %}
+                {% include 'snippets/risk_matrix.html' with data=ri_clusters.current %}
             </div>
-            <div class="w-1/2 shadow rounded-lg">
+            <div class="w-1/2 shadow rounded-lg p-6">
                 <h3 class="font-bold p-2 m-2 text-lg">{% trans "Residual" %}</h3>
-                {% include 'snippets/risk_matrix.html' with matrix=analysis.rating_matrix data=ri_clusters.residual %}
+                {% include 'snippets/risk_matrix.html' with data=ri_clusters.residual %}
             </div>
 
 

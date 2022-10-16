@@ -10,6 +10,15 @@ STATUS_COLOR_MAP = {'open': '#fac858', 'mitigated': '#91cc75', 'accepted': '#73c
                     'on_hold': '#ee6666', 'done': '#91cc75'}
 
 
+def get_rating_options(user: User):
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_labels: list = [m['risk'][i]['name'] for m in parsed_matrices for i in range(len(m['risk']))]
+    return [(i, l) for i, l in enumerate(risk_labels)]
+
+
 def risk_matrix(user: User):
     matrix_current = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
@@ -21,9 +30,9 @@ def risk_matrix(user: User):
     map_proba = {'VL': 0, 'L': 1, 'M': 2, 'H': 3, 'VH': 4}
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
-    for ri in RiskScenario.objects.filter(id__in=object_ids_view):
-        matrix_current[map_impact[ri.current_impact]][map_proba[ri.current_proba]] += 1
-        matrix_residual[map_impact[ri.residual_impact]][map_proba[ri.residual_proba]] += 1
+    # for ri in RiskScenario.objects.filter(id__in=object_ids_view):
+        # matrix_current[map_impact[ri.current_impact]][map_proba[ri.current_proba]] += 1
+        # matrix_residual[map_impact[ri.residual_impact]][map_proba[ri.residual_proba]] += 1
     return {'current': matrix_current, 'residual': matrix_residual}
 
 
@@ -54,7 +63,7 @@ def risk_per_status(user: User):
     return {"labels": labels, "values": values}
 
 
-def security_measure_per_status(user : User):
+def security_measure_per_status(user: User):
     values = list()
     labels = list()
     color_map = {"open": "#fac858", "in_progress": "#5470c6", "on_hold": "#ee6666", "done": "#91cc75"}
@@ -75,7 +84,7 @@ def security_measure_per_cur_risk(user: User):
     output = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
-    for lvl in RiskScenario.RATING_OPTIONS:
+    for lvl in get_rating_options(user):
         cnt = SecurityMeasure.objects.filter(id__in=object_ids_view).exclude(status='done').filter(riskscenario__current_level=lvl[0]).count()
         output.append({"name": lvl[1], "value": cnt})
 
@@ -101,7 +110,7 @@ def risks_count_per_level(user: User):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
 
-    for lvl in RiskScenario.RATING_OPTIONS:
+    for lvl in get_rating_options(user):
         count_c = RiskScenario.objects.filter(id__in=object_ids_view).filter(current_level=lvl[0]).count()
         count_r = RiskScenario.objects.filter(id__in=object_ids_view).filter(residual_level=lvl[0]).count()
         current_level.append({'name': lvl[1], 'value': count_c})
@@ -198,7 +207,7 @@ def security_measure_priority(user: User):
     return clusters
 
 
-def risk_status(analysis_list):
+def risk_status(user: User, analysis_list):
     names = list()
     current_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
     residual_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
@@ -209,7 +218,7 @@ def risk_status(analysis_list):
     max_tmp = list()
     for analysis in analysis_list:
 
-        for lvl in RiskScenario.RATING_OPTIONS:
+        for lvl in get_rating_options(user):
             cnt = RiskScenario.objects.filter(analysis=analysis, current_level=lvl[0]).count()
             current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
@@ -252,14 +261,14 @@ def risks_levels_per_prj_grp(user: User):
 
     for folder in Folder.objects.all():
 
-        for lvl in RiskScenario.RATING_OPTIONS:
-            cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, current_level=lvl[0]).count()
-            current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
+        # for lvl in get_rating_options(user):
+        #     cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, current_level=lvl[0]).count()
+        #     current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
-            residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
+        #     cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
+        #     residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
 
-            max_tmp.append(RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder).count())
+        #     max_tmp.append(RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder).count())
 
         names.append(str(folder))
 
