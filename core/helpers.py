@@ -18,6 +18,15 @@ def get_rating_options(user: User):
     risk_labels: list = [m['risk'][i]['name'] for m in parsed_matrices for i in range(len(m['risk']))]
     return [(i, l) for i, l in enumerate(risk_labels)]
 
+def get_rating_options_abbr(user: User):
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_abbr: list = [m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_labels: list = [m['risk'][i]['name'] for m in parsed_matrices for i in range(len(m['risk']))]
+    return list(zip(risk_abbr, risk_labels))
+
 
 def risk_matrix(user: User):
     matrix_current = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
@@ -209,21 +218,28 @@ def security_measure_priority(user: User):
 
 def risk_status(user: User, analysis_list):
     names = list()
-    current_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
-    residual_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_abbreviations: list = [m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
+    current_out = {abbr: list() for abbr in risk_abbreviations}
+    residual_out = {abbr: list() for abbr in risk_abbreviations}
 
     rsk_status_out = {'open': list(), 'mitigated': list(), 'accepted': list(), 'blocker': list()}
     mtg_status_out = {'open': list(), 'in_progress': list(), 'on_hold': list(), 'done': list()}
 
     max_tmp = list()
+    abbreviations = [x[0] for x in get_rating_options_abbr(user)]
     for analysis in analysis_list:
 
         for lvl in get_rating_options(user):
+            abbr = abbreviations[lvl[0]]
             cnt = RiskScenario.objects.filter(analysis=analysis, current_level=lvl[0]).count()
-            current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
+            current_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
 
             cnt = RiskScenario.objects.filter(analysis=analysis, residual_level=lvl[0]).count()
-            residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
+            residual_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
 
             max_tmp.append(RiskScenario.objects.filter(analysis=analysis).count())
 

@@ -14,14 +14,12 @@ from iam.models import Folder, RoleAssignment, User
 
 from django.contrib.auth.views import LoginView
 from .forms import LoginForm
+
 from django.db.models import Q
 
 from django.utils.translation import gettext_lazy as _
 
-from .helpers import (security_measure_per_status, risk_per_status, p_risks, p_risks_2,
-                      risks_count_per_level, security_measure_per_cur_risk, security_measure_per_security_function,
-                      security_measure_priority, risk_matrix, risks_per_project_groups,
-                      get_counters, risk_status, risks_levels_per_prj_grp)
+from .helpers import *
 
 from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
@@ -234,7 +232,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
     residual_level = list()
     agg_risks = list()
 
-    for lvl in RiskScenario.RATING_OPTIONS:
+    for lvl in get_rating_options(user):
         count_c = RiskScenario.objects.filter(current_level=lvl[0]).filter(analysis__in=analysis_list).count()
         count_r = RiskScenario.objects.filter(residual_level=lvl[0]).filter(analysis__in=analysis_list).count()
         current_level.append({'name': lvl[1], 'value': count_c})
@@ -243,7 +241,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
     untreated = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
         treatment__in=['mitigated', 'accepted']).count()
     untreated_h_vh = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
-        treatment__in=['mitigated', 'accepted']).filter(current_level__in=['H', 'VH']).count()
+        treatment__in=['mitigated', 'accepted']).filter(current_level__gte=2).count()
     accepted = RiskScenario.objects.filter(analysis__in=analysis_list).filter(treatment='accepted').count()
 
     values = list()
@@ -262,11 +260,11 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
 
     for _ra in analysis_list:
         synth_table = list()
-        for lvl in RiskScenario.RATING_OPTIONS:
+        for lvl in get_rating_options(user):
             count_c = RiskScenario.objects.filter(current_level=lvl[0]).filter(analysis__id=_ra).count()
             count_r = RiskScenario.objects.filter(residual_level=lvl[0]).filter(analysis__id=_ra).count()
             synth_table.append({"lvl": lvl[1], "current": count_c, "residual": count_r})
-        hvh_risks = RiskScenario.objects.filter(analysis__id=_ra).filter(current_level__in=['H', 'VH'])
+        hvh_risks = RiskScenario.objects.filter(analysis__id=_ra).filter(current_level__gte=2)
         analysis_objects.append(
             {"analysis": get_object_or_404(Analysis, pk=_ra), "synth_table": synth_table, "hvh_risks": hvh_risks}
         )
