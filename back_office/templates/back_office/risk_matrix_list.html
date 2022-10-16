@@ -17,76 +17,7 @@
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
-                        {{ filter.form.project__name }}
-                </div>
-                <div class="flex justify-center">
-                    <div
-                        x-data="{
-                            open: false,
-                            toggle() {
-                                if (this.open) {
-                                    return this.close()
-                                }
-                    
-                                this.$refs.button.focus()
-                    
-                                this.open = true
-                            },
-                            close(focusAfter) {
-                                if (! this.open) return
-                    
-                                this.open = false
-                    
-                                focusAfter && focusAfter.focus()
-                            }
-                        }"
-                        x-on:keydown.escape.prevent.stop="close($refs.button)"
-                        x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
-                        x-id="['dropdown-button']"
-                        class="relative"
-                    >
-                        <!-- Button -->
-                        <button
-                            x-ref="button"
-                            x-on:click="toggle()"
-                            :aria-expanded="open"
-                            :aria-controls="$id('dropdown-button')"
-                            type="button"
-                            class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
-                            :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
-                        >
-                            <i class="fas fa-filter"></i>
-                            <span>{% trans "Filters" %}</span>
-                        </button>
-                    
-                        <!-- Panel -->
-                        <div
-                            x-ref="panel"
-                            x-show="open"
-                            x-transition.origin.top.left
-                            x-on:click.outside="close($refs.button)"
-                            :id="$id('dropdown-button')"
-                            style="display: none;"
-                            class="absolute left-0 mt-2 z-10 w-64 bg-white rounded shadow-2xl overflow-hidden"
-                        >
-                    
-                            <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
-                                <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
-                                    {{ filter.form.is_draft }}
-                                </div>
-                                <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
-                                    {{ filter.form.auditor }}
-                                </div>
-                                <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Project" %}</p>
-                                    {{ filter.form.project }}
-                                </div>
-                                <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
-                            </div>
-                        </div>
-                    </div>
+                        {{ filter.form.name }}
                 </div>
                 <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
                     <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
@@ -115,7 +46,7 @@
                 <th class="px-6 py-3">{% trans "Name" %}</th>
                 <th class="px-6 py-3">{% trans "Description" %}</th>
                 <th class="px-6 py-3">{% trans "Matrix" %}</th>
-                <th class="px-6 py-3">{% trans "Actions" %}</th>
+                {% comment %} <th class="px-6 py-3">{% trans "Actions" %}</th> {% endcomment %}
             </thead>
             <tbody>
                 {% for matrix in matrices %}
@@ -123,7 +54,7 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-3">
-                                    <a id="matrix{{ matrix.id }}" href="{% url 'ra-update' matrix.id %}?next={{ request.path|urlencode }}"
+                                    <a id="matrix{{ matrix.id }}" href="#?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ matrix.name|capfirst }}
                                     </a>
@@ -141,13 +72,15 @@
                                 {% for row in matrix.render_grid_as_colors %}
                                 <div class="flex flex-col">
                                     {% for item in row reversed %}
-                                        <div class="w-8 h-4" style="background-color: {{ item.rgb }}">&nbsp;</div>
+                                        <div class="w-8 h-4 cursor-pointer relative inline-block group" style="background-color: {{ item.rgb }}">
+                                            <span class="hidden m-2 w-fit whitespace-nowrap bg-black text-white text-center rounded p-1 absolute z-10 group-hover:block opacity-70 left-full">{{ item.name }}</span>
+                                        </div>
                                     {% endfor %}
                                 </div>
                                 {% endfor %}
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        {% comment %} <td class="px-6 py-4 whitespace-nowrap">
 
                             <div class="w-full">
                                 <span><a href="{% url 'RA' matrix.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
@@ -164,12 +97,11 @@
                                         
                                     </a>
                                           
-                                    {% comment %} {% include 'back_office/snippets/modal.html' with modal_action="delete" header=_("Delete risk matrix?") object=matrix %} {% endcomment %}
                                 
                                 </span>
 
                             </div>
-                        </td>
+                        </td> {% endcomment %}
                     </tr>
                 {% empty %}
                 <tr class="text-black p-4 text-center">

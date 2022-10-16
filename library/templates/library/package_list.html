@@ -49,8 +49,7 @@
                                             <div x-cloak x-show="open" class="absolute z-10 bg-white shadow-md rounded-md p-4">
                                                 <form action="{% url 'import-default-package' package.name %}" method="POST" c>
                                                     {% csrf_token %}
-                                                    <button type="submit" class="table-action cursor-pointer w-fit">UPLOAD</button>
-                                                    </button>
+                                                    <button type="submit" class="table-action cursor-pointer w-fit">{% trans "Import" %}</button>
                                                 </form>
                                             </div>
                                         </span>
