@@ -213,7 +213,7 @@ class MyProjectsListView(ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        agg_data = risk_status(Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user))
+        agg_data = risk_status(self.request.user, Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user))
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         _tmp = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
