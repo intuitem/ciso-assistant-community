@@ -6,6 +6,7 @@ from .forms import *
 
 from django.views.generic import TemplateView, ListView, FormView
 from django.views import View
+from django.contrib import messages
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
@@ -64,6 +65,11 @@ class PackageDetailView(TemplateView):
         return matrices
 
 def import_default_package(request, package_name):
-    package = get_package(package_name)
-    import_package(package)
-    return redirect('package-list')
+    try:
+        package = get_package(package_name)
+        import_package(package)
+    except:
+        messages.error(request, f'{package_name} was not imported !')
+        return redirect("package-list")
+    messages.success(request, f'{package_name} was imported !')
+    return redirect("package-list")
