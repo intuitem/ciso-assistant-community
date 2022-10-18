@@ -12,6 +12,7 @@
     {% endwith %}
 
     <div class="flex flex-col space-y-6">
+        {% include 'back_office/snippets/messages.html' %}
         <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-4">
             <h1 class="text-xl font-semibold">{% trans "Default packages" %}</h1>
             <div class="rounded shadow-md">
@@ -21,7 +22,6 @@
                         <th class="px-6 py-3">{% trans "Description" %}</th>
                         <th class="px-6 py-3">{% trans "Actions" %}</th>
                     </thead>
-                    {% include 'back_office/snippets/messages.html' %}
                     <tbody>
                         {% for package in packages %}
                             <tr class=" odd:bg-white even:bg-gray-50 ">

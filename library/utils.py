@@ -1,5 +1,6 @@
 from core.models import RiskMatrix
 from back_office.models import Threat, SecurityFunction
+from django.contrib import messages
 from iam.models import Folder
 
 from .validators import *
@@ -139,7 +140,7 @@ def import_security_function(fields):
 
     return security_function
 
-def import_package(package):
+def import_package(request, package):
     '''
     Imports a package
     
@@ -158,6 +159,7 @@ def import_package(package):
         elif obj['type'] == 'security_function':
             security_functions.append(obj.get('fields'))
         else:
+            messages.error(request, f'Package was not imported.')
             raise Exception(f'Unknown object type: {obj["type"]}')
 
     for matrix in matrices:
@@ -169,4 +171,5 @@ def import_package(package):
     for security_function in security_functions:
         import_security_function(security_function)
 
+    messages.success(request, f'Package imported successfully.')
     return True
