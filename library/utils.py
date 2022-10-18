@@ -171,5 +171,5 @@ def import_package(request, package):
     for security_function in security_functions:
         import_security_function(security_function)
 
-    messages.success(request, f'Package imported successfully.')
+    messages.success(request, f'Package "{package["name"]}" imported successfully.')
     return True
