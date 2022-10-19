@@ -33,9 +33,11 @@
     </div>
     {% endif %}
     <!-- End Filters Dropdown Form -->
+    {% if add_threat %}
     {% include 'back_office/snippets/add_button_modal.html' with form=threat_create_form header=_("Add Threat") model="threat" content=_("New threat") %}
+    {% endif %}
 </div>
-        <div class="relative overflow-x-auto shadow-md rounded-l-lg rounded-r-lg border-none focus:ring-0">
+        <div class="relative overflow-x-auto shadow-md rounded-l-lg rounded-r-lg border-none focus:ring-0 mt-2">
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Threat" %}</th>
@@ -57,13 +59,16 @@
                     <td class="px-6 py-4">
                         <div class="">
                             {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                            {% if threat.id in object_ids_change %}
                             <span>
                                 <a href="{% url 'threat-update' threat.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </span>
-
+                            {% endif %}
+                            {% if threat.id in object_ids_delete %}
                             {% include 'back_office/snippets/delete_button_modal.html' with object=threat header=_("Delete threat?") model='threat' %}
+                            {% endif %}
 
                         </div>
                     </td>

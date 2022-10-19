@@ -102,11 +102,13 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
+        {% if add_riskscenario%}
         {% include 'back_office/snippets/add_button_modal.html' with form=risk_scenario_create_form header=_("Add Risk Scenario") model="risk-scenario" content=_("New risk scenario") %}
+        {% endif %}
 
 
     </div>
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Title" %}</th>
@@ -157,13 +159,16 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 <span><a href="{% url 'RA' scenario.analysis.id %}#{{scenario.id}}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if scenario.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if scenario.id in object_ids_delete %}
                                 {% include 'back_office/snippets/delete_button_modal.html' with object=scenario header=_("Delete risk scenario?") %}
+                                {% endif%}
 
                             </div>
                         </td>

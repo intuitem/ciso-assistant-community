@@ -36,13 +36,15 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
+        {% if add_asset %}
         <div class="grid mb-4 w-full">
             <a href="{% url 'asset-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Asset" %}</a>
         </div>
+        {% endif %}
     
     </div>
 
-    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Name" %}</th>
@@ -70,14 +72,16 @@
                         <td class="px-6 py-4 whitespace-nowrap">
 
                             <div class="">
+                                {% if asset.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'asset-update' asset.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if asset.id in object_ids_delete %}
                                 {% include 'back_office/snippets/delete_button_modal.html' with object=asset header=_("Delete asset?") model='asset' %}
-
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

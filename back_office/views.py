@@ -82,6 +82,9 @@ class ProjectListView(UserPassesTestMixin, ListView):
         filter = ProjectFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['project_create_form'] = ProjectForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
+        context['add_project'] = RoleAssignment.has_permission(self.request.user, 'add_project')
         return context
 
     def test_func(self):
@@ -192,6 +195,9 @@ class AssetListView(UserPassesTestMixin, ListView):
         filter = AssetFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['asset_create_form'] = AssetForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
+        context['add_asset'] = RoleAssignment.has_permission(self.request.user, 'add_asset')
         return context
 
     def test_func(self):
@@ -277,6 +283,9 @@ class FolderListView(UserPassesTestMixin, ListView):
         filter = ProjectsDomainFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['projects_domain_create_form'] = FolderUpdateForm
+        context['add_folder'] = RoleAssignment.has_permission(self.request.user, 'add_folder')
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder)
         return context
 
     def test_func(self):
@@ -388,6 +397,9 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
         # self.model._meta.verbose_name # TODO: Find a way to get unlocalized model verbose_name, as localization may break stuff e.g. urls
         context['model'] = 'analysis'
         context['analysis_create_form'] = RiskAnalysisCreateForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        context['add_analysis'] = RoleAssignment.has_permission(self.request.user, 'add_analysis')
         return context
 
     def test_func(self):
@@ -486,6 +498,9 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['model'] = 'risk-scenario'
         context['risk_scenario_create_form'] = RiskScenarioCreateForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+        context['add_riskscenario'] = RoleAssignment.has_permission(self.request.user, 'add_riskscenario')
         return context
 
     def test_func(self):
@@ -603,6 +618,9 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         filter = SecurityMeasureFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['measure_create_form'] = SecurityMeasureCreateForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+        context['add_securitymeasure'] = RoleAssignment.has_permission(self.request.user, 'add_securitymeasure')
         return context
 
     def get_queryset(self):
@@ -694,6 +712,9 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
         filter = SecurityFunctionFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['security_function_create_form'] = SecurityFunctionCreateForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
+        context['add_securityfunction'] = RoleAssignment.has_permission(self.request.user, 'add_securityfunction')
         return context
 
     def test_func(self):
@@ -770,6 +791,9 @@ class ThreatListView(UserPassesTestMixin, ListView):
         filter = ThreatFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['threat_create_form'] = ThreatCreateForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
+        context['add_threat'] = RoleAssignment.has_permission(self.request.user, 'add_threat')
         return context
 
     def test_func(self):
@@ -837,6 +861,9 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
         context['risk_acceptance_update_form'] = RiskAcceptanceCreateUpdateForm
+        (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
+        context['add_riskacceptance'] = RoleAssignment.has_permission(self.request.user, 'add_riskacceptance')
         return context
 
     def get_queryset(self):
@@ -1023,6 +1050,7 @@ class UserGroupListView(UserPassesTestMixin, ListView):
             Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
         )
+        context['add_usergroup'] = RoleAssignment.has_permission(self.request.user, 'add_usergroup')
         return context
 
     def test_func(self):

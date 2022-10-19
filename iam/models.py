@@ -324,3 +324,11 @@ class RoleAssignment(models.Model):
         for user_group in UserGroup.get_user_groups(user):
             assignments += list(user_group.roleassignment_set.all())
         return assignments
+    
+    def has_permission(user, codename):
+        """ Determines if a user has a specific permission """
+        for ra in RoleAssignment.get_role_assignments(user):
+            for perm in ra.role.permissions.all():
+                if perm.codename == codename:
+                    return True
+        return False

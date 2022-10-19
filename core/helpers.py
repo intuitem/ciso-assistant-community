@@ -268,23 +268,28 @@ def risk_status(user: User, analysis_list):
 
 def risks_levels_per_prj_grp(user: User):
     names = list()
-    current_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
-    residual_out = {'VL': list(), 'L': list(), 'M': list(), 'H': list(), 'VH': list()}
-
-    max_tmp = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_abbreviations: list = [m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
+    current_out = {abbr: list() for abbr in risk_abbreviations}
+    residual_out = {abbr: list() for abbr in risk_abbreviations}
 
+    max_tmp = list()
+
+    abbreviations = [x[0] for x in get_rating_options_abbr(user)]
     for folder in Folder.objects.all():
 
-        # for lvl in get_rating_options(user):
-        #     cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, current_level=lvl[0]).count()
-        #     current_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
+        for lvl in get_rating_options(user):
+            abbr = abbreviations[lvl[0]]
+            cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, current_level=lvl[0]).count()
+            current_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
 
-        #     cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
-        #     residual_out[lvl[0]].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[lvl[0]]}})
+            cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
+            residual_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
 
-        #     max_tmp.append(RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder).count())
+            max_tmp.append(RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder).count())
 
         names.append(str(folder))
 
