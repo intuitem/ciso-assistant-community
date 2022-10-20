@@ -56,7 +56,7 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
 class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'version', 'is_draft', 'rating_matrix', 'comments']
+        fields = ['project', 'auditor', 'version', 'is_draft', 'comments']
 
 
 class SecurityMeasureCreateForm(StyledModelForm):
