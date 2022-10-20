@@ -32,7 +32,8 @@ def index(request):
         "security_measure_status": security_measure_per_status(request.user),
         "measures_to_review": measures_to_review(request.user),
         "acceptances_to_review": acceptances_to_review(request.user),
-        "today": date.today()
+        "today": date.today(),
+        "view_user": RoleAssignment.has_permission(request.user, "view_user")
     }
     return HttpResponse(template.render(context, request))
 
@@ -49,6 +50,7 @@ class QuickStartView(UserPassesTestMixin, ListView):
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
         context['asset_create_form'] = AssetForm
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         return context
 
     def get_queryset(self):
@@ -78,6 +80,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = ProjectFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -138,6 +141,7 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['analyses'] = Analysis.objects.filter(
             project=self.get_object()).order_by('is_draft', 'id')
         context['analysis_create_form'] = RiskAnalysisCreateFormInherited(
@@ -191,6 +195,7 @@ class AssetListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = AssetFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -240,6 +245,7 @@ class AssetUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['crumbs'] = {'asset-list': _('Assets')}
         return context
 
@@ -279,6 +285,7 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = ProjectsDomainFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -345,6 +352,7 @@ class FolderUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['projects'] = Project.objects.filter(folder=self.get_object())
         context['crumbs'] = {'pd-list': _('Projects domains')}
         context['project_create_form'] = ProjectFormInherited(
@@ -391,6 +399,7 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = AnalysisFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -443,6 +452,7 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['risk_scenario_create_form'] = RiskScenarioCreateForm(
             initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['scenarios'] = RiskScenario.objects.filter(
@@ -493,6 +503,7 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = RiskScenarioFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -518,6 +529,7 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['analysis'] = get_object_or_404(
             Analysis, id=self.kwargs['parent_analysis'])
 
@@ -557,6 +569,7 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['security_measures'] = self.get_object().security_measures.all()
         context['existing_security_measures'] = SecurityMeasure.objects.filter(
             project=self.get_object().analysis.project)
@@ -614,6 +627,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = SecurityMeasureFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -664,6 +678,7 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['risk_scenarios'] = RiskScenario.objects.filter(
             security_measures=self.get_object())
         context['crumbs'] = {'mtg-list': _('Security measures')}
@@ -708,6 +723,7 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = SecurityFunctionFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -745,6 +761,7 @@ class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['crumbs'] = {'security-function-list': _('Security functions')}
         return context
 
@@ -787,6 +804,7 @@ class ThreatListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = ThreatFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -824,6 +842,7 @@ class ThreatUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['crumbs'] = {'threat-list': _('Threats')}
         return context
 
@@ -856,6 +875,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = RiskAcceptanceFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -902,6 +922,7 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context["crumbs"] = {'acceptance-list': _('Risk acceptances')}
         return context
 
@@ -935,6 +956,7 @@ class MyProfileView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         return context
 
     def get_form_kwargs(self):
@@ -966,6 +988,7 @@ class UserListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = UserFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -996,6 +1019,7 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context["crumbs"] = {'user-list': _('Users')}
         return context
 
@@ -1043,6 +1067,7 @@ class UserGroupListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = UserGroupFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1078,6 +1103,7 @@ class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['users'] = User.objects.exclude(user_groups=self.get_object())
         context["associated_users"] = User.objects.filter(
             user_groups=self.get_object())
@@ -1123,6 +1149,7 @@ class RoleAssignmentListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = UserGroupFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1144,6 +1171,7 @@ class RoleAssignmentCreateView(UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context["crumbs"] = {'role-list': _('Role assignment')}
         return context
 
@@ -1174,6 +1202,7 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context["crumbs"] = {'user_group-list': _('UserGroups')}
         return context
 
@@ -1197,6 +1226,7 @@ class UserPasswordChangeView(PasswordChangeView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['this_user'] = get_object_or_404(User, pk=self.kwargs['pk'])
         context["crumbs"] = {'user-list': _('Users')}
         return context
@@ -1224,6 +1254,7 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = RiskMatrixFilter(self.request.GET, queryset)
         context['filter'] = filter
