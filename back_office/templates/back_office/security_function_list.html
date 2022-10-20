@@ -51,10 +51,17 @@
                         <div class="flex items-center">
 
                             <div class="">
+                                {% if object_ids_change %}
                                 <a id="function{{ function.id }}" href="{% url 'security-function-update' function.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ function.name|capfirst }}
                                 </a>
+                                {% else %}
+                                <a id="function{{ function.id }}"
+                                class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                    {{ function.name|capfirst }}
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </th>

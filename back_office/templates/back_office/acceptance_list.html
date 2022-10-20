@@ -121,10 +121,17 @@
                                 {% endif %}">{{ acceptance.get_type_display|lower}}
                                 </span>
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ acceptance.risk_scenario }}
                                     </a>
+                                    {% else %}
+                                    <a id="acceptance{{ acceptance.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ acceptance.risk_scenario }}
+                                    </a>>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>

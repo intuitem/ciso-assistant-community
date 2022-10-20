@@ -57,10 +57,17 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="asset{{ asset.id }}" href="{% url 'asset-update' asset.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ asset }}
                                     </a>
+                                    {% else %}
+                                    <a id="asset{{ asset.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ asset }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>

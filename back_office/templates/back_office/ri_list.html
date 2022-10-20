@@ -134,10 +134,17 @@
                                 {% endif %}">{{ scenario.get_treatment_display|lower}}
                                 </span>
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ scenario.name|capfirst }}
                                     </a>
+                                    {% else %}
+                                    <a id="scenario{{ scenario.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ scenario.name|capfirst }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>

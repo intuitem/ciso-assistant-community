@@ -131,10 +131,17 @@
                                 <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
                                 {% endif %}
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="analysis{{ analysis.id }}" href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ analysis }}
                                     </a>
+                                    {% else %}
+                                    <a id="analysis{{ analysis.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ analysis }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>
