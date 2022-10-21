@@ -966,7 +966,10 @@ class MyProfileView(UserPassesTestMixin, UpdateView):
         return kwargs
 
     def get_success_url(self) -> str:
-        return self.request.POST.get('next', '/')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('index')
+        else:
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
         return self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
