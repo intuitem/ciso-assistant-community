@@ -1,8 +1,9 @@
+from typing import ValuesView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, UpdateView, CreateView, DeleteView
+from django.views.generic import ListView, UpdateView, CreateView, DeleteView, DetailView
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.translation import gettext_lazy as _
@@ -1264,6 +1265,22 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
         return context
 
 
+    def test_func(self):
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
+
+class RiskMatrixDetailedView(UserPassesTestMixin, DetailView):
+    template_name = 'back_office/risk_matrix_detailed.html'
+    context_object_name = 'matrix'
+
+    model = RiskMatrix
+
+    def get_context(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+    
     def test_func(self):
         """
         The view is always accessible, only its content is filtered by the queryset

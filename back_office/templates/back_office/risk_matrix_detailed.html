@@ -1,0 +1,30 @@
+{% extends 'back_office/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+{% with page_title=matrix.name %}
+{% include 'back_office/snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<div>
+    <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break">
+        <div class="text-xl pb-4">{% trans "Matrix view" %}</div>
+        <div class="flex space-x-3">
+            <div class="flex flex-row">
+                {% for row in matrix.render_grid_as_colors %}
+                <div class="flex flex-col">
+                    {% for item in row reversed %}
+                        <div class="w-16 h-8 cursor-pointer relative inline-block group" style="background-color: {{ item.rgb }}">
+                            <span class="hidden m-2 w-fit whitespace-nowrap bg-black text-white text-center rounded p-1 absolute z-10 group-hover:block left-full">{{ item.name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
