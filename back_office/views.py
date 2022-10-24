@@ -1279,6 +1279,7 @@ class RiskMatrixDetailedView(UserPassesTestMixin, DetailView):
 
     def get_context(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'matrix-list': _('Matrices')}
         return context
     
     def test_func(self):

@@ -1,5 +1,5 @@
 {% extends 'back_office/base.html' %}
-{% load i18n static %}
+{% load i18n back_office_extras %}
 
 {% block content %}
 {% with page_title=matrix.name %}
@@ -7,22 +7,65 @@
 {% endwith %}
 
 <div>
-    <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break">
-        <div class="text-xl pb-4">{% trans "Matrix view" %}</div>
-        <div class="flex space-x-3">
-            <div class="flex flex-row">
-                {% for row in matrix.render_grid_as_colors %}
-                <div class="flex flex-col">
-                    {% for item in row reversed %}
-                        <div class="w-16 h-8 cursor-pointer relative inline-block group" style="background-color: {{ item.rgb }}">
-                            <span class="hidden m-2 w-fit whitespace-nowrap bg-black text-white text-center rounded p-1 absolute z-10 group-hover:block left-full">{{ item.name }}</span>
-                        </div>
+    <div class="w-full bg-white shadow rounded-lg p-6">
+        <h3 class="flex font-bold p-2 m-2 text-lg">{% trans matrix.description %}</h3>
+        <div class="flex justify-center">
+            <table class="w-full">
+                <tr>
+                    <td></td>
+                    {% for probability in matrix.parse_json.probability %}
+                        <td class="w-8 h-16 text-center text-black bg-gray-500 border-2">
+                            {{ probability.description }}
+                        </td>
                     {% endfor %}
-                </div>
+                </tr>
+                {% for row in matrix.render_grid_as_colors reversed %}
+                    {% with row_index=forloop.revcounter0 %}
+                        <tr class="w-full">
+                            <td class="w-8 text-right text-black bg-gray-500 border-2 pr-2">
+                                {% with impact=matrix.parse_json.impact|index:row_index %}
+                                {{ impact.description }}
+                                {% endwith %}
+                            </td>
+                            {% for item in row %}
+                                <td class="w-8 h-16 text-left border-2" style="background-color: {{ item.rgb }}">
+                                    <span class="w-fit whitespace-nowrap text-center text-black rounded absolute group-hover:block">{{ item.name }}</span>
+                                </td>
+                            {% endfor %}
+                            </td>
+                            <td class="w-8 text-center text-black border-2">
+                                {% with impact=matrix.parse_json.impact|index:row_index %}
+                                {{ impact.name }}
+                                {% endwith %}
+                            </td>
+                        </tr>
+                    {% endwith %}
                 {% endfor %}
-            </div>
+                <tr>
+                    <td></td>
+                    {% for probability in matrix.parse_json.probability %}
+                        <td class="w-8 h-16 text-center text-black border-2">
+                            {{ probability.name }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
         </div>
-
+    </div>
+    <div class="w-full bg-white shadow rounded-lg p-6 mt-2">
+        <h3 class="flex font-bold p-2 m-2 text-lg">{% trans "Risk legend" %}</h3>
+        <div class="flex justify-center">
+            <table class="w-3/4">
+                <tr>
+                    {% for risk in matrix.parse_json.risk %}
+                    <td class="w-8 h-16 text-center border-2" style="background-color: {{ risk.rgb }}">
+                        {{ risk.name }}:
+                        {{ risk.description }}
+                    </td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
 
