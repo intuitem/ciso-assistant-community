@@ -31,7 +31,10 @@
     <div class="w-full bg-white shadow rounded-lg p-6">
         <h3 class="flex font-bold p-2 m-2 text-lg">{% trans matrix.description %}</h3>
         <div class="flex justify-center">
-            <table class="w-3/4">
+            <div class="h-16 text-black font-bold text-center ml-4 mt-36 -rotate-90">
+                {% trans "Impact" %}
+            </div>
+            <table class="w-3/4 mt-10">
                 {% for row in matrix.render_grid_as_colors reversed %}
                     {% with row_index=forloop.revcounter0 %}
                         <tr>
@@ -59,6 +62,9 @@
                     {% endfor %}
                 </tr>
             </table>
+        </div>
+        <div class="h-16 text-black font-bold text-center ml-44 mt-4">
+            {% trans "Probability" %}
         </div>
     </div>
     <div class="w-full bg-white shadow rounded-lg p-6 mt-2">
