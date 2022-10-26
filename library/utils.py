@@ -188,7 +188,7 @@ def import_package(request, package):
     uploaded_list, ignored_list = ignore_package_object(matrices, RiskMatrix)
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
-    for matrix in matrices:
+    for matrix in uploaded_list:
         import_matrix(request, matrix)
 
     uploaded_list, ignored_list = ignore_package_object(threats, Threat)
