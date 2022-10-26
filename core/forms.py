@@ -91,7 +91,6 @@ class SecurityMeasureUpdateForm(StyledModelForm):
 class RiskScenarioCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['analysis'].widget.attrs['select_disabled'] = True
     class Meta:
         model = RiskScenario
         fields = ['analysis', 'threat', 'name', 'scenario']

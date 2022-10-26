@@ -113,7 +113,6 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
 
 class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
-    template_name = 'back_office/snippets/project_create_modal.html'
     context_object_name = 'project'
     form_class = ProjectForm
 
@@ -227,7 +226,6 @@ class AssetCreateView(UserPassesTestMixin, CreateView):
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateView):
     model = Asset
-    template = 'back_office/snippets/asset_create.html'
     context_object_name = 'asset'
     form_class = AssetForm
 
@@ -318,7 +316,6 @@ class FolderCreateView(UserPassesTestMixin, CreateView):
 
 class FolderCreateViewModal(UserPassesTestMixin, CreateView):
     model = Folder
-    template_name = 'back_office/snippets/projects_domain_create_modal.html'
     context_object_name = 'domain'
     form_class = FolderUpdateForm
 
@@ -434,7 +431,6 @@ class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
 
 class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
     model = Analysis
-    template_name = 'back_office/snippets/analysis_create_modal.html'
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
 
@@ -551,7 +547,6 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
 
 class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskScenario
-    template_name = 'back_office/ri_create_modal.html'
     context_object_name = 'scenario'
     form_class = RiskScenarioCreateForm
 
@@ -660,7 +655,6 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
 class SecurityMeasureCreateViewModal(UserPassesTestMixin, CreateView):
     permission_required = 'core.add_securitymeasure'
     model = SecurityMeasure
-    template_name = 'back_office/snippets/measure_create_modal.html'
     context_object_name = 'measure'
     form_class = SecurityMeasureCreateForm
 
@@ -743,7 +737,6 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
 
 class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateView):
     model = SecurityFunction
-    template_name = 'back_office/snippets/security_function_create_modal.html'
     context_object_name = 'function'
     form_class = SecurityFunctionCreateForm
 
@@ -824,7 +817,6 @@ class ThreatListView(UserPassesTestMixin, ListView):
 
 class ThreatCreateViewModal(UserPassesTestMixin, CreateView):
     model = Threat
-    template_name = 'back_office/snippets/threat_create_modal.html'
     context_object_name = 'threat'
     form_class = ThreatCreateForm
 
@@ -903,7 +895,6 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
 
 class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskAcceptance
-    template_name = 'back_office/snippets/risk_acceptance_create_modal.html'
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
