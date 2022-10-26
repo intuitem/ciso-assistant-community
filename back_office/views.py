@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.utils.translation import gettext_lazy as _
 from datetime import date
+from django.contrib import messages
 from iam.models import UserGroup, Role, RoleAssignment
 from django.contrib.auth.views import PasswordChangeView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
@@ -336,6 +337,7 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
         ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(
             name="BI-RL-DMA"), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra3.perimeter_folders.add(folder)
+        messages.info(self.request, f'User groups {folder.name}-Auditors, {folder.name}-Analysts and {folder.name}-Domain Managers were created')
         return self.request.POST.get('next', '/')
 
     def test_func(self):
