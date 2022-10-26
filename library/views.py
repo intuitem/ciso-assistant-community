@@ -1,5 +1,6 @@
 from typing import Optional
 from core.models import RiskMatrix, Threat
+from iam.models import RoleAssignment
 
 from .utils import *
 from .forms import *
@@ -23,6 +24,7 @@ class PackageListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['packages'] = self.get_queryset()
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['form'] = UploadFileForm()
         return context
 

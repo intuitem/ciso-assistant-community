@@ -1,3 +1,4 @@
+from tkinter import E
 from core.models import RiskMatrix
 from back_office.models import Threat, SecurityFunction
 from django.contrib import messages
@@ -68,7 +69,7 @@ def get_package(name):
             return p
     return None
 
-def import_matrix(fields):
+def import_matrix(request, fields):
     '''
     Imports a matrix from a package
     
@@ -81,6 +82,7 @@ def import_matrix(fields):
     required_fields = ['name', 'description', 'probability', 'impact', 'risk', 'grid']
 
     if not object_valid(required_fields, fields):
+        messages.error(request, 'Package was not imported: Invalid matrix.')
         raise Exception('Invalid matrix')
     
     matrix = RiskMatrix.objects.create(
@@ -92,7 +94,7 @@ def import_matrix(fields):
 
     return matrix
 
-def import_threat(fields):
+def import_threat(request, fields):
     '''
     Imports a threat from a package
     
@@ -105,6 +107,7 @@ def import_threat(fields):
     required_fields = ['name', 'description']
 
     if not object_valid(required_fields, fields):
+        messages.error(request, 'Package was not imported: Invalid threat.')
         raise Exception('Invalid threat')
 
     threat = Threat.objects.create(
@@ -115,7 +118,7 @@ def import_threat(fields):
 
     return threat
 
-def import_security_function(fields):
+def import_security_function(request, fields):
     '''
     Imports a security function from a package
     
@@ -128,6 +131,7 @@ def import_security_function(fields):
     required_fields = ['name', 'description']
 
     if not object_valid(required_fields, fields):
+        messages.error(request, 'Package was not imported: Invalid security function.')
         raise Exception('Invalid security function')
 
     security_function = SecurityFunction.objects.create(
@@ -140,6 +144,23 @@ def import_security_function(fields):
 
     return security_function
 
+def ignore_package_object(package_objects, object_type):
+    '''
+    Return two lists of objects to ignore or upload
+
+    Args:
+        package_objects: objects to filter
+        object_type: type of the objects
+    '''
+    ignored_list = []
+    uploaded_list = []
+    for package_object in package_objects:
+        if object_type.objects.filter(name=package_object['name']).exists():
+            ignored_list.append(package_object)
+        else:
+            uploaded_list.append(package_object)
+    return uploaded_list, ignored_list
+
 def import_package(request, package):
     '''
     Imports a package
@@ -150,6 +171,8 @@ def import_package(request, package):
     matrices = []
     threats = []
     security_functions = []
+    objects_uploaded = 0
+    objects_ignored = 0
 
     for obj in package.get('objects'):
         if obj['type'] == 'matrix':
@@ -159,17 +182,26 @@ def import_package(request, package):
         elif obj['type'] == 'security_function':
             security_functions.append(obj.get('fields'))
         else:
-            messages.error(request, f'Package was not imported.')
+            messages.error(request, f'Package was not imported: Unknown object type: {obj["type"]}')
             raise Exception(f'Unknown object type: {obj["type"]}')
 
+    uploaded_list, ignored_list = ignore_package_object(matrices, RiskMatrix)
+    objects_ignored += len(ignored_list)
+    objects_uploaded += len(uploaded_list)
     for matrix in matrices:
-        import_matrix(matrix)
+        import_matrix(request, matrix)
 
-    for threat in threats:
-        import_threat(threat)
+    uploaded_list, ignored_list = ignore_package_object(threats, Threat)
+    objects_ignored += len(ignored_list)
+    objects_uploaded += len(uploaded_list)
+    for threat in uploaded_list:
+        import_threat(request, threat)
 
-    for security_function in security_functions:
-        import_security_function(security_function)
+    uploaded_list, ignored_list = ignore_package_object(security_functions, SecurityFunction)
+    objects_ignored += len(ignored_list)
+    objects_uploaded += len(uploaded_list)
+    for security_function in uploaded_list:
+        import_security_function(request, security_function)
 
-    messages.success(request, f'Package "{package["name"]}" imported successfully.')
+    messages.success(request, f'Package "{package["name"]}" imported successfully. {objects_uploaded} objects imported and {objects_ignored} objects ignored.')
     return True
