@@ -93,11 +93,19 @@
         <div class="flex space-x-3">
             <div class="w-1/2 shadow rounded-lg p-6">
                 <h3 class="font-bold p-2 m-2 text-lg">{% trans "Current" %}</h3>
-                {% include 'snippets/risk_matrix.html' with data=ri_clusters.current %}
+                {%if pdf %}
+                    {% include 'snippets/risk_matrix.html' with enriched_data=ri_clusters.current %}
+                {% else %}
+                    {% include 'snippets/risk_matrix.html' with data=ri_clusters.current %}
+                {% endif %}
             </div>
             <div class="w-1/2 shadow rounded-lg p-6">
                 <h3 class="font-bold p-2 m-2 text-lg">{% trans "Residual" %}</h3>
-                {% include 'snippets/risk_matrix.html' with data=ri_clusters.residual %}
+                {%if pdf %}
+                    {% include 'snippets/risk_matrix.html' with enriched_data=ri_clusters.residual %}
+                {% else %}
+                    {% include 'snippets/risk_matrix.html' with data=ri_clusters.residual %}
+                {% endif %}
             </div>
 
 
