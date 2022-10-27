@@ -16,7 +16,8 @@
                 <div class="text-sm">
                     <ul class="">
                         <li class="pb-1"><span class="font-semibold">{% trans "Audited by:" %}</span> {{analysis.auditor}}</li>
-                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> {% if analysis.is_draft %} <span class="bg-blue-200 py-1 px-2 rounded-lg">{% trans "Draft" %}</span> {% else %} <span class="bg-green-200 py-1 px-2 rounded-lg">{% trans "Ready" %} </span>{% endif %}
+                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> {% if analysis.is_draft %} 
+                        <span class="bg-blue-200 py-1 px-2 rounded-lg">{% trans "Draft" %}</span> {% else %} <span class="bg-green-200 py-1 px-2 rounded-lg">{% trans "Ready" %} </span>{% endif %}
                         </li>
                         <li class="pb-1"><span class="font-semibold">{% trans "Created at:" %}</span> {{analysis.created_at|date}}</li>
                         <li class="pb-1"><span class="font-semibold">{% trans "Updated at:" %}</span> {{analysis.updated_at|date}}</li>
@@ -24,7 +25,7 @@
                 </div>
             </div>
             <div class="container w-2/3 rounded">
-                <div class="text-sm"><span class="font-semibold">{% trans "Profile:" %}</span> <span class="py-1 px-2 bg-sky-300 rounded-lg capitalize">{{analysis.rating_matrix}}</span>
+                <div class="text-sm"><span class="font-semibold">{% trans "Matrix:" %}</span> <a href="{% url 'matrix-detailed' analysis.rating_matrix.id %}?next={{ request.path|urlencode }}" class="py-1 px-2 text-blue-600 hover:text-blue-500 capitalize">{{analysis.rating_matrix}}</a>
                 </div>
                 <br>
                 <div class="text-sm"><span class="font-semibold">{% trans "Description" %}</></div>
