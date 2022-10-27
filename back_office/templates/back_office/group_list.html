@@ -31,11 +31,11 @@
             </a>
         </div>
         {% endif %}
-        {% if add_usergroup %}
+        {% comment %} {% if add_usergroup %}
         <div class="grid mb-4 w-full">
                 <a href="{% url 'user_group-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New Group" %}</a>
         </div>
-        {% endif %}
+        {% endif %} {% endcomment %}
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
