@@ -50,7 +50,7 @@ class Analysis(models.Model):
     version = models.CharField(max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
     auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
-    rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, verbose_name=_("Rating matrix"))
+    rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, help_text=_("WARNING! After choosing it, you will not be able to change it"), verbose_name=_("Rating matrix"))
 
     comments = models.TextField(max_length=1000, blank=True, null=True,
                                 verbose_name=_("Comments"))

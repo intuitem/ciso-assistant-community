@@ -49,8 +49,8 @@ class FolderUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(FolderUpdateForm, self).__init__(*args, **kwargs)
         self.fields['parent_folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        
-
+        self.fields['parent_folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    
     class Meta:
         """ for Model """
         model = Folder

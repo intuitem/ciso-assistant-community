@@ -66,7 +66,9 @@ class ProjectUpdateForm(StyledModelForm):
 class ThreatCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ThreatCreateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT).id
+        
 
     class Meta:
         model = Threat
@@ -85,7 +87,8 @@ class ThreatUpdateForm(StyledModelForm):
 class AssetForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(AssetForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT).id
 
     def clean(self) -> Optional[Dict[str, Any]]:
         super().clean()
@@ -106,7 +109,8 @@ class AssetForm(StyledModelForm):
 class SecurityFunctionCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type="GL")
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT).id
 
     class Meta:
         model = SecurityFunction

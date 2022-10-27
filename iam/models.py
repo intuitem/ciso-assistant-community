@@ -75,10 +75,10 @@ class Folder(models.Model):
     parent_folder = models.ForeignKey(
         "self", null=True, on_delete=models.CASCADE)
     builtin = models.BooleanField(default=False)
-    block_published_asset = models.BooleanField(default=False)
-    block_published_matrix = models.BooleanField(default=False)
-    block_published_threat = models.BooleanField(default=False)
-    block_published_security_function = models.BooleanField(default=False)
+    hide_public_asset = models.BooleanField(default=False)
+    hide_public_matrix = models.BooleanField(default=False)
+    hide_public_threat = models.BooleanField(default=False)
+    hide_public_security_function = models.BooleanField(default=False)
 
     class Meta:
         """ for Model """

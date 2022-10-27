@@ -11,7 +11,7 @@
         {% include 'back_office/snippets/form_field_row.html' %}
       {% else %}
       <div class="mb-6">
-        <label class="form-label">{{ field.label|striptags }}</label>
+        <label class="form-label">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
         <div>
           {{ field.errors }}
           {% if field.field.widget.attrs.select_disabled %}
@@ -29,7 +29,6 @@
       {% endfor %}
 
       <section class="col-start-3 col-span-6 place-content-end">
-
         <section class="grid grid-cols-2 place-content-end">
           <button id="cancel" @click="open = ! open" type="button"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
