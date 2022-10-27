@@ -1,6 +1,6 @@
 {
       "name": "ISO27001 Annex A",
-      "description": "security measures from ISO27001 Annex A",
+      "description": "security functions from ISO27001 Annex A",
       "format_version": "1.0",
       "objects": [
             {
