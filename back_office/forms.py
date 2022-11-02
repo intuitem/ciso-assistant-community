@@ -38,7 +38,9 @@ class StyledModelForm(ModelForm):
 class ProjectForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
 
     class Meta:
         model = Project
@@ -67,7 +69,8 @@ class ThreatCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ThreatCreateForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT).id
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
         
 
     class Meta:
@@ -77,7 +80,10 @@ class ThreatCreateForm(StyledModelForm):
 
 
 class ThreatUpdateForm(StyledModelForm):
-
+    def __init__(self, *args, **kwargs):
+        super(ThreatUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].disabled = True
     class Meta:
         model = Threat
         fields = '__all__'
@@ -88,7 +94,8 @@ class AssetForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(AssetForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT).id
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
 
     def clean(self) -> Optional[Dict[str, Any]]:
         super().clean()
@@ -110,7 +117,8 @@ class SecurityFunctionCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT).id
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
 
     class Meta:
         model = SecurityFunction

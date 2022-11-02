@@ -50,7 +50,8 @@ class FolderUpdateForm(StyledModelForm):
         super(FolderUpdateForm, self).__init__(*args, **kwargs)
         self.fields['parent_folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['parent_folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-    
+        self.fields['parent_folder'].widget.attrs['select_disabled'] = True
+
     class Meta:
         """ for Model """
         model = Folder
