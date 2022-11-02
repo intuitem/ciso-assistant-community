@@ -50,7 +50,8 @@ class FolderUpdateForm(StyledModelForm):
         super(FolderUpdateForm, self).__init__(*args, **kwargs)
         self.fields['parent_folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['parent_folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-    
+        self.fields['parent_folder'].widget.attrs['select_disabled'] = True
+
     class Meta:
         """ for Model """
         model = Folder
@@ -166,7 +167,7 @@ class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
                 kwargs={'pk': user.pk}
             ))
 
-    field_order = ['email', 'password', 'first_name', 'last_name']
+    field_order = ['last_name', 'first_name', 'password', 'email']
 
     class Meta:
         model = User

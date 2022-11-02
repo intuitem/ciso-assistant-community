@@ -150,9 +150,9 @@ class User(AbstractBaseUser):
     # we will need to delete username in the future but for now we should keep it to don't break the model
     # let's use username=email (should be manually enforced for createsuperuser)
 
-    email = models.CharField(max_length=100, unique=True)
-    first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    first_name = models.CharField(_('first name'), max_length=150, blank=True)
+    email = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(
         _('active'),
         default=True,

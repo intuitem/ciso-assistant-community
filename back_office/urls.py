@@ -27,6 +27,7 @@ urlpatterns = [
     path('roles/', login_required(views.RoleAssignmentListView.as_view()), name='role-list'),
     path('matrices/', login_required(views.RiskMatrixListView.as_view()), name='matrix-list'),
     path('matrices/<int:pk>', login_required(views.RiskMatrixDetailedView.as_view()), name='matrix-detailed'),
+    path('user/<int:pk>', login_required(views.MyProfileDetailedView.as_view()), name='user-detailed'),
 
     # CREATE VIEWS
     path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create'),
@@ -74,7 +75,7 @@ urlpatterns = [
     path('AST/<int:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
 
     path('users/<int:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
-    path('my_profile/<int:pk>', login_required(views.MyProfileView.as_view()), name='me-update'),
+    path('my_profile/<int:pk>', login_required(views.MyProfileUpdateView.as_view()), name='me-update'),
     path('users/<int:pk>/password', login_required(views.UserPasswordChangeView.as_view()), name='password-change'),
     path('user_groups/<int:pk>', login_required(views.UserGroupUpdateView.as_view()), name='user_group-update'),
     path('role-assignment/<int:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
