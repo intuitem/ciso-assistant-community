@@ -1,4 +1,3 @@
-from tkinter import E
 from core.models import RiskMatrix
 from back_office.models import Threat, SecurityFunction
 from django.contrib import messages
