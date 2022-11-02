@@ -558,7 +558,6 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
 
-
 class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
     model = RiskScenario
     template_name = 'back_office/ri_update.html'
@@ -574,6 +573,7 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateFormInherited(
             initial={'project': get_object_or_404(Project, id=self.get_object().analysis.project.id)})
+        context['measures_select_form'] = SecurityMeasureSelectForm
         context['matrix'] = self.get_object().get_matrix()
         return context
 
@@ -594,7 +594,7 @@ class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
     model = RiskScenario
     template_name = 'back_office/ri_update_modal.html'
     context_object_name = 'scenario'
-    form_class = RiskScenarioModalUpdateForm
+    form_class = SecurityMeasureSelectForm
 
     def get_success_url(self) -> str:
         return reverse_lazy('ri-update', kwargs={'pk': self.kwargs['pk']})

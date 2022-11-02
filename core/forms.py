@@ -125,6 +125,13 @@ class RiskScenarioUpdateForm(StyledModelForm):
         exclude = ['current_level', 'residual_level']
 
 
+class SecurityMeasureSelectForm(StyledModelForm):
+    
+    class Meta:
+        model = RiskScenario
+        fields = ['security_measures']
+
+
 class RiskScenarioModalUpdateForm(StyledModelForm):
     class Meta:
         model = RiskScenario

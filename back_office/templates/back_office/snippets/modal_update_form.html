@@ -22,7 +22,7 @@
           <button id="cancel" @click="open = ! open" type="button"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
           <input type="hidden" name="next" value="{{ request.path|urlencode }}">
-          <button id="{{ model }}_save" type="submit" name="select_measures"
+          <button id="{{ model }}_save" type="submit" name="select_measures" value="Select"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
             {% trans "Save" %}
           </button>

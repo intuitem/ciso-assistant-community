@@ -1,13 +1,18 @@
 {% extends 'back_office/base.html' %}
 {% load i18n static %}
+{% block head %}
+<script src="{% static 'js/risk.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+{% endblock %}
 {% block content %}
 {% with page_title=scenario %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
-<script src="{% static 'js/risk.js' %}"></script>
+
 
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
-    <form method="post" id="scenario_update_form">{% csrf_token %}
+    <form method="POST" id="scenario_update_form", action="">{% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.errors }}
     <div class="flex flex-col space-y-8">
@@ -153,7 +158,7 @@
                     <h2 class="text-lg font-semibold mb-4">{% trans "Select or create security measures" %}</h2>
                     <div class="flex flex-row">
                         <div class="flex">
-                            {% include 'back_office/snippets/update_button_modal.html' with form=form header=_("Select Security Measures") model="ri" content=_("Select security measures") %}
+                            {% include 'back_office/snippets/update_button_modal.html' with form=measures_select_form header=_("Select Security Measures") model="ri" content=_("Select security measures") %}
                             {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
                         </div>
                     </div>
@@ -170,6 +175,27 @@
         </div>
     </div>
 </div>
+
+<script> // patch for *THAT* risk scenario update form issue: 
+    $(document).ready(function() {
+        $('button#measure_save').click(function(event) {
+            event.preventDefault(); // prevent 1st submit (modal) from firing right away, without this only the modal will be submitted
+            $('#scenario_update_form, #measure-create-form').each(function() {
+                valuesToSend = $(this).serialize();
+                console.debug(valuesToSend);
+                $.ajax($(this).attr('action'),
+                    {
+                        type: $(this).attr('method'),
+                        data: valuesToSend,
+                        success: function(data) {
+                            location.reload();
+                        }
+                    }
+                )
+            });
+        });
+    });
+</script>
 
 <script>
     matrix = {{ matrix|safe }}

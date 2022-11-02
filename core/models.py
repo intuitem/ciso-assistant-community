@@ -223,7 +223,7 @@ class RiskScenario(models.Model):
     scenario = models.TextField(max_length=2000, help_text=_("Risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
-                                         verbose_name=_("Existing measures"))
+                                         verbose_name=_("Existing measures"), blank=True)
 
     # current
     current_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current probability"))
