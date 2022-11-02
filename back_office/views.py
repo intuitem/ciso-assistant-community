@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView, DetailView
 from django.http import HttpResponse
+from django.forms.models import model_to_dict
 from django.template import loader
 from django.utils.translation import gettext_lazy as _
 from datetime import date
@@ -940,8 +941,31 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
 
+class MyProfileDetailedView(UserPassesTestMixin, DetailView):
+    template_name = 'back_office/my_profile_detailed.html'
+    context_object_name = 'user'
 
-class MyProfileView(UserPassesTestMixin, UpdateView):
+    model = User
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
+        keys = ['Last name', 'First name', 'Email', 'Entry date', 'Superuser']
+        values = []
+        for key, value in model_to_dict(self.object, fields=['last_name', 'first_name', 'email', 'date_joined']).items():
+            values.append(value)
+        context['user_fields'] = {i:j for i,j in zip(keys,values)}
+        roles = []
+        for user_group in self.object.user_groups.all():
+            for ra in user_group.roleassignment_set.all():
+                roles.append(ra.role.name)
+        context['roles'] = roles
+        return context
+    
+    def test_func(self):
+       return self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
+
+class MyProfileUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'back_office/user_update.html'
     context_object_name = 'user'
     form_class = MyProfileUpdateForm
@@ -1270,7 +1294,7 @@ class RiskMatrixDetailedView(UserPassesTestMixin, DetailView):
 
     model = RiskMatrix
 
-    def get_context(self, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {'matrix-list': _('Matrices')}
         return context
