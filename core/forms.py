@@ -117,7 +117,6 @@ class RiskScenarioUpdateForm(StyledModelForm):
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50',
             'onchange': 'refresh();'
         })
-        self.fields['security_measures'].queryset = SecurityMeasure.objects.filter(project=self.instance.analysis.project)
 
     class Meta:
         model = RiskScenario
@@ -126,7 +125,7 @@ class RiskScenarioUpdateForm(StyledModelForm):
 
 
 class SecurityMeasureSelectForm(StyledModelForm):
-    
+
     class Meta:
         model = RiskScenario
         fields = ['security_measures']

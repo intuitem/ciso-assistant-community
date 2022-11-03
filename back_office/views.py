@@ -574,7 +574,11 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateFormInherited(
             initial={'project': get_object_or_404(Project, id=self.get_object().analysis.project.id)})
-        context['measures_select_form'] = SecurityMeasureSelectForm(initial={'security_measures': self.get_object().security_measures.all()})
+        context['measures_select_form'] = SecurityMeasureSelectForm(
+            initial={'security_measures': self.get_object().security_measures.all()},
+        )
+        context['measures_select_form'].fields['security_measures'].queryset = SecurityMeasure.objects.filter(project=self.get_object().parent_project())
+
         context['matrix'] = self.get_object().get_matrix()
         return context
 
