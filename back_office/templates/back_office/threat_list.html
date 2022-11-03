@@ -13,7 +13,7 @@
                     <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                         <i class="fas fa-search"></i>
                     </div>
-                    {{ filter.form.title }}
+                    {{ filter.form.name }}
             </div>
             
             <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
@@ -33,9 +33,11 @@
     </div>
     {% endif %}
     <!-- End Filters Dropdown Form -->
+    {% if add_threat %}
     {% include 'back_office/snippets/add_button_modal.html' with form=threat_create_form header=_("Add Threat") model="threat" content=_("New threat") %}
+    {% endif %}
 </div>
-        <div class="relative overflow-x-auto shadow-md rounded-l-lg rounded-r-lg border-none focus:ring-0">
+        <div class="relative overflow-x-auto shadow-md rounded-l-lg rounded-r-lg border-none focus:ring-0 mt-2">
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Threat" %}</th>
@@ -47,23 +49,33 @@
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="">
-                                <a id="instance{{ threat.id }}" href="{% url 'threat-update' threat.id %}?next={{ request.path|urlencode }}"
+                                {% if object_ids_change %}
+                                <a id="scenario{{ threat.id }}" href="{% url 'threat-update' threat.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                    {{ threat.title|capfirst }}
+                                    {{ threat.name|capfirst }}
                                 </a>
+                                {% else %}
+                                <a id="scenario{{ threat.id }}"
+                                class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                    {{ threat.name|capfirst }}
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </th>
                     <td class="px-6 py-4">
                         <div class="">
                             {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                            {% if threat.id in object_ids_change %}
                             <span>
                                 <a href="{% url 'threat-update' threat.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </span>
-
+                            {% endif %}
+                            {% if threat.id in object_ids_delete %}
                             {% include 'back_office/snippets/delete_button_modal.html' with object=threat header=_("Delete threat?") model='threat' %}
+                            {% endif %}
 
                         </div>
                     </td>

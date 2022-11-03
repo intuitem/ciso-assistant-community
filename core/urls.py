@@ -13,7 +13,7 @@ urlpatterns = [
     path('RA-PDF/<analysis>/', login_required(views.generate_ra_pdf), name='RA-PDF'),
     path('RA-CSV/<analysis>/', login_required(views.export_risks_csv), name='RA-CSV'),
 
-    path('MP/<analysis>/', login_required(views.MitigationPlanView.as_view()), name='MP'),
+    path('MP/<project>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
     path('MP-PDF/<analysis>/', login_required(views.generate_mp_pdf), name='MP-PDF'),
     path('MP-CSV/<analysis>/', login_required(views.export_mp_csv), name='MP-CSV'),
 

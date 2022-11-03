@@ -25,11 +25,11 @@
             </div>
             <div class="w-1/4 p-2 m-2  flex content-center bg-white">
                 <div class="text-5xl text-green-500 mr-2"><i class="fas fa-clone"></i></div>
-                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.RiskInstance }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Scenarios" %}</div></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.RiskScenario }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Scenarios" %}</div></div>
             </div>
             <div class="w-1/4 p-2 m-2  flex content-center bg-white">
                 <div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher"></i></div>
-                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Mitigation }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Security measures" %}</div></div>
+                <div class=" text-left"><div class="text-4xl font-bold">{{ counters.SecurityMeasure }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Security measures" %}</div></div>
             </div>
         </div>
     </section>
@@ -48,12 +48,12 @@
             </div>
             <div class="p-2 m-2 w-1/2">
                 <span class="text-sm font-semibold">{% trans "Security measures status" %}</span>
-                {% include 'back_office/fragments/measures_status.html' with name='security_measures_status' labels=mitigation_status.labels values=mitigation_status.values %}
+                {% include 'back_office/fragments/measures_status.html' with name='security_measures_status' labels=security_measure_status.labels values=security_measure_status.values %}
             </div>
         </div>
     </section>
 
-    <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+    {% comment %} <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
         <div class="p-2 m-2">
             <div class="text-2xl font-extrabold text-slate-700">{% trans "Risk over time" %} <!-- - {% trans "COMING SOON" %} --></div>
             <div class="text-sm text-slate-500 font-semibold">{% trans "by current risk level" %}</div>
@@ -62,9 +62,9 @@
             <span class="text-sm font-semibold"> </span>
             {% include 'back_office/fragments/risks_over_time.html' with name='risks_over_time' %}
         </div>
-    </section>
+    </section> {% endcomment %}
 
-    <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+    <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
         <div class="p-2 m-2">
             <div class="text-2xl font-extrabold text-slate-700">{% trans "Watch list" %}</div>
             <div class="text-sm text-slate-500 font-semibold">{% trans "Items that have expired or with close ETA" %}</div>

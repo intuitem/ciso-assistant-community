@@ -9,7 +9,21 @@
 <main class="h-screen">
 
     <div class="p-4">
-        <div class="">
+        <div class="flex-row">
+            <div class="flex w-full rounded-lg shadow bg-white border-t-4 border-violet-700 p-4 mb-2">
+                <div class="w-1/5 bg-white mx-4 py-2">
+                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 0</div>
+                    <div class="font-semibold mb-4">{% trans "Packages" %}</div>
+                    <div class="text-sm mb-2 rounded">
+                        If you have just started the application for the first time, don't forget to import some
+                        <a href="{% url 'package-list' %}" class="simple-link">{% trans "packages" %}</a> 
+                        (yours or the ones provided by default) 
+                        before doing anything.
+                </div>
+            </div>
+            <div class="mt-28 mr-4">
+                <div class="h-0 w-0 border-y-8 border-y-transparent border-l-[16px] border-l-violet-700"></div>
+            </div>
             <div class="flex w-full rounded-lg shadow bg-white p-4">
                 <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 1</div>
@@ -73,7 +87,7 @@
                 <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 4</div>
                     <div class="font-semibold mb-4">{% trans "Risk analyses" %}</div>
-                    <div class="text-sm mb-2 rounded">{% trans "You need to define a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or use a preset. Now you can start a new" %} 
+                    <div class="text-sm mb-2 rounded">{% trans "You need to select a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or import a new one with the package manager. Now you can start a new" %} 
                         <span x-data="modal()">
                             <div class="inline" x-data="{ open: false }">
                                 <a @click="open = ! open"

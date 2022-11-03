@@ -32,9 +32,11 @@
     </div>
     {% endif %}
     <!-- End Filters Dropdown Form -->
+    {% if add_securityfunction %}
     {% include 'back_office/snippets/add_button_modal.html' with form=security_function_create_form header=_("Add Security Function") model="security-function" content=_("New security function") %}
+    {% endif %}
 </div>
-<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
     <table class="w-full text-sm text-left text-gray-500">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Name" %}</th>
@@ -49,10 +51,17 @@
                         <div class="flex items-center">
 
                             <div class="">
+                                {% if object_ids_change %}
                                 <a id="function{{ function.id }}" href="{% url 'security-function-update' function.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ function.name|capfirst }}
                                 </a>
+                                {% else %}
+                                <a id="function{{ function.id }}"
+                                class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                    {{ function.name|capfirst }}
+                                </a>
+                                {% endif %}
                             </div>
                         </div>
                     </th>
@@ -73,14 +82,16 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
                             {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                            {% if function.id in object_ids_change %}
                             <span>
                                 <a href="{% url 'security-function-update' function.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </span>
-
+                            {% endif %}
+                            {% if function.id in object_ids_delete %}
                             {% include 'back_office/snippets/delete_button_modal.html' with object=function header=_("Delete security function?") model='security-function' %}
-
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

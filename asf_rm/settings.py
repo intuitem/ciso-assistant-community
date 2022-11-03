@@ -55,12 +55,12 @@ INSTALLED_APPS = [
     'fieldsets_with_inlines',
     'tailwind',
     'theme',
-    # 'django_browser_reload',
+    'iam',
     'core',
-    'general',
     'back_office',
     'cal',
     'django_filters',
+    'library',
     'import_export',
     'reversion',
 ]
@@ -116,6 +116,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+AUTH_USER_MODEL = 'iam.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -211,13 +213,13 @@ BATON = {
                     'icon': 'fas fa-glasses',
                 },
                 {
-                    'name': 'riskinstance',
-                    'label': _('Risk instances'),
+                    'name': 'riskscenario',
+                    'label': _('Risk scenarios'),
                     'icon': 'fas fa-clone',
                 },
                 {
-                    'name': 'mitigation',
-                    'label': _('Mitigations'),
+                    'name': 'security_function',
+                    'label': _('SecurityFunctions'),
                     'icon': 'fas fa-fire-extinguisher',
                 },
                 {
@@ -245,13 +247,13 @@ BATON = {
                     'icon': 'fas fa-cubes',
                 },
                 {
-                    'name': 'parentrisk',
+                    'name': 'threat',
                     'label': _('Parent Risks'),
                     'icon': 'fas fa-folder',
                 },
                 {
-                    'name': 'solution',
-                    'label': _('Solutions Catalog'),
+                    'name': 'security_function',
+                    'label': _('SecurityFunctions Catalog'),
                     'icon': 'fas fa-cogs',
                 },
             )

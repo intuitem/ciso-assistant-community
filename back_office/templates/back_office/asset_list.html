@@ -36,11 +36,13 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
-        {% include 'back_office/snippets/add_button_modal.html' with form=asset_create_form header=_("Add asset") model="asset" content=_("New asset") %}
+        {% if add_asset %}
+        {% include 'back_office/snippets/add_button_modal.html' with form=asset_create_form header=_("Add Asset") model="asset" content=_("New asset") %}
+        {% endif %}
     
     </div>
 
-    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Name" %}</th>
@@ -53,10 +55,17 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="asset{{ asset.id }}" href="{% url 'asset-update' asset.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ asset }}
                                     </a>
+                                    {% else %}
+                                    <a id="asset{{ asset.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ asset }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>
@@ -68,14 +77,16 @@
                         <td class="px-6 py-4 whitespace-nowrap">
 
                             <div class="">
+                                {% if asset.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'asset-update' asset.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if asset.id in object_ids_delete %}
                                 {% include 'back_office/snippets/delete_button_modal.html' with object=asset header=_("Delete asset?") model='asset' %}
-
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

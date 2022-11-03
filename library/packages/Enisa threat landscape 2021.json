@@ -1,0 +1,63 @@
+{
+      "name": "ENISA threat landscape 2021",
+      "description": "threats from Enisa Threat Landscape 2021 report",
+      "format_version": "1.0",
+      "objects": [
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Ransomware",
+                        "description": "Ransomware is a type of malicious attack where attackers encrypt an organisation's data and demand payment to restore access. Ransomware has been the prime threat during the reporting period, with several high profile and highly publicised incidents. The significance and impact of the threat of ransomware is also evidenced by a series of related policy initiatives in the European Union (EU) and worldwide."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Malware",
+                        "description": "Malware is software or firmware intended to perform an unauthorised process that will have an adverse impact on the confidentiality, integrity, or availability of a system. The threat of malware has been consistently ranked high for many years, albeit at a decreasing rate during the reporting period of ETL 2021. The use of new attach techniques and some major wins for the law enforcement community have impacted the operations of relevant threat actors."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Cryptojacking",
+                        "description": "Cryptojacking or hidden cryptomining is a type of cybercrime where a criminal secretly uses a victim's computing power to generate cryptocurrency. With the proliferation of cryptocurrencies and their ever-increasing uptake by the wider public, an increase in corresponding cybersecurity incidents has been observed."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "E-mail related threats",
+                        "description": "E-mail related attacks are a bundle of threats that exploit weaknesses in the human psyche and in everyday habits, rather than technical vulnerabilities in information systems. Interestingly and despite the many awareness and education campaigns against these types of attacks, the threat persists to a notable degree. In particular, the compromise of business e-mails and advanced sophisticated techniques in extracting monetary gains are on the rise."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Threats against data",
+                        "description": "This category encompasses data breaches/leaks. A data breach or data leak is the release of sensitive, confidential or protected data to an untrusted environment. Data breaches can occur as a result of a cyber-attack, an insider job, unintentional loss or exposure of data. The threat continues to be high, since access to data is a prime target for attackers for numerous reasons, e.g. extortion, ransom, defamation, misinformation, etc."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Threats against availability and integrity",
+                        "description": "Availability and integrity are the target of a plethora of threats and attacks, among which the families of Denial of Service (DoS) and Web Attacks stand out. Strictly related to web-based attacks, DDoS is one of the most critical threats to IT systems, targeting their availability by exhausting resources, causing decreases in performance, loss of data, and service outages. The treat is consistently ranked high in the ENISA threat landscape, both because of its manifestation in actual incidents and its potential for high impact."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Disinformation - misinformation",
+                        "description": "Disinformation and misinformation campaigns are on the rise, spurred by the increased use of social media platforms and online media, as well as a result of the increase of people's online presence due to the COVID-19 pandemic. This group of threats is making its first appearance in the ETL; however its importance in the cyber world is high. Disinformation and misinformation campaigns are frequently used in hybrid attacks to reduce the overall perception of trust, a major proponent of cybersecurity."
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Non-malicious threats",
+                        "description": "Threats are commonly considered as voluntary and malicious activities brought by adversaries that have some incentives to attack a specific target. With this category, we cover threats where malicious intent is not apparent. These are mostly based on human errors and system misconfigurations, but they can also refer to physical disasters that target IT infrastructures. Also attributed to their nature, these threats have a constant presence in the annual threat landscape and are a major concern for risk assessments."
+                  }
+            }
+      ]
+}

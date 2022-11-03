@@ -1,103 +1,18 @@
 {% extends 'back_office/base.html' %}
 {% load i18n static %}
+{% block head %}
+<script src="{% static 'js/risk.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+{% endblock %}
 {% block content %}
-{% with page_title=instance %}
+{% with page_title=scenario %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
 {% endwith %}
-<script>
-    var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
-    var label_low = {% blocktrans %}'Low'{% endblocktrans %};
-    var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
-    var label_high = {% blocktrans %}'High'{% endblocktrans %};
-    var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
-    
-    window.onload = function() {
-        var current_proba = document.getElementById("id_riskinstance_current_proba").value;
-        var current_impact = document.getElementById("id_riskinstance_current_impact").value;
-        var current_level = document.getElementById("current_risk_level").value;
 
-        var residual_proba = document.getElementById("id_riskinstance_residual_proba").value;
-        var residual_impact = document.getElementById("id_riskinstance_residual_impact").value;
-        var residual_level = document.getElementById("residual_risk_level").value;
-    };
-    
-    function refresh() {
-        var current_proba = document.getElementById("id_riskinstance_current_proba").value;
-        var current_impact = document.getElementById("id_riskinstance_current_impact").value;
-        var current_level = document.getElementById("current_risk_level").value;
-        CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
-        CRL_lbl = document.getElementById("current_risk_level");
-        CRL_lbl.innerHTML = `${CRL}`;
-        CRL = riskLevel(getValueIndex(current_proba), getValueIndex(current_impact));
-        CRL_lbl.classList.remove('VL','L','M','H','VH');
-        CRL_lbl.classList.add(rl_class(CRL));
 
-        var residual_proba = document.getElementById("id_riskinstance_residual_proba").value;
-        var residual_impact = document.getElementById("id_riskinstance_residual_impact").value;
-        var residual_level = document.getElementById("residual_risk_level").value;
-        RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
-        RRL_lbl = document.getElementById("residual_risk_level");
-        RRL_lbl.innerHTML = `${RRL}`;
-        RRL = riskLevel(getValueIndex(residual_proba), getValueIndex(residual_impact));
-        RRL_lbl.classList.remove('VL','L','M','H','VH');
-        RRL_lbl.classList.add(rl_class(RRL));
-    }
-
-    function getValueIndex(label) {
-      if (label == 'VL') return 0;
-      if (label == 'L') return 1;
-      if (label == 'M') return 2;
-      if (label == 'H') return 3;
-      if (label == 'VH') return 4;
-    }
-    
-    function riskLevel(p, i) {
-        var matrix = [];
-        matrix[0] = [];
-        matrix[1] = [];
-        matrix[2] = [];
-        matrix[3] = [];
-        matrix[4] = [];
-        matrix[0][0] = label_very_low;
-        matrix[1][0] = label_very_low;
-        matrix[2][0] = label_low;
-        matrix[3][0] = label_low;
-        matrix[4][0] = label_medium;
-        matrix[0][1] = label_very_low;
-        matrix[1][1] = label_low;
-        matrix[2][1] = label_low;
-        matrix[3][1] = label_medium;
-        matrix[4][1] = label_medium;
-        matrix[0][2] = label_low;
-        matrix[1][2] = label_low;
-        matrix[2][2] = label_medium;
-        matrix[3][2] = label_medium;
-        matrix[4][2] = label_high;
-        matrix[0][3] = label_low;
-        matrix[1][3] = label_medium;
-        matrix[2][3] = label_medium;
-        matrix[3][3] = label_high;
-        matrix[4][3] = label_very_high;
-        matrix[0][4] = label_medium;
-        matrix[1][4] = label_medium;
-        matrix[2][4] = label_high;
-        matrix[3][4] = label_very_high;
-        matrix[4][4] = label_very_high;
-        console.log(i);
-        return matrix[p][i];
-    }
-    
-    function rl_class(label) {
-        if (label == label_very_low) return 'VL';
-        if (label == label_low) return 'L';
-        if (label == label_medium) return 'M';
-        if (label == label_high) return 'H';
-        if (label == label_very_high) return 'VH';
-    }
-    
-    </script>
-<div>
-    <form method="post" id="instance_update_form">{% csrf_token %}
+<div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
+    <form method="POST" id="scenario_update_form", action="">{% csrf_token %}
     {{ form.non_field_errors }}
     {{ form.errors }}
     <div class="flex flex-col space-y-8">
@@ -108,15 +23,15 @@
                     <div class="flex flex-row space-x-6">
                         <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Project" %}</p>
-                            <p class="text-xs font-semibold">{{ instance.analysis.project }}</p>
+                            <p class="text-xs font-semibold">{{ scenario.analysis.project }}</p>
                         </div>
                         <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Auditor" %}</p>
-                            <p class="text-xs font-semibold">{{ instance.analysis.auditor.get_full_name }}</p>
+                            <p class="text-xs font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
                         </div>
                         <div class="flex-1 flex-col">
                             <p class="text-gray-400 text-xs">{% trans "Version" %}</p>
-                            <p class="text-xs font-semibold">{{ instance.analysis.version }}</p>
+                            <p class="text-xs font-semibold">{{ scenario.analysis.version }}</p>
                         </div>
                     </div>
                     <div class="flex flex-col">
@@ -126,18 +41,25 @@
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">{% trans "Threat" %}</p>
-                        {{ form.parent_risk.errors }}
-                        {{ form.parent_risk }}
+                        {{ form.threat.errors }}
+                        {{ form.threat }}
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">{% trans "Title" %}</p>
-                        {{ form.title.errors }}
-                        {{ form.title }}
+                        {{ form.name.errors }}
+                        {{ form.name }}
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">{% trans "Scenario" %}</p>
                         {{ form.scenario.errors }}
                         {{ form.scenario }}
+                        <p class="help_text">{{ form.scenario.help_text }}</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="text-sm font-semibold">{% trans "Assets" %}</p>
+                        {{ form.assets.errors }}
+                        {{ form.assets }}
+                        <p class="help_text">{{ form.assets.help_text }}</p>
                     </div>
                 </section>
             </div>
@@ -148,7 +70,7 @@
                 {{ form.existing_measures }}
                 <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
                 <div class="px-4 pt-2 pb-4 flex flex-col space-x-6 mt-10 rounded-lg shadow w-full border">
-                    <p class="text-lg pb-2 font-semibold">{% trans "Current indicator" %}</p>
+                    <p class="text-lg pb-2 font-semibold">{% trans "Current Assessment" %}</p>
                     <div class="px-4 pt-2 pb-4 flex flex-row space-x-6 justify-center">
                         <div>
                             <p class="pl-1 text-sm font-semibold">{% trans "Current probability" %}</p>
@@ -169,18 +91,9 @@
                         <div class=""> 
                             <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
                             <div class="">
-                                <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
-                                    {% if instance.current_level == 'VL' %}
-                                        VL 
-                                    {% elif instance.current_level == 'L' %}
-                                        L
-                                    {% elif instance.current_level == 'M' %}
-                                        M
-                                    {% elif instance.current_level == 'H' %}
-                                        H
-                                    {% elif instance.current_level == 'VH' %}
-                                        VH
-                                    {% endif %}" style="margin-bottom: 10px">{{ instance.get_current_level_display }}
+                                <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
+                                    style="background-color: {{ scenario.get_current_risk.rgb }};">
+                                    {{ scenario.get_current_risk.name }}
                                 </span>
                             </div>
                         </div>
@@ -191,7 +104,7 @@
         <section class="flex flex-row-reverse w-full">
             <div class="flex flex-col ml-1 space-y-4 w-full mb-4">
                 <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                    <h2 class="text-lg font-semibold mb-4">{% trans "Treatment" %}</h2>
+                    <h2 class="text-lg font-semibold mb-4">{% trans "Target Assessment" %}</h2>
                     <div class="flex flex-row space-x-4 mt-4 justify-center">
                         <div>
                             <p class="text-sm font-semibold whitespace-nowrap">{% trans "Residual probability" %}</p>
@@ -202,7 +115,7 @@
                             <i class="fas fa-times"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold">{% trans "Residual impact" %}</p>
+                            <p class="text-sm font-semibold white">{% trans "Residual impact" %}</p>
                             {{ form.residual_impact.errors }}
                             {{ form.residual_impact }}
                         </div>
@@ -212,18 +125,9 @@
                         <div class=""> 
                             <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
                             <div class="">
-                                <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center
-                                    {% if instance.residual_level == 'VL' %}
-                                        VL 
-                                    {% elif instance.residual_level == 'L' %}
-                                        L
-                                    {% elif instance.residual_level == 'M' %}
-                                        M
-                                    {% elif instance.residual_level == 'H' %}
-                                        H
-                                    {% elif instance.residual_level == 'VH' %}
-                                        VH
-                                    {% endif %}" style="margin-bottom: 10px">{{ instance.get_residual_level_display }}
+                                <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
+                                    style="background-color: {{ scenario.get_residual_risk.rgb }}">
+                                    {{ scenario.get_residual_risk.name }}
                                 </span>
                             </div>
                         </div>
@@ -250,10 +154,13 @@
                 </div>
             </div>
             <div class="mb-4 mr-1 w-full">
-                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-lg shadow w-full">
+                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-t-lg shadow w-full">
+                    <h2 class="text-lg font-semibold mb-4">{% trans "Select or create security measures" %}</h2>
                     <div class="flex flex-row">
-                        <h2 class="text-lg font-semibold mb-4">{% trans "Associated security measures" %}</h2>
-                        {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
+                        <div class="flex">
+                            {% include 'back_office/snippets/update_button_modal.html' with form=measures_select_form header=_("Select Security Measures") model="ri" content=_("Select security measures") %}
+                            {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
+                        </div>
                     </div>
                     {% include 'back_office/snippets/mtg_list_nested.html' %}
                 </div>
@@ -262,9 +169,58 @@
         <div class="flex space-x-2 justify-end"> 
             <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
             <input
-                type="hidden" form="instance_update_form" name="next" value={{ request.GET.next }}>
-            <button action="submit" form="instance_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600">{% trans "Save" %}</button>
+                type="hidden" form="scenario_update_form" name="next" value={{ request.GET.next }}>
+            <button action="submit" form="scenario_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-400"
+            :disabled="submitDisabled">{% trans "Save" %}</button>
         </div>
     </div>
 </div>
+
+<script> // patch for *THAT* risk scenario update form issue: 
+    $(document).ready(function() {
+        $('button#measure_save').click(function(event) {
+            event.preventDefault(); // prevent 1st submit (modal) from firing right away, without this only the modal will be submitted
+            $('#scenario_update_form, #measure-create-form').each(function() {
+                valuesToSend = $(this).serialize();
+                console.debug(valuesToSend);
+                $.ajax($(this).attr('action'),
+                    {
+                        type: $(this).attr('method'),
+                        data: valuesToSend,
+                        success: function(data) {
+                            location.reload();
+                        }
+                    }
+                )
+            });
+        });
+    });
+</script>
+
+<script>
+    matrix = {{ matrix|safe }}
+    
+    function refresh() {
+        const current_proba = document.getElementById("id_current_proba").value;
+        const current_impact = document.getElementById("id_current_impact").value;
+        const residual_proba = document.getElementById("id_residual_proba").value;
+        const residual_impact = document.getElementById("id_residual_impact").value;
+
+        const current_risk = matrix.grid[current_proba][current_impact];
+        const residual_risk = matrix.grid[residual_proba][residual_impact];
+
+        console.debug("current_risk", current_risk);
+        console.debug("residual_risk", residual_risk);
+
+        document.getElementById("current_risk_level").innerHTML = matrix.risk[current_risk].name;
+        document.getElementById("current_risk_level").style.backgroundColor = matrix.risk[current_risk].rgb;;
+        document.getElementById("residual_risk_level").innerHTML = matrix.risk[residual_risk].name;
+        document.getElementById("residual_risk_level").style.backgroundColor = matrix.risk[residual_risk].rgb;;
+    }
+
+    window.onload = function() {
+        refresh();
+    };
+</script>
+
 {% endblock %}

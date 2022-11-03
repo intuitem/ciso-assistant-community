@@ -7,8 +7,8 @@ import pytest
 
 @pytest.mark.django_db
 def testAnalysis():
-    projectsgroup = ProjectsGroup.objects.create()
-    project=Project.objects.create(parent_group=projectsgroup, name="Test")
+    folder = Folder.objects.create()
+    project=Project.objects.create(folder=folder, name="Test")
     user = User.objects.create()
     analysis = Analysis.objects.create(
         project = project,

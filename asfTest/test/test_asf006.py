@@ -37,26 +37,26 @@ def test_ASF006(page):
 			name = page.locator('id=name')
 			assert name.is_visible() == True, "Step "+str(step)+": not Ok"
 			page.goto(urlpatterns.search + "?q=e")
-	riskinstance_count = page.locator("id=riskinstance").count()
-	if riskinstance_count > 0:
-		for i in range (riskinstance_count):
-			#print(page.locator("id=riskinstance").element_handles()[i]) 
-			page.locator("id=riskinstance").element_handles()[i].click()
+	riskscenario_count = page.locator("id=riskscenario").count()
+	if riskscenario_count > 0:
+		for i in range (riskscenario_count):
+			#print(page.locator("id=riskscenario").element_handles()[i]) 
+			page.locator("id=riskscenario").element_handles()[i].click()
 			name = page.locator('id=name')
 			assert name.is_visible() == True, "Step "+str(step)+": not Ok"
 			page.goto(urlpatterns.search + "?q=e")
-	mitigation_count = page.locator("id=mitigation").count()
-	if mitigation_count > 0:
-		for i in range (mitigation_count):
-			#print(page.locator("id=mitigation").element_handles()[i]) 
-			page.locator("id=mitigation").element_handles()[i].click()
+	security_function_count = page.locator("id=security_function").count()
+	if security_function_count > 0:
+		for i in range (security_function_count):
+			#print(page.locator("id=security_function").element_handles()[i]) 
+			page.locator("id=security_function").element_handles()[i].click()
 			name = page.locator('id='+str(i+1))
 			assert name.is_visible() == True, "Step "+str(step)+": not Ok"
 			page.goto(urlpatterns.search + "?q=e")
 	# 3.2 | (no links) check in "Analytics" there aren't any analysis, ... | Each counter should be '0' |
 	step = 3.2
-	if riskinstance_count == 0 and riskanalysis_count == 0 and mitigation_count == 0:
+	if riskscenario_count == 0 and riskanalysis_count == 0 and security_function_count == 0:
 		page.click('id=analytics')
-		assert page.locator('id=riskinstances').inner_text() == '0', "Step "+str(step)+": not Ok"
-		assert page.locator('id=mitigations').inner_text() == '0', "Step "+str(step)+": not Ok"
+		assert page.locator('id=riskscenarios').inner_text() == '0', "Step "+str(step)+": not Ok"
+		assert page.locator('id=security_functions').inner_text() == '0', "Step "+str(step)+": not Ok"
 		assert page.locator('id=analysis').inner_text() == '0', "Step "+str(step)+": not Ok"

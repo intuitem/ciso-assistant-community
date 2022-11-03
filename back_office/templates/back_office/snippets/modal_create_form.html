@@ -1,7 +1,7 @@
 {% load static i18n back_office_extras %}
 
 <!-- BEGIN CREATE FORM -->
-<form action="{% url model|lower|add:'-create-modal' %}" method="post"> {% csrf_token %}
+<form action="{% url model|lower|add:'-create-modal' %}" id="{{ model|lower|add:'-create-form' }}" method="POST"> {% csrf_token %}
 
     {{ form.non_field_errors }}
     {{ form.errors }}
@@ -11,10 +11,17 @@
         {% include 'back_office/snippets/form_field_row.html' %}
       {% else %}
       <div class="mb-6">
-        <label class="form-label">{{ field.label|striptags }}</label>
+        <label class="form-label">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
         <div>
           {{ field.errors }}
-          {{ field }}
+          {% if field.field.widget.attrs.select_disabled %}
+            <select disabled class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50">
+              <option value={{ field.value }}>{{ field.initial }}</option>
+            </select>
+            <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+          {% else %}
+            {{ field }}
+          {% endif %}
           <p class="help_text">{{ field.help_text }}</p>
         </div>
       </div>
@@ -22,12 +29,11 @@
       {% endfor %}
 
       <section class="col-start-3 col-span-6 place-content-end">
-
         <section class="grid grid-cols-2 place-content-end">
           <button id="cancel" @click="open = ! open" type="button"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
           <input type="hidden" name="next" value="{{ request.path|urlencode }}">
-          <button id="{{ model }}_save" type="submit"
+          <button id="{{ model }}_save" {% if model == 'measure' %} {% else %} type="submit" {% endif %}
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
             {% trans "Save" %}
           </button>

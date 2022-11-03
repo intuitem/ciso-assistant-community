@@ -14,7 +14,7 @@
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
-                        {{ filter.form.risk_instance__title }}
+                        {{ filter.form.risk_scenario__name }}
                 </div>
                 <div class="flex justify-center">
                     <div
@@ -94,10 +94,12 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
+        {% if add_riskacceptance%}
         {% include 'back_office/snippets/add_button_modal.html' with form=risk_acceptance_create_form header=_("Add Risk Acceptance") model="acceptance" content=_("New risk acceptance") %}
+        {% endif %}
     </div>
 
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Risk acceptance" %}</th>
@@ -119,10 +121,17 @@
                                 {% endif %}">{{ acceptance.get_type_display|lower}}
                                 </span>
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ acceptance.risk_instance }}
+                                        {{ acceptance.risk_scenario }}
                                     </a>
+                                    {% else %}
+                                    <a id="acceptance{{ acceptance.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ acceptance.risk_scenario }}
+                                    </a>>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>
@@ -144,14 +153,16 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                                {% if acceptance.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if acceptance.id in object_ids_delete %}
                                 {% include 'back_office/snippets/delete_button_modal.html' with object=acceptance header=_("Delete risk acceptance?") model='risk-acceptance' %}
-
+                                {% endif %}
 
                             </div>
                         </td>

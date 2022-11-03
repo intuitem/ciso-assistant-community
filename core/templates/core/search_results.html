@@ -18,27 +18,27 @@
         </div>
     </div>
     <div class="px-2 py-4 m-2 bg-white rounded shadow">
-        <div class="text-lg font-black">{% trans "Risk scenarios" %} ({{context.RiskInstance|length}})</div>
-        {% if not context.RiskInstance %}
+        <div class="text-lg font-black">{% trans "Risk scenarios" %} ({{context.RiskScenario|length}})</div>
+        {% if not context.RiskScenario %}
         <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
         {% endif %}
         <div>
             <ul class="pl-3 ml-3 list-disc">
-                {% for entry in context.RiskInstance %}
-                <li><a id="riskinstance" href="{% url 'RA' entry.analysis.id %}#{{entry.id}}" class="text-gray-700 hover:text-blue-500">{{entry.rid}}: {{entry}}</a></li>
+                {% for entry in context.RiskScenario %}
+                <li><a id="riskscenario" href="{% url 'RA' entry.analysis.id %}#{{entry.id}}" class="text-gray-700 hover:text-blue-500">{{entry.rid}}: {{entry}}</a></li>
                 {% endfor %}
             </ul>
         </div>
     </div>
     <div class="px-2 py-4 m-2 bg-white rounded shadow">
-        <div class="text-lg font-black">{% trans "Security measures" %} ({{context.Mitigation|length}})</div>
-        {% if not context.Mitigation %}
+        <div class="text-lg font-black">{% trans "Security measures" %} ({{context.SecurityMeasure|length}})</div>
+        {% if not context.SecurityMeasure %}
         <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
         {% endif %}
         <div>
             <ul class="pl-3 ml-3 list-disc">
-                {% for entry in context.Mitigation %}
-                <li><a id="mitigation" href="{% url 'MP' entry.risk_instance.analysis.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
+                {% for entry in context.SecurityMeasure %}
+                <li><a id="security_measure" href="{% url 'MP' entry.project.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
                 {% endfor %}
             </ul>
         </div>

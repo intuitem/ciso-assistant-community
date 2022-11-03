@@ -14,7 +14,7 @@
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
-                        {{ filter.form.title }}
+                        {{ filter.form.name }}
                 </div>
                 <div class="flex justify-center">
                     <div
@@ -74,7 +74,7 @@
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent project" %}</p>
-                                    {{ filter.form.risk_instance__analysis__project }}
+                                    {{ filter.form.risk_scenario__analysis__project }}
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Type" %}</p>
@@ -82,7 +82,7 @@
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Security function" %}</p>
-                                    {{ filter.form.solution }}
+                                    {{ filter.form.security_function }}
                                 </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>
@@ -106,11 +106,12 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
+        {% if add_securitymeasure%}
         {% include 'back_office/snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="measure" content=_("New security measure") %}
+        {% endif %}
 
     </div>
-    <script src="{% static 'js/modal.js' %}"></script>
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Title" %}</th>
@@ -137,10 +138,17 @@
                                 {% endif %}">{{ measure.get_status_display|lower}}
                                 </span>
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ measure.title|capfirst }}
+                                        {{ measure.name|capfirst }}
                                     </a>
+                                    {% else %}
+                                    <a id="measure{{ measure.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ measure.name|capfirst }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </td>
@@ -167,8 +175,8 @@
                         </td>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">       
-                            {% if measure.solution %}
-                            {{ measure.solution }}
+                            {% if measure.security_function %}
+                            {{ measure.security_function }}
                             {% else %}
                                 --
                             {% endif %}
@@ -176,15 +184,17 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'MP' measure.risk_instance.analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'MP' measure.project.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if measure.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'mtg-update' measure.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if measure.id in object_ids_delete %}
                                 {% include 'back_office/snippets/delete_button_modal.html' with object=measure header=_("Delete security measure?") model='measure' %}
-
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

@@ -14,7 +14,7 @@
                         <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                             <i class="fas fa-search"></i>
                         </div>
-                        {{ filter.form.title }}
+                        {{ filter.form.name }}
                 </div>
                 <div class="flex justify-center">
                     <div
@@ -70,7 +70,7 @@
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Threat" %}</p>
-                                    {{ filter.form.parent_risk }}
+                                    {{ filter.form.threat }}
                                 </div>
                                 <div>
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent project" %}</p>
@@ -102,11 +102,13 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
+        {% if add_riskscenario%}
         {% include 'back_office/snippets/add_button_modal.html' with form=risk_scenario_create_form header=_("Add Risk Scenario") model="risk-scenario" content=_("New risk scenario") %}
+        {% endif %}
 
 
     </div>
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Title" %}</th>
@@ -132,16 +134,23 @@
                                 {% endif %}">{{ scenario.get_treatment_display|lower}}
                                 </span>
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ scenario.title|capfirst }}
+                                        {{ scenario.name|capfirst }}
                                     </a>
+                                    {% else %}
+                                    <a id="scenario{{ scenario.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ scenario.name|capfirst }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
-                                {% if scenario.parent_risk %}{{ scenario.parent_risk }}{% else %}--{% endif %}
+                                {% if scenario.threat %}{{ scenario.threat }}{% else %}--{% endif %}
                             </p>
                         </td>
                         <td class="px-6 py-4">
@@ -157,13 +166,16 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 <span><a href="{% url 'RA' scenario.analysis.id %}#{{scenario.id}}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if scenario.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if scenario.id in object_ids_delete %}
                                 {% include 'back_office/snippets/delete_button_modal.html' with object=scenario header=_("Delete risk scenario?") %}
+                                {% endif%}
 
                             </div>
                         </td>

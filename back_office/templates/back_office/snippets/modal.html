@@ -43,6 +43,8 @@ x-transition:leave-end="opacity-0"
                 {% include 'back_office/snippets/modal_create_form.html' %}
             {% elif modal_action == "delete" %}
                 {% include 'back_office/snippets/modal_delete_form.html' %}
+            {% elif modal_action == "update" %}
+                {% include 'back_office/snippets/modal_update_form.html' %}
             {% else %}
                 <p class="text-sm"><strong class="inline">{% trans "Version:" %}</strong> {% mira_version %}</p>
             {% endif %}

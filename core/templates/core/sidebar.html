@@ -108,12 +108,12 @@
                 </li>
 
                 <li class="to-page">
-                    <a href="{% url 'matrix' %}"
+                    <a href="{% url 'matrix-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-border-all"></i>
                         </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrix" %}</span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrices" %}</span>
                     </a>
                 </li>
                 <li class="to-page">
@@ -171,7 +171,7 @@
                     </a>
                 </li>
                 <li x-data="{ open : false }">
-                    <a @click="open = !open" class="relative flex flex-row items-center pr-6 nav-link">
+                    <a @click="open = !open" class="relative flex flex-row items-center pr-6 nav-link cursor-pointer">
                         <span class="nav-link-icon">
                             <i class="fas fa-info-circle"></i>
                         </span>

@@ -39,12 +39,12 @@
                         <th>{% trans "ETA" %}</th>
                         <th class="py-2 px-4">{% trans "Actions" %}</th>
                     </tr>
-                    {% for mtg in context.mitigations %}
+                    {% for mtg in context.security_measures %}
                     <tr class="border-b">
                         <td class="text-left py-2 px-4">{{mtg.parent_project}}</td>
-                        <td class="text-left py-2 px-4">{{mtg.title}}</td>
+                        <td class="text-left py-2 px-4">{{mtg.name}}</td>
                         <td class="text-center py-2 px-4">{{mtg.get_ranking_score}}</td>
-                        <td class="text-center py-2 px-4 {% include 'snippets/mtg_style.html' with mitigation=mtg %}">{{mtg.get_status_display}}</td>
+                        <td class="text-center py-2 px-4 {% include 'snippets/mtg_style.html' with security_measure=mtg %}">{{mtg.get_status_display}}</td>
                         <td class="text-center py-2 px-4">{{mtg.eta|date}}</td>
                         <td class="text-center py-2 px-4">
                             {% if mtg.link %}<a href="{{mtg.link}}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-external-link-square-alt"></i></a>{% endif %}

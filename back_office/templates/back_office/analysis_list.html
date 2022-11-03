@@ -105,12 +105,13 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
+        {% if add_analysis %}
         {% include 'back_office/snippets/add_button_modal.html' with form=analysis_create_form header=_("Add analysis") model="analysis" content=_("New risk analysis") %}
-
+        {% endif %}
     
     </div>
 
-    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg mt-2">
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "ID" %}</th>
@@ -130,10 +131,17 @@
                                 <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
                                 {% endif %}
                                 <div class="ml-3">
+                                    {% if object_ids_change %}
                                     <a id="analysis{{ analysis.id }}" href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ analysis }}
                                     </a>
+                                    {% else %}
+                                    <a id="analysis{{ analysis.id }}"
+                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                        {{ analysis }}
+                                    </a>
+                                    {% endif %}
                                 </div>
                             </div>
                         </th>
@@ -162,12 +170,14 @@
 
                             <div class="w-full">
                                 <span><a href="{% url 'RA' analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if analysis.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'ra-update' analysis.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                {% if analysis.id in object_ids_delete %}
                                 <span x-data="{ open: false }">
                                     <a @click="open = ! open" type="button"
                                     class="cursor-pointer table-action">
@@ -178,7 +188,7 @@
                                     {% include 'back_office/snippets/modal.html' with modal_action="delete" header=_("Delete risk analysis?") object=analysis %}
                                 
                                 </span>
-
+                                {% endif %}
                             </div>
                         </td>
                     </tr>

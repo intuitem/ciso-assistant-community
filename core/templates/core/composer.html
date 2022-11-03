@@ -27,7 +27,7 @@
                 <div class="p-2 m-2">{% trans "Status of associated measures" %}</div>
                 <div>
                     <div class="items-center justify-center">
-                        {% include 'snippets/bar_chart.html' with name='mtg' labels=context.mitigation_status.labels values=context.mitigation_status.values %}
+                        {% include 'snippets/bar_chart.html' with name='mtg' labels=context.security_measure_status.labels values=context.security_measure_status.values %}
                     </div>
                 </div>
             </div>

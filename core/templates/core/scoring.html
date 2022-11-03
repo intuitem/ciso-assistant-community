@@ -1,247 +1,40 @@
 {% extends 'core/base.html' %}
 
-{% load i18n %}
+{% load i18n static %}
 
 {% block head %}
-<script>
-var label_very_low = {% blocktrans %}'Very low'{% endblocktrans %};
-var label_low = {% blocktrans %}'Low'{% endblocktrans %};
-var label_medium = {% blocktrans %}'Medium'{% endblocktrans %};
-var label_high = {% blocktrans %}'High'{% endblocktrans %};
-var label_very_high = {% blocktrans %}'Very high'{% endblocktrans %};
-
-window.onload = function() {
-    BI_lbl = document.getElementById("BI");
-    TI_lbl = document.getElementById("TI");
-    var C = document.getElementById("C")
-    var A = document.getElementById("A")
-    var I = document.getElementById("I")
-    var T = document.getElementById("T")
-    var Fd = document.getElementById("fd");
-    var Rp = document.getElementById("rp");
-    var Cm = document.getElementById("cm");
-    var Pi = document.getElementById("pi");
-    var BIchecked = document.getElementById("ignoreBI");
-    var TIchecked = document.getElementById("ignoreTI");
-
-    BI_lbl.innerHTML = "--";
-    TI_lbl.innerHTML = "--";
-    C.disabled = true;
-    C.selectedIndex = 0;
-    A.disabled = true;
-    A.selectedIndex = 0;
-    I.disabled = true;
-    I.selectedIndex = 0;
-    T.disabled = true;
-    T.selectedIndex = 0;
-    Fd.disabled = false;
-    Rp.disabled = false;
-    Cm.disabled = false;
-    Pi.disabled = false;
-};
-
-function refresh() {
-    //TA
-  var sl = document.getElementById("sl").value;
-  var mo = document.getElementById("mo").value;
-  var op = document.getElementById("op").value;
-  var sc = document.getElementById("sc").value;
-  TA = (parseInt(sl) + parseInt(mo) + parseInt(op) + parseInt(sc))/4;
-    //TI
-  var c = document.getElementById("C").value;
-  var i = document.getElementById("I").value;
-  var a = document.getElementById("A").value;
-  var t = document.getElementById("T").value;
-  TI = (parseInt(c) + parseInt(i) + parseInt(a) + parseInt(t)) /4;
-    //VF
-  var di = document.getElementById("di").value;
-  var ex = document.getElementById("ex").value;
-  var kn = document.getElementById("kn").value;
-  var dt = document.getElementById("dt").value;
-  VF = (parseInt(di) + parseInt(ex) + parseInt(kn) + parseInt(dt))/4;
-    //BI
-  var fd = document.getElementById("fd").value;
-  var rp = document.getElementById("rp").value;
-  var cm = document.getElementById("cm").value;
-  var pi = document.getElementById("pi").value;
-  BI = (parseInt(fd) + parseInt(rp) + parseInt(cm) + parseInt(pi))/4;
-
-  vector = document.getElementById("vector");
-  vector.innerHTML = `${sl}${mo}${op}${sc}-${di}${ex}${kn}${dt}-${c}${i}${a}${t}-${fd}${rp}${cm}${pi}`;
-
-  TA_lbl = document.getElementById("TA");
-  TA_lbl.innerHTML = TA;
-
-  TI_lbl = document.getElementById("TI");
-  TI_lbl.innerHTML = TI;
-
-  VF_lbl = document.getElementById("VF");
-  VF_lbl.innerHTML = VF;
-
-  BI_lbl = document.getElementById("BI");
-  BI_lbl.innerHTML = BI;
-
-  var pf_label = "N/A";
-  proba = (TA+VF)/2;
-
-  document.getElementById("PF").innerHTML = getTextP(proba);
-  document.getElementById("PF_v").innerHTML = `(${proba})`;
-
-  IF = document.getElementById("IF");
-  IF_v = document.getElementById("IF_v");
-  impact = 0;
-
-  var C = document.getElementById("C")
-  var A = document.getElementById("A")
-  var I = document.getElementById("I")
-  var T = document.getElementById("T")
-  var Fd = document.getElementById("fd");
-  var Rp = document.getElementById("rp");
-  var Cm = document.getElementById("cm");
-  var Pi = document.getElementById("pi");
-  var BIchecked = document.getElementById("ignoreBI");
-  var TIchecked = document.getElementById("ignoreTI");
-  if (BIchecked.checked == false) {
-      impact = BI;
-      TI_lbl.innerHTML = "--";
-      C.disabled = true;
-      C.selectedIndex = 0;
-      A.disabled = true;
-      A.selectedIndex = 0;
-      I.disabled = true;
-      I.selectedIndex = 0;
-      T.disabled = true;
-      T.selectedIndex = 0;
-      Fd.disabled = false;
-      Rp.disabled = false;
-      Cm.disabled = false;
-      Pi.disabled = false;
-  }
-  else {
-      impact = TI;
-      BI_lbl.innerHTML = "--";
-      Fd.disabled = true;
-      Fd.selectedIndex = 0;
-      Rp.disabled = true;
-      Rp.selectedIndex = 0;
-      Cm.disabled = true;
-      Cm.selectedIndex = 0;
-      Pi.disabled = true;
-      Pi.selectedIndex = 0;
-      C.disabled = false;
-      A.disabled = false;
-      I.disabled = false;
-      T.disabled = false;
-  }
-
-  IF.innerHTML = getTextI(impact);
-  IF_v.innerHTML = `(${impact})`;
-
-  RL = riskLevel(getLabelIndex(getTextP(proba)), getLabelIndex(getTextI(impact)));
-  RL_lbl = document.getElementById("risk_level");
-  RL_lbl.innerHTML = `${RL}`;
-  RL_lbl.classList.remove('VL','L','M','H','VH');
-  RL_lbl.classList.add(rl_class(RL));
-
-
-}
-
-function getTextP(score) {
-    if(score <= 2) return label_very_low;
-    if(score <= 4) return label_low;
-    if(score <= 6) return label_medium;
-    if(score <= 8) return label_high;
-    if(score <= 9) return label_very_high;
-}
-
-function getTextI(score) {
-    if(score <= 0.25) return label_very_low;
-    if(score < 2) return label_low;
-    if(score <= 3) return label_medium;
-    if(score <= 6) return label_high;
-    if(score <= 9) return label_very_high;
-}
-
-function getLabelIndex(label) {
-  if (label == label_very_low) return 0;
-  if (label == label_low) return 1;
-  if (label == label_medium) return 2;
-  if (label == label_high) return 3;
-  if (label == label_very_high) return 4;
-}
-
-function riskLevel(p, i) {
-    var matrix = [];
-    matrix[0] = [];
-    matrix[1] = [];
-    matrix[2] = [];
-    matrix[3] = [];
-    matrix[4] = [];
-    matrix[0][0] = label_very_low;
-    matrix[1][0] = label_very_low;
-    matrix[2][0] = label_low;
-    matrix[3][0] = label_low;
-    matrix[4][0] = label_medium;
-    matrix[0][1] = label_very_low;
-    matrix[1][1] = label_low;
-    matrix[2][1] = label_low;
-    matrix[3][1] = label_medium;
-    matrix[4][1] = label_medium;
-    matrix[0][2] = label_low;
-    matrix[1][2] = label_low;
-    matrix[2][2] = label_medium;
-    matrix[3][2] = label_medium;
-    matrix[4][2] = label_high;
-    matrix[0][3] = label_low;
-    matrix[1][3] = label_medium;
-    matrix[2][3] = label_medium;
-    matrix[3][3] = label_high;
-    matrix[4][3] = label_very_high;
-    matrix[0][4] = label_medium;
-    matrix[1][4] = label_medium;
-    matrix[2][4] = label_high;
-    matrix[3][4] = label_very_high;
-    matrix[4][4] = label_very_high;
-    return matrix[p][i];
-
-}
-
-function rl_class(label) {
-    if (label == label_very_low) return 'VL';
-    if (label == label_low) return 'L';
-    if (label == label_medium) return 'M';
-    if (label == label_high) return 'H';
-    if (label == label_very_high) return 'VH';
-}
-
-</script>
-
 {% endblock %}
+
 {% block content %}
+<script src="{% static 'js/risk.js' %}"></script>
 
 <main class="text-sm h-full flex flex-col">
 
-    <div class="mx-auto">
+    <div class="mx-auto mt-4">
+        <div class="flex flex-col">
+            <p class="text-sm">{% trans "Risk matrix" %}</p>
+            <select id="matrixSelect" class="form-input w-fit pr-8 capitalize" onchange="refresh()"></select>
+        </div>
         <div class="grid lg:grid-cols-2">
             <div class="">
                 <!--Threat Agent Factors-->
                 <div id="ta_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How technically skilled is this group of threat agents?" %}</div>
-                        <select class="my-select w-full" id="sl" onchange="refresh()">
+                        <select class="my-select w-full" id="skill_level" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
-                            <option class="text-1" value="1">1 - {% trans "Security penetration skills" %}</option>
+                            <option class="text-1" value="1">1 - {% trans "No technical skills" %}</option>
                             <option class="text-2" value="2">2</option>
-                            <option class="text-3" value="3">3 - {% trans "Network and programming skills" %}</option>
+                            <option class="text-3" value="3">3 - {% trans "Some technical skills" %}</option>
                             <option class="text-4" value="4">4</option>
                             <option class="text-5" value="5">5 - {% trans "Advanced computer user" %}</option>
-                            <option class="text-6" value="6">6 - {% trans "Some technical skills" %}</option>
+                            <option class="text-6" value="6">6 - {% trans "Network and programming skills" %}</option>
                             <option class="text-7" value="7">7</option>
                             <option class="text-8" value="8">8</option>
-                            <option class="text-9" value="9">9 - {% trans "No technical skills" %}</option>
+                            <option class="text-9" value="9">9 - {% trans "Security penetration skills" %}</option>
                         </select>
                         <div>{% trans "How motivated is this group of threat agents to find and exploit this vulnerability?" %}</div>
-                        <select class="my-select w-full" id="mo" onchange="refresh()">
+                        <select class="my-select w-full" id="motive" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Low or no reward" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -254,7 +47,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "High reward" %}</option>
                         </select>
                         <div>{% trans "What resources and opportunities are required for this group of threat agents to find and exploit this vulnerability?" %}</div>
-                        <select class="my-select w-full" id="op" onchange="refresh()">
+                        <select class="my-select w-full" id="opportunity" onchange="refresh()">
                             <option class="text-0" value="0">0 - {% trans "Full access or expensive resources required" %}</option>
                             <option class="text-1" value="1">1</option>
                             <option class="text-2" value="2">2</option>
@@ -267,7 +60,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "No access or resources required" %}</option>
                         </select>
                         <div>{% trans "How large is this group of threat agents?" %}</div>
-                        <select class="my-select w-full" id="sc" onchange="refresh()">
+                        <select class="my-select w-full" id="size" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1</option>
                             <option class="text-2" value="2">2 - {% trans "Developers or system administrators" %}</option>
@@ -282,16 +75,16 @@ function rl_class(label) {
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-                            <div class="text-gray-100 text-xs">{% trans "Threat Agent Factor" %}</div>
-                            <div class="font-bold text-white text-lg" id="TA">--</div>
+                            <div class="text-gray-100 text-xs">{% trans "Threat Agent Factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="threat_agent_score">--</div>
                         </div>
                     </div>
                 </div>
-                <!--Vulnerability Factor-->
+                <!--Vulnerability Factors-->
                 <div id="vf_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How easy is it for this group of threat agents to discover this vulnerability?" %}</div>
-                        <select class="my-select w-full" id="di" onchange="refresh()">
+                        <select class="my-select w-full" id="ease_of_discovery" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Practically impossible" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -304,7 +97,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "Automated tools available" %}</option>
                         </select>
                         <div>{% trans "How easy is it for this group of threat agents to actually exploit this vulnerability?" %}</div>
-                        <select class="my-select w-full" id="ex" onchange="refresh()">
+                        <select class="my-select w-full" id="ease_of_exploit" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Theoretical" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -317,7 +110,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "Automated tools available" %}</option>
                         </select>
                         <div>{% trans "How well known is this vulnerability to this group of threat agents?" %}</div>
-                        <select class="my-select w-full" id="kn" onchange="refresh()">
+                        <select class="my-select w-full" id="awareness" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Unknown" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -330,7 +123,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "Public knowledge" %}</option>
                         </select>
                         <div>{% trans "How likely is an exploit to be detected?" %}</div>
-                        <select class="my-select w-full" id="dt" onchange="refresh()">
+                        <select class="my-select w-full" id="intrusion_detection" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Active detection in application" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -345,82 +138,19 @@ function rl_class(label) {
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-                            <div class="text-gray-100 text-xs">{% trans "Vulnerability Factor" %}</div>
-                            <div class="font-bold text-white text-lg" id="VF">--</div>
+                            <div class="text-gray-100 text-xs">{% trans "Vulnerability Factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="vulnerability_score">--</div>
                         </div>
                     </div>
                 </div>       
             </div>
         
             <div class="my-4 lg:my-0">
-                <!--Technical Impact Factor-->
-                <div id="ti_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
-                    <div class="col-span-4 p-2">
-                        <div>{% trans "How much data could be disclosed and how sensitive is it?" %}</div>
-                        <select class="my-select w-full" id="C" onchange="refresh()">
-                            <option class="text-0" value="0">0 - N/A</option>
-                            <option class="text-1" value="1">1</option>
-                            <option class="text-2" value="2">2 - {% trans "Minimal non-sensitive data disclosed" %}</option>
-                            <option class="text-3" value="3">3</option>
-                            <option class="text-4" value="4">4</option>
-                            <option class="text-5" value="5">5</option>
-                            <option class="text-6" value="6">6 - {% trans "Minimal critical data or extensive non-sensitive data disclosed" %}</option>
-                            <option class="text-7" value="7">7 - {% trans "Extensive critical data disclosed" %}</option>
-                            <option class="text-8" value="8">8</option>
-                            <option class="text-9" value="9">9 - {% trans "All data disclosed" %}</option>
-                        </select>
-                        <div>{% trans "How much data could be corrupted and how damaged is it?" %}</div>
-                        <select class="my-select w-full" id="I" onchange="refresh()">
-                            <option class="text-0" value="0">0 - N/A</option>
-                            <option class="text-1" value="1">1 - {% trans "Minimal slightly corrupt data" %}</option>
-                            <option class="text-2" value="2">2</option>
-                            <option class="text-3" value="3">3 - {% trans "Minimal seriously corrupt data" %}</option>
-                            <option class="text-4" value="4">4</option>
-                            <option class="text-5" value="5">5 - {% trans "Extensive slightly corrupt data" %}</option>
-                            <option class="text-6" value="6">6</option>
-                            <option class="text-7" value="7">7 - {% trans "Extensive seriously corrupt data" %}</option>
-                            <option class="text-8" value="8">8</option>
-                            <option class="text-9" value="9">9 - {% trans "All data totally corrupt" %}</option>
-                        </select>
-                        <div>{% trans "How much service could be lost and how vital is it?" %}</div>
-                        <select class="my-select w-full" id="A" onchange="refresh()">
-                                <option class="text-0" value="0">0 - N/A</option>
-                            <option class="text-1" value="1">1 - {% trans "Minimal secondary services interrupted" %}</option>
-                            <option class="text-2" value="2">2</option>
-                            <option class="text-3" value="3">3</option>
-                            <option class="text-4" value="4">4</option>
-                            <option class="text-5" value="5">5 - {% trans "Minimal primary or extensive secondary services interrupted" %}</option>
-                            <option class="text-6" value="6">6</option>
-                            <option class="text-7" value="7">7 - {% trans "Extensive primary services interrupted" %}</option>
-                            <option class="text-8" value="8">8</option>
-                            <option class="text-9" value="9">9 - {% trans "All services completely lost" %}</option>
-                        </select>
-                        <div>{% trans "Are the threat agents' actions traceable to an individual?" %}</div>
-                        <select class="my-select w-full" id="T" onchange="refresh()">
-                            <option class="text-0" value="0">0 - N/A</option>
-                            <option class="text-1" value="1">1 - {% trans "Fully traceable" %}</option>
-                            <option class="text-2" value="2">2</option>
-                            <option class="text-3" value="3">3</option>
-                            <option class="text-4" value="4">4</option>
-                            <option class="text-5" value="5">5 - {% trans "Possibly traceable" %}</option>
-                            <option class="text-6" value="6">6</option>
-                            <option class="text-7" value="7">7</option>
-                            <option class="text-8" value="8">8</option>
-                            <option class="text-9" value="9">9 - {% trans "Completely anonymous" %}</option>
-                        </select>
-                    </div>
-                    <div class="my-auto ml-2 col-span 1 w-full">
-                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
-                            <div class="text-gray-100 text-xs">{% trans "Technical Impact Factor" %}</div>
-                            <div class="font-bold text-white text-lg" id="TI">--</div>
-                        </div>
-                    </div>
-                </div>
-                <!--Business Impact Factor-->
-                <div id="bi_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
+                <!--Business Impact Factors-->
+                <div id="bi_div" class="px-4 py-2 mx-1 my-2 shadow rounded h-1/2 grid grid-cols-5 bg-white">
                     <div class="col-span-4 p-2">
                         <div>{% trans "How much financial damage will result from an exploit?" %} </div>
-                        <select class="my-select w-full" id="fd" onchange="refresh()">
+                        <select class="my-select w-full" id="financial_damage" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Less than the cost to fix the vulnerability" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -433,7 +163,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "Bankruptcy" %}</option>
                         </select>
                         <div>{% trans "Would an exploit result in reputation damage that would harm the business?" %}</div>
-                        <select class="my-select w-full" id="rp" onchange="refresh()">
+                        <select class="my-select w-full" id="reputation_damage" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1 - {% trans "Minimal damage" %}</option>
                             <option class="text-2" value="2">2</option>
@@ -446,7 +176,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9 - {% trans "Brand damage" %}</option>
                         </select>
                         <div>{% trans "How much exposure does non-compliance introduce?" %}</div>
-                        <select class="my-select w-full" id="cm" onchange="refresh()">
+                        <select class="my-select w-full" id="non_compliance" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1</option>
                             <option class="text-2" value="2">2 - {% trans "Minor violation" %}</option>
@@ -459,7 +189,7 @@ function rl_class(label) {
                             <option class="text-9" value="9">9</option>
                         </select>
                         <div>{% trans "How much personally identifiable information could be disclosed?" %}</div>
-                        <select class="my-select w-full" id="pi" onchange="refresh()">
+                        <select class="my-select w-full" id="privacy_violation" onchange="refresh()">
                             <option class="text-0" value="0">0 - N/A</option>
                             <option class="text-1" value="1">1</option>
                             <option class="text-2" value="2">2</option>
@@ -474,15 +204,78 @@ function rl_class(label) {
                     </div>
                     <div class="my-auto ml-2 col-span 1 w-full">
                         <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-                            <div class="text-gray-100 text-xs">{% trans "Business Impact Factor" %}</div>
-                            <div class="font-bold text-white text-lg" id="BI">--</div>
+                            <div class="text-gray-100 text-xs">{% trans "Business Impact Factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="business_impact_score">--</div>
                             <div class="flex flex-row space-x-2 items-center">
-                                <input onchange="refresh()" id="ignoreBI" type="checkbox" class="w-4 h-4 text-green-800 bg-gray-100 border-gray-300 rounded focus:ring-green-800 
+                                <input onchange="refresh()" id="ignore_business_impact" type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded
                                 focus:ring-2">
                                 <label class="ml-2 text-sm font-medium text-gray-100">
                                     {% trans "Ignore" %}
                                   </label>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Technical Impact Factors-->
+                <div id="ti_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
+                    <div class="col-span-4 p-2">
+                        <div>{% trans "How much data could be disclosed and how sensitive is it?" %}</div>
+                        <select class="my-select w-full" id="loss_of_confidentiality" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1</option>
+                            <option class="text-2" value="2">2 - {% trans "Minimal non-sensitive data disclosed" %}</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6 - {% trans "Minimal critical data or extensive non-sensitive data disclosed" %}</option>
+                            <option class="text-7" value="7">7 - {% trans "Extensive critical data disclosed" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "All data disclosed" %}</option>
+                        </select>
+                        <div>{% trans "How much data could be corrupted and how damaged is it?" %}</div>
+                        <select class="my-select w-full" id="loss_of_integrity" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Minimal slightly corrupt data" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Minimal seriously corrupt data" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Extensive slightly corrupt data" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Extensive seriously corrupt data" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "All data totally corrupt" %}</option>
+                        </select>
+                        <div>{% trans "How much service could be lost and how vital is it?" %}</div>
+                        <select class="my-select w-full" id="loss_of_availability" onchange="refresh()">
+                                <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Minimal secondary services interrupted" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Minimal primary or extensive secondary services interrupted" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Extensive primary services interrupted" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "All services completely lost" %}</option>
+                        </select>
+                        <div>{% trans "Are the threat agents' actions traceable to an individual?" %}</div>
+                        <select class="my-select w-full" id="loss_of_accountability" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Fully traceable" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Possibly traceable" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Completely anonymous" %}</option>
+                        </select>
+                    </div>
+                    <div class="my-auto ml-2 col-span 1 w-full">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
+                            <div class="text-gray-100 text-xs">{% trans "Technical Impact Factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="technical_impact_score">--</div>
                         </div>
                     </div>
                 </div>
@@ -497,15 +290,15 @@ function rl_class(label) {
                     <div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
                         <div class="text-gray-100 font-semibold ">{% trans "Probability" %}</div>
                         <div>
-                            <span class="text-xl text-white font-bold" id="PF">--</span>
-                            <span class="text-white text-xs" id="PF_v"></span></div>
+                            <span class="text-xl text-white font-bold" id="probability_label">--</span>
+                            <span class="text-white text-xs" id="probability_score"></span></div>
                     </div>
                 </div>
         
                 <div class="text-2xl p-2 grid grid-rows-2 grid-cols-3 items-center text-center w-full mb-4" id="score">
                     <div class="text-lg p-1 col-span-3">{% trans "Risk level" %}</div>
                     <i class="fas fa-arrow-alt-circle-right"></i>
-                    <span class="py-2 px-0 font-semibold rounded shadow" id="risk_level">
+                    <span class="py-2 px-0 font-semibold rounded shadow" id="risk_label">
                         <p class="overflow-clip">--</p></span>
                     <i class="fas fa-arrow-alt-circle-left"></i>
                 </div>
@@ -514,8 +307,8 @@ function rl_class(label) {
                     <div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
                         <div class="text-gray-100 font-semibold">{% trans "Impact" %}</div>
                         <div>
-                            <span class="text-xl text-white font-bold" id="IF">--</span>
-                            <span class="text-white text-xs" id="IF_v"></span>
+                            <span class="text-xl text-white font-bold" id="impact_label">--</span>
+                            <span class="text-white text-xs" id="impact_score"></span>
                         </div>
                     </div>
                 </div>
@@ -526,5 +319,48 @@ function rl_class(label) {
 
 </main>
 
+<script>
+    matrices = {{ matrices|safe }}
+    for (var i = 0; i < matrices.length; i++) {
+        matrices[i] = JSON.parse(matrices[i]);
+    }
+    
+    var matrixSelect = document.getElementById("matrixSelect");
+    for (var i = 0; i < matrices.length; i++) {
+        var option = document.createElement("option");
+        option.text = matrices[i].name;
+        option.value = i;
+        matrixSelect.add(option);
+    }
+
+    function getSelectedMatrix() {
+        var matrix_id = matrixSelect.options[matrixSelect.selectedIndex].value;
+        for (var i = 0; i < matrices.length; i++) {
+            if (i == matrix_id) {
+                return matrices[i];
+            }
+        }
+    }
+    
+    function refresh() {
+        const ignoreBusinessImpact = isBusinessImpactIgnored();
+
+        const factors = getFactorsValues();
+        const vector = buildVector(factors);
+        const scores = computeFactorsScores(factors, ignoreBusinessImpact);
+        const matrix = getSelectedMatrix();
+        const labels = scoreToRating(matrix, scores);
+
+
+        renderVector(vector);
+        renderScores(scores, ignoreBusinessImpact);
+        renderLabels(labels);
+        renderIgnoredFactors();
+    }
+
+    window.onload = function() {
+        refresh();
+    };
+</script>
 
 {% endblock %}

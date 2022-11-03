@@ -6,7 +6,7 @@
 {% endwith %}
 
 <div>
-    <form method="post" id="analysis_form">{% csrf_token %}
+    <form method="post" id="analysis_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
         <div class="bg-white rounded-lg shadow px-8 py-6">
             <section class="flex flex-col space-y-4">
                 <div class="flex flex-row space-x-6">
@@ -24,8 +24,8 @@
                 </div>
                 <div class="flex flex-col">
                     <p class="text-sm font-semibold">{% trans "Domain" %}</p>
-                    {{ form.parent_group.errors }}
-                    {{ form.parent_group }}
+                    {{ form.folder.errors }}
+                    {{ form.folder }}
                 </div>
                 <div class="flex flex-col">
                     <p class="text-sm font-semibold">{% trans "Status" %}</p>
