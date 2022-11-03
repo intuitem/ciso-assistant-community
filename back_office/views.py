@@ -950,15 +950,16 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
+        context['user_groups'] = self.object.user_groups.all()
         keys = ['Last name', 'First name', 'Email', 'Entry date', 'Superuser']
         values = []
         for key, value in model_to_dict(self.object, fields=['last_name', 'first_name', 'email', 'date_joined']).items():
             values.append(value)
-        context['user_fields'] = {i:j for i,j in zip(keys,values)}
+        context['user_fields'] = dict(zip(keys,values))
         roles = []
         for user_group in self.object.user_groups.all():
-            for ra in user_group.roleassignment_set.all():
-                roles.append(ra.role.name)
+            for role_assignment in user_group.roleassignment_set.all():
+                roles.append(role_assignment.role.name)
         context['roles'] = roles
         return context
     
