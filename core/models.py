@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from asf_rm import settings
 from back_office.models import Project, SecurityFunction, Asset, Threat
@@ -300,6 +301,7 @@ class RiskAcceptance(models.Model):
         ('temporary', _('Temporary')),
         ('permanent', _('Permanent')),
     ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     risk_scenario = models.ForeignKey(RiskScenario, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
     validator = models.CharField(max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"))
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))

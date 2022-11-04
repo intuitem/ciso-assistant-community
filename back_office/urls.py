@@ -66,7 +66,7 @@ urlpatterns = [
     path('RS/<int:pk>', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
     path('RS/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='ri-update-modal'),
     path('MSR/<int:pk>', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
-    path('RAC/<int:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
+    path('RAC/<str:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
     path('TH/<int:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
     path('SF/<int:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
 
@@ -83,7 +83,7 @@ urlpatterns = [
     # DELETE VIEWS
     path('RA/<int:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
     path('RS/<int:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='risk-scenario-delete'),
-    path('RAC/<int:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
+    path('RAC/<str:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
     path('MSR/<int:pk>/delete/', login_required(views.SecurityMeasureDeleteView.as_view()), name='measure-delete'),
     path('PRJ/<int:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
     path('AST/<int:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
