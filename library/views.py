@@ -24,6 +24,7 @@ class PackageListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['packages'] = self.get_queryset()
+        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['form'] = UploadFileForm()
         return context
@@ -48,6 +49,8 @@ class PackageDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = get_package(kwargs['package'])
+        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['package'] = package
         context['types'] = self.get_object_types(package)
         context['matrices'] = self.get_matrices(package)
