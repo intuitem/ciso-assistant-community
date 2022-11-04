@@ -321,7 +321,7 @@ def export_risks_csv(request, analysis):
             security_measures = ''
             for mtg in ri.security_measures.all():
                 security_measures += f"[{mtg.status}]{mtg.name} \n"
-            row = [ri.rid(), ri.threat, ri.name, ri.scenario,
+            row = [ri.rid(), ri.threat, ri.name, ri.description,
                 ri.existing_measures, ri.get_current_level_display(),
                 security_measures, ri.get_residual_level_display(), ri.treatment,
                 ]

@@ -29,7 +29,7 @@
                 </div>
                 <br>
                 <div class="text-sm"><span class="font-semibold">{% trans "Description" %}</></div>
-                <div class="text-sm"> {{analysis.comments}}</div>
+                <div class="text-sm"> {{analysis.description}}</div>
             </div>
 
         </div>
@@ -62,10 +62,10 @@
             {% for RI in context %}
             <tr class="border-b tr-hover">
                 <td class="py-2 px-2 text-center text-xs font-bold" id="{{RI.id}}"><a class=""
-                                                               href="#{{RI.id}}">{{RI.rid}}</a></td>
+                                                               href="#{{RI.id}}">{{ forloop.counter }}</a></td>
                 <td class="p-2 capitalize">{{RI.threat}}</td>
                 <td class="p-2">{{RI.name}}</td>
-                <td class="text-xs p-2">{{RI.scenario|linebreaksbr}}</td>
+                <td class="text-xs p-2">{{RI.description|linebreaksbr}}</td>
                 <td class="text-xs p-2">{{RI.existing_measures|linebreaksbr}}</td>
                 <td class="text-center p-1 {{RI.current_level}}"><span class="font-semibold">{{RI.get_current_risk.name}}</span><br>
                     <span class="text-xs">I={{RI.get_current_impact.name}}, P={{RI.get_current_proba.name}}</span>

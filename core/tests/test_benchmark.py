@@ -15,7 +15,7 @@ for i in range(10000):
     analysis = Analysis()
     project = Project.objects.get(id=1)
     analysis.project = project
-    analysis.comments = "Lorem ipsum dolor sir amet..."
+    analysis.description = "Lorem ipsum dolor sir amet..."
     analyses.append(analysis)
 Analysis.objects.bulk_create(analyses, batch_size)
 '''
@@ -33,6 +33,6 @@ print(f'Execution time is: {timeit.timeit(setup=setup_code, stmt=s2, number=1)}'
 #     for i in range(1000):
 #         analysis = Analysis()
 #         analysis.project = get_object_or_404(Project, id=1)
-#         analysis.comments = "Lorem ipsum dolor sir amet..."
+#         analysis.description = "Lorem ipsum dolor sir amet..."
 #         analyses.append(analysis)
 #     Analysis.objects.bulk_create(analyses, batch_size)

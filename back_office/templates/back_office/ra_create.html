@@ -38,10 +38,10 @@
                 </div>
                 <div class="px-4 py-6 w-full">
                     <h2 class="text-xl font-semibold mb-4">{% trans "Analysis" %}</h2>
-                    <p class="text-sm font-semibold">{% trans "Comments" %}</p>
-                    {{ form.comments.errors }}
-                    {{ form.comments }}
-                    <p class="text-xs text-gray-400">{{ form.comments.help_text|striptags|capfirst }}</p>
+                    <p class="text-sm font-semibold">{% trans "Description" %}</p>
+                    {{ form.description.errors }}
+                    {{ form.description }}
+                    <p class="text-xs text-gray-400">{{ form.description.help_text|striptags|capfirst }}</p>
                 </div>
             </div>
         </div>

@@ -109,7 +109,7 @@
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Project Name" %}</th>
             <th class="px-6 py-3">{% trans "Domain" %}</th>
-            <th class="px-6 py-3">{% trans "Summary" %}</th>
+            <th class="px-6 py-3">{% trans "Description" %}</th>
             {% comment %} <th class="px-6 py-3">{% trans "Status" %}</th> {% endcomment %}
             <th class="px-6 py-3">{% trans "Actions" %}</th>
         </thead>
@@ -154,7 +154,7 @@
                     </td>
                     <td class="px-6 py-4">
                         <p class="text-gray-900 whitespace-no-wrap">
-                        {{ project.summary|capfirst }}
+                        {{ project.description|capfirst }}
                         </p>
                     </td>
                     {% comment %} <td class="px-6 py-4">

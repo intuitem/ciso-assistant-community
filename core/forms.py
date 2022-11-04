@@ -41,7 +41,7 @@ class LoginForm(AuthenticationForm):
 class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
         
 class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
@@ -50,13 +50,13 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
         
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'version', 'is_draft', 'comments']
+        fields = ['project', 'auditor', 'name', 'description', 'version', 'is_draft']
 
 
 class SecurityMeasureCreateForm(StyledModelForm):
@@ -93,7 +93,7 @@ class RiskScenarioCreateForm(StyledModelForm):
         super().__init__(*args, **kwargs)
     class Meta:
         model = RiskScenario
-        fields = ['analysis', 'threat', 'name', 'scenario']
+        fields = ['analysis', 'threat', 'name', 'description']
 
 
 class RiskScenarioUpdateForm(StyledModelForm):
