@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.core.exceptions import ValidationError
 from asf_rm import settings
 from back_office.models import Project, SecurityFunction, Asset, Threat
 from core.base_models import AbstractBaseModel
@@ -46,7 +47,6 @@ class Analysis(AbstractBaseModel):
     auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
     rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, help_text=_("WARNING! After choosing it, you will not be able to change it"), verbose_name=_("Rating matrix"))
-    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -123,6 +123,12 @@ class Analysis(AbstractBaseModel):
             "count": len(errors_lst + warnings_lst + info_lst)
         }
         return findings
+
+    def clean(self) -> None:
+        super().clean()
+        scope = Analysis.objects.filter(project=self.project)
+        if not self.is_unique_in_scope(scope, ['name', 'version']):
+            raise ValidationError(_("This analysis already exists in this project"))
 
 
 def risk_scoring(probability, impact, matrix: RiskMatrix):
@@ -273,7 +279,7 @@ class RiskScenario(AbstractBaseModel):
         return str(self.parent_project()) + ': ' + str(self.name)
 
     def rid(self):
-        return 'R.' + str(self.id)
+        return f'R.{self.scoped_id(scope=RiskScenario.objects.filter(analysis=self.analysis))}'
 
     def save(self, *args, **kwargs):
         self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
