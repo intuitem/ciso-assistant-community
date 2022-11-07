@@ -5,7 +5,8 @@ from django.contrib.auth.models import AnonymousUser, User
 
 from core.models import Analysis, RiskScenario, SecurityMeasure
 from core.views import *
-from general.models import Threat, Project, Folder
+from back_office.models import Threat, Project
+from iam.models import Folder
 from django.utils.translation import gettext_lazy as _
 
 import pytest

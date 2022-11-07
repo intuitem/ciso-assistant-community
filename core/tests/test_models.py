@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from core.models import Analysis
-from general.models import *
+from back_office.models import *
+from iam.models import *
 from django.utils.translation import gettext as _
 import pytest
 
