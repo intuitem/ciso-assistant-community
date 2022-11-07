@@ -226,15 +226,15 @@ class RiskScenario(models.Model):
                                          verbose_name=_("Existing measures"), blank=True)
 
     # current
-    current_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current probability"))
-    current_impact = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current impact"))
-    current_level = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current level"),
+    current_proba = models.SmallIntegerField(default=-1, verbose_name=_("Current probability"))
+    current_impact = models.SmallIntegerField(default=-1, verbose_name=_("Current impact"))
+    current_level = models.SmallIntegerField(default=-1, verbose_name=_("Current level"),
                                      help_text=_('The risk level given the current measures. Automatically updated on Save, based on the chosen matrix'))
 
     # residual
-    residual_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual probability"))
-    residual_impact = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual impact"))
-    residual_level = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual level"),
+    residual_proba = models.SmallIntegerField(default=-1, verbose_name=_("Residual probability"))
+    residual_impact = models.SmallIntegerField(default=-1, verbose_name=_("Residual impact"))
+    residual_level = models.SmallIntegerField(default=-1, verbose_name=_("Residual level"),
                                       help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'))
 
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
@@ -260,26 +260,38 @@ class RiskScenario(models.Model):
         return self.analysis.rating_matrix.parse_json()
 
     def get_current_risk(self):
+        if self.current_level < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'rgb': '#A9A9A9'}
         matrix = self.get_matrix()
         return matrix['risk'][self.current_level]
 
     def get_current_impact(self):
+        if self.current_impact < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['impact'][self.current_impact]
 
     def get_current_proba(self):
+        if self.current_proba < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['probability'][self.current_proba]
 
     def get_residual_risk(self):
+        if self.residual_level < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'rgb': '#A9A9A9'}
         matrix = self.get_matrix()
         return matrix['risk'][self.residual_level]
 
     def get_residual_impact(self):
+        if self.residual_impact < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['impact'][self.residual_impact]
 
     def get_residual_proba(self):
+        if self.residual_proba < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['probability'][self.residual_proba]
 
@@ -290,8 +302,10 @@ class RiskScenario(models.Model):
         return 'R.' + str(self.id)
 
     def save(self, *args, **kwargs):
-        self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
-        self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
+        if self.current_proba > 0 and self.current_impact > 0:
+            self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
+        if self.residual_proba > 0 and self.residual_impact > 0:
+            self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
         super(RiskScenario, self).save(*args, **kwargs)
 
 
