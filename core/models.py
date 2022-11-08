@@ -302,9 +302,9 @@ class RiskScenario(models.Model):
         return 'R.' + str(self.id)
 
     def save(self, *args, **kwargs):
-        if self.current_proba > 0 and self.current_impact > 0:
+        if self.current_proba >= 0 and self.current_impact >= 0:
             self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
-        if self.residual_proba > 0 and self.residual_impact > 0:
+        if self.residual_proba >= 0 and self.residual_impact >= 0:
             self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
         super(RiskScenario, self).save(*args, **kwargs)
 
