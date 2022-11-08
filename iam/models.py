@@ -233,7 +233,7 @@ class RoleAssignment(models.Model):
         return "id=" + str(self.id) + \
             ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
             ", role: " + str(self.role.name) + \
-            ", user: " + (str(self.user.username) if self.user else "/") + \
+            ", user: " + (str(self.user.email) if self.user else "/") + \
             ", user group: " + (str(self.user_group.name)
                                 if self.user_group else "/")
 
