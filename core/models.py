@@ -232,7 +232,6 @@ class RiskScenario(AbstractBaseModel):
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
                                  verbose_name=_("Treatment status"))
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
