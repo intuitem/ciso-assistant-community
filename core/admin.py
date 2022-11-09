@@ -45,7 +45,7 @@ class RiskScenarioInline(admin.StackedInline):
         (_('Threat description'), {'fields': ['name', 'scenario']}),
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
         (_('Residual level'), {'fields': ['associated_security_measures','residual_proba', 'residual_impact', 'residual_level']}),
-        (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
+        (_('Follow-up'), {'fields': ['treatment', 'description', 'created_at', 'updated_at']}),
     ]
 
     def associated_security_measures(self, obj):
@@ -73,7 +73,7 @@ class RiskScenarioAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionMo
         (_('Current level'), {'fields': ['existing_measures', 'current_proba', 'current_impact', 'current_level']}),
         # SecurityMeasureInline,
         (_('Residual level'), {'fields': ['residual_proba', 'residual_impact', 'residual_level']}),
-        (_('Follow-up'), {'fields': ['treatment', 'comments', 'created_at', 'updated_at']}),
+        (_('Follow-up'), {'fields': ['treatment', 'description', 'created_at', 'updated_at']}),
     ]
     # inlines = [SecurityMeasureInline]
 

@@ -3,6 +3,7 @@
 
 from collections import defaultdict
 from typing import Any, Tuple
+import uuid
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -11,10 +12,12 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 from asf_rm import settings
 from back_office.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
+from core.base_models import AbstractBaseModel
 
 
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     folder = models.ForeignKey("Folder", verbose_name=_(
         "Domain"), on_delete=models.CASCADE, default=None)
     name = models.CharField(_('name'), max_length=150, unique=False)
@@ -57,7 +60,7 @@ class Role(models.Model):
         return self.name
 
 
-class Folder(models.Model):
+class Folder(AbstractBaseModel):
     """ A folder is a container for other folders or any object
         Folders are organized in a tree structure, with a single root folder
         Folders are the base perimeter for role assignments
@@ -66,10 +69,6 @@ class Folder(models.Model):
         """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    # childrenClassName
-    description = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name=_("Description"))
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
@@ -118,6 +117,16 @@ class Folder(models.Model):
             return obj.risk_scenario.analysis.project.folder
 
 
+class FolderMixin(models.Model):
+    """
+    Add foreign key to Folder
+    """
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder')
+
+    class Meta:
+        abstract = True
+
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -147,9 +156,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     """ a user is a principal corresponding to a human """
-    # we will need to delete username in the future but for now we should keep it to don't break the model
-    # let's use username=email (should be manually enforced for createsuperuser)
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     email = models.CharField(max_length=100, unique=True)
@@ -206,6 +213,7 @@ class User(AbstractBaseUser):
 
 class RoleAssignment(models.Model):
     """ fundamental class for MIRA RBAC model, similar to Azure IAM model """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     perimeter_folders = models.ManyToManyField(
         "Folder", verbose_name=_("Domain"), related_name='perimeter_folders')
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -225,7 +233,7 @@ class RoleAssignment(models.Model):
         return "id=" + str(self.id) + \
             ", folders: " + str(list(self.perimeter_folders.values_list('name', flat=True))) + \
             ", role: " + str(self.role.name) + \
-            ", user: " + (str(self.user.username) if self.user else "/") + \
+            ", user: " + (str(self.user.email) if self.user else "/") + \
             ", user group: " + (str(self.user_group.name)
                                 if self.user_group else "/")
 

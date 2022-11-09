@@ -162,6 +162,7 @@
                     </a>
                 </li>
                 {% endif %}
+                {% if change_usergroup %}
                 <li class="to-page">
                     <a href="{% url 'user_group-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -171,6 +172,17 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
                     </a>
                 </li>
+                {% else %}
+                <li class="to-page">
+                    <a 
+                        class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Groups" %}</span>
+                    </a>
+                </li>
+                {% endif %}
                 <li class="to-page">
                     <a href="{% url 'role-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">

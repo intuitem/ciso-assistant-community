@@ -68,7 +68,79 @@ def get_package(name):
             return p
     return None
 
-def import_matrix(request, fields):
+def import_matrix(fields):
+    '''
+    Imports a matrix from a package
+    
+    Args:
+        fields: matrix fields
+        
+    Returns:
+        matrix: imported matrix
+    '''
+    required_fields = ['name', 'description', 'probability', 'impact', 'risk', 'grid']
+
+    if not object_valid(required_fields, fields):
+        raise Exception('Invalid matrix')
+
+    matrix = RiskMatrix.objects.create(
+        name=fields['name'],
+        description=fields['description'],
+        json_definition=json.dumps(fields),
+        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+    )
+
+    return matrix
+
+def import_threat(fields):
+    '''
+    Imports a threat from a package
+    
+    Args:
+        fields: threat fields
+        
+    Returns:
+        threat: imported threat
+    '''
+    required_fields = ['name', 'description']
+
+    if not object_valid(required_fields, fields):
+        raise Exception('Invalid threat')
+
+    threat = Threat.objects.create(
+        name=fields['name'],
+        description=fields['description'],
+        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+    )
+
+    return threat
+
+def import_security_function(fields):
+    '''
+    Imports a security function from a package
+    
+    Args:
+        fields: security function fields
+        
+    Returns:
+        security_function: imported security function
+    '''
+    required_fields = ['name', 'description']
+
+    if not object_valid(required_fields, fields):
+        raise Exception('Invalid security function')
+
+    security_function = SecurityFunction.objects.create(
+        name=fields['name'],
+        description=fields['description'],
+        provider=fields['provider'],
+        contact=fields['contact'],
+        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+    )
+
+    return security_function
+
+def import_matrix_view(request, fields):
     '''
     Imports a matrix from a package
     
@@ -93,7 +165,7 @@ def import_matrix(request, fields):
 
     return matrix
 
-def import_threat(request, fields):
+def import_threat_view(request, fields):
     '''
     Imports a threat from a package
     
@@ -117,7 +189,7 @@ def import_threat(request, fields):
 
     return threat
 
-def import_security_function(request, fields):
+def import_security_function_view(request, fields):
     '''
     Imports a security function from a package
     
@@ -160,7 +232,40 @@ def ignore_package_object(package_objects, object_type):
             uploaded_list.append(package_object)
     return uploaded_list, ignored_list
 
-def import_package(request, package):
+
+def import_package(package):
+    '''
+    Imports a package
+    
+    Args:
+        package: package to import
+    '''
+    matrices = []
+    threats = []
+    security_functions = []
+
+    for obj in package.get('objects'):
+        if obj['type'] == 'matrix':
+            matrices.append(obj.get('fields'))
+        elif obj['type'] == 'threat':
+            threats.append(obj.get('fields'))
+        elif obj['type'] == 'security_function':
+            security_functions.append(obj.get('fields'))
+        else:
+            raise Exception(f'Unknown object type: {obj["type"]}')
+
+    for matrix in matrices:
+        import_matrix(matrix)
+
+    for threat in threats:
+        import_threat(threat)
+
+    for security_function in security_functions:
+        import_security_function(security_function)
+
+    return True
+
+def import_package_view(request, package):
     '''
     Imports a package
     
@@ -188,19 +293,19 @@ def import_package(request, package):
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
     for matrix in uploaded_list:
-        import_matrix(request, matrix)
+        import_matrix_view(request, matrix)
 
     uploaded_list, ignored_list = ignore_package_object(threats, Threat)
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
     for threat in uploaded_list:
-        import_threat(request, threat)
+        import_threat_view(request, threat)
 
     uploaded_list, ignored_list = ignore_package_object(security_functions, SecurityFunction)
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
     for security_function in uploaded_list:
-        import_security_function(request, security_function)
+        import_security_function_view(request, security_function)
 
     messages.success(request, f'Package "{package["name"]}" imported successfully. {objects_uploaded} objects imported and {objects_ignored} objects ignored.')
     return True

@@ -1,7 +1,10 @@
 import uuid
 from django.db import models
+from django.core.exceptions import ValidationError
 from asf_rm import settings
 from back_office.models import Project, SecurityFunction, Asset, Threat
+from core.base_models import AbstractBaseModel
+from iam.models import FolderMixin
 from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd
@@ -13,21 +16,19 @@ from datetime import date
 from iam.models import Folder
 
 
-class RiskMatrix(models.Model):
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(max_length=2000, verbose_name=_("Description"), blank=True, null=True)
+class RiskMatrix(AbstractBaseModel, FolderMixin):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
 
-    def parse_json(self):
+    def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
-    def get_detailed_grid(self):
+    def get_detailed_grid(self) -> list:
         matrix = self.parse_json()
         grid = []
         for row in matrix['grid']:
             grid.append([item for item in row])
+        return grid
 
 
     def render_grid_as_colors(self):
@@ -37,36 +38,26 @@ class RiskMatrix(models.Model):
 
         return res
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
-class Analysis(models.Model):
-    # RATING_METHODS = [
-    #     ('default', _('Balanced (default)')),
-    #     ('critical', _('Critical (FAIR-based)')),
-    #     ('custom', _('Custom (adjusted)')),
-    # ]
+class Analysis(AbstractBaseModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     version = models.CharField(max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
     auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
     rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, help_text=_("WARNING! After choosing it, you will not be able to change it"), verbose_name=_("Rating matrix"))
-
-    comments = models.TextField(max_length=1000, blank=True, null=True,
-                                verbose_name=_("Comments"))
-
-    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("Analysis")
         verbose_name_plural = _("Analyses")
 
-    def __str__(self):
-        return 'RA-' + str(self.id) + ': ' + str(self.project) + ', version ' + str(self.version)
+    def __str__(self) -> str:
+        return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
 
-    def get_scenario_count(self):
+    def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(analysis=self.id).count()
         scenario_count = count
         return scenario_count
@@ -134,14 +125,27 @@ class Analysis(models.Model):
         }
         return findings
 
+    def save(self, *args, **kwargs) -> None:
+        scope = Analysis.objects.filter(project=self.project)
+        if not self.is_unique_in_scope(scope, ['name', 'version']):
+            raise ValidationError(_("This analysis already exists in this project"))
+        super().save(*args, **kwargs)
 
-def risk_scoring(probability, impact, matrix: RiskMatrix):
+    # NOTE: if your save() method throws an exception, you might want to override the clean() method to prevent 
+    # 500 errors when the form submitted. See https://docs.djangoproject.com/en/dev/ref/models/instances/#django.db.models.Model.clean
+    def clean(self) -> None:
+        scope = Analysis.objects.filter(project=self.project)
+        if not self.is_unique_in_scope(scope, ['name', 'version']):
+            raise ValidationError(_("This analysis already exists in this project"))
+        super().clean()
+
+def risk_scoring(probability, impact, matrix: RiskMatrix) -> int:
     fields = json.loads(matrix.json_definition)
     risk_index = fields['grid'][probability][impact]
     return risk_index
 
 
-class SecurityMeasure(models.Model):
+class SecurityMeasure(AbstractBaseModel):
     MITIGATION_STATUS = [
         ('open', _('Open')),
         ('in_progress', _('In progress')),
@@ -167,9 +171,6 @@ class SecurityMeasure(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
-
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
     type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
     status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
     eta = models.DateField(blank=True, null=True, help_text=_("Estimated Time of Arrival"), verbose_name=_("ETA"))
@@ -208,7 +209,7 @@ class SecurityMeasure(models.Model):
         return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.project.name}: {self.name} </a>'
 
 
-class RiskScenario(models.Model):
+class RiskScenario(AbstractBaseModel):
     TREATMENT_OPTIONS = [
         ('open', _('Open')),
         ('mitigated', _('Mitigated')),
@@ -220,28 +221,25 @@ class RiskScenario(models.Model):
     assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
     security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    scenario = models.TextField(max_length=2000, help_text=_("Risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
                                          verbose_name=_("Existing measures"), blank=True)
 
     # current
-    current_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current probability"))
-    current_impact = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current impact"))
-    current_level = models.PositiveSmallIntegerField(default=0, verbose_name=_("Current level"),
+    current_proba = models.SmallIntegerField(default=-1, verbose_name=_("Current probability"))
+    current_impact = models.SmallIntegerField(default=-1, verbose_name=_("Current impact"))
+    current_level = models.SmallIntegerField(default=-1, verbose_name=_("Current level"),
                                      help_text=_('The risk level given the current measures. Automatically updated on Save, based on the chosen matrix'))
 
     # residual
-    residual_proba = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual probability"))
-    residual_impact = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual impact"))
-    residual_level = models.PositiveSmallIntegerField(default=0, verbose_name=_("Residual level"),
+    residual_proba = models.SmallIntegerField(default=-1, verbose_name=_("Residual probability"))
+    residual_impact = models.SmallIntegerField(default=-1, verbose_name=_("Residual impact"))
+    residual_level = models.SmallIntegerField(default=-1, verbose_name=_("Residual level"),
                                       help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'))
 
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
                                  verbose_name=_("Treatment status"))
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
@@ -261,26 +259,38 @@ class RiskScenario(models.Model):
         return self.analysis.rating_matrix.parse_json()
 
     def get_current_risk(self):
+        if self.current_level < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'hexcolor': '#A9A9A9'}
         matrix = self.get_matrix()
         return matrix['risk'][self.current_level]
 
     def get_current_impact(self):
+        if self.current_impact < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['impact'][self.current_impact]
 
     def get_current_proba(self):
+        if self.current_proba < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['probability'][self.current_proba]
 
     def get_residual_risk(self):
+        if self.residual_level < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'hexcolor': '#A9A9A9'}
         matrix = self.get_matrix()
         return matrix['risk'][self.residual_level]
 
     def get_residual_impact(self):
+        if self.residual_impact < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['impact'][self.residual_impact]
 
     def get_residual_proba(self):
+        if self.residual_proba < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
         matrix = self.get_matrix()
         return matrix['probability'][self.residual_proba]
 
@@ -288,11 +298,17 @@ class RiskScenario(models.Model):
         return str(self.parent_project()) + ': ' + str(self.name)
 
     def rid(self):
-        return 'R.' + str(self.id)
+        return f'R.{self.scoped_id(scope=RiskScenario.objects.filter(analysis=self.analysis))}'
 
     def save(self, *args, **kwargs):
-        self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
-        self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
+        if self.current_proba >= 0 and self.current_impact >= 0:
+            self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
+        else:
+            self.current_level = -1
+        if self.residual_proba >= 0 and self.residual_impact >= 0:
+            self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
+        else:
+            self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
 
 

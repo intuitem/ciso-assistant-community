@@ -24,6 +24,7 @@ class PackageListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['packages'] = self.get_queryset()
+        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['form'] = UploadFileForm()
         return context
@@ -35,7 +36,7 @@ class PackageListView(FormView):
         if form.is_valid():
             for f in files:
                 package = json.load(f)
-                import_package(request, package)
+                import_package_view(request, package)
             return self.form_valid(form)
         else:
             messages.error(request, f'Invalid form.')
@@ -48,6 +49,8 @@ class PackageDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         package = get_package(kwargs['package'])
+        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['package'] = package
         context['types'] = self.get_object_types(package)
         context['matrices'] = self.get_matrices(package)
@@ -70,7 +73,7 @@ class PackageDetailView(TemplateView):
 def import_default_package(request, package_name):
     try:
         package = get_package(package_name)
-        import_package(request, package)
+        import_package_view(request, package)
     except:
         return redirect("package-list")
     return redirect("package-list")

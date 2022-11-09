@@ -41,7 +41,7 @@ class LoginForm(AuthenticationForm):
 class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
         
 class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
@@ -50,13 +50,13 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
         
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'is_draft', 'rating_matrix', 'comments']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:
         model = Analysis
-        fields = ['project', 'auditor', 'version', 'is_draft', 'comments']
+        fields = ['project', 'auditor', 'name', 'description', 'version', 'is_draft']
 
 
 class SecurityMeasureCreateForm(StyledModelForm):
@@ -93,14 +93,14 @@ class RiskScenarioCreateForm(StyledModelForm):
         super().__init__(*args, **kwargs)
     class Meta:
         model = RiskScenario
-        fields = ['analysis', 'threat', 'name', 'scenario']
+        fields = ['analysis', 'threat', 'name', 'description']
 
 
 class RiskScenarioUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        PROBA_CHOICES = list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['probability']]))
-        IMPACT_CHOICES = list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['impact']]))
+        PROBA_CHOICES = [(-1, '--')] + list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['probability']]))
+        IMPACT_CHOICES = [(-1, '--')] + list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['impact']]))
         self.fields['current_proba'].widget = Select(choices=PROBA_CHOICES, attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50',
             'onchange': 'refresh();'

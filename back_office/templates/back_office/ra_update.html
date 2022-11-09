@@ -1,5 +1,5 @@
 {% extends 'back_office/base.html' %}
-{% load i18n static %}
+{% load i18n static back_office_extras %}
 {% block content %}
 {% with page_title=analysis %}
 {% include 'back_office/snippets/breadcrumbs.html' %}
@@ -7,47 +7,48 @@
 
 <div class="flex flex-col lg:flex-row lg:space-x-4">
     <div>
-        <form method="post" id="analysis_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
+        <form method="post" id="analysis_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
         {{ form.non_field_errors }}
         <div class="bg-white rounded-lg shadow mb-4 px-4">
             <div class="flex flex-col mb-4">
-                <div class="px-4 py-6">
+                <div class="py-6">
                     <h2 class="text-xl font-semibold mb-4">{% trans "Risk analysis" %}</h2>
-                    <section class="flex flex-col space-y-4">
-                        <div class="flex flex-col">
-                            <p class="text-sm font-semibold">{% trans "Project" %}</p>
-                            {{ form.project.errors }}
-                            {{ form.project }}
+                    {{ form.non_field_errors }}
+                    {{ form.errors }}
+                    <div id="update_analysis-form">
+                        {% for field in form %}
+                        {% if field.field.widget|class == "CheckboxInput" %}
+                            {% include 'back_office/snippets/form_field_row.html' %}
+                        {% else %}
+                        <div class="mb-6">
+                            <label class="form-label">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
+                            <div>
+                            {{ field.errors }}
+                            {% if field.field.widget.attrs.select_disabled %}
+                                <select disabled class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50">
+                                <option value={{ field.value }}>{{ field.initial }}</option>
+                                </select>
+                                <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+                            <p class="help_text">{{ field.help_text }}</p>
+                            </div>
                         </div>
-                        <div class="flex flex-col">
-                            <p class="text-sm font-semibold">{% trans "Auditor" %}</p>
-                            {{ form.auditor.errors }}
-                            {{ form.auditor }}
-                        </div>
-                        <div class="flex flex-col">
-                            <p class="text-sm font-semibold">{% trans "Version" %}</p>
-                            {{ form.version.errors }}</p>
-                            {{ form.version }}
-                        </div>
-                        <div class="w-full">
-                            <p class="text-sm font-semibold">{% trans "Comments" %}</p>
-                            {{ form.comments.errors }}
-                            {{ form.comments }}
-                            <p class="text-xs text-gray-400">{{ form.comments.help_text|striptags|capfirst }}</p>
-                        </div>
-                        <div class="flex flex-row space-x-2 items-center">
-                            <p class="text-sm font-semibold">{% trans "Draft" %}</p>
-                            {{ form.is_draft.errors }}
-                            {{ form.is_draft }}
-                        </div>
-                        <div class="flex justify-end space-x-2">
+                        {% endif %}
+                        {% endfor %}
+
+                        <section class="col-start-3 col-span-6 place-content-end">
+                            <section class="grid grid-cols-2 place-content-end">
                             <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
-                            <input
-                                type="hidden" name="next" value={{ request.GET.next }}>
-                            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
-                :disabled="submitDisabled">{% trans "Save" %}</button>
-                        </div>
-                    </section>
+                            <input type="hidden" form="analysis_update_form" name="next" value={{ request.GET.next }}>
+                            <button id="analysis_save" type="submit" :disabled="submitDisabled"
+                                class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2 disabled:bg-indigo-400">
+                                {% trans "Save" %}
+                            </button>
+                            </section>
+                        </section>
+                    </div>
                 </div>
             </div>
         </div>

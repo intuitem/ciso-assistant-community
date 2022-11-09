@@ -84,7 +84,7 @@
                                                 <div class="flex flex-col">
                                                 {% for risk in object.fields.risk %}
                                                     <div class="flex flex-row space-x-2">
-                                                        <div class="w-fit p-1 rounded" style="background-color: {{ risk.rgb }};"></div>
+                                                        <div class="w-fit p-1 rounded" style="background-color: {{ risk.hexcolor }};"></div>
                                                         <div class="w-fit">{{ risk.abbreviation|capfirst }}</div>
                                                         <div class="w-fit">{{ risk.name|capfirst }}</div>
                                                         <div class="w-fit">{{ risk.description|capfirst }}</div>

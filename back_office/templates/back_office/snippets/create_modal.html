@@ -69,12 +69,12 @@ x-transition:leave-end="opacity-0"
                 </div>
 
                 <div class="mb-6">
-                  <label class="form-label">{{ analysis_create_form.comments.label|striptags }}</label>
+                  <label class="form-label">{{ analysis_create_form.description.label|striptags }}</label>
                   <div class="">
-                    {{ analysis_create_form.comments.errors }}
-                    {{ analysis_create_form.comments }}
+                    {{ analysis_create_form.description.errors }}
+                    {{ analysis_create_form.description }}
                     <label class="text-xs font-normal text-gray-400">
-                      {{ analysis_create_form.comments.help_text|striptags }}
+                      {{ analysis_create_form.description.help_text|striptags }}
                     </label>
                   </div>
                 </div>

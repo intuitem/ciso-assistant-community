@@ -50,10 +50,10 @@
                         {{ form.name }}
                     </div>
                     <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Scenario" %}</p>
-                        {{ form.scenario.errors }}
-                        {{ form.scenario }}
-                        <p class="help_text">{{ form.scenario.help_text }}</p>
+                        <p class="text-sm font-semibold">{% trans "Description" %}</p>
+                        {{ form.description.errors }}
+                        {{ form.description }}
+                        <p class="help_text">{{ form.description.help_text }}</p>
                     </div>
                     <div class="flex flex-col">
                         <p class="text-sm font-semibold">{% trans "Assets" %}</p>
@@ -92,7 +92,7 @@
                             <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
                             <div class="">
                                 <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
-                                    style="background-color: {{ scenario.get_current_risk.rgb }};">
+                                    style="background-color: {{ scenario.get_current_risk.hexcolor }};">
                                     {{ scenario.get_current_risk.name }}
                                 </span>
                             </div>
@@ -126,7 +126,7 @@
                             <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
                             <div class="">
                                 <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
-                                    style="background-color: {{ scenario.get_residual_risk.rgb }}">
+                                    style="background-color: {{ scenario.get_residual_risk.hexcolor }}">
                                     {{ scenario.get_residual_risk.name }}
                                 </span>
                             </div>
@@ -206,16 +206,31 @@
         const residual_proba = document.getElementById("id_residual_proba").value;
         const residual_impact = document.getElementById("id_residual_impact").value;
 
-        const current_risk = matrix.grid[current_proba][current_impact];
-        const residual_risk = matrix.grid[residual_proba][residual_impact];
+        if (current_proba >= 0 && current_impact >=0)
+            var current_risk = matrix.grid[current_proba][current_impact];
+        if (residual_proba >= 0 && residual_impact >=0)
+            var residual_risk = matrix.grid[residual_proba][residual_impact];
 
         console.debug("current_risk", current_risk);
         console.debug("residual_risk", residual_risk);
 
-        document.getElementById("current_risk_level").innerHTML = matrix.risk[current_risk].name;
-        document.getElementById("current_risk_level").style.backgroundColor = matrix.risk[current_risk].rgb;;
-        document.getElementById("residual_risk_level").innerHTML = matrix.risk[residual_risk].name;
-        document.getElementById("residual_risk_level").style.backgroundColor = matrix.risk[residual_risk].rgb;;
+        if (current_risk >= 0){
+            document.getElementById("current_risk_level").innerHTML = matrix.risk[current_risk].name;
+            document.getElementById("current_risk_level").style.backgroundColor = matrix.risk[current_risk].hexcolor;;
+        }
+        else{
+            document.getElementById("current_risk_level").innerHTML = "--";
+            document.getElementById("current_risk_level").style.backgroundColor = '#A9A9A9';;
+        }
+        if (residual_risk >= 0){
+            document.getElementById("residual_risk_level").innerHTML = matrix.risk[residual_risk].name;
+            document.getElementById("residual_risk_level").style.backgroundColor = matrix.risk[residual_risk].hexcolor;;
+        }
+        else{
+            document.getElementById("residual_risk_level").innerHTML = "--";
+            document.getElementById("residual_risk_level").style.backgroundColor = '#A9A9A9';;
+        }
+        
     }
 
     window.onload = function() {

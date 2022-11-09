@@ -1,3 +1,4 @@
+from uuid import UUID
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -70,9 +71,12 @@ def build_ri_clusters(analysis: Analysis):
     grid = matrix['grid']
     matrix_current = [[set() for _ in range(len(grid[0]))] for _ in range(len(grid))]
     matrix_residual = [[set() for _ in range(len(grid[0]))] for _ in range(len(grid))]
-    for ri in RiskScenario.objects.filter(analysis=analysis).order_by('id'):
-        matrix_current[ri.current_proba][ri.current_impact].add(ri.rid())
-        matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid())
+
+    for ri in RiskScenario.objects.filter(analysis=analysis).order_by('created_at'):
+        if ri.current_level >= 0:
+            matrix_current[ri.current_proba][ri.current_impact].add(ri.rid())
+        if ri.residual_level >=0:
+            matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid())
 
     return {'current': matrix_current, 'residual': matrix_residual}
 
@@ -83,7 +87,7 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
     context_object_name = 'context'
 
     model = RiskScenario
-    ordering = 'id'
+    ordering = 'created_at'
 
     def get_queryset(self):
         self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
@@ -110,7 +114,7 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
 def generate_ra_pdf(request, analysis: Analysis): # analysis parameter is the id of the choosen Analysis
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
-    if int(analysis) in object_ids_view:
+    if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
         data = {'context': context, 'analysis': ra, 'ri_clusters': build_ri_clusters(ra), 'matrix': ra.rating_matrix}
@@ -127,7 +131,7 @@ def generate_ra_pdf(request, analysis: Analysis): # analysis parameter is the id
 def generate_mp_pdf(request, analysis): # analysis parameter is the id of the choosen Analysis
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
-    if int(analysis) in object_ids_view:
+    if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
         data = {'context': context, 'analysis': ra}
@@ -305,7 +309,7 @@ def index(request):
 def export_risks_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
-    if int(analysis) in object_ids_view:
+    if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         
         response = HttpResponse(content_type='text/csv')
@@ -321,9 +325,9 @@ def export_risks_csv(request, analysis):
             security_measures = ''
             for mtg in ri.security_measures.all():
                 security_measures += f"[{mtg.status}]{mtg.name} \n"
-            row = [ri.rid(), ri.threat, ri.name, ri.scenario,
-                ri.existing_measures, ri.get_current_level_display(),
-                security_measures, ri.get_residual_level_display(), ri.treatment,
+            row = [ri.rid(), ri.threat, ri.name, ri.description,
+                ri.existing_measures, ri.get_current_risk()['name'],
+                security_measures, ri.get_residual_risk()['name'], ri.treatment,
                 ]
             writer.writerow(row)
 
@@ -336,7 +340,7 @@ def export_risks_csv(request, analysis):
 def export_mp_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
-    if int(analysis) in object_ids_view:
+    if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
 
         response = HttpResponse(content_type='text/csv')
