@@ -36,7 +36,7 @@ class PackageListView(FormView):
         if form.is_valid():
             for f in files:
                 package = json.load(f)
-                import_package(request, package)
+                import_package_view(request, package)
             return self.form_valid(form)
         else:
             messages.error(request, f'Invalid form.')
@@ -73,7 +73,7 @@ class PackageDetailView(TemplateView):
 def import_default_package(request, package_name):
     try:
         package = get_package(package_name)
-        import_package(request, package)
+        import_package_view(request, package)
     except:
         return redirect("package-list")
     return redirect("package-list")

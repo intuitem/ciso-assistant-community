@@ -1,6 +1,10 @@
+import uuid
 from django.db import models
+from django.core.exceptions import ValidationError
 from asf_rm import settings
 from back_office.models import Project, SecurityFunction, Asset, Threat
+from core.base_models import AbstractBaseModel
+from iam.models import FolderMixin
 from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd
@@ -12,12 +16,9 @@ from datetime import date
 from iam.models import Folder
 
 
-class RiskMatrix(models.Model):
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(max_length=2000, verbose_name=_("Description"), blank=True, null=True)
+class RiskMatrix(AbstractBaseModel, FolderMixin):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Folder"))
 
     def parse_json(self):
         return json.loads(self.json_definition)
@@ -40,22 +41,12 @@ class RiskMatrix(models.Model):
         return self.name
 
 
-class Analysis(models.Model):
-    # RATING_METHODS = [
-    #     ('default', _('Balanced (default)')),
-    #     ('critical', _('Critical (FAIR-based)')),
-    #     ('custom', _('Custom (adjusted)')),
-    # ]
+class Analysis(AbstractBaseModel):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     version = models.CharField(max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
     auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
     rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, help_text=_("WARNING! After choosing it, you will not be able to change it"), verbose_name=_("Rating matrix"))
-
-    comments = models.TextField(max_length=1000, blank=True, null=True,
-                                verbose_name=_("Comments"))
-
-    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -63,7 +54,7 @@ class Analysis(models.Model):
         verbose_name_plural = _("Analyses")
 
     def __str__(self):
-        return 'RA-' + str(self.id) + ': ' + str(self.project) + ', version ' + str(self.version)
+        return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
 
     def get_scenario_count(self):
         count = RiskScenario.objects.filter(analysis=self.id).count()
@@ -133,6 +124,12 @@ class Analysis(models.Model):
         }
         return findings
 
+    def clean(self) -> None:
+        super().clean()
+        scope = Analysis.objects.filter(project=self.project)
+        if not self.is_unique_in_scope(scope, ['name', 'version']):
+            raise ValidationError(_("This analysis already exists in this project"))
+
 
 def risk_scoring(probability, impact, matrix: RiskMatrix):
     fields = json.loads(matrix.json_definition)
@@ -140,7 +137,7 @@ def risk_scoring(probability, impact, matrix: RiskMatrix):
     return risk_index
 
 
-class SecurityMeasure(models.Model):
+class SecurityMeasure(AbstractBaseModel):
     MITIGATION_STATUS = [
         ('open', _('Open')),
         ('in_progress', _('In progress')),
@@ -166,9 +163,6 @@ class SecurityMeasure(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
-
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
     type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
     status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
     eta = models.DateField(blank=True, null=True, help_text=_("Estimated Time of Arrival"), verbose_name=_("ETA"))
@@ -207,7 +201,7 @@ class SecurityMeasure(models.Model):
         return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.project.name}: {self.name} </a>'
 
 
-class RiskScenario(models.Model):
+class RiskScenario(AbstractBaseModel):
     TREATMENT_OPTIONS = [
         ('open', _('Open')),
         ('mitigated', _('Mitigated')),
@@ -219,8 +213,6 @@ class RiskScenario(models.Model):
     assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
     security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    scenario = models.TextField(max_length=2000, help_text=_("Risk scenario and impact description>"), verbose_name=_("Scenario"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
                                          verbose_name=_("Existing measures"), blank=True)
@@ -240,7 +232,6 @@ class RiskScenario(models.Model):
     treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
                                  verbose_name=_("Treatment status"))
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
@@ -299,7 +290,7 @@ class RiskScenario(models.Model):
         return str(self.parent_project()) + ': ' + str(self.name)
 
     def rid(self):
-        return 'R.' + str(self.id)
+        return f'R.{self.scoped_id(scope=RiskScenario.objects.filter(analysis=self.analysis))}'
 
     def save(self, *args, **kwargs):
         if self.current_proba >= 0 and self.current_impact >= 0:
@@ -314,6 +305,7 @@ class RiskAcceptance(models.Model):
         ('temporary', _('Temporary')),
         ('permanent', _('Permanent')),
     ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     risk_scenario = models.ForeignKey(RiskScenario, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
     validator = models.CharField(max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"))
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))

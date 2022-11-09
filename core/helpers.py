@@ -10,7 +10,7 @@ STATUS_COLOR_MAP = {'open': '#fac858', 'mitigated': '#91cc75', 'accepted': '#73c
                     'on_hold': '#ee6666', 'done': '#91cc75'}
 
 
-def get_rating_options(user: User):
+def get_rating_options(user: User) -> list:
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
     risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
@@ -189,7 +189,7 @@ def get_counters(user: User):
 def security_measure_priority(user: User):
     def get_quadrant(security_measure):
         for risk_scenario in security_measure.riskscenario_set.all():
-            if risk_scenario.current_level in ['M', 'H', 'VH']:
+            if risk_scenario.current_level in ['M', 'H', 'VH']: # TODO: get from matrix
                 if security_measure.effort in ['S', 'M']:
                     return "1st"
                 elif security_measure.effort in ['L', 'XL']:
