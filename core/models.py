@@ -1,3 +1,4 @@
+from typing import Iterable, Optional
 import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -124,12 +125,11 @@ class Analysis(AbstractBaseModel):
         }
         return findings
 
-    def clean(self) -> None:
-        super().clean()
+    def save(self, *args, **kwargs) -> None:
         scope = Analysis.objects.filter(project=self.project)
         if not self.is_unique_in_scope(scope, ['name', 'version']):
             raise ValidationError(_("This analysis already exists in this project"))
-
+        super().save(*args, **kwargs)
 
 def risk_scoring(probability, impact, matrix: RiskMatrix):
     fields = json.loads(matrix.json_definition)
