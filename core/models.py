@@ -131,6 +131,12 @@ class Analysis(AbstractBaseModel):
             raise ValidationError(_("This analysis already exists in this project"))
         super().save(*args, **kwargs)
 
+    def clean(self):
+        scope = Analysis.objects.filter(project=self.project)
+        if not self.is_unique_in_scope(scope, ['name', 'version']):
+            raise ValidationError(_("This analysis already exists in this project"))
+        super().clean()
+
 def risk_scoring(probability, impact, matrix: RiskMatrix):
     fields = json.loads(matrix.json_definition)
     risk_index = fields['grid'][probability][impact]
