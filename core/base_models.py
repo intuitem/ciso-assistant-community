@@ -29,7 +29,5 @@ class AbstractBaseModel(models.Model):
         """
         if self.pk:
             scope = scope.exclude(pk=self.pk)
-        for field in fields_to_check:
-            if scope.filter(**{field: getattr(self, field)}).exists():
-                return False
-        return True
+        # if there is an object with the same fields_to_check in the scope, return False
+        return not scope.filter(**{field: getattr(self, field) for field in fields_to_check}).exists()
