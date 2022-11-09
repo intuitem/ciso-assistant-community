@@ -71,9 +71,12 @@ def build_ri_clusters(analysis: Analysis):
     grid = matrix['grid']
     matrix_current = [[set() for _ in range(len(grid[0]))] for _ in range(len(grid))]
     matrix_residual = [[set() for _ in range(len(grid[0]))] for _ in range(len(grid))]
+
     for ri in RiskScenario.objects.filter(analysis=analysis).order_by('created_at'):
-        matrix_current[ri.current_proba][ri.current_impact].add(ri.rid())
-        matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid())
+        if ri.current_level >= 0:
+            matrix_current[ri.current_proba][ri.current_impact].add(ri.rid())
+        if ri.residual_level >=0:
+            matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid())
 
     return {'current': matrix_current, 'residual': matrix_residual}
 

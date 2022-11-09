@@ -99,8 +99,8 @@ class RiskScenarioCreateForm(StyledModelForm):
 class RiskScenarioUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        PROBA_CHOICES = list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['probability']]))
-        IMPACT_CHOICES = list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['impact']]))
+        PROBA_CHOICES = [(-1, '--')] + list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['probability']]))
+        IMPACT_CHOICES = [(-1, '--')] + list(zip(list(range(0, 10)), [x['name'] for x in self.instance.get_matrix()['impact']]))
         self.fields['current_proba'].widget = Select(choices=PROBA_CHOICES, attrs={
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50',
             'onchange': 'refresh();'
