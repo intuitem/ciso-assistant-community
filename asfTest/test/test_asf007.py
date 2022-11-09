@@ -1,5 +1,4 @@
 # coding:utf-8
-from turtle import delay
 from playwright.sync_api import *
 from playwright.async_api import *
 from playwright import *

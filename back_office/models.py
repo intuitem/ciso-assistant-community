@@ -2,10 +2,11 @@ from typing import Iterable, Optional
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from iam.models import Folder
+from iam.models import Folder, FolderMixin
+from core.base_models import AbstractBaseModel
 
 
-class Project(models.Model):
+class Project(AbstractBaseModel):
     PRJ_LC_STATUS = [
         ('undefined', _('--')),
         ('in_design', _('Design')),
@@ -15,17 +16,12 @@ class Project(models.Model):
         ('dropped', _('Dropped')),
 
     ]
-    name = models.CharField(max_length=200, verbose_name=_("Project Name"))
     internal_id = models.CharField(max_length=100, help_text=_("If an internal reference applies"),
                                    null=True, blank=True, verbose_name=_("Internal ID"))
     folder = models.ForeignKey(
         Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     lc_status = models.CharField(max_length=20, default='in_design',
                                  choices=PRJ_LC_STATUS, verbose_name=_("Status"))
-    summary = models.TextField(max_length=1000, blank=True, null=True,
-                               help_text=_(
-                                   "This summary is optional and will appear in the risk analysis for context"),
-                               verbose_name=_("Summary"))
 
     class Meta:
         verbose_name = _("Project")
@@ -39,11 +35,7 @@ class Project(models.Model):
         return self.name
 
 
-class Threat(models.Model):
-    name = models.CharField(max_length=200, default=_(
-        "<threat short name>"), verbose_name=_("Name"))
-    description = models.TextField(max_length=1000, blank=True, null=True)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
+class Threat(AbstractBaseModel, FolderMixin):
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -54,7 +46,7 @@ class Threat(models.Model):
         return self.name
 
 
-class Asset(models.Model):
+class Asset(AbstractBaseModel, FolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -65,15 +57,12 @@ class Asset(models.Model):
         PRIMARY = 'PR', _('Primary')
         SUPPORT = 'SP', _('Support')
 
-    name = models.CharField(max_length=100, verbose_name=_('name'))
     business_value = models.TextField(
         blank=True, verbose_name=_('business value'))
-    comments = models.TextField(blank=True, verbose_name=_('comments'))
     type = models.CharField(
         max_length=2, choices=Type.choices, default=Type.PRIMARY, verbose_name=_('type'))
     parent_asset = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('parent asset'))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -108,14 +97,11 @@ class Asset(models.Model):
         return Asset.objects.filter(parent_asset=self)
 
 
-class SecurityFunction(models.Model):
-    name = models.CharField(max_length=200, verbose_name=_("Name"))
-    description = models.TextField(max_length=1000, blank=True, null=True)
+class SecurityFunction(AbstractBaseModel, FolderMixin):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     contact = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Contact"))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE)
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:

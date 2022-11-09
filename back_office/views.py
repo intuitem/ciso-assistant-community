@@ -500,14 +500,14 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/ri_list.html'
     context_object_name = 'scenarios'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = RiskScenario
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
