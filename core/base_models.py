@@ -15,6 +15,12 @@ class AbstractBaseModel(models.Model):
     def scoped_id(self, scope: models.QuerySet) -> int:
         """
         Returns the ID of the object in the given scope.
+
+        Args:
+            scope: the scope in which to run the check
+
+        Returns:
+            The ID of the object in the given scope
         """
         if self.pk:
             scope = scope.exclude(pk=self.pk)
@@ -25,11 +31,17 @@ class AbstractBaseModel(models.Model):
 
     def is_unique_in_scope(self, scope: models.QuerySet, fields_to_check: list) -> bool:
         """
-        Checks if the object is unique in the given scope.
+        Checks if the object is unique in the given scope based on the given fields.
+
+        Args:
+            scope: the scope in which to run the check
+            fields_to_check: the fields to check for uniqueness
+
+        Returns:
+            True if the object is unique in the given scope, False otherwise
         """
+        # if the object already exists (i.e. has a primary key), exclude it from the scope
+        # to avoid false positives as a result of the object being compared to itself
         if self.pk:
             scope = scope.exclude(pk=self.pk)
-        for field in fields_to_check:
-            if scope.filter(**{field: getattr(self, field)}).exists():
-                return False
-        return True
+        return not scope.filter(**{field: getattr(self, field) for field in fields_to_check}).exists()

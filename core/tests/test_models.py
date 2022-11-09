@@ -96,6 +96,27 @@ class TestAnalysis:
 
         assert isinstance(analysis.id, UUID)
 
+    def test_analysis_is_unique_in_project(self):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.create(name="test matrix", description="test matrix description", json_definition="{}", folder=folder)
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix)
+
+        with pytest.raises(ValidationError):
+            Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix)
+
+    def test_analysis_can_have_same_name_but_different_version(self):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.create(name="test matrix", description="test matrix description", json_definition="{}", folder=folder)
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix, version=1)
+
+        Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix, version=2)
+
 
 @pytest.mark.django_db
 class TestRiskScenario:
