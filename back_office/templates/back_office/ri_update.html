@@ -92,7 +92,7 @@
                             <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
                             <div class="">
                                 <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
-                                    style="background-color: {{ scenario.get_current_risk.rgb }};">
+                                    style="background-color: {{ scenario.get_current_risk.hexcolor }};">
                                     {{ scenario.get_current_risk.name }}
                                 </span>
                             </div>
@@ -126,7 +126,7 @@
                             <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
                             <div class="">
                                 <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
-                                    style="background-color: {{ scenario.get_residual_risk.rgb }}">
+                                    style="background-color: {{ scenario.get_residual_risk.hexcolor }}">
                                     {{ scenario.get_residual_risk.name }}
                                 </span>
                             </div>
@@ -216,7 +216,7 @@
 
         if (current_risk >= 0){
             document.getElementById("current_risk_level").innerHTML = matrix.risk[current_risk].name;
-            document.getElementById("current_risk_level").style.backgroundColor = matrix.risk[current_risk].rgb;;
+            document.getElementById("current_risk_level").style.backgroundColor = matrix.risk[current_risk].hexcolor;;
         }
         else{
             document.getElementById("current_risk_level").innerHTML = "--";
@@ -224,7 +224,7 @@
         }
         if (residual_risk >= 0){
             document.getElementById("residual_risk_level").innerHTML = matrix.risk[residual_risk].name;
-            document.getElementById("residual_risk_level").style.backgroundColor = matrix.risk[residual_risk].rgb;;
+            document.getElementById("residual_risk_level").style.backgroundColor = matrix.risk[residual_risk].hexcolor;;
         }
         else{
             document.getElementById("residual_risk_level").innerHTML = "--";
