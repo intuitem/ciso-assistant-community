@@ -21,14 +21,15 @@ class RiskMatrix(AbstractBaseModel, FolderMixin):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
 
-    def parse_json(self):
+    def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
-    def get_detailed_grid(self):
+    def get_detailed_grid(self) -> list:
         matrix = self.parse_json()
         grid = []
         for row in matrix['grid']:
             grid.append([item for item in row])
+        return grid
 
 
     def render_grid_as_colors(self):
@@ -38,7 +39,7 @@ class RiskMatrix(AbstractBaseModel, FolderMixin):
 
         return res
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
 
@@ -54,10 +55,10 @@ class Analysis(AbstractBaseModel):
         verbose_name = _("Analysis")
         verbose_name_plural = _("Analyses")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
 
-    def get_scenario_count(self):
+    def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(analysis=self.id).count()
         scenario_count = count
         return scenario_count
@@ -131,13 +132,15 @@ class Analysis(AbstractBaseModel):
             raise ValidationError(_("This analysis already exists in this project"))
         super().save(*args, **kwargs)
 
-    def clean(self):
+    # NOTE: if your save() method throws an exception, you might want to override the clean() method to prevent 
+    # 500 errors when the form submitted. See https://docs.djangoproject.com/en/dev/ref/models/instances/#django.db.models.Model.clean
+    def clean(self) -> None:
         scope = Analysis.objects.filter(project=self.project)
         if not self.is_unique_in_scope(scope, ['name', 'version']):
             raise ValidationError(_("This analysis already exists in this project"))
         super().clean()
 
-def risk_scoring(probability, impact, matrix: RiskMatrix):
+def risk_scoring(probability, impact, matrix: RiskMatrix) -> int:
     fields = json.loads(matrix.json_definition)
     risk_index = fields['grid'][probability][impact]
     return risk_index
