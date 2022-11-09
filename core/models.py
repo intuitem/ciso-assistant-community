@@ -252,7 +252,7 @@ class RiskScenario(AbstractBaseModel):
 
     def get_current_risk(self):
         if self.current_level < 0:
-            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'rgb': '#A9A9A9'}
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'hexcolor': '#A9A9A9'}
         matrix = self.get_matrix()
         return matrix['risk'][self.current_level]
 
@@ -270,7 +270,7 @@ class RiskScenario(AbstractBaseModel):
 
     def get_residual_risk(self):
         if self.residual_level < 0:
-            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'rgb': '#A9A9A9'}
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'hexcolor': '#A9A9A9'}
         matrix = self.get_matrix()
         return matrix['risk'][self.residual_level]
 

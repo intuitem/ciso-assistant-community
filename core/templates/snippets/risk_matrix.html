@@ -11,7 +11,7 @@
                         {% endwith %}
                     </td>
                     {% for item in row %}
-                        <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.rgb }}">
+                        <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.hexcolor }}">
                             {{ data|index:row_index|index:forloop.counter0|join:", " }}
                         </td>
                     {% endfor %}
@@ -46,13 +46,13 @@
                             </td>
                             {% if enriched_data %}
                                 {% for item in row %}
-                                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.rgb }}">
+                                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.hexcolor }}">
                                         {{ enriched_data|index:row_index|index:forloop.counter0|join:", " }}
                                     </td>
                                 {% endfor %}
                             {% else %}
                                 {% for item in row %}
-                                <td class="w-1/6 h-16 text-left border-4 border-white" style="background-color: {{ item.rgb }}">
+                                <td class="w-1/6 h-16 text-left border-4 border-white" style="background-color: {{ item.hexcolor }}">
                                 </td>
                                 {% endfor %}
                             {% endif %}
@@ -81,7 +81,7 @@
             <table class="w-3/4">
                 <tr>
                     {% for risk in matrix.parse_json.risk %}
-                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ risk.rgb }}">
+                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ risk.hexcolor }}">
                     </td>
                     {% endfor %}
                 </tr>

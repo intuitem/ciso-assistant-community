@@ -19,9 +19,9 @@
                     {"abbreviation": "H", "name": "High", "description": "High impact"}
                 ],
                 "risk": [
-                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "rgb": "#00FF00"},
-                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years", "rgb": "#FFFF00"},
-                    {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "rgb": "#FF0000"}
+                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "hexcolor": "#00FF00"},
+                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years", "hexcolor": "#FFFF00"},
+                    {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "hexcolor": "#FF0000"}
                 ],
                 "grid": [
                     [0, 1, 1],

@@ -163,7 +163,7 @@ function renderLabels(labels) {
     document.getElementById("probability_label").innerHTML = labels['probability'] === -1 ? '--' : labels['probability']['name'];
     document.getElementById("impact_label").innerHTML = labels['impact'] === -1 ? '--' : labels['impact']['name'];
     document.getElementById("risk_label").innerHTML = labels['risk'] === -1 ? '--' : labels['risk']['name'];
-    document.getElementById("risk_label").style.backgroundColor = labels['risk'] === -1 ? 'white' : labels['risk']['rgb'];
+    document.getElementById("risk_label").style.backgroundColor = labels['risk'] === -1 ? 'white' : labels['risk']['hexcolor'];
 }
 
 function isBusinessImpactIgnored() {
