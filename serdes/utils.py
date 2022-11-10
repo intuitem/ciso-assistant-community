@@ -1,5 +1,11 @@
-from django.core import serializers
+from typing import Iterable
+
 import django.apps
+from django.core import serializers
+from django.db.models import Model
+from django.db.models.deletion import Collector
+
+from iam.models import Folder
 
 
 def get_all_objects():
@@ -18,61 +24,69 @@ def get_all_objects():
     return objects
 
 
-def serialize_objects(objects, format='json'):
+def dump_objects(queryset: Iterable[Model], path: str, format: str = 'json'):
     '''
-    Serialize objects to chosen format.
+    Dump objects to a file.
 
     Parameters:
     -----------
+    queryset: Iterable[Model]
+        Queryset of objects to dump.
+    path: str
+        Path to the file to dump to.
+    format: str
+        Format to dump to. Default is 'json'.
+    '''
+    serialized_objects = serializers.serialize(format, queryset)
+    if path == '-':
+        print(serialized_objects)
+    else:
+        with open(path, 'w') as outfile:
+            outfile.write(serialized_objects)
+    return path
+
+
+def get_objects_from_folder(folder: Folder) -> set:
+    '''
+    Collates all objects in a folder.
+
+    Parameters:
+    -----------
+    folder: Folder
+        Folder to get objects from.
+
+    Returns:
+    --------
     objects: list
-        List of objects to serialize.
-    format: str
-        Format to serialize to. e.g. json, jsonl, yaml, xml.
-
-    Returns:
-    --------
-    serialized_objects: str
-        Serialized objects.
+        List of objects in the folder.
     '''
-    return serializers.serialize(format, objects)
+    objects = set()
+    # NOTE: This is a hack to get all objects in a folder.
+    #       As all objects contained in a folder are deleted
+    #       when the folder is deleted, we can use the Django
+    #       deletion collector to get all the objects in a folder.
+    collector = Collector(using='default')
+    collector.collect([folder])
 
+    for model, model_instances in collector.data.items():
+        objects.update(model_instances)
 
-def deserialize_objects(path, format='json'):
-    '''
-    Deserialize objects from a file.
-
-    Parameters:
-    -----------
-    path: str
-        Path to file to deserialize from.
-    format: str
-        Format to deserialize from. e.g. json, yaml, xml.
-
-    Returns:
-    --------
-    path: str
-        Path to file to deserialize from.
-    '''
-    objects = list()
-    with open(path, 'r') as infile:
-        for object in serializers.deserialize(format, infile):
-            objects.append(object)
     return objects
 
-
-def create_backup(path, format='json'):
+def restore_objects(path: str, format: str = 'json'):
     '''
-    Create a backup of the current state of the database.
+    Restore objects from a file.
 
     Parameters:
     -----------
     path: str
-        Path to file to backup to.
+        Path to the file to restore from.
     format: str
-        Format to backup to. e.g. json, jsonl, yaml, xml.
+        Format to restore from. Default is 'json'.
     '''
-    objects = get_all_objects()
-    serialized_objects = serialize_objects(objects, format)
-    with open(path, 'w') as outfile:
-        outfile.write(serialized_objects)
+    with open(path, 'r') as infile:
+        serialized_objects = infile.read()
+    objects = serializers.deserialize(format, serialized_objects)
+    for obj in objects:
+        obj.save()
     return path
