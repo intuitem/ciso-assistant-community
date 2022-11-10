@@ -1,0 +1,40 @@
+{% extends 'back_office/base.html' %}
+
+{% load i18n static %}
+
+{% block content %}
+
+<div>
+    {% with page_title=_('Backup Restore') %}
+        {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% endwith %}
+
+    <div class="flex flex-col space-y-6">
+        <div class="shadow-md sm:rounded-lg bg-white py-4 px-6">
+            <h1 class="text-xl font-semibold">{% trans "Import backup" %}</h1>
+            <form enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <label class="block mb-2 text-sm font-medium text-gray-900" for="multiple_files">{{ form.file.label }}</label>
+                <div class="flex flex-row">
+                    <input class="block w-full text-sm text-gray-900 bg-gray-50 
+                                rounded-l-lg border border-gray-300 cursor-pointer focus:outline-none
+                                file:border-0 file:p-2 file:text-sm file:font-medium file:bg-gray-200 file:mr-2 file:text-gray-800
+                                hover:file:bg-gray-300" id="file_upload" type="file" name="{{ form.file.name }}">
+                    <button class="bg-indigo-600 text-white aliased font-medium p-5 w-18 py-1 rounded-r-lg hover:bg-indigo-500 disabled:bg-indigo-300">
+                        {% trans "Upload" %}
+                    </button>
+                </div>
+            </form>
+            
+        </div>
+        <div class="shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-2">
+            <h1 class="text-xl font-semibold">{% trans "Export backup" %}</h1>
+            <button class="bg-indigo-600 text-white aliased font-medium p-2 rounded-lg hover:bg-indigo-500 disabled:bg-indigo-300">
+                <a href={% url 'dump-db' %}>{% trans "Dump database" %}</a>
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
