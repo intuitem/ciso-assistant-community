@@ -17,10 +17,8 @@ import io
 
 from .forms import *
 
-
-def is_admin_check(user):
-    # NOTE: This is a temporary solution. We should use a proper permission system.
-    return user.user_groups.filter(name=UserGroupCodename.ADMINISTRATORS).exists()
+def is_superuser_check(user):
+    return user.is_superuser
 
 
 class BackupRestoreView(FormView, UserPassesTestMixin):
@@ -35,7 +33,7 @@ class BackupRestoreView(FormView, UserPassesTestMixin):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        if not is_admin_check(request.user):
+        if not is_superuser_check(request.user):
             return HttpResponse(status=403)
         return super().dispatch(request, *args, **kwargs)
     
@@ -70,10 +68,10 @@ class BackupRestoreView(FormView, UserPassesTestMixin):
             return self.form_invalid(form)
 
     def test_func(self):
-        return is_admin_check(self.request.user)
+        return is_superuser_check(self.request.user)
 
 
-@user_passes_test(is_admin_check)
+@user_passes_test(is_superuser_check)
 def dump_db_view(request):
     response = HttpResponse(content_type='application/json')
     response['Content-Disposition'] = 'attachment; filename="db.json"'
