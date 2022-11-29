@@ -1160,7 +1160,7 @@ class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
         context['users'] = User.objects.exclude(user_groups=self.get_object())
         context["associated_users"] = User.objects.filter(
             user_groups=self.get_object())
-        context["crumbs"] = {'user_group-list': _('UserGroups')}
+        context["crumbs"] = {'user_group-list': _('User groups')}
         return context
 
     def get_success_url(self) -> str:
@@ -1259,7 +1259,7 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
-        context["crumbs"] = {'user_group-list': _('UserGroups')}
+        context["crumbs"] = {'user_group-list': _('User groups')}
         return context
 
     def get_success_url(self) -> str:
