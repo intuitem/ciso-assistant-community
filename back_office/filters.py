@@ -195,7 +195,7 @@ class SecurityMeasureFilter(GenericFilterSet):
             '-type': _('Type (descending)'),
             'risk_scenario__analysis__project': _('parent'.capitalize() + ' project'),
             '-risk_scenario__analysis__project': _('Parent project (descending)'),
-            'security_function': _('securityfunction'.capitalize()),
+            'security_function': _('security function'.capitalize()),
             '-security_function': _('SecurityFunction (descending)'),
         }
     )

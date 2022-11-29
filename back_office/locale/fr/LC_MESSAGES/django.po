@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-29 16:48+0000\n"
+"POT-Creation-Date: 2022-11-29 18:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,10 +140,8 @@ msgid "Type (descending)"
 msgstr "Type (descendant)"
 
 #: back_office/filters.py:198
-#, fuzzy
-#| msgid "security functions"
-msgid "securityfunction"
-msgstr "fonctions de sécurité"
+msgid "security function"
+msgstr "fonction de sécurité"
 
 #: back_office/filters.py:199
 msgid "SecurityFunction (descending)"
@@ -178,16 +176,12 @@ msgid "description"
 msgstr ""
 
 #: back_office/filters.py:257 back_office/filters.py:281
-#, fuzzy
-#| msgid "SecurityFunction (descending)"
 msgid "Description (descending)"
-msgstr "SecurityFunction (descendant)"
+msgstr "Description (descendant)"
 
 #: back_office/filters.py:269
-#, fuzzy
-#| msgid "Search domain..."
 msgid "Search matrices..."
-msgstr "Rechercher un domaine..."
+msgstr "Rechercher une matrice..."
 
 #: back_office/filters.py:294
 msgid "Search project..."
@@ -258,10 +252,8 @@ msgid "Last name (descending)"
 msgstr "Nom de famille (descendant)"
 
 #: back_office/filters.py:447
-#, fuzzy
-#| msgid "Search user_group..."
 msgid "Search user group..."
-msgstr "Rechercher un groupe..."
+msgstr "Rechercher un groupe utilisateur..."
 
 #: back_office/forms.py:46 back_office/forms.py:57 back_office/models.py:22
 #: back_office/templates/back_office/project_create.html:26
@@ -278,33 +270,27 @@ msgstr ""
 
 #: back_office/models.py:12
 msgid "Design"
-msgstr ""
+msgstr "Conception"
 
 #: back_office/models.py:13
-#, fuzzy
-#| msgid "Department"
 msgid "Development"
-msgstr "Departement"
+msgstr "Développement"
 
 #: back_office/models.py:14
-#, fuzzy
-#| msgid "Parent function"
 msgid "Production"
-msgstr "Fonction parent"
+msgstr ""
 
 #: back_office/models.py:15
 msgid "End Of Life"
-msgstr ""
+msgstr "Fin de vie"
 
 #: back_office/models.py:16
 msgid "Dropped"
-msgstr ""
+msgstr "Abandonné"
 
 #: back_office/models.py:20
-#, fuzzy
-#| msgid "Internal ID"
 msgid "Internal reference"
-msgstr "ID interne"
+msgstr "Référence interne"
 
 #: back_office/models.py:24
 #: back_office/templates/back_office/fragments/watchlist_measures.html:14
@@ -333,7 +319,7 @@ msgstr "Projets"
 #: back_office/templates/back_office/quick_start.html:30
 #: back_office/templates/back_office/sidebar.html:92 back_office/views.py:155
 msgid "Projects"
-msgstr ""
+msgstr "Projets"
 
 #: back_office/models.py:35 back_office/models.py:62 back_office/models.py:101
 msgid "published"
@@ -624,8 +610,6 @@ msgid "Save"
 msgstr "Enregistrer"
 
 #: back_office/templates/back_office/asset_list.html:40
-#, fuzzy
-#| msgid "Add asset"
 msgid "Add Asset"
 msgstr "Ajouter un bien sensible"
 
@@ -780,10 +764,8 @@ msgstr ""
 
 #: back_office/templates/back_office/group_list.html:80
 #: back_office/templates/back_office/my_profile_detailed.html:71
-#, fuzzy
-#| msgid "Delete user_group?"
 msgid "Delete user group?"
-msgstr "Supprimer le groupe ?"
+msgstr "Supprimer le groupe utilisateur ?"
 
 #: back_office/templates/back_office/group_list.html:90
 #: back_office/templates/back_office/my_profile_detailed.html:81
@@ -796,16 +778,12 @@ msgid "Edit user_group"
 msgstr "Éditer le groupe"
 
 #: back_office/templates/back_office/group_update.html:39
-#, fuzzy
-#| msgid "Associated measures"
 msgid "Associated users"
-msgstr "Mesures de sécurité associées"
+msgstr "Utilisateurs associés"
 
 #: back_office/templates/back_office/group_update.html:45
-#, fuzzy
-#| msgid "New user"
 msgid "Other users"
-msgstr "Nouvel utilisateur"
+msgstr "Autres utilisateurs"
 
 #: back_office/templates/back_office/index.html:10
 #: back_office/templates/back_office/sidebar.html:19
@@ -859,8 +837,6 @@ msgid "Items that have expired or with close ETA"
 msgstr "Objets expirés ou dont l'échéance est proche"
 
 #: back_office/templates/back_office/index.html:75
-#, fuzzy
-#| msgid "SecurityMeasures to review"
 msgid "Measures to review"
 msgstr "Mesures à revoir"
 
@@ -876,6 +852,7 @@ msgid "Parent project"
 msgstr "Projet parent"
 
 #: back_office/templates/back_office/mtg_list.html:110
+#: back_office/templates/back_office/ri_update.html:162
 msgid "Add security measure"
 msgstr "Ajouter une mesure de sécurité"
 
@@ -904,8 +881,6 @@ msgid "No measure found."
 msgstr "Aucune mesure n'a été trouvée"
 
 #: back_office/templates/back_office/mtg_update.html:11
-#, fuzzy
-#| msgid "SecurityMeasure summary"
 msgid "Measure summary"
 msgstr "Résumé de la mesure"
 
@@ -1105,8 +1080,6 @@ msgstr ""
 "organisationnelles."
 
 #: back_office/templates/back_office/quick_start.html:90
-#, fuzzy
-#| msgid "You need to define a scoring"
 msgid "You need to select a scoring"
 msgstr "Vous devez définir une"
 
@@ -1115,8 +1088,6 @@ msgid "matrix"
 msgstr "matrice"
 
 #: back_office/templates/back_office/quick_start.html:90
-#, fuzzy
-#| msgid "or use a preset. Now you can start a new"
 msgid "or import a new one with the package manager. Now you can start a new"
 msgstr ""
 "d'évaluation ou en utiliser une déjà prête. Ceci fait, vous pouvez commencer "
@@ -1273,39 +1244,20 @@ msgid "Current profile"
 msgstr "Profil courant"
 
 #: back_office/templates/back_office/ri_update.html:73
-#, fuzzy
-#| msgid "Current risk level"
 msgid "Current Assessment"
-msgstr "Niveau de risque courant"
+msgstr "Évaluation courante"
 
 #: back_office/templates/back_office/ri_update.html:107
-#, fuzzy
-#| msgid "Treatment"
 msgid "Target Assessment"
-msgstr "Traitement"
+msgstr "Évaluation cible"
 
 #: back_office/templates/back_office/ri_update.html:158
-#, fuzzy
-#| msgid "Delete security measure?"
-msgid "Select or create security measures"
-msgstr "Supprimer la mesure de sécurité ?"
+msgid "Select or create additional security measures"
+msgstr "Sélectionner ou créer des mesures de sécurité supplémentaires"
 
 #: back_office/templates/back_office/ri_update.html:161
-#, fuzzy
-#| msgid "SecurityMeasure"
-msgid "Select Security Measures"
-msgstr "Mesure"
-
-#: back_office/templates/back_office/ri_update.html:161
-#, fuzzy
-#| msgid "Delete security measure?"
 msgid "Select security measures"
-msgstr "Supprimer la mesure de sécurité ?"
-
-#: back_office/templates/back_office/ri_update.html:162
-#: back_office/templates/back_office/snippets/modal_update_form.html:7
-msgid "Add Security Measure"
-msgstr "Ajouter une mesure de sécurité"
+msgstr "Sélectionner des mesures de sécurité"
 
 #: back_office/templates/back_office/risk_matrix_list.html:9
 #: back_office/views.py:1338
@@ -1313,23 +1265,17 @@ msgid "Matrices"
 msgstr ""
 
 #: back_office/templates/back_office/risk_matrix_list.html:48
-#, fuzzy
-#| msgid "matrix"
 msgid "Matrix"
-msgstr "matrice"
+msgstr "Matrice"
 
 #: back_office/templates/back_office/risk_matrix_list.html:112
-#, fuzzy
-#| msgid "No measure found."
 msgid "No matrix found."
-msgstr "Aucune mesure n'a été trouvée"
+msgstr "Aucune matrice n'a été trouvée"
 
 #: back_office/templates/back_office/role_assignment_create.html:4
 #: back_office/templates/back_office/role_list.html:31
-#, fuzzy
-#| msgid "Role assignment"
 msgid "New role assignment"
-msgstr "Attribution des rôles"
+msgstr "Nouvelle attribution de rôle"
 
 #: back_office/templates/back_office/role_assignment_create.html:10
 #: back_office/templates/back_office/role_assignment_update.html:10
@@ -1340,7 +1286,7 @@ msgstr "Attribution des rôles"
 
 #: back_office/templates/back_office/role_list.html:10
 msgid "Available roles"
-msgstr ""
+msgstr "Rôles disponibles"
 
 #: back_office/templates/back_office/role_list.html:12
 msgid ""
@@ -1515,6 +1461,10 @@ msgstr "ainsi que tout objet enfant."
 msgid "No, take me back"
 msgstr ""
 
+#: back_office/templates/back_office/snippets/modal_update_form.html:7
+msgid "Add Security Measure"
+msgstr "Ajouter une mesure de sécurité"
+
 #: back_office/templates/back_office/snippets/mtg_list_nested.html:13
 msgid "Parent function"
 msgstr "Fonction parent"
@@ -1651,6 +1601,14 @@ msgstr "Analystes"
 #: back_office/utils.py:35
 msgid "Auditors"
 msgstr "Auditeurs"
+
+#~ msgid "Select Security Measures"
+#~ msgstr "Sélectionner des mesures de sécurité"
+
+#, fuzzy
+#~| msgid "security functions"
+#~ msgid "securityfunction"
+#~ msgstr "fonctions de sécurité"
 
 #, fuzzy
 #~| msgid "No user found."
