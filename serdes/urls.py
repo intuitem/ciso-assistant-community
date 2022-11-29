@@ -5,5 +5,5 @@ from . import views
 
 urlpatterns = [
     path('backup-restore/', login_required(views.BackupRestoreView.as_view()), name='backup-restore'),
-    path('dump-db/', views.dump_db_view, name='dump-db'),
+    path('dump-db/', login_required(views.dump_db_view), name='dump-db'),
 ]
