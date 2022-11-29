@@ -1,4 +1,3 @@
-from typing import Iterable, Optional
 import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -170,8 +169,8 @@ class SecurityMeasure(AbstractBaseModel):
     MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
     MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
-    security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("SecurityFunction"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Security Function"))
     type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
     status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
     eta = models.DateField(blank=True, null=True, help_text=_("Estimated Time of Arrival"), verbose_name=_("ETA"))
@@ -190,7 +189,7 @@ class SecurityMeasure(AbstractBaseModel):
         verbose_name_plural = _("Security measures")
 
     def parent_project(self):
-        return self.project
+        pass
 
     def __str__(self):
         return self.name
@@ -206,8 +205,8 @@ class SecurityMeasure(AbstractBaseModel):
 
     @property
     def get_html_url(self):
-        url = reverse('MP', args=(self.project.id,))
-        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.project.name}: {self.name} </a>'
+        url = reverse('MP', args=(self.folder.id,))
+        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.folder.name}: {self.name} </a>'
 
 
 class RiskScenario(AbstractBaseModel):

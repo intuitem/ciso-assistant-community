@@ -70,7 +70,7 @@ class SecurityMeasureCreateForm(StyledModelForm):
 class SecurityMeasureCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['project'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['select_disabled'] = True
 
     class Meta:
         model = SecurityMeasure

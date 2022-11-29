@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'cal',
     'django_filters',
     'library',
+    'serdes',
     'import_export',
     'reversion',
 ]

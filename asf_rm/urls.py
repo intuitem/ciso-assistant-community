@@ -23,6 +23,7 @@ urlpatterns = [
     path('core/', include('core.urls')),
     path('back-office/', include('back_office.urls')),
     path('library/', include('library.urls')),
+    path('serdes/', include('serdes.urls')),
     path('accounts/login/', cv.UserLogin.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout'),
     path('search/', cv.SearchResults.as_view(), name='search'),

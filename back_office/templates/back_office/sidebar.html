@@ -234,6 +234,15 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Packages" %}</span>
                     </a>
                 </li>
+                <li class="to-page">
+                    <a href="{% url 'backup-restore' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-save"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Backups" %}</span>
+                    </a>
+                </li>
                 {% comment %} <li class="to-page">
                     <a href="#"
                         class="relative flex flex-row items-center pr-6 nav-link">

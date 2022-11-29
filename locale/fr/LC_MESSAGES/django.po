@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-03 11:59+0100\n"
+"POT-Creation-Date: 2022-11-29 10:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,97 +18,97 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: asf_rm/settings.py:198
+#: asf_rm/settings.py:199
 msgid "Search analysis..."
 msgstr "Rechercher une analyse..."
 
-#: asf_rm/settings.py:203
+#: asf_rm/settings.py:204
 msgid "Main"
 msgstr ""
 
-#: asf_rm/settings.py:207
+#: asf_rm/settings.py:208
 msgid "Core"
 msgstr ""
 
-#: asf_rm/settings.py:212
+#: asf_rm/settings.py:213
 msgid "Analysis registry"
 msgstr "Registre des analyses"
 
-#: asf_rm/settings.py:217
+#: asf_rm/settings.py:218
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk scenarios"
 msgstr "Acceptations de risque"
 
-#: asf_rm/settings.py:222
+#: asf_rm/settings.py:223
 msgid "SecurityFunctions"
 msgstr ""
 
-#: asf_rm/settings.py:227
+#: asf_rm/settings.py:228
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
-#: asf_rm/settings.py:232
+#: asf_rm/settings.py:233
 msgid "Organization"
 msgstr "Organisation"
 
-#: asf_rm/settings.py:236
+#: asf_rm/settings.py:237
 msgid "General"
 msgstr "Général"
 
-#: asf_rm/settings.py:241
+#: asf_rm/settings.py:242
 msgid "Projects Hierarchy"
 msgstr "Hiérarchie des Projets"
 
-#: asf_rm/settings.py:246
+#: asf_rm/settings.py:247
 #, fuzzy
 #| msgid "Projects"
 msgid "Projects"
 msgstr "Projets"
 
-#: asf_rm/settings.py:251
+#: asf_rm/settings.py:252
 #, fuzzy
 #| msgid "Parent Risks"
 msgid "Parent Risks"
 msgstr "Risques Parents"
 
-#: asf_rm/settings.py:256
+#: asf_rm/settings.py:257
 #, fuzzy
 #| msgid "SecurityFunctions Catalog"
 msgid "SecurityFunctions Catalog"
 msgstr "Catalogue des SecurityFunctions"
 
-#: asf_rm/settings.py:262
+#: asf_rm/settings.py:263
 msgid "Settings"
 msgstr "Paramètres"
 
-#: asf_rm/settings.py:266
+#: asf_rm/settings.py:267
 msgid "Users and authorizations"
 msgstr "Utilisateurs et autorisations"
 
-#: asf_rm/settings.py:270
+#: asf_rm/settings.py:271
 msgid "User guide"
 msgstr "Guide utilisateur"
 
-#: asf_rm/settings.py:272
+#: asf_rm/settings.py:273
 msgid "Staff"
 msgstr ""
 
-#: asf_rm/settings.py:273
+#: asf_rm/settings.py:274
 msgid "X-Rays (all)"
 msgstr "X-Rays (tous)"
 
-#: asf_rm/settings.py:274
+#: asf_rm/settings.py:275
 msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
-#: asf_rm/settings.py:275
+#: asf_rm/settings.py:276
 msgid "Scoring assistant"
 msgstr "Assistant d'évaluation"
 
-#: asf_rm/settings.py:277
+#: asf_rm/settings.py:278
 msgid "Extra"
 msgstr ""
 
@@ -143,66 +143,55 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:19 iam/models.py:210
+#: iam/models.py:22 iam/models.py:218
 msgid "Domain"
 msgstr "Domaine"
 
-#: iam/models.py:20 iam/models.py:51
+#: iam/models.py:23 iam/models.py:54
 msgid "name"
 msgstr "nom"
 
-#: iam/models.py:25
+#: iam/models.py:28
 msgid "user group"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:26 iam/models.py:174
+#: iam/models.py:29 iam/models.py:181
 msgid "user groups"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:48
+#: iam/models.py:51
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:67
+#: iam/models.py:70
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:68
+#: iam/models.py:71
 msgid "DOMAIN"
 msgstr "DOMAINE"
 
-#: iam/models.py:69
-msgid "Name"
-msgstr "Nom"
-
-#: iam/models.py:72 library/templates/library/package_detail.html:41
-#: library/templates/library/package_detail.html:54
-#: library/templates/library/package_detail.html:112
-#: library/templates/library/package_list.html:22
-msgid "Description"
-msgstr ""
-
-#: iam/models.py:85 iam/models.py:221
+#: iam/models.py:84 iam/models.py:229
 msgid "Folder"
-msgstr ""
+msgstr "Dossier"
 
-#: iam/models.py:86
+#: iam/models.py:85
 msgid "Folders"
-msgstr ""
+msgstr "Dossiers"
 
-#: iam/models.py:153
+#: iam/models.py:160
 msgid "last name"
 msgstr "nom"
 
-#: iam/models.py:154
+#: iam/models.py:161
 msgid "first name"
 msgstr "prénom"
 
-#: iam/models.py:157
+#: iam/models.py:164
 msgid "active"
 msgstr "actif"
 
-#: iam/models.py:160
+#: iam/models.py:167
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
@@ -210,15 +199,15 @@ msgstr ""
 "Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
 "au lieu de supprimer les comptes."
 
-#: iam/models.py:164
+#: iam/models.py:171
 msgid "date joined"
 msgstr "date d'inscription"
 
-#: iam/models.py:166
+#: iam/models.py:173
 msgid "superuser status"
 msgstr "statut superutilisateur"
 
-#: iam/models.py:169
+#: iam/models.py:176
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
@@ -226,7 +215,7 @@ msgstr ""
 "Désigne que cet utilisateur a toutes les autorisations sans les assigner "
 "explicitement."
 
-#: iam/models.py:177
+#: iam/models.py:184
 msgid ""
 "The user_groups this user belongs to. A user will get all permissions "
 "granted to each of their user_groups."
@@ -235,41 +224,44 @@ msgstr ""
 "utilisateur obtiendra toutes les autorisations accordées à chacun de ses "
 "groupes d'utilisateurs."
 
-#: iam/models.py:193
+#: iam/models.py:200
 msgid "user"
 msgstr "utilisateur"
 
-#: iam/models.py:194
+#: iam/models.py:201
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:216
+#: iam/models.py:224
 msgid "Role"
-msgstr ""
+msgstr "Rôle"
 
-#: iam/models.py:218
+#: iam/models.py:226
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
-#: library/forms.py:5
+#: library/forms.py:5 serdes/forms.py:6
 msgid "Select a file"
-msgstr ""
+msgstr "Sélectionner un fichier"
 
 #: library/templates/library/package_detail.html:40
-#, fuzzy
-#| msgid "last name"
 msgid "Threat name"
-msgstr "nom"
+msgstr "Nom de la menace"
+
+#: library/templates/library/package_detail.html:41
+#: library/templates/library/package_detail.html:54
+#: library/templates/library/package_detail.html:112
+#: library/templates/library/package_list.html:22
+msgid "Description"
+msgstr ""
 
 #: library/templates/library/package_detail.html:53
-#, fuzzy
-#| msgid "last name"
 msgid "Matrix name"
-msgstr "nom"
+msgstr "Nom de la matrice"
 
 #: library/templates/library/package_detail.html:55
 msgid "Probability"
-msgstr ""
+msgstr "Probabilité"
 
 #: library/templates/library/package_detail.html:56
 msgid "Impact"
@@ -277,17 +269,15 @@ msgstr ""
 
 #: library/templates/library/package_detail.html:57
 msgid "Risk"
-msgstr ""
+msgstr "Risque"
 
 #: library/templates/library/package_detail.html:111
-#, fuzzy
-#| msgid "SecurityFunctions Catalog"
 msgid "Security function name"
-msgstr "Catalogue des SecurityFunctions"
+msgstr "Nom de la fonction de sécurité"
 
 #: library/templates/library/package_detail.html:113
 msgid "Provider"
-msgstr ""
+msgstr "Fourisseur"
 
 #: library/templates/library/package_detail.html:114
 msgid "Contact"
@@ -295,17 +285,17 @@ msgstr ""
 
 #: library/templates/library/package_list.html:5
 #: library/templates/library/package_list.html:10
-#: library/templates/library/package_upload.html:5 library/views.py:54
+#: library/templates/library/package_upload.html:5 library/views.py:57
 msgid "Packages"
 msgstr ""
 
 #: library/templates/library/package_list.html:17
 msgid "Default packages"
-msgstr ""
+msgstr "Packages par défaut"
 
 #: library/templates/library/package_list.html:21
 msgid "Package name"
-msgstr ""
+msgstr "Nom du package"
 
 #: library/templates/library/package_list.html:23
 msgid "Actions"
@@ -313,23 +303,47 @@ msgstr ""
 
 #: library/templates/library/package_list.html:53
 msgid "Import"
-msgstr ""
+msgstr "Importer"
 
 #: library/templates/library/package_list.html:64
 msgid "No package found."
-msgstr ""
+msgstr "Aucun package trouvé."
 
 #: library/templates/library/package_list.html:76
 msgid "Upload your own package"
-msgstr ""
+msgstr "Télécharger votre propre package"
 
 #: library/templates/library/package_list.html:89
+#: serdes/templates/serdes/backup_restore.html:25
 msgid "Upload"
-msgstr ""
+msgstr "Télécharger"
 
 #: library/templates/library/package_upload.html:10
 msgid "Upload a package"
-msgstr ""
+msgstr "Télécharger un package"
+
+#: serdes/forms.py:14
+msgid "File must be a JSON file."
+msgstr "Le fichier doit être un fichier JSON."
+
+#: serdes/templates/serdes/backup_restore.html:8
+msgid "Backup Restore"
+msgstr "Sauvegarde et restauration"
+
+#: serdes/templates/serdes/backup_restore.html:14
+msgid "Import backup"
+msgstr "Importer une sauvegarde"
+
+#: serdes/templates/serdes/backup_restore.html:32
+msgid "Export backup"
+msgstr "Exporter une sauvegarde"
+
+#: serdes/templates/serdes/backup_restore.html:34
+msgid "Dump database"
+msgstr "Exporter la base de données"
+
+#~ msgid "Name"
+#~ msgstr "Nom"
 
 #~ msgid "<Group title>"
 #~ msgstr "<Titre du groupe>"

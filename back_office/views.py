@@ -583,14 +583,14 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['security_measures'] = self.get_object().security_measures.all()
         context['existing_security_measures'] = SecurityMeasure.objects.filter(
-            project=self.get_object().analysis.project)
+            folder=self.get_object().analysis.project.folder)
         context['crumbs'] = {'ri-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateFormInherited(
-            initial={'project': get_object_or_404(Project, id=self.get_object().analysis.project.id)})
+            initial={'folder': get_object_or_404(Folder, id=self.get_object().analysis.project.folder.id)})
         context['measures_select_form'] = SecurityMeasureSelectForm(
             initial={'security_measures': self.get_object().security_measures.all()},
         )
-        context['measures_select_form'].fields['security_measures'].queryset = SecurityMeasure.objects.filter(project=self.get_object().parent_project())
+        context['measures_select_form'].fields['security_measures'].queryset = SecurityMeasure.objects.filter(folder=self.get_object().parent_project().folder)
 
         context['matrix'] = self.get_object().get_matrix()
         return context
@@ -708,7 +708,7 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securitymeasure"), folder=self.get_object().project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securitymeasure"), folder=self.get_object().folder)
 
 
 class SecurityMeasureDeleteView(UserPassesTestMixin, DeleteView):
@@ -1160,7 +1160,7 @@ class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
         context['users'] = User.objects.exclude(user_groups=self.get_object())
         context["associated_users"] = User.objects.filter(
             user_groups=self.get_object())
-        context["crumbs"] = {'user_group-list': _('UserGroups')}
+        context["crumbs"] = {'user_group-list': _('User groups')}
         return context
 
     def get_success_url(self) -> str:
@@ -1259,7 +1259,7 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
-        context["crumbs"] = {'user_group-list': _('UserGroups')}
+        context["crumbs"] = {'user_group-list': _('User groups')}
         return context
 
     def get_success_url(self) -> str:

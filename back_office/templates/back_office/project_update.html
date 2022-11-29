@@ -17,9 +17,9 @@
                         {{ form.name }}
                     </div>
                     <div class="flex flex-col w-full">
-                        <p class="text-sm font-semibold">{% trans "Internal ID" %}</p>
-                        {{ form.internal_id.errors }}
-                        {{ form.internal_id }}
+                        <p class="text-sm font-semibold">{{ form.internal_reference.label }}</p>
+                        {{ form.internal_reference.errors }}
+                        {{ form.internal_reference }}
                     </div>
 
                 </div>

@@ -75,7 +75,7 @@ def test_BO001(page):
 	projectName = "Project Test"
 	page.click('id=newProjectModal')
 	page.fill('id=id_project_name', projectName)
-	page.fill('id=id_project_internal_id', 'TST')
+	page.fill('id=id_project_internal_reference', 'TST')
 	page.select_option('id=id_project_parent_group', id)
 	page.select_option('id=id_project_lc_status', "in_dev")
 	page.click('id=save')
