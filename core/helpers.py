@@ -173,7 +173,7 @@ def get_counters(user: User):
     "SecurityMeasure": SecurityMeasure, 
     "Analysis": Analysis, 
     "Project": Project, 
-    "SecurityFunction": SecurityFunction, 
+    "Security Function": SecurityFunction, 
     "RiskAcceptance": RiskAcceptance, 
     "Threat": Threat}
     for name, type in objects_dict.items():

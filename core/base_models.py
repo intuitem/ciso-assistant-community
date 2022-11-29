@@ -45,3 +45,9 @@ class AbstractBaseModel(models.Model):
         if self.pk:
             scope = scope.exclude(pk=self.pk)
         return not scope.filter(**{field: getattr(self, field) for field in fields_to_check}).exists()
+
+    def display_path(self):
+        pass
+
+    def display_name(self):
+        pass

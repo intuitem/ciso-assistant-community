@@ -16,7 +16,7 @@ class Project(AbstractBaseModel):
         ('dropped', _('Dropped')),
 
     ]
-    internal_reference = models.CharField(max_length=100, help_text=_("If an internal reference applies"),
+    internal_reference = models.CharField(max_length=100,
                                    null=True, blank=True, verbose_name=_("Internal reference"))
     folder = models.ForeignKey(
         Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
@@ -26,10 +26,6 @@ class Project(AbstractBaseModel):
     class Meta:
         verbose_name = _("Project")
         verbose_name_plural = _("Projects")
-
-    def description(self):
-        return self.folder.description
-    description.short_description = _("Description")
 
     def __str__(self):
         return self.name
