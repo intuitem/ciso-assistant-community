@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-29 10:33+0000\n"
+"POT-Creation-Date: 2022-11-29 16:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -131,7 +131,7 @@ msgid "Status (descending)"
 msgstr "Statut (descendant)"
 
 #: back_office/filters.py:194 back_office/filters.py:227
-#: back_office/models.py:63
+#: back_office/models.py:59
 msgid "type"
 msgstr ""
 
@@ -300,14 +300,10 @@ msgstr ""
 msgid "Dropped"
 msgstr ""
 
-#: back_office/models.py:19
-msgid "If an internal reference applies"
-msgstr ""
-
 #: back_office/models.py:20
-#: back_office/templates/back_office/project_create.html:19
-#: back_office/templates/back_office/project_update.html:20
-msgid "Internal ID"
+#, fuzzy
+#| msgid "Internal ID"
+msgid "Internal reference"
 msgstr "ID interne"
 
 #: back_office/models.py:24
@@ -339,23 +335,11 @@ msgstr "Projets"
 msgid "Projects"
 msgstr ""
 
-#: back_office/models.py:32
-#: back_office/templates/back_office/mtg_update.html:56
-#: back_office/templates/back_office/project_create.html:36
-#: back_office/templates/back_office/project_domain_list.html:44
-#: back_office/templates/back_office/project_list.html:112
-#: back_office/templates/back_office/project_update.html:37
-#: back_office/templates/back_office/ri_update.html:53
-#: back_office/templates/back_office/risk_matrix_list.html:47
-#: back_office/templates/back_office/snippets/project_list_nested.html:10
-msgid "Description"
-msgstr ""
-
-#: back_office/models.py:39 back_office/models.py:66 back_office/models.py:105
+#: back_office/models.py:35 back_office/models.py:62 back_office/models.py:101
 msgid "published"
 msgstr ""
 
-#: back_office/models.py:42 back_office/templates/back_office/ri_create.html:31
+#: back_office/models.py:38 back_office/templates/back_office/ri_create.html:31
 #: back_office/templates/back_office/ri_list.html:72
 #: back_office/templates/back_office/ri_list.html:115
 #: back_office/templates/back_office/ri_update.html:43
@@ -364,7 +348,7 @@ msgstr ""
 msgid "Threat"
 msgstr "Menace"
 
-#: back_office/models.py:43 back_office/templates/back_office/index.html:20
+#: back_office/models.py:39 back_office/templates/back_office/index.html:20
 #: back_office/templates/back_office/quick_start.html:61
 #: back_office/templates/back_office/sidebar.html:110
 #: back_office/templates/back_office/threat_list.html:5
@@ -372,54 +356,54 @@ msgstr "Menace"
 msgid "Threats"
 msgstr "Menaces"
 
-#: back_office/models.py:57
+#: back_office/models.py:53
 msgid "Primary"
 msgstr ""
 
-#: back_office/models.py:58
+#: back_office/models.py:54
 msgid "Support"
 msgstr ""
 
-#: back_office/models.py:61
+#: back_office/models.py:57
 msgid "business value"
 msgstr "valeur commerciale"
 
-#: back_office/models.py:65
+#: back_office/models.py:61
 #, fuzzy
 #| msgid "parent project"
 msgid "parent asset"
 msgstr "projet parent"
 
-#: back_office/models.py:69 back_office/templates/back_office/asset_list.html:4
+#: back_office/models.py:65 back_office/templates/back_office/asset_list.html:4
 #: back_office/templates/back_office/asset_list.html:9
 #: back_office/templates/back_office/ri_update.html:59
 #: back_office/templates/back_office/sidebar.html:101 back_office/views.py:256
 msgid "Assets"
 msgstr "Biens sensibles"
 
-#: back_office/models.py:70
+#: back_office/models.py:66
 #, fuzzy
 #| msgid "Assets"
 msgid "Asset"
 msgstr "Biens sensibles"
 
-#: back_office/models.py:102
+#: back_office/models.py:98
 #: back_office/templates/back_office/security_function_list.html:43
 msgid "Provider"
 msgstr "Fournisseur"
 
-#: back_office/models.py:104
+#: back_office/models.py:100
 #: back_office/templates/back_office/security_function_list.html:44
 msgid "Contact"
 msgstr ""
 
-#: back_office/models.py:108 back_office/templates/back_office/mtg_list.html:84
+#: back_office/models.py:104 back_office/templates/back_office/mtg_list.html:84
 #: back_office/templates/back_office/mtg_list.html:121
 #: back_office/templates/back_office/mtg_update.html:51
 msgid "Security function"
 msgstr "Fonction de sécurité"
 
-#: back_office/models.py:109
+#: back_office/models.py:105
 #: back_office/templates/back_office/quick_start.html:75
 #: back_office/templates/back_office/security_function_list.html:5
 #: back_office/templates/back_office/sidebar.html:118 back_office/views.py:783
@@ -929,6 +913,17 @@ msgstr "Résumé de la mesure"
 msgid "Risk Scenarios"
 msgstr "Scénarios de risque"
 
+#: back_office/templates/back_office/mtg_update.html:56
+#: back_office/templates/back_office/project_create.html:36
+#: back_office/templates/back_office/project_domain_list.html:44
+#: back_office/templates/back_office/project_list.html:112
+#: back_office/templates/back_office/project_update.html:37
+#: back_office/templates/back_office/ri_update.html:53
+#: back_office/templates/back_office/risk_matrix_list.html:47
+#: back_office/templates/back_office/snippets/project_list_nested.html:10
+msgid "Description"
+msgstr ""
+
 #: back_office/templates/back_office/mtg_update.html:61
 msgid "Link"
 msgstr "Lien"
@@ -980,6 +975,10 @@ msgstr "Nouveau projet"
 #: back_office/templates/back_office/project_update.html:15
 msgid "Project Name"
 msgstr "Nom du projet"
+
+#: back_office/templates/back_office/project_create.html:19
+msgid "Internal ID"
+msgstr "ID interne"
 
 #: back_office/templates/back_office/project_domain_list.html:5
 #: back_office/templates/back_office/sidebar.html:83 back_office/views.py:366
@@ -1445,12 +1444,16 @@ msgstr ""
 msgid "Scoring assistant"
 msgstr ""
 
-#: back_office/templates/back_office/sidebar.html:252
-#: back_office/templates/back_office/sidebar.html:254
+#: back_office/templates/back_office/sidebar.html:243
+msgid "Backups"
+msgstr ""
+
+#: back_office/templates/back_office/sidebar.html:261
+#: back_office/templates/back_office/sidebar.html:263
 msgid "About MIRA"
 msgstr ""
 
-#: back_office/templates/back_office/sidebar.html:283
+#: back_office/templates/back_office/sidebar.html:292
 msgid "Logout"
 msgstr ""
 

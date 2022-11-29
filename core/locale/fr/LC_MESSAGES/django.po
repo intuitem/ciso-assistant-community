@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-29 10:28+0000\n"
+"POT-Creation-Date: 2022-11-29 16:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,7 +91,7 @@ msgid ""
 "information."
 msgstr ""
 
-#: core/models.py:46 core/models.py:172 core/templates/core/browser.html:92
+#: core/models.py:46 core/templates/core/browser.html:92
 #: core/templates/core/browser.html:117 core/templates/core/my_projects.html:35
 msgid "Project"
 msgstr "Projet"
@@ -229,9 +229,15 @@ msgstr "Important"
 msgid "Extra-Large"
 msgstr "Très Important"
 
-#: core/models.py:173
-msgid "SecurityFunction"
+#: core/models.py:172
+msgid "Domain"
 msgstr ""
+
+#: core/models.py:173
+#, fuzzy
+#| msgid "Security function"
+msgid "Security Function"
+msgstr "Fonction de sécurité"
 
 #: core/models.py:174 core/models.py:323
 #: core/templates/snippets/mp_data.html:43
