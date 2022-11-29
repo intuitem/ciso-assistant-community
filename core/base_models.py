@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 import uuid
 
 class AbstractBaseModel(models.Model):
@@ -51,3 +52,9 @@ class AbstractBaseModel(models.Model):
 
     def display_name(self):
         pass
+
+    def clean(self) -> None:
+        scope = self.__class__.objects.all()
+        if not self.is_unique_in_scope(scope=scope, fields_to_check=['name']):
+            raise ValidationError({'name': _('A {} with this name already exists.'.format(self._meta.verbose_name))})
+        super().clean()
