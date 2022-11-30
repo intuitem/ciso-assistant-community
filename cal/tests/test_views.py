@@ -1,6 +1,6 @@
 from datetime import date, datetime
-from .models import *
-from .views import *
+from cal.models import *
+from cal.views import *
 import pytest
 
 

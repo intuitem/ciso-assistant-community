@@ -1,5 +1,5 @@
-from .models import *
-from .utils import *
+from cal.models import *
+from cal.utils import *
 from calendar import LocaleHTMLCalendar
 from core.models import SecurityMeasure, RiskAcceptance
 import pytest

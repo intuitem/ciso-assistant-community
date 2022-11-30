@@ -74,9 +74,9 @@ def build_ri_clusters(analysis: Analysis):
 
     for ri in RiskScenario.objects.filter(analysis=analysis).order_by('created_at'):
         if ri.current_level >= 0:
-            matrix_current[ri.current_proba][ri.current_impact].add(ri.rid())
+            matrix_current[ri.current_proba][ri.current_impact].add(ri.rid)
         if ri.residual_level >=0:
-            matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid())
+            matrix_residual[ri.residual_proba][ri.residual_impact].add(ri.rid)
 
     return {'current': matrix_current, 'residual': matrix_residual}
 
@@ -290,7 +290,7 @@ class ComposerListView(ListView):
         v = request.GET.get('analysis')
         if v:
             request_list = request.GET.getlist('analysis')[0]
-            data = [int(item) for item in request_list.split(',')]
+            data = [item for item in request_list.split(',')]
             # debug print(f"got {len(data)} analysis in {data}")
             context = {'context': compile_analysis_for_composer(self.request.user, data)}
             return render(request, 'core/composer.html', context)
@@ -325,7 +325,7 @@ def export_risks_csv(request, analysis):
             security_measures = ''
             for mtg in ri.security_measures.all():
                 security_measures += f"[{mtg.status}]{mtg.name} \n"
-            row = [ri.rid(), ri.threat, ri.name, ri.description,
+            row = [ri.rid, ri.threat, ri.name, ri.description,
                 ri.existing_measures, ri.get_current_risk()['name'],
                 security_measures, ri.get_residual_risk()['name'], ri.treatment,
                 ]
@@ -356,7 +356,7 @@ def export_mp_csv(request, analysis):
         for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis=analysis):
             risk_scenarios = []
             for rs in mtg.riskscenario_set.all():
-                risk_scenarios.append(str(rs.rid()) + ": " + rs.name)
+                risk_scenarios.append(str(rs.rid) + ": " + rs.name)
             row = [risk_scenarios,
                 mtg.id, mtg.name, mtg.description, mtg.type, mtg.security_function, mtg.eta, mtg.effort, mtg.link, mtg.status,
                 ]

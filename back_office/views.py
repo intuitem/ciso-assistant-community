@@ -72,14 +72,14 @@ class ProjectListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/project_list.html'
     context_object_name = 'projects'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = Project
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -120,16 +120,7 @@ class ProjectCreateViewModal(UserPassesTestMixin, CreateView):
     model = Project
     context_object_name = 'project'
     form_class = ProjectForm
-
-    # def get(self, request):
-    #     next_url = request.GET.get('next')
-    #     return render(request, template_name=self.template_name, context={'form': self.form_class, 'next': next_url})
-    #     return redirect(next_url)
-
-    # def post(self, request):
-    #     form = ProjectForm(request.POST)
-    #     next_url = request.POST.get('next') if 'next' in request.POST else 'project-list'
-    #     return redirect(next_url)
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self):
         return self.request.POST.get('next', '/')
@@ -188,14 +179,14 @@ class AssetListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/asset_list.html'
     context_object_name = 'assets'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = Asset
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = AssetFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -235,6 +226,7 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateView):
     model = Asset
     context_object_name = 'asset'
     form_class = AssetForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self):
         return self.request.POST.get('next', '/')
@@ -279,7 +271,7 @@ class FolderListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/project_domain_list.html'
     context_object_name = 'domains'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = Folder
 
@@ -327,6 +319,7 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateView):
     model = Folder
     context_object_name = 'domain'
     form_class = FolderUpdateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("id")
@@ -394,7 +387,7 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/analysis_list.html'
     context_object_name = 'analyses'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = Analysis
 
@@ -445,6 +438,7 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateView):
     model = Analysis
     context_object_name = 'analysis'
     form_class = RiskAnalysisCreateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -466,7 +460,7 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
         context['risk_scenario_create_form'] = RiskScenarioCreateForm(
             initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['scenarios'] = RiskScenario.objects.filter(
-            analysis=self.get_object()).order_by('id')
+            analysis=self.get_object()).order_by('created_at')
         context['crumbs'] = {'ra-list': _('Analyses')}
         return context
 
@@ -564,6 +558,7 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskScenario
     context_object_name = 'scenario'
     form_class = RiskScenarioCreateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -637,7 +632,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/mtg_list.html'
     context_object_name = 'measures'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = SecurityMeasure
 
@@ -646,7 +641,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         queryset = self.get_queryset()
-        filter = SecurityMeasureFilter(self.request.GET, queryset)
+        filter = SecurityMeasureFilter(request=self.request, queryset=queryset)
         context['filter'] = filter
         context['measure_create_form'] = SecurityMeasureCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
@@ -657,14 +652,9 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
-        qs = self.model.objects.filter(id__in=object_ids_view)
-        filtered_list = SecurityMeasureFilter(self.request.GET, queryset=qs)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
+        filtered_list = SecurityMeasureFilter(request=self.request.GET, queryset=qs)
         return filtered_list.qs
-        # if not self.request.user.is_superuser:
-        #     agg_data = SecurityMeasure.objects.filter(risk_scenario__analysis__auditor=self.request.user).order_by('id')
-        # else:
-        #     agg_data = SecurityMeasure.objects.all().order_by('id')
-        # return agg_data
 
     def test_func(self):
         """
@@ -678,6 +668,7 @@ class SecurityMeasureCreateViewModal(UserPassesTestMixin, CreateView):
     model = SecurityMeasure
     context_object_name = 'measure'
     form_class = SecurityMeasureCreateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -727,14 +718,14 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/security_function_list.html'
     context_object_name = 'functions'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = SecurityFunction
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -762,6 +753,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateView):
     model = SecurityFunction
     context_object_name = 'function'
     form_class = SecurityFunctionCreateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -809,14 +801,14 @@ class ThreatListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/threat_list.html'
     context_object_name = 'threats'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = Threat
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = ThreatFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -844,6 +836,7 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateView):
     model = Threat
     context_object_name = 'threat'
     form_class = ThreatCreateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -888,7 +881,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/acceptance_list.html'
     context_object_name = 'acceptances'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = RiskAcceptance
 
@@ -909,7 +902,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -924,6 +917,7 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateView):
     model = RiskAcceptance
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
+    template_name = 'back_office/fallback_form.html'
 
     def get_success_url(self) -> str:
         return self.request.POST.get('next', '/')
@@ -1025,7 +1019,7 @@ class UserListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/user_list.html'
     context_object_name = 'users'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = User
 
@@ -1103,7 +1097,7 @@ class UserGroupListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/group_list.html'
     context_object_name = 'user_groups'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = UserGroup
 
@@ -1112,7 +1106,7 @@ class UserGroupListView(UserPassesTestMixin, ListView):
             Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
         )
-        qs = self.model.objects.filter(id__in=object_ids_view)
+        qs = self.model.objects.filter(id__in=object_ids_view).order_by(self.ordering)
         filtered_list = UserGroupFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 
@@ -1191,7 +1185,7 @@ class RoleAssignmentListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/role_list.html'
     context_object_name = 'assignments'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = RoleAssignment
 
@@ -1298,14 +1292,14 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
     template_name = 'back_office/risk_matrix_list.html'
     context_object_name = 'matrices'
 
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = 10
     model = RiskMatrix
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)
-        qs = self.model.objects.all().order_by('id')
+        qs = self.model.objects.all().order_by('created_at')
         filtered_list = RiskMatrixFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
 

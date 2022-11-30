@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance, RiskMatrix
 from back_office.models import Asset, Folder, Project, Threat, SecurityFunction
-from iam.models import User, UserGroup
+from iam.models import User, UserGroup, RoleAssignment
 from django.utils.translation import gettext_lazy as _
 
 
@@ -14,7 +14,7 @@ class GenericFilterSet(FilterSet):
         super().__init__(data, queryset, request=request, prefix=prefix)
         # for f in self.filters.items():
         #     print(f[0], f[1].field.widget)
-    pass
+
 
 
 class GenericOrderingFilter(OrderingFilter):
@@ -161,6 +161,15 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         fields = ['name', 'threat', 'analysis__project', 'treatment']
 
+def viewable_folders(request):
+    if request is None:
+        return Folder.objects.none()
+    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    accessible_folders = RoleAssignment.get_accessible_folders(
+        root_folder, request.user, Folder.ContentType.DOMAIN
+    )
+    return Folder.objects.filter(id__in=accessible_folders)
+
 
 class SecurityMeasureFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -169,8 +178,7 @@ class SecurityMeasureFilter(GenericFilterSet):
             'placeholder': _('Search security measure...')
         }
     ))
-    risk_scenario__analysis__project = GenericModelMultipleChoiceFilter(
-        queryset=Project.objects.all())
+    folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
     type = GenericMultipleChoiceFilter(choices=SecurityMeasure.MITIGATION_TYPE)
     status = GenericMultipleChoiceFilter(
         choices=SecurityMeasure.MITIGATION_STATUS)
@@ -182,8 +190,7 @@ class SecurityMeasureFilter(GenericFilterSet):
             ('status', 'status'),
             ('name', 'name'),
             ('type', 'type'),
-            ('risk_scenario__analysis__project',
-             'risk_scenario__analysis__project'),
+            ('folder', 'folder'),
             ('security_function', 'security_function'),
         ),
         field_labels={
@@ -193,17 +200,17 @@ class SecurityMeasureFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
-            'risk_scenario__analysis__project': _('parent'.capitalize() + ' project'),
-            '-risk_scenario__analysis__project': _('Parent project (descending)'),
-            'security_function': _('securityfunction'.capitalize()),
-            '-security_function': _('SecurityFunction (descending)'),
+            'folder': _('parent'.capitalize() + ' domain'),
+            '-folder': _('Parent domain (descending)'),
+            'security_function': _('security function'.capitalize()),
+            '-security_function': _('Security function (descending)'),
         }
     )
 
     class Meta:
         model = SecurityMeasure
         fields = ['name', 'type',
-                  'risk_scenario__analysis__project', 'security_function']
+                  'folder', 'security_function']
 
 
 class RiskAcceptanceFilter(GenericFilterSet):

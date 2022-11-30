@@ -1,4 +1,4 @@
-from .models import *
+from cal.models import *
 import pytest
 
 @pytest.mark.django_db

@@ -125,19 +125,8 @@ class Analysis(AbstractBaseModel):
         }
         return findings
 
-    def save(self, *args, **kwargs) -> None:
-        scope = Analysis.objects.filter(project=self.project)
-        if not self.is_unique_in_scope(scope, ['name', 'version']):
-            raise ValidationError(_("This analysis already exists in this project"))
-        super().save(*args, **kwargs)
-
     # NOTE: if your save() method throws an exception, you might want to override the clean() method to prevent 
     # 500 errors when the form submitted. See https://docs.djangoproject.com/en/dev/ref/models/instances/#django.db.models.Model.clean
-    def clean(self) -> None:
-        scope = Analysis.objects.filter(project=self.project)
-        if not self.is_unique_in_scope(scope, ['name', 'version']):
-            raise ValidationError(_("This analysis already exists in this project"))
-        super().clean()
 
 def risk_scoring(probability, impact, matrix: RiskMatrix) -> int:
     fields = json.loads(matrix.json_definition)
@@ -215,11 +204,12 @@ class RiskScenario(AbstractBaseModel):
         ('mitigated', _('Mitigated')),
         ('accepted', _('Accepted')),
         ('blocker', _('Show-stopper')),
+        ('transferred', _('Transferred')),
     ]
 
     analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
     assets = models.ManyToManyField(Asset, verbose_name=_("Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
-    security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security Measures"), blank=True)
+    security_measures = models.ManyToManyField(SecurityMeasure, verbose_name=_("Security measures"), blank=True)
     threat = models.ForeignKey(Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
     existing_measures = models.TextField(max_length=2000,
                                          help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
@@ -297,6 +287,7 @@ class RiskScenario(AbstractBaseModel):
     def __str__(self):
         return str(self.parent_project()) + ': ' + str(self.name)
 
+    @property
     def rid(self):
         return f'R.{self.scoped_id(scope=RiskScenario.objects.filter(analysis=self.analysis))}'
 
