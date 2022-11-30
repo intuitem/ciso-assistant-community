@@ -3,7 +3,6 @@ from core.models import *
 from back_office.models import *
 from iam.models import *
 from library.utils import *
-from django.utils.translation import gettext as _
 import pytest
 from django.contrib.auth import get_user_model
 
@@ -116,6 +115,38 @@ class TestAnalysis:
 
         Analysis.objects.create(name="test analysis", description="test analysis description",
                 project=project, rating_matrix=matrix, version=2)
+    
+    def test_analysis_can_have_same_name_and_version_in_a_different_project(self):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.create(name="test matrix", description="test matrix description", json_definition="{}", folder=folder)
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix, version=1)
+
+        project2 = Project.objects.create(name="test project 2", folder=folder)
+        Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project2, rating_matrix=matrix, version=1)
+
+    def test_analysis_scope_is_analyses_in_project(self):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.create(name="test matrix", description="test matrix description", json_definition="{}", folder=folder)
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix)
+        analysis2 = Analysis.objects.create(name="test analysis 2", description="test analysis description",
+                project=project, rating_matrix=matrix)
+        analysis3 = Analysis.objects.create(name="test analysis 3", description="test analysis description",
+                project=project, rating_matrix=matrix)
+
+        project2 = Project.objects.create(name="test project 2", folder=folder)
+        analysis4 = Analysis.objects.create(name="test analysis 4", description="test analysis description",
+                project=project2, rating_matrix=matrix)
+        analysis5 = Analysis.objects.create(name="test analysis 5", description="test analysis description",
+                project=project2, rating_matrix=matrix)
+
+
+        assert list(analysis.get_scope()) == [analysis, analysis2, analysis3]
+
 
 
 @pytest.mark.django_db
@@ -201,6 +232,50 @@ class TestRiskScenario:
                 threat=threat)
 
         assert isinstance(scenario.id, UUID)
+
+    @pytest.mark.usefixtures("matrix_fixture")
+    def test_risk_scenario_scope_is_scenarios_in_analysis(self):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.all()[0]
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix)
+        threat = Threat.objects.create(name="test threat", description="test threat description", folder=folder)
+        scenario = RiskScenario.objects.create(name="test scenario", description="test scenario description", analysis=analysis,
+                threat=threat)
+        scenario2 = RiskScenario.objects.create(name="test scenario 2", description="test scenario description", analysis=analysis,
+                threat=threat)
+        scenario3 = RiskScenario.objects.create(name="test scenario 3", description="test scenario description", analysis=analysis,
+                threat=threat)
+
+        analysis2 = Analysis.objects.create(name="test analysis 2", description="test analysis description",
+                project=project, rating_matrix=matrix)
+        scenario4 = RiskScenario.objects.create(name="test scenario 4", description="test scenario description", analysis=analysis2,
+                threat=threat)
+        scenario5 = RiskScenario.objects.create(name="test scenario 5", description="test scenario description", analysis=analysis2,
+                threat=threat)
+
+        assert list(scenario.get_scope()) == [scenario, scenario2, scenario3]
+
+    @pytest.mark.usefixtures("matrix_fixture")
+    def test_risk_scenario_rid_is_deterministic(self):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.all()[0]
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix)
+        threat = Threat.objects.create(name="test threat", description="test threat description", folder=folder)
+        scenario = RiskScenario.objects.create(name="test scenario", description="test scenario description", analysis=analysis,
+                threat=threat)
+        scenario2 = RiskScenario.objects.create(name="test scenario 2", description="test scenario description", analysis=analysis,
+                threat=threat)
+        scenario3 = RiskScenario.objects.create(name="test scenario 3", description="test scenario description", analysis=analysis,
+                threat=threat)
+
+        assert scenario.rid == "R.1"
+        assert scenario2.rid == "R.2"
+        assert scenario3.rid == "R.3"
+
 
 
 @pytest.mark.django_db
