@@ -45,7 +45,7 @@ class AbstractBaseModel(models.Model):
         # to avoid false positives as a result of the object being compared to itself
         if self.pk:
             scope = scope.exclude(pk=self.pk)
-        return not scope.filter(**{field: getattr(self, field) for field in fields_to_check}).exists()
+        return not scope.filter(**{field: getattr(self, field) for field in fields_to_check if hasattr(self, field)}).exists()
 
     def display_path(self):
         pass
@@ -53,8 +53,25 @@ class AbstractBaseModel(models.Model):
     def display_name(self):
         pass
 
+    def get_scope(self):
+        if hasattr(self, 'risk_scenario') and self.risk_scenario is not None:
+            return self.__class__.objects.filter(risk_scenario=self.risk_scenario)
+        if hasattr(self, 'analysis') and self.analysis is not None:
+            return self.__class__.objects.filter(analysis=self.analysis)
+        if hasattr(self, 'project') and self.project is not None:
+            return self.__class__.objects.filter(project=self.project)
+        if hasattr(self, 'folder') and self.folder is not None:
+            return self.__class__.objects.filter(folder=self.folder)
+        if hasattr(self, 'parent_folder') and self.parent_folder is not None:
+            return self.__class__.objects.filter(parent_folder=self.parent_folder)
+        return self.__class__.objects.all()
+
     def clean(self) -> None:
-        scope = self.__class__.objects.all()
-        if not self.is_unique_in_scope(scope=scope, fields_to_check=['name']):
-            raise ValidationError({'name': _('A {} with this name already exists.'.format(self._meta.verbose_name))})
+        scope = self.get_scope()
+        if not self.is_unique_in_scope(scope=scope, fields_to_check=['name', 'version']):
+            raise ValidationError({'name': _('A {} with this name already exists.'.format(self._meta.verbose_name.lower()))})
         super().clean()
+
+    def save(self, *args, **kwargs) -> None:
+        self.clean()
+        super().save(*args, **kwargs)
