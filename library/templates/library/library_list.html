@@ -2,53 +2,53 @@
 
 {% load i18n static %}
 
-<!-- {% block title %}{% trans "Packages"|title %}{% endblock %} -->
+<!-- {% block title %}{% trans "Libraries"|title %}{% endblock %} -->
 
 {% block content %}
 
 <div>
-    {% with page_title=_('Packages') %}
+    {% with page_title=_('Libraries') %}
     {% include 'back_office/snippets/breadcrumbs.html' %}
     {% endwith %}
 
     <div class="flex flex-col space-y-6">
         {% include 'back_office/snippets/messages.html' %}
         <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-4">
-            <h1 class="text-xl font-semibold">{% trans "Default packages" %}</h1>
+            <h1 class="text-xl font-semibold">{% trans "Default libraries" %}</h1>
             <div class="rounded shadow-md">
                 <table class="w-full text-sm text-left text-gray-500">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                        <th class="px-6 py-3">{% trans "Package name" %}</th>
+                        <th class="px-6 py-3">{% trans "Library name" %}</th>
                         <th class="px-6 py-3">{% trans "Description" %}</th>
                         <th class="px-6 py-3">{% trans "Actions" %}</th>
                     </thead>
                     <tbody>
-                        {% for package in packages %}
+                        {% for library in libraries %}
                             <tr class=" odd:bg-white even:bg-gray-50 ">
                                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="ml-3">
-                                            <a id="package{{ package.name }}" href="{% url 'package-detail' package.name %}?next={{ request.path|urlencode }}"
+                                            <a id="library{{ library.name }}" href="{% url 'library-detail' library.name %}?next={{ request.path|urlencode }}"
                                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                                {{ package.name }}
+                                                {{ library.name }}
                                             </a>
                                         </div>
                                     </div>
                                 </th>
                                 <td class="px-6 py-4">
                                     <p class="text-gray-900 whitespace-no-wrap capitalize">
-                                        {{ package.description }}
+                                        {{ library.description }}
                                     </p>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="w-full flex flex-row">
                                         <span>
-                                            <a href="{% url 'package-detail' package.name %}" class="table-action cursor-pointer"><i class="far fa-eye"></i></a>
+                                            <a href="{% url 'library-detail' library.name %}" class="table-action cursor-pointer"><i class="far fa-eye"></i></a>
                                         </span>
                                         <span x-data="{ open: false }">
                                             <a @click="open = !open" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
                                             <div x-cloak x-show="open" class="absolute z-10 bg-white shadow-md rounded-md p-4">
-                                                <form action="{% url 'import-default-package' package.name %}" method="POST" c>
+                                                <form action="{% url 'import-default-library' library.name %}" method="POST" c>
                                                     {% csrf_token %}
                                                     <button type="submit" class="table-action cursor-pointer w-fit">{% trans "Import" %}</button>
                                                 </form>
@@ -61,7 +61,7 @@
                         <tr class="text-black p-4 text-center">
                             <td colspan="8" class="py-2">
                                 <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">{% trans "No package found." %}</p>
+                                <p class="inline test-gray-900">{% trans "No library found." %}</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -72,7 +72,7 @@
         </div>
 
         <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-4">
-            <h1 class="text-xl font-semibold">{% trans "Upload your own package" %}</h1>
+            <h1 class="text-xl font-semibold">{% trans "Upload your own library" %}</h1>
             
             <div class="relative overflow-x-auto overflow-y-auto">
                 <form enctype="multipart/form-data" method="post">
