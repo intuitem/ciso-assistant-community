@@ -68,9 +68,12 @@ class AbstractBaseModel(models.Model):
 
     def clean(self) -> None:
         scope = self.get_scope()
+        field_errors = {}
         if not self.is_unique_in_scope(scope=scope, fields_to_check=['name', 'version']):
-            raise ValidationError({'name': _('A {} with this name already exists.'.format(self._meta.verbose_name.lower()))})
+            field_errors['name'] = _('This name is already in use.')
         super().clean()
+        if field_errors:
+            raise ValidationError(field_errors)
 
     def save(self, *args, **kwargs) -> None:
         self.clean()

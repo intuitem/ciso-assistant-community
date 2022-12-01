@@ -9,7 +9,7 @@ import pytest
 def matrix_fixture():
     Folder.objects.create(
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
-    import_package(get_package('Critical matrix 5x5'))
+    import_library(get_library('Critical matrix 5x5'))
 
 @pytest.mark.django_db
 def test_get_rating_options_no_matrix():

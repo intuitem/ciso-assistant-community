@@ -72,7 +72,7 @@ class Folder(AbstractBaseModel):
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
-        "self", null=True, on_delete=models.CASCADE)
+        "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"))
     builtin = models.BooleanField(default=False)
     hide_public_asset = models.BooleanField(default=False)
     hide_public_matrix = models.BooleanField(default=False)

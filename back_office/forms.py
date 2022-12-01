@@ -95,16 +95,6 @@ class AssetForm(StyledModelForm):
         self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].widget.attrs['select_disabled'] = True
 
-    def clean(self) -> Optional[Dict[str, Any]]:
-        super().clean()
-        content_type = self.cleaned_data.get('content_type')
-        parent_asset = self.cleaned_data.get('parent_asset')
-        if content_type == 'SP' and parent_asset is None:
-            self.add_error('parent_asset', 'A support asset must have a parent asset.')
-        if content_type == 'PR' and parent_asset is not None:
-            self.add_error('parent_asset', 'A primary asset cannot have a parent asset.')
-        return self.cleaned_data
-
     class Meta:
         model = Asset
         fields = '__all__'

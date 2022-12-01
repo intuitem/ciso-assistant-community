@@ -12,7 +12,7 @@ User = get_user_model()
 def matrix_fixture():
     Folder.objects.create(
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
-    import_package(get_package('Critical matrix 5x5'))
+    import_library(get_library('Critical matrix 5x5'))
 
 
 @pytest.mark.django_db

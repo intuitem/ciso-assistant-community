@@ -14,15 +14,15 @@ def object_valid(required_fields, fields):
             raise Exception(f'Missing required field: {field}')
     return True
 
-def package_valid(package):
+def library_valid(library):
     '''
-    Checks if the given package is valid
+    Checks if the given library is valid
     
     Args:
-        package: package to check
+        library: library to check
         
     Returns:
-        valid: True if the package is valid, False otherwise
+        valid: True if the library is valid, False otherwise
     '''
     pass
 

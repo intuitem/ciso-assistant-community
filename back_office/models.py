@@ -1,4 +1,5 @@
-from typing import Iterable, Optional
+from ast import Dict
+from typing import Any, Iterable, Optional
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -68,6 +69,26 @@ class Asset(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return str(self.name)
 
+    def clean(self):
+        content_type = self.type
+        parent_asset = self.parent_asset
+        field_errors = {}
+        for field in self._meta.fields:
+            if field.name != 'id' and field.name != 'created_at' and field.name != 'is_published':
+                field_errors[field.name] = []
+        if content_type == Asset.Type.SUPPORT and parent_asset is None:
+            field_errors['parent_asset'].append(ValidationError(_('A support asset must have a parent asset.')))
+        if content_type == Asset.Type.PRIMARY and parent_asset is not None:
+            field_errors['parent_asset'].append(ValidationError(_('A primary asset cannot have a parent asset.')))
+        if self.parent_asset == self:
+            field_errors['parent_asset'].append(ValidationError(_('An asset cannot be its own parent.')))
+        if not self.validate_tree():
+            field_errors['parent_asset'].append(ValidationError(_('The asset tree is not valid. Please check for cycles.')))
+        super().clean()
+        for e in field_errors:
+            if len(field_errors[e]) > 0:
+                raise ValidationError(field_errors)
+
     def is_primary(self) -> bool:
         """
         Returns True if the asset is a primary asset.
@@ -80,18 +101,36 @@ class Asset(AbstractBaseModel, FolderMixin):
         """
         return self.type == Asset.Type.SUPPORT
 
-    def get_parent_asset(self) -> Optional['Asset']:
-        """
-        Returns the parent asset if the current asset is a support asset.
-        """
-        return self.parent_asset
-
     def get_sub_assets(self):
         """
-        Returns all the sub assets.
+        Returns all the assets downstream of the current asset by running a breadth-first search.
         """
-        return Asset.objects.filter(parent_asset=self)
+        visited = set()
+        stack = [self]
+        while stack:
+            node = stack.pop()
+            if node in visited:
+                continue
+            visited.add(node)
+            for child in Asset.objects.filter(parent_asset=node):
+                stack.append(child)
+        visited.remove(self)
+        return visited
 
+    def validate_tree(self) -> bool:
+        """
+        Validates the tree of the current asset by running a breadth-first search to check for cycles.
+        """
+        visited = set()
+        stack = [self]
+        while stack:
+            node = stack.pop()
+            if node in visited:
+                return False
+            visited.add(node)
+            if node.parent_asset is not None:
+                stack.append(node.parent_asset)
+        return True
 
 class SecurityFunction(AbstractBaseModel, FolderMixin):
     provider = models.CharField(

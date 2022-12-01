@@ -55,7 +55,7 @@ class FolderUpdateForm(StyledModelForm):
     class Meta:
         """ for Model """
         model = Folder
-        exclude = ['content_type', 'builtin']
+        exclude = ['content_type', 'builtin', 'hide_public_asset', 'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function']
 
 
 class UserCreationForm(forms.ModelForm):

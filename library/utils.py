@@ -3,20 +3,22 @@ from back_office.models import Threat, SecurityFunction
 from django.contrib import messages
 from iam.models import Folder
 
+from django.utils.translation import gettext_lazy as _
+
 from .validators import *
 
 import os
 import json
 
-def get_available_package_files():
+def get_available_library_files():
     '''
-    Returns a list of available package files
+    Returns a list of available library files
     
     Returns:
-        files: list of available package files
+        files: list of available library files
     '''
     files = []
-    path = r'./library/packages'
+    path = r'./library/libraries'
     # print absolute path
     print(os.path.abspath(path))
     for f in os.listdir(path):
@@ -24,53 +26,53 @@ def get_available_package_files():
             files.append(f)
     return files
 
-def get_available_packages():
+def get_available_libraries():
     '''
-    Returns a list of available packages
+    Returns a list of available libraries
     
     Returns:
-        packages: list of available packages
+        libraries: list of available libraries
     '''
-    files = get_available_package_files()
-    path = r'./library/packages'
-    packages = []
+    files = get_available_library_files()
+    path = r'./library/libraries'
+    libraries = []
     for f in files:
         with open(f'{path}/{f}', 'r', encoding='utf-8') as file:
-            packages.append(json.load(file))
-    return packages
+            libraries.append(json.load(file))
+    return libraries
 
-def get_package_names():
+def get_library_names():
     '''
-    Returns a list of available package names
+    Returns a list of available library names
     
     Returns:
-        names: list of available package names
+        names: list of available library names
     '''
-    packages = get_available_packages()
+    libraries = get_available_libraries()
     names = []
-    for p in packages:
-        names.append(p['name'])
+    for l in libraries:
+        names.append(l['name'])
     return names
 
-def get_package(name):
+def get_library(name):
     '''
-    Returns a package by name
+    Returns a library by name
     
     Args:
-        name: name of the package to return
+        name: name of the library to return
         
     Returns:
-        package: package with the given name
+        library: library with the given name
     '''
-    packages = get_available_packages()
-    for p in packages:
-        if p['name'] == name: # TODO: use slug or cook-up some unique id instead of using 'name'
-            return p
+    libraries = get_available_libraries()
+    for l in libraries:
+        if l['name'] == name: # TODO: use slug or cook-up some unique id instead of using 'name'
+            return l
     return None
 
 def import_matrix(fields):
     '''
-    Imports a matrix from a package
+    Imports a matrix from a library
     
     Args:
         fields: matrix fields
@@ -94,7 +96,7 @@ def import_matrix(fields):
 
 def import_threat(fields):
     '''
-    Imports a threat from a package
+    Imports a threat from a library
     
     Args:
         fields: threat fields
@@ -117,7 +119,7 @@ def import_threat(fields):
 
 def import_security_function(fields):
     '''
-    Imports a security function from a package
+    Imports a security function from a library
     
     Args:
         fields: security function fields
@@ -142,7 +144,7 @@ def import_security_function(fields):
 
 def import_matrix_view(request, fields):
     '''
-    Imports a matrix from a package
+    Imports a matrix from a library
     
     Args:
         fields: matrix fields
@@ -153,7 +155,7 @@ def import_matrix_view(request, fields):
     required_fields = ['name', 'description', 'probability', 'impact', 'risk', 'grid']
 
     if not object_valid(required_fields, fields):
-        messages.error(request, 'Package was not imported: Invalid matrix.')
+        messages.error(request, 'Library was not imported: Invalid matrix.')
         raise Exception('Invalid matrix')
     
     matrix = RiskMatrix.objects.create(
@@ -167,7 +169,7 @@ def import_matrix_view(request, fields):
 
 def import_threat_view(request, fields):
     '''
-    Imports a threat from a package
+    Imports a threat from a library
     
     Args:
         fields: threat fields
@@ -178,7 +180,7 @@ def import_threat_view(request, fields):
     required_fields = ['name', 'description']
 
     if not object_valid(required_fields, fields):
-        messages.error(request, 'Package was not imported: Invalid threat.')
+        messages.error(request, 'Library was not imported: Invalid threat.')
         raise Exception('Invalid threat')
 
     threat = Threat.objects.create(
@@ -191,7 +193,7 @@ def import_threat_view(request, fields):
 
 def import_security_function_view(request, fields):
     '''
-    Imports a security function from a package
+    Imports a security function from a library
     
     Args:
         fields: security function fields
@@ -202,7 +204,7 @@ def import_security_function_view(request, fields):
     required_fields = ['name', 'description']
 
     if not object_valid(required_fields, fields):
-        messages.error(request, 'Package was not imported: Invalid security function.')
+        messages.error(request, 'Library was not imported: Invalid security function.')
         raise Exception('Invalid security function')
 
     security_function = SecurityFunction.objects.create(
@@ -215,36 +217,36 @@ def import_security_function_view(request, fields):
 
     return security_function
 
-def ignore_package_object(package_objects, object_type):
+def ignore_library_object(library_objects, object_type):
     '''
     Return two lists of objects to ignore or upload
 
     Args:
-        package_objects: objects to filter
+        library_objects: objects to filter
         object_type: type of the objects
     '''
     ignored_list = []
     uploaded_list = []
-    for package_object in package_objects:
-        if object_type.objects.filter(name=package_object['name']).exists():
-            ignored_list.append(package_object)
+    for library_objects in library_objects:
+        if object_type.objects.filter(name=library_objects['name']).exists():
+            ignored_list.append(library_objects)
         else:
-            uploaded_list.append(package_object)
+            uploaded_list.append(library_objects)
     return uploaded_list, ignored_list
 
 
-def import_package(package):
+def import_library(library):
     '''
-    Imports a package
+    Imports a library
     
     Args:
-        package: package to import
+        library: library to import
     '''
     matrices = []
     threats = []
     security_functions = []
 
-    for obj in package.get('objects'):
+    for obj in library.get('objects'):
         if obj['type'] == 'matrix':
             matrices.append(obj.get('fields'))
         elif obj['type'] == 'threat':
@@ -252,7 +254,7 @@ def import_package(package):
         elif obj['type'] == 'security_function':
             security_functions.append(obj.get('fields'))
         else:
-            raise Exception(f'Unknown object type: {obj["type"]}')
+            raise Exception(_('Unknown object type: {}').format(obj["type"]))
 
     for matrix in matrices:
         import_matrix(matrix)
@@ -265,12 +267,12 @@ def import_package(package):
 
     return True
 
-def import_package_view(request, package):
+def import_library_view(request, library):
     '''
-    Imports a package
+    Imports a library
     
     Args:
-        package: package to import
+        library: library to import
     '''
     matrices = []
     threats = []
@@ -278,7 +280,7 @@ def import_package_view(request, package):
     objects_uploaded = 0
     objects_ignored = 0
 
-    for obj in package.get('objects'):
+    for obj in library.get('objects'):
         if obj['type'] == 'matrix':
             matrices.append(obj.get('fields'))
         elif obj['type'] == 'threat':
@@ -286,26 +288,26 @@ def import_package_view(request, package):
         elif obj['type'] == 'security_function':
             security_functions.append(obj.get('fields'))
         else:
-            messages.error(request, f'Package was not imported: Unknown object type: {obj["type"]}')
+            messages.error(request, _('Library was not imported: Unknown object type: {}').format(obj["type"]))
             raise Exception(f'Unknown object type: {obj["type"]}')
 
-    uploaded_list, ignored_list = ignore_package_object(matrices, RiskMatrix)
+    uploaded_list, ignored_list = ignore_library_object(matrices, RiskMatrix)
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
     for matrix in uploaded_list:
         import_matrix_view(request, matrix)
 
-    uploaded_list, ignored_list = ignore_package_object(threats, Threat)
+    uploaded_list, ignored_list = ignore_library_object(threats, Threat)
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
     for threat in uploaded_list:
         import_threat_view(request, threat)
 
-    uploaded_list, ignored_list = ignore_package_object(security_functions, SecurityFunction)
+    uploaded_list, ignored_list = ignore_library_object(security_functions, SecurityFunction)
     objects_ignored += len(ignored_list)
     objects_uploaded += len(uploaded_list)
     for security_function in uploaded_list:
         import_security_function_view(request, security_function)
 
-    messages.success(request, f'Package "{package["name"]}" imported successfully. {objects_uploaded} objects imported and {objects_ignored} objects ignored.')
+    messages.success(request, _('Library "{}" imported successfully. {} objects imported and {} objects ignored.').format(library["name"], objects_uploaded, objects_ignored))
     return True
