@@ -60,6 +60,9 @@ class RiskAnalysisUpdateForm(StyledModelForm):
 
 
 class SecurityMeasureCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -70,6 +73,7 @@ class SecurityMeasureCreateForm(StyledModelForm):
 class SecurityMeasureCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         self.fields['folder'].widget.attrs['select_disabled'] = True
 
     class Meta:
@@ -81,6 +85,9 @@ class SecurityMeasureCreateFormInherited(StyledModelForm):
 
 
 class SecurityMeasureUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
