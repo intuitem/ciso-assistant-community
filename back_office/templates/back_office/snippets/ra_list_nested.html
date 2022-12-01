@@ -9,6 +9,12 @@
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Auditor" %}
         </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+            {% trans "Risk scenarios" %}
+        </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+            {% trans "Rating matrix" %}
+        </th>
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Last Update" %}
         </th>
@@ -35,8 +41,18 @@
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                    <p class="text-gray-900 whitespace-no-wrap">
                         {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
+                    </p>
+                </td>
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                    <p class="text-gray-900 whitespace-no-wrap">
+                        {{ analysis.get_scenario_count }}
+                    </p>
+                </td>
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                    <p class="text-gray-900 whitespace-no-wrap">
+                        {{ analysis.rating_matrix|capfirst }}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
@@ -44,7 +60,7 @@
                         {{ analysis.updated_at|date }}
                     </p>
                 </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible">
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible whitespace-nowrap">
                     <div class="w-full">
                         <span><a href="{% url 'RA' analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                         <span>
