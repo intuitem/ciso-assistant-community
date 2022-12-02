@@ -13,11 +13,6 @@
 
 # The script outputs a JSON file with the above attributes.
 
-get_version() {
-    local version=$(cat asf_rm/VERSION)
-    echo $version
-}
-
 get_commit_hash() {
     git rev-parse HEAD
 }
@@ -35,11 +30,9 @@ get_build() {
 }
 
 main() {
-    local version=$(get_version)
     local build=$(get_build)
 
     echo "{
-        \"version\": \"$version\",
         \"build\": \"$build\"
 }"
 }
