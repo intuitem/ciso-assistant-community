@@ -18,9 +18,9 @@ from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Get version from VERSION file
 with open(BASE_DIR / 'asf_rm/VERSION') as f:
     VERSION = f.read().strip()
+    print(f'MIRA Version: {VERSION}')
 
 with open(BASE_DIR / 'asf_rm/build.json') as f:
     BUILD = json.load(f)['build']
