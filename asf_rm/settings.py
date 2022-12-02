@@ -22,6 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 with open(BASE_DIR / 'asf_rm/VERSION') as f:
     VERSION = f.read().strip()
 
+with open(BASE_DIR / 'asf_rm/build.json') as f:
+    BUILD = json.load(f)['build']
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
