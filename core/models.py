@@ -183,6 +183,10 @@ class SecurityMeasure(AbstractBaseModel):
     def __str__(self):
         return self.name
 
+    @property
+    def mid(self):
+        return f'M.{self.scoped_id(scope=SecurityMeasure.objects.filter(folder=self.folder))}'
+
     def get_ranking_score(self):
         if self.effort:
             mean = 0
