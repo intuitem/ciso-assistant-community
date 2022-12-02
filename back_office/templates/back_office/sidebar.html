@@ -234,6 +234,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Libraries" %}</span>
                     </a>
                 </li>
+                {% if request.user.is_superuser %}
                 <li class="to-page">
                     <a href="{% url 'backup-restore' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -243,6 +244,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Backups" %}</span>
                     </a>
                 </li>
+                {% endif %}
                 {% comment %} <li class="to-page">
                     <a href="#"
                         class="relative flex flex-row items-center pr-6 nav-link">
