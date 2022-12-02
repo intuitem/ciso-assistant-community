@@ -10,14 +10,14 @@
     <div class="">
         <div id="message" class="p-2 m-2 text-lg">{% trans "My projects summary" %}</div>
         {% if context.agg_data.names %}
-        <div class="m-2 p-2 rounded shadow bg-white">
+        {% comment %} <div class="m-2 p-2 rounded shadow bg-white">
             <div>
                 <div>{% trans "Risk level overview" %}</div>
                 <div class="rounded items-center justify-center">
                     {% include 'snippets/dual_bar_stacked.html' with ch_context=context.agg_data %}
                 </div>
             </div>
-        </div>
+        </div> {% endcomment %}
         <div class="bg-white m-2 p-2 rounded shadow">
             <div>
                 <div>{% trans "Treatment progress overview" %}</div>
