@@ -44,7 +44,7 @@ main() {
 
     echo "{
         \"version\": \"$version\",
-        \"build\": \"$build\",
+        \"build\": \"$build\"
 }"
 }
 
