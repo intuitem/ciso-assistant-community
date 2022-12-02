@@ -155,7 +155,7 @@ def import_matrix_view(request, fields):
     required_fields = ['name', 'description', 'probability', 'impact', 'risk', 'grid']
 
     if not object_valid(required_fields, fields):
-        messages.error(request, 'Library was not imported: Invalid matrix.')
+        messages.error(request, _('Library was not imported: invalid matrix.'))
         raise Exception('Invalid matrix')
     
     matrix = RiskMatrix.objects.create(
@@ -180,7 +180,7 @@ def import_threat_view(request, fields):
     required_fields = ['name', 'description']
 
     if not object_valid(required_fields, fields):
-        messages.error(request, 'Library was not imported: Invalid threat.')
+        messages.error(request, _('Library was not imported: invalid threat.'))
         raise Exception('Invalid threat')
 
     threat = Threat.objects.create(
@@ -204,7 +204,7 @@ def import_security_function_view(request, fields):
     required_fields = ['name', 'description']
 
     if not object_valid(required_fields, fields):
-        messages.error(request, 'Library was not imported: Invalid security function.')
+        messages.error(request, _('Library was not imported: invalid security function.'))
         raise Exception('Invalid security function')
 
     security_function = SecurityFunction.objects.create(
@@ -288,7 +288,7 @@ def import_library_view(request, library):
         elif obj['type'] == 'security_function':
             security_functions.append(obj.get('fields'))
         else:
-            messages.error(request, _('Library was not imported: Unknown object type: {}').format(obj["type"]))
+            messages.error(request, _('Library was not imported: unknown object type: {}').format(obj["type"]))
             raise Exception(f'Unknown object type: {obj["type"]}')
 
     uploaded_list, ignored_list = ignore_library_object(matrices, RiskMatrix)

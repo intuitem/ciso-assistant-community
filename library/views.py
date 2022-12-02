@@ -39,7 +39,7 @@ class LibraryListView(FormView):
                 import_library_view(request, library)
             return self.form_valid(form)
         else:
-            messages.error(request, f'Invalid form.')
+            messages.error(request, _('Invalid form.'))
             return self.form_invalid(form)
 
 
