@@ -120,6 +120,13 @@ $ docker-compose up
 (venv)$ python manage.py runserver
 ```
 
+12. Configure the git hooks for generating the build name
+
+```sh
+(venv)$ ln -fs git_hooks/post-commit .git/hooks/post-commit
+(venv)$ ln -fs git_hooks/post-merge .git/hooks/post-merge
+```
+
 ## Running the tests
 
 ### Unit tests
