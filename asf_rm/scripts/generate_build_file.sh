@@ -26,7 +26,7 @@ get_branch_name() {
 }
 
 get_build() {
-    echo "$(get_branch_name).$(get_commit_hash).$(get_commit_timestamp)"
+    echo "$(get_branch_name) $(get_commit_hash) $(get_commit_timestamp)"
 }
 
 main() {
