@@ -123,8 +123,9 @@ $ docker-compose up
 12. Configure the git hooks for generating the build name
 
 ```sh
-(venv)$ ln -fs git_hooks/post-commit .git/hooks/post-commit
-(venv)$ ln -fs git_hooks/post-merge .git/hooks/post-merge
+(venv)$ cd .git/hooks 
+(venv)$ ln -fs ../../git_hooks/post-commit .
+(venv)$ ln -fs ../../git_hooks/post-merge .
 ```
 
 ## Running the tests
