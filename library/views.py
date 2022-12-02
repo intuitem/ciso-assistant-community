@@ -13,7 +13,7 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
 class LibraryListView(FormView):
-    template_name = 'library/libarry_list.html'
+    template_name = 'library/library_list.html'
     form_class = UploadFileForm
     success_url = reverse_lazy('library-list')
 
@@ -69,3 +69,11 @@ class LibraryDetailView(TemplateView):
             if obj['type'] == 'matrix':
                 matrices.append(obj)
         return matrices
+
+def import_default_library(request, library_name):
+    try:
+        library = get_library(library_name)
+        import_library_view(request, library)
+    except:
+        return redirect("library-list")
+    return redirect("library-list")
