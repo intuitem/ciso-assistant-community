@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-01 13:06+0000\n"
+"POT-Creation-Date: 2022-12-02 11:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -153,6 +153,10 @@ msgstr "les sous-dossiers sont visibles"
 #: library/forms.py:5 serdes/forms.py:6
 msgid "Select a file"
 msgstr "Sélectionner un fichier"
+
+#: library/templates/library/library_detail.html:36
+msgid "Objects of type:"
+msgstr "Objets de type :"
 
 #: library/templates/library/library_detail.html:40
 msgid "Threat name"

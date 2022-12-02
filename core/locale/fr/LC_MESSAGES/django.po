@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-01 12:37+0000\n"
+"POT-Creation-Date: 2022-12-02 11:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,8 +71,10 @@ msgstr ""
 msgid "Created at"
 msgstr "Créé le"
 
-#: core/base_models.py:72
-msgid "A {} with this name already exists."
+#: core/base_models.py:73
+#, fuzzy
+#| msgid "A {} with this name already exists."
+msgid "This name is already in use."
 msgstr "Un {} avec ce nom existe déjà."
 
 #: core/forms.py:38
@@ -83,7 +85,7 @@ msgstr "Adresse électronique"
 msgid "Password"
 msgstr "Mot de passe"
 
-#: core/forms.py:147 core/models.py:237 core/models.py:312
+#: core/forms.py:154 core/models.py:237 core/models.py:312
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 
@@ -164,8 +166,7 @@ msgstr "M#{} n'a pas d'heure d'arrivée estimée"
 
 #: core/models.py:106
 msgid "M#{} ETA is in the past now. Consider updating its status or the date"
-msgstr ""
-"M#{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
+msgstr "M#{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
 
 #: core/models.py:109
 msgid ""
@@ -185,8 +186,8 @@ msgid ""
 "R#{} has a risk acceptance that has expired. Consider updating the status or "
 "the date"
 msgstr ""
-"R#{} a une acceptation de risque expirée. Envisager d'actualiser le statut ou "
-"sa date d'expiration"
+"R#{} a une acceptation de risque expirée. Envisager d'actualiser le statut "
+"ou sa date d'expiration"
 
 #: core/models.py:139 core/models.py:203
 msgid "Open"
@@ -505,14 +506,6 @@ msgid ""
 msgstr ""
 "measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas "
 "déterminé"
-
-#: core/templates/core/analytics.html:176
-msgid "Risk per project domain (category)"
-msgstr "Risque par domaine de projets (catégorie)"
-
-#: core/templates/core/analytics.html:177
-msgid "Current versus residual"
-msgstr "Courant contre résiduel"
 
 #: core/templates/core/browser.html:86
 msgid "Browsing"
@@ -1449,3 +1442,9 @@ msgstr " \"Mesure: en attente\" "
 #: core/templates/snippets/treatment_progress_dual_bar.html:13
 msgid " \"Measure: done\" "
 msgstr " \"Mesure: terminée\" "
+
+#~ msgid "Risk per project domain (category)"
+#~ msgstr "Risque par domaine de projets (catégorie)"
+
+#~ msgid "Current versus residual"
+#~ msgstr "Courant contre résiduel"
