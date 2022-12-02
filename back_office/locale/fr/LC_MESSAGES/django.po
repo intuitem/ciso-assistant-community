@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-02 11:38+0000\n"
+"POT-Creation-Date: 2022-12-02 13:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -550,10 +550,8 @@ msgstr "Scénarios de risque"
 #: back_office/templates/back_office/analysis_list.html:120
 #: back_office/templates/back_office/ra_update.html:20
 #: back_office/templates/back_office/snippets/ra_list_nested.html:16
-#, fuzzy
-#| msgid "Rating matrices"
 msgid "Rating matrix"
-msgstr "Matrices d'évaluation"
+msgstr "Matrice d'évaluation"
 
 #: back_office/templates/back_office/analysis_list.html:121
 #: back_office/templates/back_office/snippets/ra_list_nested.html:19
@@ -577,7 +575,7 @@ msgstr "Aucune analyse n'a été trouvée."
 
 #: back_office/templates/back_office/asset_form.html:29
 #: back_office/templates/back_office/asset_update.html:29
-#: back_office/templates/back_office/fallback_form.html:34
+#: back_office/templates/back_office/fallback_form.html:33
 #: back_office/templates/back_office/group_create.html:29
 #: back_office/templates/back_office/group_update.html:29
 #: back_office/templates/back_office/mtg_update.html:30
@@ -605,7 +603,7 @@ msgstr "Annuler"
 
 #: back_office/templates/back_office/asset_form.html:32
 #: back_office/templates/back_office/asset_update.html:32
-#: back_office/templates/back_office/fallback_form.html:36
+#: back_office/templates/back_office/fallback_form.html:35
 #: back_office/templates/back_office/group_create.html:31
 #: back_office/templates/back_office/group_update.html:31
 #: back_office/templates/back_office/mtg_update.html:33
@@ -1008,7 +1006,8 @@ msgstr "Bibliothèques"
 msgid ""
 "If you have just started the application for the first time, don't forget to "
 "import some"
-msgstr ""
+msgstr "Si vous venez de commencer à utiliser l'application, n'oubliez pas "
+"d'importer des"
 
 #: back_office/templates/back_office/quick_start.html:19
 msgid "libraries"
@@ -1016,7 +1015,8 @@ msgstr "bibliothèques"
 
 #: back_office/templates/back_office/quick_start.html:20
 msgid "(yours or the ones provided by default) before doing anything."
-msgstr ""
+msgstr "(les vôtres ou celles fournies par défaut) avant de faire quoi que ce "
+"soit."
 
 #: back_office/templates/back_office/quick_start.html:30
 msgid "Setup a"
@@ -1400,16 +1400,16 @@ msgstr ""
 msgid "Scoring assistant"
 msgstr ""
 
-#: back_office/templates/back_office/sidebar.html:243
+#: back_office/templates/back_office/sidebar.html:244
 msgid "Backups"
 msgstr ""
 
-#: back_office/templates/back_office/sidebar.html:261
 #: back_office/templates/back_office/sidebar.html:263
+#: back_office/templates/back_office/sidebar.html:265
 msgid "About MIRA"
 msgstr ""
 
-#: back_office/templates/back_office/sidebar.html:292
+#: back_office/templates/back_office/sidebar.html:294
 msgid "Logout"
 msgstr ""
 
@@ -1612,8 +1612,10 @@ msgstr "Analystes"
 msgid "Auditors"
 msgstr "Auditeurs"
 
-#~ msgid "Risk Scenarios"
-#~ msgstr "Scénarios de risque"
-
-#~ msgid "Link"
-#~ msgstr "Lien"
+#: back_office/views.py:341
+msgid ""
+"User groups {} - Auditors, {} - Analysts and {} - Domain Managers were "
+"created"
+msgstr ""
+"Les groupes d'utilisateurs {} - Auditeurs, {} - Analystes et {} - Responsables de "
+"domaine ont été créés"
