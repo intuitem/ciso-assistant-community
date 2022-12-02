@@ -228,11 +228,11 @@ def risk_status(user: User, analysis_list):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
     risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
     parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    risk_abbreviations: list = [m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_abbreviations: list = [f"{m['name']}.{m['risk'][i]['abbreviation']}" for m in parsed_matrices for i in range(len(m['risk']))]
     current_out = {abbr: list() for abbr in risk_abbreviations}
     residual_out = {abbr: list() for abbr in risk_abbreviations}
 
-    rsk_status_out = {'open': list(), 'mitigated': list(), 'accepted': list(), 'blocker': list()}
+    rsk_status_out = {'open': list(), 'mitigated': list(), 'accepted': list(), 'blocker': list(), 'transferred': list()}
     mtg_status_out = {'open': list(), 'in_progress': list(), 'on_hold': list(), 'done': list()}
 
     max_tmp = list()
