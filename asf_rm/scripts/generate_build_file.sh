@@ -14,11 +14,7 @@
 # The script outputs a JSON file with the above attributes.
 
 get_version() {
-    # Get the marketing version of the current build.
-    # The version is stored in <project root>/asf_rm/meta.json.
-    # The version is stored in the "version" attribute.
-
-    local version=$(cat asf_rm/meta.json | jq -r '.version')
+    local version=$(cat asf_rm/VERSION)
     echo $version
 }
 
