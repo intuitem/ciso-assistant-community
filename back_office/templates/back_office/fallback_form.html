@@ -7,7 +7,6 @@
 
 <div class="w-fit">
     <form method="post" id="fallback_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
-        {{ form.as_p }}
         <div class="bg-white rounded-lg shadow">
             <div class="flex flex-row space-x-4 mb-4 divide-x">
                 <div class="px-4 py-6">
