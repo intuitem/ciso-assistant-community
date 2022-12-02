@@ -22,8 +22,12 @@ with open(BASE_DIR / 'asf_rm/VERSION') as f:
     VERSION = f.read().strip()
     print(f'MIRA Version: {VERSION}')
 
-with open(BASE_DIR / 'asf_rm/build.json') as f:
-    BUILD = json.load(f)['build']
+try:
+    with open(BASE_DIR / 'asf_rm/build.json') as f:
+        BUILD = json.load(f)['build']
+except FileNotFoundError:
+    BUILD = 'unset'
+    print('MIRA Build: unset. Please refer to the documentation to set it.')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
