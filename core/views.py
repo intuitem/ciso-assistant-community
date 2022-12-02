@@ -168,7 +168,7 @@ class Browser(ListView):
     context_object_name = 'context'
     template_name = 'core/browser.html'
 
-    map_rsk = {'0': "open", '1': "mitigated", '2': "accepted", '3': "blocker"}
+    map_rsk = {'0': "open", '1': "mitigated", '2': "accepted", '3': "blocker", '4': "transferred"}
     map_mtg = {'0': "open", '1': "in_progress", '2': "on_hold", '3': "done"}
 
     def get_queryset(self):
@@ -194,6 +194,7 @@ def global_analytics(request):
         "break_by_p_risks": p_risks(request.user),
         "rose": p_risks_2(request.user),
         "risks_level": risks_count_per_level(request.user),
+        "risk_colors": list(get_risk_color_map(request.user).values()),
         "risk_status": risk_per_status(request.user),
         "security_measure_status": security_measure_per_status(request.user),
         "security_measure_per_cur_risk": security_measure_per_cur_risk(request.user),

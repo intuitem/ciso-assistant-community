@@ -78,13 +78,13 @@
         <div class="px-4 py-10 m-2 flex space-x-2 w-auto">
             <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
                 {% trans "Current risk" as cur_rsk_label %}
-                {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=risks_level.current %}
+                {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=risks_level.current colors=risk_colors %}
 
 
             </div>
             <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
                 {% trans "Residual risk" as rsd_rsk_label %}
-                {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=risks_level.residual %}
+                {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=risks_level.residual colors=risk_colors %}
 
             </div>
 
@@ -104,7 +104,7 @@
                 </div>
                 <div class="w-1/2 rounded-lg shadow p-2 items-center justify-center">
                     <div>{% trans "Pending measures per associated risk level (current)" %}</div>
-                    {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=security_measure_per_cur_risk.values %}
+                    {% include 'snippets/donut_chart.html' with name='mtg_rsk' s_label=cur_rsk_label values=security_measure_per_cur_risk.values colors=risk_colors %}
                 </div>
             </div>
             <div class="px-4 m-2 space-x-2">
@@ -172,13 +172,13 @@
         </div>
     </div>
 
-    <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
+    {% comment %} <div class="p-2 m-2 bg-white shadow-lg rounded-lg">
         <div class="text-lg p-2 m-2">{% trans "Risk per project domain (category)" %}</div>
         <div class="text-sm p-2 m-2">{% trans "Current versus residual" %}</div>
         <div class="p-2">
             {% include 'snippets/dual_bar_stacked.html' with ch_context=extra %}
         </div>
 
-    </div>
+    </div> {% endcomment %}
 </div>
 {% endblock %}

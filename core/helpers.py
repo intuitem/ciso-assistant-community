@@ -5,10 +5,20 @@ from iam.models import Folder, RoleAssignment, User
 from django.db.models import Count
 from collections import Counter
 
-RISK_COLOR_MAP = {"VL": "#BBF7D0", 'L': "#BEF264", 'M': "#FEF08A", 'H': "#FBBF24", 'VH': "#F87171"}
 STATUS_COLOR_MAP = {'open': '#fac858', 'mitigated': '#91cc75', 'accepted': '#73c0de', 'blocker': '#ee6666', 'in_progress': '#5470c6',
-                    'on_hold': '#ee6666', 'done': '#91cc75'}
+                    'on_hold': '#ee6666', 'done': '#91cc75', 'transferred': '#91cc75'}
 
+def get_risk_color_map(user: User):
+    """
+    Returns a dictionary with the risk abbreviations as keys and its hex color as value
+    """
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_abbreviations: list = [f"{m['name']}.{m['risk'][i]['abbreviation']}" for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_colors: list = [m['risk'][i]['hexcolor'] for m in parsed_matrices for i in range(len(m['risk']))]
+    return dict(zip(risk_abbreviations, risk_colors))
 
 def get_rating_options(user: User) -> list:
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
@@ -23,7 +33,7 @@ def get_rating_options_abbr(user: User):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
     risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
     parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    risk_abbr: list = [m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_abbr: list = [m['name'] + '.' + m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
     risk_labels: list = [m['risk'][i]['name'] for m in parsed_matrices for i in range(len(m['risk']))]
     return list(zip(risk_abbr, risk_labels))
 
@@ -35,13 +45,8 @@ def risk_matrix(user: User):
     matrix_residual = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
                        [0, 0, 0, 0, 0]]
-    map_impact = {'VH': 0, 'H': 1, 'M': 2, 'L': 3, 'VL': 4}
-    map_proba = {'VL': 0, 'L': 1, 'M': 2, 'H': 3, 'VH': 4}
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
-    # for ri in RiskScenario.objects.filter(id__in=object_ids_view):
-        # matrix_current[map_impact[ri.current_impact]][map_proba[ri.current_proba]] += 1
-        # matrix_residual[map_impact[ri.residual_impact]][map_proba[ri.residual_proba]] += 1
     return {'current': matrix_current, 'residual': matrix_residual}
 
 
@@ -56,7 +61,7 @@ def risk_per_status(user: User):
     #
 
     # this formatting is a constraint from eCharts
-    color_map = {"open": "#fac858", "mitigated": "#91cc75", "accepted": "#73c0de", "blocker": "#ee6666"}
+    color_map = {"open": "#fac858", "mitigated": "#91cc75", "accepted": "#73c0de", "blocker": "#ee6666", "transferred": "#91cc75"}
 
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
@@ -217,6 +222,7 @@ def security_measure_priority(user: User):
 
 
 def risk_status(user: User, analysis_list):
+    risk_color_map = get_risk_color_map(user)
     names = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
@@ -236,10 +242,10 @@ def risk_status(user: User, analysis_list):
         for lvl in get_rating_options(user):
             abbr = abbreviations[lvl[0]]
             cnt = RiskScenario.objects.filter(analysis=analysis, current_level=lvl[0]).count()
-            current_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
+            current_out[abbr].append({'value': cnt, 'itemStyle': {'color': risk_color_map[abbr]}})
 
             cnt = RiskScenario.objects.filter(analysis=analysis, residual_level=lvl[0]).count()
-            residual_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
+            residual_out[abbr].append({'value': cnt, 'itemStyle': {'color': risk_color_map[abbr]}})
 
             max_tmp.append(RiskScenario.objects.filter(analysis=analysis).count())
 
@@ -267,12 +273,13 @@ def risk_status(user: User, analysis_list):
 
 
 def risks_levels_per_prj_grp(user: User):
+    risk_color_map = get_risk_color_map(user)
     names = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
     risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
     parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    risk_abbreviations: list = [m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_abbreviations: list = [f"{m['name']}.{m['risk'][i]['abbreviation']}" for m in parsed_matrices for i in range(len(m['risk']))]
     current_out = {abbr: list() for abbr in risk_abbreviations}
     residual_out = {abbr: list() for abbr in risk_abbreviations}
 
@@ -284,10 +291,10 @@ def risks_levels_per_prj_grp(user: User):
         for lvl in get_rating_options(user):
             abbr = abbreviations[lvl[0]]
             cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, current_level=lvl[0]).count()
-            current_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
+            current_out[abbr].append({'value': cnt, 'itemStyle': {'color': risk_color_map[abbr]}})
 
             cnt = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder, residual_level=lvl[0]).count()
-            residual_out[abbr].append({'value': cnt, 'itemStyle': {'color': RISK_COLOR_MAP[abbr]}})
+            residual_out[abbr].append({'value': cnt, 'itemStyle': {'color': risk_color_map[abbr]}})
 
             max_tmp.append(RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder).count())
 
