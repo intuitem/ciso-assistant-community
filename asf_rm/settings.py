@@ -18,9 +18,12 @@ from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Get version from meta.json
-with open(BASE_DIR / 'asf_rm/meta.json') as f:
-    VERSION = json.load(f)['version']
+with open(BASE_DIR / 'asf_rm/VERSION') as f:
+    VERSION = f.read().strip()
+    print(f'MIRA Version: {VERSION}')
+
+with open(BASE_DIR / 'asf_rm/build.json') as f:
+    BUILD = json.load(f)['build']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -29,7 +32,7 @@ with open(BASE_DIR / 'asf_rm/meta.json') as f:
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
 if 'DJANGO_ALLOWED_HOSTS' in os.environ:
     ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')

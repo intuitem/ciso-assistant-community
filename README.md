@@ -46,7 +46,10 @@ export POSTGRES_NAME=asf
 export POSTGRES_USER=asfuser
 export POSTGRES_PASSWORD=<XXX>
 export DB_HOST=localhost
+export DJANGO_DEBUG=True
 ```
+
+NOTE: To use the `reset.sh` script, you need to set the `POSTGRES_DBLOGIN` variable to the login of the postgres daemon.
 
 3. Create a virtual environment with the tool of your choice and activate it. For scenario:
 ```sh
