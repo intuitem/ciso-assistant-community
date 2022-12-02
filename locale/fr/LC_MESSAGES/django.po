@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-01 13:06+0000\n"
+"POT-Creation-Date: 2022-12-02 13:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -154,6 +154,10 @@ msgstr "les sous-dossiers sont visibles"
 msgid "Select a file"
 msgstr "Sélectionner un fichier"
 
+#: library/templates/library/library_detail.html:36
+msgid "Objects of type:"
+msgstr "Objets de type :"
+
 #: library/templates/library/library_detail.html:40
 msgid "Threat name"
 msgstr "Nom de la menace"
@@ -232,12 +236,24 @@ msgstr "Télécharger"
 msgid "Upload a library"
 msgstr "Télécharger une bibliothèque"
 
+#: library/utils.py:158
+msgid "Library was not imported: invalid matrix."
+msgstr "Bibliothèque non importée: matrice invalide."
+
+#: library/utils.py:183
+msgid "Library was not imported: invalid threat."
+msgstr "Bibliothèque non importée: menace invalide."
+
+#: library/utils.py:207
+msgid "Library was not imported: invalid security function."
+msgstr "Bibliothèque non importée: fonction de sécurité invalide."
+
 #: library/utils.py:257
 msgid "Unknown object type: {}"
 msgstr "Objet de type inconnu: {}"
 
 #: library/utils.py:291
-msgid "Library was not imported: Unknown object type: {}"
+msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu: {}"
 
 #: library/utils.py:312
@@ -247,6 +263,10 @@ msgid ""
 msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "
 "ignorés."
+
+#: library/views.py:42
+msgid "Invalid form."
+msgstr "Formulaire invalide."
 
 #: serdes/forms.py:14
 msgid "File must be a JSON file."

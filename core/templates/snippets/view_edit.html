@@ -7,5 +7,5 @@
 {% endif %}
 
 {% if item.obj_type == 'SecurityMeasure' %}
-<a class="text-violet-800 hover:text-gray-400" href="{% url 'MP' item.object.project.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-violet-800 hover:text-gray-400" href="{% url 'mtg-update' item.object.id %}"> <i class="far fa-edit"></i> </a>
+<a class="text-violet-800 hover:text-gray-400" href="{% url 'MP' item.object.folder.id %}#{{ item.object.id }}"> <i class="far fa-eye"></i> </a> | <a class="text-violet-800 hover:text-gray-400" href="{% url 'mtg-update' item.object.id %}"> <i class="far fa-edit"></i> </a>
 {% endif %}

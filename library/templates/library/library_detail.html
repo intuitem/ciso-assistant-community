@@ -33,7 +33,7 @@
             <div class="flex flex-col space-y-4">
                 {% for type in types %}
                 <div class="bg-white shadow border border-gray-100 text-left p-4 font-semibold rounded">
-                    <h2>Objects of type: {{ type|upper }}</h2>
+                    <h2>{% trans "Objects of type:" %} {{ type|upper }}</h2>
                     <table class="w-full text-sm text-left text-gray-500">
                         {% if type == "threat" %}
                             <tr class="text-xs text-gray-700 uppercase bg-gray-50">
