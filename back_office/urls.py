@@ -9,6 +9,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
 
     path('quick-start', login_required(views.QuickStartView.as_view()), name='quick_start'),
+    path('scoring-assistant', login_required(views.scoring_assistant), name='scoring_bo'),
 
     # LIST VIEWS
     path('analyses-registry/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),
