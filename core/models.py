@@ -155,8 +155,8 @@ class SecurityMeasure(AbstractBaseModel):
         ('XL', _('Extra-Large')),
     ]
 
-    MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
-    MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
+    MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 4, 'XL': 8}
+    # todo: think about a smarter model for ranking
 
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     security_function = models.ForeignKey(SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Security Function"))
@@ -189,10 +189,13 @@ class SecurityMeasure(AbstractBaseModel):
 
     def get_ranking_score(self):
         if self.effort:
-            mean = 0
+            value = 0
             for risk_scenario in self.riskscenario_set.all():
-                mean += self.MAP_RISK_LEVEL[risk_scenario.current_level]
-            return round(int(mean/len(self.riskscenario_set.all()))/self.MAP_EFFORT[self.effort], 4)
+                current = risk_scenario.current_level
+                residual = risk_scenario.residual_level
+                if current >= 0 and residual >= 0:
+                    value += (1 + current - residual)*(current + 1)
+            return round(value/self.MAP_EFFORT[self.effort], 4)
         else:
             return 0
 
