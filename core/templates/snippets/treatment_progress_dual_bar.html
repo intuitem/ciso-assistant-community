@@ -66,7 +66,7 @@ toolbox: {
                         overflow: 'break',
                     },
                     type: 'category',
-                    data: {{context.agg_data.names|safe}}
+                    data: {{agg_data.names|safe}}
                 }
             ],
             yAxis: [
@@ -85,7 +85,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.rsk_status_out.open|safe}}
+                    data: {{agg_data.rsk_status_out.open|safe}}
                 },
                 {
                     name: risk_mitigated,
@@ -94,7 +94,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.rsk_status_out.mitigated|safe}}
+                    data: {{agg_data.rsk_status_out.mitigated|safe}}
                 },
                 {
                     name: risk_accepted,
@@ -103,7 +103,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.rsk_status_out.accepted|safe}}
+                    data: {{agg_data.rsk_status_out.accepted|safe}}
                 },
                 {
                     name: risk_blocking,
@@ -112,7 +112,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.rsk_status_out.blocker|safe}}
+                    data: {{agg_data.rsk_status_out.blocker|safe}}
                 },
                 {
                     name: measure_open,
@@ -122,7 +122,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.mtg_status_out.open|safe}}
+                    data: {{agg_data.mtg_status_out.open|safe}}
                 },
                 {
                     name: measure_progress,
@@ -132,7 +132,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.mtg_status_out.in_progress|safe}}
+                    data: {{agg_data.mtg_status_out.in_progress|safe}}
                 },
                 {
                     name: measure_hold,
@@ -142,7 +142,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.mtg_status_out.on_hold|safe}}
+                    data: {{agg_data.mtg_status_out.on_hold|safe}}
                 },
                 {
                     name: measure_done,
@@ -152,7 +152,7 @@ toolbox: {
                     emphasis: {
                         focus: 'series'
                     },
-                    data: {{context.agg_data.mtg_status_out.done|safe}}
+                    data: {{agg_data.mtg_status_out.done|safe}}
                 },
 
             ]

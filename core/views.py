@@ -190,6 +190,16 @@ class Browser(ListView):
 def global_analytics(request):
     template = 'core/analytics.html'
 
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)
+
+    viewable_analyses = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)[0]
+
+    object_ids_view += [analysis for analysis in viewable_analyses]
+
+    _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=request.user).exclude(status='done').order_by('eta')
+
     context = {
         "counters": get_counters(request.user),
         "risks_level": risks_count_per_level(request.user),
@@ -198,7 +208,10 @@ def global_analytics(request):
         "acceptances_to_review": acceptances_to_review(request.user),
         "today": date.today(),
         "view_user": RoleAssignment.has_permission(request.user, "view_user"),
-        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup")
+        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+        "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
+        "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
+        "analyses": Analysis.objects.filter(id__in=object_ids_view).filter(auditor=request.user).order_by('created_at'),
     }
 
     return render(request, template, context)
