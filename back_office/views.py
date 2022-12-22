@@ -1004,6 +1004,9 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
 
     model = User
 
+    def get_object(self, queryset: Optional[models.query.QuerySet[Any]] = ...) -> models.Model:
+        return self.request.user
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['change_usergroup'] = RoleAssignment.has_permission(
@@ -1024,7 +1027,7 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
         return context
 
     def test_func(self):
-        return self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
+        return self.request.user.is_authenticated
 
 
 class MyProfileUpdateView(UserPassesTestMixin, UpdateView):

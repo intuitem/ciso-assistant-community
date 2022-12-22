@@ -28,7 +28,7 @@ urlpatterns = [
     path('roles/', login_required(views.RoleAssignmentListView.as_view()), name='role-list'),
     path('matrices/', login_required(views.RiskMatrixListView.as_view()), name='matrix-list'),
     path('matrices/<str:pk>', login_required(views.RiskMatrixDetailedView.as_view()), name='matrix-detailed'),
-    path('user/<str:pk>', login_required(views.MyProfileDetailedView.as_view()), name='user-detailed'),
+    path('profile', login_required(views.MyProfileDetailedView.as_view()), name='user-detailed'),
 
     # CREATE VIEWS
     path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create'),

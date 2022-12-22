@@ -20,15 +20,14 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('core/', include('core.urls')),
-    path('back-office/', include('back_office.urls')),
-    path('library/', include('library.urls')),
-    path('serdes/', include('serdes.urls')),
+    path('', include('core.urls')),
+    path('', include('back_office.urls')),
+    path('libraries/', include('library.urls')),
+    path('', include('serdes.urls')),
+
     path('accounts/login/', cv.UserLogin.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout'),
     path('search/', cv.SearchResults.as_view(), name='search'),
     path('', login_required(cv.AnalysisListView.as_view()), name='home'),
-    path('staff/x-rays', login_required(cv.ReviewView.as_view()), name='xrays'),
-
-    path("__reload__/", include("django_browser_reload.urls")),
+    path('x-rays', login_required(cv.ReviewView.as_view()), name='xrays'),
 ]
