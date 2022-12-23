@@ -204,11 +204,11 @@ class User(AbstractBaseUser):
     def get_full_name(self) -> str:
         """ get user's full name """
         full_name = f'{self.first_name} {self.last_name}'
-        return full_name.strip()
+        return full_name.strip() if full_name.strip() else self.email
 
     def get_short_name(self) -> str:
         """ get user's short name """
-        return self.first_name
+        return self.first_name if self.first_name else self.email.split('@')[0]
 
 
 class RoleAssignment(models.Model):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-02 11:38+0000\n"
+"POT-Creation-Date: 2022-12-22 19:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,12 +22,12 @@ msgstr ""
 msgid "Threat description"
 msgstr "Description de la menace"
 
-#: core/admin.py:46 core/admin.py:73 core/models.py:221
+#: core/admin.py:46 core/admin.py:73 core/models.py:228
 #: core/templates/core/browser.html:94
 msgid "Current level"
 msgstr "Niveau de risque courant"
 
-#: core/admin.py:47 core/admin.py:75 core/models.py:227
+#: core/admin.py:47 core/admin.py:75 core/models.py:234
 #: core/templates/core/browser.html:95
 msgid "Residual level"
 msgstr "Niveau de risque résiduel"
@@ -36,11 +36,11 @@ msgstr "Niveau de risque résiduel"
 msgid "Follow-up"
 msgstr "Suivi"
 
-#: core/admin.py:92 core/models.py:54 core/models.py:210
+#: core/admin.py:92 core/models.py:54 core/models.py:217
 msgid "Analysis"
 msgstr "Analyse"
 
-#: core/admin.py:93 core/models.py:55 core/templates/core/analytics.html:40
+#: core/admin.py:93 core/models.py:55 core/templates/core/analytics.html:32
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -67,7 +67,7 @@ msgstr "Nom"
 msgid "Description"
 msgstr ""
 
-#: core/base_models.py:10 core/models.py:173 core/models.py:317
+#: core/base_models.py:10 core/models.py:173 core/models.py:324
 msgid "Created at"
 msgstr "Créé le"
 
@@ -85,7 +85,7 @@ msgstr "Adresse électronique"
 msgid "Password"
 msgstr "Mot de passe"
 
-#: core/forms.py:154 core/models.py:237 core/models.py:312
+#: core/forms.py:154 core/models.py:244 core/models.py:319
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 
@@ -102,7 +102,7 @@ msgstr ""
 "plus d'informations."
 
 #: core/models.py:46 core/templates/core/browser.html:92
-#: core/templates/core/browser.html:117 core/templates/core/my_projects.html:35
+#: core/templates/core/browser.html:117 core/templates/core/my_projects.html:30
 msgid "Project"
 msgstr "Projet"
 
@@ -189,7 +189,7 @@ msgstr ""
 "R#{} a une acceptation de risque expirée. Envisager d'actualiser le statut "
 "ou sa date d'expiration"
 
-#: core/models.py:139 core/models.py:203
+#: core/models.py:139 core/models.py:210
 msgid "Open"
 msgstr "Ouvert"
 
@@ -241,13 +241,13 @@ msgstr "Domaine"
 msgid "Security Function"
 msgstr "Fonction de sécurité"
 
-#: core/models.py:163 core/models.py:314
+#: core/models.py:163 core/models.py:321
 #: core/templates/snippets/mp_data.html:43
 msgid "Type"
 msgstr ""
 
 #: core/models.py:164 core/templates/core/browser.html:120
-#: core/templates/core/my_projects.html:38
+#: core/templates/core/my_projects.html:33
 #: core/templates/snippets/mp_data.html:48
 msgid "Status"
 msgstr "Statut"
@@ -256,7 +256,7 @@ msgstr "Statut"
 msgid "Estimated Time of Arrival"
 msgstr "Heure d'arrivée prévue"
 
-#: core/models.py:165 core/templates/core/my_projects.html:39
+#: core/models.py:165 core/templates/core/my_projects.html:34
 #: core/templates/snippets/mp_data.html:45
 msgid "ETA"
 msgstr "Arrivée estimée"
@@ -273,12 +273,11 @@ msgstr "Lien"
 msgid "Relative effort of the measure (using T-Shirt sizing)"
 msgstr "Effort relatif impliqué par la mesure"
 
-#: core/models.py:171 core/templates/core/analytics.html:140
-#: core/templates/snippets/mp_data.html:46
+#: core/models.py:171 core/templates/snippets/mp_data.html:46
 msgid "Effort"
 msgstr ""
 
-#: core/models.py:174 core/models.py:233 core/models.py:318
+#: core/models.py:174 core/models.py:240 core/models.py:325
 msgid "Updated at"
 msgstr "Mis à jour le"
 
@@ -286,41 +285,42 @@ msgstr "Mis à jour le"
 msgid "Security measure"
 msgstr "Mesure de sécurité"
 
-#: core/models.py:178 core/models.py:212 core/templates/core/analytics.html:20
+#: core/models.py:178 core/models.py:219 core/templates/core/analytics.html:40
 #: core/templates/core/search_results.html:34
+#: core/templates/core/sidebar.html:100
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
-#: core/models.py:204
+#: core/models.py:211
 msgid "Mitigated"
 msgstr "Atténué"
 
 # Toléré ?
-#: core/models.py:205
+#: core/models.py:212
 msgid "Accepted"
 msgstr "Accepté"
 
-#: core/models.py:206
+#: core/models.py:213
 msgid "Show-stopper"
 msgstr "Bloquant"
 
-#: core/models.py:207
+#: core/models.py:214
 msgid "Transferred"
 msgstr "Transféré"
 
-#: core/models.py:211
+#: core/models.py:218 core/templates/core/sidebar.html:141
 msgid "Assets"
 msgstr "Biens sensibles"
 
-#: core/models.py:211
+#: core/models.py:218
 msgid "Assets impacted by the risk scenario"
 msgstr "Biens sensibles impactés par le scénario de risque"
 
-#: core/models.py:213 core/templates/snippets/ra_data.html:44
+#: core/models.py:220 core/templates/snippets/ra_data.html:44
 msgid "Threat"
 msgstr "Menace"
 
-#: core/models.py:215
+#: core/models.py:222
 msgid ""
 "The existing security measures to manage this risk. Edit the risk scenario "
 "to add extra security measures."
@@ -328,19 +328,19 @@ msgstr ""
 "Les mesures de sécurité existantes pour gérer ce risque. Modifiez le "
 "scénario de risque pour y ajouter des mesures de sécurité supplémentaires."
 
-#: core/models.py:216 core/templates/snippets/ra_data.html:47
+#: core/models.py:223 core/templates/snippets/ra_data.html:47
 msgid "Existing measures"
 msgstr "Mesures existantes"
 
-#: core/models.py:219
+#: core/models.py:226
 msgid "Current probability"
 msgstr "Probabilité courante"
 
-#: core/models.py:220
+#: core/models.py:227
 msgid "Current impact"
 msgstr "Impact courant"
 
-#: core/models.py:222
+#: core/models.py:229
 msgid ""
 "The risk level given the current measures. Automatically updated on Save, "
 "based on the chosen matrix"
@@ -349,15 +349,15 @@ msgstr ""
 "automatiquement lors de l'enregistrement. Basé sur la matrice d'évaluation "
 "choisie."
 
-#: core/models.py:225
+#: core/models.py:232
 msgid "Residual probability"
 msgstr "Probabilité résiduelle"
 
-#: core/models.py:226
+#: core/models.py:233
 msgid "Residual impact"
 msgstr "Impact résiduel"
 
-#: core/models.py:228
+#: core/models.py:235
 msgid ""
 "The risk level when all the extra measures are done. Automatically updated "
 "on Save, based on the chosen matrix"
@@ -366,146 +366,130 @@ msgstr ""
 "jour automatiquement lors de l'enregistrement. Basé sur la matrice "
 "d'évaluation choisie."
 
-#: core/models.py:231 core/templates/core/browser.html:96
+#: core/models.py:238 core/templates/core/browser.html:96
 msgid "Treatment status"
 msgstr "Statut du traitement"
 
-#: core/models.py:234 core/models.py:319
+#: core/models.py:241 core/models.py:326
 msgid "Comments"
 msgstr "Commentaires"
 
-#: core/models.py:238 core/templates/core/analytics.html:14
-#: core/templates/core/search_results.html:21
-#: core/templates/snippets/ra_data.html:39
+#: core/models.py:245 core/templates/core/search_results.html:21
+#: core/templates/core/sidebar.html:91 core/templates/snippets/ra_data.html:39
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
-#: core/models.py:246
+#: core/models.py:253
 msgid "Parent project"
 msgstr "Projet parent"
 
-#: core/models.py:308
+#: core/models.py:315
 msgid "Temporary"
 msgstr "Temporaire"
 
-#: core/models.py:309
+#: core/models.py:316
 msgid "Permanent"
 msgstr ""
 
-#: core/models.py:313
+#: core/models.py:320
 msgid "Risk owner and validator identity"
 msgstr "Identité du propriétaire et validateur du risque"
 
-#: core/models.py:313
+#: core/models.py:320
 msgid "Validator"
 msgstr "Validateur"
 
-#: core/models.py:315
+#: core/models.py:322
 msgid "If temporary, specify when the risk acceptance will no longer apply"
 msgstr ""
 "Si temporaire, spécifier quand l'acceptation du risque ne s'appliquera plus"
 
-#: core/models.py:316
+#: core/models.py:323
 msgid "Expiry date"
 msgstr "Date d'expiration"
 
-#: core/models.py:322
+#: core/models.py:329
 msgid "Risk acceptance"
 msgstr "Acceptation de risque"
 
-#: core/models.py:323 core/templates/core/analytics.html:52
+#: core/models.py:330 core/templates/core/sidebar.html:109
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
-#: core/templates/core/analytics.html:34
-msgid "Show-stoppers"
-msgstr "Bloquants"
+#: core/templates/core/analytics.html:10 core/templates/core/analytics.html:15
+#: core/templates/core/sidebar.html:47 core/templates/core/sidebar.html:58
+msgid "Analytics"
+msgstr "Analytique"
 
-#: core/templates/core/analytics.html:46
-msgid "Security functions"
-msgstr "Fonctions de sécurité"
+#: core/templates/core/analytics.html:16 core/templates/core/analytics.html:47
+msgid "My projects"
+msgstr "Mes projets"
 
-#: core/templates/core/analytics.html:60
-msgid "Risk scenarios broken down by threat"
-msgstr "Scénarios de risque répartis par menace"
+#: core/templates/core/analytics.html:17
+#: core/templates/core/project_select.html:12
+msgid "Composer"
+msgstr "Composition"
 
-#: core/templates/core/analytics.html:68
-msgid "Risk scenarios broken down by status"
-msgstr "Scénarios de risque répartis par statut"
+#: core/templates/core/analytics.html:23
+#, fuzzy
+#| msgid "Status"
+msgid "Statistics"
+msgstr "Statut"
 
-#: core/templates/core/analytics.html:76
-msgid ""
-"Risk scenarios breakdown per level: current (with the existing security "
-"measures) versus residual (once all security measures implemented)"
+#: core/templates/core/analytics.html:28 core/templates/core/sidebar.html:150
+#, fuzzy
+#| msgid "Threat"
+msgid "Threats"
+msgstr "Menace"
+
+#: core/templates/core/analytics.html:36
+#, fuzzy
+#| msgid "Scenario"
+msgid "Scenarios"
+msgstr "Scénario"
+
+# debatable, I took the same as jira for consistency
+#: core/templates/core/analytics.html:48
+#, fuzzy
+#| msgid "Assignee"
+msgid "Assigned to"
+msgstr "Responsable"
+
+#: core/templates/core/analytics.html:48
+#, fuzzy
+#| msgid "My projects"
+msgid "projects"
+msgstr "Mes projets"
+
+#: core/templates/core/analytics.html:52
+#, fuzzy
+#| msgid "Risk scenarios"
+msgid "Risk scenarios overview"
+msgstr "Scénarios de risque"
+
+#: core/templates/core/analytics.html:58
+#, fuzzy
+#| msgid "Security measures"
+msgid "Security measures status"
+msgstr "Mesures de sécurité"
+
+#: core/templates/core/analytics.html:66
+msgid "Watch list"
 msgstr ""
-"Scénarios répartis par niveau de risque: actuel (avec les mesures de "
-"sécurité existantes) contre résiduel (une fois toutes les mesures de "
-"sécurité implémentées)"
 
-#: core/templates/core/analytics.html:80 core/templates/core/composer.html:21
-#: core/templates/snippets/ra_data.html:48
-msgid "Current risk"
-msgstr "Risque courant"
+#: core/templates/core/analytics.html:67
+msgid "Items that have expired or with close ETA"
+msgstr ""
 
-#: core/templates/core/analytics.html:86 core/templates/core/composer.html:37
-#: core/templates/snippets/ra_data.html:50
-msgid "Residual risk"
-msgstr "Risque résiduel"
-
-#: core/templates/core/analytics.html:97
-msgid "Measures overview"
+#: core/templates/core/analytics.html:71
+#, fuzzy
+#| msgid "Measures overview"
+msgid "Measures to review"
 msgstr "Aperçu des mesures"
 
-#: core/templates/core/analytics.html:102
-msgid "Breakdown per status"
-msgstr "Répartition par statut"
-
-#: core/templates/core/analytics.html:106
-msgid "Pending measures per associated risk level (current)"
-msgstr "Mesures en attente par niveau de risque associé (actuel)"
-
-#: core/templates/core/analytics.html:112
-msgid "Breakdown per security function"
-msgstr "Répartition par fonction de sécurité"
-
-#: core/templates/core/analytics.html:113
-msgid "Measures per security function"
-msgstr "Mesures par fonction de sécurité"
-
-#: core/templates/core/analytics.html:124
-msgid "Measures priority quadrants"
-msgstr "Quadrant de priorisation des mesures"
-
-#: core/templates/core/analytics.html:132
-msgid "4th"
-msgstr "4ème"
-
-#: core/templates/core/analytics.html:141
-msgid "2nd"
-msgstr "2ème"
-
-#: core/templates/core/analytics.html:151
-msgid "3rd"
-msgstr "3ème"
-
-#: core/templates/core/analytics.html:159 core/templates/core/scoring.html:299
-msgid "Risk level"
-msgstr "Niveau de risque"
-
-#: core/templates/core/analytics.html:160
-msgid "1st"
-msgstr "1er"
-
-#: core/templates/core/analytics.html:170
-msgid "Note"
+#: core/templates/core/analytics.html:75
+msgid "Exceptions to review"
 msgstr ""
-
-#: core/templates/core/analytics.html:170
-msgid ""
-"measure(s) have not been processed because the estimated effort is not set."
-msgstr ""
-"measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas "
-"déterminé"
 
 #: core/templates/core/browser.html:86
 msgid "Browsing"
@@ -557,6 +541,10 @@ msgstr "projets sélectionnés "
 msgid "Current risk level"
 msgstr "Niveau de risque courant"
 
+#: core/templates/core/composer.html:21 core/templates/snippets/ra_data.html:48
+msgid "Current risk"
+msgstr "Risque courant"
+
 #: core/templates/core/composer.html:27
 msgid "Status of associated measures"
 msgstr "Statut des mesures associées"
@@ -564,6 +552,10 @@ msgstr "Statut des mesures associées"
 #: core/templates/core/composer.html:35
 msgid "Residual risk level"
 msgstr "Niveau de risque résiduel"
+
+#: core/templates/core/composer.html:37 core/templates/snippets/ra_data.html:50
+msgid "Residual risk"
+msgstr "Risque résiduel"
 
 #: core/templates/core/composer.html:44
 msgid "For the selected scope, you have:"
@@ -640,7 +632,7 @@ msgstr ""
 "Rechercher un scénario de risque, une mesure de sécurité, une analyse de "
 "risque..."
 
-#: core/templates/core/index.html:23 core/templates/core/sidebar.html:46
+#: core/templates/core/index.html:23 core/templates/core/sidebar.html:40
 msgid "Analysis registry"
 msgstr "Registre des analyses"
 
@@ -718,39 +710,33 @@ msgstr "Suiv."
 msgid "Last"
 msgstr "Fin"
 
-#: core/templates/core/my_projects.html:11
-msgid "My projects summary"
-msgstr "Résumé de mes projets"
-
-#: core/templates/core/my_projects.html:15
-msgid "Risk level overview"
-msgstr "Aperçu du niveau de risque"
-
-#: core/templates/core/my_projects.html:23
+#: core/templates/core/my_projects.html:18
 msgid "Treatment progress overview"
 msgstr "Aperçu de l'avancement du traitement"
 
-#: core/templates/core/my_projects.html:30
-msgid "Your pending measure(s)"
+#: core/templates/core/my_projects.html:25
+#, fuzzy
+#| msgid "Your pending measure(s)"
+msgid "Your pending measures"
 msgstr "Vos mesures en attente"
 
-#: core/templates/core/my_projects.html:31
+#: core/templates/core/my_projects.html:26
 msgid "ordered by ranking score"
 msgstr "classées par évaluation"
 
-#: core/templates/core/my_projects.html:36
+#: core/templates/core/my_projects.html:31
 msgid "Measure"
 msgstr "Mesure"
 
-#: core/templates/core/my_projects.html:37
+#: core/templates/core/my_projects.html:32
 msgid "Ranking score"
 msgstr "Évaluation"
 
-#: core/templates/core/my_projects.html:40
+#: core/templates/core/my_projects.html:35
 msgid "Actions"
 msgstr ""
 
-#: core/templates/core/my_projects.html:57
+#: core/templates/core/my_projects.html:52
 msgid ""
 "Ranking score is an adaptive metric that combines the information of effort "
 "and current risk level, and crosses it with the other data to assist you for "
@@ -760,16 +746,11 @@ msgstr ""
 "courant, puis les croise avec d'autres données afin de vous assister à la "
 "priorisation."
 
-#: core/templates/core/my_projects.html:60
+#: core/templates/core/my_projects.html:55
 msgid "Projects summary is empty."
 msgstr "Le résumé des projets est vide."
 
-#: core/templates/core/project_select.html:16
-#: core/templates/core/sidebar.html:99
-msgid "Composer"
-msgstr "Composition"
-
-#: core/templates/core/project_select.html:23
+#: core/templates/core/project_select.html:19
 msgid ""
 "This will help you aggregate multiple components (projects) to get the "
 "compiled view on your risk. This is particularly useful for two use cases:"
@@ -778,7 +759,7 @@ msgstr ""
 "d'avoir une vue synthétique sur votre risque, ce qui est particulièrement "
 "utile dans deux cas :"
 
-#: core/templates/core/project_select.html:25
+#: core/templates/core/project_select.html:21
 msgid ""
 "business intelligence approach to focus on a specific subset across "
 "different project domains (eg. across divisions)"
@@ -787,7 +768,7 @@ msgstr ""
 "un sous-ensemble précis distribué sur différents domaines de projets (ex : "
 "plusieurs divisions)"
 
-#: core/templates/core/project_select.html:26
+#: core/templates/core/project_select.html:22
 msgid ""
 "you are interested in the risk assessment of a specific system, for which "
 "you need the risk assessment of the underlying components"
@@ -795,11 +776,11 @@ msgstr ""
 "vous voulez évaluer le risque d'un système spécifique, pour lequel vous avez "
 "besoin de l'évaluation du risque des composants sous-jacents"
 
-#: core/templates/core/project_select.html:56
+#: core/templates/core/project_select.html:52
 msgid "Select your targets"
 msgstr "Sélectionnez vos cibles"
 
-#: core/templates/core/project_select.html:110
+#: core/templates/core/project_select.html:106
 msgid "Process"
 msgstr "Traiter"
 
@@ -1210,6 +1191,10 @@ msgstr "Vecteurs d'évaluation :"
 msgid "Probability"
 msgstr "Probabilité"
 
+#: core/templates/core/scoring.html:299
+msgid "Risk level"
+msgstr "Niveau de risque"
+
 #: core/templates/core/scoring.html:308
 #: core/templates/snippets/risk_matrix.html:35
 msgid "Impact"
@@ -1223,47 +1208,101 @@ msgstr ""
 "Aucun résultat ne correspond à votre requête. Essayez quelque chose de plus "
 "spécifique."
 
-#: core/templates/core/sidebar.html:54
-msgid "Switch to editor"
-msgstr "Basculer vers l'éditeur"
+#: core/templates/core/sidebar.html:31
+msgid "Hi"
+msgstr "Bonjour"
 
-#: core/templates/core/sidebar.html:61 core/templates/core/sidebar.html:72
-msgid "Analytics"
-msgstr "Analytique"
+#: core/templates/core/sidebar.html:31
+msgid "!"
+msgstr " !"
 
-#: core/templates/core/sidebar.html:81
-msgid "My projects"
-msgstr "Mes projets"
-
-#: core/templates/core/sidebar.html:90
+#: core/templates/core/sidebar.html:67
 msgid "Calendar"
 msgstr "Calendrier"
 
-#: core/templates/core/sidebar.html:106
-msgid "Tools"
-msgstr "Outils"
+#: core/templates/core/sidebar.html:73
+#, fuzzy
+#| msgid "Risk matrix"
+msgid "Risk management"
+msgstr "Matrice des risques"
 
-#: core/templates/core/sidebar.html:116
+#: core/templates/core/sidebar.html:82
+#, fuzzy
+#| msgid "Risk analysis"
+msgid "Risk analyses"
+msgstr "Analyse de risque"
+
+#: core/templates/core/sidebar.html:114
+msgid "General"
+msgstr ""
+
+#: core/templates/core/sidebar.html:123
+#, fuzzy
+#| msgid "Projects summary is empty."
+msgid "Projects domains"
+msgstr "Le résumé des projets est vide."
+
+#: core/templates/core/sidebar.html:132
+#, fuzzy
+#| msgid "Project"
+msgid "Projects"
+msgstr "Projet"
+
+#: core/templates/core/sidebar.html:158
+msgid "Security functions"
+msgstr "Fonctions de sécurité"
+
+#: core/templates/core/sidebar.html:167
 msgid "Rating matrices"
 msgstr "Matrices d'évaluation"
 
-#: core/templates/core/sidebar.html:135
-msgid "Scoring assistant"
-msgstr "Assistant d'évaluation"
+#: core/templates/core/sidebar.html:172
+msgid "IAM"
+msgstr ""
 
-#: core/templates/core/sidebar.html:141
+#: core/templates/core/sidebar.html:181
+#, fuzzy
+#| msgid "My projects"
+msgid "My profile"
+msgstr "Mes projets"
+
+#: core/templates/core/sidebar.html:192
+msgid "Users"
+msgstr ""
+
+#: core/templates/core/sidebar.html:215
+msgid "Groups"
+msgstr ""
+
+#: core/templates/core/sidebar.html:236
+msgid "Role assignment"
+msgstr ""
+
+#: core/templates/core/sidebar.html:242
 msgid "Extra"
 msgstr ""
 
-#: core/templates/core/sidebar.html:170
-msgid "User guide"
-msgstr "Guide utilisateur"
+#: core/templates/core/sidebar.html:260
+msgid "Quick start"
+msgstr ""
 
-#: core/templates/core/sidebar.html:178 core/templates/core/sidebar.html:180
+#: core/templates/core/sidebar.html:269
+msgid "Scoring assistant"
+msgstr "Assistant d'évaluation"
+
+#: core/templates/core/sidebar.html:278
+msgid "Libraries"
+msgstr ""
+
+#: core/templates/core/sidebar.html:288
+msgid "Backups"
+msgstr ""
+
+#: core/templates/core/sidebar.html:307 core/templates/core/sidebar.html:309
 msgid "About MIRA"
 msgstr "À propos de MIRA"
 
-#: core/templates/core/sidebar.html:187
+#: core/templates/core/sidebar.html:338
 msgid "Logout"
 msgstr "Déconnexion"
 
@@ -1442,6 +1481,72 @@ msgstr " \"Mesure: en attente\" "
 #: core/templates/snippets/treatment_progress_dual_bar.html:13
 msgid " \"Measure: done\" "
 msgstr " \"Mesure: terminée\" "
+
+#~ msgid "Show-stoppers"
+#~ msgstr "Bloquants"
+
+#~ msgid "Risk scenarios broken down by threat"
+#~ msgstr "Scénarios de risque répartis par menace"
+
+#~ msgid "Risk scenarios broken down by status"
+#~ msgstr "Scénarios de risque répartis par statut"
+
+#~ msgid ""
+#~ "Risk scenarios breakdown per level: current (with the existing security "
+#~ "measures) versus residual (once all security measures implemented)"
+#~ msgstr ""
+#~ "Scénarios répartis par niveau de risque: actuel (avec les mesures de "
+#~ "sécurité existantes) contre résiduel (une fois toutes les mesures de "
+#~ "sécurité implémentées)"
+
+#~ msgid "Breakdown per status"
+#~ msgstr "Répartition par statut"
+
+#~ msgid "Pending measures per associated risk level (current)"
+#~ msgstr "Mesures en attente par niveau de risque associé (actuel)"
+
+#~ msgid "Breakdown per security function"
+#~ msgstr "Répartition par fonction de sécurité"
+
+#~ msgid "Measures per security function"
+#~ msgstr "Mesures par fonction de sécurité"
+
+#~ msgid "Measures priority quadrants"
+#~ msgstr "Quadrant de priorisation des mesures"
+
+#~ msgid "4th"
+#~ msgstr "4ème"
+
+#~ msgid "2nd"
+#~ msgstr "2ème"
+
+#~ msgid "3rd"
+#~ msgstr "3ème"
+
+#~ msgid "1st"
+#~ msgstr "1er"
+
+#~ msgid ""
+#~ "measure(s) have not been processed because the estimated effort is not "
+#~ "set."
+#~ msgstr ""
+#~ "measure(s) n'ont/n'a pas été traitée(s) car l'effort estimé n'est pas "
+#~ "déterminé"
+
+#~ msgid "My projects summary"
+#~ msgstr "Résumé de mes projets"
+
+#~ msgid "Risk level overview"
+#~ msgstr "Aperçu du niveau de risque"
+
+#~ msgid "Switch to editor"
+#~ msgstr "Basculer vers l'éditeur"
+
+#~ msgid "Tools"
+#~ msgstr "Outils"
+
+#~ msgid "User guide"
+#~ msgstr "Guide utilisateur"
 
 #~ msgid "Risk per project domain (category)"
 #~ msgstr "Risque par domaine de projets (catégorie)"

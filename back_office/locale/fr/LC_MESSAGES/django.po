@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-02 13:22+0000\n"
+"POT-Creation-Date: 2022-12-22 19:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -317,7 +317,7 @@ msgstr "Projets"
 #: back_office/models.py:29
 #: back_office/templates/back_office/project_list.html:8
 #: back_office/templates/back_office/quick_start.html:29
-#: back_office/templates/back_office/sidebar.html:92 back_office/views.py:146
+#: back_office/templates/back_office/sidebar.html:92 back_office/views.py:166
 msgid "Projects"
 msgstr "Projets"
 
@@ -338,7 +338,7 @@ msgstr "Menace"
 #: back_office/templates/back_office/quick_start.html:60
 #: back_office/templates/back_office/sidebar.html:110
 #: back_office/templates/back_office/threat_list.html:5
-#: back_office/views.py:858
+#: back_office/views.py:893
 msgid "Threats"
 msgstr "Menaces"
 
@@ -361,7 +361,7 @@ msgstr "bien parent"
 #: back_office/models.py:66 back_office/templates/back_office/asset_list.html:4
 #: back_office/templates/back_office/asset_list.html:9
 #: back_office/templates/back_office/ri_update.html:59
-#: back_office/templates/back_office/sidebar.html:101 back_office/views.py:248
+#: back_office/templates/back_office/sidebar.html:101 back_office/views.py:263
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -403,12 +403,12 @@ msgstr "Fonction de sécurité"
 #: back_office/models.py:144
 #: back_office/templates/back_office/quick_start.html:74
 #: back_office/templates/back_office/security_function_list.html:5
-#: back_office/templates/back_office/sidebar.html:118 back_office/views.py:775
+#: back_office/templates/back_office/sidebar.html:118 back_office/views.py:808
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
 #: back_office/templates/back_office/acceptance_list.html:6
-#: back_office/templates/back_office/sidebar.html:69 back_office/views.py:940
+#: back_office/templates/back_office/sidebar.html:69 back_office/views.py:977
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
@@ -543,7 +543,7 @@ msgstr ""
 #: back_office/templates/back_office/ri_list.html:6
 #: back_office/templates/back_office/sidebar.html:51
 #: back_office/templates/back_office/snippets/ra_list_nested.html:13
-#: back_office/views.py:582
+#: back_office/views.py:608
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -816,7 +816,7 @@ msgstr "Vue d'ensemble"
 msgid "Statistics"
 msgstr "Statistiques"
 
-#: back_office/templates/back_office/index.html:24 back_office/views.py:464
+#: back_office/templates/back_office/index.html:24 back_office/views.py:485
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -826,7 +826,7 @@ msgstr "Scénarios"
 
 #: back_office/templates/back_office/index.html:32
 #: back_office/templates/back_office/mtg_list.html:6
-#: back_office/templates/back_office/sidebar.html:60 back_office/views.py:692
+#: back_office/templates/back_office/sidebar.html:60 back_office/views.py:723
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -900,7 +900,7 @@ msgid "Edit"
 msgstr "Éditer"
 
 #: back_office/templates/back_office/my_profile_detailed.html:31
-#: back_office/views.py:1157 back_office/views.py:1256
+#: back_office/views.py:1213 back_office/views.py:1318
 msgid "User groups"
 msgstr "Groupes d'utilisateurs"
 
@@ -949,7 +949,7 @@ msgid "Description"
 msgstr ""
 
 #: back_office/templates/back_office/project_domain_list.html:5
-#: back_office/templates/back_office/sidebar.html:83 back_office/views.py:359
+#: back_office/templates/back_office/sidebar.html:83 back_office/views.py:379
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
@@ -1006,7 +1006,8 @@ msgstr "Bibliothèques"
 msgid ""
 "If you have just started the application for the first time, don't forget to "
 "import some"
-msgstr "Si vous venez de commencer à utiliser l'application, n'oubliez pas "
+msgstr ""
+"Si vous venez de commencer à utiliser l'application, n'oubliez pas "
 "d'importer des"
 
 #: back_office/templates/back_office/quick_start.html:19
@@ -1015,8 +1016,8 @@ msgstr "bibliothèques"
 
 #: back_office/templates/back_office/quick_start.html:20
 msgid "(yours or the ones provided by default) before doing anything."
-msgstr "(les vôtres ou celles fournies par défaut) avant de faire quoi que ce "
-"soit."
+msgstr ""
+"(les vôtres ou celles fournies par défaut) avant de faire quoi que ce soit."
 
 #: back_office/templates/back_office/quick_start.html:30
 msgid "Setup a"
@@ -1270,7 +1271,7 @@ msgid "Select security measures"
 msgstr "Sélectionner des mesures de sécurité"
 
 #: back_office/templates/back_office/risk_matrix_list.html:9
-#: back_office/views.py:1332
+#: back_office/views.py:1401
 msgid "Matrices"
 msgstr ""
 
@@ -1290,7 +1291,7 @@ msgstr "Nouvelle attribution de rôle"
 #: back_office/templates/back_office/role_assignment_create.html:10
 #: back_office/templates/back_office/role_assignment_update.html:10
 #: back_office/templates/back_office/role_list.html:6
-#: back_office/templates/back_office/sidebar.html:192 back_office/views.py:1224
+#: back_office/templates/back_office/sidebar.html:192 back_office/views.py:1284
 msgid "Role assignment"
 msgstr "Attribution des rôles"
 
@@ -1307,6 +1308,10 @@ msgid ""
 "Analyst...) a user \n"
 "            can have access to the resources they need.\n"
 "            "
+msgstr ""
+
+#: back_office/templates/back_office/role_list.html:22
+msgid "Learn more"
 msgstr ""
 
 #: back_office/templates/back_office/role_list.html:29
@@ -1349,6 +1354,382 @@ msgstr "Groupe d'utilisateurs"
 msgid "Role information"
 msgstr "Informations du rôle"
 
+#: back_office/templates/back_office/scoring.html:15
+#, fuzzy
+#| msgid "Rating matrix"
+msgid "Risk matrix"
+msgstr "Matrice d'évaluation"
+
+#: back_office/templates/back_office/scoring.html:23
+msgid "How technically skilled is this group of threat agents?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:26
+msgid "No technical skills"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:28
+msgid "Some technical skills"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:30
+msgid "Advanced computer user"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:31
+msgid "Network and programming skills"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:34
+#, fuzzy
+#| msgid "Security functions"
+msgid "Security penetration skills"
+msgstr "Fonctions de sécurité"
+
+#: back_office/templates/back_office/scoring.html:36
+msgid ""
+"How motivated is this group of threat agents to find and exploit this "
+"vulnerability?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:39
+msgid "Low or no reward"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:42
+msgid "Possible reward"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:47
+msgid "High reward"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:49
+msgid ""
+"What resources and opportunities are required for this group of threat "
+"agents to find and exploit this vulnerability?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:51
+msgid "Full access or expensive resources required"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:55
+msgid "Special access or resources required"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:58
+msgid "Some access or resources required"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:60
+msgid "No access or resources required"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:62
+msgid "How large is this group of threat agents?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:66
+msgid "Developers or system administrators"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:68
+#, fuzzy
+#| msgid "Other users"
+msgid "Intranet users"
+msgstr "Autres utilisateurs"
+
+#: back_office/templates/back_office/scoring.html:69
+msgid "Partners"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:70
+#, fuzzy
+#| msgid "Associated users"
+msgid "Authenticated users"
+msgstr "Utilisateurs associés"
+
+#: back_office/templates/back_office/scoring.html:73
+msgid "Anonymous Internet users"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:78
+#, fuzzy
+#| msgid "Treatment status"
+msgid "Threat agent factors"
+msgstr "Statut du traitement"
+
+#: back_office/templates/back_office/scoring.html:86
+msgid ""
+"How easy is it for this group of threat agents to discover this "
+"vulnerability?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:89
+msgid "Practically impossible"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:91
+#: back_office/templates/back_office/scoring.html:104
+msgid "Difficult"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:95
+#: back_office/templates/back_office/scoring.html:106
+msgid "Easy"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:97
+#: back_office/templates/back_office/scoring.html:110
+msgid "Automated tools available"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:99
+msgid ""
+"How easy is it for this group of threat agents to actually exploit this "
+"vulnerability?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:102
+msgid "Theoretical"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:112
+msgid "How well known is this vulnerability to this group of threat agents?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:115
+msgid "Unknown"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:118
+msgid "Hidden"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:120
+msgid "Obvious"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:123
+msgid "Public knowledge"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:125
+msgid "How likely is an exploit to be detected?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:128
+msgid "Active detection in application"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:130
+msgid "Logged and reviewed"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:135
+msgid "Logged without review"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:136
+msgid "Not logged"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:141
+msgid "Vulnerability factors"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:152
+msgid "How much financial damage will result from an exploit?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:155
+msgid "Less than the cost to fix the vulnerability"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:157
+msgid "Minor effect on annual profit"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:161
+msgid "Significant effect on annual profit"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:163
+msgid "Bankruptcy"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:165
+msgid ""
+"Would an exploit result in reputation damage that would harm the business?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:168
+msgid "Minimal damage"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:171
+msgid "Loss of major accounts"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:172
+msgid "Loss of goodwill"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:176
+msgid "Brand damage"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:178
+msgid "How much exposure does non-compliance introduce?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:182
+msgid "Minor violation"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:185
+#, fuzzy
+#| msgid "Role information"
+msgid "Clear violation"
+msgstr "Informations du rôle"
+
+#: back_office/templates/back_office/scoring.html:187
+msgid "High profile violation"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:191
+msgid "How much personally identifiable information could be disclosed?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:196
+msgid "One individual"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:198
+msgid "Hundreds of people"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:200
+msgid "Thousands of people"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:202
+msgid "Millions of people"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:207
+msgid "Business impact factors"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:213
+msgid "Ignore"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:222
+msgid "How much data could be disclosed and how sensitive is it?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:226
+msgid "Minimal non-sensitive data disclosed"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:230
+msgid "Minimal critical data or extensive non-sensitive data disclosed"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:231
+msgid "Extensive critical data disclosed"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:233
+msgid "All data disclosed"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:235
+msgid "How much data could be corrupted and how damaged is it?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:238
+msgid "Minimal slightly corrupt data"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:240
+msgid "Minimal seriously corrupt data"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:242
+msgid "Extensive slightly corrupt data"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:244
+msgid "Extensive seriously corrupt data"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:246
+msgid "All data totally corrupt"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:248
+msgid "How much service could be lost and how vital is it?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:251
+msgid "Minimal secondary services interrupted"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:255
+msgid "Minimal primary or extensive secondary services interrupted"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:257
+msgid "Extensive primary services interrupted"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:259
+msgid "All services completely lost"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:261
+msgid "Are the threat agents' actions traceable to an individual?"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:264
+msgid "Fully traceable"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:270
+msgid "Possibly traceable"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:272
+msgid "Completely anonymous"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:277
+msgid "Technical impact factors"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:286
+msgid "Assessment vector:"
+msgstr ""
+
+#: back_office/templates/back_office/scoring.html:291
+#, fuzzy
+#| msgid "Current probability"
+msgid "Probability"
+msgstr "Probabilité courante"
+
+#: back_office/templates/back_office/scoring.html:299
+#, fuzzy
+#| msgid "Residual risk level"
+msgid "Risk level"
+msgstr "Niveau de risque résiduel"
+
+#: back_office/templates/back_office/scoring.html:308
+msgid "Impact"
+msgstr ""
+
 #: back_office/templates/back_office/security_function_list.html:36
 msgid "Add Security Function"
 msgstr "Ajouter une fonction de sécurité"
@@ -1387,8 +1768,8 @@ msgstr ""
 
 #: back_office/templates/back_office/sidebar.html:151
 #: back_office/templates/back_office/sidebar.html:161
-#: back_office/templates/back_office/user_list.html:6 back_office/views.py:1068
-#: back_office/views.py:1282
+#: back_office/templates/back_office/user_list.html:6 back_office/views.py:1118
+#: back_office/views.py:1346
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -1453,6 +1834,10 @@ msgstr "Accueil"
 
 #: back_office/templates/back_office/snippets/modal.html:49
 msgid "Version:"
+msgstr ""
+
+#: back_office/templates/back_office/snippets/modal.html:50
+msgid "Build:"
 msgstr ""
 
 #: back_office/templates/back_office/snippets/modal_delete_form.html:3
@@ -1612,10 +1997,10 @@ msgstr "Analystes"
 msgid "Auditors"
 msgstr "Auditeurs"
 
-#: back_office/views.py:341
+#: back_office/views.py:359
 msgid ""
 "User groups {} - Auditors, {} - Analysts and {} - Domain Managers were "
 "created"
 msgstr ""
-"Les groupes d'utilisateurs {} - Auditeurs, {} - Analystes et {} - Responsables de "
-"domaine ont été créés"
+"Les groupes d'utilisateurs {} - Auditeurs, {} - Analystes et {} - "
+"Responsables de domaine ont été créés"

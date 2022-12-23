@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-02 13:16+0000\n"
+"POT-Creation-Date: 2022-12-22 19:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -228,7 +228,7 @@ msgid "Upload your own library"
 msgstr "Télécharger votre propre bibliothèque"
 
 #: library/templates/library/library_list.html:89
-#: serdes/templates/serdes/backup_restore.html:25
+#: serdes/templates/serdes/backup_restore.html:29
 msgid "Upload"
 msgstr "Télécharger"
 
@@ -280,10 +280,30 @@ msgstr "Sauvegarde et restauration"
 msgid "Import backup"
 msgstr "Importer une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:32
+#: serdes/templates/serdes/backup_restore.html:65
+#, fuzzy
+#| msgid "Import backup"
+msgid "Import backup?"
+msgstr "Importer une sauvegarde"
+
+#: serdes/templates/serdes/backup_restore.html:74
+msgid ""
+"This action cannot be undone. This will restore the database to a previous "
+"state. Are you sure you want to do this?"
+msgstr ""
+
+#: serdes/templates/serdes/backup_restore.html:80
+msgid "No, take me back"
+msgstr ""
+
+#: serdes/templates/serdes/backup_restore.html:82
+msgid "Yes"
+msgstr ""
+
+#: serdes/templates/serdes/backup_restore.html:105
 msgid "Export backup"
 msgstr "Exporter une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:34
+#: serdes/templates/serdes/backup_restore.html:107
 msgid "Dump database"
 msgstr "Exporter la base de données"
