@@ -1,7 +1,7 @@
 from typing import ValuesView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, UpdateView, CreateView, DeleteView, DetailView
 from django.http import HttpResponse
@@ -41,6 +41,14 @@ def index(request):
         "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup")
     }
     return HttpResponse(template.render(context, request))
+
+def scoring_assistant(request):
+    template = 'back_office/scoring.html'
+    context = {}
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
+    context['matrices'] = list(RiskMatrix.objects.all().values_list('json_definition', flat=True))
+    return render(request, template, context)
 
 
 class CreateViewModal(CreateView):
@@ -996,6 +1004,9 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
 
     model = User
 
+    def get_object(self, queryset: Optional[models.query.QuerySet[Any]] = ...) -> models.Model:
+        return self.request.user
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['change_usergroup'] = RoleAssignment.has_permission(
@@ -1016,7 +1027,7 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
         return context
 
     def test_func(self):
-        return self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
+        return self.request.user.is_authenticated
 
 
 class MyProfileUpdateView(UserPassesTestMixin, UpdateView):

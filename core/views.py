@@ -190,20 +190,28 @@ class Browser(ListView):
 def global_analytics(request):
     template = 'core/analytics.html'
 
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)
+
+    viewable_analyses = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)[0]
+
+    object_ids_view += [analysis for analysis in viewable_analyses]
+
+    _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=request.user).exclude(status='done').order_by('eta')
+
     context = {
-        "break_by_p_risks": p_risks(request.user),
-        "rose": p_risks_2(request.user),
-        "risks_level": risks_count_per_level(request.user),
-        "risk_colors": list(get_risk_color_map(request.user).values()),
-        "risk_status": risk_per_status(request.user),
-        "security_measure_status": security_measure_per_status(request.user),
-        "security_measure_per_cur_risk": security_measure_per_cur_risk(request.user),
-        "security_measure_per_security_function": security_measure_per_security_function(request.user),
-        "security_measure_priority": security_measure_priority(request.user),
-        "risk_matrix": risk_matrix(request.user),
-        "risks_per_project_groups": risks_per_project_groups(request.user),
-        "extra": risks_levels_per_prj_grp(request.user),
         "counters": get_counters(request.user),
+        "risks_level": risks_count_per_level(request.user),
+        "security_measure_status": security_measure_per_status(request.user),
+        "measures_to_review": measures_to_review(request.user),
+        "acceptances_to_review": acceptances_to_review(request.user),
+        "today": date.today(),
+        "view_user": RoleAssignment.has_permission(request.user, "view_user"),
+        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+        "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
+        "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
+        "analyses": Analysis.objects.filter(id__in=object_ids_view).filter(auditor=request.user).order_by('created_at'),
     }
 
     return render(request, template, context)

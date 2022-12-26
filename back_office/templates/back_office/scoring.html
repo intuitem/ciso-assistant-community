@@ -1,0 +1,366 @@
+{% extends 'core/base.html' %}
+
+{% load i18n static %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<script src="{% static 'js/risk.js' %}"></script>
+
+<main class="text-sm h-full flex flex-col">
+
+    <div class="mx-auto mt-4">
+        <div class="flex flex-col">
+            <p class="text-sm">{% trans "Risk matrix" %}</p>
+            <select id="matrixSelect" class="form-input w-fit pr-8" onchange="refresh()"></select>
+        </div>
+        <div class="grid lg:grid-cols-2">
+            <div class="">
+                <!--Threat Agent Factors-->
+                <div id="ta_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
+                    <div class="col-span-4 p-2">
+                        <div>{% trans "How technically skilled is this group of threat agents?" %}</div>
+                        <select class="my-select w-full" id="skill_level" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "No technical skills" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Some technical skills" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Advanced computer user" %}</option>
+                            <option class="text-6" value="6">6 - {% trans "Network and programming skills" %}</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Security penetration skills" %}</option>
+                        </select>
+                        <div>{% trans "How motivated is this group of threat agents to find and exploit this vulnerability?" %}</div>
+                        <select class="my-select w-full" id="motive" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Low or no reward" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4 - {% trans "Possible reward" %}</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "High reward" %}</option>
+                        </select>
+                        <div>{% trans "What resources and opportunities are required for this group of threat agents to find and exploit this vulnerability?" %}</div>
+                        <select class="my-select w-full" id="opportunity" onchange="refresh()">
+                            <option class="text-0" value="0">0 - {% trans "Full access or expensive resources required" %}</option>
+                            <option class="text-1" value="1">1</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4 - {% trans "Special access or resources required" %}</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Some access or resources required" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "No access or resources required" %}</option>
+                        </select>
+                        <div>{% trans "How large is this group of threat agents?" %}</div>
+                        <select class="my-select w-full" id="size" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1</option>
+                            <option class="text-2" value="2">2 - {% trans "Developers or system administrators" %}</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4 - {% trans "Intranet users" %}</option>
+                            <option class="text-5" value="5">5 - {% trans "Partners" %}</option>
+                            <option class="text-6" value="6">6 - {% trans "Authenticated users" %}</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Anonymous Internet users" %}</option>
+                        </select>
+                    </div>
+                    <div class="my-auto ml-2 col-span 1 w-full">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
+                            <div class="text-gray-100 text-xs">{% trans "Threat agent factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="threat_agent_score">--</div>
+                        </div>
+                    </div>
+                </div>
+                <!--Vulnerability Factors-->
+                <div id="vf_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
+                    <div class="col-span-4 p-2">
+                        <div>{% trans "How easy is it for this group of threat agents to discover this vulnerability?" %}</div>
+                        <select class="my-select w-full" id="ease_of_discovery" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Practically impossible" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Difficult" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Easy" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Automated tools available" %}</option>
+                        </select>
+                        <div>{% trans "How easy is it for this group of threat agents to actually exploit this vulnerability?" %}</div>
+                        <select class="my-select w-full" id="ease_of_exploit" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Theoretical" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Difficult" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Easy" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Automated tools available" %}</option>
+                        </select>
+                        <div>{% trans "How well known is this vulnerability to this group of threat agents?" %}</div>
+                        <select class="my-select w-full" id="awareness" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Unknown" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4 - {% trans "Hidden" %}</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6 - {% trans "Obvious" %}</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Public knowledge" %}</option>
+                        </select>
+                        <div>{% trans "How likely is an exploit to be detected?" %}</div>
+                        <select class="my-select w-full" id="intrusion_detection" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Active detection in application" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Logged and reviewed" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8 - {% trans "Logged without review" %}</option>
+                            <option class="text-9" value="9">9 - {% trans "Not logged" %}</option>
+                        </select>
+                    </div>
+                    <div class="my-auto ml-2 col-span 1 w-full">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
+                            <div class="text-gray-100 text-xs">{% trans "Vulnerability factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="vulnerability_score">--</div>
+                        </div>
+                    </div>
+                </div>       
+            </div>
+        
+            <div class="my-4 lg:my-0">
+                <!--Business Impact Factors-->
+                <div id="bi_div" class="px-4 py-2 mx-1 my-2 shadow rounded h-1/2 grid grid-cols-5 bg-white">
+                    <div class="col-span-4 p-2">
+                        <div>{% trans "How much financial damage will result from an exploit?" %} </div>
+                        <select class="my-select w-full" id="financial_damage" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Less than the cost to fix the vulnerability" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Minor effect on annual profit" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Significant effect on annual profit" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Bankruptcy" %}</option>
+                        </select>
+                        <div>{% trans "Would an exploit result in reputation damage that would harm the business?" %}</div>
+                        <select class="my-select w-full" id="reputation_damage" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Minimal damage" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4 - {% trans "Loss of major accounts" %}</option>
+                            <option class="text-5" value="5">5 - {% trans "Loss of goodwill" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Brand damage" %}</option>
+                        </select>
+                        <div>{% trans "How much exposure does non-compliance introduce?" %}</div>
+                        <select class="my-select w-full" id="non_compliance" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1</option>
+                            <option class="text-2" value="2">2 - {% trans "Minor violation" %}</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Clear violation" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "High profile violation" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9</option>
+                        </select>
+                        <div>{% trans "How much personally identifiable information could be disclosed?" %}</div>
+                        <select class="my-select w-full" id="privacy_violation" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "One individual" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Hundreds of people" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Thousands of people" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Millions of people" %}</option>
+                        </select>
+                    </div>
+                    <div class="my-auto ml-2 col-span 1 w-full">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
+                            <div class="text-gray-100 text-xs">{% trans "Business impact factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="business_impact_score">--</div>
+                            <div class="flex flex-row space-x-2 items-center">
+                                <input onchange="refresh()" id="ignore_business_impact" type="checkbox" class="w-4 h-4 bg-gray-100 border-gray-300 rounded
+                                focus:ring-2">
+                                <label class="ml-2 text-sm font-medium text-gray-100">
+                                    {% trans "Ignore" %}
+                                  </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Technical Impact Factors-->
+                <div id="ti_div" class="px-4 py-2 mx-1 my-2 bg-white shadow rounded h-1/2 grid grid-cols-5">
+                    <div class="col-span-4 p-2">
+                        <div>{% trans "How much data could be disclosed and how sensitive is it?" %}</div>
+                        <select class="my-select w-full" id="loss_of_confidentiality" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1</option>
+                            <option class="text-2" value="2">2 - {% trans "Minimal non-sensitive data disclosed" %}</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6 - {% trans "Minimal critical data or extensive non-sensitive data disclosed" %}</option>
+                            <option class="text-7" value="7">7 - {% trans "Extensive critical data disclosed" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "All data disclosed" %}</option>
+                        </select>
+                        <div>{% trans "How much data could be corrupted and how damaged is it?" %}</div>
+                        <select class="my-select w-full" id="loss_of_integrity" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Minimal slightly corrupt data" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3 - {% trans "Minimal seriously corrupt data" %}</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Extensive slightly corrupt data" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Extensive seriously corrupt data" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "All data totally corrupt" %}</option>
+                        </select>
+                        <div>{% trans "How much service could be lost and how vital is it?" %}</div>
+                        <select class="my-select w-full" id="loss_of_availability" onchange="refresh()">
+                                <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Minimal secondary services interrupted" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5 - {% trans "Minimal primary or extensive secondary services interrupted" %}</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Extensive primary services interrupted" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "All services completely lost" %}</option>
+                        </select>
+                        <div>{% trans "Are the threat agents' actions traceable to an individual?" %}</div>
+                        <select class="my-select w-full" id="loss_of_accountability" onchange="refresh()">
+                            <option class="text-0" value="0">0 - N/A</option>
+                            <option class="text-1" value="1">1 - {% trans "Fully traceable" %}</option>
+                            <option class="text-2" value="2">2</option>
+                            <option class="text-3" value="3">3</option>
+                            <option class="text-4" value="4">4</option>
+                            <option class="text-5" value="5">5</option>
+                            <option class="text-6" value="6">6</option>
+                            <option class="text-7" value="7">7 - {% trans "Possibly traceable" %}</option>
+                            <option class="text-8" value="8">8</option>
+                            <option class="text-9" value="9">9 - {% trans "Completely anonymous" %}</option>
+                        </select>
+                    </div>
+                    <div class="my-auto ml-2 col-span 1 w-full">
+                        <div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
+                            <div class="text-gray-100 text-xs">{% trans "Technical impact factors" %}</div>
+                            <div class="font-bold text-white text-lg" id="technical_impact_score">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-2 my-8 bg-white rounded shadow">
+            <div class="p-1 m-1 text-xs">{% trans "Assessment vector:" %} <span id="vector"></span></div>
+            <div class="grid grid-cols-3 grid-rows-1 items-center justify-center">
+        
+                <div class="mx-auto w-full">
+                    <div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
+                        <div class="text-gray-100 font-semibold ">{% trans "Probability" %}</div>
+                        <div>
+                            <span class="text-xl text-white font-bold" id="probability_label">--</span>
+                            <span class="text-white text-xs" id="probability_score"></span></div>
+                    </div>
+                </div>
+        
+                <div class="text-2xl p-2 grid grid-rows-2 grid-cols-3 items-center text-center w-full mb-4" id="score">
+                    <div class="text-lg p-1 col-span-3">{% trans "Risk level" %}</div>
+                    <i class="fas fa-arrow-alt-circle-right"></i>
+                    <span class="py-2 px-0 font-semibold rounded shadow" id="risk_label">
+                        <p class="overflow-clip">--</p></span>
+                    <i class="fas fa-arrow-alt-circle-left"></i>
+                </div>
+                
+                <div class="mx-auto w-full">
+                    <div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
+                        <div class="text-gray-100 font-semibold">{% trans "Impact" %}</div>
+                        <div>
+                            <span class="text-xl text-white font-bold" id="impact_label">--</span>
+                            <span class="text-white text-xs" id="impact_score"></span>
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    matrices = {{ matrices|safe }}
+    for (var i = 0; i < matrices.length; i++) {
+        matrices[i] = JSON.parse(matrices[i]);
+    }
+    
+    var matrixSelect = document.getElementById("matrixSelect");
+    for (var i = 0; i < matrices.length; i++) {
+        var option = document.createElement("option");
+        option.text = matrices[i].name;
+        option.value = i;
+        matrixSelect.add(option);
+    }
+
+    function getSelectedMatrix() {
+        var matrix_id = matrixSelect.options[matrixSelect.selectedIndex].value;
+        for (var i = 0; i < matrices.length; i++) {
+            if (i == matrix_id) {
+                return matrices[i];
+            }
+        }
+    }
+    
+    function refresh() {
+        const ignoreBusinessImpact = isBusinessImpactIgnored();
+
+        const factors = getFactorsValues();
+        const vector = buildVector(factors);
+        const scores = computeFactorsScores(factors, ignoreBusinessImpact);
+        const matrix = getSelectedMatrix();
+        const labels = scoreToRating(matrix, scores);
+
+
+        renderVector(vector);
+        renderScores(scores, ignoreBusinessImpact);
+        renderLabels(labels);
+        renderIgnoredFactors();
+    }
+
+    window.onload = function() {
+        refresh();
+    };
+</script>
+
+{% endblock %}

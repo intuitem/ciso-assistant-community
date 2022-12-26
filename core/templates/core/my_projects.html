@@ -1,15 +1,9 @@
-{% extends 'core/base.html' %}
-
 {% load i18n %}
 
-{% block head %}
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.3.2/dist/echarts.min.js"></script>
-{% endblock %}
 {% block content %}
 <main class="p-2">
     <div class="">
-        <div id="message" class="p-2 m-2 text-lg">{% trans "My projects summary" %}</div>
-        {% if context.agg_data.names %}
+        {% if agg_data.names %}
         {% comment %} <div class="m-2 p-2 rounded shadow bg-white">
             <div>
                 <div>{% trans "Risk level overview" %}</div>
@@ -27,10 +21,10 @@
             </div>
         </div>
         <div class="p-4 m-2 shadow rounded bg-white">
-            <div class="text-lg font-semibold">{% trans "Your pending measure(s)" %}:</div>
+            <div class="text-lg font-semibold">{% trans "Your pending measures" %}:</div>
             <div class="text-sm pb-4">{% trans "ordered by ranking score" %}</div>
             <div class="flex items-center justify-center">
-                <table class="p-2 m-2 ">
+                <table class="p-2 m-2 w-full">
                     <tr class="bg-gray-100">
                         <th class="text-left py-2 px-4">{% trans "Project" %}</th>
                         <th class="text-left py-2 px-4">{% trans "Measure" %}</th>
@@ -39,13 +33,13 @@
                         <th>{% trans "ETA" %}</th>
                         <th class="py-2 px-4">{% trans "Actions" %}</th>
                     </tr>
-                    {% for mtg in context.security_measures %}
+                    {% for mtg in measures %}
                     <tr class="border-b">
-                        <td class="text-left py-2 px-4">{{mtg.parent_project}}</td>
-                        <td class="text-left py-2 px-4">{{mtg.name}}</td>
-                        <td class="text-center py-2 px-4">{{mtg.get_ranking_score}}</td>
-                        <td class="text-center py-2 px-4 {% include 'snippets/mtg_style.html' with security_measure=mtg %}">{{mtg.get_status_display}}</td>
-                        <td class="text-center py-2 px-4">{{mtg.eta|date}}</td>
+                        <td class="text-left py-2 px-4">{{ mtg.parent_project }}</td>
+                        <td class="text-left py-2 px-4">{{ mtg.name }}</td>
+                        <td class="text-center py-2 px-4">{{ mtg.get_ranking_score }}</td>
+                        <td class="text-center py-2 px-4 {% include 'snippets/mtg_style.html' with security_measure=mtg %}">{{ mtg.get_status_display }}</td>
+                        <td class="text-center py-2 px-4">{{ mtg.eta|date }}</td>
                         <td class="text-center py-2 px-4">
                             {% if mtg.link %}<a href="{{mtg.link}}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-external-link-square-alt"></i></a>{% endif %}
                             <a href="{% url 'mtg-update' mtg.id %}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-pen-square"></i></a>
