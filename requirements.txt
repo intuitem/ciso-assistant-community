@@ -12,6 +12,6 @@ django-fieldsets-with-inlines==0.6
 psycopg2-binary==2.9.2
 gunicorn==20.1.0
 pytest-django==4.5.2
-playwright==1.21
+playwright==1.29
 pytest-playwright==0.3.0
 django-filter==21.1
