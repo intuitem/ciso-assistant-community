@@ -78,11 +78,12 @@
             </div>
         </section>
     </div>
-    <div x-show="openTab === 2">
-        {% include 'core/my_projects.html' with agg_data=agg_data measures=ord_security_measures %}
-    </div>
     <div x-show="openTab === 3">
         {% include 'core/project_select.html' with analyses=analyses %}
     </div>
+    <div x-show="openTab === 2">
+        {% include 'core/my_projects.html' with agg_data=agg_data measures=ord_security_measures %}
+    </div>
+</div>
 </div>
 {% endblock %}
