@@ -98,10 +98,10 @@
 		{% include 'core/sidebar.html' %}
 		<div class="flex-1">
 			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-4' : 'ml-72'">
-			{% block content %}
-				{% comment %} {% include 'back_office/snippets/breadcrumbs.html' %} {% endcomment %}
-			{% endblock %}
-		</main>
+				{% block content %}
+					{% comment %} {% include 'back_office/snippets/breadcrumbs.html' %} {% endcomment %}
+				{% endblock %}
+			</main>
 		</div>
 	</div>
 </body>
