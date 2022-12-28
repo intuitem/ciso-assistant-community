@@ -19,9 +19,10 @@ from django.contrib.auth import views as auth_views
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 
+# beware of the order of url patterns, this can change de behavior in case of multiple matches
 urlpatterns = [
-    path('', include('core.urls')),
     path('', include('back_office.urls')),
+    path('', include('core.urls')),
     path('libraries/', include('library.urls')),
     path('', include('serdes.urls')),
 
