@@ -6,16 +6,16 @@ import cal.views as cv
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
+    path('analyses_registery', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 
-    path('RA/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
-    path('RA-PDF/<analysis>/', login_required(views.generate_ra_pdf), name='RA-PDF'),
-    path('RA-CSV/<analysis>/', login_required(views.export_risks_csv), name='RA-CSV'),
+    path('analysis/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
+    path('analysis/<analysis>.pdf', login_required(views.generate_ra_pdf), name='RA-PDF'),
+    path('analysis/<analysis>.csv', login_required(views.export_risks_csv), name='RA-CSV'),
 
-    path('MP/<folder>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
-    path('MP-PDF/<analysis>/', login_required(views.generate_mp_pdf), name='MP-PDF'),
-    path('MP-CSV/<analysis>/', login_required(views.export_mp_csv), name='MP-CSV'),
+    path('treatment/plan/<folder>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
+    path('treatment/<analysis>.pdf', login_required(views.generate_mp_pdf), name='MP-PDF'),
+    path('treatment/<analysis>.csv', login_required(views.export_mp_csv), name='MP-CSV'),
 
     path('analytics/', login_required(views.global_analytics), name='analytics'),
     path('calendar/', login_required(cv.CalendarView.as_view()), name='calendar'),

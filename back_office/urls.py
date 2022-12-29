@@ -12,7 +12,7 @@ urlpatterns = [
     path('scoring-assistant', login_required(views.scoring_assistant), name='scoring_bo'),
 
     # LIST VIEWS
-    path('analyses-registry/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),
+    path('risk_analyses/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),
     path('risk-scenarios/', login_required(views.RiskScenarioListView.as_view()), name='ri-list'),
     path('measures/', login_required(views.SecurityMeasureListView.as_view()), name='mtg-list'),
     path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
@@ -31,28 +31,28 @@ urlpatterns = [
     path('profile', login_required(views.MyProfileDetailedView.as_view()), name='user-detailed'),
 
     # CREATE VIEWS
-    path('RA/create', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create'),
-    path('RA/create_modal/', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create-modal'),
+    path('risk_analysis/create', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create'),
+    path('risk_analysis/create_modal/', login_required(views.RiskAnalysisCreateView.as_view()), name='analysis-create-modal'),
     
-    path('MSR/create_modal/', login_required(views.SecurityMeasureCreateViewModal.as_view()), name='measure-create-modal'),
+    path('security_measure/create_modal/', login_required(views.SecurityMeasureCreateViewModal.as_view()), name='measure-create-modal'),
     
-    path('RAC/create_modal/', login_required(views.RiskAcceptanceCreateViewModal.as_view()), name='acceptance-create-modal'),
+    path('risk_acceptance/create_modal/', login_required(views.RiskAcceptanceCreateViewModal.as_view()), name='acceptance-create-modal'),
     
-    path('SF/create_modal/', login_required(views.SecurityFunctionCreateViewModal.as_view()), name='security-function-create-modal'),
+    path('security_function/create_modal/', login_required(views.SecurityFunctionCreateViewModal.as_view()), name='security-function-create-modal'),
     
-    path('TH/create_modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
+    path('threat/create_modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
 
-    path('RA/<int:parent_analysis>/RS/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
-    path('RS/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
+    path('risk_analysis/<int:parent_analysis>/risk_scenario/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
+    path('risk_scenario/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
 
-    path('PD/create', login_required(views.FolderCreateView.as_view()), name='pd-create'),
-    path('PD/create_modal/', login_required(views.FolderCreateViewModal.as_view()), name='pd-create-modal'),
+    path('project_domain/create', login_required(views.FolderCreateView.as_view()), name='pd-create'),
+    path('project_domain/create_modal/', login_required(views.FolderCreateViewModal.as_view()), name='pd-create-modal'),
 
-    path('PRJ/create', login_required(views.ProjectCreateView.as_view()), name='project-create'),
-    path('PRJ/create_modal/', login_required(views.ProjectCreateViewModal.as_view()), name='project-create-modal'),
+    path('project/create', login_required(views.ProjectCreateView.as_view()), name='project-create'),
+    path('project/create_modal/', login_required(views.ProjectCreateViewModal.as_view()), name='project-create-modal'),
     
-    path('AST/create/', login_required(views.AssetCreateView.as_view()), name='asset-create'),
-    path('AST/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
+    path('asset/create/', login_required(views.AssetCreateView.as_view()), name='asset-create'),
+    path('asset/create_modal/', login_required(views.AssetCreateViewModal.as_view()), name='asset-create-modal'),
 
     
     path('users/create', login_required(views.UserCreateView.as_view()), name='user-create'),
@@ -60,20 +60,20 @@ urlpatterns = [
 
     path('role-assignment/create', login_required(views.RoleAssignmentCreateView.as_view()), name='role-assignment-create'),
     
-    # path('RS/create-modal', login_required(views.RiskScenarioCreateViewModal.as_view()), name='ri-create-modal'),
+    # path('risk_scenario/create-modal', login_required(views.RiskScenarioCreateViewModal.as_view()), name='ri-create-modal'),
     
     # UPDATE VIEWS
-    path('RA/<str:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
-    path('RS/<str:pk>', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
-    path('RS/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='ri-update-modal'),
-    path('MSR/<str:pk>', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
-    path('RAC/<str:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
-    path('TH/<str:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
-    path('SF/<str:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
+    path('risk_analysis/<str:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
+    path('risk_scenario/<str:pk>', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
+    path('risk_scenario/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='ri-update-modal'),
+    path('security_measure/<str:pk>', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
+    path('risk_acceptance/<str:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
+    path('threat/<str:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
+    path('security_function/<str:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
 
-    path('PD/<str:pk>', login_required(views.FolderUpdateView.as_view()), name='pd-update'),
-    path('PRJ/<str:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
-    path('AST/<str:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
+    path('project_domain/<str:pk>', login_required(views.FolderUpdateView.as_view()), name='pd-update'),
+    path('project/<str:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
+    path('asset/<str:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
 
     path('users/<str:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
     path('my_profile/<str:pk>', login_required(views.MyProfileUpdateView.as_view()), name='me-update'),
@@ -82,15 +82,15 @@ urlpatterns = [
     path('role-assignment/<str:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
     
     # DELETE VIEWS
-    path('RA/<str:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
-    path('RS/<str:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='risk-scenario-delete'),
-    path('RAC/<str:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
-    path('MSR/<str:pk>/delete/', login_required(views.SecurityMeasureDeleteView.as_view()), name='measure-delete'),
-    path('PRJ/<str:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
-    path('AST/<str:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
-    path('SF/<str:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
-    path('PD/<str:pk>/delete/', login_required(views.FolderDeleteView.as_view()), name='pd-delete'),
-    path('TH/<str:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),
+    path('risk_analysis/<str:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
+    path('risk_scenario/<str:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='risk-scenario-delete'),
+    path('risk_acceptance/<str:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='risk-acceptance-delete'),
+    path('security_measure/<str:pk>/delete/', login_required(views.SecurityMeasureDeleteView.as_view()), name='measure-delete'),
+    path('project/<str:pk>/delete/', login_required(views.ProjectDeleteView.as_view()), name='project-delete'),
+    path('asset/<str:pk>/delete/', login_required(views.AssetDeleteView.as_view()), name='asset-delete'),
+    path('security_function/<str:pk>/delete/', login_required(views.SecurityFunctionDeleteView.as_view()), name='security-function-delete'),
+    path('project_domain/<str:pk>/delete/', login_required(views.FolderDeleteView.as_view()), name='pd-delete'),
+    path('threat/<str:pk>/delete/', login_required(views.ThreatDeleteView.as_view()), name='threat-delete'),
 
     path('users/<str:pk>/delete', login_required(views.UserDeleteView.as_view()), name='user-delete'),
     path('user_groups/<str:pk>/delete', login_required(views.UserGroupDeleteView.as_view()), name='user_group-delete'),
