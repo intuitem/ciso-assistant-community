@@ -21,7 +21,7 @@ from django.contrib.auth.decorators import login_required
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
-    path('back_office/', include('back_office.urls')),
+    path('back-office/', include('back_office.urls')),
     path('', include('core.urls')),
     path('libraries/', include('library.urls')),
     path('serdes/', include('serdes.urls')),
