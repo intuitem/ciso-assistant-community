@@ -63,7 +63,11 @@ class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
         return qs
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_securitymeasure"), folder=get_object_or_404(Project, id=self.kwargs['project']).folder)
+        """
+        The view is always accessible, only its content is filtered by the queryset
+        """
+        return True
+
 
 
 def build_ri_clusters(analysis: Analysis):
