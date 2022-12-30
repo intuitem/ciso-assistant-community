@@ -3,7 +3,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .models import *
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class DefaultDateInput(DateInput):
     input_type = 'date'
@@ -152,3 +154,89 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
             'expiry_date': DefaultDateInput(format='%Y-%m-%d')
         }
         labels = {'risk_scenario': _('Risk scenario')}
+
+
+class ProjectForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+
+    class Meta:
+        model = Project
+        fields = '__all__'
+        labels = {'folder': _('Domain')}
+
+class ProjectFormInherited(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProjectFormInherited, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
+
+    class Meta:
+        model = Project
+        fields = '__all__'
+        labels = {'folder': _('Domain')}
+
+class ProjectUpdateForm(StyledModelForm):
+
+    class Meta:
+        model = Project
+        fields = '__all__'
+
+
+class ThreatCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ThreatCreateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
+        
+
+    class Meta:
+        model = Threat
+        fields = '__all__'
+        exclude = ['is_published']
+
+
+class ThreatUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ThreatUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].disabled = True
+    class Meta:
+        model = Threat
+        fields = '__all__'
+        exclude = ['is_published']
+
+
+class AssetForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(AssetForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
+
+    class Meta:
+        model = Asset
+        fields = '__all__'
+        exclude = ['is_published']
+
+
+class SecurityFunctionCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].widget.attrs['select_disabled'] = True
+
+    class Meta:
+        model = SecurityFunction
+        fields = '__all__'
+        exclude = ['is_published']
+
+
+class SecurityFunctionUpdateForm(StyledModelForm):
+    class Meta:
+        model = SecurityFunction
+        fields = '__all__'
+        exclude = ['is_published']

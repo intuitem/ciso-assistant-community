@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 from asf_rm import settings
-from back_office.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
+from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
 from core.base_models import AbstractBaseModel
 
 

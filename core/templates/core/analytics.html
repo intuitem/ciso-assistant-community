@@ -8,7 +8,7 @@
 {% block content %}
 <div class="h-screen" x-data="{ openTab: 1 }">
     {% with page_title=_('Analytics') %}
-    {% include 'back_office/snippets/breadcrumbs.html' %}
+    {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
 
     <div class="px-4 flex flex-row">
@@ -51,12 +51,12 @@
                 <div class=" p-2 m-2 w-1/2">
                     <span class="text-sm font-semibold">{% trans "Risk scenarios overview" %}</span>
                     <!--Chart starts here-->
-                    {% include 'back_office/fragments/animated_donut_chart.html' with name='risk_scenarios_overview' values=risks_level.current %}
+                    {% include 'core/fragments/animated_donut_chart.html' with name='risk_scenarios_overview' values=risks_level.current %}
                     <!--Chart ends here-->
                 </div>
                 <div class="p-2 m-2 w-1/2">
                     <span class="text-sm font-semibold">{% trans "Security measures status" %}</span>
-                    {% include 'back_office/fragments/measures_status.html' with name='security_measures_status' labels=security_measure_status.labels values=security_measure_status.values %}
+                    {% include 'core/fragments/measures_status.html' with name='security_measures_status' labels=security_measure_status.labels values=security_measure_status.values %}
                 </div>
             </div>
         </section>
@@ -69,11 +69,11 @@
             <div class="p-2 m-2 flex flex-col space-y-5 items-center content-center">
                 <div class="w-full">
                     <span class="text-md font-semibold">{% trans "Measures to review" %}</span>
-                    <div>{% include 'back_office/fragments/watchlist_measures.html' %}</div>
+                    <div>{% include 'core/fragments/watchlist_measures.html' %}</div>
                 </div>
                 <div class="w-full">
                     <span class="text-md font-semibold">{% trans "Exceptions to review" %}</span>
-                    <div>{% include 'back_office/fragments/watchlist_exceptions.html' %}</div>
+                    <div>{% include 'core/fragments/watchlist_exceptions.html' %}</div>
                 </div>
             </div>
         </section>

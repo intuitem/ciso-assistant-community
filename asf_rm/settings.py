@@ -64,7 +64,6 @@ INSTALLED_APPS = [
     'theme',
     'iam',
     'core',
-    'back_office',
     'cal',
     'django_filters',
     'library',
@@ -95,7 +94,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / "core/templates",
-            BASE_DIR / "back_office/templates",
             ],
         'APP_DIRS': True,
         'OPTIONS': {

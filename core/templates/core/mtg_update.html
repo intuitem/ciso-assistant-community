@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+{% block content %}
+{% with page_title=security_measure %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<div class="flex flex-col space-y-4">
+    <form method="post" id="mtg_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
+    <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+        <h2 class="text-lg font-semibold mb-4">{% trans "Measure summary" %}</h2>
+        <div>
+            <div class="text-red-500 text-sm">{{ form.non_field_errors }}</div>
+            {% for field in form %}
+            <div>
+                <label class="text-sm font-semibold">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
+                <div class="w-auto">
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                    {% endfor %}
+                    {{ field }}
+                    <div class="mt-1 text-xs text-gray-400">
+                        {{ field.help_text|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="mt-4 flex space-x-2 justify-end">
+            <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
+            <input type="hidden" name="next" value={{ request.GET.next }}>
+            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
+                :disabled="submitDisabled">{% trans "Save" %}</button>
+        </div>
+    </div>
+    </form>
+</div>
+{% endblock %}
