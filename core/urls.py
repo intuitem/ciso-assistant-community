@@ -20,7 +20,7 @@ urlpatterns = [
     path('analytics/', login_required(views.global_analytics), name='analytics'),
     path('calendar/', login_required(cv.CalendarView.as_view()), name='calendar'),
     path('my-projects/', login_required(views.MyProjectsListView.as_view()), name='my_projects'),
-    path('composer/', login_required(views.ComposerListView.as_view()), name='composer'),
+    path('analytics/composer/', login_required(views.ComposerListView.as_view()), name='composer'),
 
     path('scoring-assistant/', login_required(views.scoring_assistant), name='scoring'),
     path('risk-matrix/', login_required(views.show_risk_matrix), name='matrix'),

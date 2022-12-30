@@ -7,14 +7,29 @@
 {% endblock %}
 {% block content %}
 <div class="h-screen" x-data="{ openTab: 1 }">
-    {% with page_title=_('Analytics') %}
+    {% with page_title=_('Overwiew') %}
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
 
     <div class="px-4 flex flex-row">
-        <div @click="openTab = 1" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "Analytics" %}</div>
-        <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "My projects" %}</div>
-        <div @click="openTab = 3" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 3 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "Composer" %}</div>
+        <div @click="openTab = 1" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">
+            <span class="nav-link-icon">
+                <i class="fas fa-chart-pie"></i>
+            </span>
+            {% trans "Analytics" %}
+        </div>
+        <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">
+            <span class="nav-link-icon">
+            <i class="fas fa-star"></i>
+            </span>
+            {% trans "My projects" %}
+        </div>
+        <div @click="openTab = 3" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 3 ? 'border-b-2 bg-gray-100' : 'border-b-0'">
+            <span class="nav-link-icon">
+                <i class="fas fa-drafting-compass"></i>
+            </span>
+            {% trans "Composer" %}
+        </div>
     </div>
 
     <div x-show="openTab === 1">
