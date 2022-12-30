@@ -360,6 +360,20 @@
 
     window.onload = function() {
         refresh();
+        if (sessionStorage.getItem('sidebar-yscroll')) {
+            document.getElementById('sidebar-scroll').scrollTop = sessionStorage.getItem('sidebar-yscroll');
+        }
+        document.getElementById('sidebar-scroll').addEventListener('scroll', debounce(function(){
+            yscroll = document.getElementById('sidebar-scroll').scrollTop;
+            sessionStorage.setItem('sidebar-yscroll', yscroll);
+        }, 50));
+        items = document.querySelectorAll("ul#sidebar-items li.to-page a");
+			items.forEach(function(element) {
+				if (window.location.pathname.includes(element.getAttribute("href"))) {
+					element.classList.remove("nav-link");
+					element.classList.add("nav-link-active");
+				}
+			});
     };
 </script>
 
