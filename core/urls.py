@@ -6,7 +6,7 @@ import cal.views as cv
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('analyses-registery', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
+    path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 
     path('analyses-registery/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
