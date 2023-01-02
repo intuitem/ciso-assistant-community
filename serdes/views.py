@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
 
 from iam.models import RoleAssignment
-from back_office.utils import UserGroupCodename
+from core.utils import UserGroupCodename
 from asf_rm.settings import VERSION
 
 import re

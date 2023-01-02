@@ -19,11 +19,11 @@ from django.contrib.auth import views as auth_views
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 
+# beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
     path('', include('core.urls')),
-    path('', include('back_office.urls')),
     path('libraries/', include('library.urls')),
-    path('', include('serdes.urls')),
+    path('serdes/', include('serdes.urls')),
 
     path('accounts/login/', cv.UserLogin.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout'),

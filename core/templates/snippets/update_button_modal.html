@@ -1,0 +1,10 @@
+{% load i18n static %}
+
+<div class="grid mb-4 w-full" x-data="{ open: false }">
+    <a @click="open = ! open"
+           class="add-button">
+           <i class="fas fa-hand-pointer"></i>
+           {{ content }}
+    </a>
+        {% include "snippets/modal.html" with modal_action="update" %}
+</div>

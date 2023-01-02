@@ -1,1 +1,0 @@
-default_app_config = 'back_office.apps.BackOfficeConfig'

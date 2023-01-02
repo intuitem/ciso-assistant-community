@@ -1,6 +1,6 @@
 from uuid import UUID
 from core.models import *
-from back_office.models import *
+from core.models import *
 from iam.models import *
 from library.utils import *
 import pytest

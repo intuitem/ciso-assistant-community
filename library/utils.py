@@ -1,5 +1,5 @@
 from core.models import RiskMatrix
-from back_office.models import Threat, SecurityFunction
+from core.models import Threat, SecurityFunction
 from django.contrib import messages
 from iam.models import Folder
 

@@ -59,7 +59,7 @@
 
 			items = document.querySelectorAll("ul#sidebar-items li.to-page a");
 			items.forEach(function(element) {
-				if (element.getAttribute("href") == window.location.pathname) {
+				if (window.location.pathname.includes(element.getAttribute("href"))) {
 					element.classList.remove("nav-link");
 					element.classList.add("nav-link-active");
 				}
@@ -98,9 +98,9 @@
 		{% include 'core/sidebar.html' %}
 		<div class="flex-1">
 			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-4' : 'ml-72'">
-			{% block content %}
-				{% comment %} {% include 'back_office/snippets/breadcrumbs.html' %} {% endcomment %}
-			{% endblock %}
+				{% block content %}
+					{% comment %} {% include 'snippets/breadcrumbs.html' %} {% endcomment %}
+				{% endblock %}
 			</main>
 		</div>
 	</div>
