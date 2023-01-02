@@ -1,5 +1,6 @@
 
 {% load static i18n %}
+{% load core_extras %}
 <aside
     class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-visible left-0 z-10" :class="{ '-ml-66': !sidebarOpen }">
     <nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50  py-4 px-3">
@@ -38,7 +39,7 @@
                                 <span class="hidden w-fit text-xs whitespace-nowrap bg-gray-600 text-white text-center rounded px-1 py-0.5 absolute z-10 group-hover:block left-0">{% trans "About MIRA" %}</span>
                             </span>
                         </a>
-                        {% include "back_office/snippets/modal.html" with header=_("About MIRA") %}
+                        {% include "snippets/modal.html" with header=_("About MIRA") %}
                     </div>
                     <div>
                         <a id="translation"
@@ -54,7 +55,7 @@
                                     {% get_language_info_list for LANGUAGES as languages %}
                                     {% for language in languages %}
                                         <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
-                                            {{ language.name_local }} ({{ language.code }})
+                                            {{ language.code|country_flag }} {{ language.name_local }} ({{ language.code }})
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -361,7 +362,7 @@
                     x-id="['dropdown-button']"
                     class="relative w-full overflow-visible"
                 >
-                <button class="w-full rounded-full hover:bg-gray-200 text-center my-auto cursor-pointer"
+                <button class="w-fit px-3 rounded-full hover:bg-gray-200 text-center my-auto cursor-pointer"
                         x-ref="button"
                         x-on:click="toggle()"
                         :aria-expanded="open"
@@ -379,16 +380,16 @@
                         style="display: none;"
                         class="absolute right-0 bottom-full mt-2 w-40 rounded-md bg-white shadow-md overflow-visible hover:block z-50"
                     >
-                        <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
-                            <i class="fas fa-user"></i>
-                            {% trans "My profile" %}
-                        </a>
+                    <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                        <i class="fas fa-user"></i>
+                        {% trans "My profile" %}
+                    </a>
 
-                        <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
-                            <i class="fas fa-sign-out-alt"></i>
-                            {% trans "Log out" %}
-                        </a>
-                    </div>
+                    <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                        <i class="fas fa-sign-out-alt"></i>
+                        {% trans "Log out" %}
+                    </a>
+                </div>
             </div>
             {% comment %} <div class="flex flex-col overflow-hidden">
                 <div class="text-right w-full">

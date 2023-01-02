@@ -1,6 +1,7 @@
 from django import template
 
 from asf_rm.settings import VERSION, BUILD, DEBUG
+from core.utils import COUNTRY_FLAGS
 
 register = template.Library()
 
@@ -23,3 +24,7 @@ def index(List, i):
 @register.filter
 def entry_num_array(List):
     return range(len(List))
+
+@register.filter('country_flag')
+def country_flag(country_code):
+    return COUNTRY_FLAGS.get(country_code, '🌐')
