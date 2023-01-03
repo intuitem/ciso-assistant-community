@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-22 19:09+0000\n"
+"POT-Creation-Date: 2023-01-03 14:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgstr "Confirmation du mot de passe"
 msgid "Enter the same password as before, for verification."
 msgstr "Entrez le même mot de passe que précédemment, pour vérification."
 
-#: iam/forms.py:127 iam/forms.py:160
+#: iam/forms.py:127 iam/forms.py:163
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
 "password, but you can change the password using <a class=\"help_text-link\" "
@@ -44,7 +44,7 @@ msgstr ""
 "voir le mot de passe de cet utilisateur, mais vous pouvez modifier le mot de "
 "passe en utilisant <a class=\"help_text-link\" href=\"{}\">ce formulaire</a>."
 
-#: iam/forms.py:155
+#: iam/forms.py:158
 msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
@@ -281,10 +281,8 @@ msgid "Import backup"
 msgstr "Importer une sauvegarde"
 
 #: serdes/templates/serdes/backup_restore.html:65
-#, fuzzy
-#| msgid "Import backup"
 msgid "Import backup?"
-msgstr "Importer une sauvegarde"
+msgstr "Importer une sauvegarde ?"
 
 #: serdes/templates/serdes/backup_restore.html:74
 msgid ""
