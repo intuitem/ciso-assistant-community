@@ -130,6 +130,9 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
         )
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
         self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
+        self.fields['user_groups'].widget = forms.CheckboxSelectMultiple(
+            attrs={'class': 'text-sm rounded'}, choices=self.fields['user_groups'].choices
+        )
         if password:
             password.help_text = password.help_text.format(
                 reverse('password-change', 

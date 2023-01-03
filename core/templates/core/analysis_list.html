@@ -72,16 +72,28 @@
                     
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Draft" %}</p>
                                     {{ filter.form.is_draft }}
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
-                                    {{ filter.form.auditor }}
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.auditor }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Project" %}</p>
-                                    {{ filter.form.project }}
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Project" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.project }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>

@@ -55,11 +55,24 @@
                         {{ form.description }}
                         <p class="help_text">{{ form.description.help_text }}</p>
                     </div>
-                    <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Assets" %}</p>
-                        {{ form.assets.errors }}
-                        {{ form.assets }}
-                        <p class="help_text">{{ form.assets.help_text }}</p>
+                    <div class="flex flex-col mb-4 space-y-1">
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold">{{ form.assets.label|striptags }}</label>
+                            <div class="w-full border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll">
+                                <div class="flex flex-col">
+                                    <div>
+                                        {{ form.assets }}
+                                
+                                        {% for error in form.assets.errors %}
+                                            <li class="text-red-500 text-xs font-semibold">{{ error|striptags }}</li>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="help_text -mt-1">
+                            {{ form.assets.help_text|safe }}
+                        </div>
                     </div>
                 </section>
             </div>
