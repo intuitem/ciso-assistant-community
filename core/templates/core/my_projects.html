@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% block content %}
-<main class="p-2">
+<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
     <div class="">
         {% if agg_data.names %}
         {% comment %} <div class="m-2 p-2 rounded shadow bg-white">
@@ -12,7 +12,7 @@
                 </div>
             </div>
         </div> {% endcomment %}
-        <div class="bg-white m-2 p-2 rounded shadow">
+        <div class="m-2 p-2">
             <div>
                 <div>{% trans "Treatment progress overview" %}</div>
                 <div class="rounded items-center justify-center">
@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        <div class="p-4 m-2 shadow rounded bg-white">
+        <div class="p-4 m-2">
             <div class="text-lg font-semibold">{% trans "Your pending measures" %}:</div>
             <div class="text-sm pb-4">{% trans "ordered by ranking score" %}</div>
             <div class="flex items-center justify-center">

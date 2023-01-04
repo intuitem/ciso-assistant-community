@@ -240,6 +240,7 @@ def global_analytics(request):
         "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
         "analyses": Analysis.objects.filter(id__in=object_ids_view).filter(auditor=request.user).order_by('created_at'),
+        "colors": get_risk_color_ordered_list(request.user),
     }
 
     return render(request, template, context)

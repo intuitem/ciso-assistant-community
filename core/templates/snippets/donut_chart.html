@@ -22,7 +22,7 @@
     },
     series: [
         {
-            name: '{{s_label}}',
+            name: '{{ s_label }}',
             type: 'pie',
             radius: ['40%', '70%'],
             avoidLabelOverlap: false,
@@ -46,7 +46,7 @@
                 show: false
             },
             data: {{ values|safe }},
-            color:{{ colors|safe }},
+            color: {{ colors|safe }},
         }
     ]
 };

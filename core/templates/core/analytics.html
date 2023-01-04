@@ -11,24 +11,24 @@
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
 
-    <div class="px-4 flex flex-row">
-        <div @click="openTab = 1" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">
-            <span class="nav-link-icon">
+    <div class="px-4 flex flex-row mb-0">
+        <div @click="openTab = 1" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 1 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
                 <i class="fas fa-chart-pie"></i>
             </span>
-            {% trans "Analytics" %}
+            <div class="w-full">{% trans "Analytics" %}</div>
         </div>
-        <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">
-            <span class="nav-link-icon">
-            <i class="fas fa-star"></i>
+        <div @click="openTab = 2" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 2 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
+                <i class="fas fa-star"></i>
             </span>
-            {% trans "My projects" %}
+            <div class="w-full">{% trans "My projects" %}</div>
         </div>
-        <div @click="openTab = 3" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 3 ? 'border-b-2 bg-gray-100' : 'border-b-0'">
-            <span class="nav-link-icon">
+        <div @click="openTab = 3" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 3 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
                 <i class="fas fa-drafting-compass"></i>
             </span>
-            {% trans "Composer" %}
+            <div class="w-full">{% trans "Composer" %}</div>
         </div>
     </div>
 
@@ -57,7 +57,7 @@
             </div>
         </section>
 
-        <section class="p-2 bg-white rounded-lg shadow-lg mb-6 " id="">
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
             <div class="p-2 m-2">
                 <div class="text-2xl font-extrabold text-slate-700">{% trans "My projects" %}</div>
                 <div class="text-sm text-slate-500 font-semibold">{% trans "Assigned to" %} <span class="font-bold text-slate-700">{{ counters.Project }}</span> {% trans "projects" %}</div>
@@ -66,7 +66,7 @@
                 <div class=" p-2 m-2 w-1/2">
                     <span class="text-sm font-semibold">{% trans "Risk scenarios overview" %}</span>
                     <!--Chart starts here-->
-                    {% include 'core/fragments/animated_donut_chart.html' with name='risk_scenarios_overview' values=risks_level.current %}
+                    {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=risks_level.current %}
                     <!--Chart ends here-->
                 </div>
                 <div class="p-2 m-2 w-1/2">
@@ -93,11 +93,11 @@
             </div>
         </section>
     </div>
+    <div x-show="openTab === 2" class="h-full">
+        {% include 'core/my_projects.html' with agg_data=agg_data measures=ord_security_measures %}
+    </div>
     <div x-show="openTab === 3">
         {% include 'core/project_select.html' with analyses=analyses %}
-    </div>
-    <div x-show="openTab === 2">
-        {% include 'core/my_projects.html' with agg_data=agg_data measures=ord_security_measures %}
     </div>
 </div>
 </div>
