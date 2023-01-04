@@ -1,7 +1,8 @@
 {% load i18n static %}
 
 <div class="grid mb-4 w-full" x-data="{ open: false }">
-    <a @click="open = ! open"
+    <a @click="open = !open,
+modalOpen = !modalOpen"
            class="add-button">
            <i class="fas fa-hand-pointer"></i>
            {{ content }}

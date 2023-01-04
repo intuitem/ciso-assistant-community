@@ -6,14 +6,14 @@ import cal.views as cv
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('analyses-registery', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
+    path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 
-    path('analyses-registery/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
+    path('analyses-registry/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
     path('analysis/<analysis>.pdf', login_required(views.generate_ra_pdf), name='RA-PDF'),
     path('analysis/<analysis>.csv', login_required(views.export_risks_csv), name='RA-CSV'),
 
-    path('analyses-registery/plan/<folder>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
+    path('analyses-registry/plan/<folder>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
     path('treatment/<analysis>.pdf', login_required(views.generate_mp_pdf), name='MP-PDF'),
     path('treatment/<analysis>.csv', login_required(views.export_mp_csv), name='MP-CSV'),
 

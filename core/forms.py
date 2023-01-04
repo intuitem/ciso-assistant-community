@@ -1,4 +1,4 @@
-from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput
+from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, CheckboxSelectMultiple
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .models import *
@@ -126,6 +126,7 @@ class RiskScenarioUpdateForm(StyledModelForm):
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50',
             'onchange': 'refresh();'
         })
+        self.fields['assets'].widget = CheckboxSelectMultiple(attrs={'class': 'text-sm rounded'}, choices=self.fields['assets'].choices)
 
     class Meta:
         model = RiskScenario
@@ -134,6 +135,10 @@ class RiskScenarioUpdateForm(StyledModelForm):
 
 
 class SecurityMeasureSelectForm(StyledModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['security_measures'].widget = CheckboxSelectMultiple(attrs={'class': 'text-sm rounded'}, choices=self.fields['security_measures'].choices)
 
     class Meta:
         model = RiskScenario

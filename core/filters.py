@@ -1,4 +1,4 @@
-from django.forms import CharField, CheckboxInput, ChoiceField, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
+from django.forms import CharField, CheckboxInput, ChoiceField, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, CheckboxSelectMultiple, TextInput, Textarea, TimeInput, URLInput, widgets
 from django_filters import FilterSet, OrderingFilter, ModelMultipleChoiceFilter, MultipleChoiceFilter, CharFilter, ChoiceFilter
 # from django_filters.widgets import *
 from django.db.models import Q
@@ -27,9 +27,9 @@ class GenericOrderingFilter(OrderingFilter):
 
 
 class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
-    widget = SelectMultiple(
+    widget = CheckboxSelectMultiple(
         attrs={
-            'class': 'rounded-lg w-full',
+            'class': 'text-sm rounded',
         }
     )
 
@@ -38,9 +38,9 @@ class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
 
 
 class GenericMultipleChoiceFilter(MultipleChoiceFilter):
-    widget = SelectMultiple(
+    widget = CheckboxSelectMultiple(
         attrs={
-            'class': 'rounded-lg w-full',
+            'class': 'text-sm rounded',
         }
     )
 

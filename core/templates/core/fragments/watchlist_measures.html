@@ -8,7 +8,7 @@
                     {% trans "Measure" %}
                 </th>
                 <th data-sort="parent_project" scope="col" class="px-3 py-3">
-                    {% trans "Project" %}
+                    {% trans "Domain" %}
                 </th>
                 <th data-sort="status" scope="col" class="px-3 py-3">
                     {% trans "Status" %}
@@ -28,7 +28,7 @@
                     {{ measure }}
                 </th>
                 <td class="px-3 py-4">
-                    {{ measure.parent_project }}
+                    {{ measure.folder }}
                 </td>
                 <td class="px-3 py-4">
                     {{ measure.get_status_display }}

@@ -39,8 +39,8 @@
                         }"
                         x-on:keydown.escape.prevent.stop="close($refs.button)"
                         x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
-                        x-id="['dropdown-button']"
-                        class="relative z-10"
+                            x-id="['dropdown-button']"
+                        class="relative"
                     >
                         <!-- Button -->
                         <button
@@ -64,7 +64,7 @@
                             x-on:click.outside="close($refs.button)"
                             :id="$id('dropdown-button')"
                             style="display: none;"
-                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden z-10"
                         >
                     
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">

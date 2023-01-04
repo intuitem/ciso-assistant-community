@@ -65,15 +65,15 @@
     }
 
     .nav-link {
-        @apply flex items-center p-2 text-base font-normal text-gray-800 rounded-lg hover:bg-gray-100;
+        @apply flex items-center p-2 text-sm font-normal text-gray-800 rounded-lg hover:bg-gray-100;
     }
 
     .nav-link-active {
-        @apply flex items-center p-2 text-base font-normal text-black rounded-r-lg hover:bg-gray-100 border-l-4 border-indigo-800;
+        @apply flex items-center p-2 text-sm font-normal text-indigo-800 rounded-lg bg-indigo-100 hover:bg-indigo-200;
     }
 
     .nav-link-icon {
-        @apply text-gray-600 transition duration-75 ml-4;
+        @apply transition duration-75 ml-4;
     }
 
     .dashboard-card {
@@ -88,8 +88,8 @@
         @apply p-2 text-white bg-gray-600 rounded-xl shadow-sm;
     }
 
-    .nav-seperator {
-        @apply p-3 tracking-wide text-indigo-900 font-semibold;
+    .nav-separator {
+        @apply px-6 pt-3 text-indigo-900 font-semibold uppercase tracking-tighter text-xs;
     }
 
     .form-label {

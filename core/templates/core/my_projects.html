@@ -1,7 +1,7 @@
 {% load i18n %}
 
 {% block content %}
-<main class="p-2">
+<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
     <div class="">
         {% if agg_data.names %}
         {% comment %} <div class="m-2 p-2 rounded shadow bg-white">
@@ -12,7 +12,7 @@
                 </div>
             </div>
         </div> {% endcomment %}
-        <div class="bg-white m-2 p-2 rounded shadow">
+        <div class="m-2 p-2">
             <div>
                 <div>{% trans "Treatment progress overview" %}</div>
                 <div class="rounded items-center justify-center">
@@ -20,13 +20,13 @@
                 </div>
             </div>
         </div>
-        <div class="p-4 m-2 shadow rounded bg-white">
+        <div class="p-4 m-2">
             <div class="text-lg font-semibold">{% trans "Your pending measures" %}:</div>
             <div class="text-sm pb-4">{% trans "ordered by ranking score" %}</div>
             <div class="flex items-center justify-center">
                 <table class="p-2 m-2 w-full">
                     <tr class="bg-gray-100">
-                        <th class="text-left py-2 px-4">{% trans "Project" %}</th>
+                        <th class="text-left py-2 px-4">{% trans "Domain" %}</th>
                         <th class="text-left py-2 px-4">{% trans "Measure" %}</th>
                         <th>{% trans "Ranking score" %}</th>
                         <th>{% trans "Status" %}</th>
@@ -35,7 +35,7 @@
                     </tr>
                     {% for mtg in measures %}
                     <tr class="border-b">
-                        <td class="text-left py-2 px-4">{{ mtg.parent_project }}</td>
+                        <td class="text-left py-2 px-4">{{ mtg.folder }}</td>
                         <td class="text-left py-2 px-4">{{ mtg.name }}</td>
                         <td class="text-center py-2 px-4">{{ mtg.get_ranking_score }}</td>
                         <td class="text-center py-2 px-4 {% include 'snippets/mtg_style.html' with security_measure=mtg %}">{{ mtg.get_status_display }}</td>

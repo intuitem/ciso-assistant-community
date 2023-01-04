@@ -39,8 +39,8 @@
                         }"
                         x-on:keydown.escape.prevent.stop="close($refs.button)"
                         x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
-                        x-id="['dropdown-button']"
-                        class="relative z-10"
+                            x-id="['dropdown-button']"
+                        class="relative"
                     >
                         <!-- Button -->
                         <button
@@ -64,25 +64,49 @@
                             x-on:click.outside="close($refs.button)"
                             :id="$id('dropdown-button')"
                             style="display: none;"
-                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden z-10"
                         >
                     
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Status" %}</p>
-                                    {{ filter.form.status }}
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Status" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.status }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Parent domain" %}</p>
-                                    {{ filter.form.folder }}
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Parent domain" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.folder }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Type" %}</p>
-                                    {{ filter.form.type }}
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Type" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.type }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Security function" %}</p>
-                                    {{ filter.form.security_function }}
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Security function" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.security_function }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>

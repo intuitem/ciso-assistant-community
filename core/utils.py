@@ -34,3 +34,8 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ANALYSTS): _('Analysts'),
     str(UserGroupCodename.AUDITORS): _('Auditors'),
 }
+
+COUNTRY_FLAGS = {
+    'fr': '🇫🇷',
+    'en': '🇬🇧',
+}

@@ -20,12 +20,35 @@ def get_risk_color_map(user: User):
     risk_colors: list = [m['risk'][i]['hexcolor'] for m in parsed_matrices for i in range(len(m['risk']))]
     return dict(zip(risk_abbreviations, risk_colors))
 
+def get_risk_color_map_name(user: User):
+    """
+    Returns a dictionary with the risk names as keys and its hex color as value
+    """
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_abbreviations: list = [f"{m['name']}.{m['risk'][i]['name']}" for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_colors: list = [f"{m['name']}.{m['risk'][i]['hexcolor']}" for m in parsed_matrices for i in range(len(m['risk']))]
+    return dict(zip(risk_abbreviations, risk_colors))
+
+def get_risk_color_ordered_list(user: User):
+    """
+    Returns a list of hex colors ordered by matrix and risk
+    """
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+    risk_colors: list = [m['risk'][i]['hexcolor'] for m in parsed_matrices for i in range(len(m['risk']))]
+    return risk_colors
+
 def get_rating_options(user: User) -> list:
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
     risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
     parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    risk_labels: list = [m['risk'][i]['name'] for m in parsed_matrices for i in range(len(m['risk']))]
+    risk_labels: list = [f"{m['name']}.{m['risk'][i]['name']}" for m in parsed_matrices for i in range(len(m['risk']))]
     return [(i, l) for i, l in enumerate(risk_labels)]
 
 def get_rating_options_abbr(user: User):
@@ -36,6 +59,10 @@ def get_rating_options_abbr(user: User):
     risk_abbr: list = [m['name'] + '.' + m['risk'][i]['abbreviation'] for m in parsed_matrices for i in range(len(m['risk']))]
     risk_labels: list = [m['risk'][i]['name'] for m in parsed_matrices for i in range(len(m['risk']))]
     return list(zip(risk_abbr, risk_labels))
+
+def get_rating_options_parsed_matrix(user: User, parsed_matrix):
+    risk_labels: list = [f"{parsed_matrix['name']}.{parsed_matrix['risk'][i]['name']}" for i in range(len(parsed_matrix['risk']))]
+    return [(i, l) for i, l in enumerate(risk_labels)]
 
 
 def risk_matrix(user: User):
@@ -124,11 +151,22 @@ def risks_count_per_level(user: User):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
 
-    for lvl in get_rating_options(user):
-        count_c = RiskScenario.objects.filter(id__in=object_ids_view).filter(current_level=lvl[0]).count()
-        count_r = RiskScenario.objects.filter(id__in=object_ids_view).filter(residual_level=lvl[0]).count()
-        current_level.append({'name': lvl[1], 'value': count_c})
-        residual_level.append({'name': lvl[1], 'value': count_r})
+    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list('analysis__rating_matrix__json_definition', flat=True).distinct()
+    parsed_matrices: list = [json.loads(m) for m in risk_matrices]
+
+    for m in parsed_matrices:
+        print(get_rating_options_parsed_matrix(user, m))
+        for lvl in get_rating_options_parsed_matrix(user, m):
+            count_c = RiskScenario.objects.filter(id__in=object_ids_view).filter(current_level=lvl[0]).filter(analysis__rating_matrix__name=m['name']).count()
+            count_r = RiskScenario.objects.filter(id__in=object_ids_view).filter(residual_level=lvl[0]).filter(analysis__rating_matrix__name=m['name']).count()
+            current_level.append({'name': lvl[1], 'value': count_c})
+            residual_level.append({'name': lvl[1], 'value': count_r})
+
+    # for lvl in get_rating_options(user):
+    #     count_c = RiskScenario.objects.filter(id__in=object_ids_view).filter(current_level=lvl[0]).count()
+    #     count_r = RiskScenario.objects.filter(id__in=object_ids_view).filter(residual_level=lvl[0]).count()
+    #     current_level.append({'name': lvl[1], 'value': count_c})
+    #     residual_level.append({'name': lvl[1], 'value': count_r})
 
     return {"current": current_level, "residual": residual_level}
 

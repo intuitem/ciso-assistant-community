@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-02 13:16+0000\n"
+"POT-Creation-Date: 2023-01-03 14:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,7 +34,7 @@ msgstr "Confirmation du mot de passe"
 msgid "Enter the same password as before, for verification."
 msgstr "Entrez le même mot de passe que précédemment, pour vérification."
 
-#: iam/forms.py:127 iam/forms.py:160
+#: iam/forms.py:127 iam/forms.py:163
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
 "password, but you can change the password using <a class=\"help_text-link\" "
@@ -44,7 +44,7 @@ msgstr ""
 "voir le mot de passe de cet utilisateur, mais vous pouvez modifier le mot de "
 "passe en utilisant <a class=\"help_text-link\" href=\"{}\">ce formulaire</a>."
 
-#: iam/forms.py:155
+#: iam/forms.py:158
 msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
@@ -228,7 +228,7 @@ msgid "Upload your own library"
 msgstr "Télécharger votre propre bibliothèque"
 
 #: library/templates/library/library_list.html:89
-#: serdes/templates/serdes/backup_restore.html:25
+#: serdes/templates/serdes/backup_restore.html:29
 msgid "Upload"
 msgstr "Télécharger"
 
@@ -280,10 +280,28 @@ msgstr "Sauvegarde et restauration"
 msgid "Import backup"
 msgstr "Importer une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:32
+#: serdes/templates/serdes/backup_restore.html:65
+msgid "Import backup?"
+msgstr "Importer une sauvegarde ?"
+
+#: serdes/templates/serdes/backup_restore.html:74
+msgid ""
+"This action cannot be undone. This will restore the database to a previous "
+"state. Are you sure you want to do this?"
+msgstr ""
+
+#: serdes/templates/serdes/backup_restore.html:80
+msgid "No, take me back"
+msgstr ""
+
+#: serdes/templates/serdes/backup_restore.html:82
+msgid "Yes"
+msgstr ""
+
+#: serdes/templates/serdes/backup_restore.html:105
 msgid "Export backup"
 msgstr "Exporter une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:34
+#: serdes/templates/serdes/backup_restore.html:107
 msgid "Dump database"
 msgstr "Exporter la base de données"
