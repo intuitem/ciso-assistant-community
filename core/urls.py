@@ -9,7 +9,7 @@ urlpatterns = [
     path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 
-    path('analyses-registery/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
+    path('analyses-registry/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
     path('analysis/<analysis>.pdf', login_required(views.generate_ra_pdf), name='RA-PDF'),
     path('analysis/<analysis>.csv', login_required(views.export_risks_csv), name='RA-CSV'),
 
