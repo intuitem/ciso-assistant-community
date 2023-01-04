@@ -1,7 +1,7 @@
 {% load i18n core_extras %}
-
+<div class="bg-white shadow rounded-lg p-6">
 {% if data %}
-    <table class="w-full p-2">
+    <table class="w-full">
         {% for row in matrix.render_grid_as_colors reversed %}
             {% with row_index=forloop.revcounter0 %}
                 <tr class="w-full">
@@ -28,7 +28,7 @@
         </tr>
     </table>
 {% else %}
-    <div class="w-full bg-white shadow rounded-lg p-6">
+    <div class="w-full">
         <h3 class="flex font-bold p-2 m-2 text-lg">{% trans matrix.description %}</h3>
         <div class="flex justify-center">
             <div class="h-16 text-black font-bold text-center ml-4 mt-36 -rotate-90">
@@ -71,35 +71,28 @@
                 </tr>
             </table>
         </div>
-        <div class="h-16 text-black font-bold text-center ml-44 mt-4">
+        <div class="text-black font-bold text-center mx-auto mt-4">
             {% trans "Probability" %}
         </div>
-    </div>
-    <div class="w-full bg-white shadow rounded-lg p-6 mt-2">
-        <h3 class="flex font-bold p-2 m-2 text-lg">{% trans "Risk levels" %}</h3>
-        <div class="flex justify-center">
-            <table class="w-3/4">
-                <tr>
-                    {% for risk in matrix.parse_json.risk %}
-                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ risk.hexcolor }}">
-                    </td>
-                    {% endfor %}
-                </tr>
-                <tr>
-                    {% for risk in matrix.parse_json.risk %}
-                    <td class="w-1/6 h-16 text-center border-4 border-white bg-gray-200">
-                        {{ risk.name }}
-                    </td>
-                    {% endfor %}
-                </tr>
-                <tr>
-                    {% for risk in matrix.parse_json.risk %}
-                    <td class="w-1/6 h-16 text-center border-4 border-white bg-gray-200">
-                        {{ risk.description }}
-                    </td>
-                    {% endfor %}
-                </tr>
+    </div>   
+    <div class="w-full flex flex-col justify-start">
+        <h3 class="flex font-semibold p-2 m-2 text-md">{% trans "Risk levels" %}</h3>
+        <div class="flex justify-start mx-2">
+            <table class="w-3/4 border-separate">
+                {% for risk in matrix.parse_json.risk %}
+                    <tr class="row">
+                        <td class="w-12 h-12 text-left border-4 border-white" style="background-color: {{ risk.hexcolor }}">
+                        </td>
+                        <td class="col font-medium">
+                            {{ risk.name }}
+                        </td>
+                        <td class="col italic">
+                            {{ risk.description }}
+                        </td>
+                    </tr>
+                {% endfor %}
             </table>
         </div>
     </div>
 {% endif %}
+</div>
