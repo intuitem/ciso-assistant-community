@@ -187,7 +187,7 @@ class SearchResults(ListView):
         mtg_list = SecurityMeasure.objects.filter(Q(name__icontains=query) | Q(security_function__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        ra_list = Analysis.objects.filter(Q(project__name__icontains=query)).filter(id__in=object_ids_view)[:10]
+        ra_list = Analysis.objects.filter(Q(name__icontains=query) | Q(project__name__icontains=query) | Q(project__folder__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
 
 

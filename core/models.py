@@ -8,7 +8,7 @@ from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd
 import json
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from datetime import date
 
@@ -189,6 +189,10 @@ class Analysis(AbstractBaseModel):
         verbose_name_plural = _("Analyses")
 
     def __str__(self) -> str:
+        return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
+
+    @property
+    def path_display(self) -> str:
         return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
 
     def get_scenario_count(self) -> int:
@@ -468,8 +472,8 @@ class RiskAcceptance(models.Model):
 
     @property
     def get_html_url(self):
-        url = reverse('RA', args=(self.riskscenario.analysis.id,))
-        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.riskscenario} </a>'
+        url = reverse('RA', args=(self.risk_scenario.analysis.id,))
+        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_scenario} </a>'
 # you can consider nested inlines at some points
 
 
