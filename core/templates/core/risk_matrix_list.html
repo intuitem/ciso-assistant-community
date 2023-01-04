@@ -91,7 +91,8 @@
                                 </span>
 
                                 <span x-data="{ open: false }">
-                                    <a @click="open = ! open" type="button"
+                                    <a @click="open = !open,
+modalOpen = !modalOpen" type="button"
                                     class="cursor-pointer table-action">
                                         <i class="fas fa-trash"></i>
                                         

@@ -30,7 +30,8 @@
 
       <section class="col-start-3 col-span-6 place-content-end">
         <section class="grid grid-cols-2 place-content-end">
-          <button id="cancel" @click="open = ! open" type="button"
+          <button id="cancel" @click="open = !open,
+modalOpen = !modalOpen" type="button"
             class="inline-block font-normal text-center px-3 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
           <input type="hidden" name="next" value="{{ request.path|urlencode }}">
           <button id="{{ model }}_save" {% if model == 'measure' %} {% else %} type="submit" {% endif %}

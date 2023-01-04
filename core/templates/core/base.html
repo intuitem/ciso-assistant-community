@@ -94,7 +94,7 @@
 	<style>
 		[x-cloak] { display: none }
 	</style>
-	<div x-data="{ sidebarOpen: true }" class="flex h-screen">
+	<div x-data="{ sidebarOpen: true, modalOpen: false }" class="flex h-screen">
 		{% include 'core/sidebar.html' %}
 		<div class="flex-1">
 			<main class="px-8 pb-8 transition-all duration-300 ml-72" :class="sidebarOpen == false ? 'ml-4' : 'ml-72'">

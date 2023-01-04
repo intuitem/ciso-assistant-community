@@ -46,7 +46,8 @@
                                             <a href="{% url 'library-detail' library.name %}" class="table-action cursor-pointer"><i class="far fa-eye"></i></a>
                                         </span>
                                         <span x-data="{ open: false }">
-                                            <a @click="open = !open" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
+                                            <a @click="open = !open,
+modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
                                             <div x-cloak x-show="open" class="absolute z-10 bg-white shadow-md rounded-md p-4">
                                                 <form action="{% url 'import-default-library' library.name %}" method="POST" c>
                                                     {% csrf_token %}

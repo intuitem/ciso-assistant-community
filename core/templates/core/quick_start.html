@@ -29,7 +29,8 @@
                     <div class="font-semibold mb-4">{% trans "Projects" %}</div>
                     <div class="text-sm mb-2 rounded">{% trans "Setup a" %}
                         <div class="inline" x-data="{ open: false }">
-                            <a @click="open = ! open"
+                            <a @click="open = !open,
+modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "domain" %}
                             </a>
@@ -37,7 +38,8 @@
                         </div>
                         {% trans "to organize projects and" %} 
                         <div class="inline" x-data="{ open: false }">
-                            <a @click="open = ! open"
+                            <a @click="open = !open,
+modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "create one" %}
                             </a>
@@ -45,7 +47,8 @@
                         </div>
                         {% trans "Start identifying your" %}
                         <div class="inline" x-data="{ open: false }">
-                            <a @click="open = ! open"
+                            <a @click="open = !open,
+modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "assets" %}
                             </a>
@@ -60,7 +63,8 @@
                     <div class="font-semibold mb-4">{% trans "Threats" %}</div>
                     <div class="text-sm mb-2 rounded  ">{% trans "Identify what and who are the" %}
                         <div class="inline" x-data="{ open: false }">
-                            <a @click="open = ! open"
+                            <a @click="open = !open,
+modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "threat" %}
                             </a>
@@ -74,7 +78,8 @@
                     <div class="font-semibold mb-4">{% trans "Security functions" %}</div>
                     <div class="text-sm mb-2 rounded ">{% trans "Understand and inventory the" %}
                         <div class="inline" x-data="{ open: false }">
-                            <a @click="open = ! open"
+                            <a @click="open = !open,
+modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "security functions" %}
                             </a>
@@ -89,7 +94,8 @@
                     <div class="text-sm mb-2 rounded">{% trans "You need to select a scoring" %} <a href="{% url 'matrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or import a new one with the library manager. Now you can start a new" %} 
                         <span x-data="modal()">
                             <div class="inline" x-data="{ open: false }">
-                                <a @click="open = ! open"
+                                <a @click="open = !open,
+modalOpen = !modalOpen"
                                        class="simple-link cursor-pointer">
                                        {% trans "risk analysis" %}
                                 </a>
