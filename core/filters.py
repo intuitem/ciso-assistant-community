@@ -118,6 +118,8 @@ class AnalysisFilter(GenericFilterSet):
     auditor = GenericMultipleChoiceFilter(
         choices=get_full_names(), label=('Auditor'))
 
+    project__folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.filter(content_type=Folder.ContentType.DOMAIN))
+
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
 
     class Meta:
@@ -135,6 +137,7 @@ class RiskScenarioFilter(GenericFilterSet):
     threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
     analysis__project = GenericModelMultipleChoiceFilter(
         queryset=Project.objects.all())
+    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.filter(content_type=Folder.ContentType.DOMAIN))
     treatment = GenericMultipleChoiceFilter(
         choices=RiskScenario.TREATMENT_OPTIONS)
 
