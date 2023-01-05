@@ -143,9 +143,19 @@
 
 <script>
 		$(document).ready(function() {
+			let lang = document.documentElement.lang;
+			if (lang == "fr") {
+				lang = "fr-FR";
+			}
+			else {
+				lang = "en-GB";
+			}
 
 			var table = $('#mytable').DataTable( {
-					responsive: false
+					responsive: false,
+					language: {
+						url: "//cdn.datatables.net/plug-ins/1.13.1/i18n/" + lang +  ".json"
+					}
 				} )
 				.columns.adjust()
 				.responsive.recalc();
