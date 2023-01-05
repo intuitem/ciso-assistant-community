@@ -82,8 +82,8 @@
 <div class="m-2 bg-gray-50 min-h-screen">
 
 
-    <div class="bg-white rounded p-2 m-2 shadow">
-        <div class="text-lg py-2"><i class="fab fa-searchengin"></i> {% trans "Browsing" %} {{ context.type }} {% trans "filtered to" %} <b>{{ context.filter }}</b></div>
+    <div class="bg-white rounded p-2 m-2 shadow"
+        <div class="text-lg py-2"><i class="fab fa-searchengin"></i> {% blocktrans with type=context.type %} Browsing {{ type }} {% endblocktrans %} {% blocktrans with filter=context.filter %} with filter: <b>{{ filter }}</b>{% endblocktrans %}</div>
 
     {% if context.type == "Risk scenarios" %}
         <table id="mytable" class="hover w-full p-2 m-2" >
