@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-03 14:48+0000\n"
+"POT-Creation-Date: 2023-01-05 12:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -215,19 +215,19 @@ msgstr "Nom de la bibliothèque"
 msgid "Actions"
 msgstr ""
 
-#: library/templates/library/library_list.html:53
+#: library/templates/library/library_list.html:54
 msgid "Import"
 msgstr "Importer"
 
-#: library/templates/library/library_list.html:64
+#: library/templates/library/library_list.html:65
 msgid "No library found."
 msgstr "Aucune bibliothèque trouvée."
 
-#: library/templates/library/library_list.html:76
+#: library/templates/library/library_list.html:77
 msgid "Upload your own library"
 msgstr "Télécharger votre propre bibliothèque"
 
-#: library/templates/library/library_list.html:89
+#: library/templates/library/library_list.html:90
 #: serdes/templates/serdes/backup_restore.html:29
 msgid "Upload"
 msgstr "Télécharger"
@@ -284,24 +284,24 @@ msgstr "Importer une sauvegarde"
 msgid "Import backup?"
 msgstr "Importer une sauvegarde ?"
 
-#: serdes/templates/serdes/backup_restore.html:74
+#: serdes/templates/serdes/backup_restore.html:75
 msgid ""
 "This action cannot be undone. This will restore the database to a previous "
 "state. Are you sure you want to do this?"
 msgstr ""
 
-#: serdes/templates/serdes/backup_restore.html:80
+#: serdes/templates/serdes/backup_restore.html:82
 msgid "No, take me back"
 msgstr ""
 
-#: serdes/templates/serdes/backup_restore.html:82
+#: serdes/templates/serdes/backup_restore.html:84
 msgid "Yes"
 msgstr ""
 
-#: serdes/templates/serdes/backup_restore.html:105
+#: serdes/templates/serdes/backup_restore.html:107
 msgid "Export backup"
 msgstr "Exporter une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:107
+#: serdes/templates/serdes/backup_restore.html:109
 msgid "Dump database"
 msgstr "Exporter la base de données"
