@@ -1314,7 +1314,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         queryset = self.get_queryset()
-        filter = RiskAcceptanceFilter(self.request.GET, queryset)
+        filter = RiskAcceptanceFilter(request=self.request, queryset=queryset)
         context['filter'] = filter
         context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
         context['risk_acceptance_update_form'] = RiskAcceptanceCreateUpdateForm
@@ -1371,7 +1371,7 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().risk_scenario.analysis.project.folder)
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().folder)
 
 
 class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
