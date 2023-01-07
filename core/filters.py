@@ -217,23 +217,20 @@ class SecurityMeasureFilter(GenericFilterSet):
 
 
 class RiskAcceptanceFilter(GenericFilterSet):
-    risk_scenario__name = GenericCharFilter(widget=TextInput(
-        attrs={
-            'class': 'h-10 rounded-r-lg border-none focus:ring-0',
-            'placeholder': _('Search acceptance...')
-        }
-    ))
+    risk_scenarios = GenericModelMultipleChoiceFilter(
+        queryset=RiskScenario.objects.filter(analysis__project__folder__content_type=Folder.ContentType.DOMAIN))
+    folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
     orderby = GenericOrderingFilter(
         fields=(
-            ('risk_scenario__name', 'risk_scenario__name'),
+            ('risk_scenarios', 'risk_scenarios'),
             ('type', 'type'),
             ('expiry_date', 'expiry_date'),
             ('validator', 'validator'),
         ),
         field_labels={
-            'risk_scenario__name': _('name'.capitalize()),
-            '-risk_scenario__name': _('Name (descending)'),
+            'risk_scenarios': _('risk scenarios'.capitalize()),
+            '-risk_scenarios': _('Risk scenarios (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
             'expiry_date': _('expiry'.capitalize() + ' date'),
@@ -245,7 +242,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ['risk_scenario__name', 'type']
+        fields = ['risk_scenarios', 'type', 'folder']
 
 
 class ProjectsDomainFilter(GenericFilterSet):
