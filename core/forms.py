@@ -2,6 +2,7 @@ from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, Hi
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .models import *
+from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
@@ -152,11 +153,15 @@ class RiskScenarioModalUpdateForm(StyledModelForm):
 
 
 class RiskAcceptanceCreateUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['risk_scenarios'].widget = CheckboxSelectMultiple(attrs={'class': 'text-sm rounded'}, choices=self.fields['risk_scenarios'].choices)
+
     class Meta:
         model = RiskAcceptance
         fields = '__all__'
         widgets = {
-            'expiry_date': DefaultDateInput(format='%Y-%m-%d')
+            'expiry_date': DefaultDateInput(format='%Y-%m-%d'),
         }
         labels = {'risk_scenario': _('Risk scenario')}
 
