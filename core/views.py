@@ -973,9 +973,6 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'scenario'
     form_class = RiskScenarioCreateForm
 
-    def get_success_url(self) -> str:
-        return reverse('ri-list')
-
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
 

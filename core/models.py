@@ -454,7 +454,8 @@ class RiskAcceptance(models.Model):
         ('permanent', _('Permanent')),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    risk_scenario = models.ForeignKey(RiskScenario, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
     validator = models.CharField(max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"))
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
     expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
@@ -468,11 +469,12 @@ class RiskAcceptance(models.Model):
         verbose_name_plural = _("Risk acceptances")
 
     def __str__(self):
-        return f"[{self.type}] {self.risk_scenario}"
+        scenario_names: str = ', '.join([str(scenario) for scenario in self.risk_scenarios.all()])
+        return f"{scenario_names}"
 
     @property
     def get_html_url(self):
-        url = reverse('RA', args=(self.risk_scenario.analysis.id,))
+        url = reverse('acceptance-update', args=(self.id,))
         return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_scenario} </a>'
 # you can consider nested inlines at some points
 
