@@ -1,5 +1,5 @@
 {
-      "name": "ISO27001 Annex A",
+      "name": "ISO 27001:2013 Annex A",
       "description": "security functions from ISO27001 Annex A",
       "format_version": "1.0",
       "objects": [
@@ -8,7 +8,7 @@
                   "fields": {
                         "name": "A.5.1.1 Policies for information security",
                         "description": "A set of policies for information security shall be defined, approved by management, published and communicated to employees and relevant external parties.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -17,7 +17,7 @@
                   "fields": {
                         "name": "A.5.1.2 Review of the policies for information security",
                         "description": "To keep updated with any changes, whether internal or external, the organisation's ISMS policies must be updated on a regular basis.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -26,7 +26,7 @@
                   "fields": {
                         "name": "A.6.1.1 Information security roles and responsibilities",
                         "description": "All information security responsibilities shall be defined and allocated.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -35,7 +35,7 @@
                   "fields": {
                         "name": "A.6.1.2 Segregation of duties",
                         "description": "Conflicting duties and areas of responsibility shall be segregated to reduce opportunities for unauthorized or unintentional modification or misuse of the organization\u2019s assets.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -44,7 +44,7 @@
                   "fields": {
                         "name": "A.6.1.3 Contact with authorities",
                         "description": "Appropriate contacts with relevant authorities shall be maintained.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -53,7 +53,7 @@
                   "fields": {
                         "name": "A.6.1.4 Contact with special interest groups",
                         "description": "Appropriate contacts with special interest groups or other specialist security forums and professional associations shall be maintained.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -62,7 +62,7 @@
                   "fields": {
                         "name": "A.6.1.5 Information security in project management",
                         "description": "Information security shall be addressed in project management, regardless of the type of the project.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -71,7 +71,7 @@
                   "fields": {
                         "name": "A.6.2.1 Mobile device policy",
                         "description": "A policy and supporting security measures shall be adopted to manage the risks introduced by using mobile devices.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -80,7 +80,7 @@
                   "fields": {
                         "name": "A.6.2.2 Teleworking",
                         "description": "A policy and supporting security measures shall be implemented to protect information accessed, processed or stored at teleworking sites.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -89,7 +89,7 @@
                   "fields": {
                         "name": "A.7.1.1 Screening",
                         "description": "All job applicants should be subjected to background checks and competency assessments as part of a thorough control.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -98,7 +98,7 @@
                   "fields": {
                         "name": "A.7.1.2  Terms and conditions of employment",
                         "description": "The contractual agreements with employees and contractors shall state their and the organization\u2019s responsibilities for information security.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -107,7 +107,7 @@
                   "fields": {
                         "name": "A.7.2.1 Management responsibilities",
                         "description": "Management shall require all employees and contractors to apply information security in accordance with the established policies and procedures of the organization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -116,7 +116,7 @@
                   "fields": {
                         "name": "A.7.2.2 Information security awareness, education and training",
                         "description": "All employees of the organization and, where relevant, contractors shall receive appropriate awareness education and training and regular updates in organizational policies and procedures, as relevant for their job function.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -125,7 +125,7 @@
                   "fields": {
                         "name": "A.7.2.3 Disciplinary process",
                         "description": "There shall be a formal and communicated disciplinary process in place to take action against employees who have committed an information security breach.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -134,7 +134,7 @@
                   "fields": {
                         "name": "A.7.3.1 Termination or change of employment responsibilities",
                         "description": "Information security responsibilities and duties that remain valid after termination or change of employment shall be defined, communicated to the employee or contractor and enforced.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -143,7 +143,7 @@
                   "fields": {
                         "name": "A.8.1.1 Inventory of assets",
                         "description": "Assets associated with information and information processing facilities shall be identified and an inventory of these assets shall be drawn up and maintained.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -152,7 +152,7 @@
                   "fields": {
                         "name": "A.8.1.2 Ownership of assets",
                         "description": "Assets maintained in the inventory shall be owned.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -161,7 +161,7 @@
                   "fields": {
                         "name": "A.8.1.3 Acceptable use of assets",
                         "description": "Rules for the acceptable use of information and of assets associated with information and information processing facilities shall be identified, documented and implemented.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -170,7 +170,7 @@
                   "fields": {
                         "name": "A.8.1.4 Return of assets",
                         "description": "All employees and external party users shall return all of the organizational assets in their possession upon termination of their employment, contract or agreement.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -179,7 +179,7 @@
                   "fields": {
                         "name": "A.8.2.1 Classification of information",
                         "description": "Information shall be classified in terms of legal requirements, value, criticality and sensitivity to unauthorised disclosure or modification.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -188,7 +188,7 @@
                   "fields": {
                         "name": "A.8.2.2 Labelling of information",
                         "description": "An appropriate set of procedures for information labelling shall be developed and implemented in accordance with the information classification scheme adopted by the organization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -197,7 +197,7 @@
                   "fields": {
                         "name": "A.8.2.3 Handling of assets",
                         "description": "Procedures for handling assets shall be developed and implemented in accordance with the information classification scheme adopted by the organization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -206,7 +206,7 @@
                   "fields": {
                         "name": "A.8.3.1  Management of removable media",
                         "description": "Procedures shall be implemented for the management of removable media in accordance with the classification scheme adopted by the organization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -215,7 +215,7 @@
                   "fields": {
                         "name": "A.8.3.2 Disposal of media",
                         "description": "Media shall be disposed of securely when no longer required, using formal procedures.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -224,7 +224,7 @@
                   "fields": {
                         "name": "A.8.3.3 Physical media transfer",
                         "description": "Media containing information shall be protected against unauthorized access, misuse or corruption during transportation.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -233,7 +233,7 @@
                   "fields": {
                         "name": "A.9.1.1  Access control policy",
                         "description": "An access control policy shall be established, documented and reviewed based on business and information security require-ments.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -242,7 +242,7 @@
                   "fields": {
                         "name": "A.9.1.2 Access to networks and network services",
                         "description": "Users shall only be provided with access to the network and network services that they have been specifically authorized to use.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -251,7 +251,7 @@
                   "fields": {
                         "name": "A.9.2.1  User registration and de-registration",
                         "description": "A formal user registration and de-registration process shall be implemented to enable assignment of access rights.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -260,7 +260,7 @@
                   "fields": {
                         "name": "A.9.2.2  User access provisioning",
                         "description": "A formal user access provisioning process shall be implemented to assign or revoke access rights for all user types to all systems and services.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -269,7 +269,7 @@
                   "fields": {
                         "name": "A.9.2.3  Management of privileged access rights",
                         "description": "The allocation and use of privileged access rights shall be restricted and controlled.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -278,7 +278,7 @@
                   "fields": {
                         "name": "A.9.2.4 Management of secret authentication information of users",
                         "description": "The allocation of secret authentication information shall be controlled through a formal management process.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -287,7 +287,7 @@
                   "fields": {
                         "name": "A.9.2.5 Review of user access rights",
                         "description": "Asset owners shall review users\u2019 access rights at regular intervals.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -296,7 +296,7 @@
                   "fields": {
                         "name": "A.9.2.6  Removal or adjustment of access rights",
                         "description": "The access rights of all employees and external party users to information and information processing facilities shall be removed upon termination of their employment, contract or agreement, or adjusted upon change.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -305,7 +305,7 @@
                   "fields": {
                         "name": "A.9.3.1 Use of secret authentication information",
                         "description": "Users shall be required to follow the organization\u2019s practices in the use of secret authentication information.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -314,7 +314,7 @@
                   "fields": {
                         "name": "A.9.4.1 Information access restriction",
                         "description": "Access to information and application system functions shall be restricted in accordance with the access control policy.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -323,7 +323,7 @@
                   "fields": {
                         "name": "A.9.4.2 Secure log-on procedures",
                         "description": "Where required by the access control policy, access to systems and applications shall be controlled by a secure log-on procedure.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -332,7 +332,7 @@
                   "fields": {
                         "name": "A.9.4.3 Password management system",
                         "description": "Password management systems shall be interactive and shall ensure quality passwords.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -341,7 +341,7 @@
                   "fields": {
                         "name": "A.9.4.4 Use of privileged utility programs",
                         "description": "The use of utility programs that might be capable of overriding system and application controls shall be restricted and tightly controlled.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -350,7 +350,7 @@
                   "fields": {
                         "name": "A.9.4.5 Access control to program source code",
                         "description": "Access to program source code shall be restricted.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -359,7 +359,7 @@
                   "fields": {
                         "name": "A.10.1.1 Policy on the use of cryptographic controls",
                         "description": "A policy on the use of cryptographic controls for protection of information shall be developed and implemented.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -368,7 +368,7 @@
                   "fields": {
                         "name": "A.10.1.2 Key management",
                         "description": "A policy on the use, protection and lifetime of cryptographic keys shall be developed and implemented through their whole lifecycle.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -377,7 +377,7 @@
                   "fields": {
                         "name": "A.11.1.1 Physical security perimeter",
                         "description": "Security perimeters shall be defined and used to protect areas that contain either sensitive or critical information and information processing facilities.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -386,7 +386,7 @@
                   "fields": {
                         "name": "A.11.1.2 Physical entry controls",
                         "description": "Secure areas shall be protected by appropriate entry controls to ensure that only authorized personnel are allowed access.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -395,7 +395,7 @@
                   "fields": {
                         "name": "A.11.1.3 Securing offices, rooms and facilities",
                         "description": "Physical security for offices, rooms and facilities shall be designed and applied.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -404,7 +404,7 @@
                   "fields": {
                         "name": "A.11.1.4 Protecting against external and environmental threats",
                         "description": "Physical protection against natural disasters, malicious attack or accidents shall be designed and applied.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -413,7 +413,7 @@
                   "fields": {
                         "name": "A.11.1.5 Working in secure areas",
                         "description": "Procedures for working in secure areas shall be designed and applied.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -422,7 +422,7 @@
                   "fields": {
                         "name": "A.11.1.6 Delivery and loading areas",
                         "description": "Access points such as delivery and loading areas and other points where unauthorized persons could enter the premises shall be controlled and, if possible, isolated from information processing facilities to avoid unauthorized access.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -431,7 +431,7 @@
                   "fields": {
                         "name": "A.11.2.1  Equipment siting and protection",
                         "description": "Equipment shall be sited and protected to reduce the risks from environmental threats and hazards, and opportunities for unauthorized access.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -440,7 +440,7 @@
                   "fields": {
                         "name": "A.11.2.2 Supporting utilities",
                         "description": "Equipment shall be protected from power failures and other disruptions caused by failures in supporting utilities.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -449,7 +449,7 @@
                   "fields": {
                         "name": "A.11.2.3 Cabling security",
                         "description": "Power and telecommunications cabling carrying data or supporting information services shall be protected from interception, interference or damage.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -458,7 +458,7 @@
                   "fields": {
                         "name": "A.11.2.4 Equipment maintenance",
                         "description": "Equipment shall be correctly maintained to ensure its continued availability and integrity.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -467,7 +467,7 @@
                   "fields": {
                         "name": "A.11.2.5 Removal of assets",
                         "description": "Equipment, information or software shall not be taken off-site without prior authorization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -476,7 +476,7 @@
                   "fields": {
                         "name": "A.11.2.6 Security of equipment and assets off-premises",
                         "description": "Security shall be applied to off-site assets taking into account the different risks of working outside the organization\u2019s premises.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -485,7 +485,7 @@
                   "fields": {
                         "name": "A.11.2.7 Secure disposal or reuse of equipment",
                         "description": "All items of equipment containing storage media shall be verified to ensure that any sensitive data and licensed software has been removed or securely overwritten prior to disposal or re-use.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -494,7 +494,7 @@
                   "fields": {
                         "name": "A.11.2.8 Unattended user equipment",
                         "description": "Users shall ensure that unattended equipment has appropriate protection.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -503,7 +503,7 @@
                   "fields": {
                         "name": "A.11.2.9 Clear desk and clear screen policy",
                         "description": "A clear desk policy for papers and removable storage media and a clear screen policy for information processing facilities shall be adopted.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -512,7 +512,7 @@
                   "fields": {
                         "name": "A.12.1.1 Documented operating procedures",
                         "description": "Operating procedures shall be documented and made available to all users who need them.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -521,7 +521,7 @@
                   "fields": {
                         "name": "A.12.1.2  Change management",
                         "description": "Changes to the organization, business processes, information processing facilities and systems that affect information security shall be controlled.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -530,7 +530,7 @@
                   "fields": {
                         "name": "A.12.1.3 Capacity management",
                         "description": "The use of resources shall be monitored, tuned and projections made of future capacity requirements to ensure the required system performance.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -539,7 +539,7 @@
                   "fields": {
                         "name": "A.12.1.4 Separation of development, testing and operational environments",
                         "description": "Development, testing, and operational environments shall be separated to reduce the risks of unauthorized access or changes to the operational environment.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -548,7 +548,7 @@
                   "fields": {
                         "name": "A.12.2.1  Controls against malware",
                         "description": "Detection, prevention and recovery controls to protect against malware shall be implemented, combined with appropriate user awareness.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -557,7 +557,7 @@
                   "fields": {
                         "name": "A.12.3.1  Information backup",
                         "description": "Backup copies of information, software and system images shall be taken and tested regularly in accordance with an agreed backup policy.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -566,7 +566,7 @@
                   "fields": {
                         "name": "A.12.4.1  Event logging",
                         "description": "Event logs recording user activities, exceptions, faults and information security events shall be produced, kept and regularly reviewed.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -575,7 +575,7 @@
                   "fields": {
                         "name": "A.12.4.2 Protection of log information",
                         "description": "Logging facilities and log information shall be protected against tampering and unauthorized access.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -584,7 +584,7 @@
                   "fields": {
                         "name": "A.12.4.3 Administrator and operator logs",
                         "description": "System administrator and system operator activities shall be logged and the logs protected and regularly reviewed.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -593,7 +593,7 @@
                   "fields": {
                         "name": "A.12.4.4 Clock synchronisation",
                         "description": "The clocks of all relevant information processing systems within an organization or security domain shall be synchronised to a single reference time source.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -602,7 +602,7 @@
                   "fields": {
                         "name": "A.12.5.1 Installation of software on operational systems",
                         "description": "Procedures shall be implemented to control the installation of software on operational systems.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -611,7 +611,7 @@
                   "fields": {
                         "name": "A.12.6.1  Management of technial vulnerabilities",
                         "description": "Information about technical vulnerabilities of information systems being used shall be obtained in a timely fashion, the organization\u2019s exposure to such vulnerabilities evaluated and appropriate measures taken to address the associated risk.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -620,7 +620,7 @@
                   "fields": {
                         "name": "A.12.6.2 Restrictions on software installation",
                         "description": "Rules governing the installation of software by users shall be established and implemented.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -629,7 +629,7 @@
                   "fields": {
                         "name": "A.12.7.1 Information systems audit controls",
                         "description": "Audit requirements and activities involving verification of operational systems shall be carefully planned and agreed to minimise disruptions to business processes.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -638,7 +638,7 @@
                   "fields": {
                         "name": "A.13.1.1 Network controls",
                         "description": "Networks shall be managed and controlled to protect information in systems and applications.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -647,7 +647,7 @@
                   "fields": {
                         "name": "A.13.1.2 Security of network services",
                         "description": "Security mechanisms, service levels and management requirements of all network services shall be identified and included in network services agreements, whether these services are provided in-house or outsourced.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -656,7 +656,7 @@
                   "fields": {
                         "name": "A.13.1.3 Segregation in networks",
                         "description": "Groups of information services, users and information systems shall be segregated on networks.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -665,7 +665,7 @@
                   "fields": {
                         "name": "A.13.2.1 Information transfer policies and procedures",
                         "description": "Formal transfer policies, procedures and controls shall be in place to protect the transfer of information through the use of all types of communication facilities.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -674,7 +674,7 @@
                   "fields": {
                         "name": "A.13.2.2 Agreements on information transfer",
                         "description": "Agreements shall address the secure transfer of business information between the organization and external parties.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -683,7 +683,7 @@
                   "fields": {
                         "name": "A.13.2.3 Electronic messaging",
                         "description": "Information involved in electronic messaging shall be appropriately protected.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -692,7 +692,7 @@
                   "fields": {
                         "name": "A.13.2.4 Confidentiality or non-disclosure agreements",
                         "description": "Requirements for confidentiality or non-disclosure agreements reflecting the organization\u2019s needs for the protection of information shall be identified, regularly reviewed and documented.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -701,7 +701,7 @@
                   "fields": {
                         "name": "A.14.1.1 Information security requirements analysis and specification",
                         "description": "The information security related requirements shall be included in the requirements for new information systems or enhancements to existing information systems.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -710,7 +710,7 @@
                   "fields": {
                         "name": "A.14.1.2 Securing application services on public networks",
                         "description": "Information involved in application services passing over public networks shall be protected from fraudulent activity, contract dispute and unauthorized disclosure and modification.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -719,7 +719,7 @@
                   "fields": {
                         "name": "A.14.1.3 Protecting application services transactions",
                         "description": "Information involved in application service transactions shall be protected to prevent incomplete transmission, mis-routing, unauthorized message alteration, unauthorized disclosure, unauthorized message duplication or replay.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -728,7 +728,7 @@
                   "fields": {
                         "name": "A.14.2.1  Secure development policy",
                         "description": "Rules for the development of software and systems shall be established and applied to developments within the organization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -737,7 +737,7 @@
                   "fields": {
                         "name": "A.14.2.2 System change control procedures",
                         "description": "Changes to systems within the development lifecycle shall be controlled by the use of formal change control procedures.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -746,7 +746,7 @@
                   "fields": {
                         "name": "A.14.2.3 Technical review of applications after operating platform changes",
                         "description": "When operating platforms are changed, business critical applications shall be reviewed and tested to ensure there is no adverse impact on organizational operations or security.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -755,7 +755,7 @@
                   "fields": {
                         "name": "A.14.2.4 Restrictions on changes to software packages",
                         "description": "Modifications to software packages shall be discouraged, limited to necessary changes and all changes shall be strictly controlled.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -764,7 +764,7 @@
                   "fields": {
                         "name": "A.14.2.5 Secure system engineering principles",
                         "description": "Principles for engineering secure systems shall be established, documented, maintained and applied to any information system implementation efforts.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -773,7 +773,7 @@
                   "fields": {
                         "name": "A.14.2.6 Secure development environment",
                         "description": "Organizations shall establish and appropriately protect secure development environments for system development and integration efforts that cover the entire system development lifecycle.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -782,7 +782,7 @@
                   "fields": {
                         "name": "A.14.2.7 Outsourced development",
                         "description": "The organization shall supervise and monitor the activity of outsourced system development.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -791,7 +791,7 @@
                   "fields": {
                         "name": "A.14.2.8 System security testing",
                         "description": "Testing of security functionality shall be carried out during development.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -800,7 +800,7 @@
                   "fields": {
                         "name": "A.14.2.9 System acceptance testing",
                         "description": "Acceptance testing programs and related criteria shall be established for new information systems, upgrades and new versions.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -809,7 +809,7 @@
                   "fields": {
                         "name": "A.14.3.1 Protection of test data",
                         "description": "Test data shall be selected carefully, protected and controlled.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -818,7 +818,7 @@
                   "fields": {
                         "name": "A.15.1.1 Information security policy for supplier relationships",
                         "description": "Information security requirements for mitigating the risks associated with supplier\u2019s access to the organization\u2019s assets shall be agreed with the supplier and documented.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -827,7 +827,7 @@
                   "fields": {
                         "name": "A.15.1.2 Addressing security within supplier agreements",
                         "description": "All relevant information security requirements shall be established and agreed with each supplier that may access, process, store, communicate, or provide IT infrastructure components for, the organization\u2019s information.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -836,7 +836,7 @@
                   "fields": {
                         "name": "A.15.1.3 Information and communication technology supply chain",
                         "description": "Agreements with suppliers shall include requirements to address the information security risks associated with information and communications technology services and product supply chain.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -845,7 +845,7 @@
                   "fields": {
                         "name": "A.15.2.1  Monitoring and review of supplier services",
                         "description": "Organizations shall regularly monitor, review and audit supplier service delivery.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -854,7 +854,7 @@
                   "fields": {
                         "name": "A.15.2.2 Managing changes to supplier services",
                         "description": "Changes to the provision of services by suppliers, including maintaining and improving existing information security policies, procedures and controls, shall be managed, taking account of the criticality of business information, systems and processes involved and re-assessment of risks.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -863,7 +863,7 @@
                   "fields": {
                         "name": "A.16.1.1  Responsibilities and procedures",
                         "description": "Management responsibilities and procedures shall be established to ensure a quick, effective and orderly response to information security incidents.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -872,7 +872,7 @@
                   "fields": {
                         "name": "A.16.1.2 Reporting information security events",
                         "description": "Information security events shall be reported through appropriate management channels as quickly as possible.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -881,7 +881,7 @@
                   "fields": {
                         "name": "A.16.1.3 Reporting information security weaknesses",
                         "description": "Employees and contractors using the organization\u2019s information systems and services shall be required to note and report any observed or suspected information security weaknesses in sys-tems or services.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -890,7 +890,7 @@
                   "fields": {
                         "name": "A.16.1.4 Assessment of and decision on information security events",
                         "description": "Information security events shall be assessed and it shall be decided if they are to be classified as information security incidents.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -899,7 +899,7 @@
                   "fields": {
                         "name": "A.16.1.5 Response to information security incidents",
                         "description": "Information security incidents shall be responded to in accordance with the documented procedures.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -908,7 +908,7 @@
                   "fields": {
                         "name": "A.16.1.6 Learning from information security incidents",
                         "description": "Knowledge gained from analysing and resolving information security incidents shall be used to reduce the likelihood or impact of future incidents.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -917,7 +917,7 @@
                   "fields": {
                         "name": "A.16.1.7 Collection of evidence",
                         "description": "The organization shall define and apply procedures for the identification, collection, acquisition and preservation of information, which can serve as evidence.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -926,7 +926,7 @@
                   "fields": {
                         "name": "A.17.1.1 Planning information security continuity",
                         "description": "The organization shall determine its requirements for information security and the continuity of information security management in adverse situations, e.g. during a crisis or disaster.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -935,7 +935,7 @@
                   "fields": {
                         "name": "A.17.1.2 Implementing information security continuity",
                         "description": "The organization shall establish, document, implement and maintain processes, procedures and controls to ensure the required level of continuity for information security during an adverse situation.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -944,7 +944,7 @@
                   "fields": {
                         "name": "A.17.1.3 Verify, review and evaluate information security continuity",
                         "description": "The organization shall verify the established and implemented information security continuity controls at regular intervals in order to ensure that they are valid and effective during adverse situations.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -953,7 +953,7 @@
                   "fields": {
                         "name": "A.17.2.1 Availability of information processing facilities",
                         "description": "Information processing facilities shall be implemented with redundancy sufficient to meet availability requirements.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -962,7 +962,7 @@
                   "fields": {
                         "name": "A.18.1.1 Identification of applicable legislation and contractual requirements",
                         "description": "All relevant legislative statutory, regulatory, contractual requirements and the organization\u2019s approach to meet these requirements shall be explicitly identified, documented and kept up to date for each information system and the organization.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -971,7 +971,7 @@
                   "fields": {
                         "name": "A.18.1.2 Intellectual property rights",
                         "description": "Appropriate procedures shall be implemented to ensure compliance with legislative, regulatory and contractual requirements related to intellectual property rights and use of proprietary software products.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -980,7 +980,7 @@
                   "fields": {
                         "name": "A.18.1.3 Protection of records",
                         "description": "Records shall be protected from loss, destruction, falsification, unauthorized access and unauthorized release, in accordance with legislatory, regulatory, contractual and business requirements.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -989,7 +989,7 @@
                   "fields": {
                         "name": "A.18.1.4 Privacy and protection of personally identifiable information",
                         "description": "Privacy and protection of personally identifiable information shall be ensured as required in relevant legislation and regulation where applicable.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -998,7 +998,7 @@
                   "fields": {
                         "name": "A.18.1.5 Regulation of cryptographic controls",
                         "description": "Cryptographic controls shall be used in compliance with all relevant agreements, legislation and regulations.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -1007,7 +1007,7 @@
                   "fields": {
                         "name": "A.18.2.1  Independent review of information security",
                         "description": "The organization\u2019s approach to managing information security and its implementation (i.e. control objectives, controls, policies, processes and procedures for information security) shall be reviewed independently at planned intervals or when significant changes occur.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -1016,7 +1016,7 @@
                   "fields": {
                         "name": "A.18.2.2 Compliance with security policies and standards",
                         "description": "Managers shall regularly review the compliance of information processing and procedures within their area of responsibility with the appropriate security policies, standards and any other security requirements.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             },
@@ -1025,7 +1025,7 @@
                   "fields": {
                         "name": "A.18.2.3 Technical compliance review",
                         "description": "Information systems shall be regularly reviewed for compliance with the organization\u2019s information security policies and standards.",
-                        "provider": "ISO",
+                        "provider": "ISO 27001:2013",
                         "contact": ""
                   }
             }

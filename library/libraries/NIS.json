@@ -1,0 +1,214 @@
+{
+      "name": "Règles NIS - ANSSI",
+      "description": "Règles NIS du guide de protection des systèmes essentiels de l'ANSSI",
+      "format_version": "1.0",
+      "objects": [
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Gouvernance - Règle 1. Analyse de risque",
+                        "description": "L'opérateur de services essentiels effectue et tient à jour, dans le cadre de l'homologation de sécurité prévue à la règle 3, une analyse de risque de ses systèmes d'information essentiels (SIE). Cette analyse de risque prend notamment en compte l'analyse que l'opérateur a menée pour identifier ses systèmes d'information en tant que SIE.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Gouvernance - Règle 2. Politique de sécurité",
+                        "description": "L'opérateur de services essentiels élabore, tient à jour et met en œuvre une politique de sécurité des réseaux et systèmes d'information (PSSI). La PSSI décrit l'ensemble des procédures et des moyens organisationnels et techniques mis en œuvre par l'opérateur afin d'assurer la sécurité de ses systèmes d'information essentiels (SIE).",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Gouvernance - Règle 3. Homologation de sécurité",
+                        "description": "L'opérateur de services essentiels procède à l'homologation de sécurité de chaque système d'information essentiel (SIE), en mettant en œuvre la procédure d'homologation prévue par sa politique de sécurité des réseaux et systèmes d'information.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Gouvernance - Règle 4. Indicateurs",
+                        "description": "L'opérateur de services essentiels évalue et tient à jour, pour chaque système d'information essentiel (SIE), les indicateurs suivants : - des indicateurs relatifs au maintien en conditions de sécurité des ressources : - le pourcentage de postes utilisateurs dont les ressources systèmes ne sont pas installées dans une version supportée par le fournisseur ou le fabricant ; - le pourcentage de serveurs dont les ressources systèmes ne sont pas installées dans une version supportée par le fournisseur ou le fabricant ; - des indicateurs relatifs aux droits d'accès des utilisateurs et à l'authentification des accès aux ressources : - le pourcentage d'utilisateurs accédant au SIE au moyen de comptes privilégiés ; - le pourcentage de ressources dont les éléments secrets d'authentification ne peuvent pas être modifiés par l'opérateur ; - des indicateurs relatifs à l'administration des ressources : - le pourcentage de ressources administrées dont l'administration est effectuée à partir d'un compte non spécifique d'administration ; - le pourcentage de ressources administrées dont l'administration ne peut pas être effectuée au travers d'une liaison réseau physique ou d'une interface d'administration physique.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Gouvernance - Règle 5. Audits de la sécurité",
+                        "description": "L'opérateur de services essentiels réalise, dans le cadre de l'homologation de sécurité prévue à la règle 3, un audit de la sécurité de chaque système d'information essentiel (SIE). L'audit doit aussi être réalisé lors de chaque renouvellement de l'homologation en prenant notamment en compte les résultats de la mise à jour de l'analyse de risque du SIE.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Gouvernance - Règle 6. Cartographie",
+                        "description": "L'opérateur de services essentiels élabore et tient à jour, pour chaque système d'information essentiel (SIE), les éléments de cartographie suivants : - les noms et les fonctions des applications, supportant les activités de l'opérateur, installées sur le SIE ; - le cas échéant, les plages d'adresses IP de sortie du SIE vers internet ou un réseau tiers, ou accessibles depuis ces réseaux ; - le cas échéant, les plages d'adresses IP associées aux différents sous-réseaux composant le SIE ; - la description fonctionnelle et les lieux d'installation du SIE et de ses différents sous-réseaux ; - la description fonctionnelle des points d'interconnexion du SIE et de ses différents sous-réseaux avec des réseaux tiers, notamment la description des équipements et des fonctions de filtrage et de protection mis en œuvre au niveau de ces interconnexions ; - l'inventaire et l'architecture des dispositifs d'administration du SIE permettant de réaliser notamment les opérations d'installation à distance, de mise à jour, de supervision, de gestion des configurations, d'authentification ainsi que de gestion des comptes et des droits d'accès ; - la liste des comptes disposant de droits d'accès privilégiés au SIE (appelés « comptes privilégiés »). Cette liste précise pour chaque compte le niveau et le périmètre des droits d'accès associés, notamment les comptes sur lesquels portent ces droits (comptes d'utilisateurs, comptes de messagerie, comptes de processus, etc.) ; - l'inventaire, l'architecture et le positionnement des services de résolution de noms d'hôte, de messagerie, de relais internet et d'accès distant mis en œuvre par le SIE.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 7. Configuration",
+                        "description": "L'opérateur de services essentiels respecte les règles suivantes lorsqu'il installe des services et des équipements sur ses systèmes d'information essentiels (SIE) : - l'opérateur installe sur ses SIE les seuls services et fonctionnalités qui sont indispensables à leur fonctionnement ou à leur sécurité. Il désactive les services et les fonctionnalités qui ne sont pas indispensables, notamment ceux installés par défaut, et les désinstalle si cela est possible. Lorsque la désinstallation n'est pas possible, l'opérateur le mentionne dans le dossier d'homologation du SIE concerné en précisant les services et fonctionnalités concernés et les mesures de réduction du risque mises en œuvre ; - l'opérateur ne connecte à ses SIE que des équipements, matériels périphériques et supports amovibles dont il assure la gestion et qui sont indispensables au fonctionnement ou à la sécurité de ses SIE ; - les supports amovibles inscriptibles connectés aux SIE sont utilisés exclusivement pour le fonctionnement, y compris la maintenance et l'administration, ou la sécurité des SIE ; - l'opérateur procède, avant chaque utilisation de supports amovibles, à l'analyse de leur contenu, notamment à la recherche de code malveillant. L'opérateur met en place, sur les équipements auxquels sont connectés ces supports amovibles, des mécanismes de protection contre les risques d'exécution de code malveillant provenant de ces supports.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 8. Cloisonnement",
+                        "description": "L'opérateur de services essentiels procède au cloisonnement de ses systèmes d'information essentiels (SIE) afin de limiter la propagation des attaques informatiques au sein de ses systèmes ou ses sous-systèmes.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 9. Accès distant",
+                        "description": "L'opérateur de services essentiels protège les accès à ses systèmes d'information essentiels (SIE) effectués à travers des systèmes d'information tiers. En particulier, lorsqu'un service essentiel nécessite que le SIE nécessaire à sa fourniture soit accessible via un réseau public, l'opérateur protège cet accès au moyen de mécanismes cryptographiques conformes aux règles préconisées par l'Agence nationale de la sécurité des systèmes d'information.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 10. Filtrage",
+                        "description": "L'opérateur de services essentiels met en place des mécanismes de filtrage des flux de données circulant dans ses systèmes d'information essentiels (SIE) afin de bloquer la circulation des flux inutiles au fonctionnement de ses systèmes et susceptibles de faciliter des attaques informatiques.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 11. Comptes d'administration",
+                        "description": "L'opérateur de services essentiels crée des comptes (appelés « comptes d'administration ») destinés aux seules personnes (appelées « administrateurs ») chargées d'effectuer les opérations d'administration (installation, configuration, gestion, maintenance, supervision, etc.) des ressources de ses systèmes d'information essentiels (SIE).",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 12. Systèmes d'information d'administration",
+                        "description": "L'opérateur de services essentiels applique les règles suivantes aux systèmes d'information (appelés « systèmes d'information d'administration ») utilisés pour effectuer l'administration de ses systèmes d'information essentiels (SIE) : - les ressources matérielles et logicielles des systèmes d'information d'administration sont gérées et configurées par l'opérateur ou, le cas échéant, par le prestataire qu'il a mandaté pour réaliser les opérations d'administration ; - les ressources matérielles et logicielles des systèmes d'information d'administration sont utilisées exclusivement pour réaliser des opérations d'administration. Cependant, lorsque des raisons techniques ou organisationnelles le justifient, le poste de travail physique de l'administrateur peut être utilisé pour réaliser des opérations autres que des opérations d'administration. Dans ce cas, des mécanismes de durcissement du système d'exploitation du poste de travail et de cloisonnement doivent être mis en place pour permettre d'isoler l'environnement logiciel utilisé pour ces autres opérations de l'environnement logiciel utilisé pour les opérations d'administration ; - un environnement logiciel utilisé pour effectuer des opérations d'administration ne doit pas être utilisé à d'autres fins, comme l'accès à des sites ou serveurs de messagerie sur internet ; - un utilisateur ne doit pas se connecter à un système d'information d'administration au moyen d'un environnement logiciel utilisé pour d'autres fonctions que des opérations d'administration ; - les flux de données associés à des opérations autres que des opérations d'administration doivent, lorsqu'ils transitent sur les systèmes d'information d'administration, être cloisonnés au moyen de mécanismes de chiffrement et d'authentification conformes aux règles préconisées par l'Agence nationale de la sécurité des systèmes d'information ; - les systèmes d'information d'administration sont connectés aux ressources du SIE à administrer au travers d'une liaison réseau physique utilisée exclusivement pour les opérations d'administration. Ces ressources sont administrées au travers de leur interface d'administration physique. Lorsque des raisons techniques empêchent d'administrer une ressource au travers d'une liaison réseau physique ou de son interface d'administration physique, l'opérateur met en œuvre des mesures de réduction du risque telles que des mesures de sécurité logique. Dans ce cas, il décrit ces mesures et leurs justifications dans le dossier d'homologation du SIE concerné ; - lorsqu'ils ne circulent pas dans le système d'information d'administration, les flux d'administration sont protégés par des mécanismes de chiffrement et d'authentification conformes aux règles préconisées par l'Agence nationale de la sécurité des systèmes d'information. Si le chiffrement et l'authentification de ces flux ne sont pas possibles pour des raisons techniques, l'opérateur met en œuvre des mesures permettant de protéger la confidentialité et l'intégrité de ces flux et de renforcer le contrôle et la traçabilité des opérations d'administration. Dans ce cas, il décrit ces mesures et leurs justifications dans le dossier d'homologation du SIE concerné ; - les journaux enregistrant les événements générés par les ressources des systèmes d'information d'administration ne contiennent aucun mot de passe ou autre élément secret d'authentification en clair ou sous forme d'empreinte cryptographique.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 13. Identification",
+                        "description": "L'opérateur de services essentiels crée des comptes individuels pour tous les utilisateurs (y compris les utilisateurs ayant des comptes privilégiés ou des comptes d'administration) et pour les processus automatiques accédant aux ressources de ses systèmes d'information essentiels (SIE).",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 14. Authentification",
+                        "description": "L'opérateur de services essentiels protège les accès aux ressources de ses systèmes d'information essentiels (SIE), que ce soit par un utilisateur ou par un processus automatique, au moyen d'un mécanisme d'authentification impliquant un élément secret.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 15. Droits d'accès",
+                        "description": "L'opérateur de services essentiels définit, conformément à sa politique de sécurité des réseaux et systèmes d'information, les règles de gestion et d'attribution des droits d'accès aux ressources de ses systèmes d'information essentiels (SIE), et respecte les règles suivantes : - l'opérateur n'attribue à un utilisateur ou à un processus automatique les droits d'accès à une ressource que si cet accès est strictement nécessaire à l'exercice des missions de l'utilisateur ou au fonctionnement du processus automatique ; - l'opérateur définit les accès aux différentes fonctionnalités de chaque ressource et en attribue les droits uniquement aux utilisateurs et aux processus automatiques qui en ont strictement le besoin ; - les droits d'accès sont révisés périodiquement, au moins tous les ans, par l'opérateur. Cette révision porte sur les liens entre les comptes, les droits d'accès associés et les ressources ou les fonctionnalités qui en font l'objet ; - l'opérateur établit et tient à jour la liste des comptes privilégiés. Toute modification d'un compte privilégié (ajout, suppression, suspension ou modification des droits associés) fait l'objet d'un contrôle formel de l'opérateur destiné à vérifier que les droits d'accès aux ressources et fonctionnalités sont attribués selon le principe du moindre privilège (seuls les droits strictement nécessaires sont accordés) et en cohérence avec les besoins d'utilisation du compte.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 16. Procédure de maintien en conditions de sécurité",
+                        "description": "L'opérateur de services essentiels élabore, tient à jour et met en œuvre une procédure de maintien en conditions de sécurité des ressources matérielles et logicielles de ses systèmes d'information essentiels (SIE), conformément à sa politique de sécurité des réseaux et systèmes d'information. Cette procédure définit les conditions permettant de maintenir le niveau de sécurité des ressources des SIE en fonction de l'évolution des vulnérabilités et des menaces et précise notamment la politique d'installation de toute nouvelle version et mesure correctrice de sécurité d'une ressource et les vérifications à effectuer avant l'installation.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Protection - Règle 17. Sécurité physique et environnementale",
+                        "description": "L'opérateur de services essentiels définit et met en œuvre, conformément à sa politique de sécurité des réseaux et systèmes d'information, les procédures et les mesures de sécurité physique et environnementale applicables à ses systèmes d'information essentiels (SIE). Ces procédures et mesures portent notamment sur le contrôle du personnel interne et du personnel externe, le contrôle d'accès physique aux SIE et, le cas échéant, la protection des SIE contre les risques environnementaux tels que les catastrophes naturelles.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Défense - Règle 18. Détection",
+                        "description": "L'opérateur de services essentiels élabore, tient à jour et met en œuvre, conformément à sa politique de sécurité des réseaux et systèmes d'information, une procédure de détection des incidents de sécurité affectant ses systèmes d'information essentiels (SIE). Cette procédure prévoit des mesures organisationnelles et techniques destinées à détecter les incidents de sécurité affectant les SIE. Les mesures organisationnelles comprennent les modalités d'exploitation des dispositifs de détection et décrivent la chaîne de traitement des événements de sécurité identifiés par ces dispositifs. Les mesures techniques précisent la nature et le positionnement des dispositifs de détection. L'opérateur met en œuvre des dispositifs de détection capables d'identifier des événements caractéristiques d'un incident de sécurité notamment d'une attaque en cours ou à venir et de permettre la recherche de traces d'incidents antérieurs.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Défense - Règle 19. Journalisation",
+                        "description": "L'opérateur de services essentiels met en œuvre sur chaque système d'information essentiel (SIE) un système de journalisation qui enregistre les événements relatifs à l'authentification des utilisateurs, à la gestion des comptes et des droits d'accès, à l'accès aux ressources, aux modifications des règles de sécurité du SIE ainsi qu'au fonctionnement du SIE. Le système de journalisation contribue à la détection d'incidents de sécurité en collectant les données de journalisation.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Défense - Règle 20. Corrélation et analyse de journaux",
+                        "description": "L'opérateur de services essentiels met en œuvre un système de corrélation et d'analyse de journaux qui exploite les événements enregistrés par le système de journalisation installé sur chacun des systèmes d'information essentiels (SIE), afin de détecter des événements susceptibles d'affecter la sécurité des SIE. Le système de corrélation et d'analyse de journaux contribue à la détection d'incidents de sécurité en analysant les données de journalisation. Le système de corrélation et d'analyse de journaux est installé et exploité sur un système d'information mis en place exclusivement à des fins de détection d'événements susceptibles d'affecter la sécurité des systèmes d'information.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Défense - Règle 21. Réponse aux incidents",
+                        "description": "L'opérateur de services essentiels élabore, tient à jour et met en œuvre, conformément à sa politique de sécurité des réseaux et systèmes d'information, une procédure de traitement des incidents de sécurité affectant ses systèmes d'information essentiels (SIE).",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Défense - Règle 22. Traitement des alertes",
+                        "description": "L'opérateur de services essentiels met en place un service lui permettant de prendre connaissance, dans les meilleurs délais, d'informations transmises par l'Agence nationale de la sécurité des systèmes d'information relatives à des incidents, des vulnérabilités et des menaces. Il met en œuvre une procédure pour traiter les informations ainsi reçues et le cas échéant prendre les mesures de sécurité nécessaires à la protection de ses systèmes d'information essentiels (SIE).",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            },
+            {
+                  "type": "security_function",
+                  "fields": {
+                        "name": "Résilience - Règle 23. Gestion de crises",
+                        "description": "L'opérateur de services essentiels élabore, tient à jour et met en œuvre, conformément à sa politique de sécurité des réseaux et systèmes d'information, une procédure de gestion de crises en cas d'incidents de sécurité ayant un impact majeur sur les services essentiels de l'opérateur.",
+                        "provider": "NIS",
+                        "contact": ""
+                  }
+            }
+      ]
+}
