@@ -13,8 +13,8 @@ import pytest
 
 list = {}
 factory = RequestFactory()
-request = factory.get('/core/analytics')
-requestAnonym = factory.get('/core/analytics')
+request = factory.get('/core/overview')
+requestAnonym = factory.get('/core/overview')
 
 @pytest.fixture
 def test_setUp(db):
@@ -54,11 +54,11 @@ def test_generate_mp_pdf(db, test_setUp):
     assert generate_mp_pdf(request, 3)['Content-Disposition'] == f'filename="MP-3-Test Project-v-0.1.pdf"'
     assert str(generate_mp_pdf(request, 3)) == str(HttpResponse(status=200, content_type='application/pdf')) # Not good to compare strings, to review !
 
-def test_global_analytics(db, test_setUp):
-    assert str(global_analytics(request)) == str(HttpResponse(status=200))
+def test_global_overview(db, test_setUp):
+    assert str(global_overview(request)) == str(HttpResponse(status=200))
 
 def test_generate_ra_pdf_login(db, test_setUp):
-    assert str(generate_ra_pdf(requestAnonym, 2)) == str(HttpResponseRedirect(status=302, redirect_to="/accounts/login/?next=/core/analytics"))
+    assert str(generate_ra_pdf(requestAnonym, 2)) == str(HttpResponseRedirect(status=302, redirect_to="/accounts/login/?next=/core/overview"))
 
 def test_generate_mp_pdf_login(db, test_setUp):
-    assert str(generate_mp_pdf(requestAnonym, 3)) == str(HttpResponseRedirect(status=302, redirect_to="/accounts/login/?next=/core/analytics"))
+    assert str(generate_mp_pdf(requestAnonym, 3)) == str(HttpResponseRedirect(status=302, redirect_to="/accounts/login/?next=/core/overview"))

@@ -63,10 +63,10 @@ def test_ASF005(page):
                 next = 0
                 page.click("id=homepage")
                 assert page.url == urlpatterns.url, "Step "+str(step)+": not Ok"
-        page.click('id=analytics')
+        page.click('id=overview')
         assert page.locator('id=analysis').inner_text() == str(countAnalyses), "Step "+str(step)+": not Ok"
     else:
         time.sleep(0.1)
         assert page.locator('id=pagenum').is_visible() == True, "Step "+str(step)+": not Ok"
-        page.click('id=analytics')
+        page.click('id=overview')
         assert page.locator('id=analysis').inner_text() == '0', "Step "+str(step)+": not Ok"

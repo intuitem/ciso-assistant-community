@@ -215,8 +215,8 @@ class Browser(ListView):
 
 
 @login_required
-def global_analytics(request):
-    template = 'core/analytics.html'
+def global_overview(request):
+    template = 'core/overview.html'
 
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)

@@ -53,10 +53,10 @@ def test_ASF006(page):
 			name = page.locator('id='+str(i+1))
 			assert name.is_visible() == True, "Step "+str(step)+": not Ok"
 			page.goto(urlpatterns.search + "?q=e")
-	# 3.2 | (no links) check in "Analytics" there aren't any analysis, ... | Each counter should be '0' |
+	# 3.2 | (no links) check in "Overview" there aren't any analysis, ... | Each counter should be '0' |
 	step = 3.2
 	if riskscenario_count == 0 and riskanalysis_count == 0 and security_function_count == 0:
-		page.click('id=analytics')
+		page.click('id=overview')
 		assert page.locator('id=riskscenarios').inner_text() == '0', "Step "+str(step)+": not Ok"
 		assert page.locator('id=security_functions').inner_text() == '0', "Step "+str(step)+": not Ok"
 		assert page.locator('id=analysis').inner_text() == '0', "Step "+str(step)+": not Ok"
