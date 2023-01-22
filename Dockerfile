@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # Based on https://docs.docker.com/samples/django/
 
-FROM python:3.9
+FROM python:3.11
 ENV PYTHONUNBUFFERED 1
 
 ENV DJANGO_SECRET_KEY = ${DJANGO_SECRET_KEY}
@@ -32,5 +32,6 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 
 RUN python manage.py collectstatic --no-input --clear
 
-
+#CMD python manage.py runserver 0.0.0.0:8000
+CMD gunicorn --chdir asf_rm --bind :8000 asf_rm.wsgi:application
 EXPOSE 8000
