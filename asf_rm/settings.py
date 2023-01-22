@@ -63,7 +63,6 @@ INSTALLED_APPS = [
     'library',
     'serdes',
     'import_export',
-    'reversion',
 ]
 
 MIDDLEWARE = [

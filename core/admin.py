@@ -1,33 +1,31 @@
 from django.contrib import admin
 from .models import *
 from iam.models import Folder
-from reversion.admin import VersionAdmin
 from fieldsets_with_inlines import FieldsetsInlineMixin
 from import_export.admin import ImportExportActionModelAdmin
 from import_export import resources
 from django.utils.translation import gettext_lazy as _
 
-# HINT: Whenever you register a model with django-reversion, run createinitialrevisions.
 # TODO: we could consider nested inlines at some point
 
 
 @admin.register(Folder)
-class FolderAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class FolderAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
 @admin.register(Threat)
-class ThreatAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class ThreatAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
 @admin.register(SecurityFunction)
-class SecurityFunctionAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class SecurityFunctionAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     ...
 
 
 @admin.register(RiskAcceptance)
-class RiskAcceptanceAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class RiskAcceptanceAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     list_display = ('__str__', 'type', 'validator', 'expiry_date')
 
 
@@ -62,7 +60,7 @@ class RiskScenarioResource(resources.ModelResource):
 
 
 @admin.register(RiskScenario)
-class RiskScenarioAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class RiskScenarioAdmin(FieldsetsInlineMixin, ImportExportActionModelAdmin, admin.ModelAdmin):
     model = RiskScenario
 
     list_display = ('__str__', 'threat', 'parent_project', 'treatment')
@@ -81,7 +79,7 @@ class RiskScenarioAdmin(VersionAdmin, FieldsetsInlineMixin, ImportExportActionMo
     list_filter = ('threat', 'treatment', 'current_level', 'residual_level', 'analysis__project__name')
 
 @admin.register(Analysis)
-class AnalysisAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class AnalysisAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     model = Analysis
     inlines = [RiskScenarioInline]
 
@@ -97,7 +95,7 @@ class AnalysisAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin
 
 
 @admin.register(SecurityMeasure)
-class SecurityMeasureAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class SecurityMeasureAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     model = SecurityMeasure
 
     list_display = ('name', 'parent_project', 'type', 'security_function', 'effort', 'status')
@@ -105,7 +103,7 @@ class SecurityMeasureAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.Mod
 
 
 @admin.register(Project)
-class ProjectAdmin(VersionAdmin, ImportExportActionModelAdmin, admin.ModelAdmin):
+class ProjectAdmin(ImportExportActionModelAdmin, admin.ModelAdmin):
     model = Project
 
     list_display = ('name', 'folder', 'description', 'lc_status')
