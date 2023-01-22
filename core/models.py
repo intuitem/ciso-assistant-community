@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from asf_rm import settings
 from core.base_models import AbstractBaseModel
 from iam.models import Folder, FolderMixin
-from asf_rm.settings import ARM_SETTINGS
 from openpyxl import load_workbook
 import pandas as pd
 import json

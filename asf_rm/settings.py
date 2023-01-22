@@ -43,14 +43,8 @@ if 'DJANGO_ALLOWED_HOSTS' in os.environ:
 else:
     ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
-# ASF RM settings
-
-ARM_SETTINGS = {
-    "MATRIX_PATH": BASE_DIR / "matrix.xlsx",
-}
 
 # Application definition
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
