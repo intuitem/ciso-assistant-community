@@ -46,8 +46,11 @@ export POSTGRES_NAME=asf
 export POSTGRES_USER=asfuser
 export POSTGRES_PASSWORD=<XXX>
 export DB_HOST=localhost
+export DB_PORT=5432
 export DJANGO_DEBUG=True
 ```
+
+NOTE: DB_PORT is optional, and defaults to 5432.
 
 NOTE: To use the `reset.sh` script, you need to set the `POSTGRES_DBLOGIN` variable to the login of the postgres daemon.
 
