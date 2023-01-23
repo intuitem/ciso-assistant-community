@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mira-config
+data:
+  POSTGRES_NAME: mira
+  POSTGRES_USER: mirauser
+  DB_HOST: localhost
+  DJANGO_DEBUG: "true"
+
