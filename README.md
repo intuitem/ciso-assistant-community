@@ -48,6 +48,7 @@ export POSTGRES_PASSWORD=<XXX>
 export DB_HOST=localhost
 export DB_PORT=5432
 export DJANGO_DEBUG=True
+export DJANGO_SUPERUSER_PASSWORD=<XXX>
 ```
 
 NOTE: DB_PORT is optional, and defaults to 5432.

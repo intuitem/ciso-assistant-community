@@ -155,39 +155,42 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    """ a user is a principal corresponding to a human """
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    last_name = models.CharField(_('last name'), max_length=150, blank=True)
-    first_name = models.CharField(_('first name'), max_length=150, blank=True)
-    email = models.CharField(max_length=100, unique=True)
-    is_active = models.BooleanField(
-        _('active'),
-        default=True,
-        help_text=_(
-            'Designates whether this user should be treated as active. '
-            'Unselect this instead of deleting accounts.'
-        ),
-    )
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    is_superuser = models.BooleanField(
-        _('superuser status'),
-        default=False,
-        help_text=_(
-            'Designates that this user has all permissions without explicitly assigning them.'
-        ),
-    )
-    user_groups = models.ManyToManyField(
-        UserGroup,
-        verbose_name=_('user groups'),
-        blank=True,
-        help_text=_(
-            'The user_groups this user belongs to. A user will get all permissions '
-            'granted to each of their user_groups.'
-        ),
-        related_name="user_set",
-        related_query_name="user",
-    )
-    objects = UserManager()
+    try:
+        """ a user is a principal corresponding to a human """
+        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+        last_name = models.CharField(_('last name'), max_length=150, blank=True)
+        first_name = models.CharField(_('first name'), max_length=150, blank=True)
+        email = models.CharField(max_length=100, unique=True)
+        is_active = models.BooleanField(
+            _('active'),
+            default=True,
+            help_text=_(
+                'Designates whether this user should be treated as active. '
+                'Unselect this instead of deleting accounts.'
+            ),
+        )
+        date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+        is_superuser = models.BooleanField(
+            _('superuser status'),
+            default=False,
+            help_text=_(
+                'Designates that this user has all permissions without explicitly assigning them.'
+            ),
+        )
+        user_groups = models.ManyToManyField(
+            UserGroup,
+            verbose_name=_('user groups'),
+            blank=True,
+            help_text=_(
+                'The user_groups this user belongs to. A user will get all permissions '
+                'granted to each of their user_groups.'
+            ),
+            related_name="user_set",
+            related_query_name="user",
+        )
+        objects = UserManager()
+    except:
+        print("Exception kludge")
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
@@ -202,13 +205,18 @@ class User(AbstractBaseUser):
 #        swappable = 'AUTH_USER_MODEL'
 
     def get_full_name(self) -> str:
-        """ get user's full name """
-        full_name = f'{self.first_name} {self.last_name}'
-        return full_name.strip() if full_name.strip() else self.email
-
+        try:
+            """ get user's full name """
+            full_name = f'{self.first_name} {self.last_name}'
+            return full_name.strip() if full_name.strip() else self.email
+        except:
+            return ""
     def get_short_name(self) -> str:
-        """ get user's short name """
-        return self.first_name if self.first_name else self.email.split('@')[0]
+        try:
+            """ get user's short name """
+            return self.first_name if self.first_name else self.email.split('@')[0]
+        except:
+            return ""
 
 
 class RoleAssignment(models.Model):

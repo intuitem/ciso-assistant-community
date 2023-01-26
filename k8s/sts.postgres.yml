@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+      containers:
+      - name: postgres
+        image: postgres:latest
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+        envFrom:
+        - configMapRef:
+            name: postgres-config
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: POSTGRES_PASSWORD
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+      labels:
+        app: postgres
+    spec:
+      resources:
+        requests:
+          storage: 1Gi
+      accessModes:
+      - ReadWriteOnce
+

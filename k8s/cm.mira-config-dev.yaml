@@ -5,6 +5,6 @@ metadata:
 data:
   POSTGRES_NAME: mira
   POSTGRES_USER: mirauser
-  DB_HOST: localhost
+  DB_HOST: postgres
   DJANGO_DEBUG: "true"
 

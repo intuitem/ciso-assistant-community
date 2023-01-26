@@ -1,7 +1,7 @@
 import re
 import sys
 import os
-SECRET_KEYS = ('DJANGO_SECRET_KEY', 'POSTGRES_PASSWORD')
+SECRET_KEYS = ('DJANGO_SECRET_KEY', 'POSTGRES_PASSWORD', 'DJANGO_SUPERUSER_PASSWORD')
 
 if len(sys.argv) != 2:
     print("Usage: create_secrets.py var_file", file=sys.stderr)
@@ -20,6 +20,6 @@ with open(filename, "r") as f:
         if name in SECRET_KEYS:
             print("creating secret ", name)
             with open(f"myvars.secrets/{name}", "w") as f2:
-                print(val, file=f2)
+                print(val, file=f2, end='')
 
 print("to load the secrets in K8s, use a command like: kubectl create secret generic myvars --from-file myvars.secrets")

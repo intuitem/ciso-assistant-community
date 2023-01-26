@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-05 12:00+0000\n"
+"POT-Creation-Date: 2023-01-26 21:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:22 iam/models.py:218
+#: iam/models.py:22 iam/models.py:226
 msgid "Domain"
 msgstr "Domaine"
 
@@ -61,7 +61,7 @@ msgstr "nom"
 msgid "user group"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:29 iam/models.py:181
+#: iam/models.py:29 iam/models.py:182
 msgid "user groups"
 msgstr "groupes d'utilisateurs"
 
@@ -81,7 +81,7 @@ msgstr "DOMAINE"
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:84 iam/models.py:229
+#: iam/models.py:84 iam/models.py:237
 msgid "Folder"
 msgstr "Dossier"
 
@@ -89,19 +89,19 @@ msgstr "Dossier"
 msgid "Folders"
 msgstr "Dossiers"
 
-#: iam/models.py:160
+#: iam/models.py:161
 msgid "last name"
 msgstr "nom"
 
-#: iam/models.py:161
+#: iam/models.py:162
 msgid "first name"
 msgstr "prénom"
 
-#: iam/models.py:164
+#: iam/models.py:165
 msgid "active"
 msgstr "actif"
 
-#: iam/models.py:167
+#: iam/models.py:168
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
@@ -109,15 +109,15 @@ msgstr ""
 "Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
 "au lieu de supprimer les comptes."
 
-#: iam/models.py:171
+#: iam/models.py:172
 msgid "date joined"
 msgstr "date d'inscription"
 
-#: iam/models.py:173
+#: iam/models.py:174
 msgid "superuser status"
 msgstr "statut superutilisateur"
 
-#: iam/models.py:176
+#: iam/models.py:177
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
@@ -125,7 +125,7 @@ msgstr ""
 "Désigne que cet utilisateur a toutes les autorisations sans les assigner "
 "explicitement."
 
-#: iam/models.py:184
+#: iam/models.py:185
 msgid ""
 "The user_groups this user belongs to. A user will get all permissions "
 "granted to each of their user_groups."
@@ -134,19 +134,19 @@ msgstr ""
 "utilisateur obtiendra toutes les autorisations accordées à chacun de ses "
 "groupes d'utilisateurs."
 
-#: iam/models.py:200
+#: iam/models.py:203
 msgid "user"
 msgstr "utilisateur"
 
-#: iam/models.py:201
+#: iam/models.py:204
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:224
+#: iam/models.py:232
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:226
+#: iam/models.py:234
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
