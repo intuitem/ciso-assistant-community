@@ -13,11 +13,11 @@ spec:
       labels:
         app: mira
         rel: dev
-        ver: '0.9.1g'
+        ver: '0.9.1i'
     spec:
       containers:
         - name: mira
-          image: mira:0.9.1g
+          image: mira:0.9.1i
           ports:
           - containerPort: 8000
           envFrom:
