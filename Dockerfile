@@ -35,5 +35,6 @@ RUN django-admin makemessages --all -i venv && \
 RUN python manage.py collectstatic --no-input --clear
 
 #CMD python manage.py runserver 0.0.0.0:8000
-CMD ./startup.sh
+#CMD ./startup.sh
+ENTRYPOINT ["gunicorn", "--chdir", "asf_rm", "--bind", ":8000", "asf_rm.wsgi:application"]
 EXPOSE 8000
