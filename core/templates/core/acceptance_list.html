@@ -68,7 +68,7 @@
                                 </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                                 <div>
-                                    <p class="block text-sm font-medium text-gray-900">{% trans "Parent domain" %}</p>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Risk scenarios" %}</p>
                                     <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
                                         <div class="flex flex-col">
                                             <div>
@@ -132,7 +132,7 @@
                                 bg-red-300
                                 {% else %}
                                 bg-green-200
-                                {% endif %}">{{ acceptance.get_type_display|lower}}
+                                {% endif %}">{{ acceptance.get_type_display|lower}}
                                 </span>
                                 <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
                                     {% if object_ids_change %}
