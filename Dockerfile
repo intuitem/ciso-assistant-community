@@ -25,14 +25,14 @@ COPY . /code/
 RUN django-admin makemessages --all -i venv && \
     django-admin compilemessages -i venv
 
-# RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
-#     && sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
-#     && locale-gen
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen \
+    && locale-gen
 
 #RUN apt install -y npm && \
 #     python manage.py tailwind build
 
-RUN python manage.py collectstatic --no-input --clear
+# RUN python manage.py collectstatic --no-input --clear
 
 #CMD python manage.py runserver 0.0.0.0:8000
 #CMD ./startup.sh

@@ -13,20 +13,56 @@ spec:
       labels:
         app: mira
         rel: dev
-        ver: '0.9.1l'
+        ver: '0.9.1m'
     spec:
       volumes:
       - name: nginx-conf
         configMap:
-          name: nginx-conf
+          name: mira-config
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: startup
+        configMap:
+          name: mira-config
+          items:
+          - key: startup.sh
+            path: startup.sh
+            mode: 0755
+      - name: staticfiles
+        emptyDir:
+          sizeLimit: 50Mi
       initContainers:
         - name: mira-init
-          image: mira:0.9.1l
+          image: mira:0.9.1m
           command: ["/code/startup.sh"]
-          envFrom:
-          - configMapRef:
-              name: mira-config
+          volumeMounts:
+          - name: staticfiles
+            mountPath: /code/staticfiles
+          - name: startup
+            subPath: startup.sh
+            mountPath: /code/startup.sh
           env:
+          - name: POSTGRES_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: POSTGRES_NAME
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: DB_HOST
+          - name: DJANGO_DEBUG
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: DJANGO_DEBUG
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: POSTGRES_USER
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -39,13 +75,30 @@ spec:
                 key: DJANGO_SUPERUSER_PASSWORD
       containers:
         - name: mira
-          image: mira:0.9.1l
+          image: mira:0.9.1m
           ports:
           - containerPort: 8000
-          envFrom:
-          - configMapRef:
-              name: mira-config
           env:
+          - name: POSTGRES_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: POSTGRES_NAME
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: DB_HOST
+          - name: DJANGO_DEBUG
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: DJANGO_DEBUG
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: POSTGRES_USER
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -63,3 +116,7 @@ spec:
           volumeMounts:
           - name: nginx-conf
             mountPath: /etc/nginx/conf.d
+          - name: staticfiles
+            mountPath: /usr/share/nginx/static
+            
+

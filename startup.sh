@@ -13,6 +13,6 @@ python manage.py compilemessages -i venv -l fr
 
 # the next command will fail if already created, this is assumed
 python manage.py createsuperuser --email root@example.com --noinput
-exit 0
+python manage.py collectstatic --no-input --clear
 #python manage.py runserver 0.0.0.0:8000
 #gunicorn --chdir asf_rm --bind :8000 asf_rm.wsgi:application
