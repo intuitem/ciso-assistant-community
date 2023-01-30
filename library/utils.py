@@ -2,7 +2,7 @@ from core.models import RiskMatrix
 from core.models import Threat, SecurityFunction
 from django.contrib import messages
 from iam.models import Folder
-
+from asf_rm import settings
 from django.utils.translation import gettext_lazy as _
 
 from .validators import *
@@ -18,7 +18,7 @@ def get_available_library_files():
         files: list of available library files
     '''
     files = []
-    path = r'./library/libraries'
+    path = settings.BASE_DIR / 'library/libraries'
     # print absolute path
     print(os.path.abspath(path))
     for f in os.listdir(path):
@@ -34,10 +34,10 @@ def get_available_libraries():
         libraries: list of available libraries
     '''
     files = get_available_library_files()
-    path = r'./library/libraries'
+    path = settings.BASE_DIR / 'library/libraries'
     libraries = []
     for f in files:
-        with open(f'{path}/{f}', 'r', encoding='utf-8') as file:
+        with open(path / f, 'r', encoding='utf-8') as file:
             libraries.append(json.load(file))
     return libraries
 
