@@ -9,6 +9,11 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 @pytest.fixture
+def root_folder_fixture():
+    Folder.objects.create(
+                name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
+
+@pytest.fixture
 def matrix_fixture():
     Folder.objects.create(
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
@@ -295,13 +300,70 @@ class TestSecurityMeasure:
 @pytest.mark.django_db
 class TestRiskAcceptance:
     pytestmark = pytest.mark.django_db
+    
+    def test_acceptance_creation(self, matrix_fixture):
+        folder = Folder.objects.create(name="test folder", description="test folder description")
+        matrix = RiskMatrix.objects.all()[0]
+        project = Project.objects.create(name="test project", folder=folder)
+        analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                project=project, rating_matrix=matrix)
+        threat = Threat.objects.create(name="test threat", description="test threat description", folder=folder)
+        scenario = RiskScenario.objects.create(name="test scenario", description="test scenario description", analysis=analysis,
+                threat=threat)
+        acceptance = RiskAcceptance.objects.create(name="test acceptance", description="test acceptance description", folder=folder)
+        acceptance.risk_scenarios.add(scenario)
+        acceptance.save()
 
-    ...
+        assert isinstance(acceptance.id, UUID)
+        assert acceptance.name == "test acceptance"
+        assert acceptance.description == "test acceptance description"
+        assert acceptance.folder == folder
+        assert acceptance.risk_scenarios.count() == 1
+        assert acceptance.risk_scenarios.all()[0] == scenario
 
-@pytest.fixture
-def root_folder_fixture():
-    Folder.objects.create(
-                name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
+    def test_acceptance_creation_same_name_different_folder(self, matrix_fixture):
+            folder = Folder.objects.create(name="test folder", description="test folder description")
+            folder2 = Folder.objects.create(name="test folder 2", description="test folder description")
+            matrix = RiskMatrix.objects.all()[0]
+            project = Project.objects.create(name="test project", folder=folder)
+            analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                    project=project, rating_matrix=matrix)
+            threat = Threat.objects.create(name="test threat", description="test threat description", folder=folder)
+            scenario = RiskScenario.objects.create(name="test scenario", description="test scenario description", analysis=analysis,
+                    threat=threat)
+            acceptance = RiskAcceptance.objects.create(name="test acceptance", description="test acceptance description", folder=folder)
+            acceptance.risk_scenarios.add(scenario)
+            acceptance.save()
+
+            acceptance2 = RiskAcceptance.objects.create(name="test acceptance", description="test acceptance description", folder=folder2)
+            acceptance2.risk_scenarios.add(scenario)
+            acceptance2.save()
+
+            assert isinstance(acceptance2.id, UUID)
+            assert acceptance2.name == "test acceptance"
+            assert acceptance2.description == "test acceptance description"
+            assert acceptance2.folder == folder2
+            assert acceptance2.risk_scenarios.count() == 1
+            assert acceptance2.risk_scenarios.all()[0] == scenario
+
+    def test_acceptance_creation_same_name_same_folder(self, matrix_fixture):
+            folder = Folder.objects.create(name="test folder", description="test folder description")
+            matrix = RiskMatrix.objects.all()[0]
+            project = Project.objects.create(name="test project", folder=folder)
+            analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
+                    project=project, rating_matrix=matrix)
+            threat = Threat.objects.create(name="test threat", description="test threat description", folder=folder)
+            scenario = RiskScenario.objects.create(name="test scenario", description="test scenario description", analysis=analysis,
+                    threat=threat)
+            acceptance = RiskAcceptance.objects.create(name="test acceptance", description="test acceptance description", folder=folder)
+            acceptance.risk_scenarios.add(scenario)
+            acceptance.save()
+
+            with pytest.raises(ValidationError):
+                    acceptance2 = RiskAcceptance.objects.create(name="test acceptance", description="test acceptance description", folder=folder)
+                    acceptance2.risk_scenarios.add(scenario)
+                    acceptance2.save()
+
 
 
 @pytest.mark.django_db
