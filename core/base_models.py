@@ -5,7 +5,7 @@ import uuid
 
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200, verbose_name=_('Name'), unique=True)
+    name = models.CharField(max_length=200, verbose_name=_('Name'), unique=False)
     description = models.TextField(verbose_name=_('Description'), blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'))
 
@@ -69,7 +69,8 @@ class AbstractBaseModel(models.Model):
     def clean(self) -> None:
         scope = self.get_scope()
         field_errors = {}
-        if not self.is_unique_in_scope(scope=scope, fields_to_check=['name', 'version']):
+        _fields_to_check = self.fields_to_check if hasattr(self, 'fields_to_check') else ['name']
+        if not self.is_unique_in_scope(scope=scope, fields_to_check=_fields_to_check):
             field_errors['name'] = _('This name is already in use.')
         super().clean()
         if field_errors:
