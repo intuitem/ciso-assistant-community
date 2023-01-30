@@ -15,6 +15,73 @@
                     </div>
                     {{ filter.form.name }}
             </div>
+            <div class="flex justify-center">
+                <div
+                    x-data="{
+                        open: false,
+                        toggle() {
+                            if (this.open) {
+                                return this.close()
+                            }
+                
+                            this.$refs.button.focus()
+                
+                            this.open = true
+                        },
+                        close(focusAfter) {
+                            if (! this.open) return
+                
+                            this.open = false
+                
+                            focusAfter && focusAfter.focus()
+                        }
+                    }"
+                    x-on:keydown.escape.prevent.stop="close($refs.button)"
+                    x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                    x-id="['dropdown-button']"
+                    class="relative"
+                >
+                    <!-- Button -->
+                    <button
+                        x-ref="button"
+                        x-on:click="toggle()"
+                        :aria-expanded="open"
+                        :aria-controls="$id('dropdown-button')"
+                        type="button"
+                        class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
+                        :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
+                    >
+                        <i class="fas fa-filter"></i>
+                        <span>{% trans "Filters" %}</span>
+                    </button>
+                
+                    <!-- Panel -->
+                    <div
+                        x-ref="panel"
+                        x-show="open"
+                        x-transition.origin.top.left
+                        x-on:click.outside="close($refs.button)"
+                        :id="$id('dropdown-button')"
+                        style="display: none;"
+                        class="absolute left-0 mt-2 z-10 w-64 bg-white rounded shadow-2xl overflow-hidden"
+                    >
+                
+                        <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
+                            <div>
+                                <p class="block text-sm font-medium text-gray-900">{% trans "Provider" %}</p>
+                                <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                    <div class="flex flex-col">
+                                        <div>
+                                            {{ filter.form.provider }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
                 <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
                     <i class="fas fa-sort"></i>

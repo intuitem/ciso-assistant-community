@@ -364,12 +364,16 @@ class ThreatFilter(GenericFilterSet):
 
 
 class SecurityFunctionFilter(GenericFilterSet):
+    PROVIDER_CHOICES = SecurityFunction.objects.values_list(
+        'provider', 'provider').distinct()
+
     name = GenericCharFilter(widget=TextInput(
         attrs={
             'class': 'h-10 rounded-r-lg border-none focus:ring-0',
             'placeholder': _('Search function...')
         }
     ))
+    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES)
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
