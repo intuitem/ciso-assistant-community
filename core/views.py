@@ -483,7 +483,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = ProjectFilter(self.request.GET, queryset=qs)
+        filtered_list = ProjectFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -585,7 +585,7 @@ class AssetListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = AssetFilter(self.request.GET, queryset=qs)
+        filtered_list = AssetFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -678,7 +678,7 @@ class FolderListView(UserPassesTestMixin, ListView):
         folders_list = RoleAssignment.get_accessible_folders(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)
         qs = self.model.objects.filter(id__in=folders_list)
-        filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs)
+        filtered_list = ProjectsDomainFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -800,7 +800,7 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = AnalysisFilter(self.request.GET, queryset=qs)
+        filtered_list = AnalysisFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -911,7 +911,7 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs)
+        filtered_list = RiskScenarioFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -1058,7 +1058,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         queryset = self.get_queryset()
-        filter = SecurityMeasureFilter(request=self.request, queryset=queryset)
+        filter = SecurityMeasureFilter(self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
         context['measure_create_form'] = SecurityMeasureCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
@@ -1145,7 +1145,7 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs)
+        filtered_list = SecurityFunctionFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -1230,7 +1230,7 @@ class ThreatListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = ThreatFilter(self.request.GET, queryset=qs)
+        filtered_list = ThreatFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -1314,10 +1314,9 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         queryset = self.get_queryset()
-        filter = RiskAcceptanceFilter(request=self.request, queryset=queryset)
+        filter = RiskAcceptanceFilter(self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
         context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
-        context['risk_acceptance_update_form'] = RiskAcceptanceCreateUpdateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         context['add_riskacceptance'] = RoleAssignment.has_permission(
@@ -1459,7 +1458,7 @@ class UserListView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         qs = self.model.objects.all().order_by(
             '-is_active', '-is_superuser', 'email', 'id')
-        filtered_list = UserFilter(self.request.GET, queryset=qs)
+        filtered_list = UserFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -1545,7 +1544,7 @@ class UserGroupListView(UserPassesTestMixin, ListView):
         )
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = UserGroupFilter(self.request.GET, queryset=qs)
+        filtered_list = UserGroupFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -1634,7 +1633,7 @@ class RoleAssignmentListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
-        filtered_list = UserGroupFilter(self.request.GET, queryset=qs)
+        filtered_list = UserGroupFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
@@ -1752,7 +1751,7 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)
         qs = self.model.objects.all().order_by('created_at')
-        filtered_list = RiskMatrixFilter(self.request.GET, queryset=qs)
+        filtered_list = RiskMatrixFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
