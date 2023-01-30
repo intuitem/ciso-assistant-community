@@ -253,6 +253,12 @@ class RiskAcceptanceFilter(GenericFilterSet):
         model = RiskAcceptance
         fields = ['name', 'risk_scenarios', 'type', 'folder']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        req_get = getattr(self.request, 'GET', None)
+        self.filters['search'].field.widget.attrs['value'] = req_get.get('search', '')
+
+
     def acceptance_search(self, queryset, name, search_query):
         return queryset.filter(
             Q(name__icontains=search_query) | Q(risk_scenarios__name__icontains=search_query)

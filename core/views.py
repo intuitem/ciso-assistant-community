@@ -1329,7 +1329,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs)
+        filtered_list = RiskAcceptanceFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def test_func(self):
