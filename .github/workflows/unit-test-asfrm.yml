@@ -2,9 +2,8 @@ name: Unit Test on Asf-rm
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [ develop ]
     
 env:
   GITHUB_WORKFLOW: github_actions
