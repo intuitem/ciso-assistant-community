@@ -184,6 +184,8 @@ class Analysis(AbstractBaseModel):
     rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, help_text=_("WARNING! After choosing it, you will not be able to change it"), verbose_name=_("Rating matrix"))
     updated_at = models.DateTimeField(auto_now=True)
 
+    fields_to_check = ['name', 'version']
+
     class Meta:
         verbose_name = _("Analysis")
         verbose_name_plural = _("Analyses")
@@ -448,19 +450,17 @@ class RiskScenario(AbstractBaseModel):
         super(RiskScenario, self).save(*args, **kwargs)
 
 
-class RiskAcceptance(models.Model):
+class RiskAcceptance(AbstractBaseModel):
     ACCEPTANCE_TYPE = [
         ('temporary', _('Temporary')),
         ('permanent', _('Permanent')),
     ]
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
     validator = models.CharField(max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"))
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
     expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
                                    blank=True, null=True, verbose_name=_("Expiry date"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
@@ -469,6 +469,8 @@ class RiskAcceptance(models.Model):
         verbose_name_plural = _("Risk acceptances")
 
     def __str__(self):
+        if self.name:
+            return self.name
         scenario_names: str = ', '.join([str(scenario) for scenario in self.risk_scenarios.all()])
         return f"{scenario_names}"
 
