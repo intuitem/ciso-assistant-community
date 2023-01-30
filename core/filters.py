@@ -65,13 +65,22 @@ class GenericCharFilter(CharFilter):
 class GenericChoiceFilter(ChoiceFilter):
     widget = Select(
         attrs={
-            'class': 'rounded-lg w-full'
+            'class': 'rounded-lg w-full border-gray-200'
         }
     )
 
     def __init__(self, *args, widget=widget, **kwargs):
         super().__init__(*args, widget=widget, **kwargs)
 
+
+def viewable_folders(request):
+    if request is None:
+        return Folder.objects.none()
+    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    accessible_folders = RoleAssignment.get_accessible_folders(
+        root_folder, request.user, Folder.ContentType.DOMAIN
+    )
+    return Folder.objects.filter(id__in=accessible_folders)
 
 class AnalysisFilter(GenericFilterSet):
     def get_full_names():
@@ -164,15 +173,6 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         fields = ['name', 'threat', 'analysis__project', 'treatment']
 
-def viewable_folders(request):
-    if request is None:
-        return Folder.objects.none()
-    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-    accessible_folders = RoleAssignment.get_accessible_folders(
-        root_folder, request.user, Folder.ContentType.DOMAIN
-    )
-    return Folder.objects.filter(id__in=accessible_folders)
-
 
 class SecurityMeasureFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -234,6 +234,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
             ('type', 'type'),
             ('expiry_date', 'expiry_date'),
             ('validator', 'validator'),
+            ('folder', 'folder'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
@@ -246,18 +247,14 @@ class RiskAcceptanceFilter(GenericFilterSet):
             '-expiry_date': _('Expiry date (descending)'),
             'validator': _('validator'.capitalize()),
             '-validator': _('Validator (descending)'),
+            'folder': _('parent domain'.capitalize()),
+            '-folder': _('Parent domain (descending)'),
         }
     )
 
     class Meta:
         model = RiskAcceptance
-        fields = ['name', 'risk_scenarios', 'type', 'folder']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        req_get = getattr(self.request, 'GET', None)
-        self.filters['search'].field.widget.attrs['value'] = req_get.get('search', '')
-
+        fields = ['risk_scenarios', 'type', 'folder']
 
     def acceptance_search(self, queryset, name, search_query):
         return queryset.filter(
@@ -321,7 +318,7 @@ class ProjectFilter(GenericFilterSet):
             'placeholder': _('Search project...')
         }
     ))
-    folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
     lc_status = GenericMultipleChoiceFilter(choices=Project.PRJ_LC_STATUS)
     orderby = GenericOrderingFilter(
         fields=(
