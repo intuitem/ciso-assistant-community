@@ -10,6 +10,12 @@
     <div class="flex flex-row justify-start space-x-4 h-fit">
         <form method="get">
             <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    {{ filter.form.search }}
+                </div>
                 <div class="flex justify-center">
                     <div
                         x-data="{
