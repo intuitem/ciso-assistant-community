@@ -327,15 +327,15 @@ class ProjectFilter(GenericFilterSet):
         fields=(
             ('name', 'name'),
             ('lc_status', 'lc_status'),
-            ('domain', 'domain'),
+            ('folder', 'folder'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
             'lc_status': _('status'.capitalize()),
             '-lc_status': _('Status (descending)'),
-            'domain': _('Parent domain'),
-            '-domain': _('Parent domain (descending)'),
+            'folder': _('Parent domain'),
+            '-folder': _('Parent domain (descending)'),
         }
     )
 
