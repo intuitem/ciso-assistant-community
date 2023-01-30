@@ -65,13 +65,22 @@ class GenericCharFilter(CharFilter):
 class GenericChoiceFilter(ChoiceFilter):
     widget = Select(
         attrs={
-            'class': 'rounded-lg w-full'
+            'class': 'rounded-lg w-full border-gray-200'
         }
     )
 
     def __init__(self, *args, widget=widget, **kwargs):
         super().__init__(*args, widget=widget, **kwargs)
 
+
+def viewable_folders(request):
+    if request is None:
+        return Folder.objects.none()
+    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    accessible_folders = RoleAssignment.get_accessible_folders(
+        root_folder, request.user, Folder.ContentType.DOMAIN
+    )
+    return Folder.objects.filter(id__in=accessible_folders)
 
 class AnalysisFilter(GenericFilterSet):
     def get_full_names():
@@ -164,15 +173,6 @@ class RiskScenarioFilter(GenericFilterSet):
         model = RiskScenario
         fields = ['name', 'threat', 'analysis__project', 'treatment']
 
-def viewable_folders(request):
-    if request is None:
-        return Folder.objects.none()
-    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-    accessible_folders = RoleAssignment.get_accessible_folders(
-        root_folder, request.user, Folder.ContentType.DOMAIN
-    )
-    return Folder.objects.filter(id__in=accessible_folders)
-
 
 class SecurityMeasureFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -217,35 +217,49 @@ class SecurityMeasureFilter(GenericFilterSet):
 
 
 class RiskAcceptanceFilter(GenericFilterSet):
-    risk_scenario__name = GenericCharFilter(widget=TextInput(
+    search = GenericCharFilter(widget=TextInput(
         attrs={
             'class': 'h-10 rounded-r-lg border-none focus:ring-0',
             'placeholder': _('Search acceptance...')
         }
-    ))
+    ), method='acceptance_search')
+    risk_scenarios = GenericModelMultipleChoiceFilter(
+        queryset=RiskScenario.objects.filter(analysis__project__folder__content_type=Folder.ContentType.DOMAIN))
+    folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
     type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
     orderby = GenericOrderingFilter(
         fields=(
-            ('risk_scenario__name', 'risk_scenario__name'),
+            ('name', 'name'),
+            ('risk_scenarios', 'risk_scenarios'),
             ('type', 'type'),
             ('expiry_date', 'expiry_date'),
             ('validator', 'validator'),
+            ('folder', 'folder'),
         ),
         field_labels={
-            'risk_scenario__name': _('name'.capitalize()),
-            '-risk_scenario__name': _('Name (descending)'),
+            'name': _('name'.capitalize()),
+            '-name': _('Name (descending)'),
+            'risk_scenarios': _('risk scenarios'.capitalize()),
+            '-risk_scenarios': _('Risk scenarios (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
             'expiry_date': _('expiry'.capitalize() + ' date'),
             '-expiry_date': _('Expiry date (descending)'),
             'validator': _('validator'.capitalize()),
             '-validator': _('Validator (descending)'),
+            'folder': _('parent domain'.capitalize()),
+            '-folder': _('Parent domain (descending)'),
         }
     )
 
     class Meta:
         model = RiskAcceptance
-        fields = ['risk_scenario__name', 'type']
+        fields = ['risk_scenarios', 'type', 'folder']
+
+    def acceptance_search(self, queryset, name, search_query):
+        return queryset.filter(
+            Q(name__icontains=search_query) | Q(risk_scenarios__name__icontains=search_query)
+        ).distinct()
 
 
 class ProjectsDomainFilter(GenericFilterSet):
@@ -304,21 +318,21 @@ class ProjectFilter(GenericFilterSet):
             'placeholder': _('Search project...')
         }
     ))
-    folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
     lc_status = GenericMultipleChoiceFilter(choices=Project.PRJ_LC_STATUS)
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
             ('lc_status', 'lc_status'),
-            ('domain', 'domain'),
+            ('folder', 'folder'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
             'lc_status': _('status'.capitalize()),
             '-lc_status': _('Status (descending)'),
-            'domain': _('Parent domain'),
-            '-domain': _('Parent domain (descending)'),
+            'folder': _('Parent domain'),
+            '-folder': _('Parent domain (descending)'),
         }
     )
 

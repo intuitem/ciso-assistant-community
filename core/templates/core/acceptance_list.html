@@ -2,7 +2,7 @@
 {% load i18n static %}
 
 {% block content %}
-<div class="" >
+<div>
     {% with page_title=_('Risk acceptances') %}
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
@@ -11,10 +11,10 @@
         <form method="get">
             <div class="flex flex-row space-x-4">
                 <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
-                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        {{ filter.form.risk_scenario__name }}
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    {{ filter.form.search }}
                 </div>
                 <div class="flex justify-center">
                     <div
@@ -72,6 +72,26 @@
                                     <p class="block mb-1 text-sm font-medium text-gray-900">{% trans "Type" %}</p>
                                     {{ filter.form.type }}
                                 </div>
+                                <div>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Risk scenarios" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.risk_scenarios }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Parent domain" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.folder }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>
                         </div>
@@ -112,25 +132,25 @@
                 {% for acceptance in acceptances %}
                     <tr class="odd:bg-white even:bg-gray-50">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            <div class="flex items-center">
+                            <div class="flex items-center max-w-full">
                                 <span class=" p-1 rounded-lg text-xs
                                 {% if acceptance.type == "temporary" %}
                                 bg-red-300
                                 {% else %}
                                 bg-green-200
-                                {% endif %}">{{ acceptance.get_type_display|lower}}
+                                {% endif %}">{{ acceptance.get_type_display|lower}}
                                 </span>
-                                <div class="ml-3">
+                                <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
                                     {% if object_ids_change %}
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
-                                        {{ acceptance.risk_scenario }}
+                                    class="text-gray-900 text-md font-semibold hover:text-blue-500">
+                                        {{ acceptance }}
                                     </a>
                                     {% else %}
-                                    <a id="acceptance{{ acceptance.id }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                        {{ acceptance.risk_scenario }}
-                                    </a>>
+                                    <p id="acceptance{{ acceptance.id }}"
+                                    class="text-gray-900 text-md font-semibold">
+                                        {{ acceptance }}
+                                    </p>
                                     {% endif %}
                                 </div>
                             </div>
