@@ -1,7 +1,7 @@
 import re
 import sys
 import os
-SECRET_KEYS = ('DJANGO_SECRET_KEY', 'POSTGRES_PASSWORD', 'DJANGO_SUPERUSER_PASSWORD')
+SECRET_KEYS = ('DJANGO_SECRET_KEY', 'POSTGRES_PASSWORD', 'DJANGO_SUPERUSER_EMAIL', 'DJANGO_SUPERUSER_PASSWORD')
 
 if len(sys.argv) != 2:
     print("Usage: create_secrets.py var_file", file=sys.stderr)

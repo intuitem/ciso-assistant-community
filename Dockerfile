@@ -35,6 +35,6 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 # RUN python manage.py collectstatic --no-input --clear
 
 #CMD python manage.py runserver 0.0.0.0:8000
-#CMD ./startup.sh
-ENTRYPOINT ["gunicorn", "--chdir", "asf_rm", "--bind", ":8000", "--env", "RUN_MAIN=true", "asf_rm.wsgi:application"]
+ENTRYPOINT ["bash", "startup.sh"]
+#ENTRYPOINT ["gunicorn", "--chdir", "asf_rm", "--bind", ":8000", "--env", "RUN_MAIN=true", "asf_rm.wsgi:application"]
 EXPOSE 8000
