@@ -55,4 +55,4 @@ jobs:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: |
           export $(grep -v '^#' .env | xargs)
-          bash test.sh
+          find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs pytest
