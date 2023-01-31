@@ -3,16 +3,15 @@ name: Unit Test on Asf-rm
 on:
   push:
   pull_request:
-    branches: [ develop ]
-    
+    branches: [develop]
+
 env:
   GITHUB_WORKFLOW: github_actions
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:14.1
@@ -20,41 +19,41 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: postgres
-        ports: ['5432:5432']
+        ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    
+
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Create env variable
-      run: |
-        touch .env
-        echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
-        echo POSTGRES_NAME=postgres >> .env
-        echo POSTGRES_USER=postgres >> .env
-        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-        echo DB_HOST=localhost >> .env
-        cat .env
-    - name: Setup migrations
-      run: |
-        export $(grep -v '^#' .env | xargs)
-        python manage.py makemigrations
-        python manage.py migrate
-    - name: Run Tests
-      env:
-          DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
-      run: |
-        export $(grep -v '^#' .env | xargs)
-        bash test.sh 
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Create env variable
+        run: |
+          touch .env
+          echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
+          echo POSTGRES_NAME=postgres >> .env
+          echo POSTGRES_USER=postgres >> .env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+          echo DB_HOST=localhost >> .env
+          cat .env
+      - name: Setup migrations
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          python manage.py makemigrations
+          python manage.py migrate
+      - name: Run Tests
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
+        run: |
+          export $(grep -v '^#' .env | xargs)
+          bash test.sh
