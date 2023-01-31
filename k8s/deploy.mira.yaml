@@ -13,7 +13,7 @@ spec:
       labels:
         app: mira
         rel: dev
-        ver: '0.9.1p'
+        ver: '0.9.1r'
     spec:
       volumes:
       - name: nginx-conf
@@ -34,7 +34,7 @@ spec:
           sizeLimit: 50Mi
       initContainers:
         - name: mira-init
-          image: mira:0.9.1p
+          image: mira:0.9.1r
           command: ["/code/startup.sh"]
           volumeMounts:
           - name: staticfiles
@@ -75,7 +75,7 @@ spec:
                 key: DJANGO_SUPERUSER_PASSWORD
       containers:
         - name: mira
-          image: mira:0.9.1p
+          image: mira:0.9.1r
           ports:
           - containerPort: 8000
           env:
