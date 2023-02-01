@@ -5,7 +5,7 @@
     class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-visible left-0 z-10" :class="{ '-ml-66': !sidebarOpen }">
     <nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50  py-4 px-3">
         <div class="flex flex-row space-x-4 border-b pb-3" aria-label="logo">
-            <div class="flex items-center justify-left rounded shadow-sm shadow-indigo-300">
+            <div class="flex items-center justify-left rounded">
                 <svg height="48" width="48" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                     <defs>
                         <style>
@@ -33,11 +33,10 @@
                 <div class="flex flex-row space-x-2 w-full mt-auto">
                     <p class="font-semibold text-gray-900">MIRA</p>
                     <div x-data="{ open : false }" class="w-full">
-                        <a @click="open = !open,
-modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                             <span class="transition duration-75 text-gray-700 group">
                                 <i class="fas fa-info-circle"></i>
-                                <span class="hidden w-fit text-xs whitespace-nowrap bg-gray-600 text-white text-center rounded px-1 py-0.5 absolute z-10 group-hover:block right-0">{% trans "About MIRA" %}</span>
+                                <span class="hidden w-fit text-xs whitespace-nowrap bg-gray-600 text-white text-center rounded px-1 py-0.5 absolute z-10 group-hover:block left-0">{% trans "About MIRA" %}</span>
                             </span>
                         </a>
                         {% include "snippets/modal.html" with header=_("About MIRA") %}
@@ -53,7 +52,7 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                         <span class="nav-link-icon">
                             <i class="fas fa-book-open"></i>
                         </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analysis registry" %}</span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analyses registry" %}</span>
                     </a>
                 </li>
                 
