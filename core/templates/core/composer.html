@@ -59,35 +59,35 @@
                 {{item.analysis}}
               </button>
           </div>
-          <div x-show="show" class="border border-1 px-10 py-6 bg-white flex space-x-4 rounded-b-lg">
-              <div class="w-1/3">
-              <div class="my-4"> <span class="font-semibold">{% trans "Risk analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
-                  <b>{{item.analysis.quality_check.count}}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}</div>
-              <div>
-                  <table class="border border-collapse m-2 p-2 rounded">
-                      <tr class="">
-                          <th class="border p-2 bg-gray-200"></th>
-                          <th class="border p-2 bg-gray-200">{% trans "Current" %}</th>
-                          <th class="border p-2 bg-gray-200">{% trans "Residual" %}</th>
-                      </tr>
-                      {% for lvl in item.synth_table %}
+          <div x-show="show" class="border border-1 px-10 py-6 bg-white flex flex-row space-x-4 rounded-b-lg">
+              <div class="">
+                <div class="my-4"> <span class="font-semibold">{% trans "Risk analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
+                    <b>{{item.analysis.quality_check.count}}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}</div>
+                <div>
+                    <table class="border border-collapse m-2 p-2 rounded">
+                        <tr class="">
+                            <th class="border p-2 bg-gray-200"></th>
+                            <th class="border p-2 bg-gray-200">{% trans "Current" %}</th>
+                            <th class="border p-2 bg-gray-200">{% trans "Residual" %}</th>
+                        </tr>
+                        {% for lvl in item.synth_table %}
 
-                      <tr>
-                          <td class="border p-2">{{lvl.lvl}}</td>
-                          <td class="border p-2 text-center">{{lvl.current}}</td>
-                          <td class="border p-2 text-center">{{lvl.residual}}</td>
-                      </tr>
-                      {% endfor %}
+                        <tr>
+                            <td class="border p-2">{{lvl.lvl}}</td>
+                            <td class="border p-2 text-center">{{lvl.current}}</td>
+                            <td class="border p-2 text-center">{{lvl.residual}}</td>
+                        </tr>
+                        {% endfor %}
 
-                  </table>
+                    </table>
+                </div>
+
+                <div>
+                    <a class="text-violet-800 hover:text-violet-600 py-2 my-2" href="{% url 'RA' item.analysis.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to full risk analysis" %}</a>
+                </div>
               </div>
 
-              <div>
-                  <a class="text-violet-800 hover:text-violet-600 py-2 my-2" href="{% url 'RA' item.analysis.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to full risk analysis" %}</a>
-              </div>
-              </div>
-
-              <div class="w-2/3 pt-14">
+              <div class="pt-14">
                   <div class="mt-4">
                       <span class="font-semibold">{% trans "High or very high risk based on the" %} <span class="underline">{% trans "current level" %}</span>:</span>
                     {% if item.hvh_risks %}
