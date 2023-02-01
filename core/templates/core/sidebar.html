@@ -317,7 +317,7 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                 <p class="text-gray-900 text-sm whitespace-nowrap overflow-hidden truncate">{{ request.user.get_full_name }}</p>
                 <p class="font-normal text-xs text-gray-600 mr-2 whitespace-nowrap overflow-hidden truncate w-full">{{ request.user.email }}</p>
             </div>
-            <div class="flex justify-center w-full">
+            <div>
             <div
                     x-data="{
                         open: false,
@@ -343,13 +343,12 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                     x-id="['dropdown-button']"
                     class="relative w-full overflow-visible"
                 >
-                <button class="w-fit px-3 rounded-full hover:bg-gray-200 text-center my-auto cursor-pointer"
+                <button class="w-fit px-3 rounded-full hover:bg-gray-100 text-center my-auto cursor-pointer"
                         x-ref="button"
                         x-on:click="toggle()"
                         :aria-expanded="open"
                         :aria-controls="$id('dropdown-button')"
-                        type="button"
-                        class="flex items-center gap-2 bg-white px-5 py-2.5 rounded-md shadow">
+                        type="button">
                     <i class="fas fa-ellipsis-v text-gray-800"></i>
                 </button>
                 <div
