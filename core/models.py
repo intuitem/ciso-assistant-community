@@ -208,11 +208,11 @@ class Analysis(AbstractBaseModel):
         info_lst = list()
         # --- check on the risk analysis:
         if self.is_draft:
-            info_lst.append({"msg": _("Risk analysis is still in Draft mode"), "obj_type": "Analysis", "object": self})
+            info_lst.append({"msg": _("{}: Risk analysis is still in Draft mode").format(self), "obj_type": "Analysis", "object": self})
         if not self.auditor:
-            info_lst.append({"msg": _("No auditor assigned to this risk analysis yet"), "obj_type": "Analysis", "object": self})
+            info_lst.append({"msg": _("{}: No auditor assigned to this risk analysis yet").format(self), "obj_type": "Analysis", "object": self})
         if not self.riskscenario_set.all():
-            warnings_lst.append({"msg": _("Analysis is empty. No risk scenario declared yet"), "obj_type": "Analysis", "object": self})
+            warnings_lst.append({"msg": _("{}: Analysis is empty. No risk scenario declared yet").format(self), "obj_type": "Analysis", "object": self})
         # ---
 
         # --- checks on the risk scenarios
@@ -253,11 +253,11 @@ class Analysis(AbstractBaseModel):
         # --- checks on the risk acceptances
         for ra in RiskAcceptance.objects.filter(risk_scenarios__analysis=self):
             if not ra.expiry_date:
-                warnings_lst.append({"msg": _("Acceptance {} has no expiry date").format(ra)})
+                warnings_lst.append({"msg": _("{}: Acceptance has no expiry date").format(ra)})
                 continue
             if date.today() > ra.expiry_date:
                 errors_lst.append(
-                    {"msg": _("Acceptance {} has expired. Consider updating the status or the date").format(ra)})
+                    {"msg": _("{}: Acceptance has expired. Consider updating the status or the date").format(ra)})
 
         findings = {
             "errors": errors_lst,
