@@ -1,4 +1,5 @@
 {% load i18n core_extras %}
+
 <div class="bg-white shadow rounded-lg p-6">
 {% if data %}
     <table class="w-full">
@@ -29,9 +30,8 @@
     </table>
 {% else %}
     <div class="w-full">
-        <h3 class="flex font-bold p-2 m-2 text-lg">{% trans matrix.description %}</h3>
-        <div class="flex justify-center">
-            <div class="h-16 text-black font-bold text-center ml-4 mt-36 -rotate-90">
+        <div class="flex flex-row justify-center">
+            <div class="h-16 text-black font-bold text-center ml-4 mt-36 -rotate-90 print-impact">
                 {% trans "Impact" %}
             </div>
             <table class="w-3/4 mt-10">
