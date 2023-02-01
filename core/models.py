@@ -251,10 +251,13 @@ class Analysis(AbstractBaseModel):
                     {"msg": _("M#{} does not have an external link attached. This will help you for follow-up").format(mtg.id), "obj_type": "SecurityMeasure", "object": mtg})
 
         # --- checks on the risk acceptances
-        for ra in RiskAcceptance.objects.filter(risk_scenario__analysis=self):
+        for ra in RiskAcceptance.objects.filter(risk_scenarios__analysis=self):
+            if not ra.expiry_date:
+                warnings_lst.append({"msg": _("Acceptance {} has no expiry date").format(ra)})
+                continue
             if date.today() > ra.expiry_date:
                 errors_lst.append(
-                    {"msg": _("R#{} has a risk acceptance that has expired. Consider updating the status or the date").format(ra.risk_scenario.id)})
+                    {"msg": _("Acceptance {} has expired. Consider updating the status or the date").format(ra)})
 
         findings = {
             "errors": errors_lst,
