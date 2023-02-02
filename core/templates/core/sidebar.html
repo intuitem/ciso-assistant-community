@@ -32,15 +32,6 @@
             <div class="flex flex-col w-full h-full">
                 <div class="flex flex-row space-x-2 w-full mt-auto">
                     <p class="font-semibold text-gray-900">MIRA</p>
-                    <div x-data="{ open : false }" class="w-full">
-                        <a @click="open = !open, modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
-                            <span class="transition duration-75 text-gray-700 group">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="hidden w-fit text-xs whitespace-nowrap bg-gray-600 text-white text-center rounded px-1 py-0.5 absolute z-10 group-hover:block left-0">{% trans "About MIRA" %}</span>
-                            </span>
-                        </a>
-                        {% include "snippets/modal.html" with header=_("About MIRA") %}
-                    </div>
                 </div>
                 <p class="text-sm font-light text-gray-500 mb-auto">by intuitem</p>
             </div>
@@ -357,38 +348,52 @@
                         x-on:click.outside="close($refs.button)"
                         :id="$id('dropdown-button')"
                         style="display: none;"
-                        class="absolute right-0 bottom-full mt-2 w-40 rounded-md bg-white shadow-md overflow-visible hover:block z-50"
+                        class="absolute right-0 bottom-full mt-2 w-fit rounded-md bg-white shadow-md overflow-visible hover:block z-50 py-2"
                     >
-                    <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                    <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800">
                         <i class="fas fa-user"></i>
                         {% trans "My profile" %}
                     </a>
 
-                    <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
-                        <i class="fas fa-sign-out-alt"></i>
-                        {% trans "Log out" %}
-                    </a>
-
+                    <div class="w-full border-t border-gray-200 my-1"></div>
+                    
                     <div class="flex flex-row items-center">
                         <div>
                             <a id="translation"
-                                class="flex flex-row items-center">
-                                <form action="{% url 'set_language' %}" method="post">
-                                    {% csrf_token %}
-                                    <select id="language" class="border-none pl-4 focus:border-none block text-sm text-gray-700 bg-white focus:ring-0" name="language" onchange="this.form.submit();"> 
-                                        {% get_current_language as LANGUAGE_CODE %} 
-                                        {% get_available_languages as LANGUAGES %}
-                                        {% get_language_info_list for LANGUAGES as languages %}
-                                        {% for language in languages %}
-                                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
-                                                {{ language.code|country_flag }} {{ language.name_local|capfirst }} ({{ language.code }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
+                            class="flex flex-row items-center">
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <select id="language" class="border-none pl-4 focus:border-none block text-sm text-gray-800 bg-white focus:ring-0" name="language" onchange="this.form.submit();"> 
+                                    {% get_current_language as LANGUAGE_CODE %} 
+                                    {% get_available_languages as LANGUAGES %}
+                                    {% get_language_info_list for LANGUAGES as languages %}
+                                    {% for language in languages %}
+                                    <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
+                                        {{ language.code|country_flag }} {{ language.name_local|capfirst }} ({{ language.code }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
                             </a>
                         </div>
                     </div>
+
+                    <div x-data="{ open : false }" class="flex items-center cursor-pointer gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="relative flex flex-row whitespace-nowrap">
+                            <span class="transition duration-75 text-gray-800 group">
+                                <i class="fas fa-info-circle"></i>
+                                {% trans "About MIRA" %}
+                            </span>
+                        </a>
+                        {% include "snippets/modal.html" with header=_("About MIRA") %}
+                    </div>
+
+                    <div class="w-full border-t border-gray-200 my-1"></div>
+
+                    <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-gray-800 hover:bg-gray-100 disabled:text-gray-500">
+                        <i class="fas fa-sign-out-alt"></i>
+                        {% trans "Log out" %}
+                    </a>
                 </div>
             </div>
         </div>

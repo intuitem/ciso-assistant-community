@@ -12,19 +12,19 @@
     {% endwith %}
 
     <div class="px-4 flex flex-row mb-0">
-        <div @click="openTab = 1" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 1 ? 'border-b' : ' bg-white border-b-0'">
+        <div @click="openTab = 1" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 1 ? 'border-b' : ' bg-white border-b-0'">
             <span class="">
                 <i class="fas fa-chart-pie"></i>
             </span>
             <div class="w-full">{% trans "Overview" %}</div>
         </div>
-        <div @click="openTab = 2" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 2 ? 'border-b' : ' bg-white border-b-0'">
+        <div @click="openTab = 2" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 2 ? 'border-b' : ' bg-white border-b-0'">
             <span class="">
                 <i class="fas fa-star"></i>
             </span>
             <div class="w-full">{% trans "Treatment" %}</div>
         </div>
-        <div @click="openTab = 3" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 3 ? 'border-b' : ' bg-white border-b-0'">
+        <div @click="openTab = 3" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 3 ? 'border-b' : ' bg-white border-b-0'">
             <span class="">
                 <i class="fas fa-drafting-compass"></i>
             </span>
