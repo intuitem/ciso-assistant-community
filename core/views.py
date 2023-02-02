@@ -139,7 +139,7 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_analysis"), folder= get_object_or_404(Analysis, id=self.kwargs['analysis']).project.folder)
 
 @login_required
-def generate_ra_pdf(request, analysis: Analysis): # analysis parameter is the id of the choosen Analysis
+def generate_ra_pdf(request, analysis: Analysis): # analysis parameter is the id of the chosen Analysis
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
