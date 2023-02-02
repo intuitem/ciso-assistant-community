@@ -245,28 +245,6 @@ def global_overview(request):
 
     return render(request, template, context)
 
-
-@method_decorator(login_required, name='dispatch')
-class MyProjectsListView(ListView):
-    template_name = 'core/my_projects.html'
-    context_object_name = 'context'
-    model = SecurityMeasure
-
-    def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        agg_data = risk_status(self.request.user, Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user))
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
-        _tmp = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
-        ord_security_measures = sorted(_tmp, key=lambda mtg: mtg.get_ranking_score(), reverse=True)
-        # TODO: add date sorting as well
-        return {'agg_data': agg_data,
-                'security_measures': ord_security_measures}
-        # for UI debug use:
-        # return risk_status(Analysis.objects.all())
-
-
 def compile_analysis_for_composer(user: User, analysis_list: list):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Analysis)

@@ -19,7 +19,6 @@ urlpatterns = [
 
     path('overview/', login_required(views.global_overview), name='overview'),
     path('calendar/', login_required(cv.CalendarView.as_view()), name='calendar'),
-    path('my-projects/', login_required(views.MyProjectsListView.as_view()), name='my_projects'),
     path('overview/composer/', login_required(views.ComposerListView.as_view()), name='composer'),
 
     path('scoring-assistant/', login_required(views.scoring_assistant), name='scoring'),

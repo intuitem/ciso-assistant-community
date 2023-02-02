@@ -22,7 +22,7 @@
             <span class="">
                 <i class="fas fa-star"></i>
             </span>
-            <div class="w-full">{% trans "My projects" %}</div>
+            <div class="w-full">{% trans "Treatment" %}</div>
         </div>
         <div @click="openTab = 3" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-500 hover:bg-gray-100 rounded-t-lg hover:border-slate-700 text-center" :class="openTab !== 3 ? 'border-b' : ' bg-white border-b-0'">
             <span class="">
@@ -94,7 +94,7 @@
         </section>
     </div>
     <div x-show="openTab === 2" class="h-full">
-        {% include 'core/my_projects.html' with agg_data=agg_data measures=ord_security_measures %}
+        {% include 'core/treatment.html' with agg_data=agg_data measures=ord_security_measures %}
     </div>
     <div x-show="openTab === 3">
         {% include 'core/project_select.html' with analyses=analyses %}
