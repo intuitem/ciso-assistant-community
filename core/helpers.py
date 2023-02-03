@@ -9,13 +9,18 @@ STATUS_COLOR_MAP = {'open': '#fac858', 'mitigated': '#91cc75', 'accepted': '#73c
                     'on_hold': '#ee6666', 'done': '#91cc75', 'transferred': '#91cc75'}
 
 
-def get_parsed_matrices(user: User):
+def get_parsed_matrices(user: User, analyses: list = None):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
-    risk_matrices: list = RiskScenario.objects.filter(id__in=object_ids_view).values_list(
-        'analysis__rating_matrix__json_definition', flat=True).distinct()
+    risk_matrices = list()
+    if analyses is None:
+        risk_matrices= RiskScenario.objects.filter(id__in=object_ids_view).values_list(
+            'analysis__rating_matrix__json_definition', flat=True).distinct()
+    else:
+        risk_matrices = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__in=analyses).values_list(
+            'analysis__rating_matrix__json_definition', flat=True).distinct()
     parsed_matrices: list = [json.loads(m) for m in risk_matrices]
-    return parsed_matrices
+    return sorted(parsed_matrices, key=lambda m: len(m['risk']), reverse=True)
 
 
 def get_risk_field(user: User, field: str):
@@ -51,9 +56,7 @@ def get_risk_color_ordered_list(user: User):
     risk_colors = list()
     encountered_risks = set()
     parsed_matrices = get_parsed_matrices(user)
-    matrices_sorted_by_risk_count = sorted(
-        parsed_matrices, key=lambda m: len(m['risk']), reverse=True)
-    for m in matrices_sorted_by_risk_count:
+    for m in parsed_matrices:
         for i in range(len(m['risk'])):
             if m['risk'][i]['name'] in encountered_risks:
                 continue
@@ -154,14 +157,12 @@ def security_measure_per_security_function(user: User):
     return {"indicators": indicators, "values": values, "min": min(values, default=0) - 1, "max": max(values, default=0) + 1}
 
 
-def aggregate_risks_per_field(user: User, field: str, residual: bool = False):
+def aggregate_risks_per_field(user: User, field: str, residual: bool = False, analyses: list = None):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
-    parsed_matrices: list = get_parsed_matrices(user)
-    matrices_sorted_by_risk_count = sorted(
-        parsed_matrices, key=lambda k: len(k['risk']), reverse=True)
+    parsed_matrices: list = get_parsed_matrices(user=user, analyses=analyses)
     values = dict()
-    for m in matrices_sorted_by_risk_count:
+    for m in parsed_matrices:
         for i in range(len(m['risk'])):
             if m['risk'][i][field] not in values:
                 values[m['risk'][i][field]] = dict()
@@ -180,16 +181,16 @@ def aggregate_risks_per_field(user: User, field: str, residual: bool = False):
     return values
 
 
-def risks_count_per_level(user: User):
+def risks_count_per_level(user: User, analyses: list = None):
     current_level = list()
     residual_level = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
 
-    for r in aggregate_risks_per_field(user, 'name').items():
+    for r in aggregate_risks_per_field(user, 'name', analyses=analyses).items():
         current_level.append({'name': r[0], 'value': r[1]['count']})
 
-    for r in aggregate_risks_per_field(user, 'name', residual=True).items():
+    for r in aggregate_risks_per_field(user, 'name', residual=True, analyses=analyses).items():
         residual_level.append({'name': r[0], 'value': r[1]['count']})
 
     return {"current": current_level, "residual": residual_level}

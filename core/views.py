@@ -248,17 +248,10 @@ def global_overview(request):
 def compile_analysis_for_composer(user: User, analysis_list: list):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Analysis)
-    analysis_objects = Analysis.objects.filter(id__in=object_ids_view).filter(id__in=analysis_list)
 
-    current_level = list()
-    residual_level = list()
-    agg_risks = list()
-
-    for lvl in get_rating_options(user):
-        count_c = RiskScenario.objects.filter(current_level=lvl[0]).filter(analysis__in=analysis_list).count()
-        count_r = RiskScenario.objects.filter(residual_level=lvl[0]).filter(analysis__in=analysis_list).count()
-        current_level.append({'name': lvl[1], 'value': count_c})
-        residual_level.append({'name': lvl[1], 'value': count_r})
+    rc = risks_count_per_level(user, analysis_list)
+    current_level = rc['current']
+    residual_level = rc['residual']
 
     untreated = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
         treatment__in=['mitigated', 'accepted']).count()
@@ -297,6 +290,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "residual_level": residual_level,
         "counters": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
+        "colors": get_risk_color_ordered_list(user),
     }
 
 
