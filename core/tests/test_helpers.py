@@ -61,11 +61,11 @@ def test_get_rating_options_perm_to_view_matrix():
     role_assignment.save()
 
     assert get_rating_options(user) == [
-        (0, 'default_5x5.Very Low'),
-        (1, 'default_5x5.Low'),
-        (2, 'default_5x5.Medium'),
-        (3, 'default_5x5.High'),
-        (4, 'default_5x5.Very High'),
+        (0, 'Very Low'),
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High'),
+        (4, 'Very High'),
     ]
 
 
@@ -117,9 +117,9 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
     role_assignment.save()
 
     assert get_rating_options_abbr(user) == [
-        ('default_5x5.VL','Very Low'),
-        ('default_5x5.L', 'Low'),
-        ('default_5x5.M', 'Medium'),
-        ('default_5x5.H', 'High'),
-        ('default_5x5.VH', 'Very High')
+        ('VL','Very Low'),
+        ('L', 'Low'),
+        ('M', 'Medium'),
+        ('H', 'High'),
+        ('VH', 'Very High')
     ]
