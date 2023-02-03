@@ -245,42 +245,13 @@ def global_overview(request):
 
     return render(request, template, context)
 
-
-@method_decorator(login_required, name='dispatch')
-class MyProjectsListView(ListView):
-    template_name = 'core/my_projects.html'
-    context_object_name = 'context'
-    model = SecurityMeasure
-
-    def get_queryset(self):
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        agg_data = risk_status(self.request.user, Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user))
-        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
-        _tmp = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis__auditor=self.request.user).exclude(status='done').order_by('eta')
-        ord_security_measures = sorted(_tmp, key=lambda mtg: mtg.get_ranking_score(), reverse=True)
-        # TODO: add date sorting as well
-        return {'agg_data': agg_data,
-                'security_measures': ord_security_measures}
-        # for UI debug use:
-        # return risk_status(Analysis.objects.all())
-
-
 def compile_analysis_for_composer(user: User, analysis_list: list):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Analysis)
-    analysis_objects = Analysis.objects.filter(id__in=object_ids_view).filter(id__in=analysis_list)
 
-    current_level = list()
-    residual_level = list()
-    agg_risks = list()
-
-    for lvl in get_rating_options(user):
-        count_c = RiskScenario.objects.filter(current_level=lvl[0]).filter(analysis__in=analysis_list).count()
-        count_r = RiskScenario.objects.filter(residual_level=lvl[0]).filter(analysis__in=analysis_list).count()
-        current_level.append({'name': lvl[1], 'value': count_c})
-        residual_level.append({'name': lvl[1], 'value': count_r})
+    rc = risks_count_per_level(user, analysis_list)
+    current_level = rc['current']
+    residual_level = rc['residual']
 
     untreated = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
         treatment__in=['mitigated', 'accepted']).count()
@@ -319,6 +290,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "residual_level": residual_level,
         "counters": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
+        "colors": get_risk_color_ordered_list(user),
     }
 
 

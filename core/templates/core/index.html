@@ -3,24 +3,27 @@
 {% block content %}
 
 <div class="w-full h-full mx-auto">
+    {% with page_title=_('Analyses registry') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
     <section class="">
-        <div class=" flex items-center content-center">
-            <div class="flex-grow mx-14 my-14">
+        <div class="flex justify-center">
+            <div class="flex-grow max-w-4xl mx-14 mb-14 mt-8">
                 <search>
                     <form action="{% url 'search' %}" class="">
-                        <span class="h-10 m-0 bg-gray-200 hover:bg-gray-300 cursor-pointer border border-gray-300 text-sm rounded-full flex">
+                        <span class="flex flex-row space-x-0 rounded-lg h-fit shadow-lg focus-within:ring-2 focus-within:ring-blue-700">
+                            <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                                <i class="fas fa-search"></i>
+                            </div>
                             <input id="search" required type="search" name="q" placeholder="{% trans "Search risk scenario, security measure, risk analysis..." %}" value="{{request.GET.q}}"
-                                    class="flex-grow px-4 rounded-l-full rounded-r-full text-sm focus:outline-none border-none overflow-ellipsis">
-                            <button id="submit" type="submit" class="text-gray-700">
+                                    class="flex-grow text-sm h-10 rounded-r-lg border-none focus:ring-0 overflow-ellipsis">
+                            {% comment %} <button id="submit" type="submit" class="text-gray-700">
                                     <i class="fas fa-search text-lg w-4 h-4 ml-2 mr-4"></i>
-                            </button>
+                            </button> {% endcomment %}
                         </span>
                     </form>
                 </search>
             </div>
-        </div>
-        <div>
-            <h2 id="title" class="text-2xl ml-2 font-bold leading-tight">{% trans "Analysis registry" %}</h2>
         </div>
 
         <div class="rounded-lg mt-2">

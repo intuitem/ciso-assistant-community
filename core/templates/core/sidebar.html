@@ -5,7 +5,7 @@
     class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-visible left-0 z-10" :class="{ '-ml-66': !sidebarOpen }">
     <nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50  py-4 px-3">
         <div class="flex flex-row space-x-4 border-b pb-3" aria-label="logo">
-            <div class="flex items-center justify-left rounded shadow-sm shadow-indigo-300">
+            <div class="flex items-center justify-left rounded">
                 <svg height="48" width="48" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                     <defs>
                         <style>
@@ -32,16 +32,6 @@
             <div class="flex flex-col w-full h-full">
                 <div class="flex flex-row space-x-2 w-full mt-auto">
                     <p class="font-semibold text-gray-900">MIRA</p>
-                    <div x-data="{ open : false }" class="w-full">
-                        <a @click="open = !open,
-modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
-                            <span class="transition duration-75 text-gray-700 group">
-                                <i class="fas fa-info-circle"></i>
-                                <span class="hidden w-fit text-xs whitespace-nowrap bg-gray-600 text-white text-center rounded px-1 py-0.5 absolute z-10 group-hover:block right-0">{% trans "About MIRA" %}</span>
-                            </span>
-                        </a>
-                        {% include "snippets/modal.html" with header=_("About MIRA") %}
-                    </div>
                 </div>
                 <p class="text-sm font-light text-gray-500 mb-auto">by intuitem</p>
             </div>
@@ -53,7 +43,7 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                         <span class="nav-link-icon">
                             <i class="fas fa-book-open"></i>
                         </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analysis registry" %}</span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analyses registry" %}</span>
                     </a>
                 </li>
                 
@@ -317,7 +307,7 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                 <p class="text-gray-900 text-sm whitespace-nowrap overflow-hidden truncate">{{ request.user.get_full_name }}</p>
                 <p class="font-normal text-xs text-gray-600 mr-2 whitespace-nowrap overflow-hidden truncate w-full">{{ request.user.email }}</p>
             </div>
-            <div class="flex justify-center w-full">
+            <div>
             <div
                     x-data="{
                         open: false,
@@ -343,13 +333,12 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                     x-id="['dropdown-button']"
                     class="relative w-full overflow-visible"
                 >
-                <button class="w-fit px-3 rounded-full hover:bg-gray-200 text-center my-auto cursor-pointer"
+                <button class="w-fit px-3 rounded-full hover:bg-gray-100 text-center my-auto cursor-pointer"
                         x-ref="button"
                         x-on:click="toggle()"
                         :aria-expanded="open"
                         :aria-controls="$id('dropdown-button')"
-                        type="button"
-                        class="flex items-center gap-2 bg-white px-5 py-2.5 rounded-md shadow">
+                        type="button">
                     <i class="fas fa-ellipsis-v text-gray-800"></i>
                 </button>
                 <div
@@ -359,38 +348,52 @@ modalOpen = !modalOpen" class="relative flex flex-row cursor-pointer">
                         x-on:click.outside="close($refs.button)"
                         :id="$id('dropdown-button')"
                         style="display: none;"
-                        class="absolute right-0 bottom-full mt-2 w-40 rounded-md bg-white shadow-md overflow-visible hover:block z-50"
+                        class="absolute right-0 bottom-full mt-2 w-fit rounded-md bg-white shadow-md overflow-visible hover:block z-50 py-2"
                     >
-                    <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                    <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800">
                         <i class="fas fa-user"></i>
                         {% trans "My profile" %}
                     </a>
 
-                    <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full first-of-type:rounded-t-md last-of-type:rounded-b-md px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
-                        <i class="fas fa-sign-out-alt"></i>
-                        {% trans "Log out" %}
-                    </a>
-
+                    <div class="w-full border-t border-gray-200 my-1"></div>
+                    
                     <div class="flex flex-row items-center">
                         <div>
                             <a id="translation"
-                                class="flex flex-row items-center">
-                                <form action="{% url 'set_language' %}" method="post">
-                                    {% csrf_token %}
-                                    <select id="language" class="border-none pl-4 focus:border-none block text-sm text-gray-700 bg-white focus:ring-0" name="language" onchange="this.form.submit();"> 
-                                        {% get_current_language as LANGUAGE_CODE %} 
-                                        {% get_available_languages as LANGUAGES %}
-                                        {% get_language_info_list for LANGUAGES as languages %}
-                                        {% for language in languages %}
-                                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
-                                                {{ language.code|country_flag }} {{ language.name_local|capfirst }} ({{ language.code }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
+                            class="flex flex-row items-center">
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <select id="language" class="border-none pl-4 focus:border-none block text-sm text-gray-800 bg-white focus:ring-0" name="language" onchange="this.form.submit();"> 
+                                    {% get_current_language as LANGUAGE_CODE %} 
+                                    {% get_available_languages as LANGUAGES %}
+                                    {% get_language_info_list for LANGUAGES as languages %}
+                                    {% for language in languages %}
+                                    <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
+                                        {{ language.code|country_flag }} {{ language.name_local|capfirst }} ({{ language.code }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
                             </a>
                         </div>
                     </div>
+
+                    <div x-data="{ open : false }" class="flex items-center cursor-pointer gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="relative flex flex-row whitespace-nowrap">
+                            <span class="transition duration-75 text-gray-800 group">
+                                <i class="fas fa-info-circle"></i>
+                                {% trans "About MIRA" %}
+                            </span>
+                        </a>
+                        {% include "snippets/modal.html" with header=_("About MIRA") %}
+                    </div>
+
+                    <div class="w-full border-t border-gray-200 my-1"></div>
+
+                    <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-gray-800 hover:bg-gray-100 disabled:text-gray-500">
+                        <i class="fas fa-sign-out-alt"></i>
+                        {% trans "Log out" %}
+                    </a>
                 </div>
             </div>
         </div>

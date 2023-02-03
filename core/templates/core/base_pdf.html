@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@100;200;300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
     <style>
 @page {
     size: A3 landscape; /* Change from the default size of A4 */
@@ -120,6 +120,10 @@ font-family: 'Source Sans Pro', sans-serif;
 .w-1\/3 {
   width: 33.333333%;
 }
+.w-3\/4 {
+  width: 75%;
+  padding-left: 0.5rem;
+}
 
 .border-gray-300 {
   border-color: rgb(212, 212, 216);
@@ -159,12 +163,6 @@ th {
 
 tr.border-b td {
   border-bottom: 1px solid #A8A29E;
-}
-
-.shadow {
-border: 1px solid #E7E5E4;
-padding: 10px;
-
 }
 
 .text-sm {
@@ -265,6 +263,34 @@ ul {
 .space-x-3 > :not([hidden]) ~ :not([hidden]) {
   margin-right: 0;
   margin-left: 0.75rem;
+}
+
+.-rotate-90 {
+  transform: rotate(-90deg);
+}
+
+.mt-36 {
+  margin-top: 9rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.w-12 {
+  width: 2rem;
+}
+
+.h-12 {
+  height: 2rem;
 }
 
 </style>
