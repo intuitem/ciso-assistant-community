@@ -275,10 +275,13 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
 
     for _ra in analysis_list:
         synth_table = list()
-        for lvl in get_rating_options(user):
-            count_c = RiskScenario.objects.filter(current_level=lvl[0]).filter(analysis__id=_ra).count()
-            count_r = RiskScenario.objects.filter(residual_level=lvl[0]).filter(analysis__id=_ra).count()
-            synth_table.append({"lvl": lvl[1], "current": count_c, "residual": count_r})
+        _rc = risks_count_per_level(user=user, analyses=[_ra])
+        length = len(_rc['current'])
+        for i in range(length):
+            count_c = _rc['current'][i]['value']
+            count_r = _rc['residual'][i]['value']
+            lvl = _rc['current'][i]['name']
+            synth_table.append({"lvl": lvl, "current": count_c, "residual": count_r})
         hvh_risks = RiskScenario.objects.filter(analysis__id=_ra).filter(current_level__gte=2)
         analysis_objects.append(
             {"analysis": get_object_or_404(Analysis, pk=_ra), "synth_table": synth_table, "hvh_risks": hvh_risks}

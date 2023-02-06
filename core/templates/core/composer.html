@@ -56,13 +56,13 @@
     <div x-data={show:false} class="rounded">
           <div class="border border-b-0 bg-gradient-to-r from-violet-800 to-violet-600 px-6 py-4 rounded-t-lg" id="headingOne">
               <button @click="show=!show" class=" text-white font-semibold hover:text-gray-300 focus:outline-none" type="button">
-                {{item.analysis}}
+                {{ item.analysis }}
               </button>
           </div>
           <div x-show="show" class="border border-1 px-10 py-6 bg-white flex flex-row space-x-4 rounded-b-lg">
               <div class="">
                 <div class="my-4"> <span class="font-semibold">{% trans "Risk analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
-                    <b>{{item.analysis.quality_check.count}}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}</div>
+                    <b>{{ item.analysis.quality_check.count }}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}</div>
                 <div>
                     <table class="border border-collapse m-2 p-2 rounded">
                         <tr class="">
@@ -73,9 +73,9 @@
                         {% for lvl in item.synth_table %}
 
                         <tr>
-                            <td class="border p-2">{{lvl.lvl}}</td>
-                            <td class="border p-2 text-center">{{lvl.current}}</td>
-                            <td class="border p-2 text-center">{{lvl.residual}}</td>
+                            <td class="border p-2">{{ lvl.lvl }}</td>
+                            <td class="border p-2 text-center">{{ lvl.current }}</td>
+                            <td class="border p-2 text-center">{{ lvl.residual }}</td>
                         </tr>
                         {% endfor %}
 
