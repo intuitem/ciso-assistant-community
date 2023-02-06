@@ -216,7 +216,7 @@ class Analysis(AbstractBaseModel):
         # ---
 
         # --- checks on the risk scenarios
-        for ri in self.riskscenario_set.all().order_by('id'):
+        for ri in self.riskscenario_set.all().order_by('created_at'):
 
             if ri.residual_level > ri.current_level:
                 errors_lst.append({"msg": _("R#{} residual risk level is higher than the current one").format(ri.id), "obj_type": "RiskScenario", "object": ri})
