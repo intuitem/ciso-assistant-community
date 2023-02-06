@@ -254,10 +254,10 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
     residual_level = rc['residual']
 
     untreated = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
-        treatment__in=['mitigated', 'accepted']).count()
+        treatment__in=['mitigated', 'accepted'])
     untreated_h_vh = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
-        treatment__in=['mitigated', 'accepted']).filter(current_level__gte=2).count()
-    accepted = RiskScenario.objects.filter(analysis__in=analysis_list).filter(treatment='accepted').count()
+        treatment__in=['mitigated', 'accepted']).filter(current_level__gte=2)
+    accepted = RiskScenario.objects.filter(analysis__in=analysis_list).filter(treatment='accepted')
 
     values = list()
     labels = list()
@@ -291,7 +291,8 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "analysis_objects": analysis_objects,
         "current_level": current_level,
         "residual_level": residual_level,
-        "counters": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
+        "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
+        "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
         "colors": get_risk_color_ordered_list(user),
     }
