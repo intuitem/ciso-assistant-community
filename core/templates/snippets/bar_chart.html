@@ -5,31 +5,32 @@
 
         // specify chart configuration item and data
         var option = {
-
-        toolbox: {
-        show: true,
-        feature: {
-            mark: {show: true},
-            dataView: {show: false, readOnly: true},
-            saveAsImage: {show: true}
-            }
-        },
-        tooltip:{},
-    xAxis: {
-        type: 'category',
-        data: {{labels|safe}},
-        axisTick: {
-                alignWithLabel: true
-            }
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [{
-        data: {{values|safe}},
-        type: 'bar'
-    }]
-};
+            toolbox: {
+            show: true,
+            feature: {
+                mark: {show: true},
+                dataView: {show: false, readOnly: true},
+                saveAsImage: {show: true}
+                }
+            },
+            tooltip:{},
+            xAxis: {
+                type: 'category',
+                data: {{labels|safe}},
+                axisTick: {
+                        alignWithLabel: true
+                    }
+            },
+            yAxis: {
+                type: 'value',
+                allowDecimals: false,
+                minInterval: 1
+            },
+            series: [{
+                data: {{values|safe}},
+                type: 'bar'
+            }]
+        };
 
         // use configuration item and data specified to show chart
         {{name}}_ch.setOption(option);
