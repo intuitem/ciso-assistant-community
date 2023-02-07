@@ -162,8 +162,8 @@ class RiskScenarioFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'threat': _('threat'.capitalize()),
             '-threat': _('Threat (descending)'),
-            'analysis__project': _('parent'.capitalize() + ' project'),
-            '-analysis__project': _('Parent project (descending)'),
+            'analysis__project': _('Project'),
+            '-analysis__project': _('Project (descending)'),
             'treatment': _('treatment'.capitalize()),
             '-treatment': _('Treatment (descending)'),
         }
