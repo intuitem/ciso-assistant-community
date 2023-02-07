@@ -10,14 +10,19 @@
     <div class="px-2 mx-2 font-semibold text-xl">{% trans "Your selection" %}</div>
     <div class="px-2 mx-2 text-sm"><i class="fas fa-info-circle"></i> {% trans "Hint: you can bookmark this page for future usage" %}</div>
     <div class="p-4 mt-4 mx-2 bg-white shadow rounded">
-        <div class="p-2 font-semibold text-lg">{% trans "Here is the overview for the" %} {{context.analysis_objects|length}} {% trans "selected analyses:" %}</div>
+        <div class="p-2 font-semibold text-lg">
+            {% blocktrans count counter=context.analysis_objects|length %}
+            Here is the overview for the selected analysis:
+            {% plural %}
+            Here is the overview for the {{ counter }} selected analyses:
+            {% endblocktrans %}
+        </div>
         <div class="flex space-x-2">
             <div class="w-1/3">
-
                 <div>
                     <div class="p-2 text-sm font-semibold">{% trans "Current risk level" %}</div>
 
-                    <div class="items-center">
+                    <div class="items-center h-96">
                         {% trans "Current risk" as cur_rsk_label %}
                         {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=context.current_level colors=context.colors %}
                     </div>
@@ -26,14 +31,14 @@
             <div class="w-1/3">
                 <div class="p-2 text-sm font-semibold">{% trans "Status of associated measures" %}</div>
                 <div>
-                    <div class="items-center justify-center">
+                    <div class="items-center justify-center h-96">
                         {% include 'snippets/bar_chart.html' with name='mtg' labels=context.security_measure_status.labels values=context.security_measure_status.values %}
                     </div>
                 </div>
             </div>
             <div class="w-1/3">
                 <div class="p-2 text-sm font-semibold">{% trans "Residual risk level" %}</div>
-                <div class="items-center">
+                <div class="items-center h-96">
                     {% trans "Residual risk" as rsd_rsk_label %}
                     {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=context.residual_level colors=context.colors %}
                 </div>
