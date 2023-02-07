@@ -3,9 +3,6 @@ kind: ConfigMap
 metadata:
   name: mira-config
 data:
-  POSTGRES_NAME: mira
-  POSTGRES_USER: mirauser
-  DB_HOST: postgres
   DJANGO_DEBUG: "True"
   nginx.conf: |
     server {

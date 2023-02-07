@@ -18,6 +18,8 @@ from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+print("BASE_DIR:", BASE_DIR)
+
 with open(BASE_DIR / 'asf_rm/VERSION') as f:
     VERSION = f.read().strip()
     print(f'MIRA Version: {VERSION}')
@@ -103,20 +105,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'asf_rm.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['POSTGRES_NAME'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-        'HOST': os.environ['DB_HOST'],
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
-}
-
 AUTH_USER_MODEL = 'iam.User'
 
 # Password validation
@@ -180,3 +168,14 @@ TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+# Database
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db/mira.sqlite3",
+    }
+}
+
