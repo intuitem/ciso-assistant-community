@@ -1,7 +1,6 @@
-from core.models import RiskMatrix
-from core.models import Threat, SecurityFunction
+from core.models import Threat, SecurityFunction, RiskMatrix
 from django.contrib import messages
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 from asf_rm import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -281,15 +280,15 @@ def import_library_view(request, library):
     objects_ignored = 0
 
     for obj in library.get('objects'):
-        if obj['type'] == 'matrix':
+        if obj['type'] == 'matrix' and RoleAssignment.has_permission(request.user, 'add_riskmatrix'):
             matrices.append(obj.get('fields'))
-        elif obj['type'] == 'threat':
+        elif obj['type'] == 'threat' and RoleAssignment.has_permission(request.user, 'add_threat'):
             threats.append(obj.get('fields'))
-        elif obj['type'] == 'security_function':
+        elif obj['type'] == 'security_function' and RoleAssignment.has_permission(request.user, 'add_securityfunction'):
             security_functions.append(obj.get('fields'))
         else:
-            messages.error(request, _('Library was not imported: unknown object type: {}').format(obj["type"]))
-            raise Exception(f'Unknown object type: {obj["type"]}')
+            messages.error(request, _('Library was not imported: permission denied or unknown object type: {}').format(obj["type"]))
+            raise Exception(f'Unknown object type: {obj["type"]} or permission denied')
 
     uploaded_list, ignored_list = ignore_library_object(matrices, RiskMatrix)
     objects_ignored += len(ignored_list)
