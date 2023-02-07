@@ -205,15 +205,15 @@ class User(AbstractBaseUser):
 #        swappable = 'AUTH_USER_MODEL'
 
     def get_full_name(self) -> str:
+        """get user's full name (i.e. first_name + last_name)"""
         try:
-            """ get user's full name """
             full_name = f'{self.first_name} {self.last_name}'
-            return full_name.strip() if full_name.strip() else self.email
+            return full_name.strip()
         except:
             return ""
     def get_short_name(self) -> str:
+        """get user's short name (i.e. first_name or email before @))"""
         try:
-            """ get user's short name """
             return self.first_name if self.first_name else self.email.split('@')[0]
         except:
             return ""

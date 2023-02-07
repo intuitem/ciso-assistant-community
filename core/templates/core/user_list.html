@@ -139,11 +139,13 @@
                             </div>
                         </td>
                         <td cclass="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <ul class="text-gray-900 whitespace-no-wrap capitalize">
                                 {% for group in user.user_groups.all %}
-                                {{ group }}/
+                                <li class="list-none">
+                                    {{ group }}
+                                </li>
                                 {% endfor %}
-                            </p>
+                            </ul>
                         </td>
                         <td cclass="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
