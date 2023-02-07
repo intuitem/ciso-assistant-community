@@ -191,7 +191,7 @@ msgstr "Nom de la fonction de sécurité"
 
 #: library/templates/library/library_detail.html:113
 msgid "Provider"
-msgstr "Fourisseur"
+msgstr "Fournisseur"
 
 #: library/templates/library/library_detail.html:114
 msgid "Contact"
