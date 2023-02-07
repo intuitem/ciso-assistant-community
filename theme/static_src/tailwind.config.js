@@ -68,6 +68,12 @@ module.exports = {
                 // => @media print { ... }
             }
         },
+        listStyleType: {
+            none: 'none',
+            disc: 'disc',
+            decimal: 'decimal',
+            circle: 'circle',
+        }
     },
     variants: {
         extend: {},

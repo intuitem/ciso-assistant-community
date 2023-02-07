@@ -7,54 +7,82 @@
 {% endblock %}
 {% block content %}
 <div class="p-4 mx-auto min-h-screen">
-    <div class="p-2 m-2 font-semibold text-xl">{% trans "Your selection" %}</div>
-    <div class="p-2 m-2 text-sm"><i class="fas fa-info-circle"></i> {% trans "Hint: you can bookmark this page for future usage" %}</div>
-    <div class="p-4 m-2 bg-white shadow rounded-xl">
-        <div class="p-2 m-2 text-semibold text-lg">{% trans "Here is the overview for the" %} {{context.analysis_objects|length}} {% trans "selected projects" %}:</div>
+    <div class="px-2 mx-2 font-semibold text-xl">{% trans "Your selection" %}</div>
+    <div class="px-2 mx-2 text-sm"><i class="fas fa-info-circle"></i> {% trans "Hint: you can bookmark this page for future usage" %}</div>
+    <div class="p-4 mt-4 mx-2 bg-white shadow rounded">
+        <div class="p-2 font-semibold text-lg">
+            {% blocktrans count counter=context.analysis_objects|length %}
+            Here is the overview for the selected analysis:
+            {% plural %}
+            Here is the overview for the {{ counter }} selected analyses:
+            {% endblocktrans %}
+        </div>
         <div class="flex space-x-2">
-            <div class="w-1/3 ">
-
+            <div class="w-1/3">
                 <div>
-                    <div class="p-2">{% trans "Current risk level" %}</div>
+                    <div class="p-2 text-sm font-semibold">{% trans "Current risk level" %}</div>
 
-                    <div class="items-center">
+                    <div class="items-center h-96">
                         {% trans "Current risk" as cur_rsk_label %}
                         {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=context.current_level colors=context.colors %}
                     </div>
                 </div>
             </div>
-            <div class="w-1/3 ">
-                <div class="p-2 m-2">{% trans "Status of associated measures" %}</div>
+            <div class="w-1/3">
+                <div class="p-2 text-sm font-semibold">{% trans "Status of associated measures" %}</div>
                 <div>
-                    <div class="items-center justify-center">
+                    <div class="items-center justify-center h-96">
                         {% include 'snippets/bar_chart.html' with name='mtg' labels=context.security_measure_status.labels values=context.security_measure_status.values %}
                     </div>
                 </div>
             </div>
-            <div class="w-1/3 ">
-                <div class="p-2">{% trans "Residual risk level" %}</div>
-                <div class="items-center">
+            <div class="w-1/3">
+                <div class="p-2 text-sm font-semibold">{% trans "Residual risk level" %}</div>
+                <div class="items-center h-96">
                     {% trans "Residual risk" as rsd_rsk_label %}
                     {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=context.residual_level colors=context.colors %}
                 </div>
 
             </div>
         </div>
-        <div class="mt-4 bg-gradient-to-br from-slate-200 shadow-lg rounded-lg p-2 ">
-            <i class="fas fa-hand-point-right"></i> <span class="font-semibold">{% trans "For the selected scope, you have:" %}</span>
-            <ul class="list-disc py-2 px-6 m-2">
-                <li><b>{{context.counters.untreated}}</b> {% trans "untreated risk scenario(s)," %}</li>
-                <li>{% trans "among which," %} <b>{{context.counters.untreated_h_vh}}</b> {% trans "currently of level high or above," %}</li>
-                <li>{% trans "and" %} <b>{{context.counters.accepted}}</b> {% trans "risk scenario(s) accepted." %}</li>
+        <div class="bg-zinc-100 shadow rounded p-3 flex flex-col space-y-2">
+            <div>
+                <i class="far fa-lightbulb mr-1"></i>&nbsp;<span class="font-semibold">{% trans "For the selected scope, you have:" %}</span>
+            </div>
+            <ul class="list-disc px-6">
+                <li>
+                    {% blocktrans count counter=context.counters.untreated %}
+                        <b>{{ counter }}</b> untreated risk scenario
+                    {% plural %}
+                        <b>{{ counter }}</b> untreated risk scenarios
+                    {% endblocktrans %}
+                    <ul class="list-circle ml-4">
+                        {% for scenario in context.riskscenarios.untreated %}
+                            <li>{{ scenario }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li>{% trans "and" %}
+                    {% blocktrans count counter=context.counters.accepted %}
+                        <b>{{ counter }}</b> risk scenario accepted
+                    {% plural %}
+                        <b>{{ counter }}</b> risk scenarios accepted
+                    {% endblocktrans %}
+                    <ul class="list-circle ml-4">
+                        {% for scenario in context.riskscenarios.accepted %}
+                            <li>{{ scenario }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
             </ul>
 
         </div>
     </div>
-    <div class="px-2 flex flex-col space-y-2">
+    <div class="mt-4 px-2 flex flex-col space-y-2">
         {% for item in context.analysis_objects %}
 
         <div x-data="{ show: false }">
-            <div class="border border-b-0 bg-white rounded-lg overflow-hidden shadow" id="headingOne">
+            <div class="bg-white rounded-lg overflow-hidden shadow" id="headingOne">
                 <div class="flex flex-row space-x-4 px-8 py-4 w-full hover:bg-gray-100 cursor-pointer items-center" @click="show=!show">
                     <div class="text-gray-700">
                         <i x-show="!show" class="fas fa-angle-down"></i>
@@ -67,13 +95,19 @@
                         {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}
                     </div>
                 </div>
-                <div x-show="show" x-transition.origin.top class="border border-1 px-10 py-6 bg-white flex flex-row space-x-4 rounded-b-lg">
-                    <div class="">
-                        <div class="my-4"> <span class="font-semibold">{% trans "Risk analysis status:" %}</span> {% if item.analysis.quality_check.count > 0 %} <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span><br>➡️ <span class="text-sm py-2 my-2">{% trans "Found" %}
-                            <b>{{ item.analysis.quality_check.count }}</b> {% trans "inconsistencies that you need to check (use x-rays)." %}</span>  {% else %} <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> {% endif %}
+                <div x-show="show" x-transition.origin.top class="border-t px-10 py-4 bg-white flex flex-row space-x-4">
+                    <div>
+                        <div class="pb-2">
+                            {% if item.analysis.quality_check.count > 0 %}➡️ <span class="text-sm">{% trans "Found" %}
+                                {% blocktrans count counter=item.analysis.quality_check.count %}
+                                    <b>{{ counter }}</b> inconsistency that you need to check (use <a class="simple-link hover:underline visited:text-indigo-600" href="/x-rays">x-rays</a> for more information).</span>
+                                {% plural %}
+                                    <b>{{ counter }}</b> inconsistencies that you need to check (use <a class="simple-link hover:underline visited:text-indigo-600" href="/x-rays">x-rays</a> for more information).</span>
+                                {% endblocktrans %}
+                            {% endif %}
                         </div>
                         <div>
-                            <table class="border border-collapse m-2 p-2 rounded">
+                            <table class="border border-collapse my-2 p-2 rounded">
                                 <tr class="">
                                     <th class="border p-2 bg-gray-200"></th>
                                     <th class="border p-2 bg-gray-200">{% trans "Current" %}</th>
@@ -92,22 +126,7 @@
                         </div>
 
                         <div>
-                            <a class="text-violet-800 hover:text-violet-600 py-2 my-2" href="{% url 'RA' item.analysis.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to full risk analysis" %}</a>
-                        </div>
-                    </div>
-
-                    <div class="pt-14">
-                        <div class="mt-4">
-                            <span class="font-semibold">{% trans "High or very high risk based on the" %} <span class="underline">{% trans "current level" %}</span>:</span>
-                            {% if item.hvh_risks %}
-                            <ul class="p-2 m-2 list-disc">
-                                {% for ri in item.hvh_risks %}
-                                <li>[{{ri.get_current_level_display}}][{{ri.get_treatment_display}}] {{ri}}</li>
-                                {% endfor %}
-                            </ul>
-                                {% else %}
-                                <p class="p-2 m-2"><i class="fas fa-check-square"></i> {% trans "Nothing to show here." %}</p>
-                                {% endif %}
+                            <a class="text-indigo-800 hover:text-indigo-600 py-2 my-2" href="{% url 'RA' item.analysis.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to full risk analysis" %}</a>
                         </div>
                     </div>
                 </div>
