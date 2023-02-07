@@ -60,7 +60,7 @@ urlpatterns = [
     
     path('threats/create-modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
 
-    path('risk-analyses/<int:parent_analysis>/risk_scenario/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
+    path('risk-analyses/<int:analysis>/risk_scenario/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
     path('risk-scenarios/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
 
     path('projects-domains/create', login_required(views.FolderCreateView.as_view()), name='pd-create'),
