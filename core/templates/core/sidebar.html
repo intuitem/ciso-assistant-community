@@ -178,15 +178,6 @@
                         <div class="t">{% trans "Access management" %}</div>
                     </div>
                 </li>
-                <li class="to-page">
-                    <a href="{% url 'user-detailed' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-info"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "My profile" %}</span>
-                    </a>
-                </li>
                 {% comment %} {% if view_user %} {% endcomment %}
                 <li class="to-page">
                     <a href="{% url 'user-list' %}"
