@@ -4,8 +4,10 @@ from django.urls.conf import include
 from . import views
 import cal.views as cv
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('password_reset', views.password_reset_request, name='password_reset'),
     path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 
