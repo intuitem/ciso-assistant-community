@@ -965,18 +965,18 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['analysis'] = get_object_or_404(
-            Analysis, id=self.kwargs['parent_analysis'])
+            Analysis, id=self.kwargs['analysis'])
 
         return context
 
     def form_valid(self, form: RiskScenarioCreateForm) -> HttpResponse:
         if form.is_valid():
             form.scenario.analysis = get_object_or_404(
-                Analysis, id=self.kwargs['parent_analysis'])
+                Analysis, id=self.kwargs['analysis'])
             return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['parent_analysis']).id})
+        return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['analysis']).id})
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
