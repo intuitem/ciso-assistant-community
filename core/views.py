@@ -11,6 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
 from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 from django.db.models.query_utils import Q
@@ -109,6 +110,11 @@ def password_reset_request(request):
                 return redirect ("/password_reset/done/")
     password_reset_form = ResetForm()
     return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+
+
+class ResetPasswordConfirmView(PasswordResetConfirmView):
+    template_name = "registration/password_reset_confirm.html"
+    form_class = ResetConfirmForm
 
 @method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
