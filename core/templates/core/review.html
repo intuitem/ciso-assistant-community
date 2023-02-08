@@ -44,7 +44,7 @@
                 </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.warnings %}
-                    <li>{{item.msg}} |
+                    <li>{{ item.msg }} |
                         {% include 'snippets/view_edit.html' with item=item %}
                     </li>
                     {% endfor %}
@@ -60,7 +60,7 @@
                 </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.info %}
-                    <li>{{item.msg}} |
+                    <li>{{ item.msg }} |
                         {% include 'snippets/view_edit.html' with item=item %}
                     </li>
                     {% endfor %}
