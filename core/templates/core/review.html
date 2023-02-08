@@ -20,10 +20,15 @@
 
                 {% if analysis.quality_check.errors %}
                 <div class="text-white font-semibold bg-gradient-to-r from-red-500 to-red-300 px-4 py-1 m-1 rounded">
-                    {{analysis.quality_check.errors | length}} <span class="font-bold">{% trans "error(s)" %}</span> {% trans "found_f" %} </div>
+                    {% blocktrans count counter=analysis.quality_check.errors|length %}
+                        {{ counter }} <span class="font-bold">error</span> found
+                        {% plural %}
+                        {{ counter }} <span class="font-bold">errors</span> found
+                    {% endblocktrans %}
+                </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.errors %}
-                    <li>{{item.msg}} |
+                    <li>{{ item.msg }} |
                         {% include 'snippets/view_edit.html' with item=item %}
                     </li>
                     {% endfor %}
@@ -31,7 +36,12 @@
                 {% endif %}
                 {% if analysis.quality_check.warnings %}
                 <div class="text-white font-semibold bg-gradient-to-r from-orange-500 to-orange-300 px-4 py-1 m-1 rounded">
-                    {{analysis.quality_check.warnings | length}} <span class="font-bold">{% trans "warning(s)" %}</span> {% trans "found_m" %} </div>
+                    {% blocktrans count counter=analysis.quality_check.warnings|length %}
+                        {{ counter }} <span class="font-bold">warning</span> found
+                        {% plural %}
+                        {{ counter }} <span class="font-bold">warnings</span> found
+                    {% endblocktrans %}
+                </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.warnings %}
                     <li>{{item.msg}} |
@@ -42,7 +52,12 @@
                 {% endif %}
                 {% if analysis.quality_check.info %}
                 <div class="text-white font-semibold bg-gradient-to-r from-blue-700 to-blue-500 px-4 py-1 m-1 rounded">
-                    {{analysis.quality_check.info | length}} <span class="font-bold">{% trans "information" %}</span> {% trans "to consider" %} </div>
+                    {% blocktrans count counter=analysis.quality_check.info|length %}
+                        {{ counter }} <span class="font-bold">information</span> to consider
+                        {% plural %}
+                        {{ counter }} <span class="font-bold">informations</span> to consider
+                    {% endblocktrans %}
+                </div>
                 <ul class="list-disc p-4">
                     {% for item in analysis.quality_check.info %}
                     <li>{{item.msg}} |
