@@ -1,7 +1,6 @@
-from core.models import RiskMatrix
-from core.models import Threat, SecurityFunction
+from core.models import Threat, SecurityFunction, RiskMatrix
 from django.contrib import messages
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 from asf_rm import settings
 from django.utils.translation import gettext_lazy as _
 
@@ -267,6 +266,18 @@ def import_library(library):
 
     return True
 
+def is_import_permited(request, object_type):
+    '''
+    Verify user permissions to import a library
+
+    Args:
+        object_type: type of the object being imported
+    '''
+    if not RoleAssignment.has_permission(request.user, 'add_'+object_type.replace("_", "")):
+        messages.error(request, _('Library was not imported: permission denied for: {}').format(object_type.replace("_", " ")))
+        raise Exception(f'Permission denied for: {object_type}')
+    return True
+
 def import_library_view(request, library):
     '''
     Imports a library
@@ -281,14 +292,14 @@ def import_library_view(request, library):
     objects_ignored = 0
 
     for obj in library.get('objects'):
-        if obj['type'] == 'matrix':
+        if obj['type']=='matrix' and is_import_permited(request, obj['type']):
             matrices.append(obj.get('fields'))
-        elif obj['type'] == 'threat':
+        elif obj['type']=='threat' and is_import_permited(request, obj['type']):
             threats.append(obj.get('fields'))
-        elif obj['type'] == 'security_function':
+        elif obj['type']=='security_function' and is_import_permited(request, obj['type']):
             security_functions.append(obj.get('fields'))
         else:
-            messages.error(request, _('Library was not imported: unknown object type: {}').format(obj["type"]))
+            messages.error(request, _('Library was not imported: unknown object type: {}').format(obj['type'].replace("_", " ")))
             raise Exception(f'Unknown object type: {obj["type"]}')
 
     uploaded_list, ignored_list = ignore_library_object(matrices, RiskMatrix)

@@ -22,7 +22,8 @@ def startup():
             "view_threat",
             "view_securityfunction",
             "view_folder",
-            "view_usergroup"
+            "view_usergroup",
+            "view_riskmatrix"
         ])
 
         analyst_permissions = Permission.objects.filter(codename__in=[
@@ -55,7 +56,8 @@ def startup():
             "view_threat",
             "view_securityfunction",
             "view_folder",
-            "view_usergroup"
+            "view_usergroup",
+            "view_riskmatrix",
         ])
 
         domain_manager_permissions = Permission.objects.filter(codename__in=[
@@ -92,6 +94,11 @@ def startup():
             "view_securityfunction",
             "view_folder",
             "change_folder",
+
+            "add_riskmatrix",
+            "view_riskmatrix",
+            "change_riskmatrix",
+            "delete_riskmatrix",
         ])
 
         administrator_permissions = Permission.objects.filter(codename__in=[
@@ -154,6 +161,11 @@ def startup():
             "view_riskacceptance",
             "change_riskacceptance",
             "delete_riskacceptance",
+
+            "add_riskmatrix",
+            "view_riskmatrix",
+            "change_riskmatrix",
+            "delete_riskmatrix",
         ])
 
         # if root folder does not exist, then create it

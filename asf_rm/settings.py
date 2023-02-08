@@ -81,6 +81,8 @@ ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

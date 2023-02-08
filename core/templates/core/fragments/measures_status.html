@@ -1,4 +1,4 @@
-<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
+<div id="{{name}}_div" class="bg-white w-auto h-full"></div>
 
 <script type="text/javascript">
     var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
@@ -10,7 +10,9 @@
             data: {{labels|safe}},
         },
         yAxis: {
-            type: 'value'
+            type: 'value',
+            allowDecimals: false,
+            minInterval: 1
         },
         series: [
             {

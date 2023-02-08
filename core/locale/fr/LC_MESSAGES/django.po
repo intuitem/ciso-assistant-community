@@ -1074,55 +1074,73 @@ msgstr ""
 "Indice : vous pouvez ajouter cette page à vos favoris pour une utilisation "
 "future"
 
-#: core/templates/core/composer.html:13
-msgid "Here is the overview for the"
-msgstr "Voici l'aperçu pour les"
+#: core/templates/core/composer.html:14
+#, python-format
+msgid ""
+"\n"
+"            Here is the overview for the selected analysis:\n"
+"            "
+msgid_plural ""
+"\n"
+"            Here is the overview for the %(counter)s selected analyses:\n"
+"            "
+msgstr[0] ""
+"\n"
+"            Voici l'aperçu de l'analyse sélectionnée :\n"
+"            "
+msgstr[1] ""
+"\n"
+"            Voici l'aperçu des %(counter)s analyses sélectionnées :\n"
+"            "
 
-#: core/templates/core/composer.html:13
-msgid "selected projects"
-msgstr "projets sélectionnés "
-
-#: core/templates/core/composer.html:18 core/templates/core/ri_create.html:75
+#: core/templates/core/composer.html:23 core/templates/core/ri_create.html:75
 #: core/templates/core/ri_update.html:105
 #: core/templates/snippets/ri_list_nested.html:19
 msgid "Current risk level"
 msgstr "Niveau de risque courant"
 
-#: core/templates/core/composer.html:21 core/templates/snippets/ra_data.html:48
+#: core/templates/core/composer.html:26 core/templates/snippets/ra_data.html:48
 msgid "Current risk"
 msgstr "Risque courant"
 
-#: core/templates/core/composer.html:27
+#: core/templates/core/composer.html:32
 msgid "Status of associated measures"
 msgstr "Statut des mesures associées"
 
-#: core/templates/core/composer.html:35 core/templates/core/ri_create.html:44
+#: core/templates/core/composer.html:40 core/templates/core/ri_create.html:44
 #: core/templates/core/ri_update.html:139
 #: core/templates/snippets/ri_list_nested.html:25
 msgid "Residual risk level"
 msgstr "Niveau de risque résiduel"
 
-#: core/templates/core/composer.html:37 core/templates/snippets/ra_data.html:50
+#: core/templates/core/composer.html:42 core/templates/snippets/ra_data.html:50
 msgid "Residual risk"
 msgstr "Risque résiduel"
 
-#: core/templates/core/composer.html:44
+#: core/templates/core/composer.html:50
 msgid "For the selected scope, you have:"
 msgstr "Pour la portée sélectionnée, vous avez :"
 
-#: core/templates/core/composer.html:46
-msgid "untreated risk scenario(s),"
-msgstr "scénario(s) de risque non traité(s)"
+#: core/templates/core/composer.html:54
+#, python-format
+msgid ""
+"\n"
+"                        <b>%(counter)s</b> untreated risk scenario\n"
+"                    "
+msgid_plural ""
+"\n"
+"                        <b>%(counter)s</b> untreated risk scenarios\n"
+"                    "
+msgstr[0] ""
+"\n"
+"                        <b>%(counter)s</b> scénario de risque non traité\n"
+"                    "
+msgstr[1] ""
+"\n"
+"                        <b>%(counter)s</b> scénarios de risque non traités\n"
+"                    "
 
-#: core/templates/core/composer.html:47
-msgid "among which,"
-msgstr "dont"
-
-#: core/templates/core/composer.html:47
-msgid "currently of level high or above,"
-msgstr "au moins de niveau élevé"
-
-#: core/templates/core/composer.html:48
+#: core/templates/core/composer.html:65
 msgid "and"
 msgstr "et"
 

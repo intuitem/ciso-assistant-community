@@ -1,5 +1,5 @@
 from uuid import UUID
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
@@ -7,6 +7,17 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
+
+from django.core.mail import send_mail, BadHeaderError
+from django.http import HttpResponse
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.contrib.auth.models import User
+from django.template.loader import render_to_string
+from django.db.models.query_utils import Q
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
 
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskMatrix
 from core.models import Project
@@ -38,9 +49,9 @@ from django.contrib import messages
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import UserGroup, Role, RoleAssignment
 from django.contrib.auth.views import PasswordChangeView
+from django.views.generic.edit import FormView
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskAcceptance
 from iam.forms import *
-from core.forms import *
 from core.forms import *
 from .filters import *
 
@@ -71,6 +82,39 @@ class UserLogin(LoginView):
     template_name = 'registration/login.html'
     form_class = LoginForm
 
+
+def password_reset_request(request):
+    if request.method == "POST":
+        password_reset_form = ResetForm(request.POST)
+        if password_reset_form.is_valid():
+            data = password_reset_form.cleaned_data['email']
+            associated_users = User.objects.filter(email=data)
+            if associated_users and associated_users.exists():
+                associated_user = associated_users[0]
+                subject = "Password Reset Requested"
+                email_template_name = "registration/password_reset_email.txt"
+                header = {
+                    "email":associated_user.email,
+                    'domain':'127.0.0.1:8000',
+                    'site_name': 'Website',
+                    "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
+                    "user": associated_user,
+                    'token': default_token_generator.make_token(associated_user),
+                    'protocol': 'http',
+                }
+                email = render_to_string(email_template_name, header)
+                try:
+                    send_mail(subject, email, 'admin@example.com' , [associated_user.email], fail_silently=False)
+                except BadHeaderError:
+                    return HttpResponse('Invalid header found.')
+                return redirect ("/password_reset/done/")
+    password_reset_form = ResetForm()
+    return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+
+
+class ResetPasswordConfirmView(PasswordResetConfirmView):
+    template_name = "registration/password_reset_confirm.html"
+    form_class = ResetConfirmForm
 
 @method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
@@ -254,10 +298,10 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
     residual_level = rc['residual']
 
     untreated = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
-        treatment__in=['mitigated', 'accepted']).count()
+        treatment__in=['mitigated', 'accepted'])
     untreated_h_vh = RiskScenario.objects.filter(analysis__in=analysis_list).exclude(
-        treatment__in=['mitigated', 'accepted']).filter(current_level__gte=2).count()
-    accepted = RiskScenario.objects.filter(analysis__in=analysis_list).filter(treatment='accepted').count()
+        treatment__in=['mitigated', 'accepted']).filter(current_level__gte=2)
+    accepted = RiskScenario.objects.filter(analysis__in=analysis_list).filter(treatment='accepted')
 
     values = list()
     labels = list()
@@ -291,7 +335,8 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "analysis_objects": analysis_objects,
         "current_level": current_level,
         "residual_level": residual_level,
-        "counters": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
+        "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
+        "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
         "colors": get_risk_color_ordered_list(user),
     }
@@ -926,18 +971,18 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['analysis'] = get_object_or_404(
-            Analysis, id=self.kwargs['parent_analysis'])
+            Analysis, id=self.kwargs['analysis'])
 
         return context
 
     def form_valid(self, form: RiskScenarioCreateForm) -> HttpResponse:
         if form.is_valid():
             form.scenario.analysis = get_object_or_404(
-                Analysis, id=self.kwargs['parent_analysis'])
+                Analysis, id=self.kwargs['analysis'])
             return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['parent_analysis']).id})
+        return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['analysis']).id})
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))

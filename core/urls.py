@@ -4,8 +4,13 @@ from django.urls.conf import include
 from . import views
 import cal.views as cv
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('password_reset', views.password_reset_request, name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', views.ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
     path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 
@@ -60,7 +65,7 @@ urlpatterns = [
     
     path('threats/create-modal/', login_required(views.ThreatCreateViewModal.as_view()), name='threat-create-modal'),
 
-    path('risk-analyses/<int:parent_analysis>/risk_scenario/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
+    path('risk-analyses/<int:analysis>/risk_scenario/create', login_required(views.RiskScenarioCreateView.as_view()), name='risk-scenario-create'),
     path('risk-scenarios/create', login_required(views.RiskScenarioCreateViewModal.as_view()), name='risk-scenario-create-modal'),
 
     path('projects-domains/create', login_required(views.FolderCreateView.as_view()), name='pd-create'),

@@ -162,8 +162,8 @@ class RiskScenarioFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'threat': _('threat'.capitalize()),
             '-threat': _('Threat (descending)'),
-            'analysis__project': _('parent'.capitalize() + ' project'),
-            '-analysis__project': _('Parent project (descending)'),
+            'analysis__project': _('Project'),
+            '-analysis__project': _('Project (descending)'),
             'treatment': _('treatment'.capitalize()),
             '-treatment': _('Treatment (descending)'),
         }
@@ -203,8 +203,8 @@ class SecurityMeasureFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
-            'folder': _('parent'.capitalize() + ' domain'),
-            '-folder': _('Parent domain (descending)'),
+            'folder': _('Ddomain'),
+            '-folder': _('Domain (descending)'),
             'security_function': _('security function'.capitalize()),
             '-security_function': _('Security function (descending)'),
         }
@@ -247,8 +247,8 @@ class RiskAcceptanceFilter(GenericFilterSet):
             '-expiry_date': _('Expiry date (descending)'),
             'validator': _('validator'.capitalize()),
             '-validator': _('Validator (descending)'),
-            'folder': _('parent domain'.capitalize()),
-            '-folder': _('Parent domain (descending)'),
+            'folder': _('Domain'.capitalize()),
+            '-folder': _('Domain (descending)'),
         }
     )
 
@@ -331,8 +331,8 @@ class ProjectFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'lc_status': _('status'.capitalize()),
             '-lc_status': _('Status (descending)'),
-            'folder': _('Parent domain'),
-            '-folder': _('Parent domain (descending)'),
+            'folder': _('Domain'),
+            '-folder': _('Domain (descending)'),
         }
     )
 

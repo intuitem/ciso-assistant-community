@@ -392,7 +392,7 @@ class RiskScenario(AbstractBaseModel):
         
     def parent_project(self):
         return self.analysis.project
-    parent_project.short_description = _("Parent project")
+    parent_project.short_description = _("Project")
 
     def get_matrix(self):
         return self.analysis.rating_matrix.parse_json()
@@ -434,7 +434,7 @@ class RiskScenario(AbstractBaseModel):
         return matrix['probability'][self.residual_proba]
 
     def __str__(self):
-        return str(self.parent_project()) + ': ' + str(self.name)
+        return str(self.parent_project()) + _(': ') + str(self.name)
 
     @property
     def rid(self):
