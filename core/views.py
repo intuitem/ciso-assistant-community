@@ -104,10 +104,11 @@ def password_reset_request(request):
                 }
                 email = render_to_string(email_template_name, header)
                 try:
-                    send_mail(subject, email, 'admin@example.com' , [associated_user.email], fail_silently=False)
+                    send_mail(subject, email, 'mira.software@intuitem.com' , [associated_user.email], fail_silently=False)
                 except BadHeaderError:
                     return HttpResponse('Invalid header found.')
                 return redirect ("/password_reset/done/")
+            messages.error(request, "An invalid email has been entered.")
     password_reset_form = ResetForm()
     return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
 
