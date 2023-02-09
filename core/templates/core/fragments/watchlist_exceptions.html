@@ -43,6 +43,13 @@
                     <a href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="font-medium text-blue-600 hover:underline">{% trans "Jump" %}</a>
                 </td>
             </tr>
+            {% empty %}
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No exceptions yet." %}</p>
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
