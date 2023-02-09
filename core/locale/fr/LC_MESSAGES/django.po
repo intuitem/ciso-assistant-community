@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-07 11:38+0000\n"
+"POT-Creation-Date: 2023-02-08 14:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,7 +43,7 @@ msgid "Analysis"
 msgstr "Analyse"
 
 #: core/admin.py:91 core/models.py:190 core/templates/core/overview.html:47
-#: core/views.py:848
+#: core/views.py:847
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -225,10 +225,8 @@ msgid "risk scenarios"
 msgstr "scénarios de risque"
 
 #: core/filters.py:243
-#, fuzzy
-#| msgid "First name (descending)"
 msgid "Risk scenarios (descending)"
-msgstr "Prénom (descendant)"
+msgstr "Scénarios de risque (descendant)"
 
 #: core/filters.py:246
 msgid "expiry"
@@ -247,10 +245,8 @@ msgid "Validator (descending)"
 msgstr "Validateur (descendant)"
 
 #: core/filters.py:250
-#, fuzzy
-#| msgid "Parent domain"
 msgid "parent domain"
-msgstr "Domaine parent"
+msgstr "domaine parent"
 
 #: core/filters.py:269
 msgid "Search domain..."
@@ -415,7 +411,7 @@ msgstr "Projet"
 
 #: core/models.py:33 core/templates/core/project_list.html:8
 #: core/templates/core/quick_start.html:29 core/templates/core/sidebar.html:138
-#: core/views.py:526
+#: core/views.py:525
 msgid "Projects"
 msgstr "Projets"
 
@@ -434,7 +430,7 @@ msgstr "Menace"
 
 #: core/models.py:43 core/templates/core/overview.html:43
 #: core/templates/core/quick_start.html:63 core/templates/core/sidebar.html:156
-#: core/templates/core/threat_list.html:5 core/views.py:1256
+#: core/templates/core/threat_list.html:5 core/views.py:1255
 msgid "Threats"
 msgstr "Menaces"
 
@@ -456,7 +452,7 @@ msgstr "bien parent"
 
 #: core/models.py:69 core/models.py:360 core/templates/core/asset_list.html:4
 #: core/templates/core/asset_list.html:9 core/templates/core/sidebar.html:147
-#: core/views.py:623
+#: core/views.py:622
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -499,7 +495,7 @@ msgstr "Fonction de sécurité"
 
 #: core/models.py:147 core/templates/core/quick_start.html:78
 #: core/templates/core/security_function_list.html:5
-#: core/templates/core/sidebar.html:164 core/views.py:1171
+#: core/templates/core/sidebar.html:164 core/views.py:1170
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
@@ -541,79 +537,69 @@ msgid "Rating matrix"
 msgstr "Matrice d'évaluation"
 
 #: core/models.py:211
-#, fuzzy
-#| msgid "Risk analysis is still in Draft mode"
 msgid "{}: Risk analysis is still in Draft mode"
-msgstr "Analyse de risque toujours en mode Brouillon"
+msgstr "{} : Analyse de risque toujours en mode Brouillon"
 
 #: core/models.py:213
-#, fuzzy
-#| msgid "No auditor assigned to this risk analysis yet"
 msgid "{}: No auditor assigned to this risk analysis yet"
-msgstr "Pas d'auditeur assigné à cette analyse de risque"
+msgstr "{} : Pas d'auditeur assigné à cette analyse de risque"
 
 #: core/models.py:215
-#, fuzzy
-#| msgid "Analysis is empty. No risk scenario declared yet"
 msgid "{}: Analysis is empty. No risk scenario declared yet"
-msgstr "Analyse vide. Pas de scénario de risque déclaré."
+msgstr "{} : Analyse vide. Pas de scénario de risque déclaré."
 
 #: core/models.py:222
-msgid "R#{} residual risk level is higher than the current one"
-msgstr "R#{} niveau du risque résiduel plus élevé que le niveau initial"
+msgid "{} residual risk level is higher than the current one"
+msgstr "{} niveau du risque résiduel plus élevé que le niveau initial"
 
 #: core/models.py:224
-msgid "R#{} residual risk probability is higher than the current one"
+msgid "{} residual risk probability is higher than the current one"
 msgstr ""
-"R#{} probabilité de risque résiduelle plus élevée que la probabilité courante"
+"{} probabilité de risque résiduelle plus élevée que la probabilité courante"
 
 #: core/models.py:226
-msgid "R#{} residual risk impact is higher than the current one"
-msgstr "R#{} impact du risque résiduel plus haut que l'impact courant"
+msgid "{} residual risk impact is higher than the current one"
+msgstr "{} impact du risque résiduel plus haut que l'impact courant"
 
 #: core/models.py:231
-msgid "R#{}: residual risk level has been lowered without any specific measure"
+msgid "{}: residual risk level has been lowered without any specific measure"
 msgstr ""
-"R#{} : le niveau de risque résiduel a été réduit sans mesure spécifique"
+"{} : le niveau de risque résiduel a été réduit sans mesure spécifique"
 
 #: core/models.py:235
-msgid "R#{} risk accepted but no risk acceptance attached"
-msgstr "R#{} risque accepté sans acceptation de risque attachée"
+msgid "{} risk accepted but no risk acceptance attached"
+msgstr "{} risque accepté sans acceptation de risque attachée"
 
 #: core/models.py:241
-msgid "M#{} does not have an ETA"
-msgstr "M#{} n'a pas d'heure d'arrivée estimée"
+msgid "{} does not have an ETA"
+msgstr "{} n'a pas d'heure d'arrivée estimée"
 
 #: core/models.py:245
-msgid "M#{} ETA is in the past now. Consider updating its status or the date"
-msgstr "M#{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
+msgid "{} ETA is in the past now. Consider updating its status or the date"
+msgstr "{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
 
 #: core/models.py:248
 msgid ""
-"M#{} does not have an estimated effort. This will help you for prioritization"
-msgstr "M#{} n'a pas d'effort estimé. Ceci vous aidera à prioriser vos mesures"
+"{} does not have an estimated effort. This will help you for prioritization"
+msgstr "{} n'a pas d'effort estimé. Spécifier un effort estimé aidera à la "
+"priorisation des mesures de sécurité"
 
 #: core/models.py:251
 msgid ""
-"M#{} does not have an external link attached. This will help you for follow-"
-"up"
+"{} does not have an external link attached. This will help you for follow-up"
 msgstr ""
-"M#{} n'a pas de lien externe attaché. Ceci vous aidera à suivre les mesures "
-"correctives"
+"{} n'a pas de lien externe attaché. Spécifier un lien externe aidera au "
+"suivi du traitement"
 
 #: core/models.py:256
 msgid "{}: Acceptance has no expiry date"
-msgstr ""
+msgstr "{} : Acceptation sans date d'expiration"
 
 #: core/models.py:260
-#, fuzzy
-#| msgid ""
-#| "R#{} has a risk acceptance that has expired. Consider updating the status "
-#| "or the date"
 msgid "{}: Acceptance has expired. Consider updating the status or the date"
 msgstr ""
-"R#{} a une acceptation de risque expirée. Envisager d'actualiser le statut "
-"ou sa date d'expiration"
+"{} a une acceptation de risque expirée. Envisager de mettre à jour son "
+"statut ou sa date d'expiration"
 
 #: core/models.py:281 core/models.py:352
 msgid "Open"
@@ -708,7 +694,7 @@ msgstr "Mesure de sécurité"
 #: core/models.py:320 core/models.py:361 core/templates/core/mtg_list.html:6
 #: core/templates/core/overview.html:55
 #: core/templates/core/search_results.html:34
-#: core/templates/core/sidebar.html:106 core/views.py:1086
+#: core/templates/core/sidebar.html:106 core/views.py:1085
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -803,7 +789,7 @@ msgstr "Commentaires"
 #: core/templates/core/ri_list.html:6
 #: core/templates/core/search_results.html:21
 #: core/templates/core/sidebar.html:97 core/templates/snippets/ra_data.html:39
-#: core/templates/snippets/ra_list_nested.html:13 core/views.py:971
+#: core/templates/snippets/ra_list_nested.html:13 core/views.py:970
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -821,10 +807,8 @@ msgid "Permanent"
 msgstr ""
 
 #: core/models.py:461
-#, fuzzy
-#| msgid "risk scenario(s) accepted."
 msgid "Select the risk scenarios to be accepted"
-msgstr "scénario(s) de risque accepté(s)"
+msgstr "Sélectionner les scénarios de risque à accepter"
 
 #: core/models.py:462
 msgid "Risk owner and validator identity"
@@ -850,7 +834,7 @@ msgid "Risk acceptance"
 msgstr "Acceptation de risque"
 
 #: core/models.py:471 core/templates/core/acceptance_list.html:6
-#: core/templates/core/sidebar.html:115 core/views.py:1339
+#: core/templates/core/sidebar.html:115 core/views.py:1338
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
@@ -971,7 +955,7 @@ msgid "Delete risk analysis?"
 msgstr "Supprimer l'analyse de risque ?"
 
 #: core/templates/core/analysis_list.html:228
-#: core/templates/core/index.html:134 core/templates/core/review.html:59
+#: core/templates/core/index.html:134 core/templates/core/review.html:74
 #: core/templates/snippets/ra_list_nested.html:91
 msgid "No analysis found."
 msgstr "Aucune analyse trouvée."
@@ -1058,7 +1042,7 @@ msgstr "Vous parcourez les %(type)s "
 #: core/templates/core/browser.html:86
 #, python-format
 msgid " with filter: <b>%(filter)s</b>"
-msgstr "avec le filtre : <b>%(filter)s</b>"
+msgstr " avec le filtre : <b>%(filter)s</b>"
 
 #: core/templates/core/browser.html:97 core/templates/core/browser.html:121
 msgid "Locate"
@@ -1160,79 +1144,54 @@ msgstr[1] ""
 msgid "and"
 msgstr "et"
 
-#: core/templates/core/composer.html:66
-#, python-format
-msgid ""
-"\n"
-"                        <b>%(counter)s</b> risk scenario accepted\n"
-"                    "
-msgid_plural ""
-"\n"
-"                        <b>%(counter)s</b> risk scenarios accepted\n"
-"                    "
-msgstr[0] ""
-"\n"
-"                        <b>%(counter)s</b> scénario de risque accepté\n"
-"                    "
-msgstr[1] ""
-"\n"
-"                        <b>%(counter)s</b> scénarios de risque acceptés\n"
-"                    "
+#: core/templates/core/composer.html:48
+msgid "risk scenario(s) accepted."
+msgstr "scénario(s) de risque accepté(s)"
 
-#: core/templates/core/composer.html:94
+#: core/templates/core/composer.html:66 core/templates/core/composer.html:72
 msgid "Review needed"
 msgstr "Révision requise"
 
-#: core/templates/core/composer.html:95
+#: core/templates/core/composer.html:67 core/templates/core/composer.html:73
 msgid "Ok"
 msgstr ""
 
-#: core/templates/core/composer.html:101
+#: core/templates/core/composer.html:72
+msgid "Risk analysis status:"
+msgstr "Statut de l'Analyse de risque :"
+
+#: core/templates/core/composer.html:72
 msgid "Found"
 msgstr "Nous avons trouvé"
 
-#: core/templates/core/composer.html:102
-#, python-format
-msgid ""
-"\n"
-"                                    <b>%(counter)s</b> inconsistency that "
-"you need to check (use <a class=\"simple-link hover:underline visited:text-"
-"indigo-600\" href=\"/x-rays\">x-rays</a> for more information).</span>\n"
-"                                "
-msgid_plural ""
-"\n"
-"                                    <b>%(counter)s</b> inconsistencies that "
-"you need to check (use <a class=\"simple-link hover:underline visited:text-"
-"indigo-600\" href=\"/x-rays\">x-rays</a> for more information).</span>\n"
-"                                "
-msgstr[0] ""
-"\n"
-"                                    <b>%(counter)s</b> incohérence que vous "
-"devez vérifier (utilisez <a class=\"simple-link hover:underline "
-"visited:text-indigo-600\" href=\"/x-rays\">x-rays</a> pour plus "
-"d'informations).</span>\n"
-"                                "
-msgstr[1] ""
-"\n"
-"                                    <b>%(counter)s</b> incohérences que vous "
-"devez vérifier (utilisez <a class=\"simple-link hover:underline "
-"visited:text-indigo-600\" href=\"/x-rays\">x-rays</a> pour plus "
-"d'informations).</span>\n"
-"                                "
+#: core/templates/core/composer.html:73
+msgid "inconsistencies that you need to check (use x-rays)."
+msgstr "incohérences que vous devez vérifier (utilisez x-rays)."
 
-#: core/templates/core/composer.html:113
-#: core/templates/snippets/ra_data.html:96
+#: core/templates/core/composer.html:79 core/templates/snippets/ra_data.html:96
 msgid "Current"
 msgstr "Risque courant"
 
-#: core/templates/core/composer.html:114
+#: core/templates/core/composer.html:80
 #: core/templates/snippets/ra_data.html:104
 msgid "Residual"
 msgstr "Risque résiduel"
 
-#: core/templates/core/composer.html:129
+#: core/templates/core/composer.html:95
 msgid "Jump to full risk analysis"
 msgstr "Aller à l'analyse de risque complète"
+
+#: core/templates/core/composer.html:101
+msgid "High or very high risk based on the"
+msgstr "Risque élevé ou très élevé selon le"
+
+#: core/templates/core/composer.html:101
+msgid "current level"
+msgstr "niveau courant"
+
+#: core/templates/core/composer.html:109
+msgid "Nothing to show here."
+msgstr "Rien à voir ici."
 
 #: core/templates/core/fragments/risks_over_time.html:6
 msgid " \"Very low\" "
@@ -1372,8 +1331,6 @@ msgid "Other users"
 msgstr "Autres utilisateurs"
 
 #: core/templates/core/index.html:6 core/templates/core/sidebar.html:46
-#, fuzzy
-#| msgid "Analysis registry"
 msgid "Analyses registry"
 msgstr "Registre des analyses"
 
@@ -1477,7 +1434,7 @@ msgid "Edit"
 msgstr "Modifier"
 
 #: core/templates/core/my_profile_detailed.html:31
-#: core/templates/core/user_list.html:79 core/views.py:1575 core/views.py:1680
+#: core/templates/core/user_list.html:79 core/views.py:1574 core/views.py:1679
 msgid "User groups"
 msgstr "Groupes utilisateurs"
 
@@ -1574,7 +1531,7 @@ msgid "Internal ID"
 msgstr "ID interne"
 
 #: core/templates/core/project_domain_list.html:5
-#: core/templates/core/sidebar.html:129 core/views.py:739
+#: core/templates/core/sidebar.html:129 core/views.py:738
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
@@ -1808,28 +1765,73 @@ msgid "All good"
 msgstr "Tout est bon"
 
 #: core/templates/core/review.html:23
-msgid "error(s)"
-msgstr "erreur(s)"
+#, python-format
+msgid ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">error</span> "
+"found\n"
+"                        "
+msgid_plural ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">errors</span> "
+"found\n"
+"                    "
+msgstr[0] ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">erreur</span> "
+"trouvée\n"
+"                        "
+msgstr[1] ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">erreurs</span> "
+"trouvées\n"
+"                    "
 
-#: core/templates/core/review.html:23
-msgid "found_f"
-msgstr "trouvée(s)"
+#: core/templates/core/review.html:39
+#, python-format
+msgid ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">warning</span> "
+"found\n"
+"                        "
+msgid_plural ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">warnings</"
+"span> found\n"
+"                    "
+msgstr[0] ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">avertissement"
+"</span> trouvé\n"
+"                        "
+msgstr[1] ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">avertissements"
+"</span> trouvés\n"
+"                    "
 
-#: core/templates/core/review.html:34
-msgid "warning(s)"
-msgstr "avertissement(s)"
-
-#: core/templates/core/review.html:34
-msgid "found_m"
-msgstr "trouvé(s)"
-
-#: core/templates/core/review.html:45
-msgid "information"
-msgstr "information(s)"
-
-#: core/templates/core/review.html:45
-msgid "to consider"
-msgstr "à prendre en compte"
+#: core/templates/core/review.html:55
+#, python-format
+msgid ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">information</"
+"span> to consider\n"
+"                        "
+msgid_plural ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">informations</"
+"span> to consider\n"
+"                    "
+msgstr[0] ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">information</"
+"span> à considérer\n"
+"                        "
+msgstr[1] ""
+"\n"
+"                        %(counter)s <span class=\"font-bold\">informations</"
+"span> à considérer\n"
+"                    "
 
 #: core/templates/core/ri_create.html:13
 msgid "Summary"
@@ -1889,7 +1891,7 @@ msgstr "Par défaut"
 msgid "Critical"
 msgstr "Critique"
 
-#: core/templates/core/risk_matrix_list.html:9 core/views.py:1763
+#: core/templates/core/risk_matrix_list.html:9 core/views.py:1762
 msgid "Matrices"
 msgstr ""
 
@@ -1909,7 +1911,7 @@ msgstr "Nouvelle affectation de rôle"
 #: core/templates/core/role_assignment_create.html:10
 #: core/templates/core/role_assignment_update.html:10
 #: core/templates/core/role_list.html:6 core/templates/core/sidebar.html:233
-#: core/views.py:1646
+#: core/views.py:1645
 msgid "Role assignment"
 msgstr "Affectation de rôle"
 
@@ -2402,7 +2404,7 @@ msgid "Access management"
 msgstr "Gestion des accès"
 
 #: core/templates/core/sidebar.html:189 core/templates/core/user_list.html:6
-#: core/views.py:1480 core/views.py:1708
+#: core/views.py:1479 core/views.py:1707
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -2784,7 +2786,7 @@ msgstr "Auditeurs"
 msgid "security measures"
 msgstr "mesures de sécurité"
 
-#: core/views.py:719
+#: core/views.py:718
 msgid ""
 "User groups {} - Auditors, {} - Analysts and {} - Domain Managers were "
 "created"
@@ -2792,32 +2794,20 @@ msgstr ""
 "Les groupes d'utilisateurs {} - Auditeurs, {} - Analystes et {} - "
 "Responsables de domaine ont été créés"
 
-#~ msgid "Here is the overview for the"
-#~ msgstr "Voici l'aperçu pour les"
+#~ msgid "error(s)"
+#~ msgstr "erreur(s)"
 
-#~ msgid "selected projects"
-#~ msgstr "projets sélectionnés "
+#~ msgid "found_f"
+#~ msgstr "trouvée(s)"
 
-#~ msgid "untreated risk scenario(s),"
-#~ msgstr "scénario(s) de risque non traité(s)"
+#~ msgid "warning(s)"
+#~ msgstr "avertissement(s)"
 
-#~ msgid "among which,"
-#~ msgstr "dont"
+#~ msgid "found_m"
+#~ msgstr "trouvé(s)"
 
-#~ msgid "currently of level high or above,"
-#~ msgstr "au moins de niveau élevé"
+#~ msgid "information"
+#~ msgstr "information(s)"
 
-#~ msgid "Risk analysis status:"
-#~ msgstr "Statut de l'Analyse de risque :"
-
-#~ msgid "inconsistencies that you need to check (use x-rays)."
-#~ msgstr "incohérences que vous devez vérifier (utilisez x-rays)."
-
-#~ msgid "High or very high risk based on the"
-#~ msgstr "Risque élevé ou très élevé selon le"
-
-#~ msgid "current level"
-#~ msgstr "niveau courant"
-
-#~ msgid "Nothing to show here."
-#~ msgstr "Rien à voir ici."
+#~ msgid "to consider"
+#~ msgstr "à prendre en compte"
