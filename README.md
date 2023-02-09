@@ -49,6 +49,16 @@ export DB_HOST=localhost
 export DB_PORT=5432
 export DJANGO_DEBUG=True
 export DJANGO_SUPERUSER_PASSWORD=<XXX>
+# Mailing in production with gmail for example
+export EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+export EMAIL_HOST=smtp.gmail.com
+export EMAIL_USE_TLS=True
+export EMAIL_PORT=587
+export EMAIL_HOST_USER=your_account@gmail.com
+export EMAIL_HOST_PASSWORD=yourpassword
+# Mailing in development with Mailhog for example
+export EMAIL_HOST=localhost
+export EMAIL_PORT=1025
 ```
 
 NOTE: DB_PORT is optional, and defaults to 5432.
