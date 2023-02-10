@@ -38,7 +38,6 @@ class LibraryListView(FormView):
                 validate_file_extension(f)
                 library = json.load(f)
                 import_library_view(request, library)
-                messages.success(request, _("Successfully imported library: {}").format(library.get('name')))
                 return self.form_valid(form)
             except ValidationError as e:
                 messages.error(request, _("Failed to import file: {}. {}").format(f.name, e.message % e.params))
