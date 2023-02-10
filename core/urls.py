@@ -11,6 +11,7 @@ urlpatterns = [
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', views.ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
+    path('first_connexion/<uidb64>/<token>/', views.FirstConnexionPasswordConfirmView.as_view(), name='first_connexion_confirm'),
     path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
     path('i18n/', include('django.conf.urls.i18n')),
 

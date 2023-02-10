@@ -117,6 +117,10 @@ class ResetPasswordConfirmView(PasswordResetConfirmView):
     template_name = "registration/password_reset_confirm.html"
     form_class = ResetConfirmForm
 
+class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
+    template_name = "registration/first_connexion_confirm.html"
+    form_class = ResetConfirmForm
+
 @method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
@@ -1504,6 +1508,31 @@ class UserCreateView(UserPassesTestMixin, CreateView):
 
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data['email']
+            superuser = form.cleaned_data['superuser']
+            user = User.objects.create_user(email=data, is_superuser=superuser)
+            subject = "First Connexion"
+            email_template_name = "registration/first_connexion_email.txt"
+            header = {
+                "email":data,
+                'domain':'127.0.0.1:8000',
+                'site_name': 'Website',
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "user": user,
+                'token': default_token_generator.make_token(user),
+                'protocol': 'http',
+            }
+            email = render_to_string(email_template_name, header)
+            try:
+                send_mail(subject, email, 'mira.software@intuitem.com' , [user.email], fail_silently=False)
+            except BadHeaderError:
+                return HttpResponse('Invalid header found.')
+            return redirect("user-list")
+        return render(request, self.template_name, {'form': form})
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_user"))

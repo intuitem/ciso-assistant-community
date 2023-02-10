@@ -7,16 +7,16 @@
 
 <div class="flex mx-auto justify-center items-center h-screen w-screen bg-gray-50">
     <div class="flex p-10 space-x-4 ">
-        <div id="hellothere" class="w-3/4 py-5  pl-5 pr-10">
+        <div id="hellothere" class="w-2/4 py-5  pl-5 pr-10">
             <div class="text-4xl py-4 font-black uppercase">{% trans "Hello there" %} 👋</div>
             <div class="text-xl">
                 <p class="py-1">{% trans "This is MIRA. Your streamlined" %} <span class="font-semibold">{% trans "one-stop shop" %}</span>
                 {% trans "for risk assessment and management." %}
                 </p>
-                <p class="py-1">{% trans "You need to" %} <span class="font-semibold">{% trans "login" %}</span> {% trans "to access all the features. Editor mode requires an extra permission." %}</p>
+                <p class="py-1">{% trans "You need to" %} <span class="font-semibold">{% trans "login" %}</span> {% trans "to access all the features." %}</p>
             </div>
         </div>
-        <div class="w-1/4 p-6 shadow-lg rounded-lg bg-white ">
+        <div class="w-2/4 p-6 shadow-lg rounded-lg bg-white ">
             <div id="login-form" class="flex flex-col">
                 <form method="post">
                     {% csrf_token %}
