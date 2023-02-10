@@ -18,12 +18,10 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900">
                             {{ library.name }}
                         </h3>
-                        <form action="{% url 'import-default-library' library.name %}" method="POST" c>
-                            {% csrf_token %}
-                            <button type="submit" class="text-2xl text-gray-700 hover:text-indigo-800 cursor-pointer w-fit">
-                                <i class="fas fa-file-import"></i>
-                            </button>
-                        </form>
+                        <span x-data="{ open: false }">
+                            <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
+                            {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
+                        </span>
                     </div>
                     <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
                         {{ library.description }}
