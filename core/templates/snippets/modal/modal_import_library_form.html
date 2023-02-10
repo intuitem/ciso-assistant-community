@@ -1,0 +1,22 @@
+{% load i18n static %}
+<div class="space-y-4">
+    <p class="relative whitespace-normal">
+        {% blocktrans %}
+        Are you sure you want to import the following library: <strong class="font-semibold text-gray-700">{{ library }}</strong>?
+        {% endblocktrans %}
+    </p>
+    <div class="whitespace-normal">
+        {{ extra_text }}
+    </div>
+    <div class="flex items-center justify-end">
+        <button
+        @click="open = !open, modalOpen = !modalOpen"
+        type="button"
+        class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gray-600 hover:bg-gray-700 mr-2"
+        >{% trans "No, take me back" %}</button>
+        <form action="{% url 'import-default-library' library %}" method="POST">{% csrf_token %}
+            <input class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-600 hover:bg-indigo-700 mr-2"
+            type="submit" value={% trans "Yes" %}>
+        </form>
+    </div>
+</div>
