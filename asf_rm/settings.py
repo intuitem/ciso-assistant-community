@@ -8,6 +8,12 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
+
+
+if "POSTGRES_NAME" environment variable defined, the database engine is posgresql
+and the other env variables are POSGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
+else it is sqlite, and no env variable is required
+
 """
 
 from pathlib import Path
@@ -17,6 +23,8 @@ from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+print("BASE_DIR:", BASE_DIR)
 
 with open(BASE_DIR / 'asf_rm/VERSION') as f:
     VERSION = f.read().strip()
@@ -108,20 +116,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'asf_rm.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['POSTGRES_NAME'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-        'HOST': os.environ['DB_HOST'],
-        'PORT': os.getenv('DB_PORT', '5432'),
-    }
-}
-
 AUTH_USER_MODEL = 'iam.User'
 
 # Password validation
@@ -185,3 +179,29 @@ TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+# Database
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
+
+if 'POSTGRES_NAME' in os.environ:
+    print("Postgresql database engine")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ['POSTGRES_NAME'],
+            'USER': os.environ['POSTGRES_USER'],
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+    print("Postgresql database engine")
+else:
+    print("sqlite database engine")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db/mira.sqlite3",
+        }
+    }

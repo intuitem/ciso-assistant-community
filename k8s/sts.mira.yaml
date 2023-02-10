@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mira
+spec:
+  serviceName: mira
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mira
+  template:
+    metadata:
+      labels:
+        app: mira
+    spec:
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+      - name: nginx-conf
+        configMap:
+          name: mira-config
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: staticfiles
+        emptyDir:
+          sizeLimit: 50Mi
+      containers:
+      - name: mira
+        image: mira:0.9.1c
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: db-data
+          mountPath: /code/db
+        - name: staticfiles
+          mountPath: /code/staticfiles
+        env:
+        - name: DJANGO_DEBUG
+          valueFrom:
+            configMapKeyRef:
+              name: mira-config
+              key: DJANGO_DEBUG
+        - name: DJANGO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: DJANGO_SECRET_KEY
+        - name: DJANGO_SUPERUSER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: DJANGO_SUPERUSER_EMAIL
+        - name: DJANGO_SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: DJANGO_SUPERUSER_PASSWORD
+      - name: nginx
+        image: nginx:latest
+        ports: 
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-conf
+          mountPath: /etc/nginx/conf.d
+        - name: staticfiles
+          mountPath: /usr/share/nginx/static
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+      labels:
+        app: mira
+    spec:
+      resources:
+        requests:
+          storage: 1Gi
+      accessModes:
+      - ReadWriteOnce
