@@ -203,7 +203,7 @@ class SecurityMeasureFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'type': _('type'.capitalize()),
             '-type': _('Type (descending)'),
-            'folder': _('Ddomain'),
+            'folder': _('Domain'),
             '-folder': _('Domain (descending)'),
             'security_function': _('security function'.capitalize()),
             '-security_function': _('Security function (descending)'),

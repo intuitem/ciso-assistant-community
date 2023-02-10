@@ -81,7 +81,7 @@ def import_matrix(fields):
     '''
     required_fields = ['name', 'description', 'probability', 'impact', 'risk', 'grid']
 
-    if not object_valid(required_fields, fields):
+    if not validate_object(required_fields, fields):
         raise Exception('Invalid matrix')
 
     matrix = RiskMatrix.objects.create(
@@ -105,7 +105,7 @@ def import_threat(fields):
     '''
     required_fields = ['name', 'description']
 
-    if not object_valid(required_fields, fields):
+    if not validate_object(required_fields, fields):
         raise Exception('Invalid threat')
 
     threat = Threat.objects.create(
@@ -128,7 +128,7 @@ def import_security_function(fields):
     '''
     required_fields = ['name', 'description']
 
-    if not object_valid(required_fields, fields):
+    if not validate_object(required_fields, fields):
         raise Exception('Invalid security function')
 
     security_function = SecurityFunction.objects.create(
@@ -153,7 +153,7 @@ def import_matrix_view(request, fields):
     '''
     required_fields = ['name', 'description', 'probability', 'impact', 'risk', 'grid']
 
-    if not object_valid(required_fields, fields):
+    if not validate_object(required_fields, fields):
         messages.error(request, _('Library was not imported: invalid matrix.'))
         raise Exception('Invalid matrix')
     
@@ -178,7 +178,7 @@ def import_threat_view(request, fields):
     '''
     required_fields = ['name', 'description']
 
-    if not object_valid(required_fields, fields):
+    if not validate_object(required_fields, fields):
         messages.error(request, _('Library was not imported: invalid threat.'))
         raise Exception('Invalid threat')
 
@@ -202,7 +202,7 @@ def import_security_function_view(request, fields):
     '''
     required_fields = ['name', 'description']
 
-    if not object_valid(required_fields, fields):
+    if not validate_object(required_fields, fields):
         messages.error(request, _('Library was not imported: invalid security function.'))
         raise Exception('Invalid security function')
 
@@ -273,9 +273,12 @@ def is_import_permited(request, object_type):
     Args:
         object_type: type of the object being imported
     '''
-    if not RoleAssignment.has_permission(request.user, 'add_'+object_type.replace("_", "")):
-        messages.error(request, _('Library was not imported: permission denied for: {}').format(object_type.replace("_", " ")))
-        raise Exception(f'Permission denied for: {object_type}')
+    object_type = object_type.replace("_", "")
+    if object_type == 'matrix':                 # dirty hack to avoid changing the library format
+        object_type = 'riskmatrix'
+    if not RoleAssignment.has_permission(request.user, f"add_{object_type}"):
+        messages.error(request, _("Library was not imported: permission denied for: {}").format(object_type))
+        raise Exception(f"Permission denied for: {object_type}")
     return True
 
 def import_library_view(request, library):
@@ -292,11 +295,11 @@ def import_library_view(request, library):
     objects_ignored = 0
 
     for obj in library.get('objects'):
-        if obj['type']=='matrix' and is_import_permited(request, obj['type']):
+        if obj['type'] == 'matrix' and is_import_permited(request, obj['type']):
             matrices.append(obj.get('fields'))
-        elif obj['type']=='threat' and is_import_permited(request, obj['type']):
+        elif obj['type'] == 'threat' and is_import_permited(request, obj['type']):
             threats.append(obj.get('fields'))
-        elif obj['type']=='security_function' and is_import_permited(request, obj['type']):
+        elif obj['type'] == 'security_function' and is_import_permited(request, obj['type']):
             security_functions.append(obj.get('fields'))
         else:
             messages.error(request, _('Library was not imported: unknown object type: {}').format(obj['type'].replace("_", " ")))

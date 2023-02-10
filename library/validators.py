@@ -1,5 +1,9 @@
-def object_valid(required_fields, fields):
-    '''
+import os
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
+
+def validate_object(required_fields, fields):
+    """
     Checks if the given object has all required fields
     
     Args:
@@ -8,26 +12,28 @@ def object_valid(required_fields, fields):
         
     Returns:
         valid: True if the object has all required fields, False otherwise
-    '''
+    """
     for field in required_fields:
         if not fields.get(field):
-            raise Exception(f'Missing required field: {field}')
+            raise ValidationError(f"Missing required field: {field}")
     return True
 
-def library_valid(library):
-    '''
-    Checks if the given library is valid
-    
-    Args:
-        library: library to check
-        
-    Returns:
-        valid: True if the library is valid, False otherwise
-    '''
-    pass
+def validate_file_extension(file):
+    """
+    Checks if the given file has a valid extension, raises a ValidationError if
+    the extension is not valid.
 
-def matrix_valid(matrix):
-    '''
+    Valid extensions are: .json
+
+    Args:
+        file: file to check
+    """
+    allowed_extensions = ['json']
+    validator = FileExtensionValidator(allowed_extensions)
+    validator(file)
+
+def validate_matrix(matrix):
+    """
     Checks if the given matrix is valid
     
     Args:
@@ -35,11 +41,11 @@ def matrix_valid(matrix):
         
     Returns:
         valid: True if the matrix is valid, False otherwise
-    '''
+    """
     pass
 
-def threat_valid(threat):
-    '''
+def validate_threat(threat):
+    """
     Checks if the given threat is valid
     
     Args:
@@ -47,11 +53,11 @@ def threat_valid(threat):
         
     Returns:
         valid: True if the threat is valid, False otherwise
-    '''
+    """
     pass
 
-def security_function_valid(security_function):
-    '''
+def validate_security_function(security_function):
+    """
     Checks if the given security function is valid
     
     Args:
@@ -59,5 +65,17 @@ def security_function_valid(security_function):
         
     Returns:
         valid: True if the security function is valid, False otherwise
-    '''
+    """
+    pass
+
+def validate_library(library):
+    """
+    Checks if the given library is valid
+    
+    Args:
+        library: library to check
+        
+    Returns:
+        valid: True if the library is valid, False otherwise
+    """
     pass
