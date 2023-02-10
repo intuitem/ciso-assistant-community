@@ -2569,7 +2569,7 @@ msgstr "Modifier l'utilisateur"
 
 #: core/templates/library/library_detail.html:36
 msgid "Objects of type:"
-msgstr ""
+msgstr "Objets de type :"
 
 #: core/templates/library/library_detail.html:40
 msgid "Threat name"
@@ -2789,6 +2789,10 @@ msgid ""
 "\"font-semibold text-gray-700\">%(library)s</strong>?\n"
 "        "
 msgstr ""
+"\n"
+"        Êtes-vous sûr de vouloir importer la bibliothèque suivante : <strong "
+"class=\"font-semibold text-gray-700\">%(library)s</strong>?\n"
+"        "
 
 #: core/templates/snippets/modal/modal_update_form.html:7
 msgid "Add Security Measure"

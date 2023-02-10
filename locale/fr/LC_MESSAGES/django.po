@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-10 10:52+0000\n"
+"POT-Creation-Date: 2023-02-10 15:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -168,17 +168,17 @@ msgstr "Bibliothèque non importée: fonction de sécurité invalide."
 
 #: library/utils.py:256
 msgid "Unknown object type: {}"
-msgstr "Objet de type inconnu: {}"
+msgstr "Objet de type inconnu : {}"
 
-#: library/utils.py:277
+#: library/utils.py:280
 msgid "Library was not imported: permission denied for: {}"
-msgstr "Bibliothèque non importée: autorisation refusée pour: {}"
+msgstr "Bibliothèque non importée: autorisation refusée pour : {}"
 
-#: library/utils.py:302
+#: library/utils.py:305
 msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu : {}"
 
-#: library/utils.py:323
+#: library/utils.py:326
 msgid ""
 "Library \"{}\" imported successfully. {} objects imported and {} objects "
 "ignored."
@@ -186,13 +186,21 @@ msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "
 "ignorés."
 
-#: library/views.py:40
-msgid "Failed to import library: {}"
-msgstr ""
+#: library/views.py:42
+msgid "Successfully imported library: {}"
+msgstr "Bibliothèque importée avec succès : {}"
 
-#: library/views.py:55
+#: library/views.py:45
+msgid "Failed to import file: {}. {}"
+msgstr "Échec de l'importation du fichier : {}"
+
+#: library/views.py:60
 msgid "Libraries"
 msgstr "Bibliothèques"
+
+#: library/views.py:81
+msgid "Failed to import library: {}"
+msgstr "Échec de l'importation de la bibliothèque : {}"
 
 #: serdes/forms.py:14
 msgid "File must be a JSON file."
