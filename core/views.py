@@ -1505,6 +1505,11 @@ class UserCreateView(UserPassesTestMixin, CreateView):
     template_name = 'core/user_create.html'
     context_object_name = 'user'
     form_class = UserCreateForm
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {'user-list': _('Users')}
+        return context
 
     def get_success_url(self) -> str:
         return reverse_lazy('user-list')
