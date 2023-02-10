@@ -1513,7 +1513,8 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data['email']
-            user = User.objects.create_user(email=data)
+            superuser = form.cleaned_data['superuser']
+            user = User.objects.create_user(email=data, is_superuser=superuser)
             subject = "First Connexion"
             email_template_name = "registration/first_connexion_email.txt"
             header = {
@@ -1527,7 +1528,7 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             }
             email = render_to_string(email_template_name, header)
             try:
-                send_mail(subject, email, 'mira.software@intuitem.com' , [data], fail_silently=False)
+                send_mail(subject, email, 'mira.software@intuitem.com' , [user.email], fail_silently=False)
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
             return redirect("user-list")

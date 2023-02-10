@@ -59,12 +59,9 @@ class FolderUpdateForm(StyledModelForm):
 
 
 class UserCreationForm(forms.ModelForm):
-    """A form for creating new users. Includes all the required
-    fields, plus a repeated password."""
-    error_messages = {
-        'password_mismatch': _('The two password fields didn’t match.'),
-    }
+    """A form for creating new users"""
     email = forms.EmailField(max_length=100)
+    superuser = forms.BooleanField(required=False)
     
 
     class Meta:

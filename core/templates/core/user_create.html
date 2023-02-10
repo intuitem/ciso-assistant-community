@@ -12,6 +12,17 @@
                 {{ form.non_field_errors }}
                 {% for field in form %}
                 <div class="">
+                    {% if field.label == "Superuser" %}
+                    <label class="text-sm font-semibold">{{ field.label|striptags }} <span class="ml-2">{{ field }}</span></label>
+                    <div class="w-auto">
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                        {% endfor %}
+                        <div class="mt-1 text-xs text-gray-400">
+                            {{ field.help_text|safe }}
+                        </div>
+                    </div>
+                    {% else %}
                     <label class="text-sm font-semibold">{{ field.label|striptags }}</label>
                     <div class="w-auto">
                         {% for error in field.errors %}
@@ -21,7 +32,8 @@
                         <div class="mt-1 text-xs text-gray-400">
                             {{ field.help_text|safe }}
                         </div>
-                      </div>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
