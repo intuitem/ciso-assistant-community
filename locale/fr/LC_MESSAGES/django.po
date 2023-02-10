@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-26 21:31+0000\n"
+"POT-Creation-Date: 2023-02-10 10:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -150,113 +150,35 @@ msgstr "Rôle"
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
-#: library/forms.py:5 serdes/forms.py:6
+#: library/forms.py:6 serdes/forms.py:6
 msgid "Select a file"
 msgstr "Sélectionner un fichier"
 
-#: library/templates/library/library_detail.html:36
-msgid "Objects of type:"
-msgstr "Objets de type :"
-
-#: library/templates/library/library_detail.html:40
-msgid "Threat name"
-msgstr "Nom de la menace"
-
-#: library/templates/library/library_detail.html:41
-#: library/templates/library/library_detail.html:54
-#: library/templates/library/library_detail.html:112
-#: library/templates/library/library_list.html:22
-msgid "Description"
-msgstr ""
-
-#: library/templates/library/library_detail.html:53
-msgid "Matrix name"
-msgstr "Nom de la matrice"
-
-#: library/templates/library/library_detail.html:55
-msgid "Probability"
-msgstr "Probabilité"
-
-#: library/templates/library/library_detail.html:56
-msgid "Impact"
-msgstr ""
-
-#: library/templates/library/library_detail.html:57
-msgid "Risk"
-msgstr "Risque"
-
-#: library/templates/library/library_detail.html:111
-msgid "Security function name"
-msgstr "Nom de la fonction de sécurité"
-
-#: library/templates/library/library_detail.html:113
-msgid "Provider"
-msgstr "Fournisseur"
-
-#: library/templates/library/library_detail.html:114
-msgid "Contact"
-msgstr ""
-
-#: library/templates/library/library_list.html:5
-#: library/templates/library/library_list.html:10
-#: library/templates/library/library_upload.html:5 library/views.py:57
-msgid "Libraries"
-msgstr "Bibliothèques"
-
-#: library/templates/library/library_list.html:17
-msgid "Default libraries"
-msgstr "Bibliothèques par défaut"
-
-#: library/templates/library/library_list.html:21
-msgid "Library name"
-msgstr "Nom de la bibliothèque"
-
-#: library/templates/library/library_list.html:23
-msgid "Actions"
-msgstr ""
-
-#: library/templates/library/library_list.html:54
-msgid "Import"
-msgstr "Importer"
-
-#: library/templates/library/library_list.html:65
-msgid "No library found."
-msgstr "Aucune bibliothèque trouvée."
-
-#: library/templates/library/library_list.html:77
-msgid "Upload your own library"
-msgstr "Télécharger votre propre bibliothèque"
-
-#: library/templates/library/library_list.html:90
-#: serdes/templates/serdes/backup_restore.html:29
-msgid "Upload"
-msgstr "Télécharger"
-
-#: library/templates/library/library_upload.html:10
-msgid "Upload a library"
-msgstr "Télécharger une bibliothèque"
-
-#: library/utils.py:158
+#: library/utils.py:157
 msgid "Library was not imported: invalid matrix."
 msgstr "Bibliothèque non importée: matrice invalide."
 
-#: library/utils.py:183
+#: library/utils.py:182
 msgid "Library was not imported: invalid threat."
 msgstr "Bibliothèque non importée: menace invalide."
 
-#: library/utils.py:207
+#: library/utils.py:206
 msgid "Library was not imported: invalid security function."
 msgstr "Bibliothèque non importée: fonction de sécurité invalide."
 
-#: library/utils.py:257
+#: library/utils.py:256
 msgid "Unknown object type: {}"
 msgstr "Objet de type inconnu: {}"
 
-#: library/utils.py:291
-msgid "Library was not imported: unknown object type: {}"
-msgstr "Bibliothèque non importée: objet de type inconnu: {}"
+#: library/utils.py:277
+msgid "Library was not imported: permission denied for: {}"
+msgstr "Bibliothèque non importée: autorisation refusée pour: {}"
 
-#: library/utils.py:312
+#: library/utils.py:302
+msgid "Library was not imported: unknown object type: {}"
+msgstr "Bibliothèque non importée: objet de type inconnu : {}"
+
+#: library/utils.py:323
 msgid ""
 "Library \"{}\" imported successfully. {} objects imported and {} objects "
 "ignored."
@@ -264,9 +186,13 @@ msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "
 "ignorés."
 
-#: library/views.py:42
-msgid "Invalid form."
-msgstr "Formulaire invalide."
+#: library/views.py:40
+msgid "Failed to import library: {}"
+msgstr ""
+
+#: library/views.py:55
+msgid "Libraries"
+msgstr "Bibliothèques"
 
 #: serdes/forms.py:14
 msgid "File must be a JSON file."
@@ -279,6 +205,10 @@ msgstr "Sauvegarde et restauration"
 #: serdes/templates/serdes/backup_restore.html:14
 msgid "Import backup"
 msgstr "Importer une sauvegarde"
+
+#: serdes/templates/serdes/backup_restore.html:29
+msgid "Upload"
+msgstr "Télécharger"
 
 #: serdes/templates/serdes/backup_restore.html:65
 msgid "Import backup?"
@@ -305,3 +235,45 @@ msgstr "Exporter une sauvegarde"
 #: serdes/templates/serdes/backup_restore.html:109
 msgid "Dump database"
 msgstr "Exporter la base de données"
+
+#~ msgid "Objects of type:"
+#~ msgstr "Objets de type :"
+
+#~ msgid "Threat name"
+#~ msgstr "Nom de la menace"
+
+#~ msgid "Matrix name"
+#~ msgstr "Nom de la matrice"
+
+#~ msgid "Probability"
+#~ msgstr "Probabilité"
+
+#~ msgid "Risk"
+#~ msgstr "Risque"
+
+#~ msgid "Security function name"
+#~ msgstr "Nom de la fonction de sécurité"
+
+#~ msgid "Provider"
+#~ msgstr "Fournisseur"
+
+#~ msgid "Default libraries"
+#~ msgstr "Bibliothèques par défaut"
+
+#~ msgid "Library name"
+#~ msgstr "Nom de la bibliothèque"
+
+#~ msgid "Import"
+#~ msgstr "Importer"
+
+#~ msgid "No library found."
+#~ msgstr "Aucune bibliothèque trouvée."
+
+#~ msgid "Upload your own library"
+#~ msgstr "Télécharger votre propre bibliothèque"
+
+#~ msgid "Upload a library"
+#~ msgstr "Télécharger une bibliothèque"
+
+#~ msgid "Invalid form."
+#~ msgstr "Formulaire invalide."
