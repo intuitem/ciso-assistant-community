@@ -8,6 +8,12 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
+
+
+if "POSTGRES_NAME" environment variable defined, the database engine is posgresql
+and the other env variables are POSGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
+else it is sqlite, and no env variable is required
+
 """
 
 from pathlib import Path
@@ -172,10 +178,25 @@ INTERNAL_IPS = [
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / "db/mira.sqlite3",
-    }
-}
 
+if 'POSTGRES_NAME' in os.environ:
+    print("Postgresql database engine")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ['POSTGRES_NAME'],
+            'USER': os.environ['POSTGRES_USER'],
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+    print("Postgresql database engine")
+else:
+    print("sqlite database engine")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db/mira.sqlite3",
+        }
+    }
