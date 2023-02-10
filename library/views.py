@@ -33,13 +33,11 @@ class LibraryListView(FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         files = request.FILES.getlist('file')
-        if form.is_valid():
+        try:
             for f in files:
-                library = json.load(f)
-                import_library_view(request, library)
-            return self.form_valid(form)
-        else:
-            messages.error(request, _('Invalid form.'))
+                validate_file_extension(f)
+        except ValidationError as e:
+            messages.error(request, _("Failed to import library: {}").format(e))
             return self.form_invalid(form)
 
 
