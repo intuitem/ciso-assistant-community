@@ -28,7 +28,7 @@ def validate_file_extension(file):
     Args:
         file: file to check
     """
-    allowed_extensions = ['.json']
+    allowed_extensions = ['json']
     validator = FileExtensionValidator(allowed_extensions)
     validator(file)
 
