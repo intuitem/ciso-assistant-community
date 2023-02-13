@@ -28,7 +28,7 @@ spec:
           sizeLimit: 50Mi
       containers:
       - name: mira
-        image: mira:0.9.1c
+        image: mira:latest
         ports:
         - containerPort: 8000
         volumeMounts:
