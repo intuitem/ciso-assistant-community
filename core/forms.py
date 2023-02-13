@@ -52,7 +52,12 @@ class ResetConfirmForm(SetPasswordForm):
         for password in self.fields.items():
             password[1].widget.attrs['class'] = style
 
-
+class FirstConnexionConfirmForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):  
+        style = 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+        super(__class__, self).__init__(*args, **kwargs)
+        for password in self.fields.items():
+            password[1].widget.attrs['class'] = style
 
 class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:

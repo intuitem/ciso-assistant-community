@@ -128,7 +128,7 @@ class ResetPasswordConfirmView(PasswordResetConfirmView):
 
 class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     template_name = "registration/first_connexion_confirm.html"
-    form_class = ResetConfirmForm
+    form_class = FirstConnexionConfirmForm
 
 @method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
@@ -1527,6 +1527,10 @@ class UserCreateView(UserPassesTestMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
         context["crumbs"] = {'user-list': _('Users')}
         return context
 
@@ -1537,8 +1541,10 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data['email']
-            superuser = form.cleaned_data['superuser']
-            user = User.objects.create_user(email=data, is_superuser=superuser)
+            admin = form.cleaned_data['administrator']
+            user = User.objects.create_user(email=data)
+            if admin:
+                UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
             subject = "First Connexion"
             email_template_name = "registration/first_connexion_email.txt"
             header = {
