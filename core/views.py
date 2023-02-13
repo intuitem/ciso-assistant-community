@@ -128,7 +128,7 @@ class ResetPasswordConfirmView(PasswordResetConfirmView):
 
 class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     template_name = "registration/first_connexion_confirm.html"
-    form_class = ResetConfirmForm
+    form_class = FirstConnexionConfirmForm
 
 @method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
