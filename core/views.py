@@ -71,6 +71,14 @@ class AnalysisListView(ListView):
     paginate_by = 10
     model = Analysis
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
+
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
@@ -437,6 +445,8 @@ def scoring_assistant(request):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
     context['matrices'] = list(RiskMatrix.objects.all().values_list('json_definition', flat=True))
+    context['change_usergroup'] = RoleAssignment.has_permission(request.user, "change_usergroup")
+    context['view_user'] = RoleAssignment.has_permission(request.user, "view_user")
     return render(request, template, context)
 
 
@@ -451,6 +461,14 @@ class ReviewView(ListView):
     context_object_name = 'context'
     model = Analysis
     ordering = 'id'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
