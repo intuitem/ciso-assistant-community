@@ -17,31 +17,18 @@ spec:
       - name: db-data
         persistentVolumeClaim:
           claimName: db-data
-      - name: nginx-conf
-        configMap:
-          name: mira-config
-          items:
-          - key: nginx.conf
-            path: nginx.conf
-      - name: staticfiles
-        emptyDir:
-          sizeLimit: 50Mi
       containers:
       - name: mira
-        image: mira:latest
+        image: mira:0.9.1f
         ports:
         - containerPort: 8000
         volumeMounts:
         - name: db-data
           mountPath: /code/db
-        - name: staticfiles
-          mountPath: /code/staticfiles
+        envFrom:
+        - configMapRef:
+            name: mira-config
         env:
-        - name: DJANGO_DEBUG
-          valueFrom:
-            configMapKeyRef:
-              name: mira-config
-              key: DJANGO_DEBUG
         - name: DJANGO_SECRET_KEY
           valueFrom:
             secretKeyRef:
@@ -57,15 +44,6 @@ spec:
             secretKeyRef:
               name: myvars
               key: DJANGO_SUPERUSER_PASSWORD
-      - name: nginx
-        image: nginx:latest
-        ports: 
-        - containerPort: 80
-        volumeMounts:
-        - name: nginx-conf
-          mountPath: /etc/nginx/conf.d
-        - name: staticfiles
-          mountPath: /usr/share/nginx/static
   volumeClaimTemplates:
   - metadata:
       name: db-data

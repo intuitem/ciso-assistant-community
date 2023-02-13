@@ -8,6 +8,5 @@ spec:
     app: mira
   ports:
   - name: http
-    port: 8000
-    targetPort: 80
- 
+    port: 80
+    targetPort: 8000
