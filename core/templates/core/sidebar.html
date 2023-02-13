@@ -178,7 +178,7 @@
                         <div class="t">{% trans "Access management" %}</div>
                     </div>
                 </li>
-                {% comment %} {% if view_user %} {% endcomment %}
+                {% if view_user %}
                 <li class="to-page">
                     <a href="{% url 'user-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -188,7 +188,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Users" %}</span>
                     </a>
                 </li>
-                {% comment %} {% else %}
+                {% else %}
                 <li class="to-page">
                     <a
                         class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
@@ -198,8 +198,8 @@
                         <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Users" %} </span>
                     </a>
                 </li>
-                {% endif %} {% endcomment %}
-                {% comment %} {% if change_usergroup %} {% endcomment %}
+                {% endif %}
+                {% if change_usergroup %}
                 <li class="to-page">
                     <a href="{% url 'user_group-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
@@ -209,7 +209,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
                     </a>
                 </li>
-                {% comment %} {% else %}
+                {% else %}
                 <li class="to-page">
                     <a 
                         class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
@@ -219,7 +219,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Groups" %}</span>
                     </a>
                 </li>
-                {% endif %} {% endcomment %}
+                {% endif %}
                 <li class="to-page">
                     <a href="{% url 'role-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
