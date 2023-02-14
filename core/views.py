@@ -1561,6 +1561,7 @@ class UserCreateView(UserPassesTestMixin, CreateView):
                 send_mail(subject, email, 'mira.software@intuitem.com' , [user.email], fail_silently=False)
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
+            messages.success(request, _('User created and email send successfully.'))
             return redirect("user-list")
         return render(request, self.template_name, {'form': form})
 
