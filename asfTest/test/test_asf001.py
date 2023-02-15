@@ -27,14 +27,14 @@ def test_asf001(page):
 	# 3 | Enter admin username and password of a basic account and click on “Log in” | Error message: “Please enter the correct username and password”	
 	step = 3	
 	page.fill("id=id_username", "root")
-	page.fill("id=id_password", "rootroot")
+	page.fill("id=id_password", "toto1234")
 	page.click("id=login")
 	assert page.url == urlpatterns.loginfirst, "Step "+str(step)+": not Ok"
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
 	# 4 | Enter admin password and username of a basic account and click on “Log in” | Error message: “Please enter the correct username and password”	
 	step = 4	
-	page.fill("id=id_username", "root2")
-	page.fill("id=id_password", "root")
+	page.fill("id=id_username", "root2@gmail.com")
+	page.fill("id=id_password", "rootroot")
 	page.click("id=login")
 	assert page.url == urlpatterns.loginfirst, "Step "+str(step)+": not Ok"
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
