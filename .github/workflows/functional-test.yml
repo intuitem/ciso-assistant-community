@@ -2,7 +2,7 @@ name: Functional test using Playwright
 
 on:
   push:
-    branches: [ main, develop, ci-cd/update-functionnal-tests]
+    branches: [ main, develop, ci-cd/update-functional-tests]
   pull_request:
     branches: [ main, develop ]
 
