@@ -2,9 +2,9 @@ name: Functional test using Playwright
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop, ci-cd/update-functionnal-tests]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build:
@@ -66,4 +66,4 @@ jobs:
     - name: Run tests
       run: | 
         export $(grep -v '^#' .env | xargs)
-        pytest asfTest --browser chromium --browser webkit --browser firefox --slowmo 100
+        pytest asfTest/test/test_asf001.py --browser chromium --browser webkit --browser firefox --slowmo 100

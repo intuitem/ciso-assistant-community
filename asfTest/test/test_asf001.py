@@ -40,7 +40,7 @@ def test_asf001(page):
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
 	# 5 | Enter valid username and password | Go on home page	
 	step = 5	
-	page.fill('id=id_username', 'root')
-	page.fill('id=id_password', 'root')
+	page.fill('id=id_username', 'root@example.com')
+	page.fill('id=id_password', 'rootroot')
 	page.click('id=login')
 	assert page.url == urlpatterns.url, "Step "+str(step)+": not Ok"
