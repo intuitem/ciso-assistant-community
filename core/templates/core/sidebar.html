@@ -324,7 +324,7 @@
                     x-id="['dropdown-button']"
                     class="relative w-full overflow-visible"
                 >
-                <button class="w-fit px-3 rounded-full hover:bg-gray-100 text-center my-auto cursor-pointer"
+                <button id="my_menu" class="w-fit px-3 rounded-full hover:bg-gray-100 text-center my-auto cursor-pointer"
                         x-ref="button"
                         x-on:click="toggle()"
                         :aria-expanded="open"
@@ -381,7 +381,7 @@
 
                     <div class="w-full border-t border-gray-200 my-1"></div>
 
-                    <a href="{% url 'logout' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-gray-800 hover:bg-gray-100 disabled:text-gray-500">
+                    <a id="logout" href="{% url 'logout' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-gray-800 hover:bg-gray-100 disabled:text-gray-500">
                         <i class="fas fa-sign-out-alt"></i>
                         {% trans "Log out" %}
                     </a>
