@@ -12,5 +12,4 @@ python manage.py compilemessages -i venv -l fr
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
     python manage.py createsuperuser --noinput
 fi
-python manage.py collectstatic --no-input --clear
 exec gunicorn --chdir asf_rm --bind :8000 --env RUN_MAIN=true asf_rm.wsgi:application
