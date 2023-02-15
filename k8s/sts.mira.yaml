@@ -5,6 +5,7 @@ metadata:
 spec:
   serviceName: mira
   replicas: 1
+  podManagementPolicy: Parallel
   selector:
     matchLabels:
       app: mira
