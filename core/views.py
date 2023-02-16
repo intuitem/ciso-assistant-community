@@ -58,6 +58,9 @@ from .filters import *
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
 from django.contrib.auth import get_user_model
 
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+
 import json
 
 User = get_user_model()
@@ -71,8 +74,18 @@ class AnalysisListView(ListView):
     paginate_by = 10
     model = Analysis
 
+    @receiver(user_logged_in)
+    def update_last_login_list(sender, user, request, **kwargs):
+        if isinstance(user, User):
+            user.update_last_login_list()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        print(self.request.user.last_five_logins)
+        if len(self.request.user.last_five_logins) <= 1:
+            context['first_login'] = True
+            messages.info(self.request, "Hello and welcome to MIRA! Since this is your first connection, "
+                                        "do not forget to ask your administrator to add you to your groups if it's not already done.")
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(

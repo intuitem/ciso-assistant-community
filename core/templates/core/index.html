@@ -7,6 +7,9 @@
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
     <section class="">
+        {% if first_login %}
+                {% include 'snippets/messages.html' %}
+            {% endif %}
         <div class="flex justify-center">
             <div class="flex-grow max-w-4xl mx-14 mb-14 mt-8">
                 <search>
