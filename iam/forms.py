@@ -130,7 +130,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
     class Meta:
         """ for Model """
         model = User
-        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions']
+        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions', 'last_five_logins']
 
 
 class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
@@ -160,7 +160,7 @@ class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions', 'user_groups', 'is_active']
+        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions', 'user_groups', 'is_active', 'last_five_logins']
 
 
 class UserPasswordChangeForm(AdminPasswordChangeForm):
