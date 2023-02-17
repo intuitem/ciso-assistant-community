@@ -82,7 +82,7 @@ class AnalysisListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if len(self.request.user.last_five_logins) <= 1:
-            messages.info(self.request, _("Hello and welcome to MIRA! Since this is your first connection, do not forget to ask your administrator to add you to your groups if it's not already done."))
+            messages.info(self.request, _("Welcome to MIRA! 👋 Feel free to contact us if you have any problems."))
         if not UserGroup.get_user_groups(self.request.user):
             messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
         context['change_usergroup'] = RoleAssignment.has_permission(
