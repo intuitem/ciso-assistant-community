@@ -161,7 +161,7 @@ class User(AbstractBaseUser):
         last_name = models.CharField(_('last name'), max_length=150, blank=True)
         first_name = models.CharField(_('first name'), max_length=150, blank=True)
         email = models.CharField(max_length=100, unique=True)
-        last_five_logins = models.JSONField(default=list)
+        last_five_logins = models.JSONField(default=list) # NOTE: think about this functionnality because now it's only used to know the first connection
         is_active = models.BooleanField(
             _('active'),
             default=True,
@@ -218,10 +218,10 @@ class User(AbstractBaseUser):
             return self.first_name if self.first_name else self.email.split('@')[0]
         except:
             return ""
-    def update_last_login_list(self):
+    def update_last_login_list(self): # NOTE: think about this functionnality because now it's only used to know the first connection
         """
-        Ajoute la date et l'heure de la dernière connexion de l'utilisateur à la liste
-        last_five_logins et ne conserve que les 5 derniers éléments.
+        Adds the date and time of the user's last login to the list
+        last_five_logins and keeps only the last 5 items.
         """
         self.last_five_logins.append(str(self.last_login))
         self.last_five_logins = self.last_five_logins[-5:]
