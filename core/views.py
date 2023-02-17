@@ -84,7 +84,7 @@ class AnalysisListView(ListView):
         if len(self.request.user.last_five_logins) <= 1:
             messages.info(self.request, _("Welcome to MIRA! 👋 Feel free to contact us if you have any problems."))
         if not UserGroup.get_user_groups(self.request.user):
-            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
+            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact your administrator."))
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
