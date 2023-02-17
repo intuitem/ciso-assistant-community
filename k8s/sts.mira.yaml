@@ -47,6 +47,16 @@ spec:
             secretKeyRef:
               name: myvars
               key: DJANGO_SUPERUSER_PASSWORD
+      - name: caddy
+        image: caddy:latest
+        command: ["caddy", "reverse-proxy", "--from", "mira.alsigo.net", "--to", "localhost:8000"]
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: db-data
+          mountPath: /data
+          subPath: caddy
   volumeClaimTemplates:
   - metadata:
       name: db-data

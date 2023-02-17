@@ -5,4 +5,4 @@ metadata:
 data:
   DJANGO_DEBUG: "True"
   EMAIL_HOST: ""
-  DJANGO_ALLOWED_HOSTS: "mira-demo.intuitem.com"
+  DJANGO_ALLOWED_HOSTS: "mira.alsigo.net"
