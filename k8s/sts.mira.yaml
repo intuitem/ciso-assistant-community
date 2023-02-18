@@ -49,7 +49,7 @@ spec:
               key: DJANGO_SUPERUSER_PASSWORD
       - name: caddy
         image: caddy:latest
-        command: ["caddy", "reverse-proxy", "--from", "mira.alsigo.net", "--to", "localhost:8000"]
+        command: ["caddy", "reverse-proxy", "--from", "mira3.alsigo.net", "--to", "localhost:8000"]
         ports:
         - containerPort: 80
         - containerPort: 443

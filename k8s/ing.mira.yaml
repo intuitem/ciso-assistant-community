@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
   rules:
-  - host: mira.alsigo.net
+  - host: mira3.alsigo.net
     http:
       paths:
       - path: /
