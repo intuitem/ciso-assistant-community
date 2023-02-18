@@ -47,6 +47,11 @@ spec:
             secretKeyRef:
               name: myvars
               key: DJANGO_SUPERUSER_PASSWORD
+        - name: EMAIL_HOST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: EMAIL_HOST_PASSWORD
       - name: caddy
         image: caddy:latest
         command: ["caddy", "reverse-proxy", "--from", "mira3.alsigo.net", "--to", "localhost:8000"]

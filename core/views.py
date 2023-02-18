@@ -61,6 +61,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
+from asf_rm.settings import MIRA_DOMAIN
+
 import json
 
 User = get_user_model()
@@ -114,13 +116,12 @@ def password_reset_request(request):
                 subject = "Password Reset Requested"
                 email_template_name = "registration/password_reset_email.txt"
                 header = {
-                    "email":associated_user.email,
-                    'domain':'127.0.0.1:8000',
-                    'site_name': 'Website',
+                    "email": associated_user.email,
+                    'domain': MIRA_DOMAIN,
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'http',
+                    'protocol': 'https',
                 }
                 email = render_to_string(email_template_name, header)
                 try:
@@ -1563,16 +1564,15 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             email_template_name = "registration/first_connexion_email.txt"
             header = {
                 "email":data,
-                'domain':'127.0.0.1:8000',
-                'site_name': 'Website',
+                'domain':MIRA_DOMAIN,
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'http',
+                'protocol': 'https',
             }
             email = render_to_string(email_template_name, header)
             try:
-                send_mail(subject, email, 'mira.software@intuitem.com' , [user.email], fail_silently=False)
+                send_mail(subject, email, None , [user.email], fail_silently=False)
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
             messages.success(request, _('User created and email send successfully.'))
