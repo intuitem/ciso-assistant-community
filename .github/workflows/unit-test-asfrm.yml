@@ -50,6 +50,8 @@ jobs:
           echo EMAIL_HOST_USER='' >> .env
           echo EMAIL_HOST_PASSWORD='' >> .env
           echo EMAIL_USE_TLS=False >> .env
+          echo MIRA_DOMAIN='mira3.alsigo.net' >> .env
+          echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
       - name: Run migrations
         run: |
           export $(grep -v '^#' .env | xargs)
