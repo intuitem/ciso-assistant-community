@@ -61,7 +61,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import MIRA_DOMAIN
+from asf_rm.settings import MIRA_DOMAIN, PROTOCOL
 
 import json
 
@@ -1568,7 +1568,7 @@ class UserCreateView(UserPassesTestMixin, CreateView):
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'https',
+                'protocol': PROTOCOL,
             }
             email = render_to_string(email_template_name, header)
             try:
