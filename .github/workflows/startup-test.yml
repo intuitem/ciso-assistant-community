@@ -3,7 +3,7 @@ name: Startup test using Playwright
 on: 
   push:
   pull_request:
-    branches: [ main ]
+    branches: [develop, main, ci-cd/update-startup-test]
 
 jobs:
   build:
