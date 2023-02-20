@@ -132,7 +132,7 @@
                                 <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "superuser" %}</span>
                                 {% endif %}
                                 <div class="">
-                                    <a id="user{{ user.id }}" href="{% url 'user-update' user.id %}?next={{ request.path|urlencode }}"
+                                    <a id="users" href="{% url 'user-update' user.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ user.email }}
                                     </a>
