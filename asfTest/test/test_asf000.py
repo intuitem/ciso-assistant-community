@@ -7,9 +7,9 @@ from playwright import *
 import urlpatterns
 
 def test_asf001(page):
-	""" 
+	"""
 	Test case: ASF-001
-	Login test with different username and password combination 
+	Login test with different username and password combination
 	# Step n | action | expected
 	"""
 	test = 1
@@ -51,8 +51,9 @@ def test_asf001(page):
 	assert page.url == urlpatterns.url, "Test "+str(test)+" Step "+str(step)+": not Ok"
 
 def test_asf002(page):
-	""" 
+	"""
 	Test case: ASF-002
+	Login, create an user and logout
 	Step n | action | expected
 	"""
 	test = 2
@@ -64,7 +65,7 @@ def test_asf002(page):
 	page.on("response", log_response)
 	page.goto(urlpatterns.url)
 	message = page.locator('id=hellothere')
-	assert message.is_visible(), "Test "+str(test)+" Step 1: not Ok"
+	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 2 | Enter an admin username and a password, then click on "Login" | Open home page
 	step += 1
 	page.fill("id=id_username", "root@gmail.com")
@@ -77,8 +78,11 @@ def test_asf002(page):
 	page.click("id=user_create")
 	page.fill("id=id_user_email", "root2@gmail.com")
 	page.keyboard.press("Enter")
-	page.click("create_button")
-	# 3 | Logout | Come back on login page
+	toast = page.locator("id=success-toast")
+	user = page.locator("text=root2@gmail.com").element_handles()[0]
+	assert toast.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	assert user.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	# 4 | Logout | Come back on login page
 	step += 1
 	page.click("id=my_menu")
 	page.click("id=logout")
