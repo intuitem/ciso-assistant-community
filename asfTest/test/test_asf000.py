@@ -79,9 +79,9 @@ def test_asf002(page):
 	page.fill("id=id_user_email", "root2@gmail.com")
 	page.keyboard.press("Enter")
 	toast = page.locator("id=success-toast")
-	user = page.locator("text=root2@gmail.com").element_handles()[0]
+	user = page.locator("id=users").element_handles()[-1]
 	assert toast.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
-	assert user.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	assert user.inner_text() == "root2@gmail.com", "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 4 | Logout | Come back on login page
 	step += 1
 	page.click("id=my_menu")
