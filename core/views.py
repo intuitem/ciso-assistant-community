@@ -61,7 +61,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import MIRA_DOMAIN
+from asf_rm.settings import MIRA_DOMAIN, PROTOCOL
 
 import json
 
@@ -84,9 +84,9 @@ class AnalysisListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if len(self.request.user.last_five_logins) <= 1:
-            messages.info(self.request, _("Hello and welcome to MIRA! Since this is your first connection, do not forget to ask your administrator to add you to your groups if it's not already done."))
+            messages.info(self.request, _("Welcome to MIRA! 👋 Feel free to contact us if you have any problems."))
         if not UserGroup.get_user_groups(self.request.user):
-            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
+            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact your administrator."))
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -1568,7 +1568,7 @@ class UserCreateView(UserPassesTestMixin, CreateView):
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'https',
+                'protocol': PROTOCOL,
             }
             email = render_to_string(email_template_name, header)
             try:

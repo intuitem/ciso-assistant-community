@@ -3,7 +3,7 @@ name: Startup test using Playwright
 on: 
   push:
   pull_request:
-    branches: [ main ]
+    branches: [develop, main]
 
 jobs:
   build:
@@ -48,6 +48,9 @@ jobs:
         echo EMAIL_HOST_USER='' >> .env
         echo EMAIL_HOST_PASSWORD='' >> .env
         echo EMAIL_USE_TLS=False >> .env
+        echo MIRA_DOMAIN='127.0.0.1:8000' >> .env
+        echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
+        echo PROTOCOL=http >> .env
     - name: Setup environment
       run: |
         export $(grep -v '^#' .env | xargs)
