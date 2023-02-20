@@ -4,20 +4,10 @@ metadata:
   name: mira-config
 data:
   DJANGO_DEBUG: "True"
-  nginx.conf: |
-    server {
-        listen 80;
-        server_name mira.intuitem.com;
-        location = /favicon.ico { access_log off; log_not_found off; }
-        location /static/ {
-            root /usr/share/nginx/;
-        }
-
-        location / {
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header Host $http_host;
-            proxy_pass http://localhost:8000;
-        }
-    }
+  EMAIL_HOST: "smtp.tem.scw.cloud"
+  EMAIL_PORT: "587"
+  EMAIL_HOST_USER: "c4d49b92-e2f7-4e3a-9b5b-fdb70ed6ee9d"
+  EMAIL_USE_TLS: "True"
+  DJANGO_ALLOWED_HOSTS: ".alsigo.net"
+  MIRA_DOMAIN: "mira3.alsigo.net"
+  DEFAULT_FROM_EMAIL: "mira@alsigo.net"

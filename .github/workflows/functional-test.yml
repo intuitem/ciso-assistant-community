@@ -51,7 +51,8 @@ jobs:
         echo EMAIL_USE_TLS=False >> .env
         echo DJANGO_SUPERUSER_EMAIL=root@gmail.com >> .env
         echo DJANGO_SUPERUSER_PASSWORD=root >> .env
-
+        echo MIRA_DOMAIN='mira3.alsigo.net' >> .env
+        echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
     - name: Setup environment
       run: |
         export $(grep -v '^#' .env | xargs)

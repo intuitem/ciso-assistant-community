@@ -11,3 +11,4 @@ pytest-django==4.5.2
 playwright==1.30
 pytest-playwright==0.3.0
 django-filter==22.1
+whitenoise==6.3.0

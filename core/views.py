@@ -58,6 +58,11 @@ from .filters import *
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
 from django.contrib.auth import get_user_model
 
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+
+from asf_rm.settings import MIRA_DOMAIN
+
 import json
 
 User = get_user_model()
@@ -71,8 +76,17 @@ class AnalysisListView(ListView):
     paginate_by = 10
     model = Analysis
 
+    @receiver(user_logged_in)
+    def update_last_login_list(sender, user, request, **kwargs):
+        if isinstance(user, User):
+            user.update_last_login_list()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if len(self.request.user.last_five_logins) <= 1:
+            messages.info(self.request, _("Welcome to MIRA! 👋 Feel free to contact us if you have any problems."))
+        if not UserGroup.get_user_groups(self.request.user):
+            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact your administrator."))
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -102,13 +116,12 @@ def password_reset_request(request):
                 subject = "Password Reset Requested"
                 email_template_name = "registration/password_reset_email.txt"
                 header = {
-                    "email":associated_user.email,
-                    'domain':'127.0.0.1:8000',
-                    'site_name': 'Website',
+                    "email": associated_user.email,
+                    'domain': MIRA_DOMAIN,
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'http',
+                    'protocol': 'https',
                 }
                 email = render_to_string(email_template_name, header)
                 try:
@@ -1439,6 +1452,8 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if not UserGroup.get_user_groups(self.request.user):
+            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -1549,18 +1564,18 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             email_template_name = "registration/first_connexion_email.txt"
             header = {
                 "email":data,
-                'domain':'127.0.0.1:8000',
-                'site_name': 'Website',
+                'domain':MIRA_DOMAIN,
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'http',
+                'protocol': 'https',
             }
             email = render_to_string(email_template_name, header)
             try:
-                send_mail(subject, email, 'mira.software@intuitem.com' , [user.email], fail_silently=False)
+                send_mail(subject, email, None , [user.email], fail_silently=False)
             except BadHeaderError:
                 return HttpResponse('Invalid header found.')
+            messages.success(request, _('User created and email send successfully.'))
             return redirect("user-list")
         return render(request, self.template_name, {'form': form})
 

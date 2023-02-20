@@ -1,0 +1,5 @@
+kubectl --kubeconfig kubeconfig-k8s-mira.yaml patch ds \
+  mira-ingress-nginx-controller \
+  --namespace kube-system \
+  --type='json' \
+  -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--enable-ssl-passthrough"}]'
