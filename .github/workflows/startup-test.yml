@@ -48,6 +48,8 @@ jobs:
         echo EMAIL_HOST_USER='' >> .env
         echo EMAIL_HOST_PASSWORD='' >> .env
         echo EMAIL_USE_TLS=False >> .env
+        echo DJANGO_SUPERUSER_EMAIL=root@gmail.com >> .env
+        echo DJANGO_SUPERUSER_PASSWORD=root >> .env
         echo MIRA_DOMAIN='127.0.0.1:8000' >> .env
         echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
         echo PROTOCOL=http >> .env
@@ -58,7 +60,7 @@ jobs:
         python manage.py migrate
         python manage.py compilemessages
         python manage.py makemessages -l fr
-        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root@gmail.com', 'root')" | python manage.py shell
+        python manage.py createsuperuser --no-input
     - name: Run server
       run: |
         export $(grep -v '^#' .env | xargs)
