@@ -73,6 +73,11 @@ def test_asf002(page):
 	assert page.url == urlpatterns.url, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 3 | Create a new user | Send a mail to the user
 	step += 1
+	page.click("id=users_tab")
+	page.click("id=user_create")
+	page.fill("id=id_user_email", "root2@gmail.com")
+	page.keyboard.press("Enter")
+	page.click("create_button")
 	# 3 | Logout | Come back on login page
 	step += 1
 	page.click("id=my_menu")
