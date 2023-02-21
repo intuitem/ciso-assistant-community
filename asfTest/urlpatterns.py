@@ -1,6 +1,6 @@
 # coding:utf-8
 
-URL = "http://0.0.0.0:8000/"
+URL = "http://127.0.0.1:8000/"
 CORE = URL + "core/"
 COMPOSER = CORE + "composer/"
 LOGIN = URL + "accounts/login/"
@@ -15,3 +15,4 @@ SCORINGASSISTANT = CORE + "scoring-assistant/"
 RISKMATRIX = CORE + "risk-matrix/"
 RA = CORE + "RA/"
 MAILHOG = "http://0.0.0.0:8025/"
+RESET_DONE = URL + "password_reset/done/"

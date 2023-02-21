@@ -51,7 +51,7 @@ def test_asf001(page):
 	page.click('id=login')
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
 
-def test_asf002(page, playwright):
+def test_asf002(page):
 	"""
 	Test case: ASF-002
 	Login, create an user and logout
@@ -96,6 +96,7 @@ def test_asf002(page, playwright):
 	page.click("text=root2@gmail.com")
 	link = page.get_by_role("link", name="127.0.0.1").element_handles()[0].inner_text()
 	page.goto(link)
+	page.on("response", log_response)
 	page.fill("id=id_new_password1", "rootroot")
 	page.fill("id=id_new_password2", "rootroot")
 	page.keyboard.press("Enter")
@@ -110,4 +111,53 @@ def test_asf002(page, playwright):
 	toast_info = page.locator("id=info-toast")
 	toast_warning = page.locator("id=warning-toast")
 	assert toast_info.is_visible() and toast_warning.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
+
+def test_asf003(page):
+	"""
+	Test case: ASF-003
+	Use of forgot password link
+	Step n | action | expected
+	"""
+	test = 3
+	# 1 | Go to the url  | Opening of the login page
+	step = 1
+	def log_response(intercepted_response):
+		# print("a response was received:", intercepted_response.status, intercepted_response.status_text)
+		assert intercepted_response.status not in (500, 404), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	page.on("response", log_response)
+	page.goto(urlpatterns.URL)
+	assert page.url == urlpatterns.LOGINFIRST, "Test "+str(test)+" Step "+str(step)+": not Ok"
+	# 2 | Click on forgot password | Open recovery password page
+	step += 1
+	page.get_by_role("link", name="Forgot password?").click()
+	page.locator("#id_email").click()
+	page.locator("#id_email").fill("root@gmail.com")
+	page.get_by_role("button", name="Send Email").click()
+	assert page.url == urlpatterns.RESET_DONE, "Test "+str(test)+" Step "+str(step)+": not Ok"
+	# 3 | Go on Mailhog to get reset link | Send to reset page
+	step += 1
+	page.remove_listener("response", log_response)
+	page.goto(urlpatterns.MAILHOG)
+	page.get_by_text("mira@software.com root@gmail.com").first.click()
+	link = page.get_by_role("link", name="http://127.0.0.1:8000/reset/").inner_text()
+	# 4 | Reset the password | Update user password
+	step += 1
+	page.goto(link)
+	page.on("response", log_response)
+	page.locator("#id_new_password1").click()
+	page.locator("#id_new_password1").fill("toto1234")
+	page.locator("#id_new_password2").click()
+	page.locator("#id_new_password2").fill("toto1234")
+	page.get_by_role("button", name="Change password").click()
+	page.get_by_role("link", name="log in").click()
+	message = page.locator('id=hellothere')
+	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	# 5 | Login with the new password | Open home page
+	step += 1
+	page.get_by_label("Email:").click()
+	page.get_by_label("Email:").fill("root@gmail.com")
+	page.get_by_label("Password:").click()
+	page.get_by_label("Password:").fill("toto1234")
+	page.get_by_role("button", name="Login").click()
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
