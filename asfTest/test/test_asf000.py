@@ -5,6 +5,7 @@ from playwright.sync_api import *
 from playwright.async_api import *
 from playwright import *
 import urlpatterns
+import time
 
 def test_asf001(page):
 	"""
@@ -50,7 +51,7 @@ def test_asf001(page):
 	page.click('id=login')
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
 
-def test_asf002(page):
+def test_asf002(page, playwright):
 	"""
 	Test case: ASF-002
 	Login, create an user and logout
@@ -90,10 +91,23 @@ def test_asf002(page):
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 5 | Create password for the new account | Come back on Login page
 	step += 1
-	page.goto()
-	#  | Enter new user's username and password | Login successfully
-	# step += 1
-	# page.fill("id=id_username", "root2@gmail.com")
-	# page.fill("id=id_password", "rootroot")
-	# page.click('id=login')
-	# assert page.url == urlpatterns.url, "Test "+str(test)+" Step "+str(step)+": not Ok"
+	page.remove_listener("response", log_response)
+	page.goto(urlpatterns.MAILHOG)
+	page.click("text=root2@gmail.com")
+	link = page.get_by_role("link", name="127.0.0.1").element_handles()[0].inner_text()
+	page.goto(link)
+	page.fill("id=id_new_password1", "rootroot")
+	page.fill("id=id_new_password2", "rootroot")
+	page.keyboard.press("Enter")
+	page.goto(urlpatterns.URL)
+	message = page.locator('id=hellothere')
+	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	# 6 | Enter new user's username and password | Login successfully
+	step += 1
+	page.fill("id=id_username", "root2@gmail.com")
+	page.fill("id=id_password", "rootroot")
+	page.click('id=login')
+	toast_info = page.locator("id=info-toast")
+	toast_warning = page.locator("id=warning-toast")
+	assert toast_info.is_visible() and toast_warning.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
+	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
