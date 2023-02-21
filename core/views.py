@@ -121,7 +121,7 @@ def password_reset_request(request):
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'https',
+                    'protocol': PROTOCOL,
                 }
                 email = render_to_string(email_template_name, header)
                 try:
