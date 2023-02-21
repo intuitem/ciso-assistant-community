@@ -139,7 +139,7 @@ def test_asf003(page):
 	step += 1
 	page.remove_listener("response", log_response)
 	page.goto(urlpatterns.MAILHOG)
-	page.get_by_text("mira@software.com root@gmail.com").first.click()
+	page.click("text=root@gmail.com")
 	link = page.get_by_role("link", name="http://127.0.0.1:8000/reset/").inner_text()
 	# 4 | Reset the password | Update user password
 	step += 1
