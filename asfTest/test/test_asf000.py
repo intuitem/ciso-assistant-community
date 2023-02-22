@@ -5,7 +5,6 @@ from playwright.sync_api import *
 from playwright.async_api import *
 from playwright import *
 import urlpatterns
-import time
 
 def test_asf001(page):
 	"""
