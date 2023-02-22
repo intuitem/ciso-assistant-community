@@ -59,6 +59,7 @@ jobs:
         echo MIRA_DOMAIN='127.0.0.1:8000' >> .env
         echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
         echo PROTOCOL=http >> .env
+        echo MIRA_SUPERUSER_EMAIL= >> .env
     - name: Setup environment
       run: |
         export $(grep -v '^#' .env | xargs)
