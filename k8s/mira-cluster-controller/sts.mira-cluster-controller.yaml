@@ -19,9 +19,10 @@ spec:
           claimName: db-data
       imagePullSecrets:
         - name: registry-secret
+      serviceAccountName: controller
       containers:
       - name: mira-cluster-controller
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.1
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.4
         ports:
         - containerPort: 8000
         volumeMounts:

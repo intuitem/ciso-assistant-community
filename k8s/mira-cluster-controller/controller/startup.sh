@@ -10,15 +10,15 @@ if [ ! -n "$DJANGO_SECRET_KEY" ]; then
     echo "Django secret key read from file"
 fi
 
-while ! python manage.py showmigrations iam > /dev/null 2>&1; do 
+while ! python manage.py showmigrations admin > /dev/null 2>&1; do 
     echo "database not ready; waiting"
     sleep 10
 done
 
-python manage.py makemigrations cal core iam
+python manage.py makemigrations 
 python manage.py migrate
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ]; then
     python manage.py createsuperuser --noinput
 fi
 
-exec gunicorn --chdir mira-cluster-controller  --bind :8000 --env RUN_MAIN=true mira_cluster_controller.wsgi:application
+exec gunicorn --chdir controller  --bind :8000 --env RUN_MAIN=true controller.wsgi:application

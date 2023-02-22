@@ -13,7 +13,7 @@ RUN apt update && \
     apt install -y gettext && \
     apt install -y locales
 
-COPY . /code/
+COPY  controller /code/
 
 ENTRYPOINT ["bash", "startup.sh"]
 EXPOSE 8000
