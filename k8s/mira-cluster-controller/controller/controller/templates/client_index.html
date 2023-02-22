@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% block page_content %}
+<h1>Clients</h1>
+<div class="row">
+<table>
+    <tr>
+      <th>name</th>
+      <th>admin email</th>
+    </tr>
+    {% for client in clients %}
+    <tr>
+      <th> {{ client.name }}</th>
+      <th> {{ client.admin_email }}</th>
+    </tr> 
+    {% endfor %}
+</table>
+</div>
+{% endblock %}
+
