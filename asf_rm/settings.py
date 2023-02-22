@@ -92,6 +92,7 @@ ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+MIRA_SUPERUSER_MAIL = os.environ['MIRA_SUPERUSER_MAIL']
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')

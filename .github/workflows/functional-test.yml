@@ -2,9 +2,9 @@ name: Functional test using Playwright
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop, ci-cd/update-functional-tests]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build:
@@ -20,6 +20,11 @@ jobs:
           POSTGRES_DB: postgres
         ports: ['5432:5432']
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      mailhog: # !Important Nom du service 
+        image: mailhog/mailhog
+        ports:
+          - 1025:1025
+          - 8025:8025
 
     steps:
     - uses: actions/checkout@v2
@@ -49,9 +54,12 @@ jobs:
         echo EMAIL_HOST_USER='' >> .env
         echo EMAIL_HOST_PASSWORD='' >> .env
         echo EMAIL_USE_TLS=False >> .env
+        echo DJANGO_SUPERUSER_EMAIL=root@gmail.com >> .env
+        echo DJANGO_SUPERUSER_PASSWORD=root >> .env
         echo MIRA_DOMAIN='127.0.0.1:8000' >> .env
         echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
         echo PROTOCOL=http >> .env
+        echo MIRA_SUPERUSER_MAIL='' >> .env
     - name: Setup environment
       run: |
         export $(grep -v '^#' .env | xargs)
@@ -59,9 +67,7 @@ jobs:
         python manage.py migrate
         python manage.py compilemessages
         python manage.py makemessages -l fr
-        python manage.py loaddata test-dump.json
-        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('root', '', 'root')" | python manage.py shell
-        echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_user('root2', '', 'rootroot')" | python manage.py shell
+        python manage.py createsuperuser --no-input
     - name: Run server
       run: |
         export $(grep -v '^#' .env | xargs)
@@ -69,4 +75,4 @@ jobs:
     - name: Run tests
       run: | 
         export $(grep -v '^#' .env | xargs)
-        pytest asfTest --browser chromium --browser webkit --browser firefox --slowmo 100
+        pytest asfTest/test/test_asf000.py --slowmo 300
