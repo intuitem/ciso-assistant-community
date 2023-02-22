@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mira-cluster-controller
+spec:
+  serviceName: mira-cluster-controller
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mira-cluster-controller
+  template:
+    metadata:
+      labels:
+        app: mira-cluster-controller
+    spec:
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+      imagePullSecrets:
+        - name: registry-secret
+      serviceAccountName: controller
+      containers:
+      - name: mira-cluster-controller
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.4
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: db-data
+          mountPath: /code/db
+        envFrom:
+        - configMapRef:
+            name: mira-cluster-controller-config
+        env:
+        - name: EMAIL_HOST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: EMAIL_HOST_PASSWORD
+      - name: caddy
+        image: caddy:latest
+        command: ["caddy", "reverse-proxy", "--from", $(MIRA_CLUSTER_CONTROLLER_DOMAIN), "--to", "localhost:8000"]
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: db-data
+          mountPath: /data
+          subPath: caddy
+        env:
+        - name: MIRA_CLUSTER_CONTROLLER_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: mira-cluster-controller-config
+              key: MIRA_CLUSTER_CONTROLLER_DOMAIN
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+      labels:
+        app: mira-cluster-controller
+    spec:
+      resources:
+        requests:
+          storage: 1Gi
+      accessModes:
+      - ReadWriteOnce

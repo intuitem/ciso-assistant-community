@@ -92,6 +92,7 @@ ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+MIRA_SUPERUSER_MAIL = os.environ['MIRA_SUPERUSER_MAIL']
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
@@ -168,9 +169,9 @@ LOCALE_PATHS = (
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'   # for collectstatic
-STATICFILES_DIRS = [
-     BASE_DIR / "static",  # the js files are here
-]
+#STATICFILES_DIRS = [
+#     BASE_DIR / "static",  # the js files are here
+#]
 
 STATIC_URL = '/static/'
 

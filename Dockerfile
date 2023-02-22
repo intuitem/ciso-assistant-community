@@ -13,7 +13,19 @@ RUN apt update && \
     apt install -y gettext && \
     apt install -y locales
 
-COPY . /code/
+COPY asf_rm /code/asf_rm
+COPY cal /code/cal
+COPY config /code/config
+COPY core /code/core
+COPY db/readme.txt /code/db/readme.txt
+COPY iam /code/iam
+COPY library /code/library
+COPY locale /code/locale
+COPY serdes /code/serdes
+COPY staticfiles /code/staticfiles
+COPY theme /code/theme
+COPY tools /code/tools
+COPY manage.py startup.sh /code/
 
 RUN django-admin makemessages --all -i venv && \
     django-admin compilemessages -i venv

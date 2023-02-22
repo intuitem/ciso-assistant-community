@@ -13,3 +13,4 @@ node_modules/
 asf_rm/build.json
 *.sqlite3
 k8s/scaleway/kubeconfig-k8s-mira.yaml
+k8s/mira-cluster-controller/venv
