@@ -62,6 +62,7 @@ from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
 from asf_rm.settings import MIRA_DOMAIN, PROTOCOL
+from captcha.fields import ReCaptchaField
 
 import json
 
@@ -104,7 +105,6 @@ class UserLogin(LoginView):
     template_name = 'registration/login.html'
     form_class = LoginForm
 
-
 def password_reset_request(request):
     if request.method == "POST":
         password_reset_form = ResetForm(request.POST)
@@ -130,9 +130,13 @@ def password_reset_request(request):
                     messages.error(request, 'An error has occured, please try later.')
                     password_reset_form = ResetForm()
                     return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+            else:
+                messages.error(request, "This user doesn't exist")
+                password_reset_form = ResetForm()
+                return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
             return redirect ("/password_reset/done/")
         else:
-            messages.error(request, "An invalid email has been entered.")
+            messages.error(request, "Invalid email or captcha")
     password_reset_form = ResetForm()
     return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
 
