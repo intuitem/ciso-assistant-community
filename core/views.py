@@ -1575,8 +1575,10 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             email = render_to_string(email_template_name, header)
             try:
                 send_mail(subject, email, None , [user.email], fail_silently=False)
-            except BadHeaderError:
-                return HttpResponse('Invalid header found.')
+            except:
+                messages.error(request, 'An error has occured, please try later.')
+                User.objects.get(email=data).delete()
+                return render(request, self.template_name, {'form': form})
             messages.success(request, _('User created and email send successfully.'))
             return redirect("user-list")
         return render(request, self.template_name, {'form': form})

@@ -6,6 +6,7 @@
 {% endwith %}
 <div>
     <form method="post" id="user_create_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
+        {% include 'snippets/messages.html' %}
         <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
             <h2 class="text-xl font-semibold mb-4">{% trans "User information" %}</h2>
             <div class="flex flex-col space-y-4">
