@@ -126,8 +126,10 @@ def password_reset_request(request):
                 email = render_to_string(email_template_name, header)
                 try:
                     send_mail(subject, email, None, [associated_user.email], fail_silently=False)
-                except BadHeaderError:
-                    return HttpResponse('Invalid header found.')
+                except:
+                    messages.error(request, 'An error has occured, please try later.')
+                    password_reset_form = ResetForm()
+                    return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
             return redirect ("/password_reset/done/")
         else:
             messages.error(request, "An invalid email has been entered.")
@@ -1573,8 +1575,10 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             email = render_to_string(email_template_name, header)
             try:
                 send_mail(subject, email, None , [user.email], fail_silently=False)
-            except BadHeaderError:
-                return HttpResponse('Invalid header found.')
+            except:
+                messages.error(request, 'An error has occured, please try later.')
+                User.objects.get(email=data).delete()
+                return render(request, self.template_name, {'form': form})
             messages.success(request, _('User created and email send successfully.'))
             return redirect("user-list")
         return render(request, self.template_name, {'form': form})
