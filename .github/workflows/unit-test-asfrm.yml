@@ -54,6 +54,8 @@ jobs:
           echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
           echo PROTOCOL=http >> .env
           echo MIRA_SUPERUSER_MAIL='' >> .env
+          echo RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123 >> .env
+          echo RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456 >> .env
       - name: Run migrations
         run: |
           export $(grep -v '^#' .env | xargs)
