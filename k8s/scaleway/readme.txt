@@ -1,6 +1,6 @@
 # list of tricks for Scaleway
 
-alias k="kubectl --kubeconfig $(pwd)/kubeconfig-k8s-mira.yaml"
+export KUBE_CONFIG=$(pwd)/kubeconfig-k8s-mira.yaml
 
 docker tag mira:0.9.1c rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:latest
 
