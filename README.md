@@ -64,6 +64,8 @@ export PROTOCOL=https
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
 export PROTOCOL=http
+export RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123
+export RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456
 ```
 
 NOTE: DB_PORT is optional, and defaults to 5432.

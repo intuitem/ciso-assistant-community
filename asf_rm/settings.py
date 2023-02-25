@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'library',
     'serdes',
     'import_export',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -91,6 +92,9 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+
+RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
+RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
 
 MIRA_SUPERUSER_MAIL = os.environ['MIRA_SUPERUSER_MAIL']
 EMAIL_HOST = os.environ['EMAIL_HOST']
