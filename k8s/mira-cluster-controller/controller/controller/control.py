@@ -1,26 +1,29 @@
 from kubernetes import client, config
+import os
 
 core_v1_api = None
 apps_v1_api = None
 try:
     config.load_incluster_config()
+    print("inside cluster")
 except:
-    print("not in cluster")
+    print("outside cluster")
     config.load_kube_config()
 
 core_v1_api = client.CoreV1Api()
 apps_v1_api = client.AppsV1Api()
-
+networking_v1_api = client.NetworkingV1Api()
 
 #https://blog.knoldus.com/how-to-create-statefulsets-workloads-using-kubernetes-python-client%EF%BF%BC/
 
 
-def create_service(core_v1_api, client_name):
+def create_service(client_name):
+    svc_name = f"mira-{client_name}"
     body = client.V1Service(
         api_version="v1",
         kind="Service",
         metadata=client.V1ObjectMeta(
-            name=f"svc-mira-{client_name}"
+            name=svc_name
         ),
         spec=client.V1ServiceSpec(
             selector={f"client": client_name},
@@ -31,10 +34,57 @@ def create_service(core_v1_api, client_name):
             ]
         )
     )
-    core_v1_api.create_namespaced_service(namespace="default", body=body)
+    try:
+        core_v1_api.create_namespaced_service(namespace="default", body=body)
+    except client.exceptions.ApiException as e:
+        if e.status == 409:
+            print(f"Service {svc_name} already exists: replace it")
+            core_v1_api.replace_namespaced_service(namespace="default", name=svc_name, body=body)
 
 
-def create_stateful_set_object(client_name, email_admin):
+
+def create_ingress(client_name, mira_domain):
+    ingress_name = f"mira-{client_name}"
+    svc_name = f"mira-{client_name}"
+    body = client.V1Ingress(
+        api_version="networking.k8s.io/v1",
+        kind="Ingress",
+        metadata=client.V1ObjectMeta(name=ingress_name, annotations={
+            "nginx.ingress.kubernetes.io/backend-protocol": "HTTPS",
+            "nginx.ingress.kubernetes.io/ssl-redirect": "true",
+            "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
+        }),
+        spec=client.V1IngressSpec(
+            ingress_class_name="nginx",
+            rules=[client.V1IngressRule(
+                host=mira_domain,
+                http=client.V1HTTPIngressRuleValue(
+                    paths=[client.V1HTTPIngressPath(
+                        path="/",
+                        path_type="Prefix",
+                        backend=client.V1IngressBackend(
+                            service=client.V1IngressServiceBackend(
+                                port=client.V1ServiceBackendPort(
+                                    number=443,
+                                ),
+                                name=svc_name)
+                            )
+                    )]
+                )
+            )
+            ]
+        )
+    )
+    try:
+        networking_v1_api.create_namespaced_ingress(namespace="default", body=body)
+    except client.exceptions.ApiException as e:
+        if e.status == 409:
+            print(f"Ingress {svc_name} already exists: replace it")
+            networking_v1_api.replace_namespaced_ingress(namespace="default", name=ingress_name, body=body)
+
+
+
+def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
     configmaps = [
         client.V1EnvFromSource(config_map_ref=client.V1ConfigMapEnvSource(name='mira-config')),
     ]
@@ -46,19 +96,17 @@ def create_stateful_set_object(client_name, email_admin):
         env_from=configmaps,
         env=[client.V1EnvVar(name="MIRA_SUPERUSER_EMAIL", value=email_admin),
              client.V1EnvVar(name="EMAIL_HOST_PASSWORD", value_from=secret),
+            client.V1EnvVar(name="DJANGO_ALLOWED_HOSTS", value=mira_domain),
             ],
         volume_mounts=[client.V1VolumeMount(name="db-data", mount_path='/code/db')],
     )
-    mira_domain = client.V1EnvVarSource(config_map_key_ref=client.V1ConfigMapKeySelector(key="MIRA_DOMAIN", name="mira-config"))
     caddy_container = client.V1Container(
         name="caddy",
         image="caddy:latest",
         ports=[client.V1ContainerPort(container_port=80), client.V1ContainerPort(container_port=443)],
-        env=[client.V1EnvVar(name="MIRA_DOMAIN", value_from=mira_domain)],
         volume_mounts=[client.V1VolumeMount(name="db-data", mount_path='/data', sub_path='caddy')],
-        command=['caddy', 'reverse-proxy', '--from', '$(MIRA_DOMAIN)', '--to', 'localhost:8000'],
+        command=['caddy', 'reverse-proxy', '--from', mira_domain, '--to', 'localhost:8000'],
     )
-    # Template
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
             labels={"app": "mira", "client": client_name}
@@ -72,8 +120,6 @@ def create_stateful_set_object(client_name, email_admin):
             image_pull_secrets=[client.V1LocalObjectReference(name="registry-secret")]
         ),
     )
-    # Spec
-
     volume_claim = client.V1PersistentVolumeClaim(
         api_version='v1',
         kind='PersistentVolumeClaim',
@@ -92,30 +138,39 @@ def create_stateful_set_object(client_name, email_admin):
         selector=client.V1LabelSelector(match_labels={"app": "mira"}),
         template=template,
         volume_claim_templates=[volume_claim],
-)
-    # StatefulSet
-    statefulset = client.V1StatefulSet(
+    )
+    return client.V1StatefulSet(
         api_version="apps/v1",
         kind="StatefulSet",
-        metadata=client.V1ObjectMeta(name=f"sts-mira-{client_name}"),
+        metadata=client.V1ObjectMeta(name=sts_name),
         spec=spec,
     )
 
-    return statefulset
+
+def create_stateful_set(client_name, email_admin, mira_domain):
+        sts_name = f"mira-{client_name}"
+        body=create_stateful_set_object(client_name, email_admin, mira_domain, sts_name)
+        try:
+            apps_v1_api.create_namespaced_stateful_set(namespace="default", body=body)
+        except client.exceptions.ApiException as e:
+            if e.status == 409:
+                print(f"StatefulSet {sts_name} already exists: replace it")
+                apps_v1_api.replace_namespaced_stateful_set(namespace="default", name= sts_name, body=body)
 
 
-def create_stateful_set(apps_v1_api, stateful_set_object):
-    # Create the Statefulset in default namespace
-    # You can replace the namespace with you have created
-    apps_v1_api.create_namespaced_stateful_set(
-        namespace="default", body=stateful_set_object
-    )
+def create_client_objects(client_name, email_admin):
+    cluster_domain = os.getenv("CLUSTER_DOMAIN")
+    if not cluster_domain:
+        print("missing CLUSTER_DOMAIN environment variable - skipping creation of objects")
+    else:
+        mira_domain = f"{client_name}.{cluster_domain}"
+        create_service(client_name)
+        create_ingress(client_name, mira_domain)
+        create_stateful_set(client_name, email_admin, mira_domain)
+
 
 def main():
-#    print(apps_v1_api.list_namespaced_stateful_set("default"))
-#    create_service(core_v1_api, "toto")
-    stateful_set_obj = create_stateful_set_object("toto", "root@example.com")
-    create_stateful_set(apps_v1_api, stateful_set_obj)
+    create_client_objects( "toto", "root@example.com")
 
 if __name__ == "__main__":
     main()

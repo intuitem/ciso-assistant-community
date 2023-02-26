@@ -4,13 +4,9 @@ metadata:
   namespace: default
   name: controller-role
 rules:
-- apiGroups: [""] # "" indicates the core API group
-  resources: ["pods"]
-  verbs: ["get", "watch", "list"]
 - apiGroups: ["apps"] 
-  resources: ["statefulsets"]
-  verbs: ["get", "watch", "list"]
-
+  resources: ["services", "statefulsets", "ingress"]
+  verbs: ["get", "watch", "list", "create", "update"]
 
 ---
 
