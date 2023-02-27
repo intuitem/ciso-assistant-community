@@ -4,8 +4,14 @@ metadata:
   namespace: default
   name: controller-role
 rules:
+- apiGroups: [""] 
+  resources: ["services"]
+  verbs: ["get", "watch", "list", "create", "update"]
 - apiGroups: ["apps"] 
-  resources: ["services", "statefulsets", "ingress"]
+  resources: ["statefulsets"]
+  verbs: ["get", "watch", "list", "create", "update"]
+- apiGroups: ["networking.k8s.io"] 
+  resources: ["ingresses"]
   verbs: ["get", "watch", "list", "create", "update"]
 
 ---

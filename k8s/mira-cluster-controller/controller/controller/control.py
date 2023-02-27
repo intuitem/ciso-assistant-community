@@ -40,6 +40,8 @@ def create_service(client_name):
         if e.status == 409:
             print(f"Service {svc_name} already exists: replace it")
             core_v1_api.replace_namespaced_service(namespace="default", name=svc_name, body=body)
+        else:
+            print("Exception:", e)
 
 
 
@@ -81,6 +83,8 @@ def create_ingress(client_name, mira_domain):
         if e.status == 409:
             print(f"Ingress {svc_name} already exists: replace it")
             networking_v1_api.replace_namespaced_ingress(namespace="default", name=ingress_name, body=body)
+        else:
+            print("Exception:", e)
 
 
 
@@ -156,6 +160,8 @@ def create_stateful_set(client_name, email_admin, mira_domain):
             if e.status == 409:
                 print(f"StatefulSet {sts_name} already exists: replace it")
                 apps_v1_api.replace_namespaced_stateful_set(namespace="default", name= sts_name, body=body)
+            else:
+                print("Exception:", e)
 
 
 def create_client_objects(client_name, email_admin):

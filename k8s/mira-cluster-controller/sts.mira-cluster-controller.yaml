@@ -22,7 +22,7 @@ spec:
       serviceAccountName: controller
       containers:
       - name: mira-cluster-controller
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.4
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.6
         ports:
         - containerPort: 8000
         volumeMounts:

@@ -1,5 +1,5 @@
 from django.db import models
-from controller.control import creatcreate_client_objects
+from controller.control import create_client_objects
 
 class Client(models.Model):
     name = models.CharField(max_length=40)

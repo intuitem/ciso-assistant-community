@@ -11,3 +11,4 @@ data:
   DJANGO_ALLOWED_HOSTS: ".alsigo.net"
   MIRA_CLUSTER_CONTROLLER_DOMAIN: "caudron.alsigo.net"
   DEFAULT_FROM_EMAIL: "mira-cluster-controller@alsigo.net"
+  CLUSTER_DOMAIN: "alsigo.net"
