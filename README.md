@@ -59,11 +59,9 @@ export EMAIL_PORT=587
 export EMAIL_HOST_USER=your_account@gmail.com
 export EMAIL_HOST_PASSWORD=yourpassword
 export DEFAULT_FROM_EMAIL=mira@alsigo.net
-export PROTOCOL=https
 # Mailing in development with Mailhog for example
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-export PROTOCOL=http
 export RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123
 export RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456
 ```

@@ -100,7 +100,7 @@ def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
         env_from=configmaps,
         env=[client.V1EnvVar(name="MIRA_SUPERUSER_EMAIL", value=email_admin),
              client.V1EnvVar(name="EMAIL_HOST_PASSWORD", value_from=secret),
-            client.V1EnvVar(name="DJANGO_ALLOWED_HOSTS", value=mira_domain),
+            client.V1EnvVar(name="MIRA_DOMAIN", value=mira_domain),
             ],
         volume_mounts=[client.V1VolumeMount(name="db-data", mount_path='/code/db')],
     )

@@ -9,3 +9,5 @@ data:
   EMAIL_HOST_USER: "c4d49b92-e2f7-4e3a-9b5b-fdb70ed6ee9d"
   EMAIL_USE_TLS: "True"
   DEFAULT_FROM_EMAIL: "mira@alsigo.net"
+  RECAPTCHA_PUBLIC_KEY: "MyRecaptchaKey123"
+  RECAPTCHA_PRIVATE_KEY: "MyRecaptchaPrivateKey456"

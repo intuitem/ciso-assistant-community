@@ -20,9 +20,10 @@ spec:
       imagePullSecrets:
         - name: registry-secret
       serviceAccountName: controller
+      enableServiceLinks: false
       containers:
       - name: mira-cluster-controller
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.7
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:latest
         ports:
         - containerPort: 8000
         volumeMounts:

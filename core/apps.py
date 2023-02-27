@@ -11,7 +11,7 @@ def startup():
         from iam.models import UserGroup, Role, RoleAssignment
         from django.contrib.auth.models import Permission
         from iam.models import User
-        from asf_rm.settings import MIRA_SUPERUSER_MAIL
+        from asf_rm.settings import MIRA_SUPERUSER_EMAIL
 
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
@@ -170,8 +170,8 @@ def startup():
         ])
 
         # if root folder does not exist, then create it
-        if MIRA_SUPERUSER_MAIL and not User.objects.filter(email=MIRA_SUPERUSER_MAIL).exists():
-            User.objects.create_user(email=MIRA_SUPERUSER_MAIL, is_superuser=True)
+        if MIRA_SUPERUSER_EMAIL and not User.objects.filter(email=MIRA_SUPERUSER_EMAIL).exists():
+            User.objects.create_user(email=MIRA_SUPERUSER_EMAIL, is_superuser=True)
         if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
             Folder.objects.create(
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)

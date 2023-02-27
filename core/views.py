@@ -61,7 +61,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import MIRA_DOMAIN, PROTOCOL
+from asf_rm.settings import MIRA_DOMAIN, EMAIL_USE_TLS
 from captcha.fields import ReCaptchaField
 
 import json
@@ -121,7 +121,7 @@ def password_reset_request(request):
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': PROTOCOL,
+                    'protocol': 'https' if EMAIL_USE_TLS else 'http',
                 }
                 email = render_to_string(email_template_name, header)
                 try:
@@ -1574,7 +1574,8 @@ class UserCreateView(UserPassesTestMixin, CreateView):
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': PROTOCOL,
+                'protocol': 'https' if EMAIL_USE_TLS else 'http',
+
             }
             email = render_to_string(email_template_name, header)
             try:

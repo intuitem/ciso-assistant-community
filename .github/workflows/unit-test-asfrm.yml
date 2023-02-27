@@ -52,8 +52,7 @@ jobs:
           echo EMAIL_USE_TLS=False >> .env
           echo MIRA_DOMAIN='127.0.0.1:8000' >> .env
           echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
-          echo PROTOCOL=http >> .env
-          echo MIRA_SUPERUSER_MAIL='' >> .env
+          echo MIRA_SUPERUSER_EMAIL='' >> .env
           echo RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123 >> .env
           echo RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456 >> .env
       - name: Run migrations

@@ -46,12 +46,12 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-if 'DJANGO_ALLOWED_HOSTS' in os.environ:
-    ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')
-else:
-    ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
-
 MIRA_DOMAIN = os.environ['MIRA_DOMAIN']
+ALLOWED_HOSTS = [MIRA_DOMAIN]
+# if 'DJANGO_ALLOWED_HOSTS' in os.environ:
+#     ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')
+# else:
+#     ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -96,14 +96,14 @@ LOGOUT_REDIRECT_URL = 'login'
 RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
 RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
 
-MIRA_SUPERUSER_MAIL = os.environ['MIRA_SUPERUSER_MAIL']
+MIRA_SUPERUSER_EMAIL = os.environ['MIRA_SUPERUSER_EMAIL']
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-# EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS'] NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution.
-PROTOCOL = os.environ['PROTOCOL']
+EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS']
+# NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution.
 
 TEMPLATES = [
     {
