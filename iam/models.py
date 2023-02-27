@@ -182,8 +182,8 @@ class User(AbstractBaseUser):
             verbose_name=_('user groups'),
             blank=True,
             help_text=_(
-                'The user_groups this user belongs to. A user will get all permissions '
-                'granted to each of their user_groups.'
+                'The user groups this user belongs to. A user will get all permissions '
+                'granted to each of their user groups.'
             ),
             related_name="user_set",
             related_query_name="user",
