@@ -8,6 +8,17 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
+    """
+    A searchable checkbox select multiple widget.
+
+    Widget attributes (in addition to the standard ones):
+        - wrapper_class: class for the wrapper div
+        - searchbar_class: class for the searchbar
+    """
+    template_name = 'forms/widgets/select_multiple.html'
+
+
 class DefaultDateInput(DateInput):
     input_type = 'date'
 
@@ -140,7 +151,10 @@ class RiskScenarioUpdateForm(StyledModelForm):
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50',
             'onchange': 'refresh();'
         })
-        self.fields['assets'].widget = CheckboxSelectMultiple(attrs={'class': 'text-sm rounded'}, choices=self.fields['assets'].choices)
+        self.fields['assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['assets'].choices)
 
     class Meta:
         model = RiskScenario
@@ -152,7 +166,10 @@ class SecurityMeasureSelectForm(StyledModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['security_measures'].widget = CheckboxSelectMultiple(attrs={'class': 'text-sm rounded'}, choices=self.fields['security_measures'].choices)
+        self.fields['security_measures'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_measures'].choices)
 
     class Meta:
         model = RiskScenario
@@ -168,7 +185,10 @@ class RiskScenarioModalUpdateForm(StyledModelForm):
 class RiskAcceptanceCreateUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['risk_scenarios'].widget = CheckboxSelectMultiple(attrs={'class': 'text-sm rounded'}, choices=self.fields['risk_scenarios'].choices)
+        self.fields['risk_scenarios'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['risk_scenarios'].choices)
 
     class Meta:
         model = RiskAcceptance
