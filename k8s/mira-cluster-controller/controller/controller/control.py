@@ -116,6 +116,7 @@ def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
             labels={"app": "mira", "client": client_name}
         ),
         spec=client.V1PodSpec(
+            enable_service_links=False,
             containers=[mira_container, caddy_container],
             volumes=[client.V1Volume(
                 name='db-data',
