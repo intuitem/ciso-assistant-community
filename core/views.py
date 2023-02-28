@@ -80,6 +80,38 @@ class GenericDetailView(DetailView):
         context['delete'] = RoleAssignment.has_permission(
             self.request.user, "delete_" + self.model.__name__.lower())
         return context
+    
+    
+class RiskScenarioDetailView(GenericDetailView):
+    model = RiskScenario
+    
+
+class SecurityMeasureDetailView(GenericDetailView):
+    model = SecurityMeasure
+    
+
+class RiskAcceptanceDetailView(GenericDetailView):
+    model = RiskAcceptance
+    
+
+class FolderDetailView(GenericDetailView):
+    model = Folder
+    
+
+class ProjectDetailView(GenericDetailView):
+    model = Project
+    
+
+class AssetDetailView(GenericDetailView):
+    model = Asset
+    
+
+class ThreatDetailView(GenericDetailView):
+    model = Threat
+    
+
+class SecurityFunctionDetailView(GenericDetailView):
+    model = SecurityFunction
 
 
 class AnalysisListView(ListView):
