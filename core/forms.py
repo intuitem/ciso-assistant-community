@@ -5,6 +5,8 @@ from .models import *
 from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
+from captcha.fields import ReCaptchaField
+from captcha.widgets import ReCaptchaV2Checkbox
 
 User = get_user_model()
 
@@ -47,13 +49,13 @@ class StyledModelForm(ModelForm):
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
 
-
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label=_("Email"), widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
 
 class ResetForm(forms.Form):
-    email = forms.CharField(label=_("Email"), widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
+    email = forms.EmailField(label=_("Email"), widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
 
 
 class ResetConfirmForm(SetPasswordForm):
@@ -63,7 +65,12 @@ class ResetConfirmForm(SetPasswordForm):
         for password in self.fields.items():
             password[1].widget.attrs['class'] = style
 
-
+class FirstConnexionConfirmForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):  
+        style = 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+        super(__class__, self).__init__(*args, **kwargs)
+        for password in self.fields.items():
+            password[1].widget.attrs['class'] = style
 
 class RiskAnalysisCreateForm(StyledModelForm):
     class Meta:

@@ -58,6 +58,12 @@ from .filters import *
 from core.helpers import get_counters, risks_count_per_level, security_measure_per_status, measures_to_review, acceptances_to_review
 from django.contrib.auth import get_user_model
 
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+
+from asf_rm.settings import MIRA_DOMAIN, EMAIL_USE_TLS
+from captcha.fields import ReCaptchaField
+
 import json
 
 User = get_user_model()
@@ -71,6 +77,23 @@ class AnalysisListView(ListView):
     paginate_by = 10
     model = Analysis
 
+    @receiver(user_logged_in)
+    def update_last_login_list(sender, user, request, **kwargs):
+        if isinstance(user, User):
+            user.update_last_login_list()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if len(self.request.user.last_five_logins) <= 1:
+            messages.info(self.request, _("Welcome to MIRA! 👋 Feel free to contact us if you have any problems."))
+        if not UserGroup.get_user_groups(self.request.user):
+            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact your administrator."))
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
+
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
@@ -81,7 +104,6 @@ class AnalysisListView(ListView):
 class UserLogin(LoginView):
     template_name = 'registration/login.html'
     form_class = LoginForm
-
 
 def password_reset_request(request):
     if request.method == "POST":
@@ -94,21 +116,27 @@ def password_reset_request(request):
                 subject = "Password Reset Requested"
                 email_template_name = "registration/password_reset_email.txt"
                 header = {
-                    "email":associated_user.email,
-                    'domain':'127.0.0.1:8000',
-                    'site_name': 'Website',
+                    "email": associated_user.email,
+                    'domain': MIRA_DOMAIN,
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'http',
+                    'protocol': 'https' if EMAIL_USE_TLS else 'http',
                 }
                 email = render_to_string(email_template_name, header)
                 try:
-                    send_mail(subject, email, 'mira.software@intuitem.com' , [associated_user.email], fail_silently=False)
-                except BadHeaderError:
-                    return HttpResponse('Invalid header found.')
-                return redirect ("/password_reset/done/")
-            messages.error(request, "An invalid email has been entered.")
+                    send_mail(subject, email, None, [associated_user.email], fail_silently=False)
+                except:
+                    messages.error(request, 'An error has occured, please try later.')
+                    password_reset_form = ResetForm()
+                    return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+            else:
+                messages.error(request, "This user doesn't exist")
+                password_reset_form = ResetForm()
+                return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+            return redirect ("/password_reset/done/")
+        else:
+            messages.error(request, "Invalid email or captcha")
     password_reset_form = ResetForm()
     return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
 
@@ -119,7 +147,7 @@ class ResetPasswordConfirmView(PasswordResetConfirmView):
 
 class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     template_name = "registration/first_connexion_confirm.html"
-    form_class = ResetConfirmForm
+    form_class = FirstConnexionConfirmForm
 
 @method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
@@ -436,6 +464,8 @@ def scoring_assistant(request):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
     context['matrices'] = list(RiskMatrix.objects.all().values_list('json_definition', flat=True))
+    context['change_usergroup'] = RoleAssignment.has_permission(request.user, "change_usergroup")
+    context['view_user'] = RoleAssignment.has_permission(request.user, "view_user")
     return render(request, template, context)
 
 
@@ -450,6 +480,14 @@ class ReviewView(ListView):
     context_object_name = 'context'
     model = Analysis
     ordering = 'id'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
@@ -1420,6 +1458,8 @@ class MyProfileDetailedView(UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if not UserGroup.get_user_groups(self.request.user):
+            messages.warning(self.request, _("Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -1508,6 +1548,10 @@ class UserCreateView(UserPassesTestMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
         context["crumbs"] = {'user-list': _('Users')}
         return context
 
@@ -1518,24 +1562,29 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data['email']
-            superuser = form.cleaned_data['superuser']
-            user = User.objects.create_user(email=data, is_superuser=superuser)
+            admin = form.cleaned_data['administrator']
+            user = User.objects.create_user(email=data)
+            if admin:
+                UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
             subject = "First Connexion"
             email_template_name = "registration/first_connexion_email.txt"
             header = {
                 "email":data,
-                'domain':'127.0.0.1:8000',
-                'site_name': 'Website',
+                'domain':MIRA_DOMAIN,
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'http',
+                'protocol': 'https' if EMAIL_USE_TLS else 'http',
+
             }
             email = render_to_string(email_template_name, header)
             try:
-                send_mail(subject, email, 'mira.software@intuitem.com' , [user.email], fail_silently=False)
-            except BadHeaderError:
-                return HttpResponse('Invalid header found.')
+                send_mail(subject, email, None , [user.email], fail_silently=False)
+            except:
+                messages.error(request, 'An error has occured, please try later.')
+                User.objects.get(email=data).delete()
+                return render(request, self.template_name, {'form': form})
+            messages.success(request, _('User created and email send successfully.'))
             return redirect("user-list")
         return render(request, self.template_name, {'form': form})
 

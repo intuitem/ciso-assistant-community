@@ -6,13 +6,14 @@
 {% endwith %}
 <div>
     <form method="post" id="user_create_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
+        {% include 'snippets/messages.html' %}
         <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
             <h2 class="text-xl font-semibold mb-4">{% trans "User information" %}</h2>
             <div class="flex flex-col space-y-4">
                 {{ form.non_field_errors }}
                 {% for field in form %}
                 <div class="">
-                    {% if field.label == "Superuser" %}
+                    {% if field.label == "Administrator" %}
                     <label class="text-sm font-semibold">{{ field.label|striptags }} <span class="ml-2">{{ field }}</span></label>
                     <div class="w-auto">
                         {% for error in field.errors %}
@@ -39,7 +40,7 @@
             </div>
             <div class="mt-4 flex space-x-2 justify-end">
                 <a href="{% url 'user-list' %}" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</a>
-            <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
+            <button id="create_button" action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
                 :disabled="submitDisabled">{% trans "Send" %}</button>
             </div>    
         </div>

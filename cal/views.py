@@ -8,6 +8,7 @@ from django.utils.translation import get_language
 import calendar
 
 from .models import *
+from iam.models import RoleAssignment
 from .utils import Calendar
 from .forms import EventForm
 from core.models import SecurityMeasure
@@ -23,6 +24,10 @@ class CalendarView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
         d = get_date(self.request.GET.get('month', None))
 
         # TODO: implement a more elegant security_function

@@ -38,17 +38,19 @@ $ git clone https://github.com/intuitem/asf-rm.git
 $ cd asf-rm
 ```
 
-2. Create local secret variables in a script located in parent folder (e.g. ../myvars)
+2. Create local secret variables in a script located in parent folder (e.g. ../myvars), to be adapted
 
 ```sh
 export DJANGO_SECRET_KEY=<XXX>
+export DJANGO_DEBUG=True
+export DJANGO_SUPERUSER_PASSWORD=<XXX>
+export MIRA_DOMAIN=mira.alsigo.net
+# for postgres (if the variables are not defined then we use sqlite)
 export POSTGRES_NAME=asf
 export POSTGRES_USER=asfuser
 export POSTGRES_PASSWORD=<XXX>
 export DB_HOST=localhost
 export DB_PORT=5432
-export DJANGO_DEBUG=True
-export DJANGO_SUPERUSER_PASSWORD=<XXX>
 # Mailing in production with gmail for example
 export EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 export EMAIL_HOST=smtp.gmail.com
@@ -56,9 +58,12 @@ export EMAIL_USE_TLS=True
 export EMAIL_PORT=587
 export EMAIL_HOST_USER=your_account@gmail.com
 export EMAIL_HOST_PASSWORD=yourpassword
+export DEFAULT_FROM_EMAIL=mira@alsigo.net
 # Mailing in development with Mailhog for example
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
+export RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123
+export RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456
 ```
 
 NOTE: DB_PORT is optional, and defaults to 5432.
@@ -159,7 +164,7 @@ You can find details about functional tests into our [Functional Test Book](/asf
 
 TBD
 
-## Deployment
+## Deployment with docker
 
 ```sh
 $ docker-compose -f docker-compose.prod.yml up
@@ -167,12 +172,32 @@ $ docker-compose -f docker-compose.prod.yml up
 
 Do not forget to check the [Django Deployment checklist](https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/)
 
+## Deployement with K8s
+
+The docker image must be compiled with:
+```sh
+$ docker build -t mira:x.y.z .
+```
+The image must be then tagged "mira:latest" for the appropriate repository and pushed to it.
+
+The deployment with sqlite is very simple:
+- Environment variables are defined in cm.mira-config-dev.yaml (except secrets)
+- Secrets shall be created using the create_secret.py script on a list of exports (eg. myvars) and then "kubectl create secrets" as recommended by the script
+- A service called "mira" is defined in svc.mira.yaml
+- An ingress is defined in ing.mira.yaml. It shall be adapted to the served domain.
+- The pods can be created with sts.mira.yaml, using a StatefulSet.
+
+When using Postgres, the pods can be created with deploy.mira.yaml, using a Deployement.
+
+Configurations and readme can be found in the k8s directory, in particular for Scaleway. 
+
 ## Built With
 
 - Django - Python Web Development Framework
 - Gunicorn - Python WSGI HTTP Server for UNIX
-- NGINX - HTTP Server and Reverse Proxy
+- caddy - HTTP Server and Reverse Proxy
 - PostgreSQL - Open Source RDBMS
+- sqlite - Open Source RDBMS
 - Tailwind CSS - CSS Framework
 - AlpineJS - Minimalist JS framework
 - Docker - Container Engine

@@ -1,0 +1,15 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: ingressroutetcpmira
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  # Match is the rule corresponding to an underlying router.
+  - match: HostSNI(`mira2.alsigo.net`)
+    services:
+    - name: mira
+      port: 443
+  tls:
+    passthrough: true
