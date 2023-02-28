@@ -98,6 +98,7 @@ urlpatterns = [
     # path('risk_scenario/create-modal', login_required(views.RiskScenarioCreateViewModal.as_view()), name='ri-create-modal'),
     
     # UPDATE VIEWS
+    path('risk-scenarios/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='ri-update-modal'),
     path('risk-analyses/<str:pk>/edit/', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
     path('risk-scenarios/<str:pk>/edit/', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
     path('security-measures/<str:pk>/edit/', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
