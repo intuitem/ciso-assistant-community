@@ -84,7 +84,8 @@ class GenericDetailView(DetailView):
                 object_data[key] = getattr(self.object, key)
             # get proper value display for choice fields
             if choices := self.get_object()._meta.get_field(key).choices:
-                object_data[key] = dict(choices)[object_data[key]]
+                if key in object_data and object_data[key] in dict(choices):
+                    object_data[key] = dict(choices)[object_data[key]]
             # convert all fields to iterables for template rendering
             if not isinstance(object_data[key], list):
                 object_data[key] = [object_data[key]]
@@ -92,7 +93,7 @@ class GenericDetailView(DetailView):
             object_data[self.object._meta.get_field(
                 key).verbose_name] = object_data.pop(key)
 
-        # exclude fields
+        # pop excluded fields
         for key in self.exclude:
             object_data.pop(key, None)
 
