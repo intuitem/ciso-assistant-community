@@ -69,6 +69,19 @@ import json
 User = get_user_model()
 
 
+class GenericDetailView(DetailView):
+    template_name = 'generic/detail.html'
+    context_object_name = 'object'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change'] = RoleAssignment.has_permission(
+            self.request.user, "change_" + self.model.__name__.lower())
+        context['delete'] = RoleAssignment.has_permission(
+            self.request.user, "delete_" + self.model.__name__.lower())
+        return context
+
+
 class AnalysisListView(ListView):
     template_name = 'core/index.html'
     context_object_name = 'context'
