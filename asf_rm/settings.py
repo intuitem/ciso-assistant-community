@@ -103,8 +103,8 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS']
-# NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution.
+# EMAIL_USE_TLS = os.environ['EMAIL_USE_TLS']
+# NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution or wait a real SMTP server.
 
 TEMPLATES = [
     {

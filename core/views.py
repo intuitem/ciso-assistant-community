@@ -61,7 +61,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import MIRA_DOMAIN, EMAIL_USE_TLS
+from asf_rm.settings import MIRA_DOMAIN
 from captcha.fields import ReCaptchaField
 from datetime import datetime, timedelta
 
@@ -120,11 +120,11 @@ def password_reset_request(request):
                 email_template_name = "registration/password_reset_email.txt"
                 header = {
                     "email": associated_user.email,
-                    'domain': MIRA_DOMAIN,
+                    'domain': str(MIRA_DOMAIN)+":8000",
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'https' if EMAIL_USE_TLS else 'http',
+                    'protocol': 'http',
                 }
                 email = render_to_string(email_template_name, header)
                 try:
@@ -1587,11 +1587,11 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             email_template_name = "registration/first_connexion_email.txt"
             header = {
                 "email":data,
-                'domain':MIRA_DOMAIN,
+                'domain':str(MIRA_DOMAIN)+":8000",
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'https' if EMAIL_USE_TLS else 'http',
+                'protocol': 'http',
 
             }
             email = render_to_string(email_template_name, header)
