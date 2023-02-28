@@ -35,6 +35,17 @@ urlpatterns = [
     path('quick-start', login_required(views.QuickStartView.as_view()), name='quick_start'),
     path('scoring-assistant', login_required(views.scoring_assistant), name='scoring_bo'),
 
+    # DETAIL VIEWS
+
+    path('risk-scenarios/<str:pk>', login_required(views.RiskScenarioDetailView.as_view()), name='risk-scenario-detail'),
+    path('security-measures/<str:pk>', login_required(views.SecurityMeasureDetailView.as_view()), name='security-measure-detail'),
+    path('risk-acceptances/<str:pk>', login_required(views.RiskAcceptanceDetailView.as_view()), name='risk-acceptance-detail'),
+    path('projects-domains/<str:pk>', login_required(views.FolderDetailView.as_view()), name='projects-domain-detail'),
+    path('projects/<str:pk>', login_required(views.ProjectDetailView.as_view()), name='project-detail'),
+    path('assets/<str:pk>', login_required(views.AssetDetailView.as_view()), name='asset-detail'),
+    path('threats/<str:pk>', login_required(views.ThreatDetailView.as_view()), name='threat-detail'),
+    path('security-functions/<str:pk>', login_required(views.SecurityFunctionDetailView.as_view()), name='security-function-detail'),
+
     # LIST VIEWS
     path('risk-analyses/', login_required(views.RiskAnalysisListView.as_view()), name='ra-list'),
     path('risk-scenarios/', login_required(views.RiskScenarioListView.as_view()), name='ri-list'),
@@ -87,23 +98,22 @@ urlpatterns = [
     # path('risk_scenario/create-modal', login_required(views.RiskScenarioCreateViewModal.as_view()), name='ri-create-modal'),
     
     # UPDATE VIEWS
-    path('risk-analyses/<str:pk>', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
-    path('risk-scenarios/<str:pk>', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
-    path('risk-scenarios/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='ri-update-modal'),
-    path('security-measures/<str:pk>', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
-    path('risk-acceptances/<str:pk>', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
-    path('threats/<str:pk>', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
-    path('security-functions/<str:pk>', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
+    path('risk-analyses/<str:pk>/edit/', login_required(views.RiskAnalysisUpdateView.as_view()), name='ra-update'),
+    path('risk-scenarios/<str:pk>/edit/', login_required(views.RiskScenarioUpdateView.as_view()), name='ri-update'),
+    path('security-measures/<str:pk>/edit/', login_required(views.SecurityMeasureUpdateView.as_view()), name='mtg-update'),
+    path('risk-acceptances/<str:pk>/edit/', login_required(views.RiskAcceptanceUpdateView.as_view()), name='acceptance-update'),
+    path('threats/<str:pk>/edit/', login_required(views.ThreatUpdateView.as_view()), name='threat-update'),
+    path('security-functions/<str:pk>/edit/', login_required(views.SecurityFunctionUpdateView.as_view()), name='security-function-update'),
 
-    path('projects-domains/<str:pk>', login_required(views.FolderUpdateView.as_view()), name='pd-update'),
-    path('projects/<str:pk>', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
-    path('assets/<str:pk>', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
+    path('projects-domains/<str:pk>/edit/', login_required(views.FolderUpdateView.as_view()), name='pd-update'),
+    path('projects/<str:pk>/edit/', login_required(views.ProjectUpdateView.as_view()), name='project-update'),
+    path('assets/<str:pk>/edit/', login_required(views.AssetUpdateView.as_view()), name='asset-update'),
 
-    path('users/<str:pk>', login_required(views.UserUpdateView.as_view()), name='user-update'),
-    path('my-profile/<str:pk>', login_required(views.MyProfileUpdateView.as_view()), name='me-update'),
+    path('users/<str:pk>/edit/', login_required(views.UserUpdateView.as_view()), name='user-update'),
+    path('my-profile/<str:pk>/edit/', login_required(views.MyProfileUpdateView.as_view()), name='me-update'),
     path('users/<str:pk>/password', login_required(views.UserPasswordChangeView.as_view()), name='password-change'),
-    path('user-groups/<str:pk>', login_required(views.UserGroupUpdateView.as_view()), name='user_group-update'),
-    path('role-assignments/<str:pk>', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
+    path('user-groups/<str:pk>/edit/', login_required(views.UserGroupUpdateView.as_view()), name='user_group-update'),
+    path('role-assignments/<str:pk>/edit/', login_required(views.RoleAssignmentUpdateView.as_view()), name='role-assignment-update'),
     
     # DELETE VIEWS
     path('risk-analyses/<str:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
