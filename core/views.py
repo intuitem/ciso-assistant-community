@@ -61,7 +61,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import MIRA_DOMAIN
+from asf_rm.settings import MIRA_DOMAIN, EMAIL_USE_TLS
 from captcha.fields import ReCaptchaField
 from datetime import datetime, timedelta
 
@@ -120,11 +120,11 @@ def password_reset_request(request):
                 email_template_name = "registration/password_reset_email.txt"
                 header = {
                     "email": associated_user.email,
-                    'domain': str(MIRA_DOMAIN)+":8000",
+                    'domain': str(MIRA_DOMAIN),
                     "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
                     "user": associated_user,
                     'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'http',
+                    'protocol': 'https' if EMAIL_USE_TLS else 'http',
                 }
                 email = render_to_string(email_template_name, header)
                 try:
@@ -138,10 +138,12 @@ def password_reset_request(request):
                             context["password_reset_form"]=password_reset_form
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
-                    send_mail(subject, email, None, [associated_user.email], fail_silently=False)
+                    print("Sending reset mail to", data)
+                    send_mail(subject, email, None, [data], fail_silently=False)
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
-                except:
+                except Exception as e:
                     messages.error(request, 'An error has occured, please try later.')
+                    print("Exception:", e)
                     password_reset_form = ResetForm()
                     context["password_reset_form"]=password_reset_form
                     return render(request=request, template_name="registration/password_reset.html", context=context)
@@ -1587,18 +1589,19 @@ class UserCreateView(UserPassesTestMixin, CreateView):
             email_template_name = "registration/first_connexion_email.txt"
             header = {
                 "email":data,
-                'domain':str(MIRA_DOMAIN)+":8000",
+                'domain':str(MIRA_DOMAIN),
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 'token': default_token_generator.make_token(user),
-                'protocol': 'http',
-
+                'protocol': 'https' if EMAIL_USE_TLS else 'http',
             }
-            email = render_to_string(email_template_name, header)
+            email_body = render_to_string(email_template_name, header)
             try:
-                send_mail(subject, email, None , [user.email], fail_silently=False)
-            except:
+                print("Sending welcome mail to", data)
+                send_mail(subject, email_body, None, [data], fail_silently=False)
+            except Exception as e:
                 messages.error(request, 'An error has occured, please try later.')
+                print("Exception:", e)
                 User.objects.get(email=data).delete()
                 return render(request, self.template_name, {'form': form})
             messages.success(request, _('User created and email send successfully.'))
