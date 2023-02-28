@@ -10,6 +10,8 @@ from django.contrib.auth import password_validation
 from django import forms
 from .models import Folder, User, UserGroup, RoleAssignment, Role
 
+from core.forms import SearchableCheckboxSelectMultiple
+
 
 class DefaultDateInput(DateInput):
     """ default date for input """
@@ -18,15 +20,18 @@ class DefaultDateInput(DateInput):
 
 class StyledModelForm(ModelForm):
     """ a nice ModelForm """
+
     def __init__(self, *args, **kwargs):
         # pragma pylint: disable=no-member
         super(__class__, self).__init__(*args, **kwargs)
-        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput)
+        text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput,
+                       HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput)
         select_inputs = (Select, SelectMultiple, NullBooleanSelect)
         for fname, f in self.fields.items():
             input_type = f.widget.__class__
             if self.Meta.model:
-                model_name = str(self.Meta.model).split('.')[-1].strip("'>").lower()
+                model_name = str(self.Meta.model).split(
+                    '.')[-1].strip("'>").lower()
             if input_type in text_inputs:
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}' if model_name else f'id_{fname}'
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
@@ -46,16 +51,20 @@ class StyledModelForm(ModelForm):
 class FolderUpdateForm(StyledModelForm):
     """ form to update a folder """
     # pragma pylint: disable=no-member
+
     def __init__(self, *args, **kwargs):
         super(FolderUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['parent_folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['parent_folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        self.fields['parent_folder'].queryset = Folder.objects.filter(
+            content_type=Folder.ContentType.ROOT)
+        self.fields['parent_folder'].initial = Folder.objects.get(
+            content_type=Folder.ContentType.ROOT)
         self.fields['parent_folder'].widget.attrs['select_disabled'] = True
 
     class Meta:
         """ for Model """
         model = Folder
-        exclude = ['content_type', 'builtin', 'hide_public_asset', 'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function']
+        exclude = ['content_type', 'builtin', 'hide_public_asset',
+                   'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function']
 
 
 class UserCreationForm(forms.ModelForm):
@@ -100,71 +109,79 @@ class UserCreationForm(forms.ModelForm):
 
 class UserCreateForm(UserCreationForm, StyledModelForm):
     """ form to create user """
-    
+    pass
 
 
 class UserUpdateForm(UserChangeForm, StyledModelForm):
-    """ form to update user """ 
-    def __init__(self, *args, user,**kwargs):
+    """ form to update user """
+
+    def __init__(self, *args, user, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
         password = self.fields.get('password')
-        self.fields['password'].help_text=_(
+        self.fields['password'].help_text = _(
             'Raw passwords are not stored, so there is no way to see this '
             'user’s password, but you can change the password using '
             '<a class="help_text-link" href="{}">this form</a>.'
         )
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
         self.fields['is_active'].widget.attrs['class'] += ' -mt-1'
-        self.fields['user_groups'].widget = forms.CheckboxSelectMultiple(
-            attrs={'class': 'text-sm rounded'}, choices=self.fields['user_groups'].choices
+        self.fields['user_groups'].widget = SearchableCheckboxSelectMultiple(
+            choices=self.fields['user_groups'].choices,
+            attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'}
         )
         if password:
             password.help_text = password.help_text.format(
-                reverse('password-change', 
-                kwargs={'pk': user.pk}
-            ))
+                reverse('password-change',
+                        kwargs={'pk': user.pk}
+                        ))
 
     field_order = ['email', 'password', 'first_name', 'last_name', 'is_active']
 
     class Meta:
         """ for Model """
         model = User
-        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions', 'last_five_logins']
+        exclude = ['last_login', 'is_superuser',
+                   'date_joined', 'user_permissions']
 
 
 class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
     """ form for logged user """
     # TODO: not sure this section is useful, self user could be in user list with a mention "me"
-    def __init__(self, *args, user,**kwargs):
+
+    def __init__(self, *args, user, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
         self.fields['email'].widget.attrs['readonly'] = True
-        self.fields['email'].help_text=_(
+        self.fields['email'].help_text = _(
             'To change your email address, please contact your administrator.'
         )
         self.fields['password'].widget.attrs['class'] = 'text-sm -mb-1 password_update'
         password = self.fields.get('password')
-        self.fields['password'].help_text=_(
+        self.fields['password'].help_text = _(
             'Raw passwords are not stored, so there is no way to see this '
             'user’s password, but you can change the password using '
             '<a class="help_text-link" href="{}">this form</a>.'
         )
         if password:
             password.help_text = password.help_text.format(
-                reverse('password-change', 
-                kwargs={'pk': user.pk}
-            ))
+                reverse('password-change',
+                        kwargs={'pk': user.pk}
+                        ))
 
     field_order = ['last_name', 'first_name', 'password', 'email']
 
     class Meta:
         model = User
-        exclude = ['last_login', 'is_superuser', 'date_joined', 'user_permissions', 'user_groups', 'is_active', 'last_five_logins']
+        exclude = ['last_login', 'is_superuser', 'date_joined',
+                   'user_permissions', 'user_groups', 'is_active']
 
 
 class UserPasswordChangeForm(AdminPasswordChangeForm):
     """ change user password form """
+
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
         for fname, f in self.fields.items():
@@ -173,12 +190,14 @@ class UserPasswordChangeForm(AdminPasswordChangeForm):
         self.fields.get('password1').widget.attrs['id'] = 'password1'
         self.fields.get('password2').widget.attrs['id'] = 'password2'
 
+
 class UserGroupCreateForm(StyledModelForm):
     """ form to create a user group """
     class Meta:
         """ for Model """
         model = UserGroup
         exclude = ['permissions', 'builtin']
+
 
 class UserGroupUpdateForm(StyledModelForm):
     """ form to update a user group """

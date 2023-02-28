@@ -12,17 +12,11 @@
         <div class="flex flex-col mb-4 space-y-1">
           <div class="flex flex-col">
               <label class="text-sm font-semibold">{{ form.security_measures.label|striptags }}</label>
-              <div class="w-full border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll">
-                  <div class="flex flex-col">
-                      <div>
                           {{ form.security_measures }}
                   
                           {% for error in form.security_measures.errors %}
                               <li class="text-red-500 text-xs font-semibold">{{ error|striptags }}</li>
                           {% endfor %}
-                      </div>
-                  </div>
-              </div>
           </div>
           <div class="help_text -mt-1">
               {{ form.security_measures.help_text|safe }}

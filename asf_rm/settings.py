@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     "whitenoise.runserver_nostatic",
     'django.contrib.staticfiles',
+    'django.forms',
     'fieldsets_with_inlines',
     'tailwind',
     'theme',
@@ -122,6 +123,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = 'asf_rm.wsgi.application'
 
