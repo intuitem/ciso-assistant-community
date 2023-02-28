@@ -73,12 +73,16 @@ class GenericDetailView(DetailView):
     template_name = 'generic/detail.html'
     context_object_name = 'object'
 
-    exclude = ['id']
+    exclude = ['id', 'is_published']
 
     def get_object_data(self):
         object_data = model_to_dict(self.object)
 
         for key in list(object_data.keys()):
+            # pop excluded fields
+            if key in self.exclude:
+                object_data.pop(key)
+                continue
             # replace uuids with their respective objects
             if object_data[key] and isinstance(object_data[key], UUID):
                 object_data[key] = getattr(self.object, key)
@@ -92,10 +96,6 @@ class GenericDetailView(DetailView):
             # replace field names with their respective verbose names
             object_data[self.object._meta.get_field(
                 key).verbose_name] = object_data.pop(key)
-
-        # pop excluded fields
-        for key in self.exclude:
-            object_data.pop(key, None)
 
         return object_data
 
@@ -129,6 +129,8 @@ class RiskAcceptanceDetailView(GenericDetailView):
 
 class FolderDetailView(GenericDetailView):
     model = Folder
+    exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
+               "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
 
 
 class ProjectDetailView(GenericDetailView):
