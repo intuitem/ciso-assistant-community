@@ -1,1 +1,32 @@
 {% extends 'core/base.html' %}
+
+{% load i18n static %}
+
+{% block content %}
+
+<div>
+    {% with page_title=object %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+
+    <div class="flex flex-col space-y-2 bg-white rounded-xl shadow-lg px-6 py-4">
+        {% for key, values in data.items %}
+        <div class="flex flex-col">
+            <div class="text-sm font-medium text-gray-800">
+                {{ key|capfirst }}
+            </div>
+            <ul class="text-sm">
+                {% for value in values %}
+                    <li class="text-gray-600 list-none">
+                        {% if value %} {{ value }} {% else %} -- {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="text-gray-600 list-none">--</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}
