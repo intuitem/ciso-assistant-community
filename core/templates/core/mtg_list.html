@@ -208,7 +208,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'MP' measure.folder.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'security-measure-detail' measure.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 {% if measure.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'mtg-update' measure.id %}" class="cursor-pointer table-action">

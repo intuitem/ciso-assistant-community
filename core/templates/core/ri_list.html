@@ -182,7 +182,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'RA' scenario.analysis.id %}#{{scenario.id}}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'risk-scenario-detail' scenario.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 {% if scenario.id in object_ids_change %}
                                 <span>
                                     <a href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">

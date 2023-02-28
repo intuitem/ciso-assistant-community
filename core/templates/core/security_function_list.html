@@ -148,7 +148,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
-                            {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                            <span><a href="{% url 'security-function-detail' function.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                             {% if function.id in object_ids_change %}
                             <span>
                                 <a href="{% url 'security-function-update' function.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
