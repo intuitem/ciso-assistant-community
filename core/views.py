@@ -63,6 +63,7 @@ from django.dispatch import receiver
 
 from asf_rm.settings import MIRA_DOMAIN, PROTOCOL
 from captcha.fields import ReCaptchaField
+from datetime import datetime, timedelta
 
 import json
 
@@ -106,7 +107,9 @@ class UserLogin(LoginView):
     form_class = LoginForm
 
 def password_reset_request(request):
+    context={}
     if request.method == "POST":
+        now = datetime.now()
         password_reset_form = ResetForm(request.POST)
         if password_reset_form.is_valid():
             data = password_reset_form.cleaned_data['email']
@@ -125,20 +128,34 @@ def password_reset_request(request):
                 }
                 email = render_to_string(email_template_name, header)
                 try:
+                    if 'last_email_sent' in request.session:
+                        last_sent_time = datetime.strptime(request.session['last_email_sent'], '%Y-%m-%d %H:%M:%S')
+                        elapsed_time = now - last_sent_time
+                        # Vérifier si 30 secondes se sont écoulées depuis le dernier envoi de mail
+                        if elapsed_time < timedelta(seconds=30):
+                            # Si oui, retourner une réponse d'erreur
+                            messages.error(request, "Please wait before requesting another password reset.")
+                            context["password_reset_form"]=password_reset_form
+                            return render(request=request, template_name="registration/password_reset.html", context=context)
+                    # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     send_mail(subject, email, None, [associated_user.email], fail_silently=False)
+                    request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except:
                     messages.error(request, 'An error has occured, please try later.')
                     password_reset_form = ResetForm()
-                    return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+                    context["password_reset_form"]=password_reset_form
+                    return render(request=request, template_name="registration/password_reset.html", context=context)
             else:
-                messages.error(request, "This user doesn't exist")
+                messages.error(request, "This user doesn't exist.")
                 password_reset_form = ResetForm()
-                return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+                context["password_reset_form"]=password_reset_form
+                return render(request=request, template_name="registration/password_reset.html", context=context)
             return redirect ("/password_reset/done/")
         else:
-            messages.error(request, "Invalid email or captcha")
+            messages.error(request, "Invalid email or captcha.")
     password_reset_form = ResetForm()
-    return render(request=request, template_name="registration/password_reset.html", context={"password_reset_form":password_reset_form})
+    context["password_reset_form"]=password_reset_form
+    return render(request=request, template_name="registration/password_reset.html", context=context)
 
 
 class ResetPasswordConfirmView(PasswordResetConfirmView):
