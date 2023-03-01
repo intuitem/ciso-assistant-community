@@ -79,7 +79,6 @@ class GenericDetailView(DetailView):
         object_data = model_to_dict(self.object)
 
         for key in list(object_data.keys()):
-            # pop excluded fields
             if key in self.exclude:
                 object_data.pop(key)
                 continue
@@ -117,6 +116,28 @@ class GenericDetailView(DetailView):
 
 class RiskScenarioDetailView(GenericDetailView):
     model = RiskScenario
+    exclude = ['id', 'current_proba', 'residual_proba', 'current_impact',
+               'residual_impact', 'current_level', 'residual_level']
+    
+    def get_object_data(self):
+        object_data = super().get_object_data()
+
+        _data = {}
+
+        _data['current_proba'] = self.object.get_current_proba()['name']
+        _data['residual_proba'] = self.object.get_residual_proba()['name']
+        _data['current_impact'] = self.object.get_current_impact()['name']
+        _data['residual_impact'] = self.object.get_residual_impact()['name']
+        _data['current_level'] = self.object.get_current_risk()['name']
+        _data['residual_level'] = self.object.get_residual_risk()['name']
+
+        for key in list(_data.keys()):
+            object_data[self.object._meta.get_field(
+                key).verbose_name] = [_data.pop(key)]
+
+
+
+        return object_data
 
 
 class SecurityMeasureDetailView(GenericDetailView):
