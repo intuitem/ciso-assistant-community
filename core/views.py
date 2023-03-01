@@ -116,17 +116,6 @@ def password_reset_request(request):
             associated_users = User.objects.filter(email=data)
             if associated_users and associated_users.exists():
                 associated_user = associated_users[0]
-                subject = "Password Reset Requested"
-                email_template_name = "registration/password_reset_email.txt"
-                header = {
-                    "email": associated_user.email,
-                    'domain': str(MIRA_DOMAIN),
-                    "uid": urlsafe_base64_encode(force_bytes(associated_user.pk)),
-                    "user": associated_user,
-                    'token': default_token_generator.make_token(associated_user),
-                    'protocol': 'https' if EMAIL_USE_TLS else 'http',
-                }
-                email = render_to_string(email_template_name, header)
                 try:
                     if 'last_email_sent' in request.session:
                         last_sent_time = datetime.strptime(request.session['last_email_sent'], '%Y-%m-%d %H:%M:%S')
@@ -139,7 +128,7 @@ def password_reset_request(request):
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
-                    send_mail(subject, email, None, [data], fail_silently=False)
+                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject="Password Reset Requested")
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     messages.error(request, 'An error has occured, please try later.')
@@ -1582,30 +1571,16 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         if form.is_valid():
             data = form.cleaned_data['email']
             admin = form.cleaned_data['administrator']
-            user = User.objects.create_user(email=data)
-            if admin:
-                UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
-            subject = "First Connexion"
-            email_template_name = "registration/first_connexion_email.txt"
-            header = {
-                "email":data,
-                'domain':str(MIRA_DOMAIN),
-                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
-                "user": user,
-                'token': default_token_generator.make_token(user),
-                'protocol': 'https' if EMAIL_USE_TLS else 'http',
-            }
-            email_body = render_to_string(email_template_name, header)
             try:
-                print("Sending welcome mail to", data)
-                send_mail(subject, email_body, None, [data], fail_silently=False)
+                user = User.objects.create_user(email=data)
+                if admin:
+                    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
+                messages.success(request, _('User created and email send successfully.'))
+                return redirect("user-list")
             except Exception as e:
-                messages.error(request, 'An error has occured, please try later.')
+                messages.error(request, "An error has occured, please try later.")
                 print("Exception:", e)
-                User.objects.get(email=data).delete()
                 return render(request, self.template_name, {'form': form})
-            messages.success(request, _('User created and email send successfully.'))
-            return redirect("user-list")
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):

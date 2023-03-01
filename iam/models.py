@@ -13,6 +13,12 @@ from django.utils.translation import gettext_lazy as _
 from asf_rm import settings
 from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
 from core.base_models import AbstractBaseModel
+from django.utils.http import urlsafe_base64_encode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from asf_rm.settings import MIRA_DOMAIN
 
 
 class UserGroup(models.Model):
@@ -140,7 +146,12 @@ class UserManager(BaseUserManager):
         user = self.model(email=email, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)
-        return user
+        try:
+            user.mailing(email_template_name="registration/first_connexion_email.txt", subject="First Connexion")
+            return user
+        except Exception as exception:
+            user.delete()
+            raise exception
 
     def create_user(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_superuser", False)
@@ -155,8 +166,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """ a user is a principal corresponding to a human """
     try:
-        """ a user is a principal corresponding to a human """
         id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
         last_name = models.CharField(_('last name'), max_length=150, blank=True)
         first_name = models.CharField(_('first name'), max_length=150, blank=True)
@@ -212,12 +223,14 @@ class User(AbstractBaseUser):
             return full_name.strip()
         except:
             return ""
+        
     def get_short_name(self) -> str:
         """get user's short name (i.e. first_name or email before @))"""
         try:
             return self.first_name if self.first_name else self.email.split('@')[0]
         except:
             return ""
+        
     def update_last_login_list(self): # NOTE: think about this functionnality because now it's only used to know the first connection
         """
         Adds the date and time of the user's last login to the list
@@ -226,6 +239,21 @@ class User(AbstractBaseUser):
         self.last_five_logins.append(str(self.last_login))
         self.last_five_logins = self.last_five_logins[-5:]
         self.save()
+    
+    def mailing(self, email_template_name, subject):
+        """
+        Sending a mail to a user for password resetting or creation
+        """
+        header = {
+                    "email": self.email,
+                    'domain': MIRA_DOMAIN,
+                    "uid": urlsafe_base64_encode(force_bytes(self.pk)),
+                    "user": self,
+                    'token': default_token_generator.make_token(self),
+                    'protocol': 'http',
+                }
+        email = render_to_string(email_template_name, header)
+        send_mail(subject, email, None, [self.email], fail_silently=False)
 
 
 class RoleAssignment(models.Model):
