@@ -5,7 +5,7 @@
     <div class="">
         <div class="bg-white py-4 px-12 m-4 shadow rounded-lg flex space-x-2 relative">
             {% if object_ids_change %}
-            <a href="{% url 'ra-update' analysis.id %}" class="absolute right-2 top-2 py-2 px-4 m-1 add-button">
+            <a href="{% url 'analysis-update' analysis.id %}" class="absolute right-2 top-2 py-2 px-4 m-1 add-button">
                 <i class="fas fa-edit"></i>
                 {% trans "Edit" %}</a>
             {% endif %}
@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div class="container w-2/3 rounded">
-                <div class="text-sm"><span class="font-semibold">{% trans "Matrix:" %}</span> <a href="{% url 'matrix-detailed' analysis.rating_matrix.id %}?next={{ request.path|urlencode }}" class="py-1 px-2 text-blue-600 hover:text-blue-500 capitalize">{{ analysis.rating_matrix }}</a>
+                <div class="text-sm"><span class="font-semibold">{% trans "Matrix:" %}</span> <a href="{% url 'matrix-detail' analysis.rating_matrix.id %}?next={{ request.path|urlencode }}" class="py-1 px-2 text-blue-600 hover:text-blue-500 capitalize">{{ analysis.rating_matrix }}</a>
                 </div>
                 <br>
                 <div class="text-sm"><span class="font-semibold">{% trans "Description" %}</div>

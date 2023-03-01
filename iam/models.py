@@ -10,6 +10,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
+from django.urls.base import reverse_lazy
 from asf_rm import settings
 from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
 from core.base_models import AbstractBaseModel
@@ -226,6 +227,11 @@ class User(AbstractBaseUser):
         self.last_five_logins.append(str(self.last_login))
         self.last_five_logins = self.last_five_logins[-5:]
         self.save()
+
+    @property
+    def edit_url(self) -> str:
+        """get the edit url of the user"""
+        return reverse_lazy(f"{self.__class__.__name__.lower()}-update", args=[self.id])
 
 
 class RoleAssignment(models.Model):

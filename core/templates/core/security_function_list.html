@@ -90,17 +90,17 @@
             </div>        
         </div>
     </form>
-    {% url 'security-function-list' as short_path %}
+    {% url 'securityfunction-list' as short_path %}
     {% if request.get_full_path != short_path %}
     <div class="flex items-center h-10 w-full">
-        <a href="{% url 'security-function-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+        <a href="{% url 'securityfunction-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
             <span>{% trans "Clear Filters" %}</span>
         </a>
     </div>
     {% endif %}
     <!-- End Filters Dropdown Form -->
     {% if add_securityfunction %}
-    {% include 'snippets/add_button_modal.html' with form=security_function_create_form header=_("Add Security Function") model="security-function" content=_("New security function") %}
+    {% include 'snippets/add_button_modal.html' with form=security_function_create_form header=_("Add Security Function") model="securityfunction" content=_("New security function") %}
     {% endif %}
 </div>
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
@@ -118,17 +118,10 @@
                         <div class="flex items-center">
 
                             <div class="">
-                                {% if object_ids_change %}
-                                <a id="function{{ function.id }}" href="{% url 'security-function-update' function.id %}?next={{ request.path|urlencode }}"
+                                <a id="function{{ function.id }}" href="{% url 'securityfunction-detail' function.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                     {{ function.name|capfirst }}
                                 </a>
-                                {% else %}
-                                <a id="function{{ function.id }}"
-                                class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                    {{ function.name|capfirst }}
-                                </a>
-                                {% endif %}
                             </div>
                         </div>
                     </th>
@@ -148,16 +141,16 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
-                            {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                            <span><a href="{% url 'securityfunction-detail' function.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                             {% if function.id in object_ids_change %}
                             <span>
-                                <a href="{% url 'security-function-update' function.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                <a href="{% url 'securityfunction-update' function.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </span>
                             {% endif %}
                             {% if function.id in object_ids_delete %}
-                            {% include 'snippets/delete_button_modal.html' with object=function header=_("Delete security function?") model='security-function' %}
+                            {% include 'snippets/delete_button_modal.html' with object=function header=_("Delete security function?") model='securityfunction' %}
                             {% endif %}
                         </div>
                     </td>

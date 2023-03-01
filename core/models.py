@@ -478,7 +478,7 @@ class RiskAcceptance(AbstractBaseModel):
 
     @property
     def get_html_url(self):
-        url = reverse('acceptance-update', args=(self.id,))
+        url = reverse('riskacceptance-update', args=(self.id,))
         return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_scenario} </a>'
 # you can consider nested inlines at some points
 

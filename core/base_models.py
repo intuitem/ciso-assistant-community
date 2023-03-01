@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.urls.base import reverse_lazy
 from django.core.exceptions import ValidationError
 import uuid
 
@@ -52,6 +53,10 @@ class AbstractBaseModel(models.Model):
 
     def display_name(self):
         pass
+
+    @property
+    def edit_url(self):
+        return reverse_lazy(f"{self.__class__.__name__.lower()}-update", kwargs={"pk": self.pk})
 
     def get_scope(self):
         if hasattr(self, 'risk_scenario') and self.risk_scenario is not None:

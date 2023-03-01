@@ -115,7 +115,7 @@
         {% endif %}
         <!-- End Filters Dropdown Form -->
         {% if add_riskacceptance%}
-        {% include 'snippets/add_button_modal.html' with form=risk_acceptance_create_form header=_("Add Risk Acceptance") model="acceptance" content=_("New risk acceptance") %}
+        {% include 'snippets/add_button_modal.html' with form=risk_acceptance_create_form header=_("Add Risk Acceptance") model="riskacceptance" content=_("New risk acceptance") %}
         {% endif %}
     </div>
 
@@ -141,17 +141,10 @@
                                 {% endif %}">{{ acceptance.get_type_display|lower}}
                                 </span>
                                 <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
-                                    {% if object_ids_change %}
-                                    <a id="acceptance{{ acceptance.id }}" href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}"
+                                    <a id="acceptance{{ acceptance.id }}" href="{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold hover:text-blue-500">
                                         {{ acceptance }}
                                     </a>
-                                    {% else %}
-                                    <p id="acceptance{{ acceptance.id }}"
-                                    class="text-gray-900 text-md font-semibold">
-                                        {{ acceptance }}
-                                    </p>
-                                    {% endif %}
                                 </div>
                             </div>
                         </th>
@@ -172,16 +165,16 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                                <span><a href="{% url 'riskacceptance-detail' acceptance.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 {% if acceptance.id in object_ids_change %}
                                 <span>
-                                    <a href="{% url 'acceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                    <a href="{% url 'riskacceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
                                 {% endif %}
                                 {% if acceptance.id in object_ids_delete %}
-                                {% include 'snippets/delete_button_modal.html' with object=acceptance header=_("Delete risk acceptance?") model='risk-acceptance' %}
+                                {% include 'snippets/delete_button_modal.html' with object=acceptance header=_("Delete risk acceptance?") model='riskacceptance' %}
                                 {% endif %}
 
                             </div>
