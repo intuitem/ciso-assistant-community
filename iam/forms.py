@@ -143,8 +143,7 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
     class Meta:
         """ for Model """
         model = User
-        exclude = ['last_login', 'is_superuser',
-                   'date_joined', 'user_permissions']
+        fields = ['email', 'password', 'first_name', 'last_name', 'is_active', 'user_groups']
 
 
 class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
