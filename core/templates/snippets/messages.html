@@ -62,3 +62,20 @@
     </div>
 </ul>
 {% endif %}
+<script>
+    const myTimeout = setTimeout(hide, 8000);
+    function hide(){
+        var time = setInterval(opac, 50), cpt=1;
+        function opac(){
+            var elms = document.querySelectorAll("[id$='-toast']");
+            if (elms){
+                if(cpt>0){
+                    for(var i = 0; i < elms.length; i++) 
+                    elms[i].style.opacity=cpt-=.025;
+                }
+                else clearInterval(time);
+            } 
+        }
+    }
+
+</script>
