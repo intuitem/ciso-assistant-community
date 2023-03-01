@@ -35,19 +35,6 @@ urlpatterns = [
     path('quick-start', login_required(views.QuickStartView.as_view()), name='quick_start'),
     path('scoring-assistant', login_required(views.scoring_assistant), name='scoring_bo'),
 
-    # DETAIL VIEWS
-
-    path('risk-scenarios/<str:pk>', login_required(views.RiskScenarioDetailView.as_view()), name='riskscenario-detail'),
-    path('security-measures/<str:pk>', login_required(views.SecurityMeasureDetailView.as_view()), name='securitymeasure-detail'),
-    path('risk-acceptances/<str:pk>', login_required(views.RiskAcceptanceDetailView.as_view()), name='riskacceptance-detail'),
-    path('projects-domains/<str:pk>', login_required(views.FolderDetailView.as_view()), name='folder-detail'),
-    path('projects/<str:pk>', login_required(views.ProjectDetailView.as_view()), name='project-detail'),
-    path('assets/<str:pk>', login_required(views.AssetDetailView.as_view()), name='asset-detail'),
-    path('threats/<str:pk>', login_required(views.ThreatDetailView.as_view()), name='threat-detail'),
-    path('security-functions/<str:pk>', login_required(views.SecurityFunctionDetailView.as_view()), name='securityfunction-detail'),
-
-    path('users/<str:pk>', login_required(views.UserDetailView.as_view()), name='user-detail'),
-
     # LIST VIEWS
     path('risk-analyses/', login_required(views.RiskAnalysisListView.as_view()), name='analysis-list'),
     path('risk-scenarios/', login_required(views.RiskScenarioListView.as_view()), name='riskscenario-list'),
@@ -132,5 +119,18 @@ urlpatterns = [
     path('users/<str:pk>/delete', login_required(views.UserDeleteView.as_view()), name='user-delete'),
     path('user-groups/<str:pk>/delete', login_required(views.UserGroupDeleteView.as_view()), name='usergroup-delete'),
 
-    path('role-assignments/<str:pk>/delete', login_required(views.RoleAssignmentDeleteView.as_view()), name='role-assignment-delete')
+    path('role-assignments/<str:pk>/delete', login_required(views.RoleAssignmentDeleteView.as_view()), name='role-assignment-delete'),
+
+    # DETAIL VIEWS
+
+    path('risk-scenarios/<str:pk>', login_required(views.RiskScenarioDetailView.as_view()), name='riskscenario-detail'),
+    path('security-measures/<str:pk>', login_required(views.SecurityMeasureDetailView.as_view()), name='securitymeasure-detail'),
+    path('risk-acceptances/<str:pk>', login_required(views.RiskAcceptanceDetailView.as_view()), name='riskacceptance-detail'),
+    path('projects-domains/<str:pk>', login_required(views.FolderDetailView.as_view()), name='folder-detail'),
+    path('projects/<str:pk>', login_required(views.ProjectDetailView.as_view()), name='project-detail'),
+    path('assets/<str:pk>', login_required(views.AssetDetailView.as_view()), name='asset-detail'),
+    path('threats/<str:pk>', login_required(views.ThreatDetailView.as_view()), name='threat-detail'),
+    path('security-functions/<str:pk>', login_required(views.SecurityFunctionDetailView.as_view()), name='securityfunction-detail'),
+
+    path('users/<str:pk>', login_required(views.UserDetailView.as_view()), name='user-detail'),
 ]
