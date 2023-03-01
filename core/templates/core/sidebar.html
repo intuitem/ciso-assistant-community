@@ -80,7 +80,7 @@
                     </div>
                 </li>
                 <li class="to-page">
-                    <a id="analyses_registry_tab" href="{% url 'ra-list' %}"
+                    <a id="analyses_registry_tab" href="{% url 'analysis-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-glasses"></i>
@@ -89,7 +89,7 @@
                     </a>
                 </li>
                 <li class="to-page">
-                    <a id="risk_scenarios_tab" href="{% url 'ri-list' %}"
+                    <a id="risk_scenarios_tab" href="{% url 'riskscenario-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-clone"></i>
@@ -98,7 +98,7 @@
                     </a>
                 </li>
                 <li class="to-page">
-                    <a id="security_measures_tab" href="{% url 'mtg-list' %}"
+                    <a id="security_measures_tab" href="{% url 'securitymeasure-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-fire-extinguisher"></i>
@@ -121,7 +121,7 @@
                     </div>
                 </li>
                 <li class="to-page">
-                    <a id="projects_domains_tab" href="{% url 'pd-list' %}"
+                    <a id="projects_domains_tab" href="{% url 'folder-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-project-diagram"></i>
@@ -157,7 +157,7 @@
                     </a>
                 </li>
                 <li class="to-page">
-                    <a id="security_functions_tab" href="{% url 'security-function-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
+                    <a id="security_functions_tab" href="{% url 'securityfunction-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
                     <span class="nav-link-icon">
                         <i class="fas fa-cogs"></i>
                     </span>
@@ -200,7 +200,7 @@
                 {% endif %}
                 {% if change_usergroup %}
                 <li class="to-page">
-                    <a id="user_groups_tab" href="{% url 'user_group-list' %}"
+                    <a id="user_groups_tab" href="{% url 'usergroup-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-users"></i>
@@ -339,7 +339,7 @@
                         style="display: none;"
                         class="absolute right-0 bottom-full mt-2 w-fit rounded-md bg-white shadow-md overflow-visible hover:block z-50 py-2"
                     >
-                    <a href="{% url 'user-detailed' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800">
+                    <a href="{% url 'user-detail' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800">
                         <i class="fas fa-user"></i>
                         {% trans "My profile" %}
                     </a>

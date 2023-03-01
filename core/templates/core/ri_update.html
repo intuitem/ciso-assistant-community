@@ -167,8 +167,8 @@
                     <h2 class="text-lg font-semibold mb-4">{% trans "Select or create additional security measures" %}</h2>
                     <div class="flex flex-row">
                         <div class="flex">
-                            {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="ri" content=_("Select security measures") %}
-                            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="measure" content=_("New security measure") %}
+                            {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="riskscenario" content=_("Select security measures") %}
+                            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New security measure") %}
                         </div>
                     </div>
                     {% include 'snippets/mtg_list_nested.html' %}

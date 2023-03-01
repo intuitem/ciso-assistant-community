@@ -34,7 +34,7 @@ modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "domain" %}
                             </a>
-                                {% include "snippets/modal/modal.html" with modal_action="create" model="pd" form=projects_domain_create_form header=_("Add projects domain") %}
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="folder" form=projects_domain_create_form header=_("Add projects domain") %}
                         </div>
                         {% trans "to organize projects and" %} 
                         <div class="inline" x-data="{ open: false }">
@@ -83,7 +83,7 @@ modalOpen = !modalOpen"
                                    class="simple-link cursor-pointer">
                                    {% trans "security functions" %}
                             </a>
-                                {% include "snippets/modal/modal.html" with modal_action="create" model="security-function" form=security_function_create_form header=_("Add security function") %}
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="securityfunction" form=security_function_create_form header=_("Add security function") %}
                         </div>
                         {% trans "that your organization have. They can be technical or organizational." %}</div>
                 </div>
@@ -107,7 +107,7 @@ modalOpen = !modalOpen"
                 <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
                     <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 5</div>
                     <div class="font-semibold mb-4">{% trans "Scenarios and Remediations" %}</div>
-                    <div class="text-sm mb-2 rounded  ">{% trans "Enrich" %} <a href="{% url 'ra-list' %}" class="simple-link">{% trans "your analysis" %}</a> {% trans "by identifying the potential risk scenarios and the security measures to mitigate them." %}</div>
+                    <div class="text-sm mb-2 rounded  ">{% trans "Enrich" %} <a href="{% url 'analysis-list' %}" class="simple-link">{% trans "your analysis" %}</a> {% trans "by identifying the potential risk scenarios and the security measures to mitigate them." %}</div>
                 </div>
 
 

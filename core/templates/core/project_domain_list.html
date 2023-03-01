@@ -24,17 +24,17 @@
                 </div>        
             </div>
         </form>
-        {% url 'pd-list' as short_path %}
+        {% url 'folder-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <div class="flex items-center h-10 w-full">
-            <a href="{% url 'pd-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+            <a href="{% url 'folder-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
                 <span>{% trans "Clear Filters" %}</span>
             </a>
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
         {% if add_folder %}
-        {% include 'snippets/add_button_modal.html' with form=projects_domain_create_form header=_("Add projects domain") model="pd" content=_("New projects domain") %}
+        {% include 'snippets/add_button_modal.html' with form=projects_domain_create_form header=_("Add projects domain") model="folder" content=_("New projects domain") %}
         {% endif %}
     </div>
     {% include 'snippets/messages.html' %}
@@ -52,7 +52,7 @@
                             <div class="flex items-center">
                                 <div>
                                 {% if object_ids_change %}
-                                <a id="domain{{ domain.id }}" href="{% url 'pd-update' domain.id %}?next={{ request.path|urlencode }}"
+                                <a id="domain{{ domain.id }}" href="{% url 'folder-update' domain.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ domain }}
                                 </a>
@@ -72,16 +72,16 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'projects-domain-detail' domain.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'folder-detail' domain.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 {% if domain.id in object_ids_change %}
                                 <span>
-                                    <a href="{% url 'pd-update' domain.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                    <a href="{% url 'folder-update' domain.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
                                 {% endif %}
                                 {% if domain.id in object_ids_delete %}
-                                {% include 'snippets/delete_button_modal.html' with object=domain header=_("Delete projects domain?") model='pd' %}
+                                {% include 'snippets/delete_button_modal.html' with object=domain header=_("Delete projects domain?") model="folder" %}
                                 {% endif %}
 
                             </div>

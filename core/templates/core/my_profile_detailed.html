@@ -45,7 +45,7 @@
                                         <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "built-in" %}</span>
                                         {% endif %}
                                         {% if object_ids_change %}
-                                        <a id="user_group{{ user_group.id }}" href="{% url 'user_group-update' user_group.id %}"
+                                        <a id="user_group{{ user_group.id }}" href="{% url 'usergroup-update' user_group.id %}"
                                         class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                             {{ user_group|capfirst }}
                                         </a>
@@ -62,13 +62,13 @@
                                 <div>
                                 {% if user_group.id in object_ids_change %}
                                     <span>
-                                        <a href="{% url 'user_group-update' user_group.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <a href="{% url 'usergroup-update' user_group.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     </span>
                                 {% endif %}
                                 {% if user_group.id in object_ids_delete %}
-                                    {% include 'snippets/delete_button_modal.html' with object=user_group header=_("Delete user group?") model='user_group' %}
+                                    {% include 'snippets/delete_button_modal.html' with object=user_group header=_("Delete user group?") model="usergroup" %}
                                 {% endif %}
                                 </div>
                             </td>

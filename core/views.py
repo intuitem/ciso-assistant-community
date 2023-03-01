@@ -75,8 +75,16 @@ class GenericDetailView(DetailView):
 
     exclude = ['id', 'is_published']
 
+    field_order = []
+
     def get_object_data(self):
         object_data = model_to_dict(self.object)
+
+        # sort fields according to field_order
+        # put first fields in field_order, then the rest
+        if self.field_order:
+            object_data = {
+                k: object_data[k] for k in self.field_order if k in object_data} | object_data
 
         for key in list(object_data.keys()):
             if key in self.exclude:
@@ -118,7 +126,7 @@ class RiskScenarioDetailView(GenericDetailView):
     model = RiskScenario
     exclude = ['id', 'current_proba', 'residual_proba', 'current_impact',
                'residual_impact', 'current_level', 'residual_level']
-    
+
     def get_object_data(self):
         object_data = super().get_object_data()
 
@@ -134,8 +142,6 @@ class RiskScenarioDetailView(GenericDetailView):
         for key in list(_data.keys()):
             object_data[self.object._meta.get_field(
                 key).verbose_name] = [_data.pop(key)]
-
-
 
         return object_data
 
@@ -911,7 +917,7 @@ class FolderCreateView(UserPassesTestMixin, CreateView):
     form_class = FolderUpdateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('pd-list')
+        return reverse_lazy('folder-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
@@ -960,14 +966,14 @@ class FolderUpdateView(UserPassesTestMixin, UpdateView):
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['projects'] = Project.objects.filter(folder=self.get_object())
-        context['crumbs'] = {'pd-list': _('Projects domains')}
+        context['crumbs'] = {'folder-list': _('Projects domains')}
         context['project_create_form'] = ProjectFormInherited(
             initial={'folder': get_object_or_404(Folder, id=self.kwargs['pk'])})
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('pd-list')
+            return reverse_lazy('folder-list')
         else:
             return self.request.POST.get('next', '/')
 
@@ -977,11 +983,11 @@ class FolderUpdateView(UserPassesTestMixin, UpdateView):
 
 class FolderDeleteView(UserPassesTestMixin, DeleteView):
     model = Folder
-    success_url = reverse_lazy('pd-list')
+    success_url = reverse_lazy('folder-list')
     template_name = 'snippets/projects_domain_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('pd-list')
+        return reverse_lazy('folder-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_folder"))
@@ -1048,7 +1054,7 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = RiskAnalysisCreateForm
 
     def get_success_url(self) -> str:
-        return self.request.POST.get('next', 'ra-list')
+        return self.request.POST.get('next', 'analysis-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"))
@@ -1070,12 +1076,12 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
             initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['scenarios'] = RiskScenario.objects.filter(
             analysis=self.get_object()).order_by('created_at')
-        context['crumbs'] = {'ra-list': _('Analyses')}
+        context['crumbs'] = {'analysis-list': _('Analyses')}
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('ra-list')
+            return reverse_lazy('analysis-list')
         else:
             return self.request.POST.get('next', '/')
 
@@ -1088,11 +1094,11 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
 
 class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
     model = Analysis
-    success_url = reverse_lazy('ra-list')
+    success_url = reverse_lazy('analysis-list')
     template_name = 'snippets/ra_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ra-list')
+        return reverse_lazy('analysis-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_analysis"))
@@ -1125,7 +1131,7 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
         queryset = self.get_queryset()
         filter = RiskScenarioFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['model'] = 'risk-scenario'
+        context['model'] = 'riskscenario'
         context['risk_scenario_create_form'] = RiskScenarioCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
@@ -1164,7 +1170,7 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
             return super().form_valid(form)
 
     def get_success_url(self) -> str:
-        return reverse('ra-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['analysis']).id})
+        return reverse('analysis-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['analysis']).id})
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
@@ -1194,7 +1200,7 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
         context['security_measures'] = self.get_object().security_measures.all()
         context['existing_security_measures'] = SecurityMeasure.objects.filter(
             folder=self.get_object().analysis.project.folder)
-        context['crumbs'] = {'ri-list': _('Risk scenarios')}
+        context['crumbs'] = {'riskscenario-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateFormInherited(
             initial={'folder': get_object_or_404(Folder, id=self.get_object().analysis.project.folder.id)})
         context['measures_select_form'] = SecurityMeasureSelectForm(
@@ -1209,10 +1215,10 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_success_url(self) -> str:
         if "select_measures" in self.request.POST:
-            return reverse_lazy('ri-update', kwargs={'pk': self.kwargs['pk']})
+            return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
             if (self.request.POST.get('next', '/') == ""):
-                return reverse_lazy('ri-list')
+                return reverse_lazy('riskscenario-list')
             else:
                 return self.request.POST.get('next', '/')
 
@@ -1227,7 +1233,7 @@ class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
     form_class = SecurityMeasureSelectForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ri-update', kwargs={'pk': self.kwargs['pk']})
+        return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskscenario"), folder=self.get_object().analysis.project.folder)
@@ -1235,11 +1241,11 @@ class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
 
 class RiskScenarioDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskScenario
-    success_url = reverse_lazy('ri-list')
+    success_url = reverse_lazy('riskscenario-list')
     template_name = 'snippets/risk_scenario_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('ri-list')
+        return reverse_lazy('riskscenario-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskscenario"))
@@ -1310,12 +1316,12 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
             self.request.user, "view_user")
         context['risk_scenarios'] = RiskScenario.objects.filter(
             security_measures=self.get_object())
-        context['crumbs'] = {'mtg-list': _('Security measures')}
+        context['crumbs'] = {'securitymeasure-list': _('Security measures')}
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('mtg-list')
+            return reverse_lazy('securitymeasure-list')
         else:
             return self.request.POST.get('next', '/')
 
@@ -1325,11 +1331,11 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
 
 class SecurityMeasureDeleteView(UserPassesTestMixin, DeleteView):
     model = SecurityMeasure
-    success_url = reverse_lazy('mtg-list')
+    success_url = reverse_lazy('securitymeasure-list')
     template_name = 'snippets/measure_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('mtg-list')
+        return reverse_lazy('securitymeasure-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securitymeasure"))
@@ -1396,12 +1402,12 @@ class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
-        context['crumbs'] = {'security-function-list': _('Security functions')}
+        context['crumbs'] = {'securityfunction-list': _('Security functions')}
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('security-function-list')
+            return reverse_lazy('securityfunction-list')
         else:
             return self.request.POST.get('next', '/')
 
@@ -1411,11 +1417,11 @@ class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
 
 class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
     model = SecurityFunction
-    success_url = reverse_lazy('security-function-list')
+    success_url = reverse_lazy('securityfunction-list')
     template_name = 'snippets/security_function_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('security-function-list')
+        return reverse_lazy('securityfunction-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securityfunction"))
@@ -1591,7 +1597,7 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
 
 
-class MyProfileDetailedView(UserPassesTestMixin, DetailView):
+class MyProfileDetailView(UserPassesTestMixin, DetailView):
     template_name = 'core/my_profile_detailed.html'
     context_object_name = 'user'
 
@@ -1828,7 +1834,7 @@ class UserGroupCreateView(UserPassesTestMixin, CreateView):
     form_class = UserGroupCreateForm
 
     def get_success_url(self) -> str:
-        return reverse_lazy('user_group-list')
+        return reverse_lazy('usergroup-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"))
@@ -1850,11 +1856,11 @@ class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
         context['users'] = User.objects.exclude(user_groups=self.get_object())
         context["associated_users"] = User.objects.filter(
             user_groups=self.get_object())
-        context["crumbs"] = {'user_group-list': _('User groups')}
+        context["crumbs"] = {'usergroup-list': _('User groups')}
         return context
 
     def get_success_url(self) -> str:
-        return reverse_lazy('user_group-list')
+        return reverse_lazy('usergroup-list')
 
     def test_func(self):
         user_group = self.get_object()
@@ -1866,11 +1872,11 @@ class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
 
 class UserGroupDeleteView(UserPassesTestMixin, DeleteView):
     model = UserGroup
-    success_url = reverse_lazy('user_group-list')
+    success_url = reverse_lazy('usergroup-list')
     template_name = 'snippets/group_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('user_group-list')
+        return reverse_lazy('usergroup-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_usergroup"))
@@ -1956,7 +1962,7 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
-        context["crumbs"] = {'user_group-list': _('User groups')}
+        context["crumbs"] = {'usergroup-list': _('User groups')}
         return context
 
     def get_success_url(self) -> str:
@@ -2028,7 +2034,7 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
         return True
 
 
-class RiskMatrixDetailedView(UserPassesTestMixin, DetailView):
+class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
     template_name = 'core/risk_matrix_detailed.html'
     context_object_name = 'matrix'
 
