@@ -46,6 +46,8 @@ urlpatterns = [
     path('threats/<str:pk>', login_required(views.ThreatDetailView.as_view()), name='threat-detail'),
     path('security-functions/<str:pk>', login_required(views.SecurityFunctionDetailView.as_view()), name='securityfunction-detail'),
 
+    path('users/<str:pk>', login_required(views.UserDetailView.as_view()), name='user-detail'),
+
     # LIST VIEWS
     path('risk-analyses/', login_required(views.RiskAnalysisListView.as_view()), name='analysis-list'),
     path('risk-scenarios/', login_required(views.RiskScenarioListView.as_view()), name='riskscenario-list'),

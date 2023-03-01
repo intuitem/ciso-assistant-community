@@ -175,6 +175,11 @@ class ThreatDetailView(GenericDetailView):
 class SecurityFunctionDetailView(GenericDetailView):
     model = SecurityFunction
 
+class UserDetailView(GenericDetailView):
+    model = User
+
+    exclude = ['id', 'password']
+
 
 class AnalysisListView(ListView):
     template_name = 'core/index.html'
