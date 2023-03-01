@@ -11,11 +11,11 @@ class RoleCodename(Enum):
         return self.value
 
 class UserGroupCodename(Enum):
-    ADMINISTRATORS = 'BI-UG-ADM'
-    GLOBAL_AUDITORS = 'BI-UG-GAD'
-    DOMAIN_MANAGERS = 'BI-UG-DMA'
-    ANALYSTS = 'BI-UG-ANA'
-    AUDITORS = 'BI-UG-AUD'
+    ADMINISTRATOR = 'BI-UG-ADM'
+    GLOBAL_AUDITOR = 'BI-UG-GAD'
+    DOMAIN_MANAGER = 'BI-UG-DMA'
+    ANALYST = 'BI-UG-ANA'
+    AUDITOR = 'BI-UG-AUD'
 
     def __str__(self) -> str:
         return self.value
@@ -28,11 +28,11 @@ BUILTIN_ROLE_CODENAMES = {
 }
 
 BUILTIN_USERGROUP_CODENAMES = {
-    str(UserGroupCodename.ADMINISTRATORS): _('Administrators'),
-    str(UserGroupCodename.GLOBAL_AUDITORS): _('Global auditors'),
-    str(UserGroupCodename.DOMAIN_MANAGERS): _('Domain managers'),
-    str(UserGroupCodename.ANALYSTS): _('Analysts'),
-    str(UserGroupCodename.AUDITORS): _('Auditors'),
+    str(UserGroupCodename.ADMINISTRATOR): _('Administrator'),
+    str(UserGroupCodename.GLOBAL_AUDITOR): _('Global auditor'),
+    str(UserGroupCodename.DOMAIN_MANAGER): _('Domain manager'),
+    str(UserGroupCodename.ANALYST): _('Analyst'),
+    str(UserGroupCodename.AUDITOR): _('Auditor'),
 }
 
 COUNTRY_FLAGS = {
