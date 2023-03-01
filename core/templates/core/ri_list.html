@@ -151,17 +151,10 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div>
-                                    {% if object_ids_change %}
-                                    <a id="scenario{{ scenario.id }}" href="{% url 'riskscenario-update' scenario.id %}?next={{ request.path|urlencode }}"
+                                    <a id="scenario{{ scenario.id }}" href="{% url 'riskscenario-detail' scenario.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ scenario.name|capfirst }}
                                     </a>
-                                    {% else %}
-                                    <p id="scenario{{ scenario.id }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                        {{ scenario.name|capfirst }}
-                                    </p>
-                                    {% endif %}
                                 </div>
                             </div>
                         </th>

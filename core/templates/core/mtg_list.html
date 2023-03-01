@@ -159,20 +159,13 @@
                                 bg-red-300 
                                 {% else %}
                                 bg-green-200 
-                                {% endif %}">{{ measure.get_status_display|lower}}
+                                {% endif %}">{{ measure.get_status_display|lower}}
                                 </span>
                                 <div class="ml-3">
-                                    {% if object_ids_change %}
-                                    <a id="measure{{ measure.id }}" href="{% url 'securitymeasure-update' measure.id %}?next={{ request.path|urlencode }}"
+                                    <a id="measure{{ measure.id }}" href="{% url 'securitymeasure-detail' measure.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ measure.name|capfirst }}
                                     </a>
-                                    {% else %}
-                                    <a id="measure{{ measure.id }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                        {{ measure.name|capfirst }}
-                                    </a>
-                                    {% endif %}
                                 </div>
                             </div>
                         </td>
