@@ -121,17 +121,17 @@
                 </div>        
             </div>
         </form>
-        {% url 'mtg-list' as short_path %}
+        {% url 'securitymeasure-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <div class="flex items-center h-10 w-full">
-            <a href="{% url 'mtg-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+            <a href="{% url 'securitymeasure-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
                 <span>{% trans "Clear Filters" %}</span>
             </a>
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
         {% if add_securitymeasure%}
-        {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="measure" content=_("New security measure") %}
+        {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New security measure") %}
         {% endif %}
 
     </div>
@@ -159,20 +159,13 @@
                                 bg-red-300 
                                 {% else %}
                                 bg-green-200 
-                                {% endif %}">{{ measure.get_status_display|lower}}
+                                {% endif %}">{{ measure.get_status_display|lower}}
                                 </span>
                                 <div class="ml-3">
-                                    {% if object_ids_change %}
-                                    <a id="measure{{ measure.id }}" href="{% url 'mtg-update' measure.id %}?next={{ request.path|urlencode }}"
+                                    <a id="measure{{ measure.id }}" href="{% url 'securitymeasure-detail' measure.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ measure.name|capfirst }}
                                     </a>
-                                    {% else %}
-                                    <a id="measure{{ measure.id }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                        {{ measure.name|capfirst }}
-                                    </a>
-                                    {% endif %}
                                 </div>
                             </div>
                         </td>
@@ -208,16 +201,16 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'MP' measure.folder.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'securitymeasure-detail' measure.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 {% if measure.id in object_ids_change %}
                                 <span>
-                                    <a href="{% url 'mtg-update' measure.id %}" class="cursor-pointer table-action">
+                                    <a href="{% url 'securitymeasure-update' measure.id %}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
                                 {% endif %}
                                 {% if measure.id in object_ids_delete %}
-                                {% include 'snippets/delete_button_modal.html' with object=measure header=_("Delete security measure?") model='measure' %}
+                                {% include 'snippets/delete_button_modal.html' with object=measure header=_("Delete security measure?") model='securitymeasure' %}
                                 {% endif %}
                             </div>
                         </td>

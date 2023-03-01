@@ -16,7 +16,7 @@
             {% for scenario in context %}
             <tr class="bg-gray-100">
                 <td class="text-lg p-3" colspan="9">
-                    <a class="hover:text-indigo-800" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}">{{ scenario.rid }}: {{ scenario.name }}</a> 
+                    <a class="hover:text-indigo-800" href="{% url 'riskscenario-update' scenario.id %}?next={{ request.path|urlencode }}">{{ scenario.rid }}: {{ scenario.name }}</a> 
                     <span class="text-xs text-center p-1 mx-1 rounded
                     {% if scenario.treatment == 'open' %}
                     bg-orange-200 
@@ -50,8 +50,8 @@
             {% endif %}
             {% for securitymeasure in scenario.security_measures.all %}
             <tr class="border-b text-sm even:bg-white odd:bg-slate-50">
-                <td class="px-2 py-3 text-center"><a class="hover:text-indigo-800" id="{{ securitymeasure.id }}" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{ securitymeasure.mid }}</a></td>
-                <td class="px-2 py-3"><a class="hover:text-indigo-800" href="{% url 'mtg-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{ securitymeasure.name }}</a></td>
+                <td class="px-2 py-3 text-center"><a class="hover:text-indigo-800" id="{{ securitymeasure.id }}" href="{% url 'securitymeasure-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{ securitymeasure.mid }}</a></td>
+                <td class="px-2 py-3"><a class="hover:text-indigo-800" href="{% url 'securitymeasure-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{ securitymeasure.name }}</a></td>
                 <td class="px-2 py-3">{% if securitymeasure.description %}{{ securitymeasure.description }}{% endif %}</td>
                 <td class="px-2 py-3">{{ securitymeasure.get_type_display }}</td>
                 <td class="px-2 py-3">{% if securitymeasure.security_function %}{{ securitymeasure.security_function }}{% else %}--{% endif %}</td>

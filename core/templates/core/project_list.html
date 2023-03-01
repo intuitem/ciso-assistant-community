@@ -145,17 +145,10 @@
                                 {% endif %}">{{ project.get_lc_status_display|lower}}
                                 </span>
                             <div class="ml-3">
-                                {% if object_ids_change %}
-                                <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}?next={{ request.path|urlencode }}"
+                                <a id="project{{ project.id }}" href="{% url 'project-detail' project.id %}?next={{ request.path|urlencode }}"
                                 class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ project.name|capfirst }}
                                 </a>
-                                {% else %}
-                                <a id="project{{ project.id }}"
-                                class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                {{ project.name|capfirst }}
-                                </a>
-                                {% endif %}
                             </div>
                         </div>
                     </th>
@@ -176,7 +169,7 @@
                     </td> {% endcomment %}
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
-                            {% comment %} <span><a href="#" class="table-action"><i class="far fa-eye"></i></a></span> {% endcomment %}
+                            <span><a href="{% url 'project-detail' project.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                             {% if object_ids_change %}
                             <span>
                                 <a href="{% url 'project-update' project.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">

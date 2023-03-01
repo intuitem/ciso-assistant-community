@@ -121,17 +121,17 @@
                 </div>        
             </div>
         </form>
-        {% url 'ri-list' as short_path %}
+        {% url 'riskscenario-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <div class="flex items-center h-10 w-full">
-            <a href="{% url 'ri-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+            <a href="{% url 'riskscenario-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
                 <span>{% trans "Clear Filters" %}</span>
             </a>
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
         {% if add_riskscenario%}
-        {% include 'snippets/add_button_modal.html' with form=risk_scenario_create_form header=_("Add Risk Scenario") model="risk-scenario" content=_("New risk scenario") %}
+        {% include 'snippets/add_button_modal.html' with form=risk_scenario_create_form header=_("Add Risk Scenario") model="riskscenario" content=_("New risk scenario") %}
         {% endif %}
 
 
@@ -151,17 +151,10 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div>
-                                    {% if object_ids_change %}
-                                    <a id="scenario{{ scenario.id }}" href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}"
+                                    <a id="scenario{{ scenario.id }}" href="{% url 'riskscenario-detail' scenario.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ scenario.name|capfirst }}
                                     </a>
-                                    {% else %}
-                                    <p id="scenario{{ scenario.id }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap">
-                                        {{ scenario.name|capfirst }}
-                                    </p>
-                                    {% endif %}
                                 </div>
                             </div>
                         </th>
@@ -182,10 +175,10 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
-                                <span><a href="{% url 'RA' scenario.analysis.id %}#{{scenario.id}}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'riskscenario-detail' scenario.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
                                 {% if scenario.id in object_ids_change %}
                                 <span>
-                                    <a href="{% url 'ri-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                    <a href="{% url 'riskscenario-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>

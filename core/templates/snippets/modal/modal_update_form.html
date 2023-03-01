@@ -4,7 +4,7 @@
 <form action="{% url model|lower|add:'-update-modal' %}" method="post"> {% csrf_token %}
     <div>
       <div class="flex-row hidden">
-            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="measure" content=_("New security measure") %}
+            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="securitymeasure" content=_("New security measure") %}
       </div>
     </div>
       <div class="mb-6">

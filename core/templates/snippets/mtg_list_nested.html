@@ -28,7 +28,7 @@
                     <div class="flex items-center">
 
                         <div class="">
-                            <a id="security_measure{{ security_measure.id }}" href="{% url 'mtg-update' security_measure.id %}?next={{ request.path|urlencode }}"
+                            <a id="security_measure{{ security_measure.id }}" href="{% url 'securitymeasure-update' security_measure.id %}?next={{ request.path|urlencode }}"
                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ security_measure.name }}
                             </a>

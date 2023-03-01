@@ -28,7 +28,7 @@
         <div class="flex flex-row">
             <h2 class="px-4 text-xl font-semibold mb-2 whitespace-nowrap">{% trans "Role assignments" %}</h2>
             <div class="grid mb-4 w-full px-4">
-                <a href="{% url 'role-assignment-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New role assignment" %}</a>
+                <a href="{% url 'roleassignment-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New role assignment" %}</a>
             </div>
         </div>
         <div class="px-4 flex flex-row">
@@ -95,12 +95,12 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="">
                                     <span>
-                                        <a href="{% url 'role-assignment-update' assignment.id %}#?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <a href="{% url 'roleassignment-update' assignment.id %}#?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     </span>
     
-                                    {% include 'snippets/delete_button_modal.html' with object=assignment header=_("Delete role assignment?") model='user_group' %}
+                                    {% include 'snippets/delete_button_modal.html' with object=assignment header=_("Delete role assignment?") model="usergroup" %}
                                 </div>
                             </td>
                         </tr>
@@ -165,12 +165,12 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="">
                                     <span>
-                                        <a href="{% url 'role-assignment-update' assignment.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <a href="{% url 'roleassignment-update' assignment.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     </span>
     
-                                    {% include 'snippets/delete_button_modal.html' with object=assignment header=_("Delete role assignment?") model='user_group' %}
+                                    {% include 'snippets/delete_button_modal.html' with object=assignment header=_("Delete role assignment?") model="usergroup" %}
                                 </div>
                             </td>
                         </tr>
