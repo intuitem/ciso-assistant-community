@@ -251,7 +251,7 @@ class User(AbstractBaseUser):
                     "uid": urlsafe_base64_encode(force_bytes(self.pk)),
                     "user": self,
                     'token': default_token_generator.make_token(self),
-                    'protocol': 'http',
+                    'protocol': 'https',
                 }
         email = render_to_string(email_template_name, header)
         send_mail(subject, email, None, [self.email], fail_silently=False)

@@ -169,10 +169,11 @@ def startup():
             "delete_riskmatrix",
         ])
 
-        # if root folder does not exist, then create it
+        # if superuser defined and does not exist, then create it
         if MIRA_SUPERUSER_EMAIL and not User.objects.filter(email=MIRA_SUPERUSER_EMAIL).exists():
             print("Creating user for", MIRA_SUPERUSER_EMAIL)
             User.objects.create_user(email=MIRA_SUPERUSER_EMAIL, is_superuser=True)
+        # if root folder does not exist, then create it
         if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
             Folder.objects.create(
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)

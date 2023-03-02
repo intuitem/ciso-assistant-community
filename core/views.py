@@ -8,7 +8,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 
-from django.core.mail import send_mail, BadHeaderError
 from django.http import HttpResponse
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetConfirmView
