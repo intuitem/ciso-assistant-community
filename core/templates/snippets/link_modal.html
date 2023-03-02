@@ -1,0 +1,9 @@
+{% load i18n static %}
+
+<div x-data="{ open: false }">
+    <a @click="open = !open,
+        modalOpen = !modalOpen"
+        class="text-indigo-500 hover:text-indigo-600 underline" href="#">{{ content }}
+    </a>
+        {% include "snippets/modal/modal.html" with modal_action="cgu" %}
+</div>
