@@ -12,7 +12,7 @@
                 {{ form.non_field_errors }}
                 {% for field in form %}
                 <div class="">
-                    {% if field.label == "Administrator" %}
+                    {% if field.name == "administrator" %}
                     <label class="text-sm font-semibold">{{ field.label|striptags }} <span class="ml-2">{{ field }}</span></label>
                     <div class="w-auto">
                         {% for error in field.errors %}

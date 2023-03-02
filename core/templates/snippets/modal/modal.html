@@ -47,6 +47,8 @@ x-transition:leave-end="opacity-0"
                 {% include 'snippets/modal/modal_update_form.html' %}
             {% elif modal_action == "import_library" %}
                 {% include 'snippets/modal/modal_import_library_form.html' %}
+            {% elif modal_action == "cgu" %}
+                {% include 'snippets/modal/modal_cgu.html' %}
             {% else %}
                 <p class="text-sm"><strong class="inline">{% trans "Version:" %}</strong> {% mira_version %}</p>
                 <p class="text-sm whitespace-nowrap"><strong class="inline">{% trans "Build:" %}</strong> {% mira_build %}</p>
