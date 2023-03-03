@@ -941,11 +941,11 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("created_at")
         auditors = UserGroup.objects.create(
-            name=UserGroupCodename.AUDITORS, folder=folder, builtin=True)
+            name=UserGroupCodename.AUDITOR, folder=folder, builtin=True)
         analysts = UserGroup.objects.create(
-            name=UserGroupCodename.ANALYSTS, folder=folder, builtin=True)
+            name=UserGroupCodename.ANALYST, folder=folder, builtin=True)
         managers = UserGroup.objects.create(
-            name=UserGroupCodename.DOMAIN_MANAGERS, folder=folder, builtin=True)
+            name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True)
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(
             name=RoleCodename.AUDITOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra1.perimeter_folders.add(folder)
