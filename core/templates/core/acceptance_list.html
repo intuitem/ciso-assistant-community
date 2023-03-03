@@ -134,11 +134,17 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center max-w-full">
                                 <span class=" p-1 rounded-lg text-xs
-                                {% if acceptance.type == "temporary" %}
-                                bg-red-300
-                                {% else %}
+                                {% if acceptance.state == "created" %}
+                                bg-blue-200
+                                {% elif acceptance.state == "submitted" %}
+                                bg-orange-200
+                                {% elif acceptance.state == "accepted" %}
                                 bg-green-200
-                                {% endif %}">{{ acceptance.get_type_display|lower}}
+                                {% elif acceptance.state == "rejected" %}
+                                bg-red-300
+                                {% elif acceptance.state == "revoked" %}
+                                bg-gray-200
+                                {% endif %}">{{ acceptance.get_state_display|lower}}
                                 </span>
                                 <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}"

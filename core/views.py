@@ -153,6 +153,24 @@ class SecurityMeasureDetailView(GenericDetailView):
 class RiskAcceptanceDetailView(GenericDetailView):
     model = RiskAcceptance
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
+        if self.object.state == 'submitted':
+            context['need_validation'] = (self.request.user == self.object.validator)
+        if self.object.state == 'accepted':
+            context['accepted'] = True
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
+        if 'accepted' in request.POST:
+            self.object.set_state('accepted')
+        elif 'rejected' in request.POST:
+            self.object.set_state('rejected')
+        elif 'revoked' in request.POST:
+            self.object.set_state('revoked')
+        return self.get(request, *args, **kwargs)
 
 class FolderDetailView(GenericDetailView):
     model = Folder
@@ -1566,6 +1584,13 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        if self.object.validator:
+            self.object.set_state('submitted') # Mettre à jour le paramètre "state"
+            self.object.save()
+        return super().form_valid(form)
+
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskacceptance"))
 
@@ -1576,6 +1601,17 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
     template_name = 'core/risk_acceptance_update.html'
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        print(self.object.validator, self.object.state)
+        if self.object.validator and self.object.state == 'created':
+            self.object.set_state('submitted') # Mettre à jour le paramètre "state"
+            self.object.save()
+        elif not self.object.validator and self.object.state == 'submitted':
+            self.object.set_state('created') # Mettre à jour le paramètre "state"
+            self.object.save()
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -32,6 +32,26 @@
             <a href={{ object.edit_url }} class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg justify-self-end w-fit h-fit font-medium">
                 <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
             </a>
+            
+        {% endif %}
+        {% if need_validation %}
+        <form method='post'>
+            {% csrf_token %}
+            <button type="submit" name="accepted" class="bg-green-700 px-4 py-2 cursor-pointer text-white hover:bg-green-600 rounded-lg justify-self-end w-fit h-fit font-medium">
+                <i class="fas fa-check mr-2"></i>{% trans "Accept" %}
+            </button>
+            <button type="submit" name="rejected" class="bg-red-700 px-4 py-2 cursor-pointer text-white hover:bg-red-600 rounded-lg justify-self-end w-fit h-fit font-medium">
+                <i class="fas fa-xmark mr-2"></i>{% trans "Reject" %}
+            </button>
+        </form>
+        {% endif %}
+        {% if accepted %}
+        <form method='post'>
+            {% csrf_token %}
+            <button type="submit" name="revoked" class="bg-red-700 px-4 py-2 cursor-pointer text-white hover:bg-red-600 rounded-lg justify-self-end w-fit h-fit font-medium">
+                <i class="fas fa-xmark mr-2"></i>{% trans "Revok" %}
+            </button>
+        </form>
         {% endif %}
     </div>
 </div>
