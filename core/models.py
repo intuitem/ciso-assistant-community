@@ -324,8 +324,12 @@ class SecurityMeasure(AbstractBaseModel):
         return self.riskscenario_set.all()
     
     @property
+    def analyses(self):
+        return {scenario.analysis for scenario in self.risk_scenarios}
+    
+    @property
     def projects(self):
-        return {scenario.analysis.project for scenario in self.risk_scenarios}
+        return {analysis.project for analysis in self.analyses}
 
     def parent_project(self):
         pass
