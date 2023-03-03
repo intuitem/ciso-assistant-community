@@ -241,7 +241,7 @@ class User(AbstractBaseUser):
         self.last_five_logins = self.last_five_logins[-5:]
         self.save()
     
-    def mailing(self, email_template_name, subject):
+    def mailing(self, email_template_name, subject, pk=False):
         """
         Sending a mail to a user for password resetting or creation
         """
@@ -252,6 +252,7 @@ class User(AbstractBaseUser):
                     "user": self,
                     'token': default_token_generator.make_token(self),
                     'protocol': 'https',
+                    'pk': str(pk) if pk else None
                 }
         email = render_to_string(email_template_name, header)
         send_mail(subject, email, None, [self.email], fail_silently=False)

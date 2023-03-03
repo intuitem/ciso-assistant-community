@@ -166,10 +166,13 @@ class RiskAcceptanceDetailView(GenericDetailView):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
         if 'accepted' in request.POST:
             self.object.set_state('accepted')
+            messages.success(request, _("Risk acceptance accepted with success"))
         elif 'rejected' in request.POST:
             self.object.set_state('rejected')
+            messages.success(request, _("Risk acceptance rejected with success"))
         elif 'revoked' in request.POST:
             self.object.set_state('revoked')
+            messages.success(request, _("Risk acceptance revoked with success"))
         return self.get(request, *args, **kwargs)
 
 class FolderDetailView(GenericDetailView):
@@ -1589,6 +1592,12 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
         if self.object.validator:
             self.object.set_state('submitted') # Mettre à jour le paramètre "state"
             self.object.save()
+            try:
+                self.object.validator.mailing("core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
+                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
+            except:
+                messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+        messages.success(self.request, "Risk acceptance has been created successfully")
         return super().form_valid(form)
 
     def test_func(self):
@@ -1608,6 +1617,11 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
         if self.object.validator and self.object.state == 'created':
             self.object.set_state('submitted') # Mettre à jour le paramètre "state"
             self.object.save()
+            try:
+                self.object.validator.mailing("core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
+                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
+            except:
+                messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
         elif not self.object.validator and self.object.state == 'submitted':
             self.object.set_state('created') # Mettre à jour le paramètre "state"
             self.object.save()

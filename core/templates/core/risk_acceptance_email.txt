@@ -1,0 +1,13 @@
+{% autoescape off %}
+Hello,
+
+You have a risk acceptance review pending. To accept or decline it, click on the link below.
+
+{{ protocol }}://{{ domain }}{% url 'riskacceptance-detail' pk=pk %}
+
+If you don't want to use this link or if it is broken, please connect to {{ protocol }}://{{domain}} and go to risk acceptances.
+
+Sincerely,
+Mira Team
+
+{% endautoescape %}
