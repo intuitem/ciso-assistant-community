@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-10 15:10+0000\n"
+"POT-Creation-Date: 2023-03-03 22:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,23 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: iam/forms.py:65
-msgid "The two password fields didn’t match."
-msgstr "Les deux champs de mot de passe ne correspondent pas."
-
-#: iam/forms.py:69
-msgid "Password"
-msgstr "Mot de passe"
-
-#: iam/forms.py:75
-msgid "Password confirmation"
-msgstr "Confirmation du mot de passe"
-
-#: iam/forms.py:78
-msgid "Enter the same password as before, for verification."
-msgstr "Entrez le même mot de passe que précédemment, pour vérification."
-
-#: iam/forms.py:127 iam/forms.py:163
+#: iam/forms.py:123 iam/forms.py:163
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
 "password, but you can change the password using <a class=\"help_text-link\" "
@@ -49,59 +33,59 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:22 iam/models.py:226
+#: iam/models.py:29 iam/models.py:269
 msgid "Domain"
 msgstr "Domaine"
 
-#: iam/models.py:23 iam/models.py:54
+#: iam/models.py:30 iam/models.py:61
 msgid "name"
 msgstr "nom"
 
-#: iam/models.py:28
+#: iam/models.py:35
 msgid "user group"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:29 iam/models.py:182
+#: iam/models.py:36 iam/models.py:195
 msgid "user groups"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:51
+#: iam/models.py:58
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:70
+#: iam/models.py:77
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:71
+#: iam/models.py:78
 msgid "DOMAIN"
 msgstr "DOMAINE"
 
-#: iam/models.py:75
+#: iam/models.py:82
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:84 iam/models.py:237
+#: iam/models.py:91 iam/models.py:280
 msgid "Folder"
 msgstr "Dossier"
 
-#: iam/models.py:85
+#: iam/models.py:92
 msgid "Folders"
 msgstr "Dossiers"
 
-#: iam/models.py:161
+#: iam/models.py:173
 msgid "last name"
 msgstr "nom"
 
-#: iam/models.py:162
+#: iam/models.py:174
 msgid "first name"
 msgstr "prénom"
 
-#: iam/models.py:165
+#: iam/models.py:178
 msgid "active"
 msgstr "actif"
 
-#: iam/models.py:168
+#: iam/models.py:181
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
@@ -109,15 +93,15 @@ msgstr ""
 "Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
 "au lieu de supprimer les comptes."
 
-#: iam/models.py:172
+#: iam/models.py:185
 msgid "date joined"
 msgstr "date d'inscription"
 
-#: iam/models.py:174
+#: iam/models.py:187
 msgid "superuser status"
 msgstr "statut superutilisateur"
 
-#: iam/models.py:177
+#: iam/models.py:190
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
@@ -125,28 +109,32 @@ msgstr ""
 "Désigne que cet utilisateur a toutes les autorisations sans les assigner "
 "explicitement."
 
-#: iam/models.py:185
+#: iam/models.py:198
+#, fuzzy
+#| msgid ""
+#| "The user_groups this user belongs to. A user will get all permissions "
+#| "granted to each of their user_groups."
 msgid ""
-"The user_groups this user belongs to. A user will get all permissions "
-"granted to each of their user_groups."
+"The user groups this user belongs to. A user will get all permissions "
+"granted to each of their user groups."
 msgstr ""
 "Les groupes d'utilisateurs auxquels cet utilisateur appartient. Un "
 "utilisateur obtiendra toutes les autorisations accordées à chacun de ses "
 "groupes d'utilisateurs."
 
-#: iam/models.py:203
+#: iam/models.py:216
 msgid "user"
 msgstr "utilisateur"
 
-#: iam/models.py:204
+#: iam/models.py:217
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:232
+#: iam/models.py:275
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:234
+#: iam/models.py:277
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
@@ -186,19 +174,15 @@ msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "
 "ignorés."
 
-#: library/views.py:42
-msgid "Successfully imported library: {}"
-msgstr "Bibliothèque importée avec succès : {}"
-
-#: library/views.py:45
+#: library/views.py:43
 msgid "Failed to import file: {}. {}"
 msgstr "Échec de l'importation du fichier : {}"
 
-#: library/views.py:60
+#: library/views.py:58
 msgid "Libraries"
 msgstr "Bibliothèques"
 
-#: library/views.py:81
+#: library/views.py:79
 msgid "Failed to import library: {}"
 msgstr "Échec de l'importation de la bibliothèque : {}"
 
@@ -243,6 +227,21 @@ msgstr "Exporter une sauvegarde"
 #: serdes/templates/serdes/backup_restore.html:109
 msgid "Dump database"
 msgstr "Exporter la base de données"
+
+#~ msgid "The two password fields didn’t match."
+#~ msgstr "Les deux champs de mot de passe ne correspondent pas."
+
+#~ msgid "Password"
+#~ msgstr "Mot de passe"
+
+#~ msgid "Password confirmation"
+#~ msgstr "Confirmation du mot de passe"
+
+#~ msgid "Enter the same password as before, for verification."
+#~ msgstr "Entrez le même mot de passe que précédemment, pour vérification."
+
+#~ msgid "Successfully imported library: {}"
+#~ msgstr "Bibliothèque importée avec succès : {}"
 
 #~ msgid "Objects of type:"
 #~ msgstr "Objets de type :"
