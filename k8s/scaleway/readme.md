@@ -54,6 +54,17 @@ k create secret generic smtp-out --from-literal EMAIL_HOST_PASSWORD=<api_key>
 
 Note that EMAIL_HOST_USER shall be set to the UUID of the project.
 
+## Recpatcha
+
+Note: this is not specific to scaleway.
+
+Store the recaptcha secret key in a secret with the following command:
+```shell
+k create secret generic recaptcha --from-literal RECAPTCHA_PRIVATE_KEY=<recaptcha_private_key>
+```
+
+The public key can be stored in the ConfigMap.
+
 ## IAM configuration
 
 ### Applications

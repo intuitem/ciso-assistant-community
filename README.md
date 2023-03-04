@@ -44,7 +44,7 @@ $ cd asf-rm
 export DJANGO_SECRET_KEY=<XXX>
 export DJANGO_DEBUG=True
 export DJANGO_SUPERUSER_PASSWORD=<XXX>
-export MIRA_DOMAIN=mira.alsigo.net
+export MIRA_URL=http://127.0.0.1:8000
 # for postgres (if the variables are not defined then we use sqlite)
 export POSTGRES_NAME=asf
 export POSTGRES_USER=asfuser

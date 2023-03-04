@@ -60,7 +60,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import MIRA_DOMAIN, EMAIL_USE_TLS
 from captcha.fields import ReCaptchaField
 from datetime import datetime, timedelta
 
