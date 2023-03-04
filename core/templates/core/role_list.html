@@ -11,7 +11,7 @@
         <p class="text-xs text-gray-600 leading-tight mb-6 w-1/2">
             {% blocktrans %}
             A assignment provides access to predefined menus and features so that depending 
-            on the assigned assignment (Administrator, Domain manager, Analyst...) a user 
+            on the assignment (Administrator, Domain manager, Analyst...), users 
             can have access to the resources they need.
             {% endblocktrans %}
         </p>
@@ -32,8 +32,8 @@
             </div>
         </div>
         <div class="px-4 flex flex-row">
-            <div @click="openTab = 1" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">Users</div>
-            <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">User groups</div>
+            <div @click="openTab = 1" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "Users" %}</div>
+            <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "User groups" %}</div>
         </div>
         <div class="relative overflow-x-auto rounded-b-lg">
             <table x-show="openTab === 1" class="w-full text-sm text-left text-gray-500 border-t">
@@ -151,14 +151,14 @@
                             <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="ml-0">
-                                        {% for domain in assignment.domains.all %}
+                                        {% for domain in assignment.perimeter_folders.all %}
                                         <li>
                                             <a id="assignment{{ assignment.id }}" href="#"
                                             class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                                 {{ domain.name }}
                                             </a>
                                         </li>
-                                            {% endfor %}
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </td>
