@@ -2,7 +2,6 @@ from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, Hi
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 from django import forms
 from .models import *
-from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from captcha.fields import ReCaptchaField

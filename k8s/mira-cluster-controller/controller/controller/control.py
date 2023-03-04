@@ -92,7 +92,7 @@ def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
     configmaps = [
         client.V1EnvFromSource(config_map_ref=client.V1ConfigMapEnvSource(name='mira-config')),
     ]
-    secret = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="EMAIL_HOST_PASSWORD", name="myvars"))
+    secret = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="EMAIL_HOST_PASSWORD", name="smtp-out"))
     mira_container = client.V1Container(
         name="mira",
         image="rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:latest",
