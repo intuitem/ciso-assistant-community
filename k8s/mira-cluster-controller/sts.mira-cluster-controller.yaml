@@ -36,7 +36,7 @@ spec:
         - name: EMAIL_HOST_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: myvars
+              name: smtp-out
               key: EMAIL_HOST_PASSWORD
       - name: caddy
         image: caddy:latest
