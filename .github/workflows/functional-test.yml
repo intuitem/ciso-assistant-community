@@ -53,7 +53,7 @@ jobs:
         echo EMAIL_PORT=1025 >> .env
         echo EMAIL_HOST_USER='' >> .env
         echo EMAIL_HOST_PASSWORD='' >> .env
-        echo EMAIL_USE_TLS=False >> .env
+        #echo EMAIL_USE_TLS=False >> .env
         echo DJANGO_SUPERUSER_EMAIL=root@gmail.com >> .env
         echo DJANGO_SUPERUSER_PASSWORD=root >> .env
         echo MIRA_DOMAIN=127.0.0.1 >> .env
