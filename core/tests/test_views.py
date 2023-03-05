@@ -35,7 +35,7 @@ def test_setUp(db, matrix_fixture):
 @pytest.fixture
 def create_user(db, django_user_model):
     def make_user(**kwargs):
-        return django_user_model.objects.create_user(email='john.doe@example.com', password='top_secret')
+        return django_user_model.objects.create_user(email='john.doe@example.com', password=None)
     return make_user
 
 def test_create_user(db, create_user):

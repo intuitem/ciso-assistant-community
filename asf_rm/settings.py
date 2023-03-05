@@ -20,6 +20,7 @@ from pathlib import Path
 import os
 import json
 from django.utils.translation import gettext_lazy as _
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,8 +47,8 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-MIRA_DOMAIN = os.environ['MIRA_DOMAIN']
-ALLOWED_HOSTS = [MIRA_DOMAIN]
+MIRA_URL = os.environ['MIRA_URL']
+ALLOWED_HOSTS = [urlparse(MIRA_URL).hostname]
 # if 'DJANGO_ALLOWED_HOSTS' in os.environ:
 #     ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')
 # else:
@@ -98,10 +99,10 @@ RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
 RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
 
-MIRA_SUPERUSER_EMAIL = os.environ['MIRA_SUPERUSER_EMAIL']
+MIRA_SUPERUSER_EMAIL = os.getenv('MIRA_SUPERUSER_EMAIL')
 EMAIL_HOST = os.environ['EMAIL_HOST']
-EMAIL_PORT = os.environ.get('EMAIL_PORT')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
