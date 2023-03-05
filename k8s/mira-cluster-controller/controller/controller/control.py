@@ -88,7 +88,7 @@ def create_ingress(client_name, mira_domain):
 
 
 
-def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
+def create_stateful_set_object(client_name, email_admin, mira_url, sts_name):
     configmaps = [client.V1EnvFromSource(config_map_ref=client.V1ConfigMapEnvSource(name='mira-config'))]
     secret_smtp_out = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="EMAIL_HOST_PASSWORD", name="smtp-out"))
     secret_recaptcha = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="RECAPTCHA_PRIVATE_KEY", name="recaptcha"))
@@ -100,6 +100,7 @@ def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
         env=[client.V1EnvVar(name="MIRA_SUPERUSER_EMAIL", value=email_admin),
              client.V1EnvVar(name="EMAIL_HOST_PASSWORD", value_from=secret_smtp_out),
              client.V1EnvVar(name="RECAPTCHA_PRIVATE_KEY", value_from=secret_recaptcha),
+             client.V1EnvVar(name="MIRA_URL", value=mira_url),
             ],
         volume_mounts=[client.V1VolumeMount(name="db-data", mount_path='/code/db')],
     )
@@ -108,7 +109,7 @@ def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
         image="caddy:latest",
         ports=[client.V1ContainerPort(container_port=80), client.V1ContainerPort(container_port=443)],
         volume_mounts=[client.V1VolumeMount(name="db-data", mount_path='/data', sub_path='caddy')],
-        command=['caddy', 'reverse-proxy', '--from', mira_domain, '--to', 'localhost:8000'],
+        command=['caddy', 'reverse-proxy', '--from', mira_url, '--to', 'localhost:8000'],
     )
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(
@@ -151,9 +152,9 @@ def create_stateful_set_object(client_name, email_admin, mira_domain, sts_name):
     )
 
 
-def create_stateful_set(client_name, email_admin, mira_domain):
+def create_stateful_set(client_name, email_admin, mira_url):
         sts_name = f"mira-{client_name}"
-        body=create_stateful_set_object(client_name, email_admin, mira_domain, sts_name)
+        body=create_stateful_set_object(client_name, email_admin, mira_url, sts_name)
         try:
             apps_v1_api.create_namespaced_stateful_set(namespace="default", body=body)
         except client.exceptions.ApiException as e:
@@ -170,9 +171,10 @@ def create_client_objects(client_name, email_admin):
         print("missing CLUSTER_DOMAIN environment variable - skipping creation of objects")
     else:
         mira_domain = f"{client_name}.{cluster_domain}"
+        mira_url = f"https://{mira_domain}"
         create_service(client_name)
         create_ingress(client_name, mira_domain)
-        create_stateful_set(client_name, email_admin, mira_domain)
+        create_stateful_set(client_name, email_admin, mira_url)
 
 
 def main():
