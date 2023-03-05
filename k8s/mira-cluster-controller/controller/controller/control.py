@@ -176,10 +176,3 @@ def create_client_objects(client_name, email_admin):
         create_ingress(client_name, mira_domain)
         create_stateful_set(client_name, email_admin, mira_url)
 
-
-def main():
-    create_client_objects( "toto", "root@example.com")
-
-if __name__ == "__main__":
-    main()
-
