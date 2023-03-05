@@ -3,3 +3,5 @@ django==4.1.5
 gunicorn==20.1.0
 whitenoise==6.3.0
 kubernetes
+django-otp 
+qrcode
