@@ -141,6 +141,7 @@ class UserManager(BaseUserManager):
         """
         Create and save a user with the given email, and password.
         """
+
         if not email:
             raise ValueError("The email must be set")
         email = self.normalize_email(email)
@@ -151,13 +152,14 @@ class UserManager(BaseUserManager):
             user.password = make_password(str(uuid.uuid4()))
             try:
                 user.mailing(email_template_name="registration/first_connexion_email.txt", subject="First Connexion")
-                return user
             except Exception as exception:
                 user.delete()
                 raise exception
         user.save(using=self._db)
+        return user
  
     def create_user(self, email, password=None, **extra_fields):
+        print("Creating user for", email)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
@@ -166,7 +168,6 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-
         return self._create_user(email, password, **extra_fields)
 
 
