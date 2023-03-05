@@ -1,7 +1,7 @@
-django==4.1.5
+django==4.1.7
 #psycopg2-binary==2.9.5
 gunicorn==20.1.0
-whitenoise==6.3.0
-kubernetes
-django-otp 
-qrcode
+whitenoise==6.4.0
+kubernetes==26.1.0
+django-otp==1.1.4
+qrcode==7.4.2
