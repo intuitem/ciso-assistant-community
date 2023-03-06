@@ -74,7 +74,6 @@ INSTALLED_APPS = [
     'django_filters',
     'library',
     'serdes',
-    'import_export',
     'captcha',
 ]
 
