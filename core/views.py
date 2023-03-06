@@ -62,6 +62,7 @@ from django.dispatch import receiver
 
 from captcha.fields import ReCaptchaField
 from datetime import datetime, timedelta
+import re
 
 import json
 
@@ -112,7 +113,7 @@ class GenericDetailView(DetailView):
         context['delete'] = RoleAssignment.has_permission(
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
-
+        context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural}
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -152,11 +153,47 @@ class SecurityMeasureDetailView(GenericDetailView):
 class RiskAcceptanceDetailView(GenericDetailView):
     model = RiskAcceptance
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
+        if self.object.state == 'submitted':
+            context['risk_acceptance_need_validation'] = (self.request.user == self.object.validator)
+        if self.object.state == 'accepted':
+            context['risk_acceptance_accepted'] = True
+        if self.object.state == 'rejected':
+            context['risk_acceptance_rejected'] = True
+        if self.object.state == 'revoked':
+            context['risk_acceptance_revoked'] = True
+        context['validate_riskacceptance'] = RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance') and (self.object.folder.id in RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN))
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
+        if RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance') and (self.object.folder.id in RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)):
+            if 'accepted' in request.POST:
+                self.object.set_state('accepted')
+                messages.success(request, _("Risk acceptance accepted with success"))
+            elif 'rejected' in request.POST:
+                self.object.set_state('rejected')
+                messages.success(request, _("Risk acceptance rejected with success"))
+            elif 'revoked' in request.POST:
+                self.object.set_state('revoked')
+                messages.success(request, _("Risk acceptance revoked with success"))
+            else:
+                messages.error(request, "An error has occured")
+        else:
+                messages.error(request, "Permission denied: you are not validator or you've not this role in this risk acceptance folder")
+        return self.get(request, *args, **kwargs)
 
 class FolderDetailView(GenericDetailView):
     model = Folder
     exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
                "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {"folder-list": _("Projects domains")}
+        return context
 
 
 class ProjectDetailView(GenericDetailView):
@@ -941,6 +978,8 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
         folder = Folder.objects.latest("created_at")
         auditors = UserGroup.objects.create(
             name=UserGroupCodename.AUDITOR, folder=folder, builtin=True)
+        validators = UserGroup.objects.create(
+            name=UserGroupCodename.VALIDATOR, folder=folder, builtin=True)
         analysts = UserGroup.objects.create(
             name=UserGroupCodename.ANALYST, folder=folder, builtin=True)
         managers = UserGroup.objects.create(
@@ -948,14 +987,17 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(
             name=RoleCodename.AUDITOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra1.perimeter_folders.add(folder)
-        ra2 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(
-            name=RoleCodename.ANALYST), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        ra2 = RoleAssignment.objects.create(user_group=validators, role=Role.objects.get(
+            name=RoleCodename.VALIDATOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra2.perimeter_folders.add(folder)
-        ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(
-            name=RoleCodename.DOMAIN_MANAGER), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        ra3 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(
+            name=RoleCodename.ANALYST), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra3.perimeter_folders.add(folder)
+        ra4 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(
+            name=RoleCodename.DOMAIN_MANAGER), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        ra4.perimeter_folders.add(folder)
         messages.info(self.request, _(
-            'User groups {} - Auditors, {} - Analysts and {} - Domain Managers were created').format(folder.name, folder.name, folder.name))
+            'User groups {} - Auditors, {} - Validators, {} - Analysts and {} - Domain Managers were created').format(folder.name, folder.name, folder.name, folder.name))
         return self.request.POST.get('next', reverse_lazy('folder-list'))
 
     def test_func(self):
@@ -1542,6 +1584,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         context['add_riskacceptance'] = RoleAssignment.has_permission(
             self.request.user, 'add_riskacceptance')
+        context['blocked_states'] = ('accepted', 'rejected', 'revoked')
         return context
 
     def get_queryset(self):
@@ -1565,6 +1608,18 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        if self.object.validator:
+            self.object.set_state('submitted') # Mettre à jour le paramètre "state"
+            self.object.save()
+            try:
+                self.object.validator.mailing("core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
+                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
+            except:
+                messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+        return super().form_valid(form)
+
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskacceptance"))
 
@@ -1576,31 +1631,47 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        print(self.object.validator, self.object.state)
+        if self.object.validator and self.object.state == 'created':
+            self.object.set_state('submitted') # Mettre à jour le paramètre "state"
+            self.object.save()
+            try:
+                self.object.validator.mailing("core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
+                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
+            except:
+                messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+        elif not self.object.validator and self.object.state == 'submitted':
+            self.object.set_state('created') # Mettre à jour le paramètre "state"
+            self.object.save()
+        return super().form_valid(form)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
-        context["crumbs"] = {'acceptance-list': _('Risk acceptances')}
+        context["crumbs"] = {'riskacceptance-list': _('Risk acceptances')}
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('acceptance-list')
+            return reverse_lazy('riskacceptance-list')
         else:
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().folder)
+        return (RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().folder) and self.get_object().state not in ('accepted', 'rejected', 'revoked'))
 
 
 class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskAcceptance
-    success_url = reverse_lazy('acceptance-list')
+    success_url = reverse_lazy('riskacceptance-list')
     template_name = 'snippets/risk_acceptance_delete_modal.html'
 
-    success_url = reverse_lazy('acceptance-list')
+    success_url = reverse_lazy('riskacceptance-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
@@ -1763,7 +1834,10 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
         return kwargs
 
     def get_success_url(self) -> str:
-        return self.request.POST.get('next', '/')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('user-list')
+        else:
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user"))

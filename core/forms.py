@@ -206,6 +206,7 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
             'expiry_date': DefaultDateInput(format='%Y-%m-%d'),
         }
         labels = {'risk_scenario': _('Risk scenario')}
+        exclude = ['state']
 
 
 class ProjectForm(StyledModelForm):

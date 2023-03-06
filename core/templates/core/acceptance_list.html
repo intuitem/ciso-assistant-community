@@ -105,10 +105,10 @@
                 </div>        
             </div>
         </form>
-        {% url 'acceptance-list' as short_path %}
+        {% url 'riskacceptance-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <div class="flex items-center h-10 w-full">
-            <a href="{% url 'acceptance-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+            <a href="{% url 'riskacceptance-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
                 <span>{% trans "Clear Filters" %}</span>
             </a>
         </div>
@@ -134,11 +134,17 @@
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center max-w-full">
                                 <span class=" p-1 rounded-lg text-xs
-                                {% if acceptance.type == "temporary" %}
-                                bg-red-300
-                                {% else %}
+                                {% if acceptance.state == "created" %}
+                                bg-blue-200
+                                {% elif acceptance.state == "submitted" %}
+                                bg-orange-200
+                                {% elif acceptance.state == "accepted" %}
                                 bg-green-200
-                                {% endif %}">{{ acceptance.get_type_display|lower}}
+                                {% elif acceptance.state == "rejected" %}
+                                bg-red-300
+                                {% elif acceptance.state == "revoked" %}
+                                bg-gray-200
+                                {% endif %}">{{ acceptance.get_state_display|lower}}
                                 </span>
                                 <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
                                     <a id="acceptance{{ acceptance.id }}" href="{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}"
@@ -166,7 +172,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 <span><a href="{% url 'riskacceptance-detail' acceptance.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
-                                {% if acceptance.id in object_ids_change %}
+                                {% if acceptance.id in object_ids_change and acceptance.state not in blocked_states %}
                                 <span>
                                     <a href="{% url 'riskacceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>

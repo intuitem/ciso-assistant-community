@@ -11,6 +11,9 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from datetime import date
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 class Project(AbstractBaseModel):
     PRJ_LC_STATUS = [
         ('undefined', _('--')),
@@ -453,20 +456,30 @@ class RiskScenario(AbstractBaseModel):
 
 
 class RiskAcceptance(AbstractBaseModel):
+
     ACCEPTANCE_TYPE = [
         ('temporary', _('Temporary')),
         ('permanent', _('Permanent')),
     ]
+    ACCEPTANCE_STATE = [
+        ('created', _('Created')),
+        ('submitted', _('Submitted')),
+        ('accepted', _('Accepted')),
+        ('rejected', _('Rejected')),
+        ('revoked', _('Revoked')),
+    ]
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
-    validator = models.CharField(max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"))
+    validator = models.ForeignKey(User, max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"), on_delete=models.SET_NULL, null=True, blank=True)
     type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
+    state = models.CharField(max_length=20, choices=ACCEPTANCE_STATE, default='created', verbose_name=_("State"))
     expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
                                    blank=True, null=True, verbose_name=_("Expiry date"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
+        permissions = [("validate_riskacceptance", "Can validate/rejected risk acceptances")]
         verbose_name = _("Risk acceptance")
         verbose_name_plural = _("Risk acceptances")
 
@@ -480,6 +493,8 @@ class RiskAcceptance(AbstractBaseModel):
     def get_html_url(self):
         url = reverse('riskacceptance-update', args=(self.id,))
         return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_scenario} </a>'
+    
+    def set_state(self, state):
+        self.state = state
+        self.save()
 # you can consider nested inlines at some points
-
-

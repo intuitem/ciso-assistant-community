@@ -8,8 +8,25 @@
     {% with page_title=object %}
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
+    {% if risk_acceptance_need_validation and validate_riskacceptance %}
+    <div class="flex flex-row items-center bg-yellow-100 rounded-xl shadow-lg px-6 py-2 mb-2">
+        <div class="text-yellow-900">
+            {% trans "This risk acceptance is awaiting processing. Remember to <strong>review</strong> it before accepting or rejecting it, you will not be able to go back." %}
+        </div>
+        <div class="ml-auto">
+            <form method='post'>
+                {% csrf_token %}
+                <button type="submit" name="accepted" class="bg-green-600 px-4 py-2 cursor-pointer text-white hover:bg-green-500 rounded-md font-medium">
+                    <i class="fas fa-check mr-2"></i>{% trans "Accept" %}
+                </button>
+                <button type="submit" name="rejected" class="bg-red-600 px-4 py-2 cursor-pointer text-white hover:bg-red-500 rounded-md font-medium">
+                    <i class="fas fa-xmark mr-2"></i>{% trans "Reject" %}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
     <div class="grid grid-cols-12 grid-flow-col bg-white rounded-xl shadow-lg px-6 py-4">
-        
         <div class="flex flex-col space-y-2">
             {% for key, values in data.items %}
             <div class="flex flex-col">
@@ -28,12 +45,27 @@
             </div>
             {% endfor %}
         </div>
-        {% if change %}
+        {% if change and not risk_acceptance_accepted and not risk_acceptance_rejected and not risk_acceptance_revoked %}
             <a href={{ object.edit_url }} class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg justify-self-end w-fit h-fit font-medium">
                 <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
-            </a>
+            </a>         
         {% endif %}
     </div>
+    {% if risk_acceptance_accepted and validate_riskacceptance %}
+    <div class="flex flex-row items-center bg-blue-100 rounded-xl shadow-lg px-6 py-2 mt-2">
+        <div class="text-blue-900">
+            {% trans "This risk acceptance is currently accepted. You can revoke it at any time, but this will be <strong>irrevocable</strong>. You will need to duplicate it with a different verison if necessary." %}
+        </div>
+        <div class="ml-auto">
+            <form method='post'>
+                {% csrf_token %}
+                <button type="submit" name="revoked" class="bg-red-700 px-4 py-2 cursor-pointer text-white hover:bg-red-600 rounded-lg justify-self-end w-fit h-fit font-medium">
+                    <i class="fas fa-xmark mr-2"></i>{% trans "Revoke it" %}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 {% endblock content %}
