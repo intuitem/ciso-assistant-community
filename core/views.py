@@ -157,9 +157,13 @@ class RiskAcceptanceDetailView(GenericDetailView):
         context = super().get_context_data(**kwargs)
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
         if self.object.state == 'submitted':
-            context['need_validation'] = (self.request.user == self.object.validator)
+            context['risk_acceptance_need_validation'] = (self.request.user == self.object.validator)
         if self.object.state == 'accepted':
-            context['accepted'] = True
+            context['risk_acceptance_accepted'] = True
+        if self.object.state == 'rejected':
+            context['risk_acceptance_rejected'] = True
+        if self.object.state == 'revoked':
+            context['risk_acceptance_revoked'] = True
         return context
     
     def post(self, request, *args, **kwargs):
@@ -1643,7 +1647,7 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().folder)
+        return (RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskacceptance"), folder=self.get_object().folder) and self.get_object().state not in ('accepted', 'rejected', 'revoked'))
 
 
 class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):

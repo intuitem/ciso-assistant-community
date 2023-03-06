@@ -8,7 +8,7 @@
     {% with page_title=object %}
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
-    {% if need_validation %}
+    {% if risk_acceptance_need_validation %}
     <div class="flex flex-row items-center bg-yellow-100 rounded-xl shadow-lg px-6 py-2 mb-2">
         <div class="text-yellow-900">
             {% trans "This risk acceptance is awaiting processing. Remember to <strong>review</strong> it before accepting or rejecting it, you will not be able to go back." %}
@@ -45,14 +45,13 @@
             </div>
             {% endfor %}
         </div>
-        {% if change %}
+        {% if change and not risk_acceptance_accepted and not risk_acceptance_rejected and not risk_acceptance_revoked %}
             <a href={{ object.edit_url }} class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg justify-self-end w-fit h-fit font-medium">
                 <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
-            </a>
-            
+            </a>         
         {% endif %}
     </div>
-    {% if accepted %}
+    {% if risk_acceptance_accepted %}
     <div class="flex flex-row items-center bg-blue-100 rounded-xl shadow-lg px-6 py-2 mt-2">
         <div class="text-blue-900">
             {% trans "This risk acceptance is currently accepted. You can revoke it at any time, but this will be <strong>irrevocable</strong>. You will need to duplicate it with a different verison if necessary." %}
