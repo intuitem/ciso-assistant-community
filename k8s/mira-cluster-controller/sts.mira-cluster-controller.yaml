@@ -36,8 +36,13 @@ spec:
         - name: EMAIL_HOST_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: myvars
+              name: smtp-out
               key: EMAIL_HOST_PASSWORD
+        - name: RECAPTCHA_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: recaptcha
+              key: RECAPTCHA_PRIVATE_KEY
       - name: caddy
         image: caddy:latest
         command: ["caddy", "reverse-proxy", "--from", $(MIRA_CLUSTER_CONTROLLER_DOMAIN), "--to", "localhost:8000"]

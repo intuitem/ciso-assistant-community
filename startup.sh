@@ -2,7 +2,7 @@
 # wait for database to be ready
 
 if [ ! -n "$DJANGO_SECRET_KEY" ]; then
-    if [ ! -f /code/db/django_secret_key ]; then
+    if [ ! -f db/django_secret_key ]; then
         cat /proc/sys/kernel/random/uuid > db/django_secret_key
         echo "generating initial Django secret key"
     fi
@@ -10,7 +10,7 @@ if [ ! -n "$DJANGO_SECRET_KEY" ]; then
     echo "Django secret key read from file"
 fi
 
-while ! python manage.py showmigrations iam > /dev/null 2>&1; do 
+while ! python manage.py showmigrations iam > /dev/null; do 
     echo "database not ready; waiting"
     sleep 10
 done

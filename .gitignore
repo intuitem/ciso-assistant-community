@@ -14,3 +14,5 @@ asf_rm/build.json
 *.sqlite3
 k8s/scaleway/kubeconfig-k8s-mira.yaml
 k8s/mira-cluster-controller/venv
+db/django_secret_key
+k8s/mira-cluster-controller/controller/db/django_secret_key

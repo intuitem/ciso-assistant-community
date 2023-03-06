@@ -19,7 +19,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from asf_rm.settings import MIRA_DOMAIN
+from asf_rm.settings import MIRA_URL
 
 
 class UserGroup(models.Model):
@@ -141,28 +141,33 @@ class UserManager(BaseUserManager):
         """
         Create and save a user with the given email, and password.
         """
+
         if not email:
             raise ValueError("The email must be set")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.password = make_password(password)
+        if password:
+            user.password = make_password(password)
+        else:
+            user.password = make_password(str(uuid.uuid4()))
+            try:
+                user.mailing(email_template_name="registration/first_connexion_email.txt", subject="First Connexion")
+            except Exception as exception:
+                user.delete()
+                raise exception
         user.save(using=self._db)
-        try:
-            user.mailing(email_template_name="registration/first_connexion_email.txt", subject="First Connexion")
-            return user
-        except Exception as exception:
-            user.delete()
-            raise exception
-
+        return user
+ 
     def create_user(self, email, password=None, **extra_fields):
+        print("Creating user for", email)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
+        print("Creating superuser for", email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-
         return self._create_user(email, password, **extra_fields)
 
 
@@ -247,7 +252,7 @@ class User(AbstractBaseUser):
         """
         header = {
                     "email": self.email,
-                    'domain': MIRA_DOMAIN,
+                    'root_url': MIRA_URL,
                     "uid": urlsafe_base64_encode(force_bytes(self.pk)),
                     "user": self,
                     'token': default_token_generator.make_token(self),

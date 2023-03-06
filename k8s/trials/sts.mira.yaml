@@ -49,7 +49,7 @@ spec:
               key: EMAIL_HOST_PASSWORD
       - name: caddy
         image: caddy:latest
-        command: ["caddy", "reverse-proxy", "--from", $(MIRA_DOMAIN), "--to", "localhost:8000"]
+        command: ["caddy", "reverse-proxy", "--from", $(MIRA_URL), "--to", "localhost:8000"]
         ports:
         - containerPort: 80
         - containerPort: 443
@@ -58,11 +58,11 @@ spec:
           mountPath: /data
           subPath: caddy
         env:
-        - name: MIRA_DOMAIN
+        - name: MIRA_URL
           valueFrom:
             configMapKeyRef:
               name: mira-config
-              key: MIRA_DOMAIN
+              key: MIRA_URL
   volumeClaimTemplates:
   - metadata:
       name: db-data

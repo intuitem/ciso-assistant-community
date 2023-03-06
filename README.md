@@ -44,7 +44,7 @@ $ cd asf-rm
 export DJANGO_SECRET_KEY=<XXX>
 export DJANGO_DEBUG=True
 export DJANGO_SUPERUSER_PASSWORD=<XXX>
-export MIRA_DOMAIN=mira.alsigo.net
+export MIRA_URL=http://127.0.0.1:8000
 # for postgres (if the variables are not defined then we use sqlite)
 export POSTGRES_NAME=asf
 export POSTGRES_USER=asfuser
@@ -174,6 +174,8 @@ Do not forget to check the [Django Deployment checklist](https://docs.djangoproj
 
 ## Deployement with K8s
 
+### Single-tenant deployment
+
 The docker image must be compiled with:
 ```sh
 $ docker build -t mira:x.y.z .
@@ -189,7 +191,26 @@ The deployment with sqlite is very simple:
 
 When using Postgres, the pods can be created with deploy.mira.yaml, using a Deployement.
 
-Configurations and readme can be found in the k8s directory, in particular for Scaleway. 
+Configurations and readme can be found in the k8s directory, in particular for Scaleway.
+
+### Multi-tenant deployment
+
+For multi-tenant, use the mira-cluster-controller application. It automatically creates clients statefulsets, service and ingress when a new client is added.
+
+Client suppression can be done from the GUI, but effective suppression requires kubectl intervention:
+    - k delete sts mira-<client>
+    - k delete ing mira-<client>
+    - k delete svc mira-<client>
+    - k delete pvc mira-<client>  ## beware, this action will suppress all client data (when using sqlite)
+
+To initiate multi-tenant admin, perform the following action
+```shell
+k exec -it mira-cluster-controller -- bash
+./superuser.sh <admin_email>
+```
+Use the static OTP provided as a last line for the initial connection to the GUI. From there, add an OTP device and attach it to the administrator.
+
+From there, management of users and clients can be done from the GUI.
 
 ## Built With
 

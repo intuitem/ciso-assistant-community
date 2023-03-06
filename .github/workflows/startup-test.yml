@@ -47,10 +47,10 @@ jobs:
         echo EMAIL_PORT=1025 >> .env
         echo EMAIL_HOST_USER='' >> .env
         echo EMAIL_HOST_PASSWORD='' >> .env
-        echo EMAIL_USE_TLS=False >> .env
+        #echo EMAIL_USE_TLS=False >> .env
         echo DJANGO_SUPERUSER_EMAIL=root@gmail.com >> .env
         echo DJANGO_SUPERUSER_PASSWORD=root >> .env
-        echo MIRA_DOMAIN=127.0.0.1 >> .env
+        echo MIRA_URL=http://127.0.0.1:8000 >> .env
         echo DEFAULT_FROM_EMAIL='mira@alsigo.net' >> .env
         echo MIRA_SUPERUSER_EMAIL='' >> .env
         echo RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123 >> .env
