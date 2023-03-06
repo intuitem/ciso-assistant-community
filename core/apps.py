@@ -219,6 +219,14 @@ def startup():
                 name="BI-RL-AUD"), is_recursive=True, builtin=True,
                 folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
             ra2.perimeter_folders.add(global_auditors.folder)
+        # if global validators user group does not exist, then create it
+        if not UserGroup.objects.filter(name="BI-UG-GVA", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+            global_validators = UserGroup.objects.create(name="BI-UG-GVA", folder=Folder.objects.get(
+                content_type=Folder.ContentType.ROOT), builtin=True)
+            ra2 = RoleAssignment.objects.create(user_group=global_validators, role=Role.objects.get(
+                name="BI-RL-VAL"), is_recursive=True, builtin=True,
+                folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            ra2.perimeter_folders.add(global_validators.folder)
         # add any superuser to the global administrors group, in case it is not yet done
         for superuser in User.objects.filter(is_superuser=True):
                 UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)

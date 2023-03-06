@@ -14,6 +14,7 @@ class RoleCodename(Enum):
 class UserGroupCodename(Enum):
     ADMINISTRATOR = 'BI-UG-ADM'
     GLOBAL_AUDITOR = 'BI-UG-GAD'
+    GLOBAL_VALIDATOR = 'BI-UG-GVA'
     DOMAIN_MANAGER = 'BI-UG-DMA'
     ANALYST = 'BI-UG-ANA'
     VALIDATOR = 'BI-UG-VAL'
@@ -33,6 +34,7 @@ BUILTIN_ROLE_CODENAMES = {
 BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ADMINISTRATOR): _('Administrator'),
     str(UserGroupCodename.GLOBAL_AUDITOR): _('Global auditor'),
+    str(UserGroupCodename.GLOBAL_VALIDATOR): _('Global validator'),
     str(UserGroupCodename.DOMAIN_MANAGER): _('Domain manager'),
     str(UserGroupCodename.ANALYST): _('Analyst'),
     str(UserGroupCodename.VALIDATOR): _('Validator'),
