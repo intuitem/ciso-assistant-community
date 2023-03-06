@@ -1827,7 +1827,10 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
         return kwargs
 
     def get_success_url(self) -> str:
-        return self.request.POST.get('next', '/')
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('user-list')
+        else:
+            return self.request.POST.get('next', '/')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user"))
