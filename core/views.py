@@ -63,6 +63,7 @@ from django.dispatch import receiver
 from asf_rm.settings import MIRA_DOMAIN, EMAIL_USE_TLS
 from captcha.fields import ReCaptchaField
 from datetime import datetime, timedelta
+import re
 
 import json
 
@@ -113,7 +114,15 @@ class GenericDetailView(DetailView):
         context['delete'] = RoleAssignment.has_permission(
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
-
+        crumb = re.findall('[A-Z][a-z]*', self.model.__name__)
+        print(self.model.__name__)
+        print(crumb)
+        output = []
+        for i in crumb:
+            i = chr( ord (i[0]) + 32) + i[1:]
+            output.append(i)
+        print(' '.join(output))
+        context['crumbs'] = {self.model.__name__.lower() + "-list": _(' '.join(output).capitalize()+"s")} if self.model.__name__ is not "Folder" else {self.model.__name__.lower() + "-list": _("Projects domains")}
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -1637,12 +1646,12 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
-        context["crumbs"] = {'acceptance-list': _('Risk acceptances')}
+        context["crumbs"] = {'riskacceptance-list': _('Risk acceptances')}
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('acceptance-list')
+            return reverse_lazy('riskacceptance-list')
         else:
             return self.request.POST.get('next', '/')
 
@@ -1652,10 +1661,10 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
 
 class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskAcceptance
-    success_url = reverse_lazy('acceptance-list')
+    success_url = reverse_lazy('riskacceptance-list')
     template_name = 'snippets/risk_acceptance_delete_modal.html'
 
-    success_url = reverse_lazy('acceptance-list')
+    success_url = reverse_lazy('riskacceptance-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
