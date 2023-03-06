@@ -172,7 +172,7 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="">
                                 <span><a href="{% url 'riskacceptance-detail' acceptance.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
-                                {% if acceptance.id in object_ids_change %}
+                                {% if acceptance.id in object_ids_change and acceptance.state not in blocked_states %}
                                 <span>
                                     <a href="{% url 'riskacceptance-update' acceptance.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>

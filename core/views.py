@@ -165,22 +165,25 @@ class RiskAcceptanceDetailView(GenericDetailView):
             context['risk_acceptance_rejected'] = True
         if self.object.state == 'revoked':
             context['risk_acceptance_revoked'] = True
-        context['validate_riskacceptance'] = RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance')
+        context['validate_riskacceptance'] = RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance') and (self.object.folder.id in RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN))
         return context
     
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
-        if 'accepted' in request.POST and RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance'):
-            self.object.set_state('accepted')
-            messages.success(request, _("Risk acceptance accepted with success"))
-        elif 'rejected' in request.POST and RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance'):
-            self.object.set_state('rejected')
-            messages.success(request, _("Risk acceptance rejected with success"))
-        elif 'revoked' in request.POST and RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance'):
-            self.object.set_state('revoked')
-            messages.success(request, _("Risk acceptance revoked with success"))
+        if RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance') and (self.object.folder.id in RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)):
+            if 'accepted' in request.POST:
+                self.object.set_state('accepted')
+                messages.success(request, _("Risk acceptance accepted with success"))
+            elif 'rejected' in request.POST:
+                self.object.set_state('rejected')
+                messages.success(request, _("Risk acceptance rejected with success"))
+            elif 'revoked' in request.POST:
+                self.object.set_state('revoked')
+                messages.success(request, _("Risk acceptance revoked with success"))
+            else:
+                messages.error(request, "An error has occured")
         else:
-            messages.error(request, "Permission denied: you are not validator")
+                messages.error(request, "Permission denied: you are not validator or you've not this role in this risk acceptance folder")
         return self.get(request, *args, **kwargs)
 
 class FolderDetailView(GenericDetailView):
@@ -1582,6 +1585,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         context['add_riskacceptance'] = RoleAssignment.has_permission(
             self.request.user, 'add_riskacceptance')
+        context['blocked_states'] = ('accepted', 'rejected', 'revoked')
         return context
 
     def get_queryset(self):
