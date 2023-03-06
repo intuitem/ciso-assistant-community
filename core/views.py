@@ -214,7 +214,7 @@ class SecurityFunctionDetailView(GenericDetailView):
 class UserDetailView(GenericDetailView):
     model = User
 
-    exclude = ['id', 'password']
+    exclude = ['id', 'password', 'last_five_logins']
 
 
 class AnalysisListView(ListView):
