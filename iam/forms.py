@@ -175,7 +175,8 @@ class MyProfileUpdateForm(UserChangeForm, StyledModelForm):
     class Meta:
         model = User
         exclude = ['last_login', 'is_superuser', 'date_joined',
-                   'user_permissions', 'user_groups', 'is_active']
+                   'user_permissions', 'user_groups', 'is_active',
+                   'last_five_logins']
 
 
 class UserPasswordChangeForm(AdminPasswordChangeForm):
