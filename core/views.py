@@ -114,15 +114,7 @@ class GenericDetailView(DetailView):
         context['delete'] = RoleAssignment.has_permission(
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
-        crumb = re.findall('[A-Z][a-z]*', self.model.__name__)
-        print(self.model.__name__)
-        print(crumb)
-        output = []
-        for i in crumb:
-            i = chr( ord (i[0]) + 32) + i[1:]
-            output.append(i)
-        print(' '.join(output))
-        context['crumbs'] = {self.model.__name__.lower() + "-list": _(' '.join(output).capitalize()+"s")} if self.model.__name__ is not "Folder" else {self.model.__name__.lower() + "-list": _("Projects domains")}
+        context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural}
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -173,25 +165,33 @@ class RiskAcceptanceDetailView(GenericDetailView):
             context['risk_acceptance_rejected'] = True
         if self.object.state == 'revoked':
             context['risk_acceptance_revoked'] = True
+        context['validate_riskacceptance'] = RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance')
         return context
     
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
-        if 'accepted' in request.POST:
+        if 'accepted' in request.POST and RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance'):
             self.object.set_state('accepted')
             messages.success(request, _("Risk acceptance accepted with success"))
-        elif 'rejected' in request.POST:
+        elif 'rejected' in request.POST and RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance'):
             self.object.set_state('rejected')
             messages.success(request, _("Risk acceptance rejected with success"))
-        elif 'revoked' in request.POST:
+        elif 'revoked' in request.POST and RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance'):
             self.object.set_state('revoked')
             messages.success(request, _("Risk acceptance revoked with success"))
+        else:
+            messages.error(request, "Permission denied: you are not validator")
         return self.get(request, *args, **kwargs)
 
 class FolderDetailView(GenericDetailView):
     model = Folder
     exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
                "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {"folder-list": _("Projects domains")}
+        return context
 
 
 class ProjectDetailView(GenericDetailView):
@@ -975,22 +975,27 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
     def get_success_url(self) -> str:
         folder = Folder.objects.latest("created_at")
         auditors = UserGroup.objects.create(
-            name=UserGroupCodename.AUDITORS, folder=folder, builtin=True)
+            name=UserGroupCodename.AUDITOR, folder=folder, builtin=True)
+        validators = UserGroup.objects.create(
+            name=UserGroupCodename.VALIDATOR, folder=folder, builtin=True)
         analysts = UserGroup.objects.create(
-            name=UserGroupCodename.ANALYSTS, folder=folder, builtin=True)
+            name=UserGroupCodename.ANALYST, folder=folder, builtin=True)
         managers = UserGroup.objects.create(
-            name=UserGroupCodename.DOMAIN_MANAGERS, folder=folder, builtin=True)
+            name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True)
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(
             name=RoleCodename.AUDITOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra1.perimeter_folders.add(folder)
-        ra2 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(
-            name=RoleCodename.ANALYST), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        ra2 = RoleAssignment.objects.create(user_group=validators, role=Role.objects.get(
+            name=RoleCodename.VALIDATOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra2.perimeter_folders.add(folder)
-        ra3 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(
-            name=RoleCodename.DOMAIN_MANAGER), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        ra3 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(
+            name=RoleCodename.ANALYST), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
         ra3.perimeter_folders.add(folder)
+        ra4 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(
+            name=RoleCodename.DOMAIN_MANAGER), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        ra4.perimeter_folders.add(folder)
         messages.info(self.request, _(
-            'User groups {} - Auditors, {} - Analysts and {} - Domain Managers were created').format(folder.name, folder.name, folder.name))
+            'User groups {} - Auditors, {} - Validators, {} - Analysts and {} - Domain Managers were created').format(folder.name, folder.name, folder.name, folder.name))
         return self.request.POST.get('next', reverse_lazy('folder-list'))
 
     def test_func(self):
@@ -1610,7 +1615,6 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
                 messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
                 messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
-        messages.success(self.request, "Risk acceptance has been created successfully")
         return super().form_valid(form)
 
     def test_func(self):

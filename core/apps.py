@@ -7,11 +7,12 @@ def startup():
     """Only called in main, not during makemigrations or migrate"""
     import os
     if os.environ.get('RUN_MAIN'):
-        from .models import Folder
+        from .models import Folder, RiskAcceptance
         from iam.models import UserGroup, Role, RoleAssignment
         from django.contrib.auth.models import Permission
         from iam.models import User
         from asf_rm.settings import MIRA_SUPERUSER_EMAIL
+        from django.contrib.contenttypes.models import ContentType
 
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
@@ -19,6 +20,21 @@ def startup():
             "view_securitymeasure",
             "view_riskscenario",
             "view_riskacceptance",
+            "view_asset",
+            "view_threat",
+            "view_securityfunction",
+            "view_folder",
+            "view_usergroup",
+            "view_riskmatrix"
+        ])
+
+        validator_permissions = Permission.objects.filter(codename__in=[
+            "view_project",
+            "view_analysis",
+            "view_securitymeasure",
+            "view_riskscenario",
+            "view_riskacceptance",
+            "validate_riskacceptance",
             "view_asset",
             "view_threat",
             "view_securityfunction",
@@ -179,6 +195,8 @@ def startup():
                 name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
             auditor = Role.objects.create(name="BI-RL-AUD", builtin=True)
             auditor.permissions.set(auditor_permissions)
+            validator = Role.objects.create(name="BI-RL-VAL", builtin=True)
+            validator.permissions.set(validator_permissions)
             analyst = Role.objects.create(name="BI-RL-ANA", builtin=True)
             analyst.permissions.set(analyst_permissions)
             domain_manager = Role.objects.create(
