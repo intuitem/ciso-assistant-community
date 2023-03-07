@@ -143,6 +143,8 @@
                 <th class="px-6 py-3">{% trans "Type" %}</th>
                 <th class="px-6 py-3">{% trans "ETA" %}</th>
                 <th class="px-6 py-3">{% trans "Security function" %}</th>
+                <th class="px-6 py-3 text-center">{% trans "Analyses" %}</th>
+                <th class="px-6 py-3 text-center">{% trans "Projects" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>
@@ -197,6 +199,16 @@
                             {% else %}
                                 --
                             {% endif %}
+                            </p> 
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <p class="text-gray-900 whitespace-no-wrap">       
+                            {{ measure.analyses|length}}
+                            </p> 
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <p class="text-gray-900 whitespace-no-wrap">       
+                            {{ measure.projects|length }}
                             </p> 
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

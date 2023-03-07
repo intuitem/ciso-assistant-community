@@ -322,6 +322,18 @@ class SecurityMeasure(AbstractBaseModel):
         verbose_name = _("Security measure")
         verbose_name_plural = _("Security measures")
 
+    @property
+    def risk_scenarios(self):
+        return self.riskscenario_set.all()
+    
+    @property
+    def analyses(self):
+        return {scenario.analysis for scenario in self.risk_scenarios}
+    
+    @property
+    def projects(self):
+        return {analysis.project for analysis in self.analyses}
+
     def parent_project(self):
         pass
 
