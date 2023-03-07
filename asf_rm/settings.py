@@ -21,6 +21,7 @@ import os
 import json
 from django.utils.translation import gettext_lazy as _
 from urllib.parse import urlparse
+import passkeys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,11 +50,7 @@ DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
 MIRA_URL = os.environ['MIRA_URL']
 ALLOWED_HOSTS = [urlparse(MIRA_URL).hostname]
-# if 'DJANGO_ALLOWED_HOSTS' in os.environ:
-#     ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')
-# else:
-#     ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
-
+CSRF_TRUSTED_ORIGINS = [MIRA_URL]
 
 # Application definition
 
@@ -75,6 +72,7 @@ INSTALLED_APPS = [
     'library',
     'serdes',
     'captcha',
+    'passkeys',
 ]
 
 MIDDLEWARE = [
@@ -218,3 +216,9 @@ else:
             'NAME': BASE_DIR / "db/mira.sqlite3",
         }
     }
+
+AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend'] # Change your authentication backend
+FIDO_SERVER_ID=urlparse(MIRA_URL).hostname      # Server rp id for FIDO2, it the full domain of your project
+FIDO_SERVER_NAME="FidoMira"
+KEY_ATTACHMENT = passkeys.Attachment.PLATFORM
+

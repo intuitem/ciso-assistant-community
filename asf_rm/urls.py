@@ -30,4 +30,5 @@ urlpatterns = [
     path('search/', cv.SearchResults.as_view(), name='search'),
     path('', login_required(cv.AnalysisListView.as_view()), name='home'),
     path('x-rays', login_required(cv.ReviewView.as_view()), name='xrays'),
+    path('passkeys/', include('passkeys.urls')),
 ]

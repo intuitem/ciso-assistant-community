@@ -21,7 +21,6 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from asf_rm.settings import MIRA_URL
 
-
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -266,6 +265,14 @@ class User(AbstractBaseUser):
     def edit_url(self) -> str:
         """get the edit url of the user"""
         return reverse_lazy(f"{self.__class__.__name__.lower()}-update", args=[self.id])
+
+    @property
+    def username(self):
+        return self.email
+    
+    @username.setter
+    def set_username(self, username):
+        self.email = username
 
 
 class RoleAssignment(models.Model):

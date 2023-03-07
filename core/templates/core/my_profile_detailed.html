@@ -21,11 +21,9 @@
         <div class="mt-4 flex space-x-2 justify-end">
             {% comment %} <button onclick="window.location.href='{% url 'index' %}';" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button> {% endcomment %}
             <input type="hidden" name="next" value={{ request.GET.next }}>
-            <a href="{% url 'me-update' user.id %}?next={{ request.path|urlencode }}" class="add-button">
-                <i class="fas fa-edit"></i>
-                {% trans "Edit" %}</a>
-        </div>    
-    </div>
+            <a href="{% url 'me-update' user.id %}?next={{ request.path|urlencode }}" class="add-button"><i class="fas fa-edit"></i>{% trans "Edit" %}</a>
+            <a href="{% url 'passkeys:home' %}?next={{ request.path|urlencode }}" class="add-button"> <i class="fas fa-edit"></i>{% trans "Passkeys" %}</a>
+            </div>
     <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow relative">
         <h2 class="text-xl mb-1 font-semibold">{% trans "User groups" %}</h2>
         <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">

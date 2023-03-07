@@ -5,7 +5,7 @@
 Retrieve the kubeconfig-k8s-mira.yaml file.
 
 ``` shell
-export KUBE_CONFIG=$(pwd)/kubeconfig-k8s-mira.yaml
+export KUBECONFIG=$(pwd)/kubeconfig-k8s-mira.yaml
 alias k=kubectl
 ```
 
