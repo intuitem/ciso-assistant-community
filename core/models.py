@@ -346,7 +346,7 @@ class SecurityMeasure(AbstractBaseModel):
 
     @property
     def get_html_url(self):
-        url = reverse('MP', args=(self.folder.id,))
+        url = reverse('securitymeasure-detail', args=(self.id,))
         return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.folder.name}: {self.name} </a>'
 
 
@@ -491,8 +491,8 @@ class RiskAcceptance(AbstractBaseModel):
 
     @property
     def get_html_url(self):
-        url = reverse('riskacceptance-update', args=(self.id,))
-        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_scenario} </a>'
+        url = reverse('riskacceptance-detail', args=(self.id,))
+        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.folder.name}: {self.name} </a>'
     
     def set_state(self, state):
         self.state = state
