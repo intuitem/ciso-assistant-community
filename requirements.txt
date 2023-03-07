@@ -13,3 +13,4 @@ pytest-playwright==0.3.1
 django-filter==22.1
 whitenoise==6.4.0
 django-recaptcha==3.0.0
+passkeys

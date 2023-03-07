@@ -1,4 +1,6 @@
 {% load static tailwind_tags %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -15,5 +17,10 @@
 				<h1 class="text-5xl">Django + Tailwind = ❤️</h1>
 			</section>
 		</div>
+		{% block head %}
+		{% endblock %}
+		{% block content %}
+		{% endblock %}
+		
 	</body>
 </html>

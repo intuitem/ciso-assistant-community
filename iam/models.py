@@ -21,7 +21,6 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from asf_rm.settings import MIRA_URL
 
-
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -267,6 +266,14 @@ class User(AbstractBaseUser):
         """get the edit url of the user"""
         return reverse_lazy(f"{self.__class__.__name__.lower()}-update", args=[self.id])
 
+    @property
+    def username(self):
+        return self.email
+    
+    @username.setter
+    def set_username(self, username):
+        self.email = username
+
 
 class RoleAssignment(models.Model):
     """ fundamental class for MIRA RBAC model, similar to Azure IAM model """
@@ -397,3 +404,16 @@ class RoleAssignment(models.Model):
                 if perm.codename == codename:
                     return True
         return False
+
+from django.contrib.auth.backends import ModelBackend
+from passkeys.backend import PasskeyModelBackend
+
+class PasskeysBackend(PasskeyModelBackend):
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        print("coucou authenticate")
+        return super().authenticate(request, username, password, **kwargs)
+
+    def get_user(self, user_id):
+        print("coucou get_user")
+        return super().get_user(user_id)
+
