@@ -70,8 +70,8 @@ def test_asf002(page):
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 2 | Enter an admin username and a password, then click on "Login" | Open home page
 	step += 1
-	page.fill("id=id_username", "root@example.com")
-	page.fill("id=id_password", "rootroot")
+	page.fill("id=id_username", "root@gmail.com")
+	page.fill("id=id_password", "root")
 	page.click('id=login')
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 3 | Create a new user | Send a mail to the user
