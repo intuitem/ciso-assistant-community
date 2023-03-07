@@ -20,8 +20,8 @@
                 {% if invalid %}
                     <div class="alert alert-danger">Invalid Username or password</div>
                 {% endif %}
-                <div id="login-form" class="flex flex-col">
-                <form id="toto" method="post">
+                <div id="login-div" class="flex flex-col">
+                <form id="login-form" method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <input type="hidden" name="passkeys" id="passkeys"/>
@@ -30,9 +30,8 @@
                             {% trans "Login" %}
                     </button>
                     <button id="login-passkeys" type="button"
-                            class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2"
-                            onclick="authn('toto')">
-                            {% trans "Login with passkeys" %}
+                            class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2 flex space-x-4 items-center" onclick="authn('login-form')">
+                            <img src="{% static 'passkeys/imgs/FIDO-Passkey_Icon-White.png' %}" style="width: 24px"><span>{% trans "Login with passkeys" %}</span>
                     </button>
                     {%include 'passkeys.js' %}
                 </form>
