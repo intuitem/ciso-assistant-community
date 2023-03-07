@@ -152,6 +152,7 @@ class SecurityMeasureDetailView(GenericDetailView):
 
 class RiskAcceptanceDetailView(GenericDetailView):
     model = RiskAcceptance
+    template_name = "core/detail/riskacceptance_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -190,14 +191,27 @@ class FolderDetailView(GenericDetailView):
     exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
                "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
     
+    template_name = "core/detail/folder_detail.html"
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {"folder-list": _("Projects domains")}
+        context['projects'] = Project.objects.filter(folder=self.object)
+        context['project_create_form'] = ProjectFormInherited(initial={'folder': self.object})
         return context
 
 
 class ProjectDetailView(GenericDetailView):
     model = Project
+
+    template_name = "core/detail/project_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["crumbs"] = {"project-list": _("Projects")}
+        context['analysis_create_form'] = RiskAnalysisCreateFormInherited(initial={'project': self.object})
+        context['analyses'] = Analysis.objects.filter(project=self.object)
+        return context
 
 
 class AssetDetailView(GenericDetailView):

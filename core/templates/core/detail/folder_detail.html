@@ -1,0 +1,12 @@
+{% extends 'generic/detail.html' %}
+{% load static i18n %}
+
+{% block below %}
+    <div class="bg-white rounded-lg shadow-lg px-4 py-6 w-full mt-2">
+        <div class="grid grid-rows-1 grid-cols-2 mb-2">
+            <h2 class="text-xl font-semibold mb-4">{% trans "Associated Projects" %}</h2>
+            {% include 'snippets/add_button_modal.html' with form=project_create_form header=_("Add project") model="project" content=_("New project") %}
+        </div>
+        {% include 'snippets/project_list_nested.html' with domain=object %}
+    </div>
+{% endblock below %}
