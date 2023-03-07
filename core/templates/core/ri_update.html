@@ -187,12 +187,19 @@
 <script>
     function cancel() {
         // unclean but works
+        const fallbackURL = "{% url 'riskscenario-list' %}";
+        if (window.history.length <= 2){
+            window.location.href = fallbackURL;
+            return;
+        }
         const prevURL = new URL(document.referrer).pathname;
         const curURL = window.location.pathname;
         if (prevURL === curURL)
+        {
             window.history.go(-2);
-        else
-            window.history.back();
+            return;
+        }
+        window.history.back();
     }
     // patch for *THAT* risk scenario update form issue:
     $(document).ready(function() {
