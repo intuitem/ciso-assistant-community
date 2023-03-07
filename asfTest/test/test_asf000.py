@@ -6,6 +6,7 @@ from playwright.async_api import *
 from playwright import *
 import urlpatterns
 import pytest
+import time
 
 def test_asf001(page):
 	"""
@@ -69,8 +70,8 @@ def test_asf002(page):
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 2 | Enter an admin username and a password, then click on "Login" | Open home page
 	step += 1
-	page.fill("id=id_username", "root@gmail.com")
-	page.fill("id=id_password", "root")
+	page.fill("id=id_username", "root@example.com")
+	page.fill("id=id_password", "rootroot")
 	page.click('id=login')
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 3 | Create a new user | Send a mail to the user
@@ -80,6 +81,7 @@ def test_asf002(page):
 	page.fill("id=id_user_email", "root2@gmail.com")
 	page.keyboard.press("Enter")
 	toast = page.locator("id=success-toast")
+	time.sleep(1)
 	user = page.locator("id=users").element_handles()[-1]
 	assert toast.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	assert user.inner_text() == "root2@gmail.com", "Test "+str(test)+" Step "+str(step)+": not Ok"
