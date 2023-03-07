@@ -27,9 +27,13 @@
                     <input type="hidden" name="passkeys" id="passkeys"/>
                     <button id="login" type="submit"
                             class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2">
-                        {% trans "Login" %}
+                            {% trans "Login" %}
                     </button>
-                    <button class="btn btn-block btn-dark" type="button" onclick="authn('toto')">&nbsp;Login By Passkeys</button>
+                    <button id="login-passkeys" type="button"
+                            class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2"
+                            onclick="authn('toto')">
+                            {% trans "Login with passkeys" %}
+                    </button>
                     {%include 'passkeys.js' %}
                 </form>
                 <label class="label">

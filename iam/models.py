@@ -404,16 +404,3 @@ class RoleAssignment(models.Model):
                 if perm.codename == codename:
                     return True
         return False
-
-from django.contrib.auth.backends import ModelBackend
-from passkeys.backend import PasskeyModelBackend
-
-class PasskeysBackend(PasskeyModelBackend):
-    def authenticate(self, request, username=None, password=None, **kwargs):
-        print("coucou authenticate")
-        return super().authenticate(request, username, password, **kwargs)
-
-    def get_user(self, user_id):
-        print("coucou get_user")
-        return super().get_user(user_id)
-

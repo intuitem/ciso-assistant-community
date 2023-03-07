@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-07 00:59+0000\n"
+"POT-Creation-Date: 2023-03-07 17:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -181,7 +181,7 @@ msgid "Type (descending)"
 msgstr "Type (descendant)"
 
 #: core/filters.py:206 core/filters.py:250 core/filters.py:334
-#: core/forms.py:220 core/forms.py:231 core/models.py:30 core/models.py:306
+#: core/forms.py:238 core/forms.py:249 core/models.py:30 core/models.py:306
 #: core/models.py:471 core/templates/core/acceptance_list.html:86
 #: core/templates/core/analysis_list.html:89
 #: core/templates/core/fragments/watchlist_exceptions.html:11
@@ -316,21 +316,21 @@ msgstr "Nom (descendant)"
 msgid "Search user group..."
 msgstr "Rechercher un groupe utilisateur..."
 
-#: core/forms.py:52 core/forms.py:56
+#: core/forms.py:53 core/forms.py:74
 #: core/templates/snippets/associated_users_list_nested.html:13
 #: core/templates/snippets/users_list_nested.html:13
 msgid "Email"
 msgstr "Adresse électronique"
 
-#: core/forms.py:53
+#: core/forms.py:54
 msgid "Password"
 msgstr "Mot de passe"
 
-#: core/forms.py:75
+#: core/forms.py:93
 msgid "terms and conditions of use"
 msgstr ""
 
-#: core/forms.py:208 core/models.py:389 core/templates/core/ri_update.html:20
+#: core/forms.py:226 core/models.py:389 core/templates/core/ri_update.html:20
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 
@@ -2721,9 +2721,13 @@ msgstr "vous connecter"
 msgid "to access all the features."
 msgstr ""
 
-#: core/templates/registration/login.html:26
+#: core/templates/registration/login.html:30
 msgid "Login"
 msgstr "Connexion"
+
+#: core/templates/registration/login.html:35
+msgid "Login with passkeys"
+msgstr ""
 
 #: core/templates/registration/password_reset.html:11
 msgid "Password reset"
