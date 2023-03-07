@@ -71,6 +71,7 @@ class FirstConnexionConfirmForm(SetPasswordForm):
         for password in self.fields.items():
             password[1].widget.attrs['class'] = style
         self.fields['terms_service'].widget.attrs['class'] = 'ml-2 rounded border-gray-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 text-indigo-500'
+        self.fields['terms_service'].widget.attrs['id'] = 'terms_service'
     
     terms_service = forms.BooleanField(label=_("terms and conditions of use"))
 

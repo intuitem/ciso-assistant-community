@@ -101,6 +101,7 @@ def test_asf002(page):
 	page.on("response", log_response)
 	page.fill("id=id_new_password1", "rootroot")
 	page.fill("id=id_new_password2", "rootroot")
+	page.locator("id=terms_service").check()
 	page.keyboard.press("Enter")
 	page.goto(urlpatterns.URL)
 	message = page.locator('id=hellothere')
