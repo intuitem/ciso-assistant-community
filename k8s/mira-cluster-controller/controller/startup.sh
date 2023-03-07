@@ -15,6 +15,7 @@ while ! python manage.py showmigrations admin > /dev/null ; do
     sleep 10
 done
 
+python manage.py collectstatic
 python manage.py makemigrations 
 python manage.py migrate
 
