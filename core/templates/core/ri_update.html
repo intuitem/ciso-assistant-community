@@ -175,7 +175,7 @@
             </div>
         </section>
         <div class="flex space-x-2 justify-end"> 
-            <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
+            <button onclick="cancel()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
             <input
                 type="hidden" form="scenario_update_form" name="next" value={{ request.GET.next }}>
             <button action="submit" form="scenario_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-400"
@@ -184,7 +184,17 @@
     </div>
 </div>
 
-<script> // patch for *THAT* risk scenario update form issue: 
+<script>
+    function cancel() {
+        // unclean but works
+        const prevURL = new URL(document.referrer).pathname;
+        const curURL = window.location.pathname;
+        if (prevURL === curURL)
+            window.history.go(-2);
+        else
+            window.history.back();
+    }
+    // patch for *THAT* risk scenario update form issue:
     $(document).ready(function() {
         $('button#measure_save').click(function(event) {
             event.preventDefault(); // prevent 1st submit (modal) from firing right away, without this only the modal will be submitted
