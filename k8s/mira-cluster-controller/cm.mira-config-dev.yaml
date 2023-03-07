@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: mira-config
 data:
-  DJANGO_DEBUG: "True"
+  DJANGO_DEBUG: "False"
   EMAIL_HOST: "smtp.tem.scw.cloud"
   EMAIL_PORT: "587"
   EMAIL_HOST_USER: "c4d49b92-e2f7-4e3a-9b5b-fdb70ed6ee9d"
