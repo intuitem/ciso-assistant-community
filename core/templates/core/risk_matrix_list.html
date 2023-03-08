@@ -43,6 +43,7 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Name" %}</th>
                 <th class="px-6 py-3">{% trans "Description" %}</th>
+                <th class="px-6 py-3 text-center">{% trans "Projects" %}</th>
                 <th class="px-6 py-3">{% trans "Matrix" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
@@ -62,6 +63,11 @@
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
                                 {{ matrix.description|capfirst }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                {{ matrix.projects|length }}
                             </p>
                         </td>
                     
