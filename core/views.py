@@ -739,7 +739,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
     ordering = 'created_at'
     paginate_by = 10
     model = Project
-
+    
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
@@ -758,7 +758,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
         queryset = self.get_queryset()
         filter = ProjectFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['project_create_form'] = ProjectForm
+        context['project_create_form'] = ProjectForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
         context['add_project'] = RoleAssignment.has_permission(
@@ -788,7 +788,7 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
 class ProjectCreateViewModal(UserPassesTestMixin, CreateViewModal):
     model = Project
     context_object_name = 'project'
-    form_class = ProjectForm
+    form_class = ProjectForm()
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'), folder=Folder.objects.get(id=self.request.POST['folder']))

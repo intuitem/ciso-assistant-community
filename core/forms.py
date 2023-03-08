@@ -2,6 +2,8 @@ from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, Hi
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 from django import forms
 from .models import *
+from iam.models import RoleAssignment
+from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from captcha.fields import ReCaptchaField
@@ -229,9 +231,14 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
 
 
 class ProjectForm(StyledModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
+        print(user)
         super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        if user:
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, permission=Permission.objects.get(codename="add_project")))
+        else:
+            self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+
 
     class Meta:
         model = Project
