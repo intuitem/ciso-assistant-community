@@ -1157,6 +1157,18 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
             folder=Folder.get_folder(self.get_object()))
 
 
+class RiskMatrixDeleteView(UserPassesTestMixin, DeleteView):
+    model = RiskMatrix
+    success_url = reverse_lazy('riskmatrix-list')
+    template_name = 'snippets/rm_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('riskmatrix-list')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskmatrix"))
+
+
 class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
     model = Analysis
     success_url = reverse_lazy('analysis-list')
@@ -2103,6 +2115,10 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
+        context["object_ids_change"] = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
+        context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[2]
         queryset = self.get_queryset()
         filter = RiskMatrixFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -2127,7 +2143,7 @@ class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
-        context["crumbs"] = {'matrix-list': _('Matrices')}
+        context["crumbs"] = {'riskmatrix-list': _('Matrices')}
         return context
 
     def test_func(self):
@@ -2135,3 +2151,29 @@ class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+    
+
+class RiskMatrixUpdateView(UserPassesTestMixin, UpdateView):
+    template_name = 'core/risk_matrix_update.html'
+    context_object_name = 'matrix'
+    form_class = RiskMatrixUpdateForm
+
+    model = RiskMatrix
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        context["crumbs"] = {'riskmatrix-list': _('Matrices')}
+        return context
+    
+    def get_success_url(self) -> str:
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('project-list')
+        else:
+            return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskmatrix"), folder=Folder.get_folder(self.get_object()))

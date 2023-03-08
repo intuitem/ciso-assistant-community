@@ -108,6 +108,12 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
         fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
 
 
+class RiskMatrixUpdateForm(StyledModelForm):
+    class Meta:
+        model = RiskMatrix
+        fields = ['is_active']
+
+
 class RiskAnalysisUpdateForm(StyledModelForm):
     class Meta:
         model = Analysis
