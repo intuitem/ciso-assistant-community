@@ -16,7 +16,7 @@ def test_installation(page):
 	def log_response(intercepted_response):
 		print("a response was received:", intercepted_response.status, intercepted_response.status_text)
 		assert intercepted_response.status not in (500, 404), "Step "+str(step)+": not Ok"
-	page.on("response", log_response)
+	# page.on("response", log_response)
 	page.goto(urlpatterns.URL)
 	message = page.locator('id=hellothere')
 	assert message.is_visible() is True, "Step 1: not Ok"
