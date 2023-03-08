@@ -169,6 +169,14 @@ class RiskMatrix(AbstractBaseModel, FolderMixin):
     @property
     def is_used(self) -> bool:
         return Analysis.objects.filter(rating_matrix=self).exists()
+    
+    @property
+    def analyses(self) -> list:
+        return Analysis.objects.filter(rating_matrix=self)
+    
+    @property
+    def projects(self) -> list:
+        return Project.objects.filter(analysis__rating_matrix=self).distinct()
 
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
