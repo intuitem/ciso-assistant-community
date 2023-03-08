@@ -93,12 +93,12 @@ def test_asf002(page):
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 5 | Create password for the new account | Come back on Login page
 	step += 1
-	page.remove_listener("response", log_response)
+	# page.remove_listener("response", log_response)
 	page.goto(urlpatterns.MAILHOG)
 	page.click("text=root2@gmail.com")
 	link = page.get_by_role("link", name="127.0.0.1").element_handles()[0].inner_text()
 	page.goto(link)
-	page.on("response", log_response)
+	# page.on("response", log_response)
 	page.fill("id=id_new_password1", "rootroot")
 	page.fill("id=id_new_password2", "rootroot")
 	page.locator("id=terms_service").check()
