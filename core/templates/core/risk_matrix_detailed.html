@@ -6,7 +6,12 @@
 {% include 'snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<div class="shadow-lg">
+<div class="shadow-lg bg-white rounded-lg flax flex-col w-full h-fit">
+    <div class="shadow-lg rounded-lg grid grid-rows-12 w-full h-fit px-4 pt-4">
+        <a href={{ object.edit_url }} class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg font-medium w-fit h-fit justify-self-end">
+            <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
+        </a>
+    </div>
     {% include 'snippets/risk_matrix.html' %}
 </div>
 
