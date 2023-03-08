@@ -6,13 +6,53 @@
 {% include 'snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<div class="shadow-lg bg-white rounded-lg flax flex-col w-full h-fit">
-    <div class="shadow-lg rounded-lg grid grid-rows-12 w-full h-fit px-4 pt-4">
+<div class="shadow-lg bg-white rounded-lg flax flex-col w-full h-fit p-4">
+    <div class="grid grid-rows-12 w-full h-fit">
         <a href={{ object.edit_url }} class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg font-medium w-fit h-fit justify-self-end">
             <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
         </a>
     </div>
     {% include 'snippets/risk_matrix.html' %}
+    <div>
+        {% blocktrans count analyses=matrix.analyses|length trimmed %}
+            Used in <strong>{{ analyses }}</strong> analysis
+        {% plural %}
+            Used in <strong>{{ analyses }}</strong> analyses
+        {% endblocktrans %}
+        {% blocktrans count projects=matrix.projects|length trimmed %}
+            across <strong>{{ projects }}</strong> project
+        {% plural %}
+            across <strong>{{ projects }}</strong> projects
+        {% endblocktrans %}
+        <div class="flex flex-col">
+            {% for project in matrix.projects %}
+                <div x-data="{ open: false }" class="text-gray-800">
+                    <button @click="open = !open" class="cursor-pointer flex items-center w-full p-5 font-medium text-left text-gray-500 border border-gray-200 focus:ring-4 focus:ring-gray-200 hover:bg-gray-100 {% if forloop.first %} rounded-t-xl {% endif %}">
+                        <i class="fas mr-4" :class="open == true ? 'fa-chevron-up' : 'fa-chevron-down'"></i> {{ project.name }}
+                    </button>
+                    <div x-show="open" class="p-5 border">
+                        <table class="text-md font-medium">
+                        {% for analysis in matrix.analyses %}
+                            {% if analysis.project == project %}
+                                <tr class="py-2">
+                                    <td class="px-2 py-1">
+                                        <a href="{% url 'RA' analysis.id %}" class="text-indigo-700 hover:text-indigo-600">
+                                            {{ analysis }}
+                                        </a>
+                                    </td>
+                                    <td class="px-2 py-1 space-x-1">
+                                        <a href="{% url 'RA' analysis.id %}" class="text-indigo-700 hover:text-indigo-600"><i class="far fa-eye"></i></a>
+                                        <a href="{{ analysis.edit_url }}" class="text-indigo-700 hover:text-indigo-600"><i class="fas fa-edit"></i></a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 {% endblock %}
