@@ -30,7 +30,8 @@
                             {% trans "Login" %}
                     </button>
                     <button id="login-passkeys" type="button"
-                            class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2 flex space-x-4 items-center" onclick="authn('login-form')">
+                            class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2 flex space-x-4 items-center justify-center"
+                            onclick="authn('login-form')">
                             <img src="{% static 'passkeys/imgs/FIDO-Passkey_Icon-White.png' %}" style="width: 24px"><span>{% trans "Login with passkeys" %}</span>
                     </button>
                     {%include 'passkeys.js' %}
