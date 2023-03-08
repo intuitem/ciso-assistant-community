@@ -94,6 +94,10 @@ class FirstConnexionConfirmForm(SetPasswordForm):
     terms_service = forms.BooleanField(label=_("terms and conditions of use"))
 
 class RiskAnalysisCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_active=True)
+
     class Meta:
         model = Analysis
         fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
@@ -102,6 +106,7 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project'].widget.attrs['select_disabled'] = True
+        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_active=True)
         
     class Meta:
         model = Analysis
