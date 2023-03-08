@@ -1,0 +1,12 @@
+{% extends 'generic/detail.html' %}
+{% load static i18n %}
+
+{% block below %}
+    <div class="mt-2 bg-white rounded-lg shadow-lg px-4 py-6 w-full">
+        <div class="grid justify-items-stretch grid-cols-2 mb-2">
+            <h2 class="text-xl font-semibold">{% trans "Associated risk analyses" %}</h2>
+            {% include 'snippets/add_button_modal.html' with form=analysis_create_form header=_("Add analysis") model="analysis" content=_("New risk analysis") %}
+        </div>
+        {% include 'snippets/ra_list_nested.html' with project=object %}
+    </div>
+{% endblock below %}
