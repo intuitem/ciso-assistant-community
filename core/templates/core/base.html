@@ -1,3 +1,4 @@
+{% comment %} This version of base.html is required for passkeys{% endcomment %}
 {% load static tailwind_tags core_extras %}
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -10,10 +11,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" rel="stylesheet">
+	<link href="/static/cache/fontawesome-free-6.3.0-web/css/all.min.css" rel="stylesheet">
 
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-	<script defer src="https://unpkg.com/alpinejs@3.9.2/dist/cdn.min.js"></script>
+	<script defer src="/static/cache/alpine-3.12.0.min.js"></script>
 	{% block head %}
 	{% endblock %}
 	{% tailwind_css %}
