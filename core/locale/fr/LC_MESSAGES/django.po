@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-07 18:06+0000\n"
+"POT-Creation-Date: 2023-03-08 14:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -212,7 +212,7 @@ msgstr "Fonction de sécurité (descendant)"
 msgid "Search acceptance..."
 msgstr "Rechercher une acceptation..."
 
-#: core/filters.py:242 core/views.py:458
+#: core/filters.py:242 core/views.py:472
 msgid "risk scenarios"
 msgstr "scénarios de risque"
 
@@ -379,7 +379,7 @@ msgstr "Statut"
 #: core/models.py:36 core/templates/core/mtg_list.html:147
 #: core/templates/core/project_list.html:8
 #: core/templates/core/quick_start.html:29 core/templates/core/sidebar.html:138
-#: core/views.py:799
+#: core/views.py:211 core/views.py:813
 msgid "Projects"
 msgstr "Projets"
 
@@ -398,7 +398,7 @@ msgstr "Menace"
 
 #: core/models.py:46 core/templates/core/quick_start.html:63
 #: core/templates/core/sidebar.html:156 core/templates/core/threat_list.html:5
-#: core/views.py:1542
+#: core/views.py:1556
 msgid "Threats"
 msgstr "Menaces"
 
@@ -420,7 +420,7 @@ msgstr "bien parent"
 
 #: core/models.py:72 core/models.py:375 core/templates/core/asset_list.html:4
 #: core/templates/core/asset_list.html:9 core/templates/core/sidebar.html:147
-#: core/views.py:898
+#: core/views.py:912
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -466,7 +466,7 @@ msgstr "Fonction de sécurité"
 
 #: core/models.py:150 core/templates/core/quick_start.html:78
 #: core/templates/core/security_function_list.html:5
-#: core/templates/core/sidebar.html:164 core/views.py:1456
+#: core/templates/core/sidebar.html:164 core/views.py:1470
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
@@ -514,7 +514,7 @@ msgid "Analysis"
 msgstr "Analyse"
 
 #: core/models.py:193 core/templates/core/mtg_list.html:146
-#: core/templates/core/overview.html:43 core/views.py:1130
+#: core/templates/core/overview.html:43 core/views.py:1144
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -676,7 +676,7 @@ msgstr "Mesure de sécurité"
 #: core/models.py:323 core/models.py:376 core/templates/core/mtg_list.html:6
 #: core/templates/core/overview.html:51
 #: core/templates/core/search_results.html:34
-#: core/templates/core/sidebar.html:106 core/views.py:1370
+#: core/templates/core/sidebar.html:106 core/views.py:1384
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -779,7 +779,7 @@ msgstr "Commentaires"
 #: core/templates/core/ri_list.html:6
 #: core/templates/core/search_results.html:21
 #: core/templates/core/sidebar.html:97 core/templates/snippets/ra_data.html:39
-#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1254
+#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1268
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -849,7 +849,7 @@ msgstr "Acceptation de risque"
 
 #: core/models.py:496 core/templates/core/acceptance_list.html:6
 #: core/templates/core/overview.html:55 core/templates/core/sidebar.html:115
-#: core/views.py:1656
+#: core/views.py:1670
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
@@ -902,7 +902,7 @@ msgstr "Date d'expiration"
 #: core/templates/core/analysis_list.html:144
 #: core/templates/core/asset_list.html:50
 #: core/templates/core/group_list.html:45 core/templates/core/mtg_list.html:148
-#: core/templates/core/my_profile_detailed.html:36
+#: core/templates/core/my_profile_detailed.html:34
 #: core/templates/core/project_domain_list.html:45
 #: core/templates/core/project_list.html:127
 #: core/templates/core/ri_list.html:146 core/templates/core/role_list.html:45
@@ -937,6 +937,7 @@ msgid "Draft"
 msgstr "Brouillon"
 
 #: core/templates/core/analysis_list.html:131
+#: core/templates/core/detail/project_detail.html:8
 #: core/templates/core/project_update.html:54
 #: core/templates/core/quick_start.html:102
 #: core/templates/snippets/create_modal.html:28
@@ -944,6 +945,7 @@ msgid "Add analysis"
 msgstr "Ajouter une analyse"
 
 #: core/templates/core/analysis_list.html:131
+#: core/templates/core/detail/project_detail.html:8
 #: core/templates/core/project_update.html:54
 msgid "New risk analysis"
 msgstr "Nouvelle analyse de risque"
@@ -1221,6 +1223,60 @@ msgstr "Risque résiduel"
 msgid "Jump to full risk analysis"
 msgstr "Aller à l'analyse de risque complète"
 
+#: core/templates/core/detail/folder_detail.html:7
+#: core/templates/core/pd_update.html:38
+msgid "Associated Projects"
+msgstr "Projets associés"
+
+#: core/templates/core/detail/folder_detail.html:8
+#: core/templates/core/pd_update.html:39
+#: core/templates/core/project_list.html:116
+#: core/templates/core/quick_start.html:46
+msgid "Add project"
+msgstr "Ajouter un projet"
+
+#: core/templates/core/detail/folder_detail.html:8
+#: core/templates/core/pd_update.html:39
+#: core/templates/core/project_create.html:4
+#: core/templates/core/project_list.html:116
+msgid "New project"
+msgstr "Nouveau projet"
+
+#: core/templates/core/detail/project_detail.html:7
+#: core/templates/core/project_update.html:53
+msgid "Associated risk analyses"
+msgstr "Analyses de risque associées"
+
+#: core/templates/core/detail/riskacceptance_detail.html:8
+msgid ""
+"This risk acceptance is awaiting processing. Remember to <strong>review</"
+"strong> it before accepting or rejecting it, you will not be able to go back."
+msgstr ""
+
+# Toléré ?
+#: core/templates/core/detail/riskacceptance_detail.html:14
+#, fuzzy
+#| msgid "Accepted"
+msgid "Accept"
+msgstr "Accepté"
+
+#: core/templates/core/detail/riskacceptance_detail.html:17
+#, fuzzy
+#| msgid "project"
+msgid "Reject"
+msgstr "projet"
+
+#: core/templates/core/detail/riskacceptance_detail.html:29
+msgid ""
+"This risk acceptance is currently accepted. You can revoke it at any time, "
+"but this will be <strong>irrevocable</strong>. You will need to duplicate it "
+"with a different verison if necessary."
+msgstr ""
+
+#: core/templates/core/detail/riskacceptance_detail.html:35
+msgid "Revoke it"
+msgstr ""
+
 #: core/templates/core/fragments/risks_over_time.html:6
 msgid " \"Very low\" "
 msgstr " \"Très faible\" "
@@ -1335,22 +1391,22 @@ msgid "Groups"
 msgstr "Groupes"
 
 #: core/templates/core/group_list.html:44
-#: core/templates/core/my_profile_detailed.html:35
+#: core/templates/core/my_profile_detailed.html:33
 msgid "Group Name"
 msgstr "NNom du groupe"
 
 #: core/templates/core/group_list.html:54
-#: core/templates/core/my_profile_detailed.html:45
+#: core/templates/core/my_profile_detailed.html:43
 msgid "built-in"
 msgstr "intégré"
 
 #: core/templates/core/group_list.html:80
-#: core/templates/core/my_profile_detailed.html:71
+#: core/templates/core/my_profile_detailed.html:69
 msgid "Delete user group?"
 msgstr "Supprimer le groupe utilisateur ?"
 
 #: core/templates/core/group_list.html:90
-#: core/templates/core/my_profile_detailed.html:81
+#: core/templates/core/my_profile_detailed.html:79
 msgid "No user group found."
 msgstr "Aucun groupe utilisateur trouvé."
 
@@ -1465,15 +1521,19 @@ msgstr "Résumé de la mesure"
 msgid "My profile"
 msgstr "Mon profil"
 
-#: core/templates/core/my_profile_detailed.html:27
-#: core/templates/generic/detail.html:50
+#: core/templates/core/my_profile_detailed.html:25
+#: core/templates/generic/detail.html:33
 #: core/templates/snippets/ra_data.html:10
 msgid "Edit"
 msgstr "Modifier"
 
-#: core/templates/core/my_profile_detailed.html:31
+#: core/templates/core/my_profile_detailed.html:26
+msgid "Passkeys"
+msgstr ""
+
+#: core/templates/core/my_profile_detailed.html:29
 #: core/templates/core/role_list.html:36 core/templates/core/user_list.html:79
-#: core/views.py:1926 core/views.py:2032
+#: core/views.py:1940 core/views.py:2046
 msgid "User groups"
 msgstr "Groupes utilisateurs"
 
@@ -1543,22 +1603,6 @@ msgstr "Changer le mot de passe"
 msgid "Enter a new password for the user "
 msgstr "Entrez un nouveau mot de passe pour l'utilisateur "
 
-#: core/templates/core/pd_update.html:38
-msgid "Associated Projects"
-msgstr "Projets associés"
-
-#: core/templates/core/pd_update.html:39
-#: core/templates/core/project_list.html:116
-#: core/templates/core/quick_start.html:46
-msgid "Add project"
-msgstr "Ajouter un projet"
-
-#: core/templates/core/pd_update.html:39
-#: core/templates/core/project_create.html:4
-#: core/templates/core/project_list.html:116
-msgid "New project"
-msgstr "Nouveau projet"
-
 #: core/templates/core/project_create.html:14
 #: core/templates/core/project_list.html:122
 #: core/templates/core/project_update.html:15
@@ -1570,7 +1614,7 @@ msgid "Internal ID"
 msgstr "ID interne"
 
 #: core/templates/core/project_domain_list.html:5
-#: core/templates/core/sidebar.html:129 core/views.py:195 core/views.py:1020
+#: core/templates/core/sidebar.html:129 core/views.py:198 core/views.py:1034
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
@@ -1633,10 +1677,6 @@ msgstr "Sélectionnez vos cibles"
 #: core/templates/core/project_select.html:106
 msgid "Process"
 msgstr "Traiter"
-
-#: core/templates/core/project_update.html:53
-msgid "Associated risk analyses"
-msgstr "Analyses de risque associées"
 
 #: core/templates/core/quick_start.html:5 core/templates/core/sidebar.html:251
 msgid "Quick start"
@@ -1848,8 +1888,8 @@ msgstr[0] ""
 "                        "
 msgstr[1] ""
 "\n"
-"                        %(counter)s <span class=\"font-"
-"bold\">avertissements</span> trouvés\n"
+"                        %(counter)s <span class=\"font-bold"
+"\">avertissements</span> trouvés\n"
 "                    "
 
 #: core/templates/core/review.html:55
@@ -1925,6 +1965,39 @@ msgstr "Sélectionner ou créer des mesures de sécurité supplémentaires"
 msgid "Select security measures"
 msgstr "Sélectionner des mesures de sécurité"
 
+#: core/templates/core/risk_acceptance_email.txt:4
+#: core/templates/registration/first_connexion_email.txt:4
+#: core/templates/registration/password_reset_email.txt:4
+msgid "Hello"
+msgstr "Bonjour"
+
+#: core/templates/core/risk_acceptance_email.txt:6
+msgid ""
+"You have a risk acceptance review pending. To accept or decline it, click on "
+"the link below"
+msgstr "Vous avez une revue d'acceptation de risque en attente. Pour l'accepter ou la rejeter, cliquez sur le lien ci-dessous"
+
+#: core/templates/core/risk_acceptance_email.txt:10
+msgid ""
+"If you don't want to use this link or if it is broken, please connect to"
+msgstr "Si vous ne voulez pas utiliser ce lien ou s'il est endommagé, connectez vous sur"
+
+#: core/templates/core/risk_acceptance_email.txt:10
+msgid "and go to risk acceptances"
+msgstr "et allez dans les acceptations de risque"
+
+#: core/templates/core/risk_acceptance_email.txt:12
+#: core/templates/registration/first_connexion_email.txt:14
+#: core/templates/registration/password_reset_email.txt:14
+msgid "Sincerely"
+msgstr "Coridalement"
+
+#: core/templates/core/risk_acceptance_email.txt:13
+#: core/templates/registration/first_connexion_email.txt:15
+#: core/templates/registration/password_reset_email.txt:15
+msgid "Mira Team"
+msgstr "L'équipe Mira"
+
 #: core/templates/core/risk_matrix.html:11
 msgid "Default"
 msgstr "Par défaut"
@@ -1933,7 +2006,7 @@ msgstr "Par défaut"
 msgid "Critical"
 msgstr "Critique"
 
-#: core/templates/core/risk_matrix_list.html:9 core/views.py:2116
+#: core/templates/core/risk_matrix_list.html:9 core/views.py:2130
 msgid "Matrices"
 msgstr ""
 
@@ -1953,7 +2026,7 @@ msgstr "Nouvelle assignation de rôle"
 #: core/templates/core/role_assignment_create.html:10
 #: core/templates/core/role_assignment_update.html:10
 #: core/templates/core/role_list.html:6 core/templates/core/sidebar.html:227
-#: core/views.py:1998
+#: core/views.py:2012
 msgid "Role assignment"
 msgstr "Assignation de rôle"
 
@@ -1989,7 +2062,7 @@ msgstr "Assignations de rôle"
 
 #: core/templates/core/role_list.html:35 core/templates/core/sidebar.html:188
 #: core/templates/core/sidebar.html:197 core/templates/core/user_list.html:6
-#: core/views.py:1787 core/views.py:1827 core/views.py:2060
+#: core/views.py:1801 core/views.py:1841 core/views.py:2074
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -2598,36 +2671,6 @@ msgstr "Aucun utilisateur trouvé."
 msgid "Edit user"
 msgstr "Modifier l'utilisateur"
 
-#: core/templates/generic/detail.html:14
-msgid ""
-"This risk acceptance is awaiting processing. Remember to <strong>review</"
-"strong> it before accepting or rejecting it, you will not be able to go back."
-msgstr ""
-
-# Toléré ?
-#: core/templates/generic/detail.html:20
-#, fuzzy
-#| msgid "Accepted"
-msgid "Accept"
-msgstr "Accepté"
-
-#: core/templates/generic/detail.html:23
-#, fuzzy
-#| msgid "project"
-msgid "Reject"
-msgstr "projet"
-
-#: core/templates/generic/detail.html:57
-msgid ""
-"This risk acceptance is currently accepted. You can revoke it at any time, "
-"but this will be <strong>irrevocable</strong>. You will need to duplicate it "
-"with a different verison if necessary."
-msgstr ""
-
-#: core/templates/generic/detail.html:63
-msgid "Revoke it"
-msgstr ""
-
 #: core/templates/library/library_detail.html:23
 #: core/templates/library/library_list.html:49
 msgid "Import library"
@@ -2706,10 +2749,37 @@ msgid "Terms and conditions of use"
 msgstr ""
 
 #: core/templates/registration/first_connexion_confirm.html:68
-#, fuzzy
 #| msgid "Change password"
 msgid "Confirm password"
 msgstr "Changer le mot de passe"
+
+#: core/templates/registration/first_connexion_email.txt:6
+msgid ""
+"We received a request to create your account for this email address. To "
+"initiate your password for your account, click the link below"
+msgstr ""
+"Nous avons reçu une demande de création de compte lié à cette adresse e-"
+"mail. Pour lancer la procédure de création de compte, cliquez sur le lien ci-"
+"dessous"
+
+#: core/templates/registration/first_connexion_email.txt:10
+msgid ""
+"This link can only be used once. If you need to reset your password, please "
+"visit"
+msgstr ""
+"Ce lien ne peut être utilisé qu'une seule fois. Si vous devez réinitialiser "
+"votre mot de passe à nouveau, veuillez visiter"
+
+#: core/templates/registration/first_connexion_email.txt:10
+msgid "and request a reset"
+msgstr "et demandez une autre réinitialisation"
+
+#: core/templates/registration/first_connexion_email.txt:12
+#: core/templates/registration/password_reset_email.txt:12
+msgid "If you did not make this request, you can simply ignore this email"
+msgstr ""
+"Si vous n'avez pas effectué cette demande, vous pouvez simplement ignorer "
+"cet email"
 
 #: core/templates/registration/login.html:16
 msgid "You need to"
@@ -2727,7 +2797,7 @@ msgstr ""
 msgid "Login"
 msgstr "Connexion"
 
-#: core/templates/registration/login.html:35
+#: core/templates/registration/login.html:34
 msgid "Login with passkeys"
 msgstr ""
 
@@ -2794,6 +2864,29 @@ msgstr ""
 "Si vous ne recevez pas d'email, veuillez vous assurer que vous avez entré "
 "l'adresse avec laquelle vous vous êtes enregistré, et vérifiez votre "
 "répertoire spam."
+
+#: core/templates/registration/password_reset_email.txt:6
+msgid ""
+"We received a request to reset the password for your account for this email "
+"address. To initiate the password reset process for your account, click the "
+"link below."
+msgstr ""
+"Nous avons reçu une demande de réinitialisation de mot de passe pour votre "
+"compte lié à cette adresse e-mail. Pour lancer la procédure de "
+"réinitialisation de mot de passe pour votre compte, cliquez sur le lien ci-"
+"dessous."
+
+#: core/templates/registration/password_reset_email.txt:10
+msgid ""
+"This link can only be used once. If you need to reset your password again, "
+"please visit"
+msgstr ""
+"Ce lien ne peut être utilisé qu'une seule fois. Si vous devez réinitialiser "
+"votre mot de passe à nouveau, veuillez visiter"
+
+#: core/templates/registration/password_reset_email.txt:10
+msgid "and request another reset"
+msgstr "et demandez une autre réinitialisation"
 
 #: core/templates/snippets/associated_users_list_nested.html:7
 #: core/templates/snippets/users_list_nested.html:7
@@ -2873,8 +2966,8 @@ msgstr "Non, revenir en arrière"
 #, python-format
 msgid ""
 "\n"
-"        Are you sure you want to import the following library: <strong "
-"class=\"font-semibold text-gray-700\">%(library)s</strong>?\n"
+"        Are you sure you want to import the following library: <strong class="
+"\"font-semibold text-gray-700\">%(library)s</strong>?\n"
 "        "
 msgstr ""
 "\n"
@@ -2996,39 +3089,43 @@ msgstr "Auditeurs globaux"
 msgid "Global validator"
 msgstr "Auditeurs globaux"
 
-#: core/views.py:175
+#: core/views.py:176
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk acceptance accepted with success"
 msgstr "Acceptations de risque"
 
-#: core/views.py:178
+#: core/views.py:179
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk acceptance rejected with success"
 msgstr "Acceptations de risque"
 
-#: core/views.py:181
+#: core/views.py:182
 #, fuzzy
 #| msgid "Risk acceptances"
 msgid "Risk acceptance revoked with success"
 msgstr "Acceptations de risque"
 
-#: core/views.py:237
+#: core/views.py:251
 msgid "Welcome to MIRA! 👋 Feel free to contact us if you have any problems."
 msgstr ""
 
-#: core/views.py:240
+#: core/views.py:254
 msgid ""
 "Warning! You are not assigned to any group. Without a group you will not "
 "have access to any functionality. Please contact your administrator."
 msgstr ""
 
-#: core/views.py:462
+#: core/views.py:296
+msgid "Password Reset Requested"
+msgstr "Réinitialisation du mot de passe"
+
+#: core/views.py:476
 msgid "security measures"
 msgstr "mesures de sécurité"
 
-#: core/views.py:1000
+#: core/views.py:1014
 #, fuzzy
 #| msgid ""
 #| "User groups {} - Auditors, {} - Analysts and {} - Domain Managers were "
@@ -3040,13 +3137,17 @@ msgstr ""
 "Les groupes d'utilisateurs {} - Auditeurs, {} - Analystes et {} - "
 "Responsables de domaine ont été créés"
 
-#: core/views.py:1693
+#: core/views.py:1631 core/views.py:1655
+msgid "Pending risk acceptance: "
+msgstr "Acceptation de risque en attente: "
+
+#: core/views.py:1707
 msgid ""
 "Warning! You are not assigned to any group. Without a group you will not "
 "have access to any functionality. Please contact you administrator."
 msgstr ""
 
-#: core/views.py:1802
+#: core/views.py:1816
 msgid "User created and email send successfully."
 msgstr ""
 

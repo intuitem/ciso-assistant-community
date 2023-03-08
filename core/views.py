@@ -293,7 +293,7 @@ def password_reset_request(request):
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
-                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject="Password Reset Requested")
+                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject=_("Password Reset Requested"))
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     messages.error(request, 'An error has occured, please try later.')
@@ -1628,7 +1628,7 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
             self.object.set_state('submitted') # Mettre à jour le paramètre "state"
             self.object.save()
             try:
-                self.object.validator.mailing("core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
+                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
                 messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
                 messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
@@ -1652,7 +1652,7 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
             self.object.set_state('submitted') # Mettre à jour le paramètre "state"
             self.object.save()
             try:
-                self.object.validator.mailing("core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
+                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
                 messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
                 messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)

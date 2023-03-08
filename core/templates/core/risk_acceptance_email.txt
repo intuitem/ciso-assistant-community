@@ -1,13 +1,15 @@
+{% load i18n static%}
+
 {% autoescape off %}
-Hello,
+{% trans "Hello"%},
 
-You have a risk acceptance review pending. To accept or decline it, click on the link below.
+{% trans "You have a risk acceptance review pending. To accept or decline it, click on the link below" %}.
 
-{{ protocol }}://{{ domain }}{% url 'riskacceptance-detail' pk=pk %}
+{{root_url}}{% url 'riskacceptance-detail' pk=pk %}
 
-If you don't want to use this link or if it is broken, please connect to {{ protocol }}://{{domain}} and go to risk acceptances.
+{% trans "If you don't want to use this link or if it is broken, please connect to" %} {{root_url}} {% trans "and go to risk acceptances" %}.
 
-Sincerely,
-Mira Team
+{% trans "Sincerely" %},
+{% trans "Mira Team" %}
 
 {% endautoescape %}
