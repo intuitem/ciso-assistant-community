@@ -150,7 +150,7 @@ class UserManager(BaseUserManager):
         else:
             user.password = make_password(str(uuid.uuid4()))
             try:
-                user.mailing(email_template_name="registration/first_connexion_email.txt", subject="First Connexion")
+                user.mailing(email_template_name="registration/first_connexion_email.txt", subject=_("First Connexion"))
             except Exception as exception:
                 user.delete()
                 raise exception
