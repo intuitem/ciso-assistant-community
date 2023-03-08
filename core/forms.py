@@ -56,18 +56,23 @@ class LoginForm(AuthenticationForm):
     def clean(self):
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
-        print("coucou clean")
-#    if username and password:
-        self.user_cache = authenticate(self.request, username=username, password=password)
-        if self.user_cache is None:
+        passkey = self.request.POST.get('passkeys')
+        if (username and password) or passkey:
+            self.user_cache = authenticate(self.request, username=username, password=password)
+            if self.user_cache is None:
+                raise forms.ValidationError(
+                    self.error_messages['invalid_login'],
+                    code='invalid_login',
+                    params={'username': self.username_field.verbose_name},
+                )
+            else:
+                self.confirm_login_allowed(self.user_cache)
+        else:
             raise forms.ValidationError(
                 self.error_messages['invalid_login'],
                 code='invalid_login',
                 params={'username': self.username_field.verbose_name},
             )
-        else:
-            self.confirm_login_allowed(self.user_cache)
-
         return self.cleaned_data
 
 class ResetForm(forms.Form):
