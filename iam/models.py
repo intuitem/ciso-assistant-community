@@ -312,7 +312,7 @@ class RoleAssignment(models.Model):
         return False
 
     @staticmethod
-    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, permission=None) -> 'list[Folder]':
+    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, permission: Permission=None) -> 'list[Folder]':
         """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
            Returns the list of the ids of the matching folders
            If permission is specified, returns accessible folders which can be altered with this specific permission"""
