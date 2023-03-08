@@ -388,6 +388,10 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
         context['matrix'] = self.analysis.rating_matrix
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
         return context
 
     def test_func(self):
