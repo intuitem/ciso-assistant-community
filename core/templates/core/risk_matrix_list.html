@@ -1,8 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n static %}
 
-<!-- {% block title %}{% trans "Risk analyses"|title %}{% endblock %} -->
-
 {% block content %}
 
 <div>
@@ -92,7 +90,7 @@
                                 </span>
                                 {% endif %}
                                 
-                                {% if matrix.id in object_ids_delete %}
+                                {% if matrix.id in object_ids_delete and not matrix.is_used %}
                                 <span x-data="{ open: false }">
                                     <a @click="open = !open, modalOpen = !modalOpen" type="button"
                                     class="cursor-pointer table-action">

@@ -165,6 +165,10 @@ class RiskMatrix(AbstractBaseModel, FolderMixin):
         See the documentation for more information."), default=dict)
     is_active = models.BooleanField(_('active'), default=True, help_text=_(
         "If the matrix is set as inactive, it will not be available for selection for new risk analyses."))
+    
+    @property
+    def is_used(self) -> bool:
+        return Analysis.objects.filter(rating_matrix=self).exists()
 
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
