@@ -110,7 +110,7 @@ class FirstConnexionConfirmForm(SetPasswordForm):
 class RiskAnalysisCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_active=True)
+        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
         self.default_if_one_all()
 
     class Meta:
@@ -121,7 +121,7 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project'].widget.attrs['select_disabled'] = True
-        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_active=True)
+        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
         self.default_if_one_all()
         
     class Meta:
@@ -132,7 +132,7 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
 class RiskMatrixUpdateForm(StyledModelForm):
     class Meta:
         model = RiskMatrix
-        fields = ['is_active']
+        fields = ['is_enabled']
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):

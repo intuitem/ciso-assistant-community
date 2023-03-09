@@ -163,8 +163,8 @@ class SecurityFunction(AbstractBaseModel, FolderMixin):
 class RiskMatrix(AbstractBaseModel, FolderMixin):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
-    is_active = models.BooleanField(_('active'), default=True, help_text=_(
-        "If the matrix is set as inactive, it will not be available for selection for new risk analyses."))
+    is_enabled = models.BooleanField(_('enabled'), default=True, help_text=_(
+        "If the matrix is set as disabled, it will not be available for selection for new risk analyses."))
     
     @property
     def is_used(self) -> bool:
