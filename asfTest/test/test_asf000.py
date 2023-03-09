@@ -87,8 +87,8 @@ def test_asf002(page):
 	assert user.inner_text() == "root2@gmail.com", "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 4 | Logout | Come back on login page
 	step += 1
-	page.click("id=my_menu")
 	time.sleep(1)
+	page.click("id=my_menu")
 	page.click("id=logout")
 	assert page.url == urlpatterns.LOGIN, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
