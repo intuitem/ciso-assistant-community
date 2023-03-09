@@ -87,9 +87,10 @@ def test_asf002(page):
 	assert user.inner_text() == "root2@gmail.com", "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 4 | Logout | Come back on login page
 	step += 1
-	time.sleep(1)
-	page.click("id=my_menu")
-	page.click("id=logout")
+	menu = page.wait_for_selector("id=my_menu")
+	menu.click()
+	logout = page.wait_for_selector("id=logout")
+	logout.click()
 	assert page.url == urlpatterns.LOGIN, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 5 | Create password for the new account | Come back on Login page
