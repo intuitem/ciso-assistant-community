@@ -145,7 +145,6 @@ class UserManager(BaseUserManager):
             raise ValueError("The email must be set")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.save(using=self._db)
         if password:
             user.password = make_password(password)
         else:
@@ -153,7 +152,9 @@ class UserManager(BaseUserManager):
             try:
                 user.mailing(email_template_name="registration/first_connexion_email.txt", subject=_("First Connexion"))
             except Exception as exception:
+                user.save(using=self._db)
                 raise exception
+        user.save(using=self._db)
         return user
  
     def create_user(self, email, password=None, **extra_fields):
