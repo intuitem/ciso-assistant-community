@@ -941,7 +941,7 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN, codename="change_folder")
         qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(
             self.request.GET, queryset=qs, request=self.request)
@@ -1334,7 +1334,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         filter = SecurityMeasureFilter(
             self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
-        context['measure_create_form'] = SecurityMeasureCreateForm
+        context['measure_create_form'] = SecurityMeasureCreateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         context['add_securitymeasure'] = RoleAssignment.has_permission(
@@ -1593,7 +1593,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         filter = RiskAcceptanceFilter(
             self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
-        context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
+        context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         context['add_riskacceptance'] = RoleAssignment.has_permission(
