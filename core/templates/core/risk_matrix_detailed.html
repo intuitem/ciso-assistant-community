@@ -6,8 +6,17 @@
 {% include 'snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<div class="shadow-lg bg-white rounded-lg flax flex-col w-full h-fit p-4">
-    <div class="grid grid-rows-12 w-full h-fit">
+{% if not matrix.is_active %}
+<div class="flex flex-row items-center bg-blue-100 rounded-xl shadow-lg px-6 py-2 mb-2">
+    <div class="text-gray-800">
+        This risk matrix is <strong>disabled</strong>, therefore it cannot be used in any new analyses.
+        In order to enable it, you can edit it and change its status.
+    </div>
+</div>
+{% endif %}
+
+<div class="shadow-lg bg-white rounded-lg flex flex-col w-full h-fit p-4">
+    <div class="flex flex-row w-full h-fit justify-end">
         <a href={{ object.edit_url }} class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg font-medium w-fit h-fit justify-self-end">
             <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
         </a>
@@ -25,14 +34,14 @@
             across <strong>{{ projects }}</strong> projects
         {% endblocktrans %}
         <div class="flex flex-col">
-            {% for project in matrix.projects %}
+            {% for project in viewable_projects %}
                 <div x-data="{ open: false }" class="text-gray-800">
                     <button @click="open = !open" class="cursor-pointer flex items-center w-full p-5 font-medium text-left text-gray-500 border border-gray-200 focus:ring-4 focus:ring-gray-200 hover:bg-gray-100 {% if forloop.first %} rounded-t-xl {% endif %}">
                         <i class="fas mr-4" :class="open == true ? 'fa-chevron-up' : 'fa-chevron-down'"></i> {{ project.name }}
                     </button>
                     <div x-show="open" class="p-5 border">
                         <table class="text-md font-medium">
-                        {% for analysis in matrix.analyses %}
+                        {% for analysis in viewable_analyses %}
                             {% if analysis.project == project %}
                                 <tr class="py-2">
                                     <td class="px-2 py-1">
@@ -42,7 +51,9 @@
                                     </td>
                                     <td class="px-2 py-1 space-x-1">
                                         <a href="{% url 'RA' analysis.id %}" class="text-indigo-700 hover:text-indigo-600"><i class="far fa-eye"></i></a>
-                                        <a href="{{ analysis.edit_url }}" class="text-indigo-700 hover:text-indigo-600"><i class="fas fa-edit"></i></a>
+                                        {% if change_analysis %}
+                                            <a href="{{ analysis.edit_url }}" class="text-indigo-700 hover:text-indigo-600"><i class="fas fa-edit"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endif %}
