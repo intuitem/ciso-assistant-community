@@ -453,6 +453,29 @@ class SearchResults(ListView):
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
 
 
+@method_decorator(login_required, name='dispatch')
+class Browser(ListView):
+    context_object_name = 'context'
+    template_name = 'core/browser.html'
+
+    map_rsk = {'0': "open", '1': "mitigated",
+               '2': "accepted", '3': "blocker", '4': "transferred"}
+    map_mtg = {'0': "open", '1': "in_progress", '2': "on_hold", '3': "done"}
+
+    def get_queryset(self):
+
+        rsk = self.request.GET.get('rsk')
+        mtg = self.request.GET.get('mtg')
+        if rsk:
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            return {"type": _("risk scenarios"), "filter": self.map_rsk[rsk], "items": RiskScenario.objects.filter(treatment=self.map_rsk[rsk]).filter(id__in=object_ids_view)}
+        if mtg:
+            (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+            return {"type": _("security measures"), "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
+
+
 @login_required
 def global_overview(request):
     template = 'core/overview.html'
