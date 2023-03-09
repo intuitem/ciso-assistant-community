@@ -1808,17 +1808,14 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data['email']
-            admin = form.cleaned_data['administrator']
             try:
-                user = User.objects.create_user(email=data)
-                if admin:
-                    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
+                User.objects.create_user(email=data)
                 messages.success(request, _('User created and email send successfully.'))
                 return redirect("user-list")
             except Exception as e:
-                messages.error(request, "An error has occured, please try later.")
+                messages.error(request, "An error has occured during user creation. If he has not received the mail, please use the forgot link on login page.")
                 print("Exception:", e)
-                return render(request, self.template_name, {'form': form})
+                return redirect("user-list")
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):
