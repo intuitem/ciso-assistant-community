@@ -123,7 +123,7 @@
         <table class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Risk acceptance" %}</th>
-                <!--<th class="px-6 py-3">{% trans "Type" %}</th>-->
+                <th class="px-6 py-3">{% trans "Domain" %}</th>
                 <th class="px-6 py-3">{% trans "Validator" %}</th>
                 <th class="px-6 py-3">{% trans "Expiry Date" %}</th>
                 <th class="px-6 py-3">{% trans "Actions" %}</th>
@@ -154,11 +154,11 @@
                                 </div>
                             </div>
                         </th>
-                        <!--<td class="px-6 py-4">
+                        <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
-                                {{ acceptance.type }}
+                                {{ acceptance.folder }}
                             </p>
-                        </td> -->
+                        </td>
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap">
                                 {{ acceptance.validator }}
