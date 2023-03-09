@@ -312,14 +312,14 @@ class RoleAssignment(models.Model):
         return False
 
     @staticmethod
-    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, permission: Permission=None) -> 'list[Folder]':
+    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, codename: str="view_folder") -> 'list[Folder]':
         """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
            Returns the list of the ids of the matching folders
            If permission is specified, returns accessible folders which can be altered with this specific permission"""
         folders_set = set()
-        ref_permission = Permission.objects.get(codename="view_folder")
+        ref_permission = Permission.objects.get(codename=codename)
         # first get all accessible folders, independently of contentType
-        for ra in [x for x in RoleAssignment.get_role_assignments(user) if (((permission in x.role.permissions.all()) and (ref_permission in x.role.permissions.all())) if permission else ref_permission in x.role.permissions.all())]:
+        for ra in [x for x in RoleAssignment.get_role_assignments(user) if ((Permission.objects.get(codename="view_folder") in x.role.permissions.all()) and (ref_permission in x.role.permissions.all()))]:
             for f in ra.perimeter_folders.all():
                 folders_set.add(f)
                 folders_set.update(f.sub_folders())
