@@ -483,11 +483,13 @@ class RiskAcceptance(AbstractBaseModel):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
     risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
     validator = models.ForeignKey(User, max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"), on_delete=models.SET_NULL, null=True, blank=True)
-    type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
     state = models.CharField(max_length=20, choices=ACCEPTANCE_STATE, default='created', verbose_name=_("State"))
-    expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
-                                   blank=True, null=True, verbose_name=_("Expiry date"))
+    expiry_date = models.DateField(help_text=_("Specify when the risk acceptance will no longer apply"),
+                                   null=True, verbose_name=_("Expiry date"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+    accepted_date = models.DateField(blank=True, null=True, verbose_name=_("Acceptance date"))
+    rejected_date = models.DateField(blank=True, null=True, verbose_name=_("Rejection date"))
+    revoked_date = models.DateField(blank=True, null=True, verbose_name=_("Revocation date"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
@@ -508,5 +510,11 @@ class RiskAcceptance(AbstractBaseModel):
     
     def set_state(self, state):
         self.state = state
+        if state == "accepted":
+            self.accepted_date = date.today()
+        if state == "rejected":
+            self.rejected_date = date.today()
+        elif state == "revoked":
+            self.revoked_date = date.today()
         self.save()
 # you can consider nested inlines at some points

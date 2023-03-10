@@ -153,6 +153,19 @@ class SecurityMeasureDetailView(GenericDetailView):
 class RiskAcceptanceDetailView(GenericDetailView):
     model = RiskAcceptance
     template_name = "core/detail/riskacceptance_detail.html"
+    exclude = ['']
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
+        if self.object.state in ('created', 'submitted'):
+            self.exclude = ['accepted_date', 'revoked_date', 'rejected_date']
+        elif self.object.state == 'accepted':
+            self.exclude = ['revoked_date', 'rejected_date']
+        elif self.object.state == 'rejected':
+            self.exclude = ['accepted_date', 'revoked_date']
+        elif self.object.state == 'revoked':
+            self.exclude = ['rejected_date']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
