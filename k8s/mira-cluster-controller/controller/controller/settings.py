@@ -145,7 +145,7 @@ if 'POSTGRES_NAME' in os.environ:
             'USER': os.environ['POSTGRES_USER'],
             'PASSWORD': os.environ['POSTGRES_PASSWORD'],
             'HOST': os.environ['DB_HOST'],
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
     print("Postgresql database engine")

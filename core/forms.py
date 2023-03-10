@@ -27,6 +27,19 @@ class DefaultDateInput(DateInput):
 
 
 class StyledModelForm(ModelForm):
+    def default_if_one(self, field_name):
+        field=self.fields[field_name]
+        if not hasattr(field, '_queryset'):
+            return
+        if field._queryset and len(field._queryset) == 1:
+            field.widget.attrs['select_disabled'] = True
+            field.widget.attrs['class'] += ' disabled:opacity-50'
+            field.initial = field.queryset[0]
+
+    def default_if_one_all(self):
+        for fname, f in self.fields.items():
+            self.default_if_one(fname)
+
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         text_inputs = (TextInput, NumberInput, EmailInput, URLInput, PasswordInput, HiddenInput, DefaultDateInput, DateInput, DateTimeInput, TimeInput)
@@ -49,6 +62,7 @@ class StyledModelForm(ModelForm):
             if input_type == DefaultDateInput:
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
+            self.default_if_one(fname)
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label=_("Email"), required=False, widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
@@ -100,6 +114,11 @@ class FirstConnexionConfirmForm(SetPasswordForm):
     terms_service = forms.BooleanField(label=_("terms and conditions of use"))
 
 class RiskAnalysisCreateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
+        self.default_if_one_all()
+
     class Meta:
         model = Analysis
         fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
@@ -108,10 +127,18 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project'].widget.attrs['select_disabled'] = True
+        self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
+        self.default_if_one_all()
         
     class Meta:
         model = Analysis
         fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
+
+
+class RiskMatrixUpdateForm(StyledModelForm):
+    class Meta:
+        model = RiskMatrix
+        fields = ['is_enabled']
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
@@ -121,7 +148,7 @@ class RiskAnalysisUpdateForm(StyledModelForm):
 
 
 class SecurityMeasureCreateForm(StyledModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
@@ -227,9 +254,11 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                    choices=self.fields['risk_scenarios'].choices)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_riskacceptance"))
-        else:
-            self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
+        # else:
+        #     self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        # Else statement causes a problem because during submition for global folder
+        # Folder.objects.filter(content_type=Folder.ContentType.DOMAIN) doesn't content global so an error occured
 
     class Meta:
         model = RiskAcceptance
