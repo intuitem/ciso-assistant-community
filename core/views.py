@@ -165,12 +165,12 @@ class RiskAcceptanceDetailView(GenericDetailView):
             context['risk_acceptance_rejected'] = True
         if self.object.state == 'revoked':
             context['risk_acceptance_revoked'] = True
-        context['validate_riskacceptance'] = RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance') and (self.object.folder.id in RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)) or (UserGroup.objects.get(name="BI-UG-GVA") in UserGroup.get_user_groups(self.request.user))
+        context['validate_riskacceptance'] = self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, content_type=None,codename='validate_riskacceptance') or (UserGroup.objects.get(name="BI-UG-GVA") in UserGroup.get_user_groups(self.request.user))
         return context
     
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
-        if self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, codename='validate_riskacceptance'):
+        if self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, content_type=None,codename='validate_riskacceptance'):
             if 'accepted' in request.POST:
                 self.object.set_state('accepted')
                 messages.success(request, _("Risk acceptance: {} accepted with success!".format(self.object.name)))

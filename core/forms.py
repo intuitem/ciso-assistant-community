@@ -227,9 +227,11 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                    choices=self.fields['risk_scenarios'].choices)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_riskacceptance"))
-        else:
-            self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
+        # else:
+        #     self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        # Else statement causes a problem because during submition for global folder
+        # Folder.objects.filter(content_type=Folder.ContentType.DOMAIN) doesn't content global so an error occured
 
     class Meta:
         model = RiskAcceptance
