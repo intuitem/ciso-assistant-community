@@ -197,7 +197,7 @@ class RiskAcceptanceDetailView(GenericDetailView):
                 messages.error(request, "An error has occured")
         else:
                 messages.error(request, "Permission denied: you are not validator or you've not this role in this risk acceptance folder")
-        return self.get(request, *args, **kwargs)
+        return redirect("riskacceptance-detail", self.object.id)
 
 class FolderDetailView(GenericDetailView):
     model = Folder
