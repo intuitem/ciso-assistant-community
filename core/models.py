@@ -469,10 +469,6 @@ class RiskScenario(AbstractBaseModel):
 
 class RiskAcceptance(AbstractBaseModel):
 
-    ACCEPTANCE_TYPE = [
-        ('temporary', _('Temporary')),
-        ('permanent', _('Permanent')),
-    ]
     ACCEPTANCE_STATE = [
         ('created', _('Created')),
         ('submitted', _('Submitted')),

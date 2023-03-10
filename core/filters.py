@@ -226,12 +226,10 @@ class RiskAcceptanceFilter(GenericFilterSet):
     risk_scenarios = GenericModelMultipleChoiceFilter(
         queryset=RiskScenario.objects.filter(analysis__project__folder__content_type=Folder.ContentType.DOMAIN))
     folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
-    type = GenericChoiceFilter(choices=RiskAcceptance.ACCEPTANCE_TYPE)
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
             ('risk_scenarios', 'risk_scenarios'),
-            ('type', 'type'),
             ('expiry_date', 'expiry_date'),
             ('validator', 'validator'),
             ('folder', 'folder'),
@@ -241,8 +239,6 @@ class RiskAcceptanceFilter(GenericFilterSet):
             '-name': _('Name (descending)'),
             'risk_scenarios': _('risk scenarios'.capitalize()),
             '-risk_scenarios': _('Risk scenarios (descending)'),
-            'type': _('type'.capitalize()),
-            '-type': _('Type (descending)'),
             'expiry_date': _('expiry'.capitalize() + ' date'),
             '-expiry_date': _('Expiry date (descending)'),
             'validator': _('validator'.capitalize()),
@@ -254,7 +250,7 @@ class RiskAcceptanceFilter(GenericFilterSet):
 
     class Meta:
         model = RiskAcceptance
-        fields = ['risk_scenarios', 'type', 'folder']
+        fields = ['risk_scenarios', 'folder']
 
     def acceptance_search(self, queryset, name, search_query):
         return queryset.filter(
