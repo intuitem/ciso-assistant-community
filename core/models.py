@@ -9,7 +9,7 @@ import pandas as pd
 import json
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -487,9 +487,9 @@ class RiskAcceptance(AbstractBaseModel):
     expiry_date = models.DateField(help_text=_("Specify when the risk acceptance will no longer apply"),
                                    null=True, verbose_name=_("Expiry date"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-    accepted_date = models.DateField(blank=True, null=True, verbose_name=_("Acceptance date"))
-    rejected_date = models.DateField(blank=True, null=True, verbose_name=_("Rejection date"))
-    revoked_date = models.DateField(blank=True, null=True, verbose_name=_("Revocation date"))
+    accepted_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Acceptance date"))
+    rejected_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Rejection date"))
+    revoked_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Revocation date"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
@@ -511,10 +511,10 @@ class RiskAcceptance(AbstractBaseModel):
     def set_state(self, state):
         self.state = state
         if state == "accepted":
-            self.accepted_date = date.today()
+            self.accepted_date = datetime.now()
         if state == "rejected":
-            self.rejected_date = date.today()
+            self.rejected_date = datetime.now()
         elif state == "revoked":
-            self.revoked_date = date.today()
+            self.revoked_date = datetime.now()
         self.save()
 # you can consider nested inlines at some points
