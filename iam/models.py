@@ -314,6 +314,7 @@ class RoleAssignment(models.Model):
     @staticmethod
     def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, codename: str="view_folder") -> 'list[Folder]':
         """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
+           If the contentType is not specified, returns all accessible folders
            Returns the list of the ids of the matching folders
            If permission is specified, returns accessible folders which can be altered with this specific permission"""
         folders_set = set()
@@ -328,7 +329,7 @@ class RoleAssignment(models.Model):
         perimeter.add(folder)
         perimeter.update(folder.sub_folders())
         # return filtered result
-        return [x.id for x in folders_set if x.content_type == content_type and x in perimeter]
+        return [x.id for x in folders_set if (x.content_type == content_type if content_type else True) and x in perimeter]
 
     @staticmethod
     def get_accessible_object_ids(folder: Folder, user: User, object_type: Any) -> Tuple['list[Any]', 'list[Any]', 'list[Any]']:
