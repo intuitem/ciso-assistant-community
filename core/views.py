@@ -1123,7 +1123,8 @@ class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        project = Project.objects.get(id=self.request.POST['project'])
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=project.folder.id))
 
 
 class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
