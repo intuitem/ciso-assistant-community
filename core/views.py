@@ -814,7 +814,7 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
 class ProjectCreateViewModal(UserPassesTestMixin, CreateViewModal):
     model = Project
     context_object_name = 'project'
-    form_class = ProjectForm()
+    form_class = ProjectForm
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'), folder=Folder.objects.get(id=self.request.POST['folder']))
