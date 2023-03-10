@@ -28,7 +28,7 @@ urlpatterns = [
     path('overview/composer/', login_required(views.ComposerListView.as_view()), name='composer'),
 
     path('scoring-assistant/', login_required(views.scoring_assistant), name='scoring'),
-    path('risk-matrix/', login_required(views.show_risk_matrix), name='matrix'),
+    path('risk-matrix/', login_required(views.show_risk_matrix), name='riskmatrix'), # obsolete, to be removed
 
     path('browser/', login_required(views.Browser.as_view()), name='browser'),
 
@@ -50,8 +50,7 @@ urlpatterns = [
     path('users/', login_required(views.UserListView.as_view()), name='user-list'),
     path('user_groups/', login_required(views.UserGroupListView.as_view()), name='usergroup-list'),
     path('roles/', login_required(views.RoleAssignmentListView.as_view()), name='role-list'),
-    path('matrices/', login_required(views.RiskMatrixListView.as_view()), name='matrix-list'),
-    path('matrices/<str:pk>', login_required(views.RiskMatrixDetailView.as_view()), name='matrix-detail'),
+    path('matrices/', login_required(views.RiskMatrixListView.as_view()), name='riskmatrix-list'),
     path('profile', login_required(views.MyProfileDetailView.as_view()), name='user-detail'),
 
     # CREATE VIEWS
@@ -88,6 +87,8 @@ urlpatterns = [
     
     # UPDATE VIEWS
     path('risk-scenarios/update_modal', login_required(views.RiskScenarioUpdateViewModal.as_view()), name='riskscenario-update-modal'),
+
+    path('matrices/<str:pk>/edit/', login_required(views.RiskMatrixUpdateView.as_view()), name='riskmatrix-update'),
     path('risk-analyses/<str:pk>/edit/', login_required(views.RiskAnalysisUpdateView.as_view()), name='analysis-update'),
     path('risk-scenarios/<str:pk>/edit/', login_required(views.RiskScenarioUpdateView.as_view()), name='riskscenario-update'),
     path('security-measures/<str:pk>/edit/', login_required(views.SecurityMeasureUpdateView.as_view()), name='securitymeasure-update'),
@@ -106,6 +107,7 @@ urlpatterns = [
     path('role-assignments/<str:pk>/edit/', login_required(views.RoleAssignmentUpdateView.as_view()), name='roleassignment-update'),
     
     # DELETE VIEWS
+    path('matrices/<str:pk>/delete/', login_required(views.RiskMatrixDeleteView.as_view()), name='riskmatrix-delete'),
     path('risk-analyses/<str:pk>/delete/', login_required(views.RiskAnalysisDeleteView.as_view()), name='analysis-delete'),
     path('risk-scenarios/<str:pk>/delete/', login_required(views.RiskScenarioDeleteView.as_view()), name='riskscenario-delete'),
     path('risk-acceptances/<str:pk>/delete/', login_required(views.RiskAcceptanceDeleteView.as_view()), name='riskacceptance-delete'),
@@ -122,7 +124,7 @@ urlpatterns = [
     path('role-assignments/<str:pk>/delete', login_required(views.RoleAssignmentDeleteView.as_view()), name='role-assignment-delete'),
 
     # DETAIL VIEWS
-
+    path('matrices/<str:pk>', login_required(views.RiskMatrixDetailView.as_view()), name='riskmatrix-detail'),
     path('risk-scenarios/<str:pk>', login_required(views.RiskScenarioDetailView.as_view()), name='riskscenario-detail'),
     path('security-measures/<str:pk>', login_required(views.SecurityMeasureDetailView.as_view()), name='securitymeasure-detail'),
     path('risk-acceptances/<str:pk>', login_required(views.RiskAcceptanceDetailView.as_view()), name='riskacceptance-detail'),
