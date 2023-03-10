@@ -166,7 +166,7 @@ def create_stateful_set(client_name, email_admin, mira_url):
 
 
 def create_client_objects(client_name, email_admin):
-    cluster_domain = os.getenv("CLUSTER_DOMAIN")
+    cluster_domain = os.environ.get("CLUSTER_DOMAIN")
     if not cluster_domain:
         print("missing CLUSTER_DOMAIN environment variable - skipping creation of objects")
     else:
