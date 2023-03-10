@@ -121,7 +121,7 @@ class RiskAnalysisUpdateForm(StyledModelForm):
 
 
 class SecurityMeasureCreateForm(StyledModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
@@ -220,7 +220,7 @@ class RiskScenarioModalUpdateForm(StyledModelForm):
 
 
 class RiskAcceptanceCreateUpdateForm(StyledModelForm):
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['risk_scenarios'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
