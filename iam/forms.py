@@ -70,7 +70,6 @@ class FolderUpdateForm(StyledModelForm):
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users"""
     email = forms.EmailField(max_length=100)
-    administrator = forms.BooleanField(required=False)
     
 
     class Meta:

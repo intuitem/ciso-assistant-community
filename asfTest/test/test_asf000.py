@@ -20,7 +20,7 @@ def test_asf001(page):
 	def log_response(intercepted_response):
 		# print("a response was received:", intercepted_response.status, intercepted_response.status_text)
 		assert intercepted_response.status not in (500, 404), "Test "+str(test)+" Step "+str(step)+": not Ok"
-	page.on("response", log_response)
+	# page.on("response", log_response)
 	page.goto(urlpatterns.URL)
 	assert page.url == urlpatterns.LOGINFIRST, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 2 | Enter a wrong username, a wrong password and click on “Log in” | Error message: “Please enter the correct username and password”
@@ -64,7 +64,7 @@ def test_asf002(page):
 	def log_response(intercepted_response):
 		print("a response was received:", intercepted_response.status, intercepted_response.status_text)
 		assert intercepted_response.status not in (500, 404), "Test "+str(test)+" Step "+str(step)+": not Ok"
-	page.on("response", log_response)
+	# page.on("response", log_response)
 	page.goto(urlpatterns.URL)
 	message = page.locator('id=hellothere')
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
@@ -93,12 +93,12 @@ def test_asf002(page):
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 5 | Create password for the new account | Come back on Login page
 	step += 1
-	page.remove_listener("response", log_response)
+	# page.remove_listener("response", log_response)
 	page.goto(urlpatterns.MAILHOG)
 	page.click("text=root2@gmail.com")
 	link = page.get_by_role("link", name="127.0.0.1").element_handles()[0].inner_text()
 	page.goto(link)
-	page.on("response", log_response)
+	# page.on("response", log_response)
 	page.fill("id=id_new_password1", "rootroot")
 	page.fill("id=id_new_password2", "rootroot")
 	page.locator("id=terms_service").check()

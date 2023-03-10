@@ -306,10 +306,8 @@ def password_reset_request(request):
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
-                    associated_user.mailing(
-                        email_template_name="registration/password_reset_email.txt", subject="Password Reset Requested")
-                    request.session['last_email_sent'] = now.strftime(
-                        '%Y-%m-%d %H:%M:%S')
+                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject=_("Password Reset Requested"))
+                    request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     messages.error(
                         request, 'An error has occured, please try later.')
@@ -759,7 +757,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
     ordering = 'created_at'
     paginate_by = 10
     model = Project
-
+    
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
@@ -778,7 +776,7 @@ class ProjectListView(UserPassesTestMixin, ListView):
         queryset = self.get_queryset()
         filter = ProjectFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['project_create_form'] = ProjectForm
+        context['project_create_form'] = ProjectForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
         context['add_project'] = RoleAssignment.has_permission(
@@ -802,16 +800,16 @@ class ProjectCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class ProjectCreateViewModal(UserPassesTestMixin, CreateViewModal):
     model = Project
     context_object_name = 'project'
-    form_class = ProjectForm
+    form_class = ProjectForm()
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class ProjectUpdateView(UserPassesTestMixin, UpdateView):
@@ -905,7 +903,7 @@ class AssetCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -914,7 +912,7 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = AssetForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class AssetUpdateView(UserPassesTestMixin, UpdateView):
@@ -961,7 +959,7 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN, codename="change_folder")
         qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(
             self.request.GET, queryset=qs, request=self.request)
@@ -1130,7 +1128,7 @@ class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1142,7 +1140,7 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return self.request.POST.get('next', 'analysis-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
@@ -1270,7 +1268,7 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
         return reverse('analysis-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['analysis']).id})
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1279,7 +1277,7 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = RiskScenarioCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
@@ -1366,7 +1364,7 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
         filter = SecurityMeasureFilter(
             self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
-        context['measure_create_form'] = SecurityMeasureCreateForm
+        context['measure_create_form'] = SecurityMeasureCreateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         context['add_securitymeasure'] = RoleAssignment.has_permission(
@@ -1396,7 +1394,7 @@ class SecurityMeasureCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = SecurityMeasureCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securitymeasure"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securitymeasure"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
@@ -1484,7 +1482,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = SecurityFunctionCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
@@ -1570,7 +1568,7 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = ThreatCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class ThreatUpdateView(UserPassesTestMixin, UpdateView):
@@ -1625,7 +1623,7 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
         filter = RiskAcceptanceFilter(
             self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
-        context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm
+        context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
         context['add_riskacceptance'] = RoleAssignment.has_permission(
@@ -1661,17 +1659,15 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
             self.object.set_state('submitted')
             self.object.save()
             try:
-                self.object.validator.mailing(
-                    "core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
-                messages.success(
-                    self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
+                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
+                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
                 messages.error(
                     self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
         return super().form_valid(form)
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskacceptance"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskacceptance"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
@@ -1689,10 +1685,8 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
             self.object.set_state('submitted')
             self.object.save()
             try:
-                self.object.validator.mailing(
-                    "core/risk_acceptance_email.txt", "Pending risk acceptance: " + self.object.name, self.object.pk)
-                messages.success(
-                    self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
+                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
+                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
                 messages.error(
                     self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
@@ -1849,19 +1843,14 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             data = form.cleaned_data['email']
-            admin = form.cleaned_data['administrator']
             try:
-                user = User.objects.create_user(email=data)
-                if admin:
-                    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
-                messages.success(request, _(
-                    'User created and email send successfully.'))
+                User.objects.create_user(email=data)
+                messages.success(request, _('User created and email send successfully.'))
                 return redirect("user-list")
             except Exception as e:
-                messages.error(
-                    request, "An error has occured, please try later.")
+                messages.error(request, "An error has occured during user creation. If he has not received the mail, please use the forgot link on login page.")
                 print("Exception:", e)
-                return render(request, self.template_name, {'form': form})
+                return redirect("user-list")
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):
