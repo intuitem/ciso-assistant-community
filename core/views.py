@@ -2072,7 +2072,10 @@ class UserPasswordChangeView(PasswordChangeView):
     model = User
 
     def get_success_url(self) -> str:
-        return reverse_lazy("me-update", kwargs={'pk': self.request.user.id})
+        self.object = get_object_or_404(User, pk=self.kwargs['pk'])
+        if self.object == self.request.user:
+            return reverse_lazy("me-update", kwargs={'pk': self.request.user.id})
+        return reverse_lazy("user-update", kwargs={'pk': self.object.id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
