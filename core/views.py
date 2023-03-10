@@ -476,7 +476,6 @@ class Browser(ListView):
     map_mtg = {'0': "open", '1': "in_progress", '2': "on_hold", '3': "done"}
 
     def get_queryset(self):
-
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
@@ -487,6 +486,14 @@ class Browser(ListView):
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
                 Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
             return {"type": _("security measures"), "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
+        
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
 
 
 @login_required

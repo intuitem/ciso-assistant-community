@@ -1,89 +1,17 @@
-@@ -1,164 +0,0 @@
 {% extends 'core/base.html' %}
 
 {% load i18n %}
 
 {% block head %}
 <title>Mira - Viewer</title>
-    <link href="/static/cache/jquery.dataTables-1.10.19.min.css" rel="stylesheet">
-	 <!--Responsive Extension Datatables CSS-->
-	 <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet">
 
-	<script type="text/javascript" src="/static/cache/jquery-3.6.3.min.js"></script>
-
-	<!--Datatables -->
-	<script src="/static/cache/responsive.dataTables-2.2.3.min.css"></script>
-	<script src="/static/cache/dataTables.responsive-2.2.3.min.js"></script>
-
-<style>
-    		/*Form fields*/
-		.dataTables_wrapper select,
-		.dataTables_wrapper .dataTables_filter input {
-			color: #4a5568; 			/*text-gray-700*/
-			padding-left: 1rem; 		/*pl-4*/
-			padding-right: 1rem; 		/*pl-4*/
-			padding-top: .5rem; 		/*pl-2*/
-			padding-bottom: .5rem; 		/*pl-2*/
-			line-height: 1.25; 			/*leading-tight*/
-			border-width: 2px; 			/*border-2*/
-			border-radius: .25rem;
-			border-color: #edf2f7; 		/*border-gray-200*/
-			background-color: #edf2f7; 	/*bg-gray-200*/
-		}
-
-		/*Row Hover*/
-		table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
-			background-color: #ebf4ff;	/*bg-indigo-100*/
-		}
-
-		/*Pagination Buttons*/
-		.dataTables_wrapper .dataTables_paginate .paginate_button		{
-			font-weight: 700;				/*font-bold*/
-			border-radius: .25rem;			/*rounded*/
-			border: 1px solid transparent;	/*border border-transparent*/
-		}
-
-		/*Pagination Buttons - Current selected */
-		.dataTables_wrapper .dataTables_paginate .paginate_button.current	{
-			color: #fff !important;				/*text-white*/
-			box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06); 	/*shadow*/
-			font-weight: 700;					/*font-bold*/
-			border-radius: .25rem;				/*rounded*/
-			background: #667eea !important;		/*bg-indigo-500*/
-			border: 1px solid transparent;		/*border border-transparent*/
-		}
-
-		/*Pagination Buttons - Hover */
-		.dataTables_wrapper .dataTables_paginate .paginate_button:hover		{
-			color: #fff !important;				/*text-white*/
-			box-shadow: 0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06);	 /*shadow*/
-			font-weight: 700;					/*font-bold*/
-			border-radius: .25rem;				/*rounded*/
-			background: #667eea !important;		/*bg-indigo-500*/
-			border: 1px solid transparent;		/*border border-transparent*/
-		}
-
-		/*Add padding to bottom border */
-		table.dataTable.no-footer {
-			border-bottom: 1px solid #e2e8f0;	/*border-b-1 border-gray-300*/
-			margin-top: 0.75em;
-			margin-bottom: 0.75em;
-		}
-
-		/*Change colour of responsive icon*/
-		table.dataTable.dtr-inline.collapsed>tbody>tr>td:first-child:before, table.dataTable.dtr-inline.collapsed>tbody>tr>th:first-child:before {
-			background-color: #667eea !important; /*bg-indigo-500*/
-		}
-
-
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="m-2 bg-gray-50 min-h-screen">
+<div class="m-2 bg-gray-50 max-h-screen p-5 rounded-xl shadow-lg">
 
 
-    <div class="bg-white rounded p-2 m-2 shadow"
+    <div>
         <div class="text-lg py-2"><i class="fab fa-searchengin"></i> {% blocktrans with type=context.type %} Browsing {{ type }} {% endblocktrans %} {% blocktrans with filter=context.filter %} with filter: <b>{{ filter }}</b>{% endblocktrans %}</div>
 
     {% if context.type == "Risk scenarios" %}
@@ -103,8 +31,8 @@
                   <tr class="p-1">
                     <td class=" px-1 py-2">{{ item.analysis.project }}</td>
                     <td class="">{{ item.name }}</td>
-                      <td class="">{{ item.get_current_level_display }}</td>
-                      <td class="">{{ item.get_residual_level_display }}</td>
+                      <td class="">{{ item.get_current_risk }}</td>
+                      <td class="">{{ item.get_residual_risk }}</td>
                       <td class="">{{ item.get_treatment_display }}</td>
                       <td class=" text-center"><a href="#"><i class="fas fa-external-link-square-alt"></i></a></td>
                   </tr>
@@ -112,24 +40,30 @@
             </tbody>
         </table>
         {% else %}
-        <table id="mytable" class="hover w-full p-2 m-2" >
+        <table id="mytable" class="hover w-full p-2 m-2">
             <thead>
             <tr>
-                <th class="text-left">{% trans "Project" %}</th>
-                <th class="text-left">{% trans "Name" %}</th>
-                <th class="text-left">{% trans "Associated risk" %}</th>
-                <th class="text-left">{% trans "Status" %}</th>
-                <th class="text-center">{% trans "Locate" %}</th>
+                <th class="text-left px-1">{% trans "Name" %}</th>
+                <th class="text-left px-1">{% trans "Domain" %}</th>
+                <th class="text-left px-1">{% trans "ETA" %}</th>
+                <th class="text-left px-1">{% trans "Associated risk scenarios" %}</th>
+                <th class="text-left px-1">{% trans "Status" %}</th>
+                <th class="text-center px-1">{% trans "Locate" %}</th>
             </tr>
             </thead>
             <tbody>
                 {% for item in context.items %}
                   <tr class="p-1">
-                    <td class=" px-1 py-2">{{ item.risk_scenario.analysis.project }}</td>
-                    <td class="">{{ item.name }}</td>
-                      <td class="">{{ item.risk_scenario.name }}</td>
-                      <td class="">{{ item.get_status_display }}</td>
-                      <td class=" text-center"><a href="#"><i class="fas fa-external-link-square-alt"></i></a></td>
+					<td class="px-1">{{ item.name }}</td>
+					<td class="px-1">{{ item.folder }}</td>
+                    <td class="px-1">{{ item.eta }}</td>
+					<td class="px-1">
+					{% for risk in item.risk_scenarios %}
+						{{ risk }}{% if not forloop.last %}, {% endif %}
+					{% endfor %}
+					</td>
+					<td class="px-1">{{ item.get_status_display }}</td>
+					<td class="px-1 text-center"><a href="{% url 'securitymeasure-detail' item.id %}"><i class="fas fa-external-link-square-alt"></i></a></td>
                   </tr>
                 {% endfor %}
             </tbody>
@@ -142,24 +76,4 @@
 
 </div>
 
-<script>
-		$(document).ready(function() {
-			let lang = document.documentElement.lang;
-			if (lang == "fr") {
-				lang = "fr-FR";
-			}
-			else {
-				lang = "en-GB";
-			}
-
-			var table = $('#mytable').DataTable( {
-					responsive: false,
-					language: {
-						url: "//cdn.datatables.net/plug-ins/1.13.1/i18n/" + lang +  ".json"
-					}
-				} )
-				.columns.adjust()
-				.responsive.recalc();
-		} );
-</script>
 {% endblock %}
