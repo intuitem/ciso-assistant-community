@@ -66,8 +66,8 @@ class Asset(AbstractBaseModel, FolderMixin):
         blank=True, verbose_name=_('business value'))
     type = models.CharField(
         max_length=2, choices=Type.choices, default=Type.PRIMARY, verbose_name=_('type'))
-    parent_asset = models.ForeignKey(
-        'self', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('parent asset'))
+    parent_assets = models.ManyToManyField(
+        'self', blank=True, verbose_name=_('parent assets'), symmetrical=False)
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -78,24 +78,20 @@ class Asset(AbstractBaseModel, FolderMixin):
         return str(self.name)
 
     def clean(self):
-        content_type = self.type
-        parent_asset = self.parent_asset
         field_errors = {}
         for field in self._meta.fields:
             if field.name != 'id' and field.name != 'created_at' and field.name != 'is_published':
                 field_errors[field.name] = []
-        if content_type == Asset.Type.SUPPORT and parent_asset is None:
-            field_errors['parent_asset'].append(ValidationError(
-                _('A support asset must have a parent asset.')))
-        if content_type == Asset.Type.PRIMARY and parent_asset is not None:
-            field_errors['parent_asset'].append(ValidationError(
-                _('A primary asset cannot have a parent asset.')))
-        if self.parent_asset == self:
-            field_errors['parent_asset'].append(
+        field_errors['parent_assets'] = []
+        if self.type == Asset.Type.PRIMARY and self.parent_assets.exists():
+            field_errors['parent_assets'].append(ValidationError(
+                _('A primary asset cannot have parent assets.')))
+        if self.parent_assets.contains(self):
+            field_errors['parent_assets'].append(
                 ValidationError(_('An asset cannot be its own parent.')))
-        if not self.validate_tree():
-            field_errors['parent_asset'].append(ValidationError(
-                _('The asset tree is not valid. Please check for cycles.')))
+        if not self.validate_graph():
+            field_errors['parent_assets'].append(ValidationError(
+                _('The asset graph is not valid. Please check for cycles.')))
         super().clean()
         for e in field_errors:
             if len(field_errors[e]) > 0:
@@ -124,26 +120,31 @@ class Asset(AbstractBaseModel, FolderMixin):
             if node in visited:
                 continue
             visited.add(node)
-            for child in Asset.objects.filter(parent_asset=node):
+            for child in Asset.objects.filter(parent_assets__id__exact=node.id):
                 stack.append(child)
         visited.remove(self)
         return visited
-
-    def validate_tree(self) -> bool:
+    
+    def dfs(self, visited, stack) -> bool:
         """
-        Validates the tree of the current asset by running a breadth-first search to check for cycles.
+        Runs a depth-first search on the current asset to check for cycles.
+        """
+        if self in visited:
+            return False
+        visited.add(self)
+        for child in Asset.objects.filter(parent_assets__id__exact=self.id):
+            if not child.dfs(visited, stack):
+                return False
+        visited.remove(self)
+        return True
+    
+    def validate_graph(self) -> bool:
+        """
+        Validates the graph of the current asset by running a depth-first search to check for cycles.
         """
         visited = set()
-        stack = [self]
-        while stack:
-            node = stack.pop()
-            if node in visited:
-                return False
-            visited.add(node)
-            if node.parent_asset is not None:
-                stack.append(node.parent_asset)
-        return True
-
+        stack = []
+        return self.dfs(visited, stack)
 
 class SecurityFunction(AbstractBaseModel, FolderMixin):
     provider = models.CharField(
