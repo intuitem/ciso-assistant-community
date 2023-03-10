@@ -113,7 +113,8 @@ class GenericDetailView(DetailView):
         context['delete'] = RoleAssignment.has_permission(
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
-        context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural}
+        context['crumbs'] = {self.model.__name__.lower(
+        ) + "-list": self.model._meta.verbose_name_plural}
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
@@ -158,7 +159,8 @@ class RiskAcceptanceDetailView(GenericDetailView):
         context = super().get_context_data(**kwargs)
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
         if self.object.state == 'submitted':
-            context['risk_acceptance_need_validation'] = (self.request.user == self.object.validator)
+            context['risk_acceptance_need_validation'] = (
+                self.request.user == self.object.validator)
         if self.object.state == 'accepted':
             context['risk_acceptance_accepted'] = True
         if self.object.state == 'rejected':
@@ -167,7 +169,7 @@ class RiskAcceptanceDetailView(GenericDetailView):
             context['risk_acceptance_revoked'] = True
         context['validate_riskacceptance'] = self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, content_type=None,codename='validate_riskacceptance') or (UserGroup.objects.get(name="BI-UG-GVA") in UserGroup.get_user_groups(self.request.user))
         return context
-    
+
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
         if self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, content_type=None,codename='validate_riskacceptance'):
@@ -186,18 +188,20 @@ class RiskAcceptanceDetailView(GenericDetailView):
                 messages.error(request, "Permission denied: you are not validator or you've not this role in the folder: {}. If you are the validator of this risk acceptance please contact your administrator.".format(self.object.folder))
         return self.get(request, *args, **kwargs)
 
+
 class FolderDetailView(GenericDetailView):
     model = Folder
     exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
                "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
-    
+
     template_name = "core/detail/folder_detail.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {"folder-list": _("Projects domains")}
         context['projects'] = Project.objects.filter(folder=self.object)
-        context['project_create_form'] = ProjectFormInherited(initial={'folder': self.object})
+        context['project_create_form'] = ProjectFormInherited(
+            initial={'folder': self.object})
         return context
 
 
@@ -209,7 +213,8 @@ class ProjectDetailView(GenericDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["crumbs"] = {"project-list": _("Projects")}
-        context['analysis_create_form'] = RiskAnalysisCreateFormInherited(initial={'project': self.object})
+        context['analysis_create_form'] = RiskAnalysisCreateFormInherited(
+            initial={'project': self.object})
         context['analyses'] = Analysis.objects.filter(project=self.object)
         return context
 
@@ -224,6 +229,7 @@ class ThreatDetailView(GenericDetailView):
 
 class SecurityFunctionDetailView(GenericDetailView):
     model = SecurityFunction
+
 
 class UserDetailView(GenericDetailView):
     model = User
@@ -272,7 +278,7 @@ class UserLogin(LoginView):
 
 
 def password_reset_request(request):
-    context={}
+    context = {}
     if request.method == "POST":
         now = datetime.now()
         password_reset_form = ResetForm(request.POST)
@@ -283,34 +289,37 @@ def password_reset_request(request):
                 associated_user = associated_users[0]
                 try:
                     if 'last_email_sent' in request.session:
-                        last_sent_time = datetime.strptime(request.session['last_email_sent'], '%Y-%m-%d %H:%M:%S')
+                        last_sent_time = datetime.strptime(
+                            request.session['last_email_sent'], '%Y-%m-%d %H:%M:%S')
                         elapsed_time = now - last_sent_time
                         # Vérifier si 30 secondes se sont écoulées depuis le dernier envoi de mail
                         if elapsed_time < timedelta(seconds=30):
                             # Si oui, retourner une réponse d'erreur
-                            messages.error(request, "Please wait before requesting another password reset.")
-                            context["password_reset_form"]=password_reset_form
+                            messages.error(
+                                request, "Please wait before requesting another password reset.")
+                            context["password_reset_form"] = password_reset_form
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
                     associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject=_("Password Reset Requested"))
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
-                    messages.error(request, 'An error has occured, please try later.')
+                    messages.error(
+                        request, 'An error has occured, please try later.')
                     print("Exception:", e)
                     password_reset_form = ResetForm()
-                    context["password_reset_form"]=password_reset_form
+                    context["password_reset_form"] = password_reset_form
                     return render(request=request, template_name="registration/password_reset.html", context=context)
             else:
                 messages.error(request, "This user doesn't exist.")
                 password_reset_form = ResetForm()
-                context["password_reset_form"]=password_reset_form
+                context["password_reset_form"] = password_reset_form
                 return render(request=request, template_name="registration/password_reset.html", context=context)
-            return redirect ("/password_reset/done/")
+            return redirect("/password_reset/done/")
         else:
             messages.error(request, "Invalid email or captcha.")
     password_reset_form = ResetForm()
-    context["password_reset_form"]=password_reset_form
+    context["password_reset_form"] = password_reset_form
     return render(request=request, template_name="registration/password_reset.html", context=context)
 
 
@@ -388,6 +397,10 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
         context['matrix'] = self.analysis.rating_matrix
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
         return context
 
     def test_func(self):
@@ -1157,6 +1170,18 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
             folder=Folder.get_folder(self.get_object()))
 
 
+class RiskMatrixDeleteView(UserPassesTestMixin, DeleteView):
+    model = RiskMatrix
+    success_url = reverse_lazy('riskmatrix-list')
+    template_name = 'snippets/rm_delete_modal.html'
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('riskmatrix-list')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskmatrix"))
+
+
 class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
     model = Analysis
     success_url = reverse_lazy('analysis-list')
@@ -1625,13 +1650,15 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
     def form_valid(self, form):
         self.object = form.save(commit=False)
         if self.object.validator:
-            self.object.set_state('submitted') # Mettre à jour le paramètre "state"
+            # Mettre à jour le paramètre "state"
+            self.object.set_state('submitted')
             self.object.save()
             try:
                 self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
                 messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
-                messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+                messages.error(
+                    self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
         return super().form_valid(form)
 
     def test_func(self):
@@ -1649,15 +1676,18 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
         self.object = form.save(commit=False)
         print(self.object.validator, self.object.state)
         if self.object.validator and self.object.state == 'created':
-            self.object.set_state('submitted') # Mettre à jour le paramètre "state"
+            # Mettre à jour le paramètre "state"
+            self.object.set_state('submitted')
             self.object.save()
             try:
                 self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
                 messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
             except:
-                messages.error(self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+                messages.error(
+                    self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
         elif not self.object.validator and self.object.state == 'submitted':
-            self.object.set_state('created') # Mettre à jour le paramètre "state"
+            # Mettre à jour le paramètre "state"
+            self.object.set_state('created')
             self.object.save()
         return super().form_valid(form)
 
@@ -2100,6 +2130,10 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
+        context["object_ids_change"] = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
+        context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[2]
         queryset = self.get_queryset()
         filter = RiskMatrixFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -2122,9 +2156,17 @@ class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['change_usergroup'] = RoleAssignment.has_permission(
             self.request.user, "change_usergroup")
+        context['viewable_projects'] = Project.objects.filter(
+            id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)[0]).filter(
+            id__in=(self.get_object().projects.all().values_list('id', flat=True)))
+        context['viewable_analyses'] = Analysis.objects.filter(
+            id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)[0]).filter(
+            id__in=(self.get_object().analyses.all().values_list('id', flat=True)))
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
-        context["crumbs"] = {'matrix-list': _('Matrices')}
+        context['change_analysis'] = RoleAssignment.has_permission(
+            self.request.user, "change_analysis")
+        context["crumbs"] = {'riskmatrix-list': _('Matrices')}
         return context
 
     def test_func(self):
@@ -2132,3 +2174,29 @@ class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
         The view is always accessible, only its content is filtered by the queryset
         """
         return True
+
+
+class RiskMatrixUpdateView(UserPassesTestMixin, UpdateView):
+    template_name = 'core/risk_matrix_update.html'
+    context_object_name = 'matrix'
+    form_class = RiskMatrixUpdateForm
+
+    model = RiskMatrix
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        context["crumbs"] = {'riskmatrix-list': _('Matrices')}
+        return context
+
+    def get_success_url(self) -> str:
+        if (self.request.POST.get('next', '/') == ""):
+            return reverse_lazy('riskmatrix-list')
+        else:
+            return self.request.POST.get('next', '/')
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskmatrix"), folder=Folder.get_folder(self.get_object()))

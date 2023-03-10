@@ -1,8 +1,6 @@
 {% extends 'core/base.html' %}
 {% load i18n static %}
 
-<!-- {% block title %}{% trans "Risk analyses"|title %}{% endblock %} -->
-
 {% block content %}
 
 <div>
@@ -27,10 +25,10 @@
                 </div>        
             </div>
         </form>
-        {% url 'matrix-list' as short_path %}
+        {% url 'riskmatrix-list' as short_path %}
         {% if request.get_full_path != short_path %}
         <div class="flex items-center h-10 w-full">
-            <a href="{% url 'matrix-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+            <a href="{% url 'riskmatrix-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
                 <span>{% trans "Clear Filters" %}</span>
             </a>
         </div>
@@ -45,16 +43,18 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Name" %}</th>
                 <th class="px-6 py-3">{% trans "Description" %}</th>
+                <th class="px-6 py-3 text-center">{% trans "Projects" %}</th>
                 <th class="px-6 py-3">{% trans "Matrix" %}</th>
-                {% comment %} <th class="px-6 py-3">{% trans "Actions" %}</th> {% endcomment %}
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
             </thead>
             <tbody>
                 {% for matrix in matrices %}
                     <tr class=" odd:bg-white even:bg-gray-50 ">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="ml-3">
-                                    <a id="matrix{{ matrix.id }}" href="{% url 'matrix-detail' matrix.id %}?next={{ request.path|urlencode }}"
+                                <div>
+                                    {% if not matrix.is_enabled %}<span class="bg-gray-200 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{% trans "disabled" %}</span>{% endif %}
+                                    <a id="matrix{{ matrix.id }}" href="{% url 'riskmatrix-detail' matrix.id %}?next={{ request.path|urlencode }}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                         {{ matrix.name|capfirst }}
                                     </a>
@@ -64,6 +64,11 @@
                         <td class="px-6 py-4">
                             <p class="text-gray-900 whitespace-no-wrap capitalize">
                                 {{ matrix.description|capfirst }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                {{ matrix.projects|length }}
                             </p>
                         </td>
                     
@@ -80,29 +85,30 @@
                                 {% endfor %}
                             </div>
                         </td>
-                        {% comment %} <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="px-6 py-4 whitespace-nowrap">
 
                             <div class="w-full">
-                                <span><a href="{% url 'RA' matrix.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                <span><a href="{% url 'riskmatrix-detail' matrix.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if matrix.id in object_ids_change %}
                                 <span>
-                                    <a href="{% url 'analysis-update' matrix.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                    <a href="{% url 'riskmatrix-update' matrix.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 </span>
-
+                                {% endif %}
+                                
+                                {% if matrix.id in object_ids_delete and not matrix.is_used %}
                                 <span x-data="{ open: false }">
-                                    <a @click="open = !open,
-modalOpen = !modalOpen" type="button"
+                                    <a @click="open = !open, modalOpen = !modalOpen" type="button"
                                     class="cursor-pointer table-action">
                                         <i class="fas fa-trash"></i>
-                                        
                                     </a>
-                                          
-                                
+                                    {% include 'snippets/modal/modal.html' with modal_action="delete" header=_("Delete matrix?") object=matrix model='riskmatrix' %}
                                 </span>
+                                {% endif %}
 
                             </div>
-                        </td> {% endcomment %}
+                        </td>
                     </tr>
                 {% empty %}
                 <tr class="text-black p-4 text-center">

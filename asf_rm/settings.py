@@ -96,13 +96,13 @@ RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
 RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
 
-MIRA_SUPERUSER_EMAIL = os.getenv('MIRA_SUPERUSER_EMAIL')
+MIRA_SUPERUSER_EMAIL = os.environ.get('MIRA_SUPERUSER_EMAIL')
 EMAIL_HOST = os.environ['EMAIL_HOST']
-EMAIL_PORT = os.getenv('EMAIL_PORT')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
 EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
 # NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution or wait a real SMTP server.
 
 TEMPLATES = [
@@ -204,7 +204,7 @@ if 'POSTGRES_NAME' in os.environ:
             'USER': os.environ['POSTGRES_USER'],
             'PASSWORD': os.environ['POSTGRES_PASSWORD'],
             'HOST': os.environ['DB_HOST'],
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
     print("Postgresql database engine")
@@ -217,8 +217,7 @@ else:
         }
     }
 
-AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend'] # Change your authentication backend
-FIDO_SERVER_ID=urlparse(MIRA_URL).hostname      # Server rp id for FIDO2, it the full domain of your project
+AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend'] 
+FIDO_SERVER_ID=urlparse(MIRA_URL).hostname
 FIDO_SERVER_NAME="FidoMira"
 KEY_ATTACHMENT = passkeys.Attachment.PLATFORM
-
