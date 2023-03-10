@@ -267,12 +267,11 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
             'expiry_date': DefaultDateInput(format='%Y-%m-%d'),
         }
         labels = {'risk_scenario': _('Risk scenario')}
-        exclude = ['state']
+        exclude = ['state', 'accepted_date', 'rejected_date', 'revoked_date']
 
 
 class ProjectForm(StyledModelForm):
-    def __init__(self, user=None, *args, **kwargs):
-        print(user)
+    def __init__(self, user=None, *args, **kwargs):   
         super(ProjectForm, self).__init__(*args, **kwargs)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_project"))

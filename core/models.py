@@ -9,7 +9,7 @@ import pandas as pd
 import json
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -526,10 +526,6 @@ class RiskScenario(AbstractBaseModel):
 
 class RiskAcceptance(AbstractBaseModel):
 
-    ACCEPTANCE_TYPE = [
-        ('temporary', _('Temporary')),
-        ('permanent', _('Permanent')),
-    ]
     ACCEPTANCE_STATE = [
         ('created', _('Created')),
         ('submitted', _('Submitted')),
@@ -537,22 +533,18 @@ class RiskAcceptance(AbstractBaseModel):
         ('rejected', _('Rejected')),
         ('revoked', _('Revoked')),
     ]
-    folder = models.ForeignKey(
-        Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
-    risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_(
-        "Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
-    validator = models.ForeignKey(User, max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_(
-        "Validator"), on_delete=models.SET_NULL, null=True, blank=True)
-    type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE,
-                            default='temporary', verbose_name=_("Type"))
-    state = models.CharField(
-        max_length=20, choices=ACCEPTANCE_STATE, default='created', verbose_name=_("State"))
-    expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
-                                   blank=True, null=True, verbose_name=_("Expiry date"))
-    updated_at = models.DateTimeField(
-        auto_now=True, verbose_name=_("Updated at"))
-    comments = models.CharField(
-        max_length=500, blank=True, null=True, verbose_name=_("Comments"))
+    
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
+    validator = models.ForeignKey(User, max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"), on_delete=models.SET_NULL, null=True, blank=True)
+    state = models.CharField(max_length=20, choices=ACCEPTANCE_STATE, default='created', verbose_name=_("State"))
+    expiry_date = models.DateField(help_text=_("Specify when the risk acceptance will no longer apply"),
+                                   null=True, verbose_name=_("Expiry date"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+    accepted_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Acceptance date"))
+    rejected_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Rejection date"))
+    revoked_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Revocation date"))
+    comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
         permissions = [("validate_riskacceptance",
@@ -574,5 +566,11 @@ class RiskAcceptance(AbstractBaseModel):
 
     def set_state(self, state):
         self.state = state
+        if state == "accepted":
+            self.accepted_date = datetime.now()
+        if state == "rejected":
+            self.rejected_date = datetime.now()
+        elif state == "revoked":
+            self.revoked_date = datetime.now()
         self.save()
 # you can consider nested inlines at some points

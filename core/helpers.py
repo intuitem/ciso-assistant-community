@@ -401,7 +401,6 @@ def acceptances_to_review(user: User):
         Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskAcceptance)
     acceptances = RiskAcceptance.objects.filter(id__in=object_ids_view).filter(
         expiry_date__lte=date.today()+timedelta(days=30)
-    ).exclude(type__iexact='permanent'
-              ).order_by('expiry_date')
+    ).order_by('expiry_date')
 
     return acceptances

@@ -154,6 +154,19 @@ class SecurityMeasureDetailView(GenericDetailView):
 class RiskAcceptanceDetailView(GenericDetailView):
     model = RiskAcceptance
     template_name = "core/detail/riskacceptance_detail.html"
+    exclude = ['']
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
+        if self.object.state in ('created', 'submitted'):
+            self.exclude = ['accepted_date', 'revoked_date', 'rejected_date']
+        elif self.object.state == 'accepted':
+            self.exclude = ['revoked_date', 'rejected_date']
+        elif self.object.state == 'rejected':
+            self.exclude = ['accepted_date', 'revoked_date']
+        elif self.object.state == 'revoked':
+            self.exclude = ['rejected_date']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,8 +198,8 @@ class RiskAcceptanceDetailView(GenericDetailView):
             else:
                 messages.error(request, "An error has occured")
         else:
-                messages.error(request, "Permission denied: you are not validator or you've not this role in the folder: {}. If you are the validator of this risk acceptance please contact your administrator.".format(self.object.folder))
-        return self.get(request, *args, **kwargs)
+                messages.error(request, "Permission denied: you are not validator or you've not this role in this risk acceptance folder")
+        return redirect("riskacceptance-detail", self.object.id)
 
 
 class FolderDetailView(GenericDetailView):
@@ -2093,7 +2106,10 @@ class UserPasswordChangeView(PasswordChangeView):
     model = User
 
     def get_success_url(self) -> str:
-        return reverse_lazy("me-update", kwargs={'pk': self.request.user.id})
+        self.object = get_object_or_404(User, pk=self.kwargs['pk'])
+        if self.object == self.request.user:
+            return reverse_lazy("me-update", kwargs={'pk': self.request.user.id})
+        return reverse_lazy("user-update", kwargs={'pk': self.object.id})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
