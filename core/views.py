@@ -1123,7 +1123,8 @@ class RiskAnalysisCreateView(UserPassesTestMixin, CreateView):
         return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        project = Project.objects.get(id=self.request.POST['project'])
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=project.folder.id))
 
 
 class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1135,7 +1136,8 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return self.request.POST.get('next', 'analysis-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        project = Project.objects.get(id=self.request.POST['project'])
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=project.folder.id))
 
 
 class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
@@ -1263,7 +1265,8 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
         return reverse('analysis-update', kwargs={'pk': get_object_or_404(Analysis, id=self.kwargs['analysis']).id})
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        analysis = get_object_or_404(Analysis, id=self.request.POST['analysis'])
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=analysis.project.folder.id))
 
 
 class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1272,7 +1275,8 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = RiskScenarioCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        analysis = get_object_or_404(Analysis, id=self.request.POST['analysis'])
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=analysis.project.folder.id))
 
 
 class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
