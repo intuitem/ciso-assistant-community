@@ -170,20 +170,20 @@ class RiskAcceptanceDetailView(GenericDetailView):
     
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
-        if RoleAssignment.has_permission(self.request.user, 'validate_riskacceptance') and (self.object.folder.id in RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN)):
+        if self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, codename='validate_riskacceptance'):
             if 'accepted' in request.POST:
                 self.object.set_state('accepted')
-                messages.success(request, _("Risk acceptance accepted with success"))
+                messages.success(request, _("Risk acceptance: {} accepted with success!".format(self.object.name)))
             elif 'rejected' in request.POST:
                 self.object.set_state('rejected')
-                messages.success(request, _("Risk acceptance rejected with success"))
+                messages.success(request, _("Risk acceptance: {} rejected with success!".format(self.object.name)))
             elif 'revoked' in request.POST:
                 self.object.set_state('revoked')
-                messages.success(request, _("Risk acceptance revoked with success"))
+                messages.success(request, _("Risk acceptance: {} revoked with success!".format(self.object.name)))
             else:
                 messages.error(request, "An error has occured")
         else:
-                messages.error(request, "Permission denied: you are not validator or you've not this role in this risk acceptance folder")
+                messages.error(request, "Permission denied: you are not validator or you've not this role in the folder: {}. If you are the validator of this risk acceptance please contact your administrator.".format(self.object.folder))
         return self.get(request, *args, **kwargs)
 
 class FolderDetailView(GenericDetailView):
