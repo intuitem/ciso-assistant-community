@@ -401,47 +401,26 @@ class TestAsset:
         asset = Asset.objects.create(name="Asset", folder=root_folder, type=Asset.Type.PRIMARY)
         parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
         with pytest.raises(ValidationError):
-            asset.parent_asset = parent_asset
+            asset.parent_assets.add(parent_asset)
             asset.save()
-
-    def test_asset_support_must_have_parent_asset(self, root_folder_fixture):
-        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        with pytest.raises(ValidationError):
-            Asset.objects.create(name="Asset", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=None)
 
     def test_asset_can_not_be_its_own_parent(self, root_folder_fixture):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        asset = Asset.objects.create(name="Asset", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=parent_asset)
+        asset = Asset.objects.create(name="Asset", folder=root_folder, type=Asset.Type.SUPPORT)
         with pytest.raises(ValidationError):
-            asset.parent_asset = asset
+            asset.parent_assets.add(asset)
             asset.save()
-
-    def test_asset_root_asset_must_be_primary(self, root_folder_fixture):
-        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        asset1 = Asset.objects.create(name="Asset1", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=parent_asset)
-        asset2 = Asset.objects.create(name="Asset2", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=asset1)
-        with pytest.raises(ValidationError):
-            asset1.parent_asset = asset2
-            asset1.save()
 
     def test_asset_graph_has_no_cycles(self, root_folder_fixture):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        asset1 = Asset.objects.create(name="Asset1", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=parent_asset)
-        asset2 = Asset.objects.create(name="Asset2", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=asset1)
+        asset1 = Asset.objects.create(name="Asset1", folder=root_folder, type=Asset.Type.SUPPORT)
+        asset2 = Asset.objects.create(name="Asset2", folder=root_folder, type=Asset.Type.SUPPORT)
+        asset1.parent_assets.add(parent_asset)
+        asset2.parent_assets.add(asset1)
+        asset1.save()
+        asset2.save()
         with pytest.raises(ValidationError):
-            asset1.parent_asset = asset2
-            asset1.save()
-
-    def test_asset_graph_has_no_cycles_2(self, root_folder_fixture):
-        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        asset1 = Asset.objects.create(name="Asset1", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=parent_asset)
-        asset2 = Asset.objects.create(name="Asset2", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=asset1)
-        asset3 = Asset.objects.create(name="Asset3", folder=root_folder, type=Asset.Type.SUPPORT, parent_asset=asset2)
-        with pytest.raises(ValidationError):
-            asset1.parent_asset = asset3
+            asset1.parent_assets.add(asset2)
             asset1.save()
