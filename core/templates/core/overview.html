@@ -63,13 +63,18 @@
                 <div class="text-sm text-slate-500 font-semibold">{% trans "Assigned to" %} <span class="font-bold text-slate-700">{{ counters.Project }}</span> {% trans "projects" %}</div>
             </div>
             <div class="flex items-center content-center">
-                <div class="h-96 p-2 m-2 w-1/2">
-                    <span class="text-sm font-semibold">{% trans "Risk scenarios overview" %}</span>
+                <div class="h-96 p-2 m-2 w-1/3">
+                    <span class="text-sm font-semibold">{% trans "Current risk level per risk scenario" %}</span>
                     <!--Chart starts here-->
                     {% include 'snippets/donut_chart.html' with name='cur_rsk' s_label=cur_rsk_label values=risks_level.current %}
                     <!--Chart ends here-->
                 </div>
-                <div class="h-96 p-2 m-2 w-1/2">
+                <div class="h-96 p-2 m-2 w-1/3">
+                    <span class="text-sm font-semibold">{% trans "Residual risk level per risk scenario" %}</span>
+                    {% trans "Residual risk" as rsd_rsk_label %}
+                    {% include 'snippets/donut_chart.html' with name='rsd_rsk' s_label=rsd_rsk_label values=risks_level.residual %}
+                </div>
+                <div class="h-96 p-2 m-2 w-1/3">
                     <span class="text-sm font-semibold">{% trans "Security measures status" %}</span>
                     {% include 'core/fragments/measures_status.html' with name='security_measures_status' labels=security_measure_status.labels values=security_measure_status.values %}
                 </div>
