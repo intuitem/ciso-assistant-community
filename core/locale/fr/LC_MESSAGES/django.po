@@ -1447,7 +1447,7 @@ msgid "Other users"
 msgstr "Autres utilisateurs"
 
 #: core/templates/core/index.html:6 core/templates/core/sidebar.html:46
-msgid "Analyses registry"
+msgid "Analysis registry"
 msgstr "Registre des analyses"
 
 #: core/templates/core/index.html:18
