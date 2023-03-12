@@ -396,31 +396,4 @@ class TestAsset:
         assert asset1.folder == root_folder
         assert asset2.folder == folder
 
-    def test_asset_primary_does_not_have_parent_asset(self, root_folder_fixture):
-        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        asset = Asset.objects.create(name="Asset", folder=root_folder, type=Asset.Type.PRIMARY)
-        parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        with pytest.raises(ValidationError):
-            asset.parent_assets.add(parent_asset)
-            asset.save()
-
-    def test_asset_can_not_be_its_own_parent(self, root_folder_fixture):
-        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        asset = Asset.objects.create(name="Asset", folder=root_folder, type=Asset.Type.SUPPORT)
-        with pytest.raises(ValidationError):
-            asset.parent_assets.add(asset)
-            asset.save()
-
-    def test_asset_graph_has_no_cycles(self, root_folder_fixture):
-        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        parent_asset = Asset.objects.create(name="Parent", folder=root_folder)
-        asset1 = Asset.objects.create(name="Asset1", folder=root_folder, type=Asset.Type.SUPPORT)
-        asset2 = Asset.objects.create(name="Asset2", folder=root_folder, type=Asset.Type.SUPPORT)
-        asset1.parent_assets.add(parent_asset)
-        asset2.parent_assets.add(asset1)
-        asset1.save()
-        asset2.save()
-        with pytest.raises(ValidationError):
-            asset1.parent_assets.add(asset2)
-            asset1.save()
+# Note: no validation can be done at model level for m2m fields. This is done at form level.
