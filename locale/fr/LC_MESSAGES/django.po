@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-08 14:15+0000\n"
+"POT-Creation-Date: 2023-03-11 22:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: iam/forms.py:123 iam/forms.py:163
+#: iam/forms.py:122 iam/forms.py:162
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
 "password, but you can change the password using <a class=\"help_text-link\" "
@@ -28,7 +28,7 @@ msgstr ""
 "voir le mot de passe de cet utilisateur, mais vous pouvez modifier le mot de "
 "passe en utilisant <a class=\"help_text-link\" href=\"{}\">ce formulaire</a>."
 
-#: iam/forms.py:158
+#: iam/forms.py:157
 msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
