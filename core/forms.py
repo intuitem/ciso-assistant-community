@@ -342,7 +342,6 @@ class AssetForm(StyledModelForm):
         cleaned_data = super().clean()
         parent_assets = cleaned_data.get('parent_assets')
         type = cleaned_data.get('type')
-        print("hello from clean AssetForm", type, parent_assets)
         if type == Asset.Type.PRIMARY and parent_assets.exists():
             raise ValidationError(_('A primary asset cannot have parent assets.'))
         for parent in parent_assets.all():
