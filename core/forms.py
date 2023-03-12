@@ -336,7 +336,19 @@ class AssetForm(StyledModelForm):
         self.fields['parent_assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
                      'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
-                        choices=self.fields['parent_assets'].choices)
+                        choices=[(a, b) for (a, b) in self.fields['parent_assets'].choices if a.instance.is_primary()])
+
+    def clean(self):
+        cleaned_data = super().clean()
+        parent_assets = cleaned_data.get('parent_assets')
+        type = cleaned_data.get('type')
+        print("hello from clean AssetForm", type, parent_assets)
+        if type == Asset.Type.PRIMARY and parent_assets.exists():
+            raise ValidationError(_('A primary asset cannot have parent assets.'))
+        for parent in parent_assets.all():
+            if parent.type == Asset.Type.SUPPORT:
+                raise ValidationError(_('Parent assets shall be of type primary.'))
+        return cleaned_data
 
     class Meta:
         model = Asset

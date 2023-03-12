@@ -10,8 +10,8 @@ import json
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime
-
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 
@@ -65,7 +65,7 @@ class Asset(AbstractBaseModel, FolderMixin):
     business_value = models.TextField(
         blank=True, verbose_name=_('business value'))
     type = models.CharField(
-        max_length=2, choices=Type.choices, default=Type.PRIMARY, verbose_name=_('type'))
+        max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_('type'))
     parent_assets = models.ManyToManyField(
         'self', blank=True, verbose_name=_('parent assets'), symmetrical=False)
     is_published = models.BooleanField(_('published'), default=True)
@@ -77,25 +77,6 @@ class Asset(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return str(self.name)
 
-    def clean(self):
-        field_errors = {}
-        for field in self._meta.fields:
-            if field.name != 'id' and field.name != 'created_at' and field.name != 'is_published':
-                field_errors[field.name] = []
-        field_errors['parent_assets'] = []
-        if self.type == Asset.Type.PRIMARY and self.parent_assets.exists():
-            field_errors['parent_assets'].append(ValidationError(
-                _('A primary asset cannot have parent assets.')))
-        if self.parent_assets.contains(self):
-            field_errors['parent_assets'].append(
-                ValidationError(_('An asset cannot be its own parent.')))
-        if not self.validate_graph():
-            field_errors['parent_assets'].append(ValidationError(
-                _('The asset graph is not valid. Please check for cycles.')))
-        super().clean()
-        for e in field_errors:
-            if len(field_errors[e]) > 0:
-                raise ValidationError(field_errors)
 
     def is_primary(self) -> bool:
         """
@@ -109,42 +90,6 @@ class Asset(AbstractBaseModel, FolderMixin):
         """
         return self.type == Asset.Type.SUPPORT
 
-    def get_sub_assets(self):
-        """
-        Returns all the assets downstream of the current asset by running a breadth-first search.
-        """
-        visited = set()
-        stack = [self]
-        while stack:
-            node = stack.pop()
-            if node in visited:
-                continue
-            visited.add(node)
-            for child in Asset.objects.filter(parent_assets__id__exact=node.id):
-                stack.append(child)
-        visited.remove(self)
-        return visited
-    
-    def dfs(self, visited, stack) -> bool:
-        """
-        Runs a depth-first search on the current asset to check for cycles.
-        """
-        if self in visited:
-            return False
-        visited.add(self)
-        for child in Asset.objects.filter(parent_assets__id__exact=self.id):
-            if not child.dfs(visited, stack):
-                return False
-        visited.remove(self)
-        return True
-    
-    def validate_graph(self) -> bool:
-        """
-        Validates the graph of the current asset by running a depth-first search to check for cycles.
-        """
-        visited = set()
-        stack = []
-        return self.dfs(visited, stack)
 
 class SecurityFunction(AbstractBaseModel, FolderMixin):
     provider = models.CharField(
