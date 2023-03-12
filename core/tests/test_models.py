@@ -375,7 +375,7 @@ class TestAsset:
         asset = Asset.objects.create(name="Asset", folder=root_folder)
         assert asset.name == "Asset"
         assert asset.folder == root_folder
-        assert asset.type == Asset.Type.PRIMARY
+        assert asset.type == Asset.Type.SUPPORT
 
     def test_asset_creation_same_name(self, root_folder_fixture):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
