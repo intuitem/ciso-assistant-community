@@ -11,6 +11,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime
 from django.contrib.auth import get_user_model
+from typing import Self
 
 User = get_user_model()
 
@@ -57,7 +58,8 @@ class Asset(AbstractBaseModel, FolderMixin):
         The type of the asset.
 
         An asset can either be a primary or a support asset.
-        A support asset must be linked to another "parent" asset.
+        A support asset can be linked to another "parent" asset of type primary or support.
+        Cycles are not allowed
         """
         PRIMARY = 'PR', _('Primary')
         SUPPORT = 'SP', _('Support')
@@ -89,6 +91,12 @@ class Asset(AbstractBaseModel, FolderMixin):
         Returns True if the asset is a support asset.
         """
         return self.type == Asset.Type.SUPPORT
+
+    def get_lineage(self) -> list[Self]:
+        result = {self}
+        for x in self.parent_assets.all():
+            result.update(x.get_lineage())
+        return list(result)
 
 
 class SecurityFunction(AbstractBaseModel, FolderMixin):
