@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-12 01:32+0000\n"
+"POT-Creation-Date: 2023-03-12 01:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -337,13 +337,13 @@ msgstr ""
 msgid "Risk scenario"
 msgstr "Scénario de risque"
 
-#: core/forms.py:347
+#: core/forms.py:346
 #, fuzzy
 #| msgid "A primary asset cannot have a parent asset."
 msgid "A primary asset cannot have parent assets."
 msgstr "Un bien primaire ne peut pas avoir de bien parent."
 
-#: core/forms.py:350
+#: core/forms.py:349
 msgid "Parent assets shall be of type primary."
 msgstr ""
 

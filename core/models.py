@@ -62,8 +62,8 @@ class Asset(AbstractBaseModel, FolderMixin):
         PRIMARY = 'PR', _('Primary')
         SUPPORT = 'SP', _('Support')
 
-    business_value = models.TextField(
-        blank=True, verbose_name=_('business value'))
+    business_value = models.CharField(
+        max_length=200, blank=True, verbose_name=_('business value'))
     type = models.CharField(
         max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_('type'))
     parent_assets = models.ManyToManyField(
