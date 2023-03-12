@@ -391,8 +391,8 @@ class TestAsset:
         asset2 = Asset.objects.create(name="Asset", folder=folder)
         assert asset1.name == "Asset"
         assert asset2.name == "Asset"
-        assert asset1.type == Asset.Type.PRIMARY
-        assert asset2.type == Asset.Type.PRIMARY
+        assert asset1.type == Asset.Type.SUPPORT
+        assert asset2.type == Asset.Type.SUPPORT
         assert asset1.folder == root_folder
         assert asset2.folder == folder
 
