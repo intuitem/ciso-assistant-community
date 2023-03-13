@@ -395,9 +395,9 @@
               with no z-index so that it does not get in front of the backdrop when a modal is opened. 
               A small issue is that by removing its z-index, the button gets behind the sidebar when a modal is opened.
 {% endcomment %}
-<button x-show="!modalOpen" class="z-10 fixed left-64 ml-5 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow text-indigo-900 hover:scale-105 hover:bg-indigo-700 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-62': sidebarOpen == false }">
+<button x-show="!modalOpen" class="z-10 fixed left-64 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow text-indigo-900 hover:scale-105 hover:bg-indigo-700 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="sidebarOpen == false ? '-ml-62' : 'ml-5'">
     <i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
 </button>
-<button x-show="modalOpen" class="fixed left-64 ml-5 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow text-indigo-900 hover:scale-105 hover:bg-indigo-700 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-62': sidebarOpen == false }">
+<button x-show="modalOpen" class="fixed left-64 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow text-indigo-900 hover:scale-105 hover:bg-indigo-700 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="sidebarOpen == false ? '-ml-62' : 'ml-5'">
     <i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
 </button>
