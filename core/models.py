@@ -10,8 +10,9 @@ import json
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime
-
 from django.contrib.auth import get_user_model
+from typing import Self
+
 User = get_user_model()
 
 
@@ -57,17 +58,18 @@ class Asset(AbstractBaseModel, FolderMixin):
         The type of the asset.
 
         An asset can either be a primary or a support asset.
-        A support asset must be linked to another "parent" asset.
+        A support asset can be linked to another "parent" asset of type primary or support.
+        Cycles are not allowed
         """
         PRIMARY = 'PR', _('Primary')
         SUPPORT = 'SP', _('Support')
 
-    business_value = models.TextField(
-        blank=True, verbose_name=_('business value'))
+    business_value = models.CharField(
+        max_length=200, blank=True, verbose_name=_('business value'))
     type = models.CharField(
-        max_length=2, choices=Type.choices, default=Type.PRIMARY, verbose_name=_('type'))
-    parent_asset = models.ForeignKey(
-        'self', on_delete=models.CASCADE, blank=True, null=True, verbose_name=_('parent asset'))
+        max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_('type'))
+    parent_assets = models.ManyToManyField(
+        'self', blank=True, verbose_name=_('parent assets'), symmetrical=False)
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -77,29 +79,6 @@ class Asset(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return str(self.name)
 
-    def clean(self):
-        content_type = self.type
-        parent_asset = self.parent_asset
-        field_errors = {}
-        for field in self._meta.fields:
-            if field.name != 'id' and field.name != 'created_at' and field.name != 'is_published':
-                field_errors[field.name] = []
-        if content_type == Asset.Type.SUPPORT and parent_asset is None:
-            field_errors['parent_asset'].append(ValidationError(
-                _('A support asset must have a parent asset.')))
-        if content_type == Asset.Type.PRIMARY and parent_asset is not None:
-            field_errors['parent_asset'].append(ValidationError(
-                _('A primary asset cannot have a parent asset.')))
-        if self.parent_asset == self:
-            field_errors['parent_asset'].append(
-                ValidationError(_('An asset cannot be its own parent.')))
-        if not self.validate_tree():
-            field_errors['parent_asset'].append(ValidationError(
-                _('The asset tree is not valid. Please check for cycles.')))
-        super().clean()
-        for e in field_errors:
-            if len(field_errors[e]) > 0:
-                raise ValidationError(field_errors)
 
     def is_primary(self) -> bool:
         """
@@ -113,36 +92,11 @@ class Asset(AbstractBaseModel, FolderMixin):
         """
         return self.type == Asset.Type.SUPPORT
 
-    def get_sub_assets(self):
-        """
-        Returns all the assets downstream of the current asset by running a breadth-first search.
-        """
-        visited = set()
-        stack = [self]
-        while stack:
-            node = stack.pop()
-            if node in visited:
-                continue
-            visited.add(node)
-            for child in Asset.objects.filter(parent_asset=node):
-                stack.append(child)
-        visited.remove(self)
-        return visited
-
-    def validate_tree(self) -> bool:
-        """
-        Validates the tree of the current asset by running a breadth-first search to check for cycles.
-        """
-        visited = set()
-        stack = [self]
-        while stack:
-            node = stack.pop()
-            if node in visited:
-                return False
-            visited.add(node)
-            if node.parent_asset is not None:
-                stack.append(node.parent_asset)
-        return True
+    def ancestors_plus_self(self) -> list[Self]:
+        result = {self}
+        for x in self.parent_assets.all():
+            result.update(x.ancestors_plus_self())
+        return list(result)
 
 
 class SecurityFunction(AbstractBaseModel, FolderMixin):

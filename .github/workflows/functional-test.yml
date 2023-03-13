@@ -2,7 +2,7 @@ name: Functional test using Playwright
 
 on:
   push:
-    branches: [ main, develop, ci-cd/update-functional-tests]
+    branches: [ ci-cd/update-functional-tests]
   pull_request:
     branches: [ main, develop ]
 
@@ -28,10 +28,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python 3.11
       uses: actions/setup-python@v2
       with:
-        python-version: "3.8"
+        python-version: "3.11"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
