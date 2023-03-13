@@ -1,0 +1,22 @@
+{% load i18n static %}
+<div class="space-y-4">
+    <p class="relative whitespace-normal">{% trans "This action cannot be undone. This will permanently affect the following object: " %}<strong>{{ object }}</strong></p>
+    {% comment %} {% for item in object.item_set.all %}
+        {{ item }}
+    {% endfor %} {% endcomment %}
+    <div class="whitespace-normal">
+        {{ extra_text }}
+    </div>
+    <div class="flex items-center justify-end">
+        <button
+        @click="open = !open,
+modalOpen = !modalOpen"
+        type="button"
+        class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gray-600 hover:bg-gray-500 mr-2"
+        >{% trans "No, take me back" %}</button>
+        <form method="post">{% csrf_token %}
+            <input class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-red-600 hover:bg-red-700 mr-2"
+            type="submit" name={{ name }} value={% trans "Yes" %}>
+        </form>
+    </div>
+</div>
