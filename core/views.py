@@ -925,7 +925,7 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
 
 class AssetUpdateView(UserPassesTestMixin, UpdateView):
     model = Asset
-    template_name = 'core/asset_update.html'
+ #   template_name = 'core/asset_update.html'
     context_object_name = 'asset'
     form_class = AssetForm
 

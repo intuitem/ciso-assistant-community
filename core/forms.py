@@ -342,14 +342,13 @@ class AssetForm(StyledModelForm):
         """ check the AssetForm values before submission to the model. This is required as we used manytomany """
         cleaned_data = super().clean()
         parent_assets = cleaned_data.get('parent_assets')
-        asset_type = cleaned_data.get('asset_type')
+        asset_type = cleaned_data.get('type')
         if asset_type == Asset.Type.PRIMARY and parent_assets.exists():
             raise ValidationError(_('A primary asset cannot have parent assets.'))
-        parent_assets = cleaned_data.get('parent_assets')
         # if we are in an update form, let's check there are no cycles
         if self.instance:
             for parent in parent_assets.all():
-                if self.instance in parent.get_lineage():
+                if self.instance in parent.ancestors_plus_self():
                     raise ValidationError(_('Cycles are not allowed.'))
         return cleaned_data
 

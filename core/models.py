@@ -92,10 +92,10 @@ class Asset(AbstractBaseModel, FolderMixin):
         """
         return self.type == Asset.Type.SUPPORT
 
-    def get_lineage(self) -> list[Self]:
+    def ancestors_plus_self(self) -> list[Self]:
         result = {self}
         for x in self.parent_assets.all():
-            result.update(x.get_lineage())
+            result.update(x.ancestors_plus_self())
         return list(result)
 
 
