@@ -547,8 +547,7 @@ class RiskAcceptance(AbstractBaseModel):
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
-        permissions = [("validate_riskacceptance",
-                        "Can validate/rejected risk acceptances")]
+        permissions = [("validate_riskacceptance", "Can validate/rejected risk acceptances")]
         verbose_name = _("Risk acceptance")
         verbose_name_plural = _("Risk acceptances")
 
