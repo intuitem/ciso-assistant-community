@@ -43,7 +43,7 @@ from django.http import HttpResponse
 from django.forms.models import model_to_dict
 from django.template import loader
 from django.utils.translation import gettext_lazy as _
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from datetime import date
 from django.contrib import messages
 from core.utils import RoleCodename, UserGroupCodename
@@ -262,7 +262,7 @@ class AnalysisListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.first_login:
-            messages.info(self.request, mark_safe(_(
+            messages.info(self.request, format_html(_(
                 "Welcome to MIRA! 👋<br>Question or feedback? click <a class='text-blue-600 underline hover:text-blue-500' target='_blank' href='https://intuitem.com/contact/'>here</a>")))
             self.request.user.first_login = False
             self.request.user.save()
