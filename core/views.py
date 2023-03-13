@@ -43,6 +43,7 @@ from django.http import HttpResponse
 from django.forms.models import model_to_dict
 from django.template import loader
 from django.utils.translation import gettext_lazy as _
+from django.utils.html import format_html
 from datetime import date
 from django.contrib import messages
 from core.utils import RoleCodename, UserGroupCodename
@@ -251,7 +252,7 @@ class SecurityFunctionDetailView(GenericDetailView):
 class UserDetailView(GenericDetailView):
     model = User
 
-    exclude = ['id', 'password', 'last_five_logins']
+    exclude = ['id', 'password', 'first_login']
 
 
 class AnalysisListView(ListView):
@@ -262,16 +263,13 @@ class AnalysisListView(ListView):
     paginate_by = 10
     model = Analysis
 
-    @receiver(user_logged_in)
-    def update_last_login_list(sender, user, request, **kwargs):
-        if isinstance(user, User):
-            user.update_last_login_list()
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if len(self.request.user.last_five_logins) <= 1:
-            messages.info(self.request, _(
-                "Welcome to MIRA! 👋 Feel free to contact us if you have any problems."))
+        if self.request.user.first_login:
+            messages.info(self.request, format_html(_(
+                "Welcome to MIRA! 👋<br>Question or feedback? click <a class='text-blue-600 underline hover:text-blue-500' target='_blank' href='https://intuitem.com/contact/'>here</a>")))
+            self.request.user.first_login = False
+            self.request.user.save()
         if not UserGroup.get_user_groups(self.request.user):
             messages.warning(self.request, _(
                 "Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact your administrator."))

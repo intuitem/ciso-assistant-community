@@ -177,7 +177,7 @@ class User(AbstractBaseUser):
         last_name = models.CharField(_('last name'), max_length=150, blank=True)
         first_name = models.CharField(_('first name'), max_length=150, blank=True)
         email = models.CharField(max_length=100, unique=True)
-        last_five_logins = models.JSONField(default=list) # NOTE: think about this functionnality because now it's only used to know the first connection
+        first_login = models.BooleanField(default=True)
         is_active = models.BooleanField(
             _('active'),
             default=True,
@@ -235,15 +235,6 @@ class User(AbstractBaseUser):
             return self.first_name if self.first_name else self.email.split('@')[0]
         except:
             return ""
-        
-    def update_last_login_list(self): # NOTE: think about this functionnality because now it's only used to know the first connection
-        """
-        Adds the date and time of the user's last login to the list
-        last_five_logins and keeps only the last 5 items.
-        """
-        self.last_five_logins.append(str(self.last_login))
-        self.last_five_logins = self.last_five_logins[-5:]
-        self.save()
     
     def mailing(self, email_template_name, subject, pk=False):
         """
