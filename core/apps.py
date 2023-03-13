@@ -7,12 +7,11 @@ def startup():
     """Only called in main, not during makemigrations or migrate"""
     import os
     if os.environ.get('RUN_MAIN'):
-        from .models import Folder, RiskAcceptance
+        from .models import Folder
         from iam.models import UserGroup, Role, RoleAssignment
         from django.contrib.auth.models import Permission
         from iam.models import User
         from asf_rm.settings import MIRA_SUPERUSER_EMAIL
-        from django.contrib.contenttypes.models import ContentType
 
         auditor_permissions = Permission.objects.filter(codename__in=[
             "view_project",
@@ -178,6 +177,7 @@ def startup():
             "view_riskacceptance",
             "change_riskacceptance",
             "delete_riskacceptance",
+            "validate_riskacceptance",
 
             "add_riskmatrix",
             "view_riskmatrix",

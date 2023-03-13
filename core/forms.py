@@ -333,6 +333,24 @@ class AssetForm(StyledModelForm):
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['parent_assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
+                     'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+                        'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
+                        choices=self.fields['parent_assets'].choices)
+
+    def clean(self):
+        """ check the AssetForm values before submission to the model. This is required as we used manytomany """
+        cleaned_data = super().clean()
+        parent_assets = cleaned_data.get('parent_assets')
+        asset_type = cleaned_data.get('type')
+        if asset_type == Asset.Type.PRIMARY and parent_assets.exists():
+            raise ValidationError(_('A primary asset cannot have parent assets.'))
+        # if we are in an update form, let's check there are no cycles
+        if self.instance:
+            for parent in parent_assets.all():
+                if self.instance in parent.ancestors_plus_self():
+                    raise ValidationError(_('Cycles are not allowed.'))
+        return cleaned_data
 
     class Meta:
         model = Asset
