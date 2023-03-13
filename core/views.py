@@ -180,12 +180,16 @@ class RiskAcceptanceDetailView(GenericDetailView):
             context['risk_acceptance_rejected'] = True
         if self.object.state == 'revoked':
             context['risk_acceptance_revoked'] = True
-        context['validate_riskacceptance'] = self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, content_type=None,codename='validate_riskacceptance') or (UserGroup.objects.get(name="BI-UG-GVA") in UserGroup.get_user_groups(self.request.user))
+        context['validate_riskacceptance'] = RoleAssignment.is_access_allowed(user=self.request.user, 
+                                            perm=Permission.objects.get(codename='validate_riskacceptance'), 
+                                            folder=self.object.folder)
         return context
 
     def post(self, request, *args, **kwargs):
         self.object = get_object_or_404(RiskAcceptance, id=self.kwargs['pk'])
-        if self.object.folder.id in RoleAssignment.get_accessible_folders(folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), user=self.request.user, content_type=None,codename='validate_riskacceptance'):
+        if RoleAssignment.is_access_allowed(user=self.request.user, 
+                                            perm=Permission.objects.get(codename='validate_riskacceptance'), 
+                                            folder=self.object.folder):
             if 'accepted' in request.POST:
                 self.object.set_state('accepted')
                 messages.success(request, _("Risk acceptance: {} accepted with success!".format(self.object.name)))
@@ -196,9 +200,9 @@ class RiskAcceptanceDetailView(GenericDetailView):
                 self.object.set_state('revoked')
                 messages.success(request, _("Risk acceptance: {} revoked with success!".format(self.object.name)))
             else:
-                messages.error(request, "An error has occured")
+                messages.error(request, "An internal error has occured.")
         else:
-                messages.error(request, "Permission denied: you are not validator or you've not this role in this risk acceptance folder")
+                messages.error(request, "Permission denied: you are not allowed to validate this risk acceptance.")
         return redirect("riskacceptance-detail", self.object.id)
 
 
