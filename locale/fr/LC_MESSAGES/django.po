@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-10 20:32+0000\n"
+"POT-Creation-Date: 2023-03-13 12:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:28 iam/models.py:282
+#: iam/models.py:28 iam/models.py:273
 msgid "Domain"
 msgstr "Domaine"
 
@@ -65,7 +65,7 @@ msgstr "DOMAINE"
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:90 iam/models.py:293
+#: iam/models.py:90 iam/models.py:284
 msgid "Folder"
 msgstr "Dossier"
 
@@ -134,11 +134,11 @@ msgstr "utilisateur"
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:288
+#: iam/models.py:279
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:290
+#: iam/models.py:281
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
