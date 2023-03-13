@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 19:58+0000\n"
+"POT-Creation-Date: 2023-03-13 23:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -929,7 +929,7 @@ msgstr "Date d'expiration"
 #: core/templates/core/security_function_list.html:112
 #: core/templates/core/threat_list.html:44
 #: core/templates/core/treatment.html:35 core/templates/core/user_list.html:120
-#: core/templates/library/library_list.html:22
+#: core/templates/library/library_list.html:23
 #: core/templates/snippets/ra_list_nested.html:22
 msgid "Actions"
 msgstr ""
@@ -1571,6 +1571,7 @@ msgstr "Groupes utilisateurs"
 
 #: core/templates/core/overview.html:10 core/templates/core/overview.html:19
 #: core/templates/core/sidebar.html:64
+#: core/templates/library/library_list.html:22
 msgid "Overview"
 msgstr "Vue d'ensemble"
 
@@ -1920,8 +1921,8 @@ msgstr[0] ""
 "                        "
 msgstr[1] ""
 "\n"
-"                        %(counter)s <span class=\"font-bold"
-"\">avertissements</span> trouvés\n"
+"                        %(counter)s <span class=\"font-"
+"bold\">avertissements</span> trouvés\n"
 "                    "
 
 #: core/templates/core/review.html:55
@@ -2755,7 +2756,7 @@ msgid "Edit user"
 msgstr "Modifier l'utilisateur"
 
 #: core/templates/library/library_detail.html:23
-#: core/templates/library/library_list.html:49
+#: core/templates/library/library_list.html:81
 msgid "Import library"
 msgstr "Importer une bibliothèque"
 
@@ -2787,15 +2788,74 @@ msgstr "Bibliothèques par défaut"
 msgid "Library name"
 msgstr "Nom de la bibliothèque"
 
-#: core/templates/library/library_list.html:58
+#: core/templates/library/library_list.html:47
+#, python-format
+msgid ""
+"\n"
+"                                                %(counter)s threat\n"
+"                                            "
+msgid_plural ""
+"\n"
+"                                                %(counter)s threats\n"
+"                                            "
+msgstr[0] ""
+"\n"
+"                        %(counter)s menace\n"
+"                    "
+msgstr[1] ""
+"\n"
+"                        %(counter)s menaces\n"
+"                    "
+
+#: core/templates/library/library_list.html:56
+#, python-format
+msgid ""
+"\n"
+"                                                %(counter)s matrix\n"
+"                                            "
+msgid_plural ""
+"\n"
+"                                                %(counter)s matrices\n"
+"                                            "
+msgstr[0] ""
+"\n"
+"                        %(counter)s matrice\n"
+"                    "
+msgstr[1] ""
+"\n"
+"                        %(counter)s matrices\n"
+"                    "
+
+#: core/templates/library/library_list.html:65
+#, python-format
+msgid ""
+"\n"
+"                                                %(counter)s security "
+"function\n"
+"                                            "
+msgid_plural ""
+"\n"
+"                                                %(counter)s security "
+"functions\n"
+"                                            "
+msgstr[0] ""
+"\n"
+"                        %(counter)s fonction de sécurité\n"
+"                    "
+msgstr[1] ""
+"\n"
+"                        %(counter)s fonctions de sécurité\n"
+"                    "
+
+#: core/templates/library/library_list.html:90
 msgid "No library found."
 msgstr "Aucune bibliothèque trouvée."
 
-#: core/templates/library/library_list.html:70
+#: core/templates/library/library_list.html:102
 msgid "Upload your own library"
 msgstr "Télécharger votre propre bibliothèque"
 
-#: core/templates/library/library_list.html:83
+#: core/templates/library/library_list.html:115
 msgid "Upload"
 msgstr "Télécharger"
 
@@ -3061,8 +3121,8 @@ msgstr "ainsi que tous les objets enfants."
 #, python-format
 msgid ""
 "\n"
-"        Are you sure you want to import the following library: <strong class="
-"\"font-semibold text-gray-700\">%(library)s</strong>?\n"
+"        Are you sure you want to import the following library: <strong "
+"class=\"font-semibold text-gray-700\">%(library)s</strong>?\n"
 "        "
 msgstr ""
 "\n"
@@ -3255,6 +3315,13 @@ msgstr ""
 #: core/views.py:1862
 msgid "User created and email send successfully."
 msgstr ""
+
+#, fuzzy, python-format
+#~| msgid "New security function"
+#~ msgid " %(counter)s security function "
+#~ msgid_plural " %(counter)s security functions "
+#~ msgstr[0] "Nouvelle fonction de sécurité"
+#~ msgstr[1] "Nouvelle fonction de sécurité"
 
 #~ msgid "Risk scenarios overview"
 #~ msgstr "Vue d'ensemble des scénarios de risque"
