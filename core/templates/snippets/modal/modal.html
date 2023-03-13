@@ -41,6 +41,8 @@ x-transition:leave-end="opacity-0"
 
             {% if modal_action == "create" %}
                 {% include 'snippets/modal/modal_create_form.html' %}
+            {% elif modal_action == "action" %}
+                {% include 'snippets/modal/modal_action_form.html' %}
             {% elif modal_action == "delete" %}
                 {% include 'snippets/modal/modal_delete_form.html' %}
             {% elif modal_action == "update" %}
