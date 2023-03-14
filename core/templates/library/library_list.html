@@ -19,6 +19,7 @@
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                         <th class="px-6 py-3">{% trans "Library name" %}</th>
                         <th class="px-6 py-3">{% trans "Description" %}</th>
+                        <th class="px-6 py-3">{% trans "Overview" %}</th>
                         <th class="px-6 py-3">{% trans "Actions" %}</th>
                     </thead>
                     <tbody>
@@ -38,6 +39,37 @@
                                     <p class="text-gray-900 whitespace-no-wrap capitalize">
                                         {{ library.description }}
                                     </p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <ul>
+                                        {% if library.threats > 0 %}
+                                        <li class="text-gray-900 whitespace-no-wrap">
+                                            {% blocktrans count counter=library.threats %}
+                                                {{ counter }} threat
+                                            {% plural %}
+                                                {{ counter }} threats
+                                            {% endblocktrans %}
+                                        </li>
+                                        {% endif %}
+                                        {% if library.matrices > 0 %}
+                                        <li class="text-gray-900 whitespace-no-wrap">
+                                            {% blocktrans count counter=library.matrices %}
+                                                {{ counter }} matrix
+                                            {% plural %}
+                                                {{ counter }} matrices
+                                            {% endblocktrans %}
+                                        </li>
+                                        {% endif %}
+                                        {% if library.security_functions > 0 %}
+                                        <li class="text-gray-900 whitespace-no-wrap">
+                                            {% blocktrans count counter=library.security_functions %}
+                                                {{ counter }} security function
+                                            {% plural %}
+                                                {{ counter }} security functions
+                                            {% endblocktrans %}
+                                        </li>
+                                        {% endif %}
+                                    </ul>
                                 </td>
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <div class="w-full flex flex-row">

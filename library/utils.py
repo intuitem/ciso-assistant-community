@@ -69,6 +69,23 @@ def get_library(name):
             return l
     return None
 
+def get_library_items(library, type):
+    '''
+    Returns a list of items of a given type from a library
+    
+    Args:
+        library: library to return items from
+        type: type of items to return
+        
+    Returns:
+        items: list of items of the given type from the library
+    '''
+    items = []
+    for item in library['items']:
+        if item['type'] == type:
+            items.append(item)
+    return items
+
 def import_matrix(fields):
     '''
     Imports a matrix from a library

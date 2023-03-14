@@ -19,6 +19,11 @@ class LibraryListView(FormView):
 
     def get_queryset(self):
         qs = get_available_libraries()
+        for lib in qs:
+            lib['threats'] = len([x for x in lib['objects'] if x['type'] == 'threat'])
+            lib['matrices'] = len([x for x in lib['objects'] if x['type'] == 'matrix'])
+            lib['security_functions'] = len([x for x in lib['objects'] if x['type'] == 'security_function'])
+            lib['objects'].clear()
         return qs
 
     def get_context_data(self, **kwargs):
