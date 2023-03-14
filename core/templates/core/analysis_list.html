@@ -134,7 +134,7 @@
     </div>
 
     <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg mt-2">
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="w-full text-sm text-left">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "ID" %}</th>
                 <th class="px-6 py-3">{% trans "Auditor" %}</th>
@@ -145,24 +145,23 @@
             </thead>
             <tbody>
                 {% for analysis in page_obj %}
-                    <tr class=" odd:bg-white even:bg-gray-50 ">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'RA' analysis.id %}?next={{ request.path|urlencode }}'">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if analysis.is_draft %}
-                                <span class="bg-blue-200 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
+                                <span class="bg-blue-200 p-1 rounded-lg text-xs text-gray-900">{% trans "draft" %}</span>
                                 {% else %}
-                                <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
+                                <span class="bg-green-200 p-1 rounded-lg text-xs text-gray-900">{% trans "ready" %}</span>
                                 {% endif %}
                                 <div class="ml-3">
-                                    <a id="analysis{{ analysis.id }}" href="{% url 'RA' analysis.id %}?next={{ request.path|urlencode }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    <p id="analysis{{ analysis.id }}" class="text-md font-semibold whitespace-no-wrap">
                                         {{ analysis }}
-                                    </a>
+                                    </p>
                                 </div>
                             </div>
                         </th>
                         <td class="px-3 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {% if analysis.auditor %}
                                     {% if analysis.auditor.get_full_name %}
                                         {{ analysis.auditor.get_full_name }}
@@ -173,17 +172,17 @@
                             </p>
                         </td>
                         <td class="px-3 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize text-center">
+                            <p class="whitespace-no-wrap capitalize text-center">
                                 {{ analysis.get_scenario_count }}
                             </p>
                         </td>
                         <td class="px-3 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize text-center">
+                            <p class="whitespace-no-wrap capitalize text-center">
                                 {{ analysis.rating_matrix }}
                             </p>
                         </td>
                         <td class="px-3 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap">
+                            <p class="whitespace-no-wrap">
                                 {{ analysis.updated_at|date }}
                             </p>
                         </td>
@@ -199,17 +198,7 @@
                                 </span>
                                 {% endif %}
                                 {% if analysis.id in object_ids_delete %}
-                                <span x-data="{ open: false }">
-                                    <a @click="open = !open,
-modalOpen = !modalOpen" type="button"
-                                    class="cursor-pointer table-action">
-                                        <i class="fas fa-trash"></i>
-                                        
-                                    </a>
-                                          
-                                    {% include 'snippets/modal/modal.html' with modal_action="delete" header=_("Delete risk analysis?") object=analysis %}
-                                
-                                </span>
+                                {% include 'snippets/delete_button_modal.html' with object=analysis header=_("Delete risk analysis?") %}
                                 {% endif %}
                             </div>
                         </td>

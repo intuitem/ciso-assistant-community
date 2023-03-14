@@ -18,70 +18,43 @@
         <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Last Update" %}
         </th>
-        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Actions" %}
-        </th>
     </thead>
     <tbody>
         {% for analysis in analyses %}
-            <tr>
+            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'analysis-update' analysis.id %}?next={{ request.path|urlencode }}'">
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
                         {% if analysis.is_draft %}
-                        <span class="bg-blue-200 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
+                        <span class="bg-blue-200 p-1 rounded-lg text-xs text-gray-900">{% trans "draft" %}</span>
                         {% else %}
-                        <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
+                        <span class="bg-green-200 p-1 rounded-lg text-xs text-gray-900">{% trans "ready" %}</span>
                         {% endif %}
                         <div class="ml-3">
-                            <a id="analysis{{ analysis.id }}" href="{% url 'analysis-update' analysis.id %}?next={{ request.path|urlencode }}"
-                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                            <a id="analysis{{ analysis.id }}" class="text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ analysis }}
                             </a>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {{ analysis.get_scenario_count }}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {{ analysis.rating_matrix|capfirst }}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {{ analysis.updated_at|date }}
                     </p>
-                </td>
-                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm overflow-visible whitespace-nowrap">
-                    <div class="w-full">
-                        <span><a href="{% url 'RA' analysis.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
-                        <span>
-                            <a href="{% url 'analysis-update' analysis.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        </span>
-
-                        <span x-data="{ open: false }">
-                            <a @click="open = !open,
-modalOpen = !modalOpen" type="button"
-                            class="cursor-pointer table-action">
-                                <i class="fas fa-trash"></i>
-                                
-                            </a>
-                                  
-                            {% include 'snippets/modal/modal.html' with modal_action="delete" model="analysis" header=_("Delete risk analysis?") object=analysis %}
-                        
-                        </span>
-
-                    </div>
                 </td>
             </tr>
         {% empty %}

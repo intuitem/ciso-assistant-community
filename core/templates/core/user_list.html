@@ -111,7 +111,7 @@
         </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="w-full text-sm text-left">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Email Address" %}</th>
                 <th class="px-6 py-3">{% trans "User Groups" %}</th>
@@ -121,25 +121,24 @@
             </thead>
             <tbody>
                 {% for user in users %}
-                    <tr class="odd:bg-white even:bg-gray-50">
-                        <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'user-detail' user.id %}?next={{ request.path|urlencode }}'">
+                        <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if not user.is_active %}
-                                <span class="bg-orange-300 p-1 rounded-lg text-xs mr-2">{% trans "inactive" %}</span>
+                                <span class="bg-orange-300 p-1 rounded-lg text-xs mr-2 text-gray-900">{% trans "inactive" %}</span>
                                 {% endif %}
                                 {% if user.is_superuser %}
-                                <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "superuser" %}</span>
+                                <span class="bg-red-300 p-1 rounded-lg text-xs mr-2 text-gray-900">{% trans "superuser" %}</span>
                                 {% endif %}
                                 <div class="">
-                                    <a id="users" href="{% url 'user-detail' user.id %}?next={{ request.path|urlencode }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    <p id="users" class="text-md font-semibold whitespace-no-wrap">
                                         {{ user.email }}
-                                    </a>
+                                    </p>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <ul class="text-gray-900 whitespace-no-wrap capitalize">
+                            <ul class="whitespace-no-wrap capitalize">
                                 {% for group in user.user_groups.all %}
                                 <li class="list-none">
                                     {{ group }}
@@ -148,12 +147,12 @@
                             </ul>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {{ user.get_full_name }}
                             </p>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap">
+                            <p class="whitespace-no-wrap">
                                 {{ user.date_joined|date }}
                             </p>
                         </td>

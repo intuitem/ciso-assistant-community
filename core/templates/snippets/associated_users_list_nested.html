@@ -15,30 +15,29 @@
     </thead>
     <tbody>
         {% for user in associated_users|dictsort:"last_name" %}
-            <tr>
+            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'user-update' user.id %}?next={{ request.path|urlencode }}'">
                 <td scope="row" class="px-5 py-5 border-b text-sm text-gray-900 whitespace-nowrap">
                     <div class="flex items-center">
                         {% if not user.is_active %}
-                        <span class="bg-orange-300 p-1 rounded-lg text-xs mr-2">{% trans "inactive" %}</span>
+                        <span class="bg-orange-300 p-1 rounded-lg text-xs mr-2 text-gray-900">{% trans "inactive" %}</span>
                         {% endif %}
                         {% if user.is_superuser %}
-                        <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "superuser" %}</span>
+                        <span class="bg-red-300 p-1 rounded-lg text-xs mr-2 text-gray-900">{% trans "superuser" %}</span>
                         {% endif %}
                         <div class="">
-                            <a id="user{{ user.id }}" href="{% url 'user-update' user.id %}?next={{ request.path|urlencode }}"
-                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                            <p id="user{{ user.id }}" class="text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ user.get_username }}
-                            </a>
+                            </p>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                    <p class="whitespace-no-wrap capitalize">
                         {{ user.get_full_name}}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {{ user.email }}
                     </p>
                 </td>

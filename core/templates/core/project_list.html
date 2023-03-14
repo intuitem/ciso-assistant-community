@@ -117,7 +117,7 @@
     {% endif %}
 </div>
 <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
-    <table class="w-full text-sm text-left text-gray-500">
+    <table class="w-full text-sm text-left">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Project Name" %}</th>
             <th class="px-6 py-3">{% trans "Domain" %}</th>
@@ -127,8 +127,8 @@
         </thead>
         <tbody>
             {% for project in projects %}
-                <tr class="odd:bg-white even:bg-gray-50">
-                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'project-detail' project.id %}?next={{ request.path|urlencode }}'">
+                    <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                         <div class="flex items-center">
                             <span class=" p-1 rounded-lg text-xs
                                 {% if project.lc_status == 'in_design' %}
@@ -142,23 +142,22 @@
                                 {% elif project.lc_status == 'dropped' %}
                                 bg-gray-200 
                                 {% else %}
-                                {% endif %}">{{ project.get_lc_status_display|lower}}
+                                {% endif %} text-gray-900">{{ project.get_lc_status_display|lower}}
                                 </span>
                             <div class="ml-3">
-                                <a id="project{{ project.id }}" href="{% url 'project-detail' project.id %}?next={{ request.path|urlencode }}"
-                                class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                <p id="project{{ project.id }}" class="text-md font-semibold whitespace-no-wrap">
                                 {{ project.name|capfirst }}
-                                </a>
+                                </p>
                             </div>
                         </div>
                     </th>
                     <td class="px-6 py-4">
-                        <p class="text-gray-900 whitespace-no-wrap capitalize">
+                        <p class="whitespace-no-wrap capitalize">
                             {{ project.folder }}
                         </p>
                     </td>
                     <td class="px-6 py-4">
-                        <p class="text-gray-900 whitespace-no-wrap">
+                        <p class="whitespace-no-wrap">
                         {{ project.description|capfirst }}
                         </p>
                     </td>
