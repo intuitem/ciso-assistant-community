@@ -1918,7 +1918,7 @@ class UserGroupListView(UserPassesTestMixin, ListView):
     template_name = 'core/group_list.html'
     context_object_name = 'user_groups'
 
-    ordering = 'name'
+    ordering = 'folder'
     paginate_by = 10
     model = UserGroup
 

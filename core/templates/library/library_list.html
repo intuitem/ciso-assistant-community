@@ -15,7 +15,7 @@
         <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-4">
             <h1 class="text-xl font-semibold">{% trans "Default libraries" %}</h1>
             <div class="rounded shadow-md">
-                <table class="w-full text-sm text-left text-gray-500">
+                <table class="w-full text-sm text-left">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                         <th class="px-6 py-3">{% trans "Library name" %}</th>
                         <th class="px-6 py-3">{% trans "Description" %}</th>
@@ -24,26 +24,25 @@
                     </thead>
                     <tbody>
                         {% for library in libraries %}
-                            <tr class=" odd:bg-white even:bg-gray-50 ">
-                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'library-detail' library.name %}?next={{ request.path|urlencode }}'">
+                                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="ml-3">
-                                            <a id="library{{ library.name }}" href="{% url 'library-detail' library.name %}?next={{ request.path|urlencode }}"
-                                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                            <p id="library{{ library.name }}" class="text-md font-semibold whitespace-no-wrap">
                                                 {{ library.name }}
-                                            </a>
+                                            </p>
                                         </div>
                                     </div>
                                 </th>
                                 <td class="px-6 py-4">
-                                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                    <p class="whitespace-no-wrap capitalize">
                                         {{ library.description }}
                                     </p>
                                 </td>
                                 <td class="px-6 py-4">
                                     <ul>
                                         {% if library.threats > 0 %}
-                                        <li class="text-gray-900 whitespace-no-wrap">
+                                        <li class="whitespace-no-wrap">
                                             {% blocktrans count counter=library.threats %}
                                                 {{ counter }} threat
                                             {% plural %}
@@ -52,7 +51,7 @@
                                         </li>
                                         {% endif %}
                                         {% if library.matrices > 0 %}
-                                        <li class="text-gray-900 whitespace-no-wrap">
+                                        <li class="whitespace-no-wrap">
                                             {% blocktrans count counter=library.matrices %}
                                                 {{ counter }} matrix
                                             {% plural %}
@@ -61,7 +60,7 @@
                                         </li>
                                         {% endif %}
                                         {% if library.security_functions > 0 %}
-                                        <li class="text-gray-900 whitespace-no-wrap">
+                                        <li class="whitespace-no-wrap">
                                             {% blocktrans count counter=library.security_functions %}
                                                 {{ counter }} security function
                                             {% plural %}
@@ -76,7 +75,7 @@
                                         <span>
                                             <a title="detailed view" href="{% url 'library-detail' library.name %}" class="table-action cursor-pointer"><i class="far fa-eye"></i></a>
                                         </span>
-                                        <span x-data="{ open: false }">
+                                        <span x-data="{ open: false }" onclick="event.stopPropagation();">
                                             <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
                                             {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
                                         </span>

@@ -1,6 +1,6 @@
 {% load i18n static %}
 <div class="space-y-4">
-    <p class="relative whitespace-normal">{% trans "This action cannot be undone. This will permanently delete the following object: " %}<strong>{{ object }}</strong> 
+    <p class="relative whitespace-normal text-gray-700">{% trans "This action cannot be undone. This will permanently delete the following object: " %}<strong>{{ object }}</strong> 
     {% trans "as well as any child object." %}</p>
     {% comment %} {% for item in object.item_set.all %}
         {{ item }}

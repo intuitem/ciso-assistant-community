@@ -15,25 +15,24 @@
     </thead>
     <tbody>
         {% for project in projects %}{% if project.folder == domain %}
-            <tr>
+            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'project-update' project.id %}?next={{ request.path|urlencode }}'">
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <div class="flex items-center">
 
                         <div>
-                            <a id="project{{ project.id }}" href="{% url 'project-update' project.id %}?next={{ request.path|urlencode }}"
-                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                            <a id="project{{ project.id }}" class="text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ project.name }}
                             </a>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                    <p class="whitespace-no-wrap capitalize">
                         {% if project.description %}{{ project.description }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {{ project.get_lc_status_display }}
                     </p>
                 </td>

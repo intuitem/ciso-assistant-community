@@ -18,9 +18,9 @@
     </thead>
     <tbody>
         {% for security_measure in security_measures %}
-            <tr>
+            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'securitymeasure-update' security_measure.id %}?next={{ request.path|urlencode }}'">
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                    <p class="whitespace-no-wrap capitalize">
                         {{ security_measure.mid }}
                     </p>
                 </td>
@@ -28,20 +28,19 @@
                     <div class="flex items-center">
 
                         <div class="">
-                            <a id="security_measure{{ security_measure.id }}" href="{% url 'securitymeasure-update' security_measure.id %}?next={{ request.path|urlencode }}"
-                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                            <p id="security_measure{{ security_measure.id }}" class="text-md font-semibold whitespace-no-wrap hover:text-blue-500">
                                 {{ security_measure.name }}
-                            </a>
+                            </p>
                         </div>
                     </div>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap capitalize">
+                    <p class="whitespace-no-wrap capitalize">
                         {% if security_measure.security_function %}{{ security_measure.security_function }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                    <p class="text-gray-900 whitespace-no-wrap">
+                    <p class="whitespace-no-wrap">
                         {{ security_measure.get_status_display }}
                     </p>
                 </td>

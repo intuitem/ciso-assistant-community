@@ -36,7 +36,7 @@
             <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "User groups" %}</div>
         </div>
         <div class="relative overflow-x-auto rounded-b-lg">
-            <table x-show="openTab === 1" class="w-full text-sm text-left text-gray-500 border-t">
+            <table x-show="openTab === 1" class="w-full text-sm text-left border-t">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <th class="px-6 py-3">{% trans "User" %}</th>
                     <th class="px-6 py-3">{% trans "Email address" %}</th>
@@ -48,43 +48,43 @@
                     {% for assignment in assignments %}
                     {% if assignment.user %}
                         <tr class="odd:bg-white even:bg-gray-50">
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
                                         <a id="assignment{{ assignment.id }}" href="#"
-                                        class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        class="text-md font-semibold whitespace-no-wrap">
                                             {{ assignment.user.get_full_name|capfirst }}
                                         </a>
                                     </div>
                                 </div>
                             </td>
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
                                         <p id="assignment{{ assignment.id }}" href="#"
-                                        class="text-gray-500 whitespace-no-wrap">
+                                        class="whitespace-no-wrap">
                                             {{ assignment.user.email }}
                                         </p>
                                     </div>
                                 </div>
                             </td>
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
                                         <a id="assignment{{ assignment.id }}" href="#"
-                                        class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        class="text-md font-semibold whitespace-no-wrap">
                                             {{ assignment.role|capfirst }}
                                         </a>
                                     </div>
                                 </div>
                             </td>
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
                                         {% for domain in assignment.domains.all %}
                                         <li>
                                             <a id="assignment{{ assignment.id }}" href="#"
-                                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                            class="text-md font-semibold whitespace-no-wrap">
                                                     {{ domain.name }}
                                             </a>
                                         </li>
@@ -117,7 +117,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <table x-show="openTab === 2" class="w-full text-sm text-left text-gray-500 border-t">
+            <table x-show="openTab === 2" class="w-full text-sm text-left border-t">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <th class="px-6 py-3">{% trans "User group" %}</th>
                     <th class="px-6 py-3">{% trans "Role" %}</th>
@@ -128,33 +128,30 @@
                     {% for assignment in assignments %}
                         {% if assignment.user_group %}
                         <tr class="odd:bg-white even:bg-gray-50">
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
-                                        <a id="assignment{{ assignment.id }}" href="#"
-                                        class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        <a id="assignment{{ assignment.id }}" class="text-md font-semibold whitespace-no-wrap">
                                             {{ assignment.user_group|capfirst }}
                                         </a>
                                     </div>
                                 </div>
                             </td>
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
-                                        <a id="assignment{{ assignment.id }}" href="#"
-                                        class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        <a id="assignment{{ assignment.id }}" class="text-md font-semibold whitespace-no-wrap">
                                             {{ assignment.role|capfirst }}
                                         </a>
                                     </div>
                                 </div>
                             </td>
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                            <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer">
                                 <div class="flex items-center">
                                     <div class="ml-0">
                                         {% for domain in assignment.perimeter_folders.all %}
                                         <li>
-                                            <a id="assignment{{ assignment.id }}" href="#"
-                                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                            <a id="assignment{{ assignment.id }}" class="text-md font-semibold whitespace-no-wrap">
                                                 {{ domain.name }}
                                             </a>
                                         </li>

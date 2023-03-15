@@ -1,4 +1,4 @@
-<span x-data="{ open: false }">
+<span x-data="{ open: false }" onclick="event.stopPropagation();">
     <a @click="open = !open,
 modalOpen = !modalOpen" type="button"
     class="cursor-pointer table-action">

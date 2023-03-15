@@ -39,7 +39,7 @@
     </div>
 
     <div class="mt-4 relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="w-full text-sm text-left">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Name" %}</th>
                 <th class="px-6 py-3">{% trans "Description" %}</th>
@@ -49,29 +49,27 @@
             </thead>
             <tbody>
                 {% for matrix in matrices %}
-                    <tr class=" odd:bg-white even:bg-gray-50 ">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'riskmatrix-detail' matrix.id %}?next={{ request.path|urlencode }}'">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center">
                                 <div>
                                     {% if not matrix.is_enabled %}<span class="bg-gray-200 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{% trans "disabled" %}</span>{% endif %}
-                                    <a id="matrix{{ matrix.id }}" href="{% url 'riskmatrix-detail' matrix.id %}?next={{ request.path|urlencode }}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    <p id="matrix{{ matrix.id }}" class="text-md font-semibold whitespace-no-wrap">
                                         {{ matrix.name|capfirst }}
-                                    </a>
+                                    </p>
                                 </div>
                             </div>
                         </th>
                         <td class="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {{ matrix.description|capfirst }}
                             </p>
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {{ matrix.projects|length }}
                             </p>
                         </td>
-                    
                         <td class="px-6 py-4">
                             <div class="flex flex-row">
                                 {% for row in matrix.render_grid_as_colors %}
@@ -98,13 +96,7 @@
                                 {% endif %}
                                 
                                 {% if matrix.id in object_ids_delete and not matrix.is_used %}
-                                <span x-data="{ open: false }">
-                                    <a @click="open = !open, modalOpen = !modalOpen" type="button"
-                                    class="cursor-pointer table-action">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                    {% include 'snippets/modal/modal.html' with modal_action="delete" header=_("Delete matrix?") object=matrix model='riskmatrix' %}
-                                </span>
+                                {% include 'snippets/delete_button_modal.html' with object=matrix header=_("Delete matrix?") %}
                                 {% endif %}
 
                             </div>
