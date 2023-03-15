@@ -9,10 +9,13 @@
     <form method="post" id="acceptance_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
         <div class="bg-white rounded-lg shadow px-8 py-6">
             <section class="flex flex-col space-y-4 mb-2">
+                <div class="text-red-500 text-sm">{{ form.non_field_errors }}</div>
                 {% for field in form %}
                     <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{{ field.label|striptags }}</p>
-                        {{ field.errors }}
+                        <label class="text-sm font-semibold">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
+                        {% for error in field.errors %}
+                            <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                        {% endfor %}
                         {{ field }}
                         {{ field.helptext }}
                     </div>
