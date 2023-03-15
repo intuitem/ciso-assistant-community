@@ -31,6 +31,9 @@
                                     <div>
                                     {{ field.errors }}
                                     {{ field }}
+                                    {% if field.field.widget.attrs.disabled %}
+                                        <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+                                    {% endif %}
                                     <p class="help_text">{{ field.help_text }}</p>
                                     </div>
                                 </div>
