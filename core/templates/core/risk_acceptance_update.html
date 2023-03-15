@@ -19,7 +19,7 @@
                 {% endfor %}
             </section>
             <div class="flex justify-end space-x-2 mt-4">
-                <button onclick="window.history.back()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
+                <button onclick="window.history.back(); return false;" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
                 <input type="hidden" name="next" value={{ request.GET.next }}>
                 <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
                 :disabled="submitDisabled">{% trans "Save" %}</button>

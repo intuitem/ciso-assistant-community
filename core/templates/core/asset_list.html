@@ -43,7 +43,7 @@
     </div>
 
     <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg mt-2">
-        <table class="w-full text-sm text-left text-gray-500">
+        <table class="w-full text-sm text-left">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                 <th class="px-6 py-3">{% trans "Name" %}</th>
                 <th class="px-6 py-3">{% trans "Description" %}</th>
@@ -53,29 +53,29 @@
             </thead>
             <tbody>
                 {% for asset in page_obj %}
-                    <tr class=" odd:bg-white even:bg-gray-50 ">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'asset-detail' asset.id %}?next={{ request.path|urlencode }}'">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="ml-3">
-                                    <a id="asset{{ asset.id }}" href="{% url 'asset-detail' asset.id %}"
-                                    class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                    <p id="asset{{ asset.id }}" href=""
+                                    class="text-md font-semibold whitespace-no-wrap">
                                         {{ asset }}
-                                    </a>
+                                    </p>
                                 </div>
                             </div>
                         </th>
                         <td class="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {{ asset.description }}
                             </p>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {{ asset.business_value }}
                             </p>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="text-gray-900 whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap capitalize">
                                 {{ asset.get_type_display }}
                             </p>
                         </td>

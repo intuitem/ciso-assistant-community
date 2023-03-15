@@ -38,21 +38,20 @@
     {% endif %}
 </div>
         <div class="relative overflow-x-auto shadow-md rounded-l-lg rounded-r-lg border-none focus:ring-0 mt-2">
-    <table class="w-full text-sm text-left text-gray-500">
+    <table class="w-full text-sm text-left">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Threat" %}</th>
             <th class="px-6 py-3">{% trans "Actions" %}</th>
         </thead>
         <tbody>
             {% for threat in threats %}
-                <tr class="odd:bg-white even:bg-gray-50">
-                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'threat-detail' threat.id %}?next={{ request.path|urlencode }}'">
+                    <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="">
-                                <a id="scenario{{ threat.id }}" href="{% url 'threat-detail' threat.id %}?next={{ request.path|urlencode }}"
-                                class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                <p id="scenario{{ threat.id }}" class="text-md font-semibold whitespace-no-wrap">
                                     {{ threat.name|capfirst }}
-                                </a>
+                                </p>
                             </div>
                         </div>
                     </th>
