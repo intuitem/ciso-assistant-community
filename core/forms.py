@@ -268,6 +268,17 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         }
         labels = {'risk_scenario': _('Risk scenario')}
         exclude = ['state', 'accepted_date', 'rejected_date', 'revoked_date']
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        risk_scenarios = cleaned_data.get('risk_scenarios')
+        folder = cleaned_data.get('folder')
+
+        folders = folder.sub_folders()
+        folders.append(folder)
+        for obj in risk_scenarios:
+            if obj.analysis.project.folder not in folders:
+                raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
 
 
 class ProjectForm(StyledModelForm):
