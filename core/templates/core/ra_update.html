@@ -30,13 +30,9 @@
                                     <label class="form-label">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
                                     <div>
                                     {{ field.errors }}
-                                    {% if field.field.widget.attrs.select_disabled %}
-                                        <select disabled class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50">
-                                        <option value={{ field.value }}>{{ field.initial }}</option>
-                                        </select>
+                                    {{ field }}
+                                    {% if field.field.widget.attrs.disabled %}
                                         <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
-                                    {% else %}
-                                        {{ field }}
                                     {% endif %}
                                     <p class="help_text">{{ field.help_text }}</p>
                                     </div>

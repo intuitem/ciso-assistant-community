@@ -32,7 +32,7 @@ class StyledModelForm(ModelForm):
         if not hasattr(field, '_queryset'):
             return
         if field._queryset and len(field._queryset) == 1:
-            field.widget.attrs['select_disabled'] = True
+            field.widget.attrs['disabled'] = True
             field.widget.attrs['class'] += ' disabled:opacity-50'
             field.initial = field.queryset[0]
 
@@ -136,12 +136,17 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
 
 
 class RiskMatrixUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.default_if_one_all()
+
     class Meta:
         model = RiskMatrix
         fields = ['is_enabled']
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
+
     class Meta:
         model = Analysis
         fields = ['project', 'auditor', 'name', 'description', 'version', 'is_draft']
