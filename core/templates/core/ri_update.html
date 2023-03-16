@@ -10,7 +10,7 @@
 
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
     <form method="POST" id="scenario_update_form", action="">{% csrf_token %}
-    {{ form.non_field_errors }}
+    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
     {{ form.errors }}
     <div class="flex flex-col space-y-8">
         <section class="flex flex-row space-x-4 w-full">

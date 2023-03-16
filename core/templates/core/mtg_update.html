@@ -10,7 +10,7 @@
     <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
         <h2 class="text-lg font-semibold mb-4">{% trans "Measure summary" %}</h2>
         <div>
-            <div class="text-red-500 text-sm">{{ form.non_field_errors }}</div>
+            <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
             {% for field in form %}
             <div>
                 <label class="text-sm font-semibold">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>

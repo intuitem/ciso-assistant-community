@@ -23,7 +23,21 @@
                 <div id="login-div" class="flex flex-col">
                 <form id="login-form" method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    <p class="text-red-500 text-sm font-semibold">{{ form.non_field_errors|striptags }}</p>
+                    {% for field in form %}
+                    <div class="">
+                        <label class="">{{ field.label|striptags }}:</label>
+                        <div class="w-auto">
+                            {% for error in field.errors %}
+                                <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                            {% endfor %}
+                            {{ field }}
+                            <div class="mt-1 text-xs text-gray-400">
+                                {{ field.help_text|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                     <input type="hidden" name="passkeys" id="passkeys"/>
                     <button id="login" type="submit"
                             class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2">

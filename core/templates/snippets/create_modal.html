@@ -45,7 +45,9 @@ modalOpen = !modalOpen">
                 <div class="mb-6">
                   <label class="form-label">{{ field.label|striptags }}</label>
                   <div class="">
-                    {{ field.errors }}
+                    {% for error in field.errors %}
+                      <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                    {% endfor %}
                     {{ field }}
                     {{ field.help_text }}
                   </div>

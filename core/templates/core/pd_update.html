@@ -9,7 +9,7 @@
     <form method="post" id="pd_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
     <div class="bg-white rounded-lg shadow px-4 py-6 w-full mb-4">
         <div class="flex flex-col space-y-4">
-            {{ form.non_field_errors }}
+            <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
             {% for field in form %}
             <div class="">
                 <label class="text-sm font-semibold">{{ field.label|striptags }}</label>

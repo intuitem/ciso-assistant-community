@@ -10,7 +10,7 @@
         <div class="bg-white rounded-lg shadow">
             <div class="flex flex-row space-x-4 mb-4 divide-x">
                 <div class="px-4 py-6">
-                    <div class="text-red-500 text-sm">{{ form.non_field_errors }}</div>
+                    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
                     {% for field in form %}
                     <div>
                         <label class="text-sm font-semibold">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>

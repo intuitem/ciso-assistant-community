@@ -15,7 +15,7 @@
             </div>
             <div class="flex flex-col space-y-4">
                 {% include 'snippets/risk_matrix.html' %}
-                {{ form.non_field_errors }}
+                <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
                 {% for field in form %}
                     {% if field.field.widget|class == "CheckboxInput" %}
                         {% include 'snippets/form_field_row.html' %}
