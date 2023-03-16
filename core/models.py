@@ -458,7 +458,7 @@ class RiskScenario(AbstractBaseModel):
         return matrix['probability'][self.residual_proba]
 
     def __str__(self):
-        return str(self.parent_project()) + _(': ') + str(self.name)
+        return str(self.parent_project().folder) + _('/') + str(self.parent_project()) + _(': ') + str(self.name)
 
     @property
     def rid(self):
