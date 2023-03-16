@@ -458,7 +458,7 @@ class RiskScenario(AbstractBaseModel):
         return matrix['probability'][self.residual_proba]
 
     def __str__(self):
-        return str(self.parent_project()) + _(': ') + str(self.name)
+        return str(self.parent_project().folder) + _('/') + str(self.parent_project()) + _(': ') + str(self.name)
 
     @property
     def rid(self):
@@ -489,7 +489,7 @@ class RiskAcceptance(AbstractBaseModel):
     ]
     
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
-    risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted"))
+    risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted, attention they must be part of the chosen domain"))
     validator = models.ForeignKey(User, max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"), on_delete=models.SET_NULL, null=True, blank=True)
     state = models.CharField(max_length=20, choices=ACCEPTANCE_STATE, default='created', verbose_name=_("State"))
     expiry_date = models.DateField(help_text=_("Specify when the risk acceptance will no longer apply"),

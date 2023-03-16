@@ -813,8 +813,8 @@ msgid "Revoked"
 msgstr ""
 
 #: core/models.py:492
-msgid "Select the risk scenarios to be accepted"
-msgstr "Sélectionner les scénarios de risque à accepter"
+msgid "Select the risk scenarios to be accepted, attention they must be part of the chosen domain"
+msgstr "Sélectionner les scénarios de risque à accepter, attention ils doivent faire partis du domaine choisi"
 
 #: core/models.py:493
 msgid "Risk owner and validator identity"
