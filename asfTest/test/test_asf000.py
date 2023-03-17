@@ -29,7 +29,7 @@ def test_asf001(page):
 	page.fill("id=id_password", "pass")
 	page.click("id=login")
 	assert page.url == urlpatterns.LOGINFIRST, "Test "+str(test)+" Step "+str(step)+": not Ok"
-	message = page.locator("ul.errorlist.nonfield")
+	message = page.locator("id=login-error")
 	assert message.is_visible() is True, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 3 | Enter admin username and password of a basic account and click on “Log in” | Error message: “Please enter the correct username and password”
 	step += 1
