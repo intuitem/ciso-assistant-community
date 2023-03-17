@@ -102,7 +102,7 @@
             <div class="relative overflow-x-auto overflow-y-auto">
                 <form enctype="multipart/form-data" method="post">
                     {% csrf_token %}
-                    {{ form.non_field_errors }}
+                    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
                     <label class="block mb-2 text-sm font-medium text-gray-900" for="multiple_files">{{ form.file.label }}</label>
                     <div class="flex flex-row">
                         <input class="block w-full text-sm text-gray-900 bg-gray-50 

@@ -9,12 +9,12 @@
     <div class="flex flex-col lg:flex-row lg:space-x-4 w-full">
         <div>
             <form method="post" id="analysis_update_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
-            {{ form.non_field_errors }}
+                <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
             <div class="bg-white rounded-lg shadow mb-4 px-4">
                 <div class="flex flex-col mb-4">
                     <div class="py-6">
                         <h2 class="text-xl font-semibold mb-4 whitespace-nowrap">{% trans "Risk analysis" %}</h2>
-                        {{ form.non_field_errors }}
+                        <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
                         {{ form.errors }}
                         <div id="update_analysis-form">
                             <label class="form-label">{% trans "Rating matrix" %}</label>
@@ -29,7 +29,9 @@
                                 <div>
                                     <label class="form-label">{{ field.label|striptags }} {% if field.field.required %}<span class="text-red-500">*</span>{% endif %}</label>
                                     <div>
-                                    {{ field.errors }}
+                                    {% for error in field.errors %}
+                                        <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                                    {% endfor %}
                                     {{ field }}
                                     {% if field.field.widget.attrs.disabled %}
                                         <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
