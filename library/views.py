@@ -12,7 +12,9 @@ from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
-class LibraryListView(FormView):
+from core.views import BaseContextMixin
+
+class LibraryListView(BaseContextMixin, FormView):
     template_name = 'library/library_list.html'
     form_class = UploadFileForm
     success_url = reverse_lazy('library-list')
@@ -29,8 +31,6 @@ class LibraryListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['libraries'] = self.get_queryset()
-        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['form'] = UploadFileForm()
         return context
 
@@ -49,14 +49,12 @@ class LibraryListView(FormView):
                 return self.form_invalid(form)
 
 
-class LibraryDetailView(TemplateView):
+class LibraryDetailView(BaseContextMixin, TemplateView):
     template_name = 'library/library_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         library = get_library(kwargs['library'])
-        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         context['library'] = library
         context['types'] = self.get_object_types(library)
         context['matrices'] = self.get_matrices(library)

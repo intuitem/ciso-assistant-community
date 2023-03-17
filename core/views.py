@@ -70,7 +70,18 @@ import json
 User = get_user_model()
 
 
-class GenericDetailView(DetailView):
+class BaseContextMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
+
+
+class GenericDetailView(BaseContextMixin, DetailView):
     template_name = 'generic/detail.html'
     context_object_name = 'object'
 
@@ -116,10 +127,6 @@ class GenericDetailView(DetailView):
         context['data'] = self.get_object_data()
         context['crumbs'] = {self.model.__name__.lower(
         ) + "-list": self.model._meta.verbose_name_plural}
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
 
         return context
 
@@ -255,7 +262,7 @@ class UserDetailView(GenericDetailView):
     exclude = ['id', 'password', 'first_login']
 
 
-class AnalysisListView(ListView):
+class AnalysisListView(BaseContextMixin, ListView):
     template_name = 'core/index.html'
     context_object_name = 'context'
 
@@ -273,10 +280,6 @@ class AnalysisListView(ListView):
         if not UserGroup.get_user_groups(self.request.user):
             messages.warning(self.request, _(
                 "Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact your administrator."))
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         return context
 
     def get_queryset(self):
@@ -388,7 +391,7 @@ def build_ri_clusters(analysis: Analysis):
 
 
 @method_decorator(login_required, name='dispatch')
-class RiskAnalysisView(UserPassesTestMixin, ListView):
+class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/ra.html'
     context_object_name = 'context'
 
@@ -412,10 +415,6 @@ class RiskAnalysisView(UserPassesTestMixin, ListView):
         context['matrix'] = self.analysis.rating_matrix
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         return context
 
     def test_func(self):
@@ -702,7 +701,7 @@ def show_risk_matrix(request):
     return render(request, template, context)
 
 
-class ReviewView(ListView):
+class ReviewView(BaseContextMixin, ListView):
     template_name = 'core/review.html'
     context_object_name = 'context'
     model = Analysis
@@ -710,10 +709,6 @@ class ReviewView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         return context
 
     def get_queryset(self):
@@ -732,7 +727,7 @@ class CreateViewModal(CreateView):
         return self.request.POST.get('next', reverse_lazy(f'{self.context_object_name}-list'))
 
 
-class QuickStartView(UserPassesTestMixin, ListView):
+class QuickStartView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/quick_start.html'
     context_object_name = 'quick-start'
 
@@ -744,10 +739,6 @@ class QuickStartView(UserPassesTestMixin, ListView):
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
         context['asset_create_form'] = AssetForm
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         return context
 
     def get_queryset(self):
@@ -760,7 +751,7 @@ class QuickStartView(UserPassesTestMixin, ListView):
         return True
 
 
-class ProjectListView(UserPassesTestMixin, ListView):
+class ProjectListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/project_list.html'
     context_object_name = 'projects'
 
@@ -779,10 +770,6 @@ class ProjectListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = ProjectFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -822,7 +809,7 @@ class ProjectCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='add_project'), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
-class ProjectUpdateView(UserPassesTestMixin, UpdateView):
+class ProjectUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = Project
     template_name = 'core/project_update.html'
     context_object_name = 'project'
@@ -830,10 +817,6 @@ class ProjectUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['analyses'] = Analysis.objects.filter(
             project=self.get_object()).order_by('is_draft', 'id')
         context['analysis_create_form'] = RiskAnalysisCreateFormInherited(
@@ -863,7 +846,7 @@ class ProjectDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_project"))
 
 
-class AssetListView(UserPassesTestMixin, ListView):
+class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/asset_list.html'
     context_object_name = 'assets'
 
@@ -882,10 +865,6 @@ class AssetListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = AssetFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -925,17 +904,13 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
-class AssetUpdateView(UserPassesTestMixin, UpdateView):
+class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = Asset
     context_object_name = 'asset'
     form_class = AssetForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['crumbs'] = {'asset-list': _('Assets')}
         return context
 
@@ -958,7 +933,7 @@ class AssetDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_asset"))
 
 
-class FolderListView(UserPassesTestMixin, ListView):
+class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/project_domain_list.html'
     context_object_name = 'domains'
 
@@ -976,10 +951,6 @@ class FolderListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = ProjectsDomainFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1045,7 +1016,7 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
 
 
-class FolderUpdateView(UserPassesTestMixin, UpdateView):
+class FolderUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = Folder
     template_name = 'core/pd_update.html'
     context_object_name = 'domain'
@@ -1053,10 +1024,6 @@ class FolderUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['projects'] = Project.objects.filter(folder=self.get_object())
         context['crumbs'] = {'folder-list': _('Projects domains')}
         context['project_create_form'] = ProjectFormInherited(
@@ -1085,7 +1052,7 @@ class FolderDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_folder"))
 
 
-class RiskAnalysisListView(UserPassesTestMixin, ListView):
+class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/analysis_list.html'
     context_object_name = 'analyses'
 
@@ -1104,10 +1071,6 @@ class RiskAnalysisListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = AnalysisFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1154,7 +1117,7 @@ class RiskAnalysisCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_analysis"), folder=Folder.objects.get(id=project.folder.id))
 
 
-class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
+class RiskAnalysisUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = Analysis
     template_name = 'core/ra_update.html'
     context_object_name = 'analysis'
@@ -1162,10 +1125,6 @@ class RiskAnalysisUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['risk_scenario_create_form'] = RiskScenarioCreateForm(
             initial={'analysis': get_object_or_404(Analysis, id=self.kwargs['pk'])})
         context['scenarios'] = RiskScenario.objects.filter(
@@ -1210,7 +1169,7 @@ class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_analysis"))
 
 
-class RiskScenarioListView(UserPassesTestMixin, ListView):
+class RiskScenarioListView(BaseContextMixin, UserPassesTestMixin, ListView):
     permission_required = 'core.view_riskscenario'
     template_name = 'core/ri_list.html'
     context_object_name = 'scenarios'
@@ -1230,10 +1189,6 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = RiskScenarioFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1252,7 +1207,7 @@ class RiskScenarioListView(UserPassesTestMixin, ListView):
         return True
 
 
-class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
+class RiskScenarioCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
     model = RiskScenario
     template_name = 'core/ri_create.html'
     context_object_name = 'scenario'
@@ -1260,10 +1215,6 @@ class RiskScenarioCreateView(UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['analysis'] = get_object_or_404(
             Analysis, id=self.kwargs['analysis'])
 
@@ -1293,7 +1244,7 @@ class RiskScenarioCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskscenario"), folder=Folder.objects.get(id=analysis.project.folder.id))
 
 
-class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
+class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = RiskScenario
     template_name = 'core/ri_update.html'
     context_object_name = 'scenario'
@@ -1301,10 +1252,6 @@ class RiskScenarioUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['security_measures'] = self.get_object().security_measures.all()
         context['existing_security_measures'] = SecurityMeasure.objects.filter(
             folder=self.get_object().analysis.project.folder)
@@ -1359,7 +1306,7 @@ class RiskScenarioDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskscenario"))
 
 
-class SecurityMeasureListView(UserPassesTestMixin, ListView):
+class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/mtg_list.html'
     context_object_name = 'measures'
 
@@ -1369,10 +1316,6 @@ class SecurityMeasureListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = SecurityMeasureFilter(
             self.request.GET, queryset=queryset, request=self.request)
@@ -1410,7 +1353,7 @@ class SecurityMeasureCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securitymeasure"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
-class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
+class SecurityMeasureUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = SecurityMeasure
     template_name = 'core/mtg_update.html'
     context_object_name = 'security_measure'
@@ -1418,10 +1361,6 @@ class SecurityMeasureUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['risk_scenarios'] = RiskScenario.objects.filter(
             security_measures=self.get_object())
         context['crumbs'] = {'securitymeasure-list': _('Security measures')}
@@ -1449,7 +1388,7 @@ class SecurityMeasureDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securitymeasure"))
 
 
-class SecurityFunctionListView(UserPassesTestMixin, ListView):
+class SecurityFunctionListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/security_function_list.html'
     context_object_name = 'functions'
 
@@ -1468,10 +1407,6 @@ class SecurityFunctionListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = SecurityFunctionFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1498,7 +1433,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
-class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
+class SecurityFunctionUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = SecurityFunction
     template_name = 'core/security_function_update.html'
     context_object_name = 'function'
@@ -1506,10 +1441,6 @@ class SecurityFunctionUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['crumbs'] = {'securityfunction-list': _('Security functions')}
         return context
 
@@ -1535,7 +1466,7 @@ class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securityfunction"))
 
 
-class ThreatListView(UserPassesTestMixin, ListView):
+class ThreatListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/threat_list.html'
     context_object_name = 'threats'
 
@@ -1554,10 +1485,6 @@ class ThreatListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = ThreatFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1584,7 +1511,7 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
-class ThreatUpdateView(UserPassesTestMixin, UpdateView):
+class ThreatUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     model = Threat
     template_name = 'core/threat_update.html'
     context_object_name = 'threat'
@@ -1592,10 +1519,6 @@ class ThreatUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['crumbs'] = {'threat-list': _('Threats')}
         return context
 
@@ -1618,7 +1541,7 @@ class ThreatDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_threat"))
 
 
-class RiskAcceptanceListView(UserPassesTestMixin, ListView):
+class RiskAcceptanceListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/acceptance_list.html'
     context_object_name = 'acceptances'
 
@@ -1628,10 +1551,6 @@ class RiskAcceptanceListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = RiskAcceptanceFilter(
             self.request.GET, queryset=queryset, request=self.request)
@@ -1683,7 +1602,7 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_riskacceptance"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
-class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
+class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     permission_required = 'core.change_riskacceptance'
     model = RiskAcceptance
     template_name = 'core/risk_acceptance_update.html'
@@ -1711,10 +1630,6 @@ class RiskAcceptanceUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["crumbs"] = {'riskacceptance-list': _('Risk acceptances')}
         return context
 
@@ -1739,7 +1654,7 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
 
 
-class MyProfileDetailView(UserPassesTestMixin, DetailView):
+class MyProfileDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
     template_name = 'core/my_profile_detailed.html'
     context_object_name = 'user'
 
@@ -1753,10 +1668,6 @@ class MyProfileDetailView(UserPassesTestMixin, DetailView):
         if not UserGroup.get_user_groups(self.request.user):
             messages.warning(self.request, _(
                 "Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['user_groups'] = self.object.user_groups.all()
         keys = ['Last name', 'First name', 'Email', 'Entry date', 'Superuser']
         values = []
@@ -1774,7 +1685,7 @@ class MyProfileDetailView(UserPassesTestMixin, DetailView):
         return self.request.user.is_authenticated
 
 
-class MyProfileUpdateView(UserPassesTestMixin, UpdateView):
+class MyProfileUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     template_name = 'core/user_update.html'
     context_object_name = 'user'
     form_class = MyProfileUpdateForm
@@ -1783,10 +1694,6 @@ class MyProfileUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         return context
 
     def get_form_kwargs(self):
@@ -1805,7 +1712,7 @@ class MyProfileUpdateView(UserPassesTestMixin, UpdateView):
         return self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
 
 
-class UserListView(UserPassesTestMixin, ListView):
+class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/user_list.html'
     context_object_name = 'users'
 
@@ -1822,10 +1729,6 @@ class UserListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = UserFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1835,17 +1738,13 @@ class UserListView(UserPassesTestMixin, ListView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user"))
 
 
-class UserCreateView(UserPassesTestMixin, CreateView):
+class UserCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
     template_name = 'core/user_create.html'
     context_object_name = 'user'
     form_class = UserCreateForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["crumbs"] = {'user-list': _('Users')}
         return context
 
@@ -1870,7 +1769,7 @@ class UserCreateView(UserPassesTestMixin, CreateView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_user"))
 
 
-class UserUpdateView(UserPassesTestMixin, UpdateView):
+class UserUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     template_name = 'core/user_update.html'
     context_object_name = 'user'
     form_class = UserUpdateForm
@@ -1879,10 +1778,6 @@ class UserUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["crumbs"] = {'user-list': _('Users')}
         return context
 
@@ -1914,7 +1809,7 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_user"))
 
 
-class UserGroupListView(UserPassesTestMixin, ListView):
+class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/group_list.html'
     context_object_name = 'user_groups'
 
@@ -1935,10 +1830,6 @@ class UserGroupListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = UserGroupFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -1966,7 +1857,7 @@ class UserGroupCreateView(UserPassesTestMixin, CreateView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"))
 
 
-class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
+class UserGroupUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     template_name = 'core/group_update.html'
     context_object_name = 'user_group'
     form_class = UserGroupUpdateForm
@@ -1975,10 +1866,6 @@ class UserGroupUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['users'] = User.objects.exclude(user_groups=self.get_object())
         context["associated_users"] = User.objects.filter(
             user_groups=self.get_object())
@@ -2008,7 +1895,7 @@ class UserGroupDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_usergroup"))
 
 
-class RoleAssignmentListView(UserPassesTestMixin, ListView):
+class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
     permission_required = 'core.view_roleassignment'
     template_name = 'core/role_list.html'
     context_object_name = 'assignments'
@@ -2029,10 +1916,6 @@ class RoleAssignmentListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         queryset = self.get_queryset()
         filter = UserGroupFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -2043,7 +1926,7 @@ class RoleAssignmentListView(UserPassesTestMixin, ListView):
         return True
 
 
-class RoleAssignmentCreateView(UserPassesTestMixin, CreateView):
+class RoleAssignmentCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
     permission_required = 'core.add_roleassignment'
     template_name = 'core/role_assignment_create.html'
     context_object_name = 'assignment'
@@ -2054,10 +1937,6 @@ class RoleAssignmentCreateView(UserPassesTestMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["crumbs"] = {'role-list': _('Role assignment')}
         return context
 
@@ -2078,7 +1957,7 @@ class RoleAssignmentDeleteView(UserPassesTestMixin, DeleteView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_roleassignment"))
 
 
-class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
+class RoleAssignmentUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     permission_required = 'auth.change_role'
     template_name = 'core/role_update.html'
     context_object_name = 'role'
@@ -2088,10 +1967,6 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["crumbs"] = {'usergroup-list': _('User groups')}
         return context
 
@@ -2104,7 +1979,7 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
                                                                      perm=Permission.objects.get(codename="change_roleassignment"), folder=Folder.get_folder(ra))
 
 
-class UserPasswordChangeView(PasswordChangeView):
+class UserPasswordChangeView(BaseContextMixin, PasswordChangeView):
     """ view to change user password """
     template_name = 'core/password_change.html'
     form_class = UserPasswordChangeForm
@@ -2118,10 +1993,6 @@ class UserPasswordChangeView(PasswordChangeView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['this_user'] = get_object_or_404(User, pk=self.kwargs['pk'])
         context["crumbs"] = {'user-list': _('Users')}
         return context
@@ -2133,7 +2004,7 @@ class UserPasswordChangeView(PasswordChangeView):
         return kwargs
 
 
-class RiskMatrixListView(UserPassesTestMixin, ListView):
+class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/risk_matrix_list.html'
     context_object_name = 'matrices'
 
@@ -2151,10 +2022,6 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["object_ids_change"] = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
         context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
@@ -2171,7 +2038,7 @@ class RiskMatrixListView(UserPassesTestMixin, ListView):
         return True
 
 
-class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
+class RiskMatrixDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
     template_name = 'core/risk_matrix_detailed.html'
     context_object_name = 'matrix'
 
@@ -2179,16 +2046,12 @@ class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
         context['viewable_projects'] = Project.objects.filter(
             id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)[0]).filter(
             id__in=(self.get_object().projects.all().values_list('id', flat=True)))
         context['viewable_analyses'] = Analysis.objects.filter(
             id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)[0]).filter(
             id__in=(self.get_object().analyses.all().values_list('id', flat=True)))
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context['change_analysis'] = RoleAssignment.has_permission(
             self.request.user, "change_analysis")
         context["crumbs"] = {'riskmatrix-list': _('Matrices')}
@@ -2201,7 +2064,7 @@ class RiskMatrixDetailView(UserPassesTestMixin, DetailView):
         return True
 
 
-class RiskMatrixUpdateView(UserPassesTestMixin, UpdateView):
+class RiskMatrixUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     template_name = 'core/risk_matrix_update.html'
     context_object_name = 'matrix'
     form_class = RiskMatrixUpdateForm
@@ -2210,10 +2073,6 @@ class RiskMatrixUpdateView(UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(
-            self.request.user, "view_user")
         context["crumbs"] = {'riskmatrix-list': _('Matrices')}
         return context
 
