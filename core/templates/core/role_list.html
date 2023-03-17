@@ -19,24 +19,24 @@
             {% for role in roles %}
                 <div class="border border-gray-200 p-2 rounded-lg w-64 shadow">
                     <h2 class="text-lg text-gray-900 font-medium">{{ role }}</h2>
-                    <a href="#" class="w-fit leading-relaxed text-sm text-indigo-500 cursor-pointer hover:underline">{% trans "Learn more" %}</a>
+                    {% include 'snippets/link_modal.html' with header=role content=_("Learn more") topic=role.name %}</label>
                 </div>
             {% endfor %}
         </div>
     </div>
-    <div x-data="{ openTab: 1 }" class="bg-white rounded py-4 shadow-md">
+    <div x-data="{ openTab: localStorage.getItem('openTab') }" class="bg-white rounded py-4 shadow-md">
         <div class="flex flex-row">
             <h2 class="px-4 text-xl font-semibold mb-2 whitespace-nowrap">{% trans "Role assignments" %}</h2>
             <div class="grid mb-4 w-full px-4">
-                <a href="{% url 'roleassignment-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New role assignment" %}</a>
+                <a href="#" class="add-button bg-gray-500 hover:bg-gray-500"><i class="fas fa-plus mr-2"></i>{% trans "New role assignment" %}</a>
             </div>
         </div>
         <div class="px-4 flex flex-row">
-            <div @click="openTab = 1" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "Users" %}</div>
-            <div @click="openTab = 2" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "User groups" %}</div>
+            <div id="openTab1" @click="openTab = 1; localStorage.setItem('openTab', 1)" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 1 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "Users" %}</div>
+            <div id="openTab2" @click="openTab = 2; localStorage.setItem('openTab', 2)" class="cursor-pointer px-2 w-fit border-indigo-500 hover:bg-gray-200 rounded-t hover:border-indigo-700" :class="openTab == 2 ? 'border-b-2 bg-gray-100' : 'border-b-0'">{% trans "User groups" %}</div>
         </div>
         <div class="relative overflow-x-auto rounded-b-lg">
-            <table x-show="openTab === 1" class="w-full text-sm text-left border-t">
+            <table x-show="openTab == 1" class="w-full text-sm text-left border-t">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <th class="px-6 py-3">{% trans "User" %}</th>
                     <th class="px-6 py-3">{% trans "Email address" %}</th>
@@ -117,7 +117,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <table x-show="openTab === 2" class="w-full text-sm text-left border-t">
+            <table x-show="openTab == 2" class="w-full text-sm text-left border-t">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <th class="px-6 py-3">{% trans "User group" %}</th>
                     <th class="px-6 py-3">{% trans "Role" %}</th>
@@ -162,12 +162,16 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="">
                                     <span>
-                                        <a href="{% url 'roleassignment-update' assignment.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <a href="#" class="cursor-pointer table-action">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                     </span>
-    
-                                    {% include 'snippets/delete_button_modal.html' with object=assignment header=_("Delete role assignment?") model="usergroup" %}
+                                    <span>
+                                        <a href="#" class="cursor-pointer table-action">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </span>
+                                    {% comment %} {% include 'snippets/delete_button_modal.html' with object=assignment header=_("Delete role assignment?") model="usergroup" %} {% endcomment %}
                                 </div>
                             </td>
                         </tr>

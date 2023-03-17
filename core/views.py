@@ -2017,6 +2017,10 @@ class RoleAssignmentListView(UserPassesTestMixin, ListView):
     paginate_by = 10
     model = RoleAssignment
 
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to go through groups to assign roles."))
+
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
         filtered_list = UserGroupFilter(
@@ -2095,7 +2099,7 @@ class RoleAssignmentUpdateView(UserPassesTestMixin, UpdateView):
         return reverse_lazy('role-list')
 
     def test_func(self):
-        ra = self.get_object()
+        ra = get_object_or_404(RoleAssignment, pk=self.kwargs['pk'])
         return not (ra.builtin) and RoleAssignment.is_access_allowed(user=self.request.user,
                                                                      perm=Permission.objects.get(codename="change_roleassignment"), folder=Folder.get_folder(ra))
 
