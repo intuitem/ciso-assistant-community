@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import user_passes_test
 from iam.models import RoleAssignment
 from core.utils import UserGroupCodename
 from asf_rm.settings import VERSION
+from core.views import BaseContextMixin
 
 import re
 import sys
@@ -21,15 +22,13 @@ def is_superuser_check(user):
     return user.is_superuser
 
 
-class BackupRestoreView(FormView, UserPassesTestMixin):
+class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
     template_name = 'serdes/backup_restore.html'
     form_class = UploadFileForm
     success_url = reverse_lazy('backup-restore')
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(self.request.user, "change_usergroup")
-        context['view_user'] = RoleAssignment.has_permission(self.request.user, "view_user")
         return context
 
     def dispatch(self, request, *args, **kwargs):
