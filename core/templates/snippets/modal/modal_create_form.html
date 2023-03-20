@@ -16,14 +16,10 @@
           {% for error in field.errors %}
             <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
           {% endfor %}
-          {% if field.field.widget.attrs.disabled %}
-            <select disabled class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50">
-              <option value={{ field.value }}>{{ field.initial }}</option>
-            </select>
-            <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
-          {% else %}
             {{ field }}
-          {% endif %}
+            {% if field.field.widget.attrs.disabled %}
+              <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+            {% endif %}
           <p class="help_text">{{ field.help_text }}</p>
         </div>
       </div>
