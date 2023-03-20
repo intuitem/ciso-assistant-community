@@ -126,7 +126,7 @@ class GenericDetailView(BaseContextMixin, DetailView):
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
         context['crumbs'] = {self.model.__name__.lower(
-        ) + "-list": self.model._meta.verbose_name_plural}
+        ).replace('risk', '') + "-list": self.model._meta.verbose_name_plural}
 
         return context
 
@@ -720,8 +720,25 @@ class ReviewView(BaseContextMixin, ListView):
         return Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user)
 
 
-class CreateViewModal(CreateView):
+class CreateViewModal(BaseContextMixin, CreateView):
     template_name: str = 'core/fallback_form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        url_name = self.model.__name__.lower().replace('risk', '')
+        if self.model.__name__.lower() == "folder":
+            plural_name = _("Projects domains")
+            name = "projects domain"
+        elif self.model.__name__.lower() == "securityfunction":
+            plural_name = _("Security functions")
+            name = "security function"
+        else:
+            plural_name = self.model._meta.verbose_name_plural
+            name = self.model.__name__.replace('Risk', 'Risk ').lower()        
+        context["cancel_url"] = reverse_lazy(f'{url_name}-list')
+        context["crumbs"] = {url_name + "-list": plural_name}
+        context["object_type"] = _("Add" + " " + name)
+        return context
 
     def get_success_url(self):
         return self.request.POST.get('next', reverse_lazy(f'{self.context_object_name}-list'))
@@ -1255,7 +1272,7 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         context['security_measures'] = self.get_object().security_measures.all()
         context['existing_security_measures'] = SecurityMeasure.objects.filter(
             folder=self.get_object().analysis.project.folder)
-        context['crumbs'] = {'riskscenario-list': _('Risk scenarios')}
+        context['crumbs'] = {'scenario-list': _('Risk scenarios')}
         context['measure_create_form'] = SecurityMeasureCreateFormInherited(
             initial={'folder': get_object_or_404(Folder, id=self.get_object().analysis.project.folder.id)})
         context['measures_select_form'] = SecurityMeasureSelectForm(
@@ -1273,7 +1290,7 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
             return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
             if (self.request.POST.get('next', '/') == ""):
-                return reverse_lazy('riskscenario-list')
+                return reverse_lazy('scenario-list')
             else:
                 return self.request.POST.get('next', '/')
 
@@ -1296,11 +1313,11 @@ class RiskScenarioUpdateViewModal(UserPassesTestMixin, UpdateView):
 
 class RiskScenarioDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskScenario
-    success_url = reverse_lazy('riskscenario-list')
+    success_url = reverse_lazy('scenario-list')
     template_name = 'snippets/risk_scenario_delete_modal.html'
 
     def get_success_url(self) -> str:
-        return reverse_lazy('riskscenario-list')
+        return reverse_lazy('scenario-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskscenario"))
@@ -1630,12 +1647,12 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["crumbs"] = {'riskacceptance-list': _('Risk acceptances')}
+        context["crumbs"] = {'acceptance-list': _('Risk acceptances')}
         return context
 
     def get_success_url(self) -> str:
         if (self.request.POST.get('next', '/') == ""):
-            return reverse_lazy('riskacceptance-list')
+            return reverse_lazy('acceptance-list')
         else:
             return self.request.POST.get('next', '/')
 
@@ -1645,10 +1662,10 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
 
 class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     model = RiskAcceptance
-    success_url = reverse_lazy('riskacceptance-list')
+    success_url = reverse_lazy('acceptance-list')
     template_name = 'snippets/risk_acceptance_delete_modal.html'
 
-    success_url = reverse_lazy('riskacceptance-list')
+    success_url = reverse_lazy('acceptance-list')
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))

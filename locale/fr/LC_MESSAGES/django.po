@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-13 23:07+0000\n"
+"POT-Creation-Date: 2023-03-20 16:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,11 +182,11 @@ msgstr ""
 msgid "Failed to import file: {}. {}"
 msgstr "Échec de l'importation du fichier : {}"
 
-#: library/views.py:63
+#: library/views.py:61
 msgid "Libraries"
 msgstr "Bibliothèques"
 
-#: library/views.py:84
+#: library/views.py:82
 msgid "Failed to import library: {}"
 msgstr "Échec de l'importation de la bibliothèque : {}"
 

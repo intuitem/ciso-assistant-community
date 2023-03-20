@@ -36,9 +36,9 @@ urlpatterns = [
 
     # LIST VIEWS
     path('risk-analyses/', login_required(views.RiskAnalysisListView.as_view()), name='analysis-list'),
-    path('risk-scenarios/', login_required(views.RiskScenarioListView.as_view()), name='riskscenario-list'),
+    path('risk-scenarios/', login_required(views.RiskScenarioListView.as_view()), name='scenario-list'),
     path('security-measures/', login_required(views.SecurityMeasureListView.as_view()), name='securitymeasure-list'),
-    path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='riskacceptance-list'),
+    path('risk-acceptances/', login_required(views.RiskAcceptanceListView.as_view()), name='acceptance-list'),
 
     path('projects-domains/', login_required(views.FolderListView.as_view()), name='folder-list'),
     path('projects/', login_required(views.ProjectListView.as_view()), name='project-list'),

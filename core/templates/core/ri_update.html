@@ -185,7 +185,7 @@
 <script>
     function cancel() {
         // unclean but works
-        const fallbackURL = "{% url 'riskscenario-list' %}";
+        const fallbackURL = "{% url 'scenario-list' %}";
         if (window.history.length <= 2){
             window.location.href = fallbackURL;
             return false;
