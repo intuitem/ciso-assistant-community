@@ -51,6 +51,15 @@
 		}
 	</style>
 	<script>
+		function redirectToNext() {
+			var nextParam = window.location.search.match(/(\?|\&)next=([^&]*)/);
+			if (nextParam) {
+			  window.location.href = nextParam[2];
+			} 
+			else {
+			  window.history.back();
+			}
+		}
 		window.onload = function() {
 			if (sessionStorage.getItem('sidebar-yscroll')) {
 				document.getElementById('sidebar-scroll').scrollTop = sessionStorage.getItem('sidebar-yscroll');
