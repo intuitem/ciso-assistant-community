@@ -10,7 +10,23 @@
         <div class="bg-white rounded-lg shadow">
             <div class="flex flex-row space-x-4 mb-4 divide-x">
                 <div class="px-4 py-6">
-                    {{ form.as_div }}
+                    {% for field in form %}
+                    <div class="">
+                        <label class="">{{ field.label|striptags }}:</label>
+                        <div class="w-auto">
+                            {% for error in field.errors %}
+                                <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                            {% endfor %}
+                            {{ field }}
+                            {% if field.field.widget.attrs.disabled %}
+                                <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+                            {% endif %}
+                            <div class="mt-1 text-xs text-gray-400">
+                                {{ field.help_text|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
