@@ -96,7 +96,7 @@
                                 {% endif %}
                                 
                                 {% if matrix.id in object_ids_delete and not matrix.is_used %}
-                                {% include 'snippets/delete_button_modal.html' with object=matrix header=_("Delete matrix?") %}
+                                {% include 'snippets/delete_button_modal.html' with object=matrix model='riskmatrix' header=_("Delete matrix?") %}
                                 {% endif %}
 
                             </div>
