@@ -220,4 +220,4 @@ else:
 AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend'] 
 FIDO_SERVER_ID=urlparse(MIRA_URL).hostname
 FIDO_SERVER_NAME="FidoMira"
-KEY_ATTACHMENT = passkeys.Attachment.PLATFORM
+# leave KEY_ATTACHMENT undefined to allow both platform and roaming authenticators
