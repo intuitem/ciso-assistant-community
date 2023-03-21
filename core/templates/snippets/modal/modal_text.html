@@ -29,6 +29,11 @@
             <div class="text-5xl text-blue-800"><i class="fa-solid fa-building-shield"></i></div>
         </div>
             <p>{% trans "This role permits to manage project domains, users and users rights, but has no direct access to projects" %}</p>
+        {% elif topic == 'no_matrix' %}
+        <div class="p-2 m-2 flex content-center">
+            <div class="text-5xl text-red-500 animate-pulse"><i class="fa-solid fa-table"></i></div>
+        </div>
+            <p>{% trans "<strong>No matrix loaded or enabled</strong>. If you have not at least one enabled matrix in your database, you will not be able to create analyses." %}</p>
         {% endif %}
     </div>
   <!-- END UPDATE FORM -->
