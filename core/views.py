@@ -125,8 +125,7 @@ class GenericDetailView(BaseContextMixin, DetailView):
         context['delete'] = RoleAssignment.has_permission(
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
-        context['crumbs'] = {self.model.__name__.lower(
-        ).replace('risk', '') + "-list": self.model._meta.verbose_name_plural}
+        context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural}
 
         return context
 
