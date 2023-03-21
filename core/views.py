@@ -1081,6 +1081,7 @@ class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
         context['add_analysis'] = RoleAssignment.has_permission(
             self.request.user, 'add_analysis')
+        context['no_matrix'] = (RiskMatrix.objects.all().count() - RiskMatrix.objects.filter(is_enabled=False).count()) < 1
         return context
 
     def test_func(self):
