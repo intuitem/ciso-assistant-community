@@ -5,7 +5,7 @@
     <div class="">
         <div class="bg-white py-4 px-12 m-4 shadow rounded-lg flex space-x-2 relative">
             {% if object_ids_change %}
-            <a href="{% url 'analysis-update' analysis.id %}" class="absolute right-2 top-2 py-2 px-4 m-1 add-button">
+            <a href="{% url 'analysis-update' analysis.id %}?next={{ request.path|urlencode }}" class="absolute right-2 top-2 py-2 px-4 m-1 add-button">
                 <i class="fas fa-edit"></i>
                 {% trans "Edit" %}</a>
             {% endif %}

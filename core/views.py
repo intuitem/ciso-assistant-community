@@ -126,7 +126,7 @@ class GenericDetailView(BaseContextMixin, DetailView):
             self.request.user, "delete_" + self.model.__name__.lower())
         context['data'] = self.get_object_data()
         context['crumbs'] = {self.model.__name__.lower(
-        ) + "-list": self.model._meta.verbose_name_plural}
+        ).replace('risk', '') + "-list": self.model._meta.verbose_name_plural}
 
         return context
 
@@ -720,11 +720,28 @@ class ReviewView(BaseContextMixin, ListView):
         return Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user)
 
 
-class CreateViewModal(CreateView):
+class CreateViewModal(BaseContextMixin, CreateView):
     template_name: str = 'core/fallback_form.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        url_name = self.model.__name__.lower()
+        if self.model.__name__.lower() == "folder":
+            plural_name = _("Projects domains")
+            name = "projects domain"
+        elif self.model.__name__.lower() == "securityfunction":
+            plural_name = _("Security functions")
+            name = "security function"
+        else:
+            plural_name = self.model._meta.verbose_name_plural
+            name = self.model.__name__.replace('Risk', 'Risk ').lower()        
+        context["cancel_url"] = reverse_lazy(f'{url_name}-list')
+        context["crumbs"] = {url_name + "-list": plural_name}
+        context["object_type"] = _("Add" + " " + name)
+        return context
+
     def get_success_url(self):
-        return self.request.POST.get('next', reverse_lazy(f'{self.context_object_name}-list'))
+        return self.request.POST.get('next', reverse_lazy(f'{self.model.__name__.lower()}-list'))
 
 
 class QuickStartView(BaseContextMixin, UserPassesTestMixin, ListView):
