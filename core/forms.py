@@ -281,9 +281,10 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
 
         folders = folder.sub_folders()
         folders.append(folder)
-        for obj in risk_scenarios:
-            if obj.analysis.project.folder not in folders:
-                raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
+        if risk_scenarios:
+            for obj in risk_scenarios:
+                if obj.analysis.project.folder not in folders:
+                    raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
 
 
 class ProjectForm(StyledModelForm):
