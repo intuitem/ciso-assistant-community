@@ -120,10 +120,15 @@ class GenericDetailView(BaseContextMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change'] = RoleAssignment.has_permission(
-            self.request.user, "change_" + self.model.__name__.lower())
-        context['delete'] = RoleAssignment.has_permission(
-            self.request.user, "delete_" + self.model.__name__.lower())
+        print(self.model)
+        (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, self.model)
+        context['change'] = self.object.id in object_ids_change
+        context['delete'] = self.object.id in object_ids_delete
+        if self.model is User:
+            # NOTE: using has_permission() because get_accessible_objects() doesn't handle this object_type moreover there isn't scope
+            context['change'] = RoleAssignment.has_permission(self.request.user, 'change_user')
+            context['delete'] = RoleAssignment.has_permission(self.request.user, 'delete_user')
         context['data'] = self.get_object_data()
         context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural}
 
@@ -524,7 +529,7 @@ def global_overview(request):
         "measures_to_review": measures_to_review(request.user),
         "acceptances_to_review": acceptances_to_review(request.user),
         "today": date.today(),
-        "view_user": RoleAssignment.has_permission(request.user, "view_user"),
+        "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
         "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
@@ -688,7 +693,7 @@ def scoring_assistant(request):
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
     context['change_usergroup'] = RoleAssignment.has_permission(
-        request.user, "change_usergroup")
+        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
     return render(request, template, context)
@@ -2069,8 +2074,9 @@ class RiskMatrixDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
         context['viewable_analyses'] = Analysis.objects.filter(
             id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)[0]).filter(
             id__in=(self.get_object().analyses.all().values_list('id', flat=True)))
-        context['change_analysis'] = RoleAssignment.has_permission(
-            self.request.user, "change_analysis")
+        context['changeable_analyses'] = Analysis.objects.filter(
+            id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)[1]).filter(
+            id__in=(self.get_object().analyses.all().values_list('id', flat=True)))
         context["crumbs"] = {'riskmatrix-list': _('Matrices')}
         return context
 

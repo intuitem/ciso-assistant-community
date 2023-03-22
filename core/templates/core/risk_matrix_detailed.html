@@ -51,7 +51,7 @@
                                     </td>
                                     <td class="px-2 py-1 space-x-1">
                                         <a href="{% url 'RA' analysis.id %}" class="text-indigo-700 hover:text-indigo-600"><i class="far fa-eye"></i></a>
-                                        {% if change_analysis %}
+                                        {% if analysis in changeable_analyses %}
                                             <a href="{{ analysis.edit_url }}" class="text-indigo-700 hover:text-indigo-600"><i class="fas fa-edit"></i></a>
                                         {% endif %}
                                     </td>
