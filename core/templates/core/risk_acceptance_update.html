@@ -31,47 +31,20 @@
     </form>
 </div>
 <script>
-    // Get a reference to the fields you want to manipulate
     var field1 = document.getElementById('id_riskacceptance_folder');
     var parentDiv = document.getElementById('id_risk_scenarios');
     var labels = parentDiv.querySelectorAll('label');
 
-    // Disable field2 when field1 is not complete
-    window.onload = function() {
-        var selectedText = field1.options[field1.selectedIndex].textContent;
-        if (field1.value === '') {
-            for (var i = 0; i < labels.length; i++) {
-                labels[i].setAttribute('class', 'hidden');
-            }
-        }
-        else {
-            for (var i = 0; i < labels.length; i++) {
-                if ((labels[i].innerText.indexOf(selectedText) !== -1) || (selectedText === 'Global')) {
-                    labels[i].removeAttribute('class');
-                }
-                else {
-                    labels[i].setAttribute('class', 'hidden');
-                }   
-            }
-        }
+    function updateLabels() {
+    var selectedText = field1.options[field1.selectedIndex].textContent;
+    for (var i = 0; i < labels.length; i++) {
+        var isGlobal = (selectedText === 'Global');
+        var isVisible = (labels[i].innerText.includes(selectedText+"/") || isGlobal);
+        labels[i].classList.toggle('hidden', !isVisible);
     }
-    field1.addEventListener('click', function() {
-        var selectedText = field1.options[field1.selectedIndex].textContent;
-        if (field1.value === '') {
-            for (var i = 0; i < labels.length; i++) {
-                labels[i].setAttribute('class', 'hidden');
-            }
-        }
-        else {
-            for (var i = 0; i < labels.length; i++) {
-                if ((labels[i].innerText.indexOf(selectedText) !== -1) || (selectedText === 'Global')) {
-                    labels[i].removeAttribute('class');
-                }
-                else {
-                    labels[i].setAttribute('class', 'hidden');
-                }   
-            }
-        }
-    });
+    }
+
+    window.onload = updateLabels;
+    field1.addEventListener('click', updateLabels);
 </script>
 {% endblock %}
