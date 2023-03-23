@@ -240,6 +240,7 @@ class ProjectDetailView(GenericDetailView):
         context['analysis_create_form'] = RiskAnalysisCreateFormInherited(
             initial={'project': self.object})
         context['analyses'] = Analysis.objects.filter(project=self.object)
+        context['no_matrix'] = (RiskMatrix.objects.all().count() - RiskMatrix.objects.filter(is_enabled=False).count()) < 1
         return context
 
 
