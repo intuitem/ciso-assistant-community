@@ -69,7 +69,7 @@ class LoginForm(AuthenticationForm):
     password = forms.CharField(label=_("Password"), required=False, widget=forms.PasswordInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
 
     def clean(self):
-        username = self.cleaned_data.get('username')
+        username = self.cleaned_data.get('username').lower()
         password = self.cleaned_data.get('password')
         passkey = self.request.POST.get('passkeys')
         if (username and password) or passkey:
