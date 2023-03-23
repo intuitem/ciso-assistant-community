@@ -32,7 +32,7 @@ class StyledModelForm(ModelForm):
         if not hasattr(field, '_queryset'):
             return
         if field._queryset and len(field._queryset) == 1:
-            field.widget.attrs['disabled'] = True
+            field.disabled = True
             field.widget.attrs['class'] += ' disabled:opacity-50'
             field.initial = field.queryset[0]
 
