@@ -253,6 +253,7 @@ class User(AbstractBaseUser):
         try:
             send_mail(subject, email, None, [self.email], fail_silently=False)
         except Exception as e:
+            print("using rescue mailer")
             with get_connection(
                 host=EMAIL_HOST_RESCUE, 
                 port=EMAIL_PORT_RESCUE, 
