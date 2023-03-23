@@ -62,7 +62,8 @@ class StyledModelForm(ModelForm):
             if input_type == DefaultDateInput:
                 f.widget.attrs['id'] = f'id_{model_name}_{fname}'
                 f.widget.attrs['class'] = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'
-            self.default_if_one(fname)
+            if input_type == Select:
+                self.default_if_one(fname)
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label=_("Email"), required=False, widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
