@@ -99,11 +99,10 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://deve
 MIRA_SUPERUSER_EMAIL = os.environ.get('MIRA_SUPERUSER_EMAIL')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
 EMAIL_HOST = os.environ['EMAIL_HOST']
 EMAIL_PORT = os.environ.get('EMAIL_PORT')
 EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY if SENDGRID_API_KEY else os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get('EMAIL_HOST_RESCUE')
