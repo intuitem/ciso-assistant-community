@@ -120,7 +120,6 @@ class GenericDetailView(BaseContextMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(self.model)
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, self.model)
         context['change'] = self.object.id in object_ids_change
@@ -1633,7 +1632,6 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
-        print(self.object.validator, self.object.state)
         if self.object.validator and self.object.state == 'created':
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
