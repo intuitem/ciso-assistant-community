@@ -10,48 +10,67 @@
 
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
     <form method="POST" id="scenario_update_form", action="">{% csrf_token %}
-    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
-    {{ form.errors }}
-    <div class="flex flex-col space-y-8">
-        <section class="flex flex-row space-x-4 w-full">
-            <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                <h2 class="text-lg font-semibold mb-4">{% trans "Risk scenario" %}</h2>
-                <section class="flex flex-col space-y-4">
-                    <div class="flex flex-row space-x-6">
-                        <div class="flex-1 flex-col">
-                            <p class="text-gray-400 text-xs">{% trans "Project" %}</p>
-                            <p class="text-xs font-semibold">{{ scenario.analysis.project }}</p>
+    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}{{ form.errors }}</p>
+    <div class="flex flex-col space-y-2">
+        <section class="flex flex-col w-full">
+            <div class="flex flex-row">
+                <div class="px-4 pt-2 pb-4 mb-2 mr-2 bg-white rounded-lg shadow w-3/4">
+                    <h2 class="text-lg font-semibold mb-4">{% trans "Context" %}</h2>
+                    <section class="flex flex-col space-y-4">
+                        <div class="flex flex-row space-x-6">
+                            <div class="flex-1 flex-col">
+                                <p class="text-gray-400 text-sm font-semibold">{% trans "Project" %}: </p>
+                                <p class="text-sm font-semibold">{{ scenario.analysis.project }}</p>
+                            </div>
+                            <div class="flex-1 flex-col">
+                                <p class="text-gray-400 text-sm font-semibold">{% trans "Auditor" %}: </p>
+                                <p class="text-sm font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
+                            </div>
+                            <div class="flex-1 flex-col">
+                                <p class="text-gray-400 text-sm font-semibold">{% trans "Version" %}: </p>
+                                <p class="text-sm font-semibold">{{ scenario.analysis.version }}</p>
+                            </div>
+                            <div class="flex-1 flex-col">
+                                <p class="text-sm font-semibold">{% trans "Analysis" %}: </p>
+                                <p class="text-red-500 text-xs font-semibold">{{ form.analysis.errors }}</p>
+                                {{ form.analysis }}
+                                {% if form.analysis.field.widget.attrs.disabled %}
+                                        <input type="hidden" name="{{ form.analysis.name }}" value="{{ form.analysis.value }}">
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="flex-1 flex-col">
-                            <p class="text-gray-400 text-xs">{% trans "Auditor" %}</p>
-                            <p class="text-xs font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
+                    </section>
+                </div>
+                <div class="px-4 pt-2 pb-4 mb-2 bg-white rounded-lg shadow w-1/4">
+                    <h2 class="text-lg font-semibold mb-4">{% trans "Status" %}</h2>
+                    <div class="flex-col">
+                        <p class="text-gray-400 text-sm font-semibold">{% trans "Last update" %}:</p>
+                        <p class="text-sm font-semibold">{{ scenario.updated_at }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-row">
+                <div class="px-4 pt-2 pb-4 mb-2 mr-2 bg-white rounded-lg shadow w-1/2">
+                    <section class="flex flex-col space-y-4">
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold">{% trans "Threat" %}</p>
+                            {{ form.threat.errors }}
+                            {{ form.threat }}
                         </div>
-                        <div class="flex-1 flex-col">
-                            <p class="text-gray-400 text-xs">{% trans "Version" %}</p>
-                            <p class="text-xs font-semibold">{{ scenario.analysis.version }}</p>
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold">{% trans "Name" %}</p>
+                            {{ form.name.errors }}
+                            {{ form.name }}
                         </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Analysis" %}</p>
-                        {{ form.analysis.errors }}
-                        {{ form.analysis }}
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Threat" %}</p>
-                        {{ form.threat.errors }}
-                        {{ form.threat }}
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Name" %}</p>
-                        {{ form.name.errors }}
-                        {{ form.name }}
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="text-sm font-semibold">{% trans "Description" %}</p>
-                        {{ form.description.errors }}
-                        {{ form.description }}
-                        <p class="help_text">{{ form.description.help_text }}</p>
-                    </div>
+                        <div class="flex flex-col">
+                            <p class="text-sm font-semibold">{% trans "Description" %}</p>
+                            {{ form.description.errors }}
+                            {{ form.description }}
+                            <p class="help_text">{{ form.description.help_text }}</p>
+                        </div>
+                    </section>
+                </div>
+                <div class="px-4 pt-2 pb-4 mb-2 bg-white rounded-lg shadow w-1/2">
                     <div class="flex flex-col mb-4 space-y-1">
                         <div class="flex flex-col">
                             <label class="text-sm font-semibold">{{ form.assets.label|striptags }}</label>
@@ -67,40 +86,46 @@
                             {{ form.assets.help_text|safe }}
                         </div>
                     </div>
-                </section>
+                </div>
             </div>
             <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
-                <h2 class="text-lg font-semibold mb-4">{% trans "Current profile" %}</h2>
-                <p class="text-sm font-semibold">{% trans "Existing measures" %}</p>
-                {{ form.existing_measures.errors }}
-                {{ form.existing_measures }}
-                <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
-                <div class="px-4 pt-2 pb-4 flex flex-col space-x-6 mt-10 rounded-lg shadow w-full border">
-                    <p class="text-lg pb-2 font-semibold">{% trans "Current Assessment" %}</p>
-                    <div class="px-4 pt-2 pb-4 flex flex-row space-x-6 justify-center">
-                        <div>
-                            <p class="pl-1 text-sm font-semibold">{% trans "Current probability" %}</p>
-                            {{ form.current_proba.errors }}
-                            {{ form.current_proba }}
-                        </div>
-                        <div class="items-center pt-7">
-                            <i class="fas fa-times"></i>
-                        </div>
-                        <div>
-                            <p class="pl-1 text-sm font-semibold">{% trans "Current impact" %}</p>
-                            {{ form.current_impact.errors }}
-                            {{ form.current_impact }}
-                        </div>
-                        <div class="items-center pt-7">
-                            <i class="fas fa-equals"></i>
-                        </div>
-                        <div class=""> 
-                            <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
-                            <div class="">
-                                <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
-                                    style="background-color: {{ scenario.get_current_risk.hexcolor }};">
-                                    {{ scenario.get_current_risk.name }}
-                                </span>
+                <div class="flex flex-row">
+                    <div class="w-1/2 mr-2">
+                        <h2 class="text-lg font-semibold mb-4">{% trans "Current risk" %}</h2>
+                        <p class="text-sm font-semibold">{% trans "Existing measures" %}</p>
+                        {{ form.existing_measures.errors }}
+                        {{ form.existing_measures }}
+                        <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
+                    </div>
+                    <div class="flex items-center w-1/2">
+                        <div class="px-4 pt-2 pb-4 flex flex-col rounded-lg w-full border">
+                            <p class="text-lg pb-2 font-semibold">{% trans "Current Assessment" %}</p>
+                            <div class="px-4 pt-2 pb-4 flex flex-row space-x-6 justify-center">
+                                <div>
+                                    <p class="pl-1 text-sm font-semibold">{% trans "Current probability" %}</p>
+                                    {{ form.current_proba.errors }}
+                                    {{ form.current_proba }}
+                                </div>
+                                <div class="items-center pt-7">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <div>
+                                    <p class="pl-1 text-sm font-semibold">{% trans "Current impact" %}</p>
+                                    {{ form.current_impact.errors }}
+                                    {{ form.current_impact }}
+                                </div>
+                                <div class="items-center pt-7">
+                                    <i class="fas fa-equals"></i>
+                                </div>
+                                <div class=""> 
+                                    <p class="pl-1 text-sm font-semibold">{% trans "Current risk level" %}</p>
+                                    <div class="">
+                                        <span id="current_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
+                                            style="background-color: {{ scenario.get_current_risk.hexcolor }};">
+                                            {{ scenario.get_current_risk.name }}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -139,7 +164,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col space-y-4 px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+                <div class="flex flex-col space-y-2 px-4 pt-2 pb-4 bg-white rounded-lg shadow">
                     <div>
                         <h2 class="text-lg font-semibold mb-4">{% trans "Follow-up" %}</h2>
                         <p class="text-sm font-semibold">{% trans "Treatment status" %}</p>
@@ -154,12 +179,7 @@
                 </div>
             </div>
         </form>
-            <div class="flex flex-col justify-center w-20 space-y-8">
-                <div class="items-center pl-5 pb-20 mt-2">
-                    <i class="scale-[5] scale-y-[3] fas fa-caret-right text-warmgray-700 drop-shadow-xs"></i>
-                </div>
-            </div>
-            <div class="mb-4 mr-1 w-full">
+            <div class="bg-white rounded-lg shadow pb-6 mb-4 mr-1 w-full">
                 <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-t-lg shadow w-full">
                     <h2 class="text-lg font-semibold mb-4">{% trans "Select or create additional security measures" %}</h2>
                     <div class="flex flex-row">
@@ -171,14 +191,14 @@
                     {% include 'snippets/mtg_list_nested.html' %}
                 </div>
             </div>
-        </section>
-        <div class="flex space-x-2 justify-end"> 
+            <div class="flex space-x-2 justify-end"> 
             <button onclick="cancel()" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
             <input
                 type="hidden" form="scenario_update_form" name="next" value={{ request.GET.next }}>
             <button action="submit" form="scenario_update_form" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-400"
             :disabled="submitDisabled">{% trans "Save" %}</button>
         </div>
+        </section>
     </div>
 </div>
 
