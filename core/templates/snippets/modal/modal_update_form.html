@@ -1,0 +1,42 @@
+{% load static i18n core_extras %}
+
+<!-- BEGIN UPDATE FORM -->
+<form action="{% url model|lower|add:'-update-modal' %}" method="post"> {% csrf_token %}
+    <div>
+      <div class="flex-row hidden">
+            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add Security Measure") model="securitymeasure" content=_("New security measure") %}
+      </div>
+    </div>
+      <div class="mb-6">
+        <label class="form-label">{{ form.label|striptags }}</label>
+        <div class="flex flex-col mb-4 space-y-1">
+          <div class="flex flex-col">
+              <label class="text-sm font-semibold">{{ form.security_measures.label|striptags }}</label>
+                          {{ form.security_measures }}
+                  
+                          {% for error in form.security_measures.errors %}
+                              <li class="text-red-500 text-xs font-semibold">{{ error|striptags }}</li>
+                          {% endfor %}
+          </div>
+          <div class="help_text -mt-1">
+              {{ form.security_measures.help_text|safe }}
+          </div>
+      </div>
+      </div>
+
+      <section class="col-start-3 col-span-6 place-content-end">
+
+        <section class="grid grid-cols-2 place-content-end">
+          <button id="cancel" @click="open = !open,
+modalOpen = !modalOpen" type="button"
+            class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-black bg-gray-300 hover:bg-gray-400">{% trans "Cancel" %}</button>
+          <input type="hidden" name="next" value="{{ request.path|urlencode }}">
+          <button id="{{ model }}_save" type="submit" name="select_measures" value="Select"
+            class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-800 hover:bg-indigo-600 ml-2">
+            {% trans "Save" %}
+          </button>
+        </section>
+      </section>
+    </div>
+  </form>
+  <!-- END UPDATE FORM -->

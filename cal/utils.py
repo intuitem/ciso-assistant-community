@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from calendar import HTMLCalendar, LocaleHTMLCalendar
 from .models import Event
-from core.models import Mitigation, RiskAcceptance
+from core.models import SecurityMeasure, RiskAcceptance
 
 class Calendar(LocaleHTMLCalendar):
     def __init__(self, year=None, month=None, *args, **kwargs):
@@ -32,7 +32,7 @@ class Calendar(LocaleHTMLCalendar):
     # formats a month as a table
     # filter events by year and month
     def formatmonth(self, withyear=True):
-        events = {'mtg': Mitigation.objects.filter(eta__year=self.year, eta__month=self.month),
+        events = {'mtg': SecurityMeasure.objects.filter(eta__year=self.year, eta__month=self.month),
                   'ra': RiskAcceptance.objects.filter(expiry_date__year=self.year, expiry_date__month=self.month)}
 
         cal = f'<table class="calendar">\n'

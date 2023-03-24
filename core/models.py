@@ -1,105 +1,254 @@
+import uuid
 from django.db import models
-from django.contrib.auth.models import User
-from general.models import *
-from asf_rm.settings import ARM_SETTINGS
+from django.core.exceptions import ValidationError
+from asf_rm import settings
+from core.base_models import AbstractBaseModel
+from iam.models import Folder, FolderMixin
 from openpyxl import load_workbook
 import pandas as pd
-from django.urls import reverse
+import json
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from datetime import date
+from datetime import date, datetime
+from django.contrib.auth import get_user_model
+from typing import Self
+
+User = get_user_model()
 
 
-class Analysis(models.Model):
-    RATING_METHODS = [
-        ('default', _('Balanced (default)')),
-        ('critical', _('Critical (FAIR-based)')),
-        ('custom', _('Custom (adjusted)')),
+class Project(AbstractBaseModel):
+    PRJ_LC_STATUS = [
+        ('undefined', _('--')),
+        ('in_design', _('Design')),
+        ('in_dev', _('Development')),
+        ('in_prod', _('Production')),
+        ('eol', _('End Of Life')),
+        ('dropped', _('Dropped')),
+
     ]
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name=_("Project"))
-    version = models.CharField(max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
-    auditor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Auditor"))
+    internal_reference = models.CharField(max_length=100,
+                                          null=True, blank=True, verbose_name=_("Internal reference"))
+    folder = models.ForeignKey(
+        Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    lc_status = models.CharField(max_length=20, default='in_design',
+                                 choices=PRJ_LC_STATUS, verbose_name=_("Status"))
+
+    class Meta:
+        verbose_name = _("Project")
+        verbose_name_plural = _("Projects")
+
+    def __str__(self):
+        return self.name
+
+
+class Threat(AbstractBaseModel, FolderMixin):
+    is_published = models.BooleanField(_('published'), default=True)
+
+    class Meta:
+        verbose_name = _("Threat")
+        verbose_name_plural = _("Threats")
+
+    def __str__(self):
+        return self.name
+
+
+class Asset(AbstractBaseModel, FolderMixin):
+    class Type(models.TextChoices):
+        """
+        The type of the asset.
+
+        An asset can either be a primary or a support asset.
+        A support asset can be linked to another "parent" asset of type primary or support.
+        Cycles are not allowed
+        """
+        PRIMARY = 'PR', _('Primary')
+        SUPPORT = 'SP', _('Support')
+
+    business_value = models.CharField(
+        max_length=200, blank=True, verbose_name=_('business value'))
+    type = models.CharField(
+        max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_('type'))
+    parent_assets = models.ManyToManyField(
+        'self', blank=True, verbose_name=_('parent assets'), symmetrical=False)
+    is_published = models.BooleanField(_('published'), default=True)
+
+    class Meta:
+        verbose_name_plural = _("Assets")
+        verbose_name = _("Asset")
+
+    def __str__(self) -> str:
+        return str(self.name)
+
+
+    def is_primary(self) -> bool:
+        """
+        Returns True if the asset is a primary asset.
+        """
+        return self.type == Asset.Type.PRIMARY
+
+    def is_support(self) -> bool:
+        """
+        Returns True if the asset is a support asset.
+        """
+        return self.type == Asset.Type.SUPPORT
+
+    def ancestors_plus_self(self) -> list[Self]:
+        result = {self}
+        for x in self.parent_assets.all():
+            result.update(x.ancestors_plus_self())
+        return list(result)
+
+
+class SecurityFunction(AbstractBaseModel, FolderMixin):
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider"))
+    contact = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Contact"))
+    is_published = models.BooleanField(_('published'), default=True)
+
+    class Meta:
+        verbose_name = _("Security function")
+        verbose_name_plural = _("Security functions")
+
+    def __str__(self):
+        return self.name
+
+
+class RiskMatrix(AbstractBaseModel, FolderMixin):
+    json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
+        See the documentation for more information."), default=dict)
+    is_enabled = models.BooleanField(_('enabled'), default=True, help_text=_(
+        "If the matrix is set as disabled, it will not be available for selection for new risk analyses."))
+    
+    @property
+    def is_used(self) -> bool:
+        return Analysis.objects.filter(rating_matrix=self).exists()
+    
+    @property
+    def analyses(self) -> list:
+        return Analysis.objects.filter(rating_matrix=self)
+    
+    @property
+    def projects(self) -> list:
+        return Project.objects.filter(analysis__rating_matrix=self).distinct()
+
+    def parse_json(self) -> dict:
+        return json.loads(self.json_definition)
+
+    def get_detailed_grid(self) -> list:
+        matrix = self.parse_json()
+        grid = []
+        for row in matrix['grid']:
+            grid.append([item for item in row])
+        return grid
+
+    def render_grid_as_colors(self):
+        matrix = self.parse_json()
+        grid = matrix['grid']
+        res = [[matrix['risk'][i] for i in row] for row in grid]
+
+        return res
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Analysis(AbstractBaseModel):
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, verbose_name=_("Project"))
+    version = models.CharField(
+        max_length=100, blank=True, null=True, default="0.1", verbose_name=_("Version"))
+    auditor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+                                null=True, blank=True, verbose_name=_("Auditor"))
     is_draft = models.BooleanField(verbose_name=_("is a draft"), default=True)
-    rating_matrix = models.CharField(choices=RATING_METHODS, default='default', max_length=20, verbose_name=_("Rating matrix"))
-
-    comments = models.TextField(max_length=1000, blank=True, null=True,
-                                verbose_name=_("Comments"))
-
-    created_at = models.DateTimeField(auto_now_add=True)
+    rating_matrix = models.ForeignKey(RiskMatrix, on_delete=models.PROTECT, help_text=_(
+        "WARNING! After choosing it, you will not be able to change it"), verbose_name=_("Rating matrix"))
     updated_at = models.DateTimeField(auto_now=True)
+
+    fields_to_check = ['name', 'version']
 
     class Meta:
         verbose_name = _("Analysis")
         verbose_name_plural = _("Analyses")
 
-    def __str__(self):
-        return 'RA-' + str(self.id) + ': ' + str(self.project) + ', version ' + str(self.version)
+    def __str__(self) -> str:
+        return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
 
-    def save(self, *args, **kwargs):
-        for ri in self.riskinstance_set.all():
-            ri.save()
-        super(Analysis, self).save(*args, **kwargs)
+    @property
+    def path_display(self) -> str:
+        return f'{self.project.folder}/{self.project}/{self.name} - {self.version}'
 
-    def get_scenario_count(self):
-        count = RiskInstance.objects.filter(analysis=self.id).count()
+    def get_scenario_count(self) -> int:
+        count = RiskScenario.objects.filter(analysis=self.id).count()
         scenario_count = count
         return scenario_count
 
     def quality_check(self) -> dict:
 
-        ri_value = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
         errors_lst = list()
         warnings_lst = list()
         info_lst = list()
         # --- check on the risk analysis:
         if self.is_draft:
-            info_lst.append({"msg": _("Risk analysis is still in Draft mode"), "obj_type": "Analysis", "object": self})
+            info_lst.append({"msg": _("{}: Risk analysis is still in Draft mode").format(
+                self), "obj_type": "analysis", "object": self})
         if not self.auditor:
-            info_lst.append({"msg": _("No auditor assigned to this risk analysis yet"), "obj_type": "Analysis", "object": self})
-        if not self.riskinstance_set.all():
-            warnings_lst.append({"msg": _("Analysis is empty. No risk scenario declared yet"), "obj_type": "Analysis", "object": self})
+            info_lst.append({"msg": _("{}: No auditor assigned to this risk analysis yet").format(
+                self), "obj_type": "analysis", "object": self})
+        if not self.riskscenario_set.all():
+            warnings_lst.append({"msg": _("{}: Analysis is empty. No risk scenario declared yet").format(
+                self), "obj_type": "analysis", "object": self})
         # ---
 
-        # --- checks on the risk instances
-        for ri in self.riskinstance_set.all().order_by('id'):
+        # --- checks on the risk scenarios
+        for ri in self.riskscenario_set.all().order_by('created_at'):
 
-            if ri_value[ri.residual_level] > ri_value[ri.current_level]:
-                errors_lst.append({"msg": _("R#{} residual risk level is higher than the current one").format(ri.id), "obj_type": "RiskInstance", "object": ri})
-            if ri_value[ri.residual_proba] > ri_value[ri.current_proba]:
-                errors_lst.append({"msg": _("R#{} residual risk probability is higher than the current one").format(ri.id), "obj_type": "RiskInstance", "object": ri})
-            if ri_value[ri.residual_impact] > ri_value[ri.current_impact]:
-                errors_lst.append({"msg": _("R#{} residual risk impact is higher than the current one").format(ri.id), "obj_type": "RiskInstance", "object": ri})
+            if ri.residual_level > ri.current_level:
+                errors_lst.append({"msg": _("{} residual risk level is higher than the current one").format(
+                    ri.rid), "obj_type": "riskscenario", "object": ri})
+            if ri.residual_proba > ri.current_proba:
+                errors_lst.append({"msg": _("{} residual risk probability is higher than the current one").format(
+                    ri.rid), "obj_type": "riskscenario", "object": ri})
+            if ri.residual_impact > ri.current_impact:
+                errors_lst.append({"msg": _("{} residual risk impact is higher than the current one").format(
+                    ri.rid), "obj_type": "riskscenario", "object": ri})
 
-            if ri_value[ri.residual_level] < ri_value[ri.current_level] or ri_value[ri.residual_proba] < ri_value[
-                ri.current_proba] or ri_value[ri.residual_impact] < ri_value[ri.current_impact]:
-                if ri.associated_mitigations() == 0:
+            if ri.residual_level < ri.current_level or ri.residual_proba < ri.current_proba or ri.residual_impact < ri.current_impact:
+                if ri.security_measures.count() == 0:
                     errors_lst.append(
-                        {"msg": _("R#{}: residual risk level has been lowered without any specific measure").format(ri.id), "obj_type": "RiskInstance", "object": ri})
+                        {"msg": _("{}: residual risk level has been lowered without any specific measure").format(ri.rid), "obj_type": "riskscenario", "object": ri})
 
             if ri.treatment == 'accepted':
                 if not ri.riskacceptance_set.exists():
-                    warnings_lst.append({"msg": _("R#{} risk accepted but no risk acceptance attached").format(ri.id), "obj_type": "RiskInstance", "object": ri})
+                    warnings_lst.append({"msg": _("{} risk accepted but no risk acceptance attached").format(
+                        ri.rid), "obj_type": "riskscenario", "object": ri})
         # ---
 
-        # --- checks on the mitigations
-        for mtg in Mitigation.objects.filter(risk_instance__analysis=self):
+        # --- checks on the security measures
+        for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=self):
             if not mtg.eta:
-                warnings_lst.append({"msg": _("M#{} does not have an ETA").format(mtg.id), "obj_type": "Mitigation", "object": mtg})
+                warnings_lst.append({"msg": _("{} does not have an ETA").format(
+                    mtg.mid), "obj_type": "securitymeasure", "object": mtg})
             else:
                 if date.today() > mtg.eta:
                     errors_lst.append(
-                        {"msg": _("M#{} ETA is in the past now. Consider updating its status or the date").format(mtg.id), "obj_type": "Mitigation", "object": mtg})
+                        {"msg": _("{} ETA is in the past now. Consider updating its status or the date").format(mtg.mid), "obj_type": "securitymeasure", "object": mtg})
             if not mtg.effort:
                 warnings_lst.append(
-                    {"msg": _("M#{} does not have an estimated effort. This will help you for prioritization").format(mtg.id), "obj_type": "Mitigation", "object": mtg})
+                    {"msg": _("{} does not have an estimated effort. This will help you for prioritization").format(mtg.mid), "obj_type": "securitymeasure", "object": mtg})
             if not mtg.link:
                 info_lst.append(
-                    {"msg": _("M#{} does not have an external link attached. This will help you for follow-up").format(mtg.id), "obj_type": "Mitigation", "object": mtg})
+                    {"msg": _("{} does not have an external link attached. This will help you for follow-up").format(mtg.mid), "obj_type": "securitymeasure", "object": mtg})
 
         # --- checks on the risk acceptances
-        for ra in RiskAcceptance.objects.filter(risk_instance__analysis=self):
+        for ra in RiskAcceptance.objects.filter(risk_scenarios__analysis=self):
+            if not ra.expiry_date:
+                warnings_lst.append({"msg": _("{}: Acceptance has no expiry date").format(
+                    ra), "obj_type": "securitymeasure", "object": ra})
+                continue
             if date.today() > ra.expiry_date:
                 errors_lst.append(
-                    {"msg": _("R#{} has a risk acceptance that has expired. Consider updating the status or the date").format(ra.risk_instance.id)})
+                    {"msg": _("{}: Acceptance has expired. Consider updating the status or the date").format(ra), "obj_type": "securitymeasure", "object": ra})
 
         findings = {
             "errors": errors_lst,
@@ -109,87 +258,17 @@ class Analysis(models.Model):
         }
         return findings
 
-
-def risk_scoring(proba, impact, matrix):
-    matrix_path = ARM_SETTINGS["MATRIX_PATH"]
-    df = pd.read_excel(matrix_path, None)
-    # None in read_excel allow to read all sheets, TODO move this elsewhere to avoid multiple IOs
-    focus = df[matrix]
-    return focus[(focus.proba == proba) & (focus.impact == impact)].level.values[0]
+    # NOTE: if your save() method throws an exception, you might want to override the clean() method to prevent
+    # 500 errors when the form submitted. See https://docs.djangoproject.com/en/dev/ref/models/instances/#django.db.models.Model.clean
 
 
-class RiskInstance(models.Model):
-    TREATMENT_OPTIONS = [
-        ('open', _('Open')),
-        ('mitigated', _('Mitigated')),
-        ('accepted', _('Accepted')),
-        ('blocker', _('Show-stopper')),
-    ]
-    # 1 very low, 2 low, 3 medium, 4 high, 5 very high
-    RATING_OPTIONS = [
-        ('VL', _('Very low')),
-        ('L', _('Low')),
-        ('M', _('Medium')),
-        ('H', _('High')),
-        ('VH', _('Very high')),
-    ]
-
-    analysis = models.ForeignKey(Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
-    assets = models.ManyToManyField(Asset)
-    parent_risk = models.ForeignKey(ParentRisk, on_delete=models.CASCADE, verbose_name=_("Threat"))
-    title = models.CharField(max_length=200, default=_("<risk scenario short title>"), verbose_name=_("Title"))
-    scenario = models.TextField(max_length=2000, default=_("<risk scenario and impact description>"), verbose_name=_("Scenario"))
-    existing_measures = models.TextField(max_length=2000,
-                                         help_text=_("The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
-                                         default=_("<we have solution A and Process B to handle this>"),
-                                         verbose_name=_("Existing measures"))
-
-    # current
-    current_proba = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                     verbose_name=_("Current probability"))
-    current_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current impact"))
-    current_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Current level"),
-                                     help_text=_('The risk level given the current measures. Automatically updated on Save, based on the chosen matrix'))
-
-    # residual
-    residual_proba = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                      verbose_name=_("Residual probability"))
-    residual_impact = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS, verbose_name=_("Residual impact"))
-    residual_level = models.CharField(default='VL', max_length=2, choices=RATING_OPTIONS,
-                                      help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'),
-                                      verbose_name=_("Residual level"))
-
-    treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
-                                 verbose_name=_("Treatment status"))
-
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-    comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
-
-    class Meta:
-        verbose_name = _("Risk scenario")
-        verbose_name_plural = _("Risk scenarios")
-
-    def parent_project(self):
-        return self.analysis.project
-    parent_project.short_description = _("Parent project")
-
-    def associated_mitigations(self):
-        return self.mitigation_set.count()
-
-    def __str__(self):
-        return str(self.parent_project()) + ': ' + str(self.title)
-
-    def rid(self):
-        return 'R.' + str(self.id)
-
-    def save(self, *args, **kwargs):
-        self.current_level = risk_scoring(self.current_proba, self.current_impact, self.analysis.rating_matrix)
-        self.residual_level = risk_scoring(self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
-        super(RiskInstance, self).save(*args, **kwargs)
+def risk_scoring(probability, impact, matrix: RiskMatrix) -> int:
+    fields = json.loads(matrix.json_definition)
+    risk_index = fields['grid'][probability][impact]
+    return risk_index
 
 
-class Mitigation(models.Model):
+class SecurityMeasure(AbstractBaseModel):
     MITIGATION_STATUS = [
         ('open', _('Open')),
         ('in_progress', _('In progress')),
@@ -210,73 +289,241 @@ class Mitigation(models.Model):
         ('XL', _('Extra-Large')),
     ]
 
-    MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 3, 'XL': 4}
-    MAP_RISK_LEVEL = {'VL': 1, 'L': 2, 'M': 3, 'H': 4, 'VH': 5}
+    MAP_EFFORT = {None: -1, 'S': 1, 'M': 2, 'L': 4, 'XL': 8}
+    # todo: think about a smarter model for ranking
 
-    risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
-    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Solution"))
-
-    title = models.CharField(max_length=200, default=_("<short title for the measure>"), verbose_name=_("Title"))
-    description = models.TextField(max_length=500, blank=True, null=True, verbose_name=_("Description"))
-    type = models.CharField(max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
-    status = models.CharField(max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
-    eta = models.DateField(blank=True, null=True, help_text=_("Estimated Time of Arrival"), verbose_name=_("ETA"))
+    folder = models.ForeignKey(
+        Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    security_function = models.ForeignKey(
+        SecurityFunction, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Security Function"))
+    type = models.CharField(
+        max_length=20, choices=MITIGATION_TYPE, default='n/a', verbose_name=_("Type"))
+    status = models.CharField(
+        max_length=20, choices=MITIGATION_STATUS, default='open', verbose_name=_("Status"))
+    eta = models.DateField(blank=True, null=True, help_text=_(
+        "Estimated Time of Arrival"), verbose_name=_("ETA"))
     link = models.CharField(null=True, blank=True, max_length=1000,
-                            help_text=_("External url for action follow-up (eg. Jira ticket)"),
+                            help_text=_(
+                                "External url for action follow-up (eg. Jira ticket)"),
                             verbose_name=_("Link"))
     effort = models.CharField(null=True, blank=True, max_length=2, choices=EFFORT,
-                              help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
+                              help_text=_(
+                                  "Relative effort of the measure (using T-Shirt sizing)"),
                               verbose_name=_("Effort"))
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+    created_at = models.DateTimeField(
+        auto_now_add=True, verbose_name=_("Created at"))
+    updated_at = models.DateTimeField(
+        auto_now=True, verbose_name=_("Updated at"))
 
     class Meta:
         verbose_name = _("Security measure")
         verbose_name_plural = _("Security measures")
 
+    @property
+    def risk_scenarios(self):
+        return self.riskscenario_set.all()
+
+    @property
+    def analyses(self):
+        return {scenario.analysis for scenario in self.risk_scenarios}
+
+    @property
+    def projects(self):
+        return {analysis.project for analysis in self.analyses}
+
     def parent_project(self):
-        return self.risk_instance.parent_project()
-    parent_project.short_description = _("Parent project")
+        pass
 
     def __str__(self):
-        return self.title
+        return self.name
+
+    @property
+    def mid(self):
+        return f'M.{self.scoped_id(scope=SecurityMeasure.objects.filter(folder=self.folder))}'
 
     def get_ranking_score(self):
         if self.effort:
-            return round(self.MAP_RISK_LEVEL[self.risk_instance.current_level]/self.MAP_EFFORT[self.effort], 4)
+            value = 0
+            for risk_scenario in self.riskscenario_set.all():
+                current = risk_scenario.current_level
+                residual = risk_scenario.residual_level
+                if current >= 0 and residual >= 0:
+                    value += (1 + current - residual)*(current + 1)
+            return round(value/self.MAP_EFFORT[self.effort], 4)
         else:
             return 0
 
     @property
     def get_html_url(self):
-        url = reverse('MP', args=(self.risk_instance.analysis.id,))
-        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.risk_instance.analysis.project.name}: {self.title} </a>'
+        url = reverse('securitymeasure-detail', args=(self.id,))
+        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.folder.name}: {self.name} </a>'
 
 
-class RiskAcceptance(models.Model):
-    ACCEPTANCE_TYPE = [
-        ('temporary', _('Temporary')),
-        ('permanent', _('Permanent')),
+class RiskScenario(AbstractBaseModel):
+    TREATMENT_OPTIONS = [
+        ('open', _('Open')),
+        ('mitigated', _('Mitigated')),
+        ('accepted', _('Accepted')),
+        ('blocker', _('Show-stopper')),
+        ('transferred', _('Transferred')),
     ]
-    risk_instance = models.ForeignKey(RiskInstance, on_delete=models.CASCADE, verbose_name=_("Risk scenario"))
-    validator = models.CharField(max_length=200, default=_("<Risk owner and validator identity>"), verbose_name=_("Validator"))
-    type = models.CharField(max_length=20, choices=ACCEPTANCE_TYPE, default='temporary', verbose_name=_("Type"))
-    expiry_date = models.DateField(help_text=_("If temporary, specify when the risk acceptance will no longer apply"),
-                                   blank=True, null=True, verbose_name=_("Expiry date"))
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+
+    analysis = models.ForeignKey(
+        Analysis, on_delete=models.CASCADE, verbose_name=_("Analysis"))
+    assets = models.ManyToManyField(Asset, verbose_name=_(
+        "Assets"), blank=True, help_text=_("Assets impacted by the risk scenario"))
+    security_measures = models.ManyToManyField(
+        SecurityMeasure, verbose_name=_("Security measures"), blank=True)
+    threat = models.ForeignKey(
+        Threat, on_delete=models.CASCADE, verbose_name=_("Threat"))
+    existing_measures = models.TextField(max_length=2000,
+                                         help_text=_(
+                                             "The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."),
+                                         verbose_name=_("Existing measures"), blank=True)
+
+    # current
+    current_proba = models.SmallIntegerField(
+        default=-1, verbose_name=_("Current probability"))
+    current_impact = models.SmallIntegerField(
+        default=-1, verbose_name=_("Current impact"))
+    current_level = models.SmallIntegerField(default=-1, verbose_name=_("Current level"),
+                                             help_text=_('The risk level given the current measures. Automatically updated on Save, based on the chosen matrix'))
+
+    # residual
+    residual_proba = models.SmallIntegerField(
+        default=-1, verbose_name=_("Residual probability"))
+    residual_impact = models.SmallIntegerField(
+        default=-1, verbose_name=_("Residual impact"))
+    residual_level = models.SmallIntegerField(default=-1, verbose_name=_("Residual level"),
+                                              help_text=_('The risk level when all the extra measures are done. Automatically updated on Save, based on the chosen matrix'))
+
+    treatment = models.CharField(max_length=20, choices=TREATMENT_OPTIONS, default='open',
+                                 verbose_name=_("Treatment status"))
+
+    updated_at = models.DateTimeField(
+        auto_now=True, verbose_name=_("Updated at"))
+    comments = models.CharField(
+        max_length=500, blank=True, null=True, verbose_name=_("Comments"))
+
+    class Meta:
+        verbose_name = _("Risk scenario")
+        verbose_name_plural = _("Risk scenarios")
+
+    # def get_rating_options(self, field: str) -> list[tuple]:
+    #     matrix = self.analysis.rating_matrix.parse_json()
+    #     return [(k, v) for k, v in matrix.fields[field].items()]
+
+    def parent_project(self):
+        return self.analysis.project
+    parent_project.short_description = _("Project")
+
+    def get_matrix(self):
+        return self.analysis.rating_matrix.parse_json()
+
+    def get_current_risk(self):
+        if self.current_level < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'hexcolor': '#A9A9A9'}
+        matrix = self.get_matrix()
+        return matrix['risk'][self.current_level]
+
+    def get_current_impact(self):
+        if self.current_impact < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
+        matrix = self.get_matrix()
+        return matrix['impact'][self.current_impact]
+
+    def get_current_proba(self):
+        if self.current_proba < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
+        matrix = self.get_matrix()
+        return matrix['probability'][self.current_proba]
+
+    def get_residual_risk(self):
+        if self.residual_level < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated', 'hexcolor': '#A9A9A9'}
+        matrix = self.get_matrix()
+        return matrix['risk'][self.residual_level]
+
+    def get_residual_impact(self):
+        if self.residual_impact < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
+        matrix = self.get_matrix()
+        return matrix['impact'][self.residual_impact]
+
+    def get_residual_proba(self):
+        if self.residual_proba < 0:
+            return {'abbreviation': '--', 'name': '--', 'description': 'not rated'}
+        matrix = self.get_matrix()
+        return matrix['probability'][self.residual_proba]
+
+    def __str__(self):
+        return str(self.parent_project().folder) + _('/') + str(self.parent_project()) + _(': ') + str(self.name)
+
+    @property
+    def rid(self):
+        return f'R.{self.scoped_id(scope=RiskScenario.objects.filter(analysis=self.analysis))}'
+
+    def save(self, *args, **kwargs):
+        if self.current_proba >= 0 and self.current_impact >= 0:
+            self.current_level = risk_scoring(
+                self.current_proba, self.current_impact, self.analysis.rating_matrix)
+        else:
+            self.current_level = -1
+        if self.residual_proba >= 0 and self.residual_impact >= 0:
+            self.residual_level = risk_scoring(
+                self.residual_proba, self.residual_impact, self.analysis.rating_matrix)
+        else:
+            self.residual_level = -1
+        super(RiskScenario, self).save(*args, **kwargs)
+
+
+class RiskAcceptance(AbstractBaseModel):
+
+    ACCEPTANCE_STATE = [
+        ('created', _('Created')),
+        ('submitted', _('Submitted')),
+        ('accepted', _('Accepted')),
+        ('rejected', _('Rejected')),
+        ('revoked', _('Revoked')),
+    ]
+    
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, verbose_name=_("Domain"))
+    risk_scenarios = models.ManyToManyField(RiskScenario, verbose_name=_("Risk scenarios"), help_text=_("Select the risk scenarios to be accepted, attention they must be part of the chosen domain"))
+    validator = models.ForeignKey(User, max_length=200, help_text=_("Risk owner and validator identity"), verbose_name=_("Validator"), on_delete=models.SET_NULL, null=True, blank=True)
+    state = models.CharField(max_length=20, choices=ACCEPTANCE_STATE, default='created', verbose_name=_("State"))
+    expiry_date = models.DateField(help_text=_("Specify when the risk acceptance will no longer apply"),
+                                   null=True, verbose_name=_("Expiry date"))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
+    accepted_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Acceptance date"))
+    rejected_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Rejection date"))
+    revoked_date = models.DateTimeField(blank=True, null=True, verbose_name=_("Revocation date"))
     comments = models.CharField(max_length=500, blank=True, null=True, verbose_name=_("Comments"))
 
     class Meta:
+        permissions = [("validate_riskacceptance", "Can validate/rejected risk acceptances")]
         verbose_name = _("Risk acceptance")
         verbose_name_plural = _("Risk acceptances")
 
     def __str__(self):
-        return f"[{self.type}] {self.risk_instance}"
+        if self.name:
+            return self.name
+        scenario_names: str = ', '.join(
+            [str(scenario) for scenario in self.risk_scenarios.all()])
+        return f"{scenario_names}"
 
     @property
     def get_html_url(self):
-        url = reverse('RA', args=(self.risk_instance.analysis.id,))
-        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.risk_instance} </a>'
+        url = reverse('riskacceptance-detail', args=(self.id,))
+        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.folder.name}: {self.name} </a>'
+
+    def set_state(self, state):
+        self.state = state
+        if state == "accepted":
+            self.accepted_date = datetime.now()
+        if state == "rejected":
+            self.rejected_date = datetime.now()
+        elif state == "revoked":
+            self.revoked_date = datetime.now()
+        self.save()
 # you can consider nested inlines at some points

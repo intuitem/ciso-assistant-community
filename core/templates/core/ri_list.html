@@ -1,0 +1,206 @@
+{% extends 'core/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+<div class="">
+    {% with page_title=_('Risk scenarios') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <!-- Ordering, Searchbar and Dropdown Form -->
+    <div class="flex flex-row justify-start space-x-4 h-fit">
+        <form method="get">
+            <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        {{ filter.form.name }}
+                </div>
+                <div class="flex justify-center">
+                    <div
+                        x-data="{
+                            open: false,
+                            toggle() {
+                                if (this.open) {
+                                    return this.close()
+                                }
+                    
+                                this.$refs.button.focus()
+                    
+                                this.open = true
+                            },
+                            close(focusAfter) {
+                                if (! this.open) return
+                    
+                                this.open = false
+                    
+                                focusAfter && focusAfter.focus()
+                            }
+                        }"
+                        x-on:keydown.escape.prevent.stop="close($refs.button)"
+                        x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                            x-id="['dropdown-button']"
+                        class="relative"
+                    >
+                        <!-- Button -->
+                        <button
+                            x-ref="button"
+                            x-on:click="toggle()"
+                            :aria-expanded="open"
+                            :aria-controls="$id('dropdown-button')"
+                            type="button"
+                            class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
+                            :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
+                        >
+                            <i class="fas fa-filter"></i>
+                            <span>{% trans "Filters" %}</span>
+                        </button>
+                    
+                        <!-- Panel -->
+                        <div
+                            x-ref="panel"
+                            x-show="open"
+                            x-transition.origin.top.left
+                            x-on:click.outside="close($refs.button)"
+                            :id="$id('dropdown-button')"
+                            style="display: none;"
+                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden z-10"
+                        >
+                    
+                            <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
+                                <div>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Threat" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.threat }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Domain" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.analysis__project__folder }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Project" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.analysis__project }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="block text-sm font-medium text-gray-900">{% trans "Treatment status" %}</p>
+                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
+                                        <div class="flex flex-col">
+                                            <div>
+                                                {{ filter.form.treatment }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
+                </div>        
+            </div>
+        </form>
+        {% url 'riskscenario-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <div class="flex items-center h-10 w-full">
+            <a href="{% url 'riskscenario-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+                <span>{% trans "Clear Filters" %}</span>
+            </a>
+        </div>
+        {% endif %}
+        <!-- End Filters Dropdown Form -->
+        {% if add_riskscenario%}
+        {% include 'snippets/add_button_modal.html' with form=risk_scenario_create_form header=_("Add risk scenario") model="riskscenario" content=_("New risk scenario") %}
+        {% endif %}
+
+
+    </div>
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
+        <table class="w-full text-sm text-left">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <th class="px-6 py-3">{% trans "Name" %}</th>
+                <th class="px-6 py-3">{% trans "Threat" %}</th>
+                <th class="px-6 py-3">{% trans "Project" %}</th>
+                <th class="px-6 py-3">{% trans "Treatment status" %}</th> 
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                {% for scenario in scenarios %}
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'riskscenario-detail' scenario.id %}?next={{ request.path|urlencode }}'">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div>
+                                    <p id="scenario{{ scenario.id }}" class="text-md font-semibold whitespace-no-wrap">
+                                        {{ scenario.name|capfirst }}
+                                    </p>
+                                </div>
+                            </div>
+                        </th>
+                        <td class="px-6 py-4">
+                            <p class="whitespace-no-wrap capitalize">
+                                {% if scenario.threat %}{{ scenario.threat }}{% else %}--{% endif %}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="whitespace-no-wrap">
+                                {{ scenario.parent_project }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="whitespace-no-wrap">
+                                {{ scenario.get_treatment_display }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="">
+                                <span><a href="{% url 'riskscenario-detail' scenario.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if scenario.id in object_ids_change %}
+                                <span>
+                                    <a href="{% url 'riskscenario-update' scenario.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </span>
+                                {% endif %}
+                                {% if scenario.id in object_ids_delete %}
+                                {% include 'snippets/delete_button_modal.html' with object=scenario header=_("Delete risk scenario?") %}
+                                {% endif%}
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="text-black p-4 text-center">
+                        <td colspan="8" class="py-2">
+                            <i class="inline fas fa-exclamation-triangle"></i>
+                            <p class="inline test-gray-900">{% trans "No scenario found." %}</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'snippets/paginator.html' %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+
+<div>
+    {% with page_title=_('Matrices') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+    <div class="flex flex-row justify-start space-x-4 h-fit">
+        <!-- Ordering, Searchbar and Dropdown Form -->
+        <form method="get">
+            <div class="flex flex-row space-x-4">
+                <div class="flex flex-row space-x-0 rounded-lg h-fit shadow focus-within:ring-2 focus-within:ring-blue-700">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        {{ filter.form.name }}
+                </div>
+                <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
+                    <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                        <i class="fas fa-sort"></i>
+                    </div>
+                    {{ filter.form.orderby }}
+                </div>        
+            </div>
+        </form>
+        {% url 'riskmatrix-list' as short_path %}
+        {% if request.get_full_path != short_path %}
+        <div class="flex items-center h-10 w-full">
+            <a href="{% url 'riskmatrix-list' %}" class="inline-block align-middle hover:underline px-4 cursor-pointer leading-tight whitespace-nowrap">
+                <span>{% trans "Clear Filters" %}</span>
+            </a>
+        </div>
+        {% endif %}
+        <!-- End Filters Dropdown Form -->
+
+    
+    </div>
+
+    <div class="mt-4 relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <th class="px-6 py-3">{% trans "Name" %}</th>
+                <th class="px-6 py-3">{% trans "Description" %}</th>
+                <th class="px-6 py-3 text-center">{% trans "Projects" %}</th>
+                <th class="px-6 py-3">{% trans "Matrix" %}</th>
+                <th class="px-6 py-3">{% trans "Actions" %}</th>
+            </thead>
+            <tbody>
+                {% for matrix in matrices %}
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'riskmatrix-detail' matrix.id %}?next={{ request.path|urlencode }}'">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div>
+                                    {% if not matrix.is_enabled %}<span class="bg-gray-200 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{% trans "disabled" %}</span>{% endif %}
+                                    <p id="matrix{{ matrix.id }}" class="text-md font-semibold whitespace-no-wrap">
+                                        {{ matrix.name|capfirst }}
+                                    </p>
+                                </div>
+                            </div>
+                        </th>
+                        <td class="px-6 py-4">
+                            <p class="whitespace-no-wrap capitalize">
+                                {{ matrix.description|capfirst }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <p class="whitespace-no-wrap capitalize">
+                                {{ matrix.projects|length }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-row">
+                                {% for row in matrix.render_grid_as_colors %}
+                                <div class="flex flex-col">
+                                    {% for item in row reversed %}
+                                        <div class="w-8 h-4 cursor-pointer relative inline-block group" style="background-color: {{ item.hexcolor }}">
+                                            <span class="hidden m-2 w-fit whitespace-nowrap bg-black text-white text-center rounded p-1 absolute z-10 group-hover:block left-full">{{ item.name }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+
+                            <div class="w-full">
+                                <span><a href="{% url 'riskmatrix-detail' matrix.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                                {% if matrix.id in object_ids_change %}
+                                <span>
+                                    <a href="{% url 'riskmatrix-update' matrix.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </span>
+                                {% endif %}
+                                
+                                {% if matrix.id in object_ids_delete and not matrix.is_used %}
+                                {% include 'snippets/delete_button_modal.html' with object=matrix model='riskmatrix' header=_("Delete matrix?") %}
+                                {% endif %}
+
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No matrix found." %}</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include 'snippets/paginator.html' %}
+    </div>
+</div>
+
+
+{% endblock %}

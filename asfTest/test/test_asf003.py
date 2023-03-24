@@ -28,7 +28,7 @@ def test_ASF003(page):
     assert page.url == urlpatterns.composer, "Step "+str(step)+": not Ok"
     # 3 | Select the first project (if it exists or skip) and click on “Process” | Opening of the first analysis | 
     step = 3
-    page.click('id=analytics')
+    page.click('id=overview')
     if page.locator('id=analysis').inner_text() != '0':
         page.click("id=composer")
         page.click("id=openmenu")
@@ -52,10 +52,10 @@ def test_ASF003(page):
     time.sleep(1)
     title = page.locator('id=message')
     assert title.is_visible() == True, "Step "+str(step)+": not Ok"
-    # 6 | Click on "Analytics" | Opening of "Analytics" |
+    # 6 | Click on "Overview" | Opening of "Overview" |
     step = 6
-    page.click("id=analytics")
-    assert page.url == urlpatterns.analytics, "Step "+str(step)+": not Ok"
+    page.click("id=overview")
+    assert page.url == urlpatterns.overview, "Step "+str(step)+": not Ok"
     time.sleep(1)
     header = page.locator('id=header')
     assert header.is_visible() == True, "Step "+str(step)+": not Ok"

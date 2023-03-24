@@ -1,6 +1,6 @@
 # MIRA
 
-MIRA offers a straightforward solution to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
+MIRA offers a straightforward security_function to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
 
 ## General
 
@@ -38,17 +38,39 @@ $ git clone https://github.com/intuitem/asf-rm.git
 $ cd asf-rm
 ```
 
-2. Create local secret variables in a script located in parent folder (e.g. ../myvars)
+2. Create local secret variables in a script located in parent folder (e.g. ../myvars), to be adapted
 
 ```sh
 export DJANGO_SECRET_KEY=<XXX>
+export DJANGO_DEBUG=True
+export DJANGO_SUPERUSER_PASSWORD=<XXX>
+export MIRA_URL=http://127.0.0.1:8000
+# for postgres (if the variables are not defined then we use sqlite)
 export POSTGRES_NAME=asf
 export POSTGRES_USER=asfuser
 export POSTGRES_PASSWORD=<XXX>
 export DB_HOST=localhost
+export DB_PORT=5432
+# Mailing in production with gmail for example
+export EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+export EMAIL_HOST=smtp.gmail.com
+export EMAIL_USE_TLS=True
+export EMAIL_PORT=587
+export EMAIL_HOST_USER=your_account@gmail.com
+export EMAIL_HOST_PASSWORD=yourpassword
+export DEFAULT_FROM_EMAIL=mira@alsigo.net
+# Mailing in development with Mailhog for example
+export EMAIL_HOST=localhost
+export EMAIL_PORT=1025
+export RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123
+export RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456
 ```
 
-3. Create a virtual environment with the tool of your choice and activate it. For instance:
+NOTE: DB_PORT is optional, and defaults to 5432.
+
+NOTE: To use the `reset.sh` script, you need to set the `POSTGRES_DBLOGIN` variable to the login of the postgres daemon.
+
+3. Create a virtual environment with the tool of your choice and activate it. For scenario:
 ```sh
 $ pip install virtualenv
 $ virtualenv venv
@@ -73,6 +95,11 @@ $ source ../myvars
     - create user asfuser with password '<POSTGRES_PASSWORD>';
     - grant all privileges on database asf to asfuser;
 
+- Note: to clean existing migrations, type:
+```sh
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find . -path "*/migrations/*.pyc"  -delete
+```
 
 6. prepare migrations 
 
@@ -112,6 +139,14 @@ $ docker-compose up
 (venv)$ python manage.py runserver
 ```
 
+12. Configure the git hooks for generating the build name
+
+```sh
+(venv)$ cd .git/hooks 
+(venv)$ ln -fs ../../git_hooks/post-commit .
+(venv)$ ln -fs ../../git_hooks/post-merge .
+```
+
 ## Running the tests
 
 ### Unit tests
@@ -129,7 +164,7 @@ You can find details about functional tests into our [Functional Test Book](/asf
 
 TBD
 
-## Deployment
+## Deployment with docker
 
 ```sh
 $ docker-compose -f docker-compose.prod.yml up
@@ -137,12 +172,53 @@ $ docker-compose -f docker-compose.prod.yml up
 
 Do not forget to check the [Django Deployment checklist](https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/)
 
+## Deployement with K8s
+
+### Single-tenant deployment
+
+The docker image must be compiled with:
+```sh
+$ docker build -t mira:x.y.z .
+```
+The image must be then tagged "mira:latest" for the appropriate repository and pushed to it.
+
+The deployment with sqlite is very simple:
+- Environment variables are defined in cm.mira-config-dev.yaml (except secrets)
+- Secrets shall be created using the create_secret.py script on a list of exports (eg. myvars) and then "kubectl create secrets" as recommended by the script
+- A service called "mira" is defined in svc.mira.yaml
+- An ingress is defined in ing.mira.yaml. It shall be adapted to the served domain.
+- The pods can be created with sts.mira.yaml, using a StatefulSet.
+
+When using Postgres, the pods can be created with deploy.mira.yaml, using a Deployement.
+
+Configurations and readme can be found in the k8s directory, in particular for Scaleway.
+
+### Multi-tenant deployment
+
+For multi-tenant, use the mira-cluster-controller application. It automatically creates clients statefulsets, service and ingress when a new client is added.
+
+Client suppression can be done from the GUI, but effective suppression requires kubectl intervention:
+    - k delete sts mira-<client>
+    - k delete ing mira-<client>
+    - k delete svc mira-<client>
+    - k delete pvc mira-<client>  ## beware, this action will suppress all client data (when using sqlite)
+
+To initiate multi-tenant admin, perform the following action
+```shell
+k exec -it mira-cluster-controller -- bash
+./superuser.sh <admin_email>
+```
+Use the static OTP provided as a last line for the initial connection to the GUI. From there, add an OTP device and attach it to the administrator.
+
+From there, management of users and clients can be done from the GUI.
+
 ## Built With
 
 - Django - Python Web Development Framework
 - Gunicorn - Python WSGI HTTP Server for UNIX
-- NGINX - HTTP Server and Reverse Proxy
+- caddy - HTTP Server and Reverse Proxy
 - PostgreSQL - Open Source RDBMS
+- sqlite - Open Source RDBMS
 - Tailwind CSS - CSS Framework
 - AlpineJS - Minimalist JS framework
 - Docker - Container Engine

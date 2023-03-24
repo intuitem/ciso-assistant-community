@@ -1,0 +1,21 @@
+{% load i18n static %}
+
+{% if topic == 'no_matrix' %}
+<div class="grid mb-4 w-full" x-data="{ open: false }">
+    <a @click="open = !open,
+            modalOpen = !modalOpen"
+           class="add-button">
+           <i class="fas fa-plus"></i>
+           {{ content }}
+    </a>
+        {% include "snippets/modal/modal.html" with modal_action="text" %}
+</div>
+{% else %}
+<div x-data="{ open: false }">
+    <a @click="open = !open,
+        modalOpen = !modalOpen"
+        class="text-indigo-500 hover:text-indigo-600 underline" href="#">{{ content }}
+    </a>
+        {% include "snippets/modal/modal.html" with modal_action="text" %}
+</div>
+{% endif %}

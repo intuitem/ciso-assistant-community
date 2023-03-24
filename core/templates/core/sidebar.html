@@ -1,11 +1,12 @@
 
 {% load static i18n %}
+{% load core_extras %}
 <aside
-    class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-y-auto left-0 z-10" :class="{ '-ml-66': !sidebarOpen }">
+    class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-visible left-0 z-10" :class="{ '-ml-66': !sidebarOpen }">
     <nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50  py-4 px-3">
-        <div class="bg-white rounded-xl shadow" aria-label="logo">
-            <div class="flex items-center justify-center p-3">
-                <svg height="128" width="128" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <div class="flex flex-row space-x-4 border-b pb-3" aria-label="logo">
+            <div class="flex items-center justify-left rounded">
+                <svg height="48" width="48" id="a" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                     <defs>
                         <style>
                             .b,
@@ -28,61 +29,43 @@
                     <polygon class="c" points="480.91 253.74 68.58 15.68 68.58 491.8 480.91 253.74" />
                 </svg>
             </div>
-            <div class="flex items-center justify-center h-14 py-2">
-                <div id="title" class="text-xl text-indigo-900">
-                    <span class="font-semibold">MIRA</span>
-                    <i class="fas fa-circle-notch"></i>
-                    <span class="font-bold">Viewer</span>
+            <div class="flex flex-col w-full h-full">
+                <div class="flex flex-row space-x-2 w-full mt-auto">
+                    <p class="font-semibold text-gray-900">MIRA</p>
                 </div>
+                <p class="text-sm font-light text-gray-500 mb-auto">by intuitem</p>
             </div>
         </div>
-        <div class="scrollbar overflow-x-hidden flex-grow mr-4" id="sidebar-scroll">
+        <div class="scrollbar overflow-x-visible flex-grow mr-4" id="sidebar-scroll">
             <ul class="flex flex-col py-4 space-y-1" id="sidebar-items">
                 <li class="to-page">
-                    <a href="{% url 'analysis_list' %}" class="relative flex flex-row items-center pr-6 nav-link">
+                    <a id="analyses_tab" href="{% url 'analysis_list' %}" class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-book-open"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analysis registry" %}</span>
                     </a>
                 </li>
-                <li>
-                    <a href="/back-office/" class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-keyboard"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Switch to editor" %}</span>
-                    </a>
-                </li>
                 
 
-                <li class="nav-seperator text-md">
-                    <div class="flex flex-row items-center h-8">
-                        <div class="">{% trans "Analytics" %}</div>
+                <li class="nav-separator pt-4">
+                    <div class="flex flex-row items-center">
+                        <div class="">{% trans "Dashboard" %}</div>
                     </div>
                 </li>
 
 
                 <li class="to-page">
-                    <a id="analytics" href="{% url 'analytics' %}"
+                    <a id="overview_tab" href="{% url 'overview' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
-                            <i class="fas fa-chart-pie"></i>
+                            <i class="fas fa-tachometer-alt"></i>
                         </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analytics" %}</span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Overview" %}</span>
                     </a>
                 </li>
                 <li class="to-page">
-                    <a id="myprojects" href="{% url 'my_projects' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-star"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "My projects" %}</span>
-                    </a>
-                </li>
-                <li class="to-page">
-                    <a id="calendar" href="{% url 'calendar' %}"
+                    <a id="calendar_tab" href="{% url 'calendar' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-calendar-alt"></i>
@@ -90,34 +73,168 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Calendar" %}</span>
                     </a>
                 </li>
-                <li class="to-page">
-                    <a id="composer" href="{% url 'composer' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-drafting-compass"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Composer" %}</span>
-                    </a>
-                </li>
 
-
-                <li class="nav-seperator text-md">
-                    <div class="flex flex-row items-center h-8">
-                        <div class="">{% trans "Tools" %}</div>
+                <li class="nav-separator pt-4">
+                    <div class="flex flex-row items-center">
+                        <div class="">{% trans "Risk management" %}</div>
                     </div>
                 </li>
-
                 <li class="to-page">
-                    <a href="{% url 'matrix' %}"
+                    <a id="analyses_registry_tab" href="{% url 'analysis-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-glasses"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk analyses" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="risk_scenarios_tab" href="{% url 'riskscenario-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-clone"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk scenarios" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="security_measures_tab" href="{% url 'securitymeasure-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-fire-extinguisher"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security measures" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="risk_acceptances_tab" href="{% url 'riskacceptance-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk acceptances" %}</span>
+                    </a>
+                </li>
+                <li class="nav-separator pt-4">
+                    <div class="flex flex-row items-center">
+                        <div class="">{% trans "General" %}</div>
+                    </div>
+                </li>
+                <li class="to-page">
+                    <a id="projects_domains_tab" href="{% url 'folder-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects domains" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="projects_tab" href="{% url 'project-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-cubes"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="assets_tab" href="{% url 'asset-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-gem"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="threats_tab" href="{% url 'threat-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-biohazard"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Threats" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="security_functions_tab" href="{% url 'securityfunction-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
+                    <span class="nav-link-icon">
+                        <i class="fas fa-cogs"></i>
+                    </span>
+                    <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security functions" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="matrices_tab" href="{% url 'riskmatrix-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-border-all"></i>
                         </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrix" %}</span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrices" %}</span>
                     </a>
                 </li>
+                <li class="nav-separator pt-4">
+                    <div class="flex flex-row items-center">
+                        <div class="t">{% trans "Access management" %}</div>
+                    </div>
+                </li>
+                {% if view_user %}
                 <li class="to-page">
-                    <a href="{% url 'xrays' %}"
+                    <a id="users_tab" href="{% url 'user-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Users" %}</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="to-page">
+                    <a id="users_tab" class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
+                        <span class="nav-link-icon">
+                            <i class="fa fa-user"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Users" %} </span>
+                    </a>
+                </li>
+                {% endif %}
+                {% if change_usergroup %}
+                <li class="to-page">
+                    <a id="user_groups_tab" href="{% url 'usergroup-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="to-page">
+                    <a id="user_groups_tab" class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-users"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Groups" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="to-page">
+                    <a href="{% url 'role-list' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Role assignment" %}</span>
+                    </a>
+                </li>
+
+                <li class="nav-separator pt-4">
+                    <div class="flex flex-row items-center">
+                        <div class="">{% trans "Extra" %}</div>
+                    </div>
+                </li>
+                <li class="to-page">
+                    <a id="xrays_tab" href="{% url 'xrays' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-bolt"></i>
@@ -125,9 +242,17 @@
                         <span class="ml-2 text-sm tracking-wide truncate">X-Rays</span>
                     </a>
                 </li>
-
                 <li class="to-page">
-                    <a href="{% url 'scoring' %}"
+                    <a id="quick_start_tab" href="{% url 'quick_start' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-fighter-jet"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
+                    </a>
+                </li>
+                <li class="to-page">
+                    <a id="scoring_tab" href="{% url 'scoring_bo' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-star-half-alt"></i>
@@ -135,63 +260,145 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Scoring assistant" %}</span>
                     </a>
                 </li>
-                
-                <li class="nav-seperator text-md">
-                    <div class="flex flex-row items-center h-8">
-                        <div class="">{% trans "Extra" %}</div>
-                    </div>
-                </li>
-                <li>
-                    <a id="translation"
+                <li class="to-page">
+                    <a id="library_tab" href="{% url 'library-list' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
-                            <i class="fas fa-language"></i>              
+                            <i class="fas fa-folder-plus"></i>
                         </span>
-                        <form action="{% url 'set_language' %}" method="post">
-                            {% csrf_token %}
-                            <select id="language" class=" border-none focus:border-none block text-sm capitalize text-gray-700 bg-gray-50" name="language" onchange="this.form.submit();"> 
-                                {% get_current_language as LANGUAGE_CODE %} 
-                                {% get_available_languages as LANGUAGES %}
-                                {% get_language_info_list for LANGUAGES as languages %}
-                                {% for language in languages %}
-                                    <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
-                                        {{ language.name_local }} ({{ language.code }})
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </form>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Libraries" %}</span>
                     </a>
                 </li>
+                {% if request.user.is_superuser %}
                 <li class="to-page">
-                    <a href="#" class="relative flex flex-row items-center pr-6 nav-link">
+                    <a id="bacup_tab" href="{% url 'backup-restore' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-save"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Backups" %}</span>
+                    </a>
+                </li>
+                {% endif %}
+                {% comment %} <li class="to-page">
+                    <a href="#"
+                        class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
                             <i class="fas fa-question-circle"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "User guide" %}</span>
                     </a>
-                </li>
-                <li x-data="{ open : false }">
-                    <a @click="open = !open" class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-info-circle"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "About MIRA" %}</span>
-                    </a>
-                    {% include "back_office/snippets/modal.html" with header=_("About MIRA") %}
-                </li>
-                <li>
-                    <a href="{% url 'logout' %}" class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-sign-in-alt"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Logout" %} [{{ request.user }}]</span>
-                    </a>
-                </li>
+                </li> {% endcomment %}
             </ul>
+        </div>
+        <div class="border-t pt-2.5 flex flex-row">
+            <div class="mr-2 w-10/12 flex flex-col">
+                <p class="text-gray-900 text-sm whitespace-nowrap overflow-hidden truncate">{{ request.user.get_full_name }}</p>
+                <p class="font-normal text-xs text-gray-600 mr-2 whitespace-nowrap overflow-hidden truncate w-full">{{ request.user.email }}</p>
+            </div>
+            <div>
+            <div
+                    x-data="{
+                        open: false,
+                        toggle() {
+                            if (this.open) {
+                                return this.close()
+                            }
+
+                            this.$refs.button.focus()
+
+                            this.open = true
+                        },
+                        close(focusAfter) {
+                            if (! this.open) return
+
+                            this.open = false
+
+                            focusAfter && focusAfter.focus()
+                        }
+                    }"
+                    x-on:keydown.escape.prevent.stop="close($refs.button)"
+                    x-on:focusin.window="! $refs.panel.contains($event.target) && close()"
+                    x-id="['dropdown-button']"
+                    class="relative w-full overflow-visible"
+                >
+                <button id="my_menu" class="w-fit px-3 rounded-full hover:bg-gray-100 text-center my-auto cursor-pointer"
+                        x-ref="button"
+                        x-on:click="toggle()"
+                        :aria-expanded="open"
+                        :aria-controls="$id('dropdown-button')"
+                        type="button">
+                    <i class="fas fa-ellipsis-v text-gray-800"></i>
+                </button>
+                <div
+                        x-ref="panel"
+                        x-show="open"
+                        x-transition.origin.top.left
+                        x-on:click.outside="close($refs.button)"
+                        :id="$id('dropdown-button')"
+                        style="display: none;"
+                        class="absolute right-0 bottom-full mt-2 w-fit rounded-md bg-white shadow-md overflow-visible hover:block z-50 py-2"
+                    >
+                    <a href="{% url 'user-detail' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800">
+                        <i class="fas fa-user"></i>
+                        {% trans "My profile" %}
+                    </a>
+
+                    <div class="w-full border-t border-gray-200 my-1"></div>
+                    
+                    <div class="flex flex-row items-center">
+                        <div>
+                            <a id="translation"
+                            class="flex flex-row items-center">
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <select id="language" class="border-none pl-4 focus:border-none block text-sm text-gray-800 bg-white focus:ring-0" name="language" onchange="this.form.submit();"> 
+                                    {% get_current_language as LANGUAGE_CODE %} 
+                                    {% get_available_languages as LANGUAGES %}
+                                    {% get_language_info_list for LANGUAGES as languages %}
+                                    {% for language in languages %}
+                                    <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected {% endif %}> 
+                                        {{ language.code|country_flag }} {{ language.name_local|capfirst }} ({{ language.code }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </form>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open : false }" class="flex items-center cursor-pointer gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="relative flex flex-row whitespace-nowrap">
+                            <span class="transition duration-75 text-gray-800 group">
+                                <i class="fas fa-info-circle"></i>
+                                {% trans "About MIRA" %}
+                            </span>
+                        </a>
+                        {% include "snippets/modal/modal.html" with header=_("About MIRA") %}
+                    </div>
+
+                    <div class="w-full border-t border-gray-200 my-1"></div>
+
+                    <a id="logout" href="{% url 'logout' %}" class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm text-gray-800 hover:bg-gray-100 disabled:text-gray-500">
+                        <i class="fas fa-sign-out-alt"></i>
+                        {% trans "Log out" %}
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 </aside>
 <!-- SIDEBAR TOGGLE -->
-<button class=" z-10 fixed left-64 ml-5 transition-all duration-300 w-6 h-6 rounded-full content-center self-center bg-white shadow shadow-blue-500/50 text-violet-900 hover:scale-105 hover:bg-violet-900 hover:text-white"  @click="sidebarOpen = !sidebarOpen" :class="{ '-ml-62': sidebarOpen == false }">
+{% comment %} 
+              TODO: Find a better solution for button getting in front of modal backdrop.
+              Here, we have two buttons, one with a z-index so that it is placed in front of the sidebar, and one
+              with no z-index so that it does not get in front of the backdrop when a modal is opened. 
+              A small issue is that by removing its z-index, the button gets behind the sidebar when a modal is opened.
+{% endcomment %}
+<button x-show="!modalOpen" class="z-10 fixed left-64 w-6 h-6 rounded-full content-center self-center bg-white shadow text-indigo-900 hover:scale-105 hover:bg-indigo-700 hover:text-white"  @click="sidebarOpen = !sidebarOpen; sidebarAnimation = true" :class="sidebarOpen == false ? '-ml-62' : 'ml-5' + (sidebarAnimation == false ? '' : ' transition-all duration-300')">
     <i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
 </button>
+<button x-show="modalOpen" class="fixed left-64 w-6 h-6 rounded-full content-center self-center bg-white shadow text-indigo-900 hover:scale-105 hover:bg-indigo-700 hover:text-white"  @click="sidebarOpen = !sidebarOpen; sidebarAnimation = true" :class="sidebarOpen == false ? '-ml-62' : 'ml-5' + (sidebarAnimation == false ? '' : ' transition-all duration-300')">
+    <i class="fas fa-angle-left transition-all duration-100" :class="{ 'rotate-180': sidebarOpen == false }"></i>
+</button>
+

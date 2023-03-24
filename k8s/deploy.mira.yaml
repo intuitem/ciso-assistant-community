@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mira
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mira
+      rel: dev
+  template:
+    metadata:
+      labels:
+        app: mira
+        rel: dev
+        ver: '0.9.1'
+    spec:
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: mira-config
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+      - name: staticfiles
+        emptyDir:
+          sizeLimit: 50Mi
+      containers:
+        - name: mira
+          image: mira:0.9.1a
+          ports:
+          - containerPort: 8000
+          volumeMounts:
+          - name: staticfiles
+            mountPath: /code/staticfiles
+          env:
+          - name: POSTGRES_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: POSTGRES_NAME
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: DB_HOST
+          - name: DJANGO_DEBUG
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: DJANGO_DEBUG
+          - name: POSTGRES_USER
+            valueFrom:
+              configMapKeyRef:
+                name: mira-config
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: myvars
+                key: POSTGRES_PASSWORD
+          - name: DJANGO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: myvars
+                key: DJANGO_SECRET_KEY
+          - name: DJANGO_SUPERUSER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: myvars
+                key: DJANGO_SUPERUSER_EMAIL
+          - name: DJANGO_SUPERUSER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: myvars
+                key: DJANGO_SUPERUSER_PASSWORD
+        - name: nginx
+          image: nginx:latest
+          ports: 
+          - containerPort: 80
+          volumeMounts:
+          - name: nginx-conf
+            mountPath: /etc/nginx/conf.d
+          - name: staticfiles
+            mountPath: /usr/share/nginx/static
+            
+

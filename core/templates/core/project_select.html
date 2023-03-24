@@ -1,22 +1,18 @@
-{% extends 'core/base.html' %}
-
 {% load i18n %}
 
-{% block head %}
-    <script nomodule src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine-ie11.min.js" defer></script>
-    <style>
-          [x-cloak] {
-              display: none;
-          }
-      </style>
-{% endblock %}
-{% block content %}
-<main class="m-2 p-2 h-screen"> 
-  <div class="p-2 m-2 bg-white rounded shadow">
+<script nomodule src="/static/cache/alpine-3.12.0.min.js" defer></script>
+<style>
+    [x-cloak] {
+        display: none;
+    }
+</style>
+
+<main class="p-2 bg-white rounded-lg shadow-lg mb-6"> 
+  <div class="p-2 m-2">
 <div id="title" class="text-lg font-black m-1 p-1">{% trans "Composer" %}</div>
 <select x-cloak id="select" hidden>
-    {% for prj in context %}
-    <option value="{{prj.id}}">{{prj}}</option>
+    {% for analysis in analyses %}
+    <option value="{{ analysis.id }}">{{ analysis }}</option>
     {% endfor %}
 </select>
 <div>
@@ -162,4 +158,3 @@
         </script>
   </div>
 </main>
-{% endblock %}

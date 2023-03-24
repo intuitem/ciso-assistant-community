@@ -1,5 +1,4 @@
 # coding:utf-8
-from turtle import delay
 from playwright.sync_api import *
 from playwright.async_api import *
 from playwright import *
@@ -29,7 +28,7 @@ def test_ASF007(page):
 	title = page.locator('id=title').inner_text()
 	tabs = [
 		page.locator('id=edit').inner_text().strip(),
-		page.locator('id=analytics').inner_text().strip(),
+		page.locator('id=overview').inner_text().strip(),
 		page.locator('id=myprojects').inner_text().strip(),
 		page.locator('id=calendar').inner_text().strip(),
 		page.locator('id=composer').inner_text().strip(),
@@ -54,7 +53,7 @@ def test_ASF007(page):
 	title = page.locator('id=title').inner_text()
 	tabs = [
 		page.locator('id=edit').inner_text().strip(),
-		page.locator('id=analytics').inner_text().strip(),
+		page.locator('id=overview').inner_text().strip(),
 		page.locator('id=myprojects').inner_text().strip(),
 		page.locator('id=calendar').inner_text().strip(),
 		page.locator('id=composer').inner_text().strip(),

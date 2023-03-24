@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mira-cluster-controller-config
+data:
+  DJANGO_DEBUG: "False"
+  EMAIL_HOST: "smtp.tem.scw.cloud"
+  EMAIL_PORT: "587"
+  EMAIL_HOST_USER: "c4d49b92-e2f7-4e3a-9b5b-fdb70ed6ee9d"
+  EMAIL_USE_TLS: "True"
+  DJANGO_ALLOWED_HOSTS: "caudron.alsigo.net"
+  MIRA_CLUSTER_CONTROLLER_DOMAIN: "caudron.alsigo.net"
+  DEFAULT_FROM_EMAIL: "mira-cluster-controller@alsigo.net"
+  CLUSTER_DOMAIN: "alsigo.net"
+

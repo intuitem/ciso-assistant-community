@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mira
+spec:
+  serviceName: mira
+  replicas: 1
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: mira
+  template:
+    metadata:
+      labels:
+        app: mira
+    spec:
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+      - name: mira
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:latest
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: db-data
+          mountPath: /code/db
+        envFrom:
+        - configMapRef:
+            name: mira-config
+        env:
+        - name: DJANGO_SUPERUSER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: DJANGO_SUPERUSER_EMAIL
+        - name: DJANGO_SUPERUSER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: DJANGO_SUPERUSER_PASSWORD
+        - name: EMAIL_HOST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: myvars
+              key: EMAIL_HOST_PASSWORD
+      - name: caddy
+        image: caddy:latest
+        command: ["caddy", "reverse-proxy", "--from", $(MIRA_URL), "--to", "localhost:8000"]
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        volumeMounts:
+        - name: db-data
+          mountPath: /data
+          subPath: caddy
+        env:
+        - name: MIRA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: mira-config
+              key: MIRA_URL
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+      labels:
+        app: mira
+    spec:
+      resources:
+        requests:
+          storage: 1Gi
+      accessModes:
+      - ReadWriteOnce

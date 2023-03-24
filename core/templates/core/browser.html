@@ -1,18 +1,19 @@
+@@ -1,164 +0,0 @@
 {% extends 'core/base.html' %}
 
 {% load i18n %}
 
 {% block head %}
 <title>Mira - Viewer</title>
-<link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="/static/cache/jquery.dataTables-1.10.19.min.css" rel="stylesheet">
 	 <!--Responsive Extension Datatables CSS-->
 	 <link href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css" rel="stylesheet">
 
-	<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+	<script type="text/javascript" src="/static/cache/jquery-3.6.3.min.js"></script>
 
 	<!--Datatables -->
-	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-	<script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+	<script src="/static/cache/responsive.dataTables-2.2.3.min.css"></script>
+	<script src="/static/cache/dataTables.responsive-2.2.3.min.js"></script>
 
 <style>
     		/*Form fields*/
@@ -82,15 +83,15 @@
 <div class="m-2 bg-gray-50 min-h-screen">
 
 
-    <div class="bg-white rounded p-2 m-2 shadow">
-        <div class="text-lg py-2"><i class="fab fa-searchengin"></i> {% trans "Browsing" %} {{ context.type }} {% trans "filtered to" %} <b>{{ context.filter }}</b></div>
+    <div class="bg-white rounded p-2 m-2 shadow"
+        <div class="text-lg py-2"><i class="fab fa-searchengin"></i> {% blocktrans with type=context.type %} Browsing {{ type }} {% endblocktrans %} {% blocktrans with filter=context.filter %} with filter: <b>{{ filter }}</b>{% endblocktrans %}</div>
 
-    {% if context.type == "Risk instances" %}
+    {% if context.type == "Risk scenarios" %}
         <table id="mytable" class="hover w-full p-2 m-2" >
             <thead>
             <tr>
                 <th class="text-left">{% trans "Project" %}</th>
-                <th class="text-left">{% trans "Title" %}</th>
+                <th class="text-left">{% trans "Name" %}</th>
                 <th class="text-left">{% trans "Current level" %}</th>
                 <th class="text-left">{% trans "Residual level" %}</th>
                 <th class="text-left">{% trans "Treatment status" %}</th>
@@ -101,7 +102,7 @@
                 {% for item in context.items %}
                   <tr class="p-1">
                     <td class=" px-1 py-2">{{ item.analysis.project }}</td>
-                    <td class="">{{ item.title }}</td>
+                    <td class="">{{ item.name }}</td>
                       <td class="">{{ item.get_current_level_display }}</td>
                       <td class="">{{ item.get_residual_level_display }}</td>
                       <td class="">{{ item.get_treatment_display }}</td>
@@ -115,7 +116,7 @@
             <thead>
             <tr>
                 <th class="text-left">{% trans "Project" %}</th>
-                <th class="text-left">{% trans "Title" %}</th>
+                <th class="text-left">{% trans "Name" %}</th>
                 <th class="text-left">{% trans "Associated risk" %}</th>
                 <th class="text-left">{% trans "Status" %}</th>
                 <th class="text-center">{% trans "Locate" %}</th>
@@ -124,9 +125,9 @@
             <tbody>
                 {% for item in context.items %}
                   <tr class="p-1">
-                    <td class=" px-1 py-2">{{ item.risk_instance.analysis.project }}</td>
-                    <td class="">{{ item.title }}</td>
-                      <td class="">{{ item.risk_instance.title }}</td>
+                    <td class=" px-1 py-2">{{ item.risk_scenario.analysis.project }}</td>
+                    <td class="">{{ item.name }}</td>
+                      <td class="">{{ item.risk_scenario.name }}</td>
                       <td class="">{{ item.get_status_display }}</td>
                       <td class=" text-center"><a href="#"><i class="fas fa-external-link-square-alt"></i></a></td>
                   </tr>
@@ -143,9 +144,19 @@
 
 <script>
 		$(document).ready(function() {
+			let lang = document.documentElement.lang;
+			if (lang == "fr") {
+				lang = "fr-FR";
+			}
+			else {
+				lang = "en-GB";
+			}
 
 			var table = $('#mytable').DataTable( {
-					responsive: false
+					responsive: false,
+					language: {
+						url: "//cdn.datatables.net/plug-ins/1.13.1/i18n/" + lang +  ".json"
+					}
 				} )
 				.columns.adjust()
 				.responsive.recalc();

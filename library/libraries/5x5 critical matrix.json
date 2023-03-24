@@ -1,0 +1,42 @@
+{
+    "name": "Critical matrix 5x5",
+    "description": "Critical matrix 5x5",
+    "format_version": "1.0",
+    "objects": [
+        {
+            "type": "matrix",
+            "fields": {
+                "name": "default_5x5",
+                "description": "critical matrix",
+                "probability" : [
+                    {"abbreviation": "VL", "name": "Very Low", "description": "Very unfrequent event"},
+                    {"abbreviation": "L", "name": "Low", "description": "Unfrequent event"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Occasional event"},
+                    {"abbreviation": "H", "name": "High", "description": "Frequent event"},
+                    {"abbreviation": "VH", "name": "Very High", "description": "Very frequent event"}
+                ],
+                "impact": [
+                    {"abbreviation": "VL", "name": "Very Low", "description": "Very low impact"},
+                    {"abbreviation": "L", "name": "Low", "description": "Low impact"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Medium impact"},
+                    {"abbreviation": "H", "name": "High", "description": "High impact"},
+                    {"abbreviation": "VH", "name": "Very High", "description": "Very high impact"}
+                ],
+                "risk": [
+                    {"abbreviation": "VL", "name": "Very Low", "description": "negligible risk", "hexcolor": "#BBF7D0"},
+                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "hexcolor": "#BEF264"},
+                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years", "hexcolor": "#FEF08A"},
+                    {"abbreviation": "H", "name": "High", "description": "risk requiring mitigation within 6 months", "hexcolor": "#FBBF24"},
+                    {"abbreviation": "VH", "name": "Very High", "description": "unacceptable risk", "hexcolor": "#F87171"}
+                ],
+                "grid": [
+                    [0, 0, 1, 1, 2],
+                    [0, 1, 1, 2, 2],
+                    [1, 1, 2, 2, 3],
+                    [1, 2, 2, 3, 4],
+                    [2, 2, 3, 4, 4]
+                ]
+            }
+        }
+    ]
+}

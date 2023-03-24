@@ -1,0 +1,34 @@
+{
+    "name": "FAIR matrix",
+    "description": "Balanced 3x3 matrix inspired from FAIR",
+    "format_version": "1.0",
+    "objects": [
+        {
+            "type": "matrix",
+            "fields": {
+                "name": "balanced",
+                "description": "inspired from FAIR",
+                "probability" : [
+                    {"abbreviation": "L", "name": "Low", "description": "Unfrequent event"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Occasional event"},
+                    {"abbreviation": "H", "name": "High", "description": "Frequent event"}
+                ],
+                "impact": [
+                    {"abbreviation": "L", "name": "Low", "description": "Low impact"},
+                    {"abbreviation": "M", "name": "Medium", "description": "Medium impact"},
+                    {"abbreviation": "H", "name": "High", "description": "High impact"}
+                ],
+                "risk": [
+                    {"abbreviation": "L", "name": "Low", "description": "acceptable risk", "hexcolor": "#00FF00"},
+                    {"abbreviation": "M", "name": "Medium", "description": "risk requiring mitigation within 2 years","hexcolor": "#FFFF00"},
+                    {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "hexcolor": "#FF0000"}
+                ],
+                "grid": [
+                    [0, 0, 1],
+                    [0, 1, 1],
+                    [1, 1, 2]
+                ]
+            }
+        }
+   ]
+}

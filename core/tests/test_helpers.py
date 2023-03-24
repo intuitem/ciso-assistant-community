@@ -1,90 +1,125 @@
 from core.models import *
 from core.helpers import *
+from iam.models import *
+from library.utils import *
 from django.db.models import Count
 import pytest
 
-RISK_COLOR_MAP = {"VL": "#BBF7D0", 'L': "#BEF264", 'M': "#FEF08A", 'H': "#FBBF24", 'VH': "#F87171"}
-STATUS_COLOR_MAP = {'open': '#fac858', 'mitigated': '#91cc75', 'accepted': '#73c0de', 'blocker': '#ee6666', 'in_progress': '#5470c6',
-                    'on_hold': '#ee6666', 'done': '#91cc75'}
-risk = {}
 
-@pytest.fixture()
-def test_setUp(db):
-    risk["parentgroup"] = ProjectsGroup.objects.create(name = "Test ProjectsGroup")
-    risk["project"] = Project.objects.create(name = "Test project", parent_group = risk.get("parentgroup"))
-    risk["analysis"] = Analysis.objects.create(project = risk.get("project"))
-    risk["parentrisk"] = ParentRisk.objects.create(title = "Test ParentRisk")
-    risk["riskinstance"] = RiskInstance.objects.create(title = "Test Ri", analysis = risk.get("analysis"), 
-                           parent_risk = risk.get("parentrisk"), current_proba = "H", current_impact="L"),
-    risk["solution_one"] = Solution.objects.create(name = "Test SolutionOne")
-    risk["solution_two"] = Solution.objects.create(name = "Test SolutionTwo")
-    risk["mitigation"] = Mitigation.objects.create(title = "Test Mitigation", risk_instance = RiskInstance.objects.get(title = "Test Ri"), 
-                         solution = Solution.objects.get(name = "Test SolutionOne"), effort = 'L')
+@pytest.fixture
+def matrix_fixture():
+    Folder.objects.create(
+        name="Global", content_type=Folder.ContentType.ROOT, builtin=True)
+    import_library(get_library('Critical matrix 5x5'))
 
-def test_risk_matrix(db, test_setUp):
-    matrix_current = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], 
-                      [0, 0, 0, 0, 0], [0, 0, 0, 1, 0], 
-                      [0, 0, 0, 0, 0]]
-    matrix_residual = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
-                       [0, 0, 0, 0, 0], [0, 0, 0, 0, 0],
-                       [1, 0, 0, 0, 0]]
-    assert risk_matrix() == {'current': matrix_current, 'residual': matrix_residual}
 
-def test_risk_per_status(db, test_setUp):
-    assert risk_per_status() == {'labels': ['Open', 'Mitigated', 'Accepted', 'Show-stopper'], 'values': [{'value': 1, 'itemStyle': {'color': '#fac858'}}, 
-                                {'value': 0, 'itemStyle': {'color': '#91cc75'}}, {'value': 0, 'itemStyle': {'color': '#73c0de'}}, 
-                                {'value': 0, 'itemStyle': {'color': '#ee6666'}}]}
+@pytest.mark.django_db
+def test_get_rating_options_no_matrix():
+    root_folder = Folder.objects.create(
+        name='Global', content_type=Folder.ContentType.ROOT, builtin=True)
+    user = User.objects.create(email='test@test.com', password='test')
+    assert get_rating_options(user) == []
 
-def test_mitigation_per_status(db, test_setUp):
-    assert mitigation_per_status() == {'labels': ['Open', 'In progress', 'On hold', 'Done'], 'values': [{'itemStyle': {'color': '#fac858'}, 'value': 1}, 
-                                      {'itemStyle': {'color': '#5470c6'}, 'value': 0}, {'itemStyle': {'color': '#ee6666'}, 'value': 0}, 
-                                      {'itemStyle': {'color': '#91cc75'}, 'value': 0}]}
 
-def test_mitigation_per_cur_risk(db, test_setUp):
-    assert mitigation_per_cur_risk() == {'values': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
-                                        {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}]}
+@pytest.mark.usefixtures('matrix_fixture')
+@pytest.mark.django_db
+def test_get_rating_options_no_perm_to_view_matrix(matrix_fixture):
+    user = User.objects.create(email='test@test.com', password='test')
+    assert get_rating_options(user) == []
 
-def test_mitigation_per_solution(db, test_setUp):
-    assert mitigation_per_solution() == {'indicators': ['Test SolutionOne'], 'values': [1], 'min': 0, 'max': 2}
 
-def test_risks_count_per_level(db, test_setUp):
-    assert risks_count_per_level() == {'current': [{'name': 'Very low', 'value': 0}, {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 1}, 
-                                      {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}], 'residual': [{'name': 'Very low', 'value': 1}, 
-                                      {'name': 'Low', 'value': 0}, {'name': 'Medium', 'value': 0}, {'name': 'High', 'value': 0}, {'name': 'Very high', 'value': 0}]}
+@pytest.mark.usefixtures('matrix_fixture')
+@pytest.mark.django_db
+def test_get_rating_options_perm_to_view_matrix():
+    user = User.objects.create(email='test@test.com', password='test')
+    folder = Folder.objects.create(name='test', content_type=Folder.ContentType.DOMAIN, builtin=False,
+                                   parent_folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+    project = Project.objects.create(name='test', folder=folder)
+    analysis = Analysis.objects.create(name='test', project=project, rating_matrix=RiskMatrix.objects.latest('created_at'))
+    RiskScenario.objects.create(name='test', analysis=analysis, threat=Threat.objects.create(name='test', folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)))
+    role = Role.objects.create(name='test')
+    auditor_permissions = Permission.objects.filter(codename__in=[
+        "view_project",
+        "view_analysis",
+        "view_securitymeasure",
+        "view_riskscenario",
+        "view_riskacceptance",
+        "view_asset",
+        "view_threat",
+        "view_securityfunction",
+        "view_folder",
+        "view_usergroup"
+    ])
+    role.permissions.set(auditor_permissions)
+    role.save()
+    role_assignment = RoleAssignment.objects.create(
+        user=user,
+        role=role,
+        folder=folder,
+    )
+    role_assignment.perimeter_folders.add(folder)
+    role_assignment.save()
 
-def test_p_risks(db, test_setUp):
-    assert p_risks() == {'indicators': ['Test ParentRisk'], 'values': [1], 'min': 0, 'max': 2}
-
-def test_p_risks_2(db, test_setUp):
-    assert p_risks_2() == [{'value': 1, 'name': 'Test ParentRisk'}]
-
-def test_risks_per_project_groups(db, test_setUp): # Syntax problem, not good to compare strings, to review!
-    list = [
-        {
-            'prj_grp': ProjectsGroup.objects.get(name = "Test ProjectsGroup"),
-            'ri_level': RiskInstance.objects.filter(analysis__project__parent_group=ProjectsGroup.objects.get(name = "Test ProjectsGroup")).values(
-            'current_level').annotate(total=Count('current_level'))
-        }
+    assert get_rating_options(user) == [
+        (0, 'Very Low'),
+        (1, 'Low'),
+        (2, 'Medium'),
+        (3, 'High'),
+        (4, 'Very High'),
     ]
-    assert str(risks_per_project_groups()) == str(list)
 
-def test_get_counters(db, test_setUp):
-    assert get_counters() == {'RiskInstance': 1, 'Mitigation': 1, 'Analysis': 1, 'Project': 1, 'Solution': 2, 'RiskAcceptance': 0, 'ShowStopper': 0}
 
-def test_mitigation_priority(db, test_setUp): # Syntax problem, not good to compare strings, to review!
-    assert str(mitigation_priority()) == "{'1st': [], '2nd': [<Mitigation: Test Mitigation>], '3rd': [], '4th': [], 'undefined': []}"
+@pytest.mark.django_db
+def test_get_rating_options_abbr_no_matrix():
+    root_folder = Folder.objects.create(
+        name='Global', content_type=Folder.ContentType.ROOT, builtin=True)
+    user = User.objects.create(email='test@test.com', password='test')
+    assert get_rating_options_abbr(user) == []
 
-def test_risk_status(db, test_setUp):
-    list = [risk.get('analysis')]
-    assert risk_status(list) == {'names': ['Test project 0.1'], 
-                                 'current_out': {'VL': [{'value': 0, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 1, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
-                                 'residual_out': {'VL': [{'value': 1, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 0, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
-                                 'rsk_status_out': {'open': [{'value': 1, 'itemStyle': {'color': '#fac858'}}], 'mitigated': [{'value': 0, 'itemStyle': {'color': '#91cc75'}}], 'accepted': [{'value': 0, 'itemStyle': {'color': '#73c0de'}}], 'blocker': [{'value': 0, 'itemStyle': {'color': '#ee6666'}}]}, 
-                                 'mtg_status_out': {'open': [{'value': 1, 'itemStyle': {'color': '#fac858'}}], 'in_progress': [{'value': 0, 'itemStyle': {'color': '#5470c6'}}], 'on_hold': [{'value': 0, 'itemStyle': {'color': '#ee6666'}}], 'done': [{'value': 0, 'itemStyle': {'color': '#91cc75'}}]}, 
-                                 'y_max_rsk': 2}
 
-def test_risks_levels_per_prj_grp(db, test_setUp):
-    assert risks_levels_per_prj_grp() == {'names': ['Test ProjectsGroup'], 
-                                          'current_out': {'VL': [{'value': 0, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 1, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
-                                          'residual_out': {'VL': [{'value': 1, 'itemStyle': {'color': '#BBF7D0'}}], 'L': [{'value': 0, 'itemStyle': {'color': '#BEF264'}}], 'M': [{'value': 0, 'itemStyle': {'color': '#FEF08A'}}], 'H': [{'value': 0, 'itemStyle': {'color': '#FBBF24'}}], 'VH': [{'value': 0, 'itemStyle': {'color': '#F87171'}}]}, 
-                                          'y_max_rsk': 2}
+@pytest.mark.usefixtures('matrix_fixture')
+@pytest.mark.django_db
+def test_get_rating_options_abbr_no_perm_to_view_matrix(matrix_fixture):
+    user = User.objects.create(email='test@test.com', password='test')
+    assert get_rating_options_abbr(user) == []
+
+
+@pytest.mark.usefixtures('matrix_fixture')
+@pytest.mark.django_db
+def test_get_rating_options_abbr_perm_to_view_matrix():
+    user = User.objects.create(email='test@test.com', password='test')
+    folder = Folder.objects.create(name='test', content_type=Folder.ContentType.DOMAIN, builtin=False,
+                                   parent_folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+    project = Project.objects.create(name='test', folder=folder)
+    analysis = Analysis.objects.create(name='test', project=project, rating_matrix=RiskMatrix.objects.latest('created_at'))
+    RiskScenario.objects.create(name='test', analysis=analysis, threat=Threat.objects.create(name='test', folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)))
+    role = Role.objects.create(name='test')
+    auditor_permissions = Permission.objects.filter(codename__in=[
+        "view_project",
+        "view_analysis",
+        "view_securitymeasure",
+        "view_riskscenario",
+        "view_riskacceptance",
+        "view_asset",
+        "view_threat",
+        "view_securityfunction",
+        "view_folder",
+        "view_usergroup"
+    ])
+    role.permissions.set(auditor_permissions)
+    role.save()
+    role_assignment = RoleAssignment.objects.create(
+        user=user,
+        role=role,
+        folder=folder,
+    )
+    role_assignment.perimeter_folders.add(folder)
+    role_assignment.save()
+
+    assert get_rating_options_abbr(user) == [
+        ('VL','Very Low'),
+        ('L', 'Low'),
+        ('M', 'Medium'),
+        ('H', 'High'),
+        ('VH', 'Very High')
+    ]

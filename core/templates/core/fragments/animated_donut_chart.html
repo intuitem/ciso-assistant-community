@@ -1,0 +1,134 @@
+<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+    var option;
+
+    const data = [
+    { value: {{ values.0.value|safe }}, name: 'Very low' },
+    { value: {{ values.1.value|safe }}, name: 'Low' },
+    { value: {{ values.2.value|safe }}, name: 'Medium' },
+    { value: {{ values.3.value|safe }}, name: 'High' },
+    { value: {{ values.4.value|safe }}, name: 'Very high' }
+    ];
+    const defaultPalette = [
+        // '#51689b', '#ce5c5c', '#fbc357', '#8fbf8f', '#659d84', '#fb8e6a', '#c77288', '#786090', '#91c4c5', '#6890ba'
+        '#BBF7D0',
+        '#BEF264',
+        '#FEF08A',
+        '#FBBF24',
+        '#F87171',
+        '#3ba272',
+        '#fc8452',
+        '#9a60b4',
+        '#ea7ccc'
+    ];
+    const radius = ['30%', '80%'];
+    const pieOption = {
+        series: [
+            {
+                type: 'pie',
+                id: 'distribution',
+                radius: radius,
+                label: {
+                    show: true
+                },
+                universalTransition: true,
+                animationDurationUpdate: 1000,
+                data: {{values|safe}},
+                color:["#BBF7D0","#BEF264","#FEF08A","#FBBF24","#F87171"]
+            }
+        ]
+    };
+    const parliamentOption = (function () {
+        let sum = data.reduce(function (sum, cur) {
+            return sum + cur.value;
+        }, 0);
+        let angles = [];
+        let startAngle = -Math.PI / 2;
+        let curAngle = startAngle;
+        data.forEach(function (item) {
+            angles.push(curAngle);
+            curAngle += (item.value / sum) * Math.PI * 2;
+        });
+        angles.push(startAngle + Math.PI * 2);
+        function parliamentLayout(startAngle, endAngle, totalAngle, r0, r1, size) {
+            let rowsCount = Math.ceil((r1 - r0) / size);
+            let points = [];
+            let r = r0;
+            for (let i = 0; i < rowsCount; i++) {
+                // Recalculate size
+                let totalRingSeatsNumber = Math.round((totalAngle * r) / size);
+                let newSize = (totalAngle * r) / totalRingSeatsNumber;
+                for (
+                    let k = Math.floor((startAngle * r) / newSize) * newSize;
+                    k < Math.floor((endAngle * r) / newSize) * newSize - 1e-6;
+                    k += newSize
+                ) {
+                    let angle = k / r;
+                    let x = Math.cos(angle) * r;
+                    let y = Math.sin(angle) * r;
+                    points.push([x, y]);
+                }
+                r += size;
+            }
+            return points;
+        }
+        return {
+            series: {
+                type: 'custom',
+                id: 'distribution',
+                data: {{values|safe}},
+                coordinateSystem: undefined,
+                universalTransition: true,
+                animationDurationUpdate: 1000,
+                renderItem: function (params, api) {
+                    var idx = params.dataIndex;
+                    var viewSize = Math.min(api.getWidth(), api.getHeight());
+                    var r0 = ((parseFloat(radius[0]) / 100) * viewSize) / 2;
+                    var r1 = ((parseFloat(radius[1]) / 100) * viewSize) / 2;
+                    var cx = api.getWidth() * 0.5;
+                    var cy = api.getHeight() * 0.5;
+                    var size = viewSize / 50;
+                    var points = parliamentLayout(
+                        angles[idx],
+                        angles[idx + 1],
+                        Math.PI * 2,
+                        r0,
+                        r1,
+                        size + 3
+                    );
+                    return {
+                        type: "usergroup",
+                        children: points.map(function (pt) {
+                            return {
+                                type: 'circle',
+                                autoBatch: true,
+                                shape: {
+                                    cx: cx + pt[0],
+                                    cy: cy + pt[1],
+                                    r: size / 2
+                                },
+                                style: {
+                                    fill: defaultPalette[idx % defaultPalette.length]
+                                }
+                            };
+                        })
+                    };
+                }
+            }
+        };
+    })();
+    let currentOption = (option = pieOption);
+    setInterval(function () {
+        currentOption = currentOption === pieOption ? parliamentOption : pieOption;
+        {{name}}_ch.setOption(currentOption);
+    }, 5000);
+
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
+</script>

@@ -3,29 +3,32 @@
 {% block content %}
 
 <div class="w-full h-full mx-auto">
+    {% with page_title=_('Analysis registry') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
     <section class="">
-        <div class=" flex items-center content-center">
-            <div class="flex-grow mx-14 my-14">
+        <div class="flex justify-center">
+            <div class="flex-grow max-w-4xl mx-14 mb-14 mt-8">
                 <search>
                     <form action="{% url 'search' %}" class="">
-                        <span class="h-10 m-0 bg-gray-200 hover:bg-gray-300 cursor-pointer border border-gray-300 text-sm rounded-full flex">
+                        <span class="flex flex-row space-x-0 rounded-lg h-fit shadow-lg focus-within:ring-2 focus-within:ring-blue-700">
+                            <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                                <i class="fas fa-search"></i>
+                            </div>
                             <input id="search" required type="search" name="q" placeholder="{% trans "Search risk scenario, security measure, risk analysis..." %}" value="{{request.GET.q}}"
-                                    class="flex-grow px-4 rounded-l-full rounded-r-full text-sm focus:outline-none border-none overflow-ellipsis">
-                            <button id="submit" type="submit" class="text-gray-700">
+                                    class="flex-grow text-sm h-10 rounded-r-lg border-none focus:ring-0 overflow-ellipsis">
+                            {% comment %} <button id="submit" type="submit" class="text-gray-700">
                                     <i class="fas fa-search text-lg w-4 h-4 ml-2 mr-4"></i>
-                            </button>
+                            </button> {% endcomment %}
                         </span>
                     </form>
                 </search>
             </div>
         </div>
-        <div>
-            <h2 id="title" class="text-2xl ml-2 font-bold leading-tight">{% trans "Analysis registry" %}</h2>
-        </div>
 
         <div class="rounded-lg mt-2">
             <div class="relative shadow-md rounded-lg">
-                <table class="w-full text-sm text-left text-gray-500">
+                <table class="w-full text-sm text-left">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
                             <th class="px-6 py-3">
@@ -44,34 +47,33 @@
                     </thead>
                     <tbody>
                         {% for analysis in page_obj %}
-                        <tr class="border-b  odd:bg-white even:bg-gray-50 ">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'RA' analysis.id %}?next={{ request.path|urlencode }}'">
+                            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                                 <div class="flex items-center">
 
                                     {% if analysis.is_draft %}
-                                    <span class="bg-blue-200 p-1 rounded-lg text-xs">{% trans "draft" %}</span>
+                                    <span class="bg-blue-200 p-1 rounded-lg text-xs text-gray-900">{% trans "draft" %}</span>
 
                                     {% else %}
-                                    <span class="bg-green-200 p-1 rounded-lg text-xs ">{% trans "ready" %}</span>
+                                    <span class="bg-green-200 p-1 rounded-lg text-xs text-gray-900">{% trans "ready" %}</span>
 
                                     {% endif %}
 
 
                                     <div class="ml-3">
-                                        <a id="analysis{{analysis.id}}" href="{% url 'RA' analysis.id %}"
-                                            class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-500">
+                                        <p id="analysis{{analysis.id}}" class="text-md font-semibold whitespace-no-wrap">
                                             {{ analysis }}
-                                        </a>
+                                        </p>
                                     </div>
                                 </div>
                             </th>
                             <td class="px-6 py-4">
-                                <p class="text-gray-900 whitespace-no-wrap capitalize">
+                                <p class="whitespace-no-wrap capitalize">
                                     {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
                                 </p>
                             </td>
                             <td class="px-6 py-4">
-                                <p class="text-gray-900 whitespace-no-wrap">
+                                <p class="whitespace-no-wrap">
                                     {{ analysis.updated_at|date }}
                                 </p>
                             </td>
@@ -88,7 +90,7 @@
                                                     <div class="tooltip-arrow" data-popper-arrow></div>
                                                 </div>
                                             <a>
-                                            <div x-data="{ dropdownOpen: false }" class="relative">
+                                            <div x-data="{ dropdownOpen: false }" class="relative" onclick="event.stopPropagation();">
                                                 <button @click="dropdownOpen = !dropdownOpen" class="" data-tooltip-target="tooltip-export">
                                                     <span class="table-action"><i class="fas fa-download"></i></span>
                                                     <div id="tooltip-export" role="tooltip" class="inline-block absolute invisible z-10 p-2 text-2xs text-white bg-gray-600 rounded-xl shadow-sm opacity-0 transition-opacity duration-300 tooltip ">

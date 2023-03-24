@@ -8,19 +8,36 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
+
+
+if "POSTGRES_NAME" environment variable defined, the database engine is posgresql
+and the other env variables are POSGRES_USER, POSTGRES_PASSWORD, DB_HOST, DB_PORT
+else it is sqlite, and no env variable is required
+
 """
 
 from pathlib import Path
 import os
 import json
 from django.utils.translation import gettext_lazy as _
+from urllib.parse import urlparse
+import passkeys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Get version from meta.json
-with open(BASE_DIR / 'asf_rm/meta.json') as f:
-    VERSION = json.load(f)['version']
+print("BASE_DIR:", BASE_DIR)
+
+with open(BASE_DIR / 'asf_rm/VERSION') as f:
+    VERSION = f.read().strip()
+    print(f'MIRA Version: {VERSION}')
+
+try:
+    with open(BASE_DIR / 'asf_rm/build.json') as f:
+        BUILD = json.load(f)['build']
+except FileNotFoundError:
+    BUILD = 'unset'
+    print('MIRA Build: unset. Please refer to the documentation to set it.')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -29,40 +46,33 @@ with open(BASE_DIR / 'asf_rm/meta.json') as f:
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-if 'DJANGO_ALLOWED_HOSTS' in os.environ:
-    ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')
-else:
-    ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
-
-# ASF RM settings
-
-ARM_SETTINGS = {
-    "MATRIX_PATH": BASE_DIR / "matrix.xlsx",
-}
+MIRA_URL = os.environ['MIRA_URL']
+ALLOWED_HOSTS = [urlparse(MIRA_URL).hostname]
+CSRF_TRUSTED_ORIGINS = [MIRA_URL]
 
 # Application definition
 
-
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    "whitenoise.runserver_nostatic",
     'django.contrib.staticfiles',
+    'django.forms',
     'fieldsets_with_inlines',
     'tailwind',
     'theme',
-    # 'django_browser_reload',
+    'iam',
     'core',
-    'general',
-    'back_office',
     'cal',
     'django_filters',
-    'import_export',
-    'reversion',
+    'library',
+    'serdes',
+    'captcha',
+    'passkeys',
 ]
 
 MIDDLEWARE = [
@@ -74,20 +84,32 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    # 'django_browser_reload.middleware.BrowserReloadMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
+RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
+
+MIRA_SUPERUSER_EMAIL = os.environ.get('MIRA_SUPERUSER_EMAIL')
+EMAIL_HOST = os.environ['EMAIL_HOST']
+EMAIL_PORT = os.environ.get('EMAIL_PORT')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = os.environ['EMAIL_HOST_USER']
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
+# NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution or wait a real SMTP server.
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / "core/templates",
-            BASE_DIR / "back_office/templates",
             ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -101,21 +123,11 @@ TEMPLATES = [
     },
 ]
 
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
 WSGI_APPLICATION = 'asf_rm.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['POSTGRES_NAME'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-        'HOST': os.environ['DB_HOST'],
-        'PORT': '5432',
-    }
-}
+AUTH_USER_MODEL = 'iam.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -162,123 +174,50 @@ LOCALE_PATHS = (
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # for collectstatic
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / "static",  # the js files are here
 ]
+
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-BATON = {
-    'SITE_HEADER': 'ASF RM',
-    'SITE_TITLE': 'MIRA',
-    'INDEX_TITLE': 'MIRA',
-    'SUPPORT_HREF': 'https://github.com/intuitem/asf-rm/issues',
-    'COPYRIGHT': 'copyright © 2018-2021 <a href="https://intuitem.com">intuitem</a>',  # noqa
-    'POWERED_BY': '<a href="https://intuitem.com">intuitem</a>',
-    'CONFIRM_UNSAVED_CHANGES': True,
-    'SHOW_MULTIPART_UPLOADING': True,
-    'ENABLE_IMAGES_PREVIEW': True,
-    'CHANGELIST_FILTERS_IN_MODAL': True,
-    'CHANGELIST_FILTERS_ALWAYS_OPEN': False,
-    'CHANGELIST_FILTERS_FORM': True,
-    'MENU_ALWAYS_COLLAPSED': False,
-    'COLLAPSABLE_USER_AREA': True,
-    'MENU_TITLE': 'Menu',
-    'MESSAGES_TOASTS': False,
-    'GRAVATAR_DEFAULT_IMG': 'wavatar',
-    'LOGIN_SPLASH': '/static/core/img/login-splash.png',
-    'SEARCH_FIELD': {
-        'label': _('Search analysis...'),
-        'url': '/admin/core/analysis/',
-    },
-    'MENU': (
-
-        {'type': 'title', 'label': _('Main')},
-        {
-            'type': 'app',
-            'name': 'core',
-            'label': _('Core'),
-            'default_open': True, # For debug
-            'models': (
-                {
-                    'name': 'analysis',
-                    'label': _('Analysis registry'),
-                    'icon': 'fas fa-glasses',
-                },
-                {
-                    'name': 'riskinstance',
-                    'label': _('Risk instances'),
-                    'icon': 'fas fa-clone',
-                },
-                {
-                    'name': 'mitigation',
-                    'label': _('Mitigations'),
-                    'icon': 'fas fa-fire-extinguisher',
-                },
-                {
-                    'name': 'riskacceptance',
-                    'label': _('Risk acceptances'),
-                    'icon': 'fas fa-user-tie',
-                },
-            )
-        },
-        {'type': 'title', 'label': _('Organization')},
-        {
-            'type': 'app',
-            'name': 'general',
-            'label': _('General'),
-            'default_open': True, # For debug
-            'models': (
-                {
-                    'name': 'projectsgroup',
-                    'label': _('Projects Hierarchy'),
-                    'icon': 'fas fa-sitemap',
-                },
-                {
-                    'name': 'project',
-                    'label': _('Projects'),
-                    'icon': 'fas fa-cubes',
-                },
-                {
-                    'name': 'parentrisk',
-                    'label': _('Parent Risks'),
-                    'icon': 'fas fa-folder',
-                },
-                {
-                    'name': 'solution',
-                    'label': _('Solutions Catalog'),
-                    'icon': 'fas fa-cogs',
-                },
-            )
-        },
-        
-        {'type': 'title', 'label': _('Settings')},
-        {
-            'type': 'app',
-            'name': 'auth',
-            'label': _('Users and authorizations'),
-            'default_open': True, # For debug
-            'icon': 'fas fa-users',
-        },
-        {'type': 'free', 'label': _('User guide'), 'icon': 'fas fa-question-circle', 'url': 'https://intuitem.com/'},
-
-        {'type': 'title', 'label': _('Staff')},
-        {'type': 'free', 'label': _('X-Rays (all)'), 'icon': 'fas fa-bolt', 'url': '/staff/x-rays?mode=all'},
-        {'type': 'free', 'label': _('Rating matrix'), 'url': 'https://intuitem.com/'},
-        {'type': 'free', 'label': _('Scoring assistant'), 'url': 'https://intuitem.com/'},
-
-        {'type': 'title', 'label': _('Extra')},
-        {'type': 'free', 'label': 'Agile Security Framework', 'url': 'https://intuitem.com/'},
-
-    ),
-}
-
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+# Database
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
+
+if 'POSTGRES_NAME' in os.environ:
+    print("Postgresql database engine")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ['POSTGRES_NAME'],
+            'USER': os.environ['POSTGRES_USER'],
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+            'HOST': os.environ['DB_HOST'],
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
+    print("Postgresql database engine")
+else:
+    print("sqlite database engine")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db/mira.sqlite3",
+        }
+    }
+
+AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend'] 
+FIDO_SERVER_ID=urlparse(MIRA_URL).hostname
+FIDO_SERVER_NAME="FidoMira"
+# leave KEY_ATTACHMENT undefined to allow both platform and roaming authenticators

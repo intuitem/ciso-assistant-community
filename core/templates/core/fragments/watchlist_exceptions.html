@@ -1,0 +1,50 @@
+{% load i18n %}
+
+<div class="overflow-x-auto shadow-md sm:rounded-lg mt-2">
+    <table class="w-full text-sm text-left" id="acceptancesTable">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+                <th data-sort="acceptance" scope="col" class="px-3 py-3">
+                    {% trans "Acceptance" %}
+                </th>
+                <th data-sort="parent_project" scope="col" class="px-3 py-3">
+                    {% trans "Domain" %}
+                </th>
+                <th data-sort="status" scope="col" class="px-3 py-3">
+                    {% trans "Validator" %}
+                </th>
+                <th data-sort="eta" scope="col" class="px-3 py-3">
+                    {% trans "Expiry date" %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for acceptance in acceptances_to_review %}
+            <tr class="bg-white border-b text-ellipsis overflow-hidden hover:text-indigo-500 hover:bg-gray-200 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}'">
+                <td scope="row" class="px-3 py-4 font-medium">
+                    {{ acceptance }}
+                </td>
+                <td class="px-3 py-4">
+                    {{ acceptance.folder }}
+                </td>
+                <td class="px-3 py-4">
+                    {{ acceptance.validator }}
+                </td>
+                <td class="px-3 py-4">
+                    {% if acceptance.expiry_date < today %}
+                        <span class="rounded bg-red-400 text-white p-1 text-xs mr-1">{% trans "expired" %}</span>
+                    {% endif %}
+                    {{ acceptance.expiry_date }}
+                </td>
+            </tr>
+            {% empty %}
+                <tr class="text-black p-4 text-center">
+                    <td colspan="8" class="py-2">
+                        <i class="inline fas fa-exclamation-triangle"></i>
+                        <p class="inline test-gray-900">{% trans "No exceptions yet." %}</p>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
