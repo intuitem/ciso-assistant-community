@@ -64,6 +64,12 @@ export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
 export RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123
 export RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456
+# Add a second mailing with sendgrid for example (optional)
+export EMAIL_HOST_RESCUE='smtp.sendgrid.net'
+export EMAIL_PORT_RESCUE=587
+export EMAIL_HOST_USER_RESCUE='apikey'
+export EMAIL_HOST_PASSWORD_RESCUE=SENDGRID_APIKEY
+export EMAIL_USE_TLS_RESCUE=True
 ```
 
 NOTE: DB_PORT is optional, and defaults to 5432.

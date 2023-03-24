@@ -92,16 +92,22 @@ def create_stateful_set_object(client_name, email_admin, mira_url, sts_name):
     configmaps = [client.V1EnvFromSource(config_map_ref=client.V1ConfigMapEnvSource(name='mira-config'))]
     secret_smtp_out = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="EMAIL_HOST_PASSWORD", name="smtp-out"))
     secret_recaptcha = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="RECAPTCHA_PRIVATE_KEY", name="recaptcha"))
+    env=[client.V1EnvVar(name="MIRA_SUPERUSER_EMAIL", value=email_admin),
+            client.V1EnvVar(name="EMAIL_HOST_PASSWORD", value_from=secret_smtp_out),
+            client.V1EnvVar(name="RECAPTCHA_PRIVATE_KEY", value_from=secret_recaptcha),
+            client.V1EnvVar(name="MIRA_URL", value=mira_url),
+        ]
+    try:
+        secret_smtp_out_rescue = client.V1EnvVarSource(secret_key_ref=client.V1SecretKeySelector(key="EMAIL_HOST_PASSWORD_RESCUE", name="smtp-out"))
+        env.append(client.V1EnvVar(name="EMAIL_HOST_PASSWORD_RESCUE", value_from=secret_smtp_out_rescue))
+    except:
+        pass
     mira_container = client.V1Container(
         name="mira",
         image="rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:latest",
         ports=[client.V1ContainerPort(container_port=8000)],
         env_from=configmaps,
-        env=[client.V1EnvVar(name="MIRA_SUPERUSER_EMAIL", value=email_admin),
-             client.V1EnvVar(name="EMAIL_HOST_PASSWORD", value_from=secret_smtp_out),
-             client.V1EnvVar(name="RECAPTCHA_PRIVATE_KEY", value_from=secret_recaptcha),
-             client.V1EnvVar(name="MIRA_URL", value=mira_url),
-            ],
+        env=env,
         volume_mounts=[client.V1VolumeMount(name="db-data", mount_path='/code/db')],
     )
     caddy_container = client.V1Container(

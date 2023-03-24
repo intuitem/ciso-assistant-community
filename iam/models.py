@@ -18,8 +18,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from asf_rm.settings import MIRA_URL
+from django.core.mail import send_mail, get_connection, EmailMessage
+from asf_rm.settings import MIRA_URL, EMAIL_HOST_USER_RESCUE, EMAIL_HOST_PASSWORD_RESCUE, EMAIL_HOST_RESCUE, EMAIL_PORT_RESCUE, EMAIL_USE_TLS_RESCUE
 
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
@@ -250,7 +250,20 @@ class User(AbstractBaseUser):
                     'pk': str(pk) if pk else None
                 }
         email = render_to_string(email_template_name, header)
-        send_mail(subject, email, None, [self.email], fail_silently=False)
+        try:
+            send_mail(subject, email, None, [self.email], fail_silently=False)
+        except Exception as e:
+            print("primary mailer failure")
+            if EMAIL_HOST_RESCUE:
+                with get_connection(
+                    host=EMAIL_HOST_RESCUE, 
+                    port=EMAIL_PORT_RESCUE, 
+                    username=EMAIL_HOST_USER_RESCUE, 
+                    password=EMAIL_HOST_PASSWORD_RESCUE, 
+                    use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False
+                ) as connection:
+                    EmailMessage(subject, email, None, [self.email],
+                                connection=connection).send()
 
     @property
     def edit_url(self) -> str:
