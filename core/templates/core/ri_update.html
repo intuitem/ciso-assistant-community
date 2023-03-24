@@ -24,7 +24,11 @@
                             </div>
                             <div class="flex-1 flex-col">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Auditor" %}: </p>
-                                <p class="text-sm font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
+                                {% if scenario.analysis.auditor.get_full_name %}
+                                    <p class="text-sm font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
+                                {% else %}
+                                    <p class="text-sm font-semibold">{{ scenario.analysis.auditor }}</p>
+                                {% endif %}
                             </div>
                             <div class="flex-1 flex-col">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Version" %}: </p>
@@ -98,7 +102,7 @@
                         <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
                     </div>
                     <div class="flex items-center w-1/2">
-                        <div class="px-4 pt-2 pb-4 flex flex-col rounded-lg w-full border">
+                        <div class="px-4 pt-2 pb-4 flex flex-col rounded-lg w-full border shadow">
                             <p class="text-lg pb-2 font-semibold">{% trans "Current Assessment" %}</p>
                             <div class="px-4 pt-2 pb-4 flex flex-row space-x-6 justify-center">
                                 <div>
