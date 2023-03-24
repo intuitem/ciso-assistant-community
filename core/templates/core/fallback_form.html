@@ -18,6 +18,9 @@
                             {% for error in field.errors %}
                                 <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
                             {% endfor %}
+                            {% if field.field.widget.attrs.disabled %}
+                                <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+                            {% endif %}
                             {{ field }}
                             <div class="mt-1 text-xs text-gray-400">
                                 {{ field.help_text|safe }}
