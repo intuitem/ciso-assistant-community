@@ -49,7 +49,7 @@ spec:
               name: recaptcha
               key: RECAPTCHA_PRIVATE_KEY
       - name: caddy
-        image: caddy:latest
+        image: caddy:2.6.4
         command: ["caddy", "reverse-proxy", "--from", $(MIRA_CLUSTER_CONTROLLER_DOMAIN), "--to", "localhost:8000"]
         ports:
         - containerPort: 80
