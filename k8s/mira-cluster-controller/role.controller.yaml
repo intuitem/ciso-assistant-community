@@ -6,13 +6,13 @@ metadata:
 rules:
 - apiGroups: [""] 
   resources: ["services"]
-  verbs: ["get", "watch", "list", "create", "update"]
+  verbs: ["get", "watch", "list", "create", "update", "patch", "delete"]
 - apiGroups: ["apps"] 
   resources: ["statefulsets"]
-  verbs: ["get", "watch", "list", "create", "update"]
+  verbs: ["get", "watch", "list", "create", "update", "patch", "delete"]
 - apiGroups: ["networking.k8s.io"] 
   resources: ["ingresses"]
-  verbs: ["get", "watch", "list", "create", "update"]
+  verbs: ["get", "watch", "list", "create", "update", "patch", "delete"]
 
 ---
 

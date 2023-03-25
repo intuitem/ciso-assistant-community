@@ -17,18 +17,23 @@ spec:
       - name: db-data
         persistentVolumeClaim:
           claimName: db-data
+      - name: templates-yaml
+        configMap:
+          name: templates-yaml
       imagePullSecrets:
         - name: registry-secret
       serviceAccountName: controller
       enableServiceLinks: false
       containers:
       - name: mira-cluster-controller
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:latest
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.9
         ports:
         - containerPort: 8000
         volumeMounts:
         - name: db-data
           mountPath: /code/db
+        - name: templates-yaml
+          mountPath: /code/templates
         envFrom:
         - configMapRef:
             name: mira-cluster-controller-config
