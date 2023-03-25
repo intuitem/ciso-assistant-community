@@ -47,9 +47,16 @@
                 </div>
                 <div class="px-4 pt-2 pb-4 mb-2 bg-white rounded-lg shadow w-1/4">
                     <h2 class="text-lg font-semibold mb-4">{% trans "Status" %}</h2>
-                    <div class="flex-col">
-                        <p class="text-gray-400 text-sm font-semibold">{% trans "Last update" %}:</p>
-                        <p class="text-sm font-semibold">{{ scenario.updated_at }}</p>
+                    <div class="flex flex-row">
+                        <div class="flex-1 flex-col">
+                            <p class="text-gray-400 text-sm font-semibold">{% trans "Last update" %}:</p>
+                            <p class="text-sm font-semibold">{{ scenario.updated_at }}</p>
+                        </div>
+                        <div class="flex-1 flex-col">
+                            <p class="text-sm font-semibold">{% trans "Treatment status" %}</p>
+                                {{ form.treatment.errors }}
+                                {{ form.treatment }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -137,62 +144,68 @@
             </div>
         </section>
         <section class="flex flex-row-reverse w-full">
-            <div class="flex flex-col ml-1 space-y-4 w-full mb-4">
-                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow">
-                    <h2 class="text-lg font-semibold mb-4">{% trans "Target Assessment" %}</h2>
-                    <div class="flex flex-row space-x-4 mt-4 justify-center">
-                        <div>
-                            <p class="text-sm font-semibold whitespace-nowrap">{% trans "Residual probability" %}</p>
-                            {{ form.residual_proba.errors }}
-                            {{ form.residual_proba }}
-                        </div>
-                        <div class="items-center pt-7">
-                            <i class="fas fa-times"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold white">{% trans "Residual impact" %}</p>
-                            {{ form.residual_impact.errors }}
-                            {{ form.residual_impact }}
-                        </div>
-                        <div class="items-center pt-7">
-                            <i class="fas fa-equals"></i>
-                        </div>
-                        <div class=""> 
-                            <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
-                            <div class="">
-                                <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
-                                    style="background-color: {{ scenario.get_residual_risk.hexcolor }}">
-                                    {{ scenario.get_residual_risk.name }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex flex-col space-y-2 px-4 pt-2 pb-4 bg-white rounded-lg shadow">
+            <div class="flex flex-col-reverse w-full mb-4">
+                <div class="flex flex-col space-y-2 px-4 pt-2 pb-4 mt-2 bg-white rounded-lg shadow">
                     <div>
-                        <h2 class="text-lg font-semibold mb-4">{% trans "Follow-up" %}</h2>
-                        <p class="text-sm font-semibold">{% trans "Treatment status" %}</p>
-                        {{ form.treatment.errors }}
-                        {{ form.treatment }}
+                        <h2 class="text-lg font-semibold mb-4">{% trans "Comments" %}</h2>
+                        
                     </div>
                     <div>
-                        <p class="text-sm font-semibold">{% trans "Comments" %}</p>
                         {{ form.comments.errors }}
                         {{ form.comments }}
                     </div>
                 </div>
-            </div>
-        </form>
-            <div class="bg-white rounded-lg shadow pb-6 mb-4 mr-1 w-full">
-                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-t-lg shadow w-full">
-                    <h2 class="text-lg font-semibold mb-4">{% trans "Select or create additional security measures" %}</h2>
-                    <div class="flex flex-row">
-                        <div class="flex">
-                            {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="riskscenario" content=_("Select security measures") %}
-                            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New security measure") %}
+                <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow w-full">
+                    <div class="flex flex-row-reverse">
+                        <div class="flex items-center w-1/2">
+                            <div class="px-4 pt-2 pb-4 flex flex-col rounded-lg w-full border shadow">
+                                <p class="text-lg font-semibold mb-4">{% trans "Target Assessment" %}</p>
+                                <div class="flex flex-row space-x-4 mt-4 justify-center">
+                                    <div>
+                                        <p class="text-sm font-semibold whitespace-nowrap">{% trans "Residual probability" %}</p>
+                                        {{ form.residual_proba.errors }}
+                                        {{ form.residual_proba }}
+                                    </div>
+                                    <div class="items-center pt-7">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold white">{% trans "Residual impact" %}</p>
+                                        {{ form.residual_impact.errors }}
+                                        {{ form.residual_impact }}
+                                    </div>
+                                    <div class="items-center pt-7">
+                                        <i class="fas fa-equals"></i>
+                                    </div>
+                                    <div class=""> 
+                                        <p class="pl-1 text-sm font-semibold">{% trans "Residual risk level" %}</p>
+                                        <div class="">
+                                            <span id="residual_risk_level" class="rounded-lg text-sm flex pb-2 pt-2 justify-center"
+                                                style="background-color: {{ scenario.get_residual_risk.hexcolor }}">
+                                                {{ scenario.get_residual_risk.name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                        <div class="w-1/2 mr-2">
+                            <div class="bg-white rounded-lg shadow pb-6 mb-4 mr-1 w-full">
+                                <h2 class="text-lg font-semibold mb-4">{% trans "Residual risk" %}</h2>
+                                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-t-lg shadow w-full">
+                                    <p class="text-sm font-semibold">{% trans "Select or create additional security measures" %}</p>
+                                    <div class="flex flex-row">
+                                        <div class="flex">
+                                            {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="riskscenario" content=_("Select security measures") %}
+                                            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New security measure") %}
+                                        </div>
+                                    </div>
+                                    {% include 'snippets/mtg_list_nested.html' %}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    {% include 'snippets/mtg_list_nested.html' %}
                 </div>
             </div>
             <div class="flex space-x-2 justify-end"> 
