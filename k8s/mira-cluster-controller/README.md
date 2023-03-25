@@ -17,14 +17,22 @@ When a new version of Mira is released, the template shall be updated, and each 
 
 When a client is deleted, corresponding objects are destroyed. The PersistentVolumeClaim is not deleted automatically, so recreating a client will retrieve existing data. To delete the PVC, used kubectl directly.
 
+Clients objects are created in the "default" namespace.
+
 ## Installation
+
+The namespace "controller" shall be created to host the controller:
+
+```shell
+kubectl create namespace controller
+````
 
 The following files are used to deploy the application:
 
 Name                                       | Content
 -------------------------------------------|------------------------------------
 serviceaccounts.controller.yaml            | Definition of a service account for the controller 
-role.controller.yaml                       | Access rights for the controller
+role.controller.yaml                       | Access rights for the controller (in default namespace)
 svc.mira-cluster-controller.yaml           | Service for the controller
 ing.mira-cluster-controller.yaml           | Ingress for the controller
 sts.mira-cluster-controller.yaml           | StatefulSet for the controller

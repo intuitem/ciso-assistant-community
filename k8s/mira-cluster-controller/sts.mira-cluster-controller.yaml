@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mira-cluster-controller
+  namespace: controller
 spec:
   serviceName: mira-cluster-controller
   replicas: 1
@@ -37,17 +38,6 @@ spec:
         envFrom:
         - configMapRef:
             name: mira-cluster-controller-config
-        env:
-        - name: EMAIL_HOST_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: smtp-out
-              key: EMAIL_HOST_PASSWORD
-        - name: RECAPTCHA_PRIVATE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: recaptcha
-              key: RECAPTCHA_PRIVATE_KEY
       - name: caddy
         image: caddy:2.6.4
         command: ["caddy", "reverse-proxy", "--from", $(CLUSTER_CONTROLLER_URL), "--to", "localhost:8000"]

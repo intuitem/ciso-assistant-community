@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mira-cluster-controller
+  namespace: controller
 spec:
   type: ClusterIP
   selector:

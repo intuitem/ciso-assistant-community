@@ -25,7 +25,7 @@ subjects:
 # You can specify more than one "subject"
 - kind: ServiceAccount
   name: controller
-  namespace: default
+  namespace: controller
 roleRef:
   kind: Role
   name: controller-role
