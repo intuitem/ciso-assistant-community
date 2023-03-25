@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,11 +27,9 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-if 'DJANGO_ALLOWED_HOSTS' in os.environ:
-    ALLOWED_HOSTS = os.environ['DJANGO_ALLOWED_HOSTS'].split(',')
-else:
-    ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
-
+CLUSTER_CONTROLLER_URL = os.environ['CLUSTER_CONTROLLER_URL']
+ALLOWED_HOSTS = [urlparse(CLUSTER_CONTROLLER_URL).hostname]
+CSRF_TRUSTED_ORIGINS = [CLUSTER_CONTROLLER_URL]
 
 # Application definition
 

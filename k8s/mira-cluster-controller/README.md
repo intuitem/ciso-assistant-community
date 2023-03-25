@@ -2,17 +2,51 @@
 
 MIRA cluster controller is a Django application aimed to control within a K8s cluster the deployement of objects for each client.
 
+Caddy is managing the TLS connection to the controller.
+
+A client is defined by a name and an administrator email.
+
+When a client is created, the following objects are created (or updated if the objects already exist):
+- a service
+- an ingress
+- a statefulset
+
+The objects are defined in a templated yaml, that is stored in a configmap. This allows for updating the template without changing the controller.
+
+When a new version of Mira is released, the template shall be updated, and each client can be updated by "saving" it without change.
+
+When a client is deleted, corresponding objects are destroyed. The PersistentVolumeClaim is not deleted automatically, so recreating a client will retrieve existing data. To delete the PVC, used kubectl directly.
+
 ## Installation
 
-Use sts.mira-cluster-controller.yaml to push the application on the cluster.
+The following files are used to deploy the application:
+
+Name                                       | Content
+-------------------------------------------|------------------------------------
+serviceaccounts.controller.yaml            | Definition of a service account for the controller 
+role.controller.yaml                       | Access rights for the controller
+svc.mira-cluster-controller.yaml           | Service for the controller
+ing.mira-cluster-controller.yaml           | Ingress for the controller
+sts.mira-cluster-controller.yaml           | StatefulSet for the controller
+cm.mira-cluster-controller-config-dev.yaml | Parameters for the controller
 
 ## Environment variables
 
 Environment variables come from the "mira-cluster-controller-config" configmap.
 
+Name                  | value                           | example
+----------------------|---------------------------------|--------------
+DJANGO_DEBUG          | debug mode                      | "True"
+CLUSTER_CONTROLLER_URL| url to reach the controller     | "https://caudron.alsigo.net"
+CLUSTER_DOMAIN        | domain to append to client name | "alsigo.net"
+
+
 See cm.mira-cluster-controller-config-dev.yaml for an example.
 
+## Client template
+
 The template yaml file for client objects creation is stored in the configmap "templates". To create it, use:
+
 ```shell
 kubectl create configmap templates-yaml --from-file=templates/client_template.yaml
 ````

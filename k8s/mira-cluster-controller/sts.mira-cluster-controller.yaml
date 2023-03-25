@@ -50,7 +50,7 @@ spec:
               key: RECAPTCHA_PRIVATE_KEY
       - name: caddy
         image: caddy:2.6.4
-        command: ["caddy", "reverse-proxy", "--from", $(MIRA_CLUSTER_CONTROLLER_DOMAIN), "--to", "localhost:8000"]
+        command: ["caddy", "reverse-proxy", "--from", $(CLUSTER_CONTROLLER_URL), "--to", "localhost:8000"]
         ports:
         - containerPort: 80
         - containerPort: 443
@@ -59,11 +59,11 @@ spec:
           mountPath: /data
           subPath: caddy
         env:
-        - name: MIRA_CLUSTER_CONTROLLER_DOMAIN
+        - name: CLUSTER_CONTROLLER_URL
           valueFrom:
             configMapKeyRef:
               name: mira-cluster-controller-config
-              key: MIRA_CLUSTER_CONTROLLER_DOMAIN
+              key: CLUSTER_CONTROLLER_URL
   volumeClaimTemplates:
   - metadata:
       name: db-data
