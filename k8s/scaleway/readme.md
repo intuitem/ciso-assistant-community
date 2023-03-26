@@ -1,13 +1,23 @@
 # list of tricks for Scaleway
 
+The tricks apply to the integration environment, but are transposable to other environments.
+
 ## Environment and aliases
 
-Retrieve the kubeconfig-k8s-mira.yaml file.
+Retrieve the kubeconfig file corresponding to your cluster (e.g., kubeconfig-k8s-mira-int.yaml), and set it in the KUBECONFIG env variable:
 
 ``` shell
-export KUBECONFIG=$(pwd)/kubeconfig-k8s-mira.yaml
-alias k=kubectl
+export KUBECONFIG=$(pwd)/kubeconfig-k8s-mira-int.yaml
 ```
+
+The k and kns aliases are very useful and recommended.
+
+``` shell
+alias k=kubectl
+kns='kubectl config set-context --current --namespace '
+```
+
+Tip: when working simultaneously in several environments, rename your tab to reflect the environment name (e.g., int, demo, preprod, prod).
 
 ## Pushing an image
 
@@ -40,6 +50,17 @@ To install nginx ingress controller, use "Easy deploy" instruction, with:
     - app name = mira
     - app namespace = kube-system
 Then, launch the script "patch-nginx" to add the --enable-ssl-passthrough option to nginx.
+
+## Load balancer
+
+See the documentation here: https://www.scaleway.com/en/docs/tutorials/get-started-kubernetes-loadbalancer/
+
+In practice, apply the svc.mira-lb.yaml file. After a few seconds, you can read the load-balancer IP address.
+
+```shell
+k apply -f svc.mira-lb.yaml
+k get service -A
+```
 
 ## Transactional email
 

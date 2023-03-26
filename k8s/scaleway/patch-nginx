@@ -1,4 +1,4 @@
-kubectl --kubeconfig kubeconfig-k8s-mira.yaml patch ds \
+kubectl patch ds \
   mira-ingress-nginx-controller \
   --namespace kube-system \
   --type='json' \

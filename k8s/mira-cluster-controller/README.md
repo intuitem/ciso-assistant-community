@@ -38,6 +38,8 @@ ing.mira-cluster-controller.yaml           | Ingress for the controller
 sts.mira-cluster-controller.yaml           | StatefulSet for the controller
 cm.mira-cluster-controller-config-dev.yaml | Parameters for the controller
 
+A loadbalancer is also required. Its setup depends on the cloud provider. For Scaleway, please have a look to the corresponding readme file.
+
 ## Environment variables
 
 Environment variables come from the "mira-cluster-controller-config" configmap.
