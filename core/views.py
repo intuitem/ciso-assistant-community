@@ -35,6 +35,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 import logging
 import csv
+import time, random
 
 from typing import Optional, Any
 from django.urls import reverse, reverse_lazy
@@ -333,10 +334,9 @@ def password_reset_request(request):
                     context["password_reset_form"] = password_reset_form
                     return render(request=request, template_name="registration/password_reset.html", context=context)
             else:
-                messages.error(request, "This user doesn't exist.")
-                password_reset_form = ResetForm()
-                context["password_reset_form"] = password_reset_form
-                return render(request=request, template_name="registration/password_reset.html", context=context)
+                # wrong, but we won't tell the requester for security reasons
+                time.sleep(random.random()*1.5)
+                print("wrong email reset:", data)
             return redirect("/password_reset/done/")
         else:
             messages.error(request, "Invalid email or captcha.")
