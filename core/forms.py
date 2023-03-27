@@ -5,10 +5,12 @@ from .models import *
 from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox
 from django.contrib.auth import authenticate
 from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
+
+if RECAPTCHA_PUBLIC_KEY:
+    from captcha.fields import ReCaptchaField
+    from captcha.widgets import ReCaptchaV2Checkbox
 
 User = get_user_model()
 
@@ -94,7 +96,7 @@ class LoginForm(AuthenticationForm):
 
 class ResetForm(forms.Form):
     email = forms.EmailField(label=_("Email"), widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
-    if RECAPTCHA_PUBLIC_KEY != '':
+    if RECAPTCHA_PUBLIC_KEY:
         captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
 
 
