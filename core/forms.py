@@ -254,7 +254,7 @@ class RiskScenarioModalUpdateForm(StyledModelForm):
 class RiskAcceptanceCreateUpdateForm(StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['risk_scenarios'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
+        self.fields['risk_scenarios'].widget = SearchableCheckboxSelectMultiple(attrs={'id': 'id_riskscenarios_select', 'class': 'text-sm rounded',
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                    choices=self.fields['risk_scenarios'].choices)
