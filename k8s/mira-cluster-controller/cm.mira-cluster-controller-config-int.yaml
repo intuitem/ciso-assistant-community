@@ -7,3 +7,4 @@ data:
   CLUSTER_CONTROLLER_URL: https://caudron.alsigo.net
   CLUSTER_DOMAIN: alsigo.net
   DJANGO_DEBUG: "False"
+  CLUSTER_CONTROLLER_TITLE: "MIRA INTegration cluster controller"

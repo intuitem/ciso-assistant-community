@@ -27,7 +27,7 @@ spec:
       enableServiceLinks: false
       containers:
       - name: mira-cluster-controller
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.9
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.9.1
         ports:
         - containerPort: 8000
         volumeMounts:
