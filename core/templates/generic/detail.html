@@ -28,11 +28,13 @@
             </div>
             {% endfor %}
         </div>
-        {% if change and not risk_acceptance_accepted and not risk_acceptance_rejected and not risk_acceptance_revoked %}
+        {% block edit_button %}
+        {% if change %}
         <a href="{{ object.edit_url }}?next={{ request.path|urlencode }}" class="bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg w-fit h-fit font-medium">
             <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
         </a>         
         {% endif %}
+        {% endblock edit_button %}
     </div>
     {% block below %}{% endblock below %}
 </div>
