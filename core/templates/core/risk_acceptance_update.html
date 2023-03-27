@@ -32,7 +32,7 @@
 </div>
 <script>
     var field1 = document.getElementById('id_riskacceptance_folder');
-    var parentDiv = document.getElementById('id_risk_scenarios');
+    var parentDiv = document.getElementById('id_riskscenarios_select');
     var labels = parentDiv.querySelectorAll('label');
 
     function updateLabels() {
@@ -45,6 +45,6 @@
     }
 
     window.onload = updateLabels;
-    field1.addEventListener('click', updateLabels);
+    field1.addEventListener('change', updateLabels);
 </script>
 {% endblock %}
