@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from captcha.fields import ReCaptchaField
 from captcha.widgets import ReCaptchaV2Checkbox
 from django.contrib.auth import authenticate
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
 
 User = get_user_model()
 
@@ -93,7 +94,8 @@ class LoginForm(AuthenticationForm):
 
 class ResetForm(forms.Form):
     email = forms.EmailField(label=_("Email"), widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
-    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+    if RECAPTCHA_PUBLIC_KEY != '':
+        captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
 
 
 class ResetConfirmForm(SetPasswordForm):
