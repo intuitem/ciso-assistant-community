@@ -15,7 +15,7 @@
         <section class="flex flex-col w-full">
             <div class="flex flex-row">
                 <div class="px-4 pt-2 pb-4 mb-2 mr-2 bg-white rounded-lg shadow w-3/4">
-                    <h2 class="text-lg font-semibold mb-4">{% trans "Context" %}</h2>
+                    <h2 class="text-lg font-semibold mb-4">{% trans "Scope" %}</h2>
                     <section class="flex flex-col space-y-4">
                         <div class="flex flex-row space-x-6">
                             <div class="flex-1 flex-col">
@@ -188,21 +188,15 @@
                         </div>
                     </form>
                         <div class="w-1/2 mr-2">
-                            <div class="bg-white rounded-lg shadow pb-6 mb-4 mr-1 w-full">
+                            <div class=" pb-6 mb-4 mr-1 w-full">
                                 <h2 class="text-lg font-semibold mb-4">{% trans "Residual risk" %}</h2>
-                                <div class="px-4 pt-2 mr-2 pb-4 bg-white rounded-t-lg shadow w-full">
-                                    <div class="flex flex-row">
-                                        <div class="flex w-full items-center mb-2">
-                                            <p class="text-sm font-semibold">{% trans "Select or create additional security measures" %}:</p>
-                                        </div>
-                                        <div class="flex flex-row w-1/4">
-                                            <div class="flex space-x-4">
-                                                <div>
+                                <div class="text-sm font-semibold">{% trans "Additional measures" %}</div>
+                                <div class="px-4 pt-2 mr-2 pb-4 w-full border-x-2 border-t-2">
+                                    <div class="flex">
+                                        <div>
                                                 {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="riskscenario" content=_("Select") %}
                                                 {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New") %}
-                                                </div>
                                             </div>
-                                        </div>
                                         </div>
                                         {% include 'snippets/mtg_list_nested.html' %}
                                     </div>
