@@ -82,16 +82,13 @@
                     </section>
                 </div>
                 <div class="px-4 pt-2 pb-4 mb-2 bg-white rounded-lg shadow w-1/2">
-                    <div class="flex flex-col mb-4 space-y-1">
-                        <div class="flex flex-col">
+                    <div class="flex flex-col mb-4 space-y-1 h-full">
+                        <div class="flex flex-col h-full">
                             <label class="text-sm font-semibold">{{ form.assets.label|striptags }}</label>
-
                             {{ form.assets }}
-                    
                             {% for error in form.assets.errors %}
                                 <li class="text-red-500 text-xs font-semibold">{{ error|striptags }}</li>
                             {% endfor %}
-
                         </div>
                         <div class="help_text -mt-1">
                             {{ form.assets.help_text|safe }}
@@ -207,8 +204,8 @@
                                             </div>
                                         </div>
                                         </div>
+                                        {% include 'snippets/mtg_list_nested.html' %}
                                     </div>
-                                    {% include 'snippets/mtg_list_nested.html' %}
                                 </div>
                             </div>
                         </div>
