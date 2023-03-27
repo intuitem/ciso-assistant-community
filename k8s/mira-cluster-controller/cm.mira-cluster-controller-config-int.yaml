@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mira-cluster-controller-config
+  namespace: controller
+data:
+  CLUSTER_CONTROLLER_URL: https://caudron.alsigo.net
+  CLUSTER_DOMAIN: alsigo.net
+  DJANGO_DEBUG: "False"

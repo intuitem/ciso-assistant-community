@@ -18,4 +18,4 @@ db/django_secret_key
 k8s/mira-cluster-controller/controller/db/django_secret_key
 styles.css
 k8s/scaleway/kubeconfig-k8s-mira-demo.yaml
-*.yaml
+k8s/scaleway/kubeconfig-k8s-mira-int.yaml
