@@ -194,12 +194,11 @@
                                 <div class="px-4 pt-2 mr-2 pb-4 w-full border-x-2 border-t-2">
                                     <div class="flex">
                                         <div>
-                                                {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="riskscenario" content=_("Select") %}
-                                                {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New") %}
-                                            </div>
+                                            {% include 'snippets/update_button_modal.html' with form=measures_select_form header=_("Select security measures") model="riskscenario" content=_("Select") %}
+                                            {% include 'snippets/add_button_modal.html' with form=measure_create_form header=_("Add security measure") model="securitymeasure" content=_("New") %}
                                         </div>
-                                        {% include 'snippets/mtg_list_nested.html' %}
                                     </div>
+                                    {% include 'snippets/mtg_list_nested.html' %}
                                 </div>
                             </div>
                         </div>
@@ -215,6 +214,7 @@
         </div>
         </section>
     </div>
+
 </div>
 
 <script>
@@ -235,6 +235,9 @@
         window.history.back();
         return false;
     }
+</script>
+
+<script src="{% static 'cache/jquery-3.6.3.min.js' %}">
     // patch for *THAT* risk scenario update form issue:
     $(document).ready(function() {
         $('button#measure_save').click(function(event) {
@@ -247,7 +250,7 @@
                         type: $(this).attr('method'),
                         data: valuesToSend,
                         success: function(data) {
-                            location.reload();
+                            console.log('SOOCCESSS');
                         }
                     }
                 )
