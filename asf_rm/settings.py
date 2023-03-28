@@ -52,6 +52,10 @@ MIRA_URL = os.environ['MIRA_URL']
 ALLOWED_HOSTS = [urlparse(MIRA_URL).hostname]
 CSRF_TRUSTED_ORIGINS = [MIRA_URL]
 
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,9 +75,15 @@ INSTALLED_APPS = [
     'django_filters',
     'library',
     'serdes',
-    'captcha',
     'passkeys',
 ]
+
+if RECAPTCHA_PUBLIC_KEY:
+    INSTALLED_APPS.append('captcha')
+    print("recaptcha enabled")
+else:
+    print("recaptcha disabled")
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -95,10 +105,6 @@ LOGOUT_REDIRECT_URL = 'login'
 SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', default=60*15))  # defaults to 15 minutes
 SESSION_SAVE_EVERY_REQUEST = os.environ.get('SESSION_SAVE_EVERY_REQUEST', default=True) # prevents session from expiring when user is active
 SESSION_EXPIRE_AT_BROWSER_CLOSE = os.environ.get('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True)
-
-RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
-RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
 
 MIRA_SUPERUSER_EMAIL = os.environ.get('MIRA_SUPERUSER_EMAIL')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')

@@ -62,7 +62,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from captcha.fields import ReCaptchaField
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
+if RECAPTCHA_PUBLIC_KEY:
+    from captcha.fields import ReCaptchaField
+
 from datetime import datetime, timedelta
 import re
 
