@@ -538,7 +538,7 @@ def global_overview(request):
         "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
         "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
-        "analyses": Analysis.objects.filter(id__in=object_ids_view).filter(auditor=request.user).order_by('created_at'),
+        "analyses": Analysis.objects.filter(id__in=object_ids_view).order_by('created_at'),
         "colors": get_risk_color_ordered_list(request.user),
     }
 
