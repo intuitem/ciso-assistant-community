@@ -131,7 +131,7 @@ class RiskAnalysisCreateForm(StyledModelForm):
 class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['project'].widget.attrs['select_disabled'] = True
+        self.fields['project'].widget.attrs['disabled'] = True
         self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
         self.default_if_one_all()
         
@@ -175,7 +175,7 @@ class SecurityMeasureCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
 
     class Meta:
         model = SecurityMeasure
@@ -309,7 +309,7 @@ class ProjectFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectFormInherited, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
 
     class Meta:
         model = Project
@@ -328,7 +328,7 @@ class ThreatCreateForm(StyledModelForm):
         super(ThreatCreateForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
         
 
     class Meta:
@@ -353,7 +353,7 @@ class AssetForm(StyledModelForm):
         super(AssetForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
         self.fields['parent_assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
                      'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
@@ -384,7 +384,7 @@ class SecurityFunctionCreateForm(StyledModelForm):
         super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
 
     class Meta:
         model = SecurityFunction
