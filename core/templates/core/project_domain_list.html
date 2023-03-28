@@ -58,7 +58,7 @@
                         </th>
                         <td class="px-6 py-4">
                             <p class="whitespace-no-wrap capitalize">
-                                {% if domain.description%}{{ domain.description }}{% else %}--{% endif %}
+                                {% if domain.description%}{{ domain.description|linebreaksbr }}{% else %}--{% endif %}
                             </p>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

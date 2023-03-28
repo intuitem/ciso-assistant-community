@@ -52,7 +52,7 @@
             <tr class="border-b text-sm even:bg-white odd:bg-slate-50">
                 <td class="px-2 py-3 text-center"><a class="hover:text-indigo-800" id="{{ securitymeasure.id }}" href="{% url 'securitymeasure-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{ securitymeasure.mid }}</a></td>
                 <td class="px-2 py-3"><a class="hover:text-indigo-800" href="{% url 'securitymeasure-update' securitymeasure.id %}?next={{ request.path|urlencode }}">{{ securitymeasure.name }}</a></td>
-                <td class="px-2 py-3">{% if securitymeasure.description %}{{ securitymeasure.description }}{% endif %}</td>
+                <td class="px-2 py-3">{% if securitymeasure.description %}{{ securitymeasure.description|linebreaksbr }}{% endif %}</td>
                 <td class="px-2 py-3">{{ securitymeasure.get_type_display }}</td>
                 <td class="px-2 py-3">{% if securitymeasure.security_function %}{{ securitymeasure.security_function }}{% else %}--{% endif %}</td>
                 <td class="px-2 py-3">{% if securitymeasure.eta %}{{ securitymeasure.eta }}{% else %}--{%endif%}</td>

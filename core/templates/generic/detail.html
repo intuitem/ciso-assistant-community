@@ -19,7 +19,7 @@
                 <ul class="text-sm">
                     {% for value in values %}
                     <li class="text-gray-600 list-none">
-                        {% if value %} {{ value }} {% else %} -- {% endif %}
+                        {% if value %} {{ value|linebreaksbr }} {% else %} -- {% endif %}
                     </li>
                     {% empty %}
                     <li class="text-gray-600 list-none">--</li>
