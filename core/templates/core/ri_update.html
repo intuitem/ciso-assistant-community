@@ -9,7 +9,7 @@
 
 
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
-    <form method="POST" id="scenario_update_form", action="">{% csrf_token %}
+    <form method="POST" id="scenario_update_form" action="">{% csrf_token %}
     <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}{{ form.errors }}</p>
     <div class="flex flex-col space-y-2">
         <section class="flex flex-col w-full">
@@ -237,20 +237,19 @@
     }
 </script>
 
-<script src="{% static 'cache/jquery-3.6.3.min.js' %}">
+<script>
     // patch for *THAT* risk scenario update form issue:
     $(document).ready(function() {
-        $('button#measure_save').click(function(event) {
+        $('button#securitymeasure_save').click(function(event) {
             event.preventDefault(); // prevent 1st submit (modal) from firing right away, without this only the modal will be submitted
-            $('#scenario_update_form, #measure-create-form').each(function() {
+            $('#scenario_update_form, #securitymeasure-create-form').each(function() {
                 valuesToSend = $(this).serialize();
-                console.debug(valuesToSend);
                 $.ajax($(this).attr('action'),
                     {
                         type: $(this).attr('method'),
                         data: valuesToSend,
                         success: function(data) {
-                            console.log('SOOCCESSS');
+                            location.reload();
                         }
                     }
                 )
@@ -272,9 +271,6 @@
             var current_risk = matrix.grid[current_proba][current_impact];
         if (residual_proba >= 0 && residual_impact >=0)
             var residual_risk = matrix.grid[residual_proba][residual_impact];
-
-        console.debug("current_risk", current_risk);
-        console.debug("residual_risk", residual_risk);
 
         if (current_risk >= 0){
             document.getElementById("current_risk_level").innerHTML = matrix.risk[current_risk].name;
