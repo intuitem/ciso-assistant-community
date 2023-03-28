@@ -28,7 +28,7 @@
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     <p class="whitespace-no-wrap capitalize">
-                        {% if project.description %}{{ project.description }}{% else %}--{% endif %}
+                        {% if project.description %}{{ project.description|linebreaksbr }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">

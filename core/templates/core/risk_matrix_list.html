@@ -55,14 +55,14 @@
                                 <div>
                                     {% if not matrix.is_enabled %}<span class="bg-gray-200 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{% trans "disabled" %}</span>{% endif %}
                                     <p id="matrix{{ matrix.id }}" class="text-md font-semibold whitespace-no-wrap">
-                                        {{ matrix.name|capfirst }}
+                                        {{ matrix.name }}
                                     </p>
                                 </div>
                             </div>
                         </th>
                         <td class="px-6 py-4">
                             <p class="whitespace-no-wrap capitalize">
-                                {{ matrix.description|capfirst }}
+                                {{ matrix.description|linebreaksbr }}
                             </p>
                         </td>
                         <td class="px-6 py-4 text-center">
