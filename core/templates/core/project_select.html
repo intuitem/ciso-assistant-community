@@ -102,7 +102,7 @@
                 </div>
             </div>
 
-            <button id="process" class="bg-violet-800 hover:bg-violet-700 text-md text-white p-2 rounded w-full disabled:opacity-30" type="submit">{% trans "Process" %}</button>
+            <button id="process" class="text-md text-white p-2 rounded w-full" type="submit">{% trans "Process" %}</button>
         </form>
         </div>
 
@@ -151,9 +151,12 @@
                         const submitButton = document.getElementById('process');
                         if (this.selected.length == 0){
                             submitButton.disabled = true;
+                            submitButton.classList.remove('bg-violet-800', 'hover:bg-violet-700');
+                            submitButton.classList.add('bg-gray-300', 'text-gray-200');
                         }
                         else{
                             submitButton.disabled = false;
+                            submitButton.classList.add('bg-violet-800', 'hover:bg-violet-700');
                         }
                         return this.selected.map((option)=>{
                             return this.options[option].value;
