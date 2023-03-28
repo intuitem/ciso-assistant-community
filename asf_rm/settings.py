@@ -102,6 +102,10 @@ ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', default=60*15))  # defaults to 15 minutes
+SESSION_SAVE_EVERY_REQUEST = os.environ.get('SESSION_SAVE_EVERY_REQUEST', default=True) # prevents session from expiring when user is active
+SESSION_EXPIRE_AT_BROWSER_CLOSE = os.environ.get('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True)
+
 MIRA_SUPERUSER_EMAIL = os.environ.get('MIRA_SUPERUSER_EMAIL')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
@@ -116,7 +120,8 @@ EMAIL_PORT_RESCUE = os.environ.get('EMAIL_PORT_RESCUE')
 EMAIL_HOST_USER_RESCUE = os.environ.get('EMAIL_HOST_USER_RESCUE')
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get('EMAIL_HOST_PASSWORD_RESCUE')
 EMAIL_USE_TLS_RESCUE = os.environ.get('EMAIL_USE_TLS_RESCUE')
-# NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution or wait a real SMTP server.
+
+EMAIL_TIMEOUT = float(os.environ.get('EMAIL_TIMEOUT', default="10.0")) # seconds
 
 TEMPLATES = [
     {

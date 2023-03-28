@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mira-cluster-controller-config
+  namespace: controller
+data:
+  CLUSTER_CONTROLLER_URL: https://caudron.miracloud.fr
+  CLUSTER_DOMAIN: miracloud.fr
+  DJANGO_DEBUG: "False"
+  CLUSTER_CONTROLLER_TITLE: "MIRA DEMO cluster controller"

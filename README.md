@@ -71,6 +71,10 @@ export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE='apikey'
 export EMAIL_HOST_PASSWORD_RESCUE=SENDGRID_APIKEY
 export EMAIL_USE_TLS_RESCUE=True
+# Idle session timeout management (optional)
+export SESSION_COOKIE_AGE=900 # 15 minutes, in seconds (default)
+export SESSION_EXPIRE_AT_BROWSER_CLOSE=True # (default)
+export SESSION_SAVE_EVERY_REQUEST=True # (default)
 ```
 
 NOTE: DB_PORT is optional, and defaults to 5432.
