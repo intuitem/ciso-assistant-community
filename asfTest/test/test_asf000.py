@@ -119,7 +119,6 @@ def test_asf002(page):
 	assert toast_info.is_visible() and toast_warning.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
 
-@pytest.mark.skip(reason="Conflict with captcha, need to find a solution")
 def test_asf003(page):
 	"""
 	Test case: ASF-003
