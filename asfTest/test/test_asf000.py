@@ -136,10 +136,10 @@ def test_asf003(page):
 	assert page.url == urlpatterns.LOGINFIRST, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 2 | Click on forgot password | Open recovery password page
 	step += 1
-	page.get_by_role("link", name="Forgot password?").click()
+	page.locator("#password_reset").click()
 	page.locator("#id_email").click()
 	page.locator("#id_email").fill("root@gmail.com")
-	page.get_by_role("button", name="Send Email").click()
+	page.locator("#send_button").click()
 	assert page.url == urlpatterns.RESET_DONE, "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 3 | Go on Mailhog to get reset link | Send to reset page
 	step += 1
@@ -155,15 +155,13 @@ def test_asf003(page):
 	page.locator("#id_new_password1").fill("toto1234")
 	page.locator("#id_new_password2").click()
 	page.locator("#id_new_password2").fill("toto1234")
-	page.get_by_role("button", name="Change password").click()
+	page.locator("#reset_button").click()
 	page.get_by_role("link", name="log in").click()
 	message = page.locator('id=hellothere')
 	assert message.is_visible(), "Test "+str(test)+" Step "+str(step)+": not Ok"
 	# 5 | Login with the new password | Open home page
 	step += 1
-	page.get_by_label("Email:").click()
-	page.get_by_label("Email:").fill("root@gmail.com")
-	page.get_by_label("Password:").click()
-	page.get_by_label("Password:").fill("toto1234")
-	page.get_by_role("button", name="Login").click()
+	page.locator("#id_username").fill("root@gmail.com")
+	page.locator("#id_password").fill("toto1234")
+	page.locator("#login").click()
 	assert page.url == urlpatterns.URL, "Test "+str(test)+" Step "+str(step)+": not Ok"
