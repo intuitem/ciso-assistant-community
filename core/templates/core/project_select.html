@@ -27,7 +27,7 @@
         <input name="analysis" type="hidden" x-bind:value="selectedValues()">
         <div class="inline-block relative w-96">
             <div class="flex flex-col items-center relative">
-                <div x-on:click="open" class="w-full  svelte-1l8159u">
+                <div x-on:click="open" class="w-full svelte-1l8159u cursor-pointer">
                     <div class="my-2 p-1 flex border border-gray-200 bg-white rounded svelte-1l8159u">
                         <div class="flex flex-auto flex-wrap">
                             <template x-for="(option,index) in selected" :key="options[option].value">
@@ -50,9 +50,8 @@
                             </template>
                             <div x-show="selected.length == 0" class="flex">
                                 <input placeholder="{% trans "Select your targets" %}"
-                                    class="bg-transparent p-1 px-2 appearance-none outline-none h-full w-full text-gray-800"
-                                    {% comment %} x-bind:value="selectedValues()" {% endcomment %}
-                                >
+                                    class="bg-transparent p-1 px-2 appearance-none outline-none h-full w-full text-gray-800 cursor-pointer"
+                                    disabled />
                             </div>
                         </div>
                         <div
@@ -102,7 +101,7 @@
                 </div>
             </div>
 
-            <button id="process" class="bg-violet-800 hover:bg-violet-700 text-md text-white p-2 rounded w-full" type="submit">{% trans "Process" %}</button>
+            <button id="process" class="text-md text-white p-2 rounded w-full" type="submit">{% trans "Process" %}</button>
         </form>
         </div>
 
@@ -148,6 +147,16 @@
 
                     },
                     selectedValues(){
+                        const submitButton = document.getElementById('process');
+                        if (this.selected.length == 0){
+                            submitButton.disabled = true;
+                            submitButton.classList.remove('bg-violet-800', 'hover:bg-violet-700');
+                            submitButton.classList.add('bg-gray-300', 'text-gray-200');
+                        }
+                        else{
+                            submitButton.disabled = false;
+                            submitButton.classList.add('bg-violet-800', 'hover:bg-violet-700');
+                        }
                         return this.selected.map((option)=>{
                             return this.options[option].value;
                         })

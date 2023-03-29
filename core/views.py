@@ -524,8 +524,7 @@ def global_overview(request):
 
     object_ids_view += [analysis for analysis in viewable_analyses]
 
-    _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(
-        riskscenario__analysis__auditor=request.user).exclude(status='done').order_by('eta')
+    _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).exclude(status='done').order_by('eta')
 
     context = {
         "counters": get_counters(request.user),
@@ -536,9 +535,9 @@ def global_overview(request):
         "today": date.today(),
         "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
-        "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
+        "agg_data": risk_status(request.user, Analysis.objects.filter(id__in=viewable_analyses)),
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
-        "analyses": Analysis.objects.filter(id__in=object_ids_view).filter(auditor=request.user).order_by('created_at'),
+        "analyses": Analysis.objects.filter(id__in=viewable_analyses).order_by('created_at'),
         "colors": get_risk_color_ordered_list(request.user),
     }
 
@@ -723,10 +722,7 @@ class ReviewView(BaseContextMixin, ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        mode = self.request.GET.get('mode')
-        if mode == "all":
-            return Analysis.objects.filter(id__in=object_ids_view)
-        return Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user)
+        return Analysis.objects.filter(id__in=object_ids_view)
 
 
 class CreateViewModal(BaseContextMixin, CreateView):
