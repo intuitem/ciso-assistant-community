@@ -722,10 +722,7 @@ class ReviewView(BaseContextMixin, ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        mode = self.request.GET.get('mode')
-        if mode == "all":
-            return Analysis.objects.filter(id__in=object_ids_view)
-        return Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user)
+        return Analysis.objects.filter(id__in=object_ids_view)
 
 
 class CreateViewModal(BaseContextMixin, CreateView):
