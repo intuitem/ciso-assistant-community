@@ -6,6 +6,7 @@ from django.core import management
 from django.core.management.commands import loaddata, dumpdata
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
+from  datetime import datetime;
 
 from iam.models import RoleAssignment
 from core.utils import UserGroupCodename
@@ -73,7 +74,8 @@ class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
 @user_passes_test(is_superuser_check)
 def dump_db_view(request):
     response = HttpResponse(content_type='application/json')
-    response['Content-Disposition'] = 'attachment; filename="db.json"'
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    response['Content-Disposition'] = f'attachment; filename="mira-db-{timestamp}.json"'
 
     response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
     # Here we dump th data to stdout
