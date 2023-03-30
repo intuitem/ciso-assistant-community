@@ -73,7 +73,7 @@ import json
 
 User = get_user_model()
 
-MAX_USERS = 1
+MAX_USERS = 20
 
 class BaseContextMixin:
 
