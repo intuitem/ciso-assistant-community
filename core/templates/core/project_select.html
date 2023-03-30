@@ -32,7 +32,7 @@
                         <div class="flex flex-auto flex-wrap">
                             <template x-for="(option,index) in selected" :key="options[option].value">
                                 <div
-                                    class="flex justify-center items-center m-1 font-medium py-1 px-2 rounded-full text-teal-700 bg-teal-100 border border-teal-300 ">
+                                    class="flex justify-center items-center m-1 font-medium py-1 px-2 rounded-full text-indigo-700 bg-indigo-100 border border-indigo-300 ">
                                     <div class="text-xs font-normal leading-none max-w-full flex-initial" x-model="
                                         options[option]" x-text="options[option].text"></div>
                                     <div class="flex flex-auto flex-row-reverse">
@@ -85,9 +85,9 @@
                         <div class="flex flex-col w-full">
                             <template x-for="(option,index) in options" :key="option">
                                 <div>
-                                    <div class="cursor-pointer w-full border-gray-100 rounded-t border-b hover:bg-teal-100"
+                                    <div class="cursor-pointer w-full border-gray-100 rounded-t border-b hover:bg-indigo-100"
                                         @click="select(index,$event)">
-                                        <div id="option" x-bind:class="option.selected ? 'border-teal-600' : ''"
+                                        <div id="option" x-bind:class="option.selected ? 'border-indigo-600' : ''"
                                             class="flex w-full items-center p-2 pl-2 border-transparent border-l-2 relative">
                                             <div class="w-full items-center flex">
                                                 <div class="mx-2 leading-6" x-model="option" x-text="option.text"></div>
