@@ -102,8 +102,6 @@ class Asset(AbstractBaseModel, FolderMixin):
 class SecurityFunction(AbstractBaseModel, FolderMixin):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
-    contact = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Contact"))
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
