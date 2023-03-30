@@ -103,9 +103,7 @@
 		<div class="flex-1">
 			{% if exceeded_users %}
 				<div class="grid place-content-center bg-red-600 text-white h-6 sticky top-0 z-10" :class="sidebarOpen == false ? 'ml-4' + (sidebarAnimation == false ? '' : ' transition-all duration-300') : 'ml-72' + (sidebarAnimation == false ? '' : ' transition-all duration-300')">
-					{% blocktrans %}
-					<p class="text-sm">The maximum number of licensed users has been exceeded. Please contact your provider.</p>
-					{% endblocktrans %}
+					<p class="text-sm">{% trans "The maximum number of licensed users has been exceeded. Please contact your provider" %}.</p>
 				</div>
 			{% endif %}
 			<main class="px-8 pb-8" :class="sidebarOpen == false ? 'ml-4' + (sidebarAnimation == false ? '' : ' transition-all duration-300') : 'ml-72' + (sidebarAnimation == false ? '' : ' transition-all duration-300')">
