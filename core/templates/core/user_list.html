@@ -111,11 +111,11 @@
         </div>
         <div class="grid place-content-center w-fit whitespace-nowrap mb-4 rounded-lg border-2 px-2
             {% if users_number <= users_number_limit %} 
-                border-indigo-700 bg-indigo-100 text-indigo-700 
+                text-gray-800
             {% else %} 
-                border-red-700 bg-red-100 text-red-700 
+                text-red-600
             {% endif %}">
-            <p class="">{{ users_number }} {% trans "out of" %} {{ users_number_limit }} {% trans "users" %}</p>
+            <p class="">{{ users_number }} {% trans "out of" %} {{ users_number_limit }}</p>
         </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">

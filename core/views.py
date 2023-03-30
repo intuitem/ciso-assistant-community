@@ -73,7 +73,7 @@ import json
 
 User = get_user_model()
 
-MAX_USERS = 20
+MAX_USERS = 1
 
 class BaseContextMixin:
 
@@ -535,12 +535,13 @@ def global_overview(request):
         "measures_to_review": measures_to_review(request.user),
         "acceptances_to_review": acceptances_to_review(request.user),
         "today": date.today(),
-        "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
-        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
         "agg_data": risk_status(request.user, Analysis.objects.filter(id__in=viewable_analyses)),
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
         "analyses": Analysis.objects.filter(id__in=viewable_analyses).order_by('created_at'),
         "colors": get_risk_color_ordered_list(request.user),
+        "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
+        "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
+        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
     }
 
     return render(request, template, context)
@@ -598,6 +599,9 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "analysis_objects": analysis_objects,
         "current_level": current_level,
         "residual_level": residual_level,
+        "view_user": RoleAssignment.has_permission(user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
+        "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
+        "change_usergroup": RoleAssignment.has_permission(user, "change_usergroup"),
         "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
         "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
@@ -613,8 +617,12 @@ class ComposerListView(ListView):
             request_list = request.GET.getlist('analysis')[0]
             data = [item for item in request_list.split(',')]
             # debug print(f"got {len(data)} analysis in {data}")
-            context = {'context': compile_analysis_for_composer(
-                self.request.user, data)}
+            context = {
+                "context": compile_analysis_for_composer(self.request.user, data),
+                "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
+                "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
+                "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+            }
             return render(request, 'core/composer.html', context)
         else:
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
@@ -702,6 +710,7 @@ def scoring_assistant(request):
         request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
+    context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
     return render(request, template, context)
 
 
