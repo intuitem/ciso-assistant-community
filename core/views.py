@@ -1754,6 +1754,8 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
         queryset = self.get_queryset()
         filter = UserFilter(self.request.GET, queryset)
         context['filter'] = filter
+        context['users_number'] = User.objects.all().count()
+        context['users_number_limit'] = 20
         return context
 
     def test_func(self):
