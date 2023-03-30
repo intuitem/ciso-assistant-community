@@ -152,7 +152,6 @@ def import_security_function(fields):
         name=fields['name'],
         description=fields['description'],
         provider=fields['provider'],
-        contact=fields['contact'],
         folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
     )
 
@@ -227,7 +226,6 @@ def import_security_function_view(request, fields):
         name=fields['name'],
         description=fields['description'],
         provider=fields['provider'],
-        contact=fields['contact'],
         folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
     )
 
@@ -340,5 +338,5 @@ def import_library_view(request, library):
     for security_function in uploaded_list:
         import_security_function_view(request, security_function)
 
-    messages.success(request, _('Library "{}" imported successfully. {} objects imported and {} objects ignored.').format(library["name"], objects_uploaded, objects_ignored))
+    messages.success(request, _('Library "{}" imported successfully. {} object(s) imported and {} object(s) ignored.').format(library["name"], objects_uploaded, objects_ignored))
     return True
