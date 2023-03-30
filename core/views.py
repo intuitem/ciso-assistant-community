@@ -73,6 +73,7 @@ import json
 
 User = get_user_model()
 
+MAX_USERS = 20
 
 class BaseContextMixin:
 
@@ -82,6 +83,7 @@ class BaseContextMixin:
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
+        context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
         return context
 
 
@@ -1755,7 +1757,7 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
         filter = UserFilter(self.request.GET, queryset)
         context['filter'] = filter
         context['users_number'] = User.objects.all().count()
-        context['users_number_limit'] = 20
+        context['users_number_limit'] = MAX_USERS
         return context
 
     def test_func(self):
