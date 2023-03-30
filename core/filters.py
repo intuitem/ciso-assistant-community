@@ -444,13 +444,13 @@ class UserFilter(GenericFilterSet):
 
     orderby = GenericOrderingFilter(
         fields=(
-            ('username', 'username'),
+            ('email', 'email'),
             ('first_name', 'first_name'),
             ('last_name', 'last_name'),
         ),
         field_labels={
-            'username': _('username'.capitalize()),
-            '-username': _('Username (descending)'),
+            'email': _('Email'),
+            '-email': _('Email (descending)'),
             'first_name': _('First name'),
             '-first_name': _('First name (descending)'),
             'last_name': _('Last name'),

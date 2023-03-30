@@ -109,6 +109,14 @@
         <div class="grid mb-4 w-full">
             <a id="user_create" href="{% url 'user-create' %}" class="add-button"><i class="fas fa-plus mr-2"></i>{% trans "New User" %}</a>
         </div>
+        <div class="grid place-content-center w-fit whitespace-nowrap mb-4 rounded-lg border-2 px-2
+            {% if users_number <= users_number_limit %} 
+                text-gray-800
+            {% else %} 
+                text-red-600
+            {% endif %}">
+            <p class="">{{ users_number }} {% trans "out of" %} {{ users_number_limit }}</p>
+        </div>
     </div>
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table class="w-full text-sm text-left">
