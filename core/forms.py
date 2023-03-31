@@ -394,6 +394,10 @@ class SecurityFunctionCreateForm(StyledModelForm):
 
 
 class SecurityFunctionUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SecurityFunctionUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].disabled = True
     class Meta:
         model = SecurityFunction
         fields = '__all__'
