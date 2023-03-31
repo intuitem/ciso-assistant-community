@@ -18,7 +18,7 @@
                 </div>
                 <div class="w-3/4 mx-4 py-2 text-justify grid place-content-center">
                     <div class="text-sm mb-2">
-                        {% trans "As administrator, you are in charge to import at least one matrix. You will need security functions and threats to perform a security analysis. You can either define custom" %}
+                        {% trans "As administrator, you are in charge to import at least one matrix. <br>You will need security functions and threats to perform a security analysis. You can either define custom" %}
                         <div class="inline" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                    {% trans "security functions" %}
@@ -40,9 +40,9 @@
                             </a>
                                 {% include "snippets/modal/modal.html" with modal_action="create" model="folder" form=projects_domain_create_form header=_("Add projects domain") %}
                         </div> 
-                        {% trans "to organize your projects. Now declare a few" %}
+                        {% trans "to organize your projects. <br>Now declare a few" %}
                         <a href="{% url 'user-create' %}" class="simple-link">{% trans "users" %}</a> 
-                        {% trans "and assign them to groups corresponding to their roles (domain manager, analyst, auditor, ...). Finally, you can identify and create relevant" %}
+                        {% trans "and assign them to groups corresponding to their roles (domain manager, analyst, auditor, ...). <br>Finally, you can identify and create relevant" %}
                         <div class="inline" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                    {% trans "assets" %}
@@ -84,14 +84,14 @@
                         </a>
                             {% include "snippets/modal/modal.html" with modal_action="create" model="analysis" form=analysis_create_form header=_("Add analysis") %}
                     </div>
-                    {% trans "Identify the" %}
+                    {% trans "<br>Identify the" %}
                     <div class="inline text-left" x-data="{ open: false }">
                         <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                {% trans "risk scenarios" %}
                         </a>
                             {% include "snippets/modal/modal.html" with modal_action="create" model="riskscenario" form=riskscenario_create_form header=_("Add risk scenario") %}
                     </div>
-                    {% trans "based on threats to assets, and assess the current risk level. You can use the" %}
+                    {% trans "based on threats to assets, and assess the current risk level. <br>You can use the" %}
                     <a href="{% url 'scoring' %}" class="simple-link">{% trans "scoring assistant" %}</a>
                     {% trans "to help you if needed." %}
                 </div>
@@ -130,7 +130,7 @@
                 <div class="text-sm mb-2 rounded text-center">
                     {% trans "To display your analysis, select it from the" %}
                     <a href="{% url 'analysis_list' %}" class="simple-link">{% trans "analyses registry." %}</a>
-                    {% trans "You can also export the risk analysis or its treatment plan as PDF/CSV." %}
+                    <br>{% trans "You can also export the risk analysis or its treatment plan as PDF/CSV." %}
                 </div>
             </div>
         </div>
