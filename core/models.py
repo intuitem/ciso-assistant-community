@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from asf_rm import settings
 from core.base_models import AbstractBaseModel
-from iam.models import Folder, FolderMixin
+from iam.models import Folder, FolderMixin, RootFolderMixin
 from openpyxl import load_workbook
 import pandas as pd
 import json
@@ -41,7 +41,7 @@ class Project(AbstractBaseModel):
         return self.name
 
 
-class Threat(AbstractBaseModel, FolderMixin):
+class Threat(AbstractBaseModel, RootFolderMixin):
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -52,7 +52,7 @@ class Threat(AbstractBaseModel, FolderMixin):
         return self.name
 
 
-class Asset(AbstractBaseModel, FolderMixin):
+class Asset(AbstractBaseModel, RootFolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -99,7 +99,7 @@ class Asset(AbstractBaseModel, FolderMixin):
         return list(result)
 
 
-class SecurityFunction(AbstractBaseModel, FolderMixin):
+class SecurityFunction(AbstractBaseModel, RootFolderMixin):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     is_published = models.BooleanField(_('published'), default=True)
