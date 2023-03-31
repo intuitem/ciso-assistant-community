@@ -538,7 +538,7 @@ def global_overview(request):
         "analyses": Analysis.objects.filter(id__in=viewable_analyses).order_by('created_at'),
         "colors": get_risk_color_ordered_list(request.user),
         "viewable_measures": object_ids_view,
-        "updatable_measures": object_ids_change
+        "updatable_measures": object_ids_change,
         "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
         "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
