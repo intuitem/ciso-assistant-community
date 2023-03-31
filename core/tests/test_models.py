@@ -116,20 +116,20 @@ class TestAnalysis:
         matrix = RiskMatrix.objects.create(name="test matrix", description="test matrix description", json_definition="{}", folder=folder)
         project = Project.objects.create(name="test project", folder=folder)
         analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
-                project=project, rating_matrix=matrix, version="0.1")
+                project=project, rating_matrix=matrix, version="1")
         Analysis.objects.create(name="test analysis", description="test analysis description",
-                project=project, rating_matrix=matrix, version="0.2")
+                project=project, rating_matrix=matrix, version="2")
     
     def test_analysis_can_have_same_name_and_version_in_a_different_project(self):
         folder = Folder.objects.create(name="test folder", description="test folder description")
         matrix = RiskMatrix.objects.create(name="test matrix", description="test matrix description", json_definition="{}", folder=folder)
         project = Project.objects.create(name="test project", folder=folder)
         analysis = Analysis.objects.create(name="test analysis", description="test analysis description",
-                project=project, rating_matrix=matrix, version=1)
+                project=project, rating_matrix=matrix, version="1")
 
         project2 = Project.objects.create(name="test project 2", folder=folder)
         Analysis.objects.create(name="test analysis", description="test analysis description",
-                project=project2, rating_matrix=matrix, version=1)
+                project=project2, rating_matrix=matrix, version="1")
 
     def test_analysis_scope_is_analyses_in_project(self):
         folder = Folder.objects.create(name="test folder", description="test folder description")
