@@ -80,6 +80,6 @@ def dump_db_view(request):
     response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
     # Here we dump th data to stdout
     # NOTE: We will not be able to dump selected folders with this method.
-    management.call_command(dumpdata.Command(), exclude=['contenttypes', 'auth.permission'], indent=4, stdout=response, natural_foreign=True)
+    management.call_command(dumpdata.Command(), exclude=['contenttypes', 'auth.permission', 'sessions.session'], indent=4, stdout=response, natural_foreign=True)
     response.write(']')
     return response
