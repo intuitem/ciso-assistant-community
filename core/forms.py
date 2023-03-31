@@ -132,6 +132,10 @@ class RiskAnalysisCreateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['rating_matrix'].choices)
+        self.fields['project'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['rating_matrix'].choices)
         self.default_if_one_all()
 
     class Meta:
@@ -165,6 +169,13 @@ class RiskMatrixUpdateForm(StyledModelForm):
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['project'].widget.attrs['disabled'] = True
+        self.fields['project'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['project'].choices)
 
     class Meta:
         model = Analysis
@@ -272,6 +283,11 @@ class RiskScenarioUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['threat'].choices)
+        self.fields['analysis'].widget = SearchableSelect(attrs={'class': 'text-sm rounded w-64',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll',
+                   'id': 'analysis_select'},
+                   choices=self.fields['analysis'].choices)
 
     class Meta:
         model = RiskScenario
