@@ -6,6 +6,7 @@ from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import Permission
 from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
 
 if RECAPTCHA_PUBLIC_KEY:
@@ -288,10 +289,8 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         folders = folder.sub_folders()
         folders.append(folder)
         if validator:
-            validator_folders = RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), validator, None, "validate_riskacceptance")
-            for folder in folders:
-                if folder.id not in validator_folders:
-                    raise ValidationError(_("This  validator cannot be assigned for this folder"))
+            if not RoleAssignment.is_access_allowed(validator, Permission.objects.get(codename='validate_riskacceptance'), folder):
+                raise ValidationError(_("This  validator cannot be assigned for this folder"))
         if risk_scenarios:
             for obj in risk_scenarios:
                 if obj.analysis.project.folder not in folders:
