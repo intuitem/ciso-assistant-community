@@ -61,6 +61,14 @@ class LibraryDetailView(BaseContextMixin, TemplateView):
         context['library'] = library
         context['types'] = self.get_object_types(library)
         context['matrices'] = self.get_matrices(library)
+        object_type = self.get_object_types(library).pop().replace("_", "")
+        if object_type == "matrix":
+            object_type = "riskmatrix"
+        context['can_import'] = RoleAssignment.is_access_allowed(
+                                self.request.user,
+                                Permission.objects.get(codename="add_"+object_type),
+                                Folder.objects.get(content_type=Folder.ContentType.ROOT)
+                                )
         context['crumbs'] = {'library-list': _('Libraries')}
         return context
 
