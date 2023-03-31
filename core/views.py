@@ -439,7 +439,7 @@ def generate_ra_pdf(request, analysis: Analysis):
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
-        context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
         data = {'context': context, 'analysis': ra,
                 'ri_clusters': build_ri_clusters(ra), 'matrix': ra.rating_matrix}
         html = render_to_string('core/ra_pdf.html', data)
@@ -458,7 +458,7 @@ def generate_mp_pdf(request, analysis):
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
-        context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
         data = {'context': context, 'analysis': ra}
         html = render_to_string('core/mp_pdf.html', data)
         pdf_file = HTML(string=html).write_pdf()
@@ -652,7 +652,7 @@ def export_risks_csv(request, analysis):
                    'treatment']
         writer.writerow(columns)
 
-        for ri in ra.riskscenario_set.all():
+        for ri in ra.riskscenario_set.all().order_by('created_at'):
             security_measures = ''
             for mtg in ri.security_measures.all():
                 security_measures += f"[{mtg.status}]{mtg.name} \n"
