@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from asf_rm import settings
 from core.base_models import AbstractBaseModel
-from iam.models import Folder, FolderMixin, RootFolderMixin
+from iam.models import Folder
 from openpyxl import load_workbook
 import pandas as pd
 import json
@@ -14,6 +14,26 @@ from django.contrib.auth import get_user_model
 from typing import Self
 
 User = get_user_model()
+
+class FolderMixin(models.Model):
+    """
+    Add foreign key to Folder
+    """
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder')
+
+    class Meta:
+        abstract = True
+
+
+class RootFolderMixin(FolderMixin):
+    """
+    Add foreign key to Folder, defaults to root folder
+    """
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
+                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
+
+    class Meta:
+        abstract = True
 
 
 class Project(AbstractBaseModel):
