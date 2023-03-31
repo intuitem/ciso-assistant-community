@@ -265,9 +265,9 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                    choices=self.fields['risk_scenarios'].choices)
         validators_id = []
-        for user in User.objects.all():
-            if RoleAssignment.has_permission(user, 'validate_riskacceptance'):
-                validators_id.append(user.id)
+        for candidate in User.objects.all():
+            if RoleAssignment.has_permission(candidate, 'validate_riskacceptance'):
+                validators_id.append(candidate.id)
         self.fields['validator'].queryset = User.objects.filter(id__in=validators_id)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
