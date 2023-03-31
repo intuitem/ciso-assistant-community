@@ -769,6 +769,8 @@ class QuickStartView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['projects_domain_create_form'] = FolderUpdateForm
         context['project_create_form'] = ProjectForm
         context['analysis_create_form'] = RiskAnalysisCreateForm
+        context['riskscenario_create_form'] = RiskScenarioCreateForm
+        context['securitymeasure_create_form'] = SecurityMeasureCreateForm
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
         context['asset_create_form'] = AssetForm

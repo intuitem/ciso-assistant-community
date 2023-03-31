@@ -6,116 +6,154 @@
 {% include 'snippets/breadcrumbs.html' %}
 {% endwith %}
 
-<main class="h-screen">
-
+<main class="">
     <div class="p-4">
         <div class="flex-row">
-            <div class="flex w-full rounded-lg shadow bg-white border-t-4 border-violet-700 p-4 mb-2">
-                <div class="w-1/5 bg-white mx-4 py-2">
-                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 0</div>
-                    <div class="font-semibold mb-4">{% trans "Libraries" %}</div>
-                    <div class="text-sm mb-2 rounded">
-                        {% trans "If you have just started the application for the first time, don't forget to import some" %}
-                        <a href="{% url 'library-list' %}" class="simple-link">{% trans "libraries" %}</a> 
-                        {% trans "(yours or the ones provided by default) before doing anything." %}
+            <div class="flex w-full rounded-lg shadow-md border bg-white border-indigo-700 hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 transition-all duration-500 p-4 mb-2">
+                <div class="w-1/4 mx-4 py-2">
+                    <div class="flex font-semibold justify-center mb-2">{% trans "Administrator tasks" %}</div>
+                    <div class="flex text-6xl justify-center text-blue-900">
+                        <i class="fa-solid fa-building-shield"></i>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-28 mr-4">
-                <div class="h-0 w-0 border-y-8 border-y-transparent border-l-[16px] border-l-violet-700"></div>
-            </div>
-            <div class="flex w-full rounded-lg shadow bg-white p-4">
-                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
-                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 1</div>
-                    <div class="font-semibold mb-4">{% trans "Projects" %}</div>
-                    <div class="text-sm mb-2 rounded">{% trans "Setup a" %}
+                <div class="w-3/4 mx-4 py-2 text-justify grid place-content-center">
+                    <div class="text-sm mb-2">
+                        {% trans "As administrator, you are in charge to import at least one matrix. You will need security functions and threats to perform a security analysis. You can either define custom" %}
                         <div class="inline" x-data="{ open: false }">
-                            <a @click="open = !open,
-modalOpen = !modalOpen"
-                                   class="simple-link cursor-pointer">
-                                   {% trans "domain" %}
-                            </a>
-                                {% include "snippets/modal/modal.html" with modal_action="create" model="folder" form=projects_domain_create_form header=_("Add projects domain") %}
-                        </div>
-                        {% trans "to organize projects and" %} 
-                        <div class="inline" x-data="{ open: false }">
-                            <a @click="open = !open,
-modalOpen = !modalOpen"
-                                   class="simple-link cursor-pointer">
-                                   {% trans "create one" %}
-                            </a>
-                                {% include "snippets/modal/modal.html" with modal_action="create" model="project" form=project_create_form header=_("Add project") %}
-                        </div>
-                        {% trans "Start identifying your" %}
-                        <div class="inline" x-data="{ open: false }">
-                            <a @click="open = !open,
-modalOpen = !modalOpen"
-                                   class="simple-link cursor-pointer">
-                                   {% trans "assets" %}
-                            </a>
-                                {% include "snippets/modal/modal.html" with modal_action="create" model="asset" form=asset_create_form header=_("Add asset") %}
-                        </div>
-                        {%trans "to keep focus" %}.
-                    </div>    
-                </div>
-
-                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
-                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 2</div>
-                    <div class="font-semibold mb-4">{% trans "Threats" %}</div>
-                    <div class="text-sm mb-2 rounded  ">{% trans "Identify what and who are the" %}
-                        <div class="inline" x-data="{ open: false }">
-                            <a @click="open = !open,
-modalOpen = !modalOpen"
-                                   class="simple-link cursor-pointer">
-                                   {% trans "threat" %}
-                            </a>
-                                {% include "snippets/modal/modal.html" with modal_action="create" model="threat" form=threat_create_form header=_("Add threat") %}
-                        </div> 
-                        {% trans "factors and agents that can be relevant to your organization and how they apply to your case." %}</div>
-                </div>
-
-                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
-                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 3</div>
-                    <div class="font-semibold mb-4">{% trans "Security functions" %}</div>
-                    <div class="text-sm mb-2 rounded ">{% trans "Understand and inventory the" %}
-                        <div class="inline" x-data="{ open: false }">
-                            <a @click="open = !open,
-modalOpen = !modalOpen"
-                                   class="simple-link cursor-pointer">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                    {% trans "security functions" %}
                             </a>
                                 {% include "snippets/modal/modal.html" with modal_action="create" model="securityfunction" form=security_function_create_form header=_("Add security function") %}
                         </div>
-                        {% trans "that your organization have. They can be technical or organizational." %}</div>
+                        {% trans "and" %} 
+                        <div class="inline" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                   {% trans "threats" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="threat" form=threat_create_form header=_("Add threat") %}
+                        </div>  
+                        {% trans "or import them from a" %} <a href="{% url 'library-list' %}" class="simple-link">{% trans "library" %}</a>.
+                        {% trans "It's time to define at least one" %}
+                        <div class="inline" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                   {% trans "domain" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="folder" form=projects_domain_create_form header=_("Add projects domain") %}
+                        </div> 
+                        {% trans "to organize your projects. Now declare a few" %}
+                        <a href="{% url 'user-create' %}" class="simple-link">{% trans "users" %}</a> 
+                        {% trans "and assign them to groups corresponding to their roles (domain manager, analyst, auditor, ...). Finally, you can identify and create relevant" %}
+                        <div class="inline" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                   {% trans "assets" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="asset" form=asset_create_form header=_("Add asset") %}
+                        </div>
+                        {% trans "for your organization" %}.
+                    </div>
                 </div>
-
-                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
-                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 4</div>
-                    <div class="font-semibold mb-4">{% trans "Risk analyses" %}</div>
-                    <div class="text-sm mb-2 rounded">{% trans "You need to select a scoring" %} <a href="{% url 'riskmatrix' %}" class="simple-link">{% trans "matrix" %}</a> {% trans "or import a new one with the library manager. Now you can start a new" %} 
-                        <span x-data="modal()">
-                            <div class="inline" x-data="{ open: false }">
-                                <a @click="open = !open,
-modalOpen = !modalOpen"
-                                       class="simple-link cursor-pointer">
-                                       {% trans "risk analysis" %}
-                                </a>
-                                    {% include "snippets/modal/modal.html" with modal_action="create" model="analysis" form=analysis_create_form header=_("Add analysis") %}
-                            </div>
-                        {% trans "and combine the previous items." %}</div>
-                </div>
-
-                <div class="w-1/5 bg-white border-t-4 border-violet-700 mx-4 py-2">
-                    <div class="text-indigo-800 text-sm font-semibold">{% trans "Step" %} 5</div>
-                    <div class="font-semibold mb-4">{% trans "Scenarios and Remediations" %}</div>
-                    <div class="text-sm mb-2 rounded  ">{% trans "Enrich" %} <a href="{% url 'analysis-list' %}" class="simple-link">{% trans "your analysis" %}</a> {% trans "by identifying the potential risk scenarios and the security measures to mitigate them." %}</div>
-                </div>
-
-
             </div>
-
-
-
-
+        </div>
+        <div class="flex justify-center w-full p-4 mb-2 ml-3">
+            <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="text-lg font-semibold mb-2 text-center">{% trans "Project" %}</div>
+                <div class="flex mb-2 text-6xl justify-center text-green-600">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <div class="text-sm mb-2 rounded text-center">
+                    {% trans "As administrator or domain manager, create a" %} 
+                    <div class="inline text-left" x-data="{ open: false }">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                               {% trans "project" %}
+                        </a>
+                            {% include "snippets/modal/modal.html" with modal_action="create" model="project" form=project_create_form header=_("Add project") %}
+                    </div>
+                    {% trans "within an existing domain" %}.
+                </div>    
+            </div>
+            <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="text-lg font-semibold mb-2 text-center">{% trans "Risk analysis" %}</div>
+                <div class="flex mb-2 text-6xl justify-center text-blue-500">
+                    <i class="fas fa-glasses"></i>
+                </div>
+                <div class="text-sm mb-2 rounded text-center">
+                    {% trans "You can now start a new" %}
+                    <div class="inline text-left" x-data="{ open: false }">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                               {% trans "risk analysis" %}.
+                        </a>
+                            {% include "snippets/modal/modal.html" with modal_action="create" model="analysis" form=analysis_create_form header=_("Add analysis") %}
+                    </div>
+                    {% trans "Identify the" %}
+                    <div class="inline text-left" x-data="{ open: false }">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                               {% trans "risk scenarios" %}
+                        </a>
+                            {% include "snippets/modal/modal.html" with modal_action="create" model="riskscenario" form=riskscenario_create_form header=_("Add risk scenario") %}
+                    </div>
+                    {% trans "based on threats to assets, and assess the current risk level. You can use the" %}
+                    <a href="{% url 'scoring' %}" class="simple-link">{% trans "scoring assistant" %}</a>
+                    {% trans "to help you if needed." %}
+                </div>
+            </div>
+            <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="text-lg font-semibold mb-2 text-center">{% trans "Risk treatment" %}</div>
+                <div class="flex mb-2 text-6xl justify-center text-red-500">
+                    <i class="fas fa-fire-extinguisher"></i>
+                </div>
+                <div class="text-sm mb-2 text-center">
+                    {% trans "For each risk scenario, try to define and apply additional" %}
+                    <div class="inline text-left" x-data="{ open: false }">
+                        <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                               {% trans "security measures" %}
+                        </a>
+                            {% include "snippets/modal/modal.html" with modal_action="create" model="securitymeasure" form=securitymeasure_create_form header=_("Add security measure") %}
+                    </div>
+                    {% trans "based on security functions, and assess the residual risk level." %}
+                </div>
+            </div>
+            <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="text-lg font-semibold mb-2 text-center">{% trans "Check consistency" %}</div>
+                <div class="flex mb-2 text-6xl justify-center text-yellow-500">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="text-sm mb-2 rounded text-center">
+                    <a href="{% url 'xrays' %}" class="simple-link">{% trans "X-Rays" %}</a>
+                    {% trans "will help you improve the quality of your analysis by pinpointing various inconsistencies." %}
+                </div>
+            </div>
+            <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="text-lg font-semibold mb-2 text-center">{% trans "Report" %}</div>
+                <div class="flex mb-2 text-6xl justify-center text-stone-500">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="text-sm mb-2 rounded text-center">
+                    {% trans "To display your analysis, select it from the" %}
+                    <a href="{% url 'analysis_list' %}" class="simple-link">{% trans "analyses registry." %}</a>
+                    {% trans "You can also export the risk analysis or its treatment plan as PDF/CSV." %}
+                </div>
+            </div>
+        </div>
+        <div class="flex-row">
+            <div class="flex w-full rounded-lg shadow-md bg-white border border-indigo-700 hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 transition-all duration-500 p-4 mb-2">
+                <div class="w-1/4 mx-4 py-2">
+                    <div class="flex font-semibold justify-center mb-2">{% trans "Further steps" %}</div>
+                    <div class="flex text-6xl justify-center text-gray-500">
+                        <i class="fa-solid fa-shoe-prints"></i>
+                    </div>
+                </div>
+                <div class="w-3/4 mx-4 py-2 grid place-content-center">
+                    <div class="text-sm mb-2">
+                        {% trans "Explore the dashboard to have an" %}
+                        <a href="{% url 'overview' %}" class="simple-link">{% trans "overview" %}</a>
+                        {% trans "of your analyses and check for coming deadlines with the" %}
+                        <a href="{% url 'calendar' %}" class="simple-link">{% trans "calendar" %}</a>.
+                        {% trans "You can also manage" %}
+                        <a href="{% url 'riskacceptance-list' %}" class="simple-link">{% trans "risk acceptances" %}</a>
+                        {% trans "for risks that are not currently covered." %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
