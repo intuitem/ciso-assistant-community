@@ -440,7 +440,6 @@ def generate_ra_pdf(request, analysis: Analysis):
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
-        print(context[0].rid)
         data = {'context': context, 'analysis': ra,
                 'ri_clusters': build_ri_clusters(ra), 'matrix': ra.rating_matrix}
         html = render_to_string('core/ra_pdf.html', data)
