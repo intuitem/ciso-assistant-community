@@ -368,13 +368,13 @@
                     </div>
 
                     <div x-data="{ open : false }" class="flex items-center cursor-pointer gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500">
-                        <a @click="open = !open, modalOpen = !modalOpen" class="relative flex flex-row whitespace-nowrap">
+                        <a @click="open = !open, aboutModalOpen = !aboutModalOpen" class="relative flex flex-row whitespace-nowrap">
                             <span class="transition duration-75 text-gray-800 group">
                                 <i class="fas fa-info-circle"></i>
                                 {% trans "About MIRA" %}
                             </span>
                         </a>
-                        {% include "snippets/modal/modal.html" with header=_("About MIRA") %}
+                        
                     </div>
 
                     <div class="w-full border-t border-gray-200 my-1"></div>

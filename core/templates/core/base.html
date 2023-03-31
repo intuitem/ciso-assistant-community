@@ -97,7 +97,7 @@
 	<style>
 		[x-cloak] { display: none }
 	</style>
-	<div x-data="{ sidebarOpen: true, modalOpen: false, sidebarAnimation: false }" class="flex h-screen">
+	<div x-data="{ sidebarOpen: true, modalOpen: false, aboutModalOpen: false, sidebarAnimation: false }" class="flex h-screen">
 		{% include 'core/sidebar.html' %}
 		{% include 'snippets/messages.html' %}
 		<div class="flex-1">
@@ -110,6 +110,10 @@
 				{% block content %}
 					{% comment %} {% include 'snippets/breadcrumbs.html' %} {% endcomment %}
 				{% endblock %}
+				{% comment %} 
+					the 'About MIRA' modal summoned from the sidebar was placed here to fix its rendering on Safari.
+				{% endcomment %}
+				{% include 'snippets/modal/modal_about_mira.html' with header=_("About MIRA") %}
 			</main>
 		</div>
 	</div>
