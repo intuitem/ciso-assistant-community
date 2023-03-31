@@ -1618,6 +1618,11 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def get_form_kwargs(self):
+        form = super().get_form_kwargs()
+        form['user'] = self.request.user
+        return form
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         if self.object.validator:
@@ -1642,6 +1647,11 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
     template_name = 'core/risk_acceptance_update.html'
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
+
+    def get_form_kwargs(self):
+        form = super().get_form_kwargs()
+        form['user'] = self.request.user
+        return form
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
