@@ -771,7 +771,7 @@ class QuickStartView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['analysis_create_form'] = RiskAnalysisCreateForm
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
-        context['asset_create_form'] = AssetForm
+        context['asset_create_form'] = AssetForm(user=self.request.user)
         return context
 
     def get_queryset(self):
@@ -901,7 +901,7 @@ class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
         queryset = self.get_queryset()
         filter = AssetFilter(self.request.GET, queryset)
         context['filter'] = filter
-        context['asset_create_form'] = AssetForm
+        context['asset_create_form'] = AssetForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
         context['add_asset'] = RoleAssignment.has_permission(
@@ -946,6 +946,11 @@ class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['crumbs'] = {'asset-list': _('Assets')}
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_success_url(self) -> str:
         return reverse_lazy('asset-list')
