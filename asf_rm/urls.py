@@ -16,7 +16,6 @@ Including another URLconf
 from django.urls import include, path
 import core.views as cv
 from django.contrib.auth import views as auth_views
-from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts

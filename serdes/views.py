@@ -6,7 +6,7 @@ from django.core import management
 from django.core.management.commands import loaddata, dumpdata
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
-from  datetime import datetime;
+from  datetime import datetime
 
 from iam.models import RoleAssignment
 from core.utils import UserGroupCodename
@@ -64,7 +64,7 @@ class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
                 print(request, 'No file selected.')
             return self.form_valid(form)
         else:
-            print(request, f'Invalid form.')
+            print(request, 'Invalid form.')
             return self.form_invalid(form)
 
     def test_func(self):

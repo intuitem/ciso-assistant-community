@@ -19,9 +19,7 @@ else it is sqlite, and no env variable is required
 from pathlib import Path
 import os
 import json
-from django.utils.translation import gettext_lazy as _
 from urllib.parse import urlparse
-import passkeys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
