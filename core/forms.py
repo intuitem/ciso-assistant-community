@@ -6,6 +6,7 @@ from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import Permission
 from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
 
 if RECAPTCHA_PUBLIC_KEY:
@@ -263,6 +264,11 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                    choices=self.fields['risk_scenarios'].choices)
+        validators_id = []
+        for candidate in User.objects.all():
+            if RoleAssignment.has_permission(candidate, 'validate_riskacceptance'):
+                validators_id.append(candidate.id)
+        self.fields['validator'].queryset = User.objects.filter(id__in=validators_id)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
         # else:
@@ -283,9 +289,13 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         cleaned_data = super().clean()
         risk_scenarios = cleaned_data.get('risk_scenarios')
         folder = cleaned_data.get('folder')
+        validator = cleaned_data.get('validator')
 
         folders = folder.sub_folders()
         folders.append(folder)
+        if validator:
+            if not RoleAssignment.is_access_allowed(validator, Permission.objects.get(codename='validate_riskacceptance'), folder):
+                raise ValidationError(_("This  validator cannot be assigned for this folder"))
         if risk_scenarios:
             for obj in risk_scenarios:
                 if obj.analysis.project.folder not in folders:
