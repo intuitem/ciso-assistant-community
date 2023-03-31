@@ -522,8 +522,6 @@ def global_overview(request):
     viewable_analyses = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)[0]
 
-    object_ids_view += [analysis for analysis in viewable_analyses]
-
     _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).exclude(status='done').order_by('eta')
 
     context = {
@@ -539,8 +537,8 @@ def global_overview(request):
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
         "analyses": Analysis.objects.filter(id__in=viewable_analyses).order_by('created_at'),
         "colors": get_risk_color_ordered_list(request.user),
-        "viewable_measures": RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)[0],
-        "updatable_measures": RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)[1]
+        "viewable_measures": object_ids_view,
+        "updatable_measures": object_ids_change
     }
 
     return render(request, template, context)
