@@ -933,6 +933,11 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'asset'
     form_class = AssetForm
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
