@@ -60,3 +60,25 @@ The template yaml file for client objects creation is stored in the configmap "t
 ```shell
 kubectl create configmap templates-yaml --from-file=templates/client_template.yaml
 ````
+
+## Observability
+
+Installing Prometheus and Grafana is recommended.
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo add stable "https://charts.helm.sh/stable" 
+helm repo update
+helm install prometheus prometheus-community/prometheus --create-namespace --namespace monitoring  --set server.persistentVolume.size=100Gi,server.retention=30d
+helm install prometheus prometheus-community/prometheus --create-namespace --namespace monitoring  --set server.persistentVolume.size=100Gi,server.retention=30d
+# export POD_NAME=$(kubectl get pods --namespace monitoring -l "app=prometheus,component=server" -o jsonpath="{.items[0].ta.name}")
+# kubectl --namespace monitoring port-forward $POD_NAME 9090
+helm repo add grafana https://grafana.github.io/helm-charts
+helm install grafana grafana/grafana --set persistence.enabled=true,persistence.type=pvc,tence.size=10Gi --namespace=monitoring
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+kubectl port-forward --namespace monitoring service/grafana 3000:80
+```
+
+In Grafana, add the Prometheus data source with path "http://prometheus-server".
+ 
