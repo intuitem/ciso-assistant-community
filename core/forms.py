@@ -360,7 +360,7 @@ class ThreatUpdateForm(StyledModelForm):
 
 
 class AssetForm(StyledModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super(AssetForm, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
         self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
@@ -369,6 +369,10 @@ class AssetForm(StyledModelForm):
                      'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                         choices=self.fields['parent_assets'].choices)
+        viewable_assets = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Asset)[0] if user else Asset.objects.none()
+        self.fields['parent_assets'].queryset = Asset.objects.filter(id__in=viewable_assets
+            ).exclude(id=self.instance.id) if self.instance else Asset.objects.filter(id__in=viewable_assets)
 
     def clean(self):
         """ check the AssetForm values before submission to the model. This is required as we used manytomany """
