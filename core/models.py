@@ -102,8 +102,6 @@ class Asset(AbstractBaseModel, FolderMixin):
 class SecurityFunction(AbstractBaseModel, FolderMixin):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
-    contact = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Contact"))
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -238,7 +236,7 @@ class Analysis(AbstractBaseModel):
                     {"msg": _("{}/{} does not have an estimated effort. This will help you for prioritization").format(mtg.folder, mtg), "obj_type": "securitymeasure", "object": mtg})
             if not mtg.link:
                 info_lst.append(
-                    {"msg": _("{}/{} does not have an external link attached. This will help you for follow-up").format(mtg.folder, mtg), "obj_type": "securitymeasure", "object": mtg})
+                    {"msg": _("{}/{}: Security measure does not have an external link attached. This will help you for follow-up").format(mtg.folder, mtg), "obj_type": "securitymeasure", "object": mtg})
 
         # --- checks on the risk acceptances
         for ra in RiskAcceptance.objects.filter(risk_scenarios__analysis=self):
