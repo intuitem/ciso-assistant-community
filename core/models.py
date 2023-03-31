@@ -15,26 +15,6 @@ from typing import Self
 
 User = get_user_model()
 
-class FolderMixin(models.Model):
-    """
-    Add foreign key to Folder
-    """
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder')
-
-    class Meta:
-        abstract = True
-
-
-class RootFolderMixin(FolderMixin):
-    """
-    Add foreign key to Folder, defaults to root folder
-    """
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
-                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
-
-    class Meta:
-        abstract = True
-
 
 class Project(AbstractBaseModel):
     PRJ_LC_STATUS = [
@@ -61,8 +41,10 @@ class Project(AbstractBaseModel):
         return self.name
 
 
-class Threat(AbstractBaseModel, RootFolderMixin):
+class Threat(AbstractBaseModel):
     is_published = models.BooleanField(_('published'), default=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
+                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         verbose_name = _("Threat")
@@ -72,7 +54,7 @@ class Threat(AbstractBaseModel, RootFolderMixin):
         return self.name
 
 
-class Asset(AbstractBaseModel, RootFolderMixin):
+class Asset(AbstractBaseModel):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -91,6 +73,8 @@ class Asset(AbstractBaseModel, RootFolderMixin):
     parent_assets = models.ManyToManyField(
         'self', blank=True, verbose_name=_('parent assets'), symmetrical=False)
     is_published = models.BooleanField(_('published'), default=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
+                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -119,10 +103,12 @@ class Asset(AbstractBaseModel, RootFolderMixin):
         return list(result)
 
 
-class SecurityFunction(AbstractBaseModel, RootFolderMixin):
+class SecurityFunction(AbstractBaseModel):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     is_published = models.BooleanField(_('published'), default=True)
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
+                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         verbose_name = _("Security function")
@@ -132,11 +118,13 @@ class SecurityFunction(AbstractBaseModel, RootFolderMixin):
         return self.name
 
 
-class RiskMatrix(AbstractBaseModel, FolderMixin):
+class RiskMatrix(AbstractBaseModel):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
     is_enabled = models.BooleanField(_('enabled'), default=True, help_text=_(
         "If the matrix is set as disabled, it will not be available for selection for new risk analyses."))
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
+                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
     
     @property
     def is_used(self) -> bool:
