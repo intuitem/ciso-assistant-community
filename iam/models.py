@@ -138,7 +138,7 @@ class RootFolderMixin(FolderMixin):
     Add foreign key to Folder, defaults to root folder
     """
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
-                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         abstract = True
