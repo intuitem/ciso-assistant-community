@@ -8,27 +8,27 @@
         <div class="p-2 m-2 flex content-center">
             <div class="text-5xl text-yellow-900"><i class="fa-solid fa-book"></i></div>
         </div>
-            <p>{% trans "This role gives read access to selected projects and domains" %}</p>
+            <p>{% trans "This role gives read access to selected projects and domains." %}</p>
         {% elif topic == "BI-RL-VAL" %}
         <div class="p-2 m-2 flex content-center">
             <div class="text-5xl text-green-500"><i class="fa-solid fa-circle-check"></i></div>
         </div>
-            <p>{% trans "This role is exactly like an auditor but it can also manage risk acceptances" %}</p>
+            <p>{% trans "This role is like an auditor, and can also manage risk acceptances." %}</p>
         {% elif topic == "BI-RL-ANA" %}
         <div class="p-2 m-2 flex content-center">
             <div class="text-5xl text-indigo-500"><i class="fa-solid fa-chart-simple"></i></div>
         </div>
-            <p>{% trans "This role gives read and write access to selected projects and domains. It has also read access on global and domain objects" %}</p>
+            <p>{% trans "This role gives read and write access to selected projects and domains. It has also read access on global and domain objects." %}</p>
         {% elif topic == "BI-RL-DMA" %}
         <div class="p-2 m-2 flex content-center">
             <div class="text-5xl text-amber-400"><i class="fa-solid fa-folder-open"></i></div>
         </div>
-            <p>{% trans "This role gives full access to selected domains. Like an analyst, it has also read access on global and domain objects" %}</p>
+            <p>{% trans "This role gives full access to selected domains. Like an analyst, it has also read access on global and domain objects." %}</p>
         {% elif topic == "BI-RL-ADM" %}
         <div class="p-2 m-2 flex content-center">
             <div class="text-5xl text-blue-800"><i class="fa-solid fa-building-shield"></i></div>
         </div>
-            <p>{% trans "This role permits to manage project domains, users and users rights, but has no direct access to projects" %}</p>
+            <p>{% trans "This role has all permissions, specifically to manage project domains, users and users rights." %}</p>
         {% elif topic == 'no_matrix' %}
         <div class="p-2 m-2 flex content-center">
             <div class="text-5xl text-red-500 animate-pulse"><i class="fa-solid fa-table"></i></div>
