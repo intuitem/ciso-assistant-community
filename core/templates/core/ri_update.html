@@ -21,12 +21,12 @@
                         <div class="flex flex-row space-x-6 justify-between">
                             <div class="flex-col w-1/4">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Project" %}: </p>
-                                <p class="text-sm font-semibold">{{ scenario.analysis.project }}</p>
+                                <p class="text-sm font-semibold break-words">{{ scenario.analysis.project }}</p>
                             </div>
                             <div class="flex-col w-1/3">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Analysis" %}: </p>
                                 <p class="text-red-500 text-xs font-semibold">{{ form.analysis.errors|striptags }}</p>
-                                <p class="text-sm font-semibold">{{ scenario.analysis }}</p>
+                                <p class="text-sm font-semibold break-words">{{ scenario.analysis }}</p>
                                 {% if form.analysis.field.widget.attrs.disabled %}
                                         <input type="hidden" name="{{ form.analysis.name }}" value="{{ form.analysis.value }}">
                                 {% endif %}
@@ -34,14 +34,14 @@
                             <div class="flex-col w-1/3">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Auditor" %}: </p>
                                 {% if scenario.analysis.auditor.get_full_name %}
-                                    <p class="text-sm font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
+                                    <p class="text-sm font-semibold break-words">{{ scenario.analysis.auditor.get_full_name }}</p>
                                 {% else %}
-                                    <p class="text-sm font-semibold">{{ scenario.analysis.auditor }}</p>
+                                    <p class="text-sm font-semibold break-words">{{ scenario.analysis.auditor }}</p>
                                 {% endif %}
                             </div>
                             <div class="flex-col">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Version" %}: </p>
-                                <p class="text-sm font-semibold">{{ scenario.analysis.version }}</p>
+                                <p class="text-sm font-semibold break-words">{{ scenario.analysis.version }}</p>
                             </div>
                         </div>
                     </section>
