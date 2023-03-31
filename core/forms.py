@@ -127,7 +127,7 @@ class RiskAnalysisCreateForm(StyledModelForm):
 
     class Meta:
         model = Analysis
-        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix', 'version']
         
 class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
@@ -138,7 +138,7 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
         
     class Meta:
         model = Analysis
-        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix', 'version']
 
 
 class RiskMatrixUpdateForm(StyledModelForm):
