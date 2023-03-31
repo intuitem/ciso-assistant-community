@@ -2,14 +2,13 @@
 
 {% load i18n %}
 
-{% block head %}
-<title>{% trans "X-Rays: review engine" %}</title>
-{% endblock %}
 {% block content %}
+{% with page_title=_('X-Rays') %}
+    {% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
 <main class="p-2 2xl:p-8 text-sm h-full">
     <div class="bg-white p-2 mx-auto shadow rounded">
-
-        <div class="p-6 max-w-3xl">
+        <div class="p-6 w-full">
 
             {% for analysis in context %}
             <div class="border-b mb-4">

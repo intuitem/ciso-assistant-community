@@ -39,11 +39,22 @@
                         <td class="text-left py-2 px-4">{{ mtg.name }}</td>
                         <td class="text-center py-2 px-4">{{ mtg.get_ranking_score }}</td>
                         <td class="text-center py-2 px-4 {% include 'snippets/mtg_style.html' with security_measure=mtg %}">{{ mtg.get_status_display }}</td>
-                        <td class="text-center py-2 px-4">{{ mtg.eta|date }}</td>
+                        <td class="text-center py-2 px-4">{% if mtd.eta %} {{ mtg.eta|date }} {% else %} -- {% endif %}</td>
                         <td class="text-center py-2 px-4">
-                            {% if mtg.link %}<a href="{{mtg.link}}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-external-link-square-alt"></i></a>{% endif %}
-                            <a href="{% url 'securitymeasure-update' mtg.id %}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-pen-square"></i></a>
+                            {% if mtg.id in viewable_measures %} 
+                                <a href="{% url 'securitymeasure-detail' mtg.id %}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-eye"></i></a>
+                            {% endif %}
+                            {% if mtg.id in updatable_measures %}
+                                <a href="{% url 'securitymeasure-update' mtg.id %}" class="text-indigo-500 hover:text-indigo-300"><i class="fas fa-pen-square"></i></a>
+                            {% endif %}
                         </td>
+                    {% empty %}
+                    <tr class="text-black p-4 text-center">
+                        <td colspan="8" class="py-2">
+                            <i class="inline fas fa-exclamation-triangle"></i>
+                            <p class="inline test-gray-900">{% trans "No pending measure." %}</p>
+                        </td>
+                    </tr>
                     {% endfor %}
                     </tr>
                 </table>
