@@ -18,10 +18,12 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900">
                             {{ library.name }}
                         </h3>
+                        {% if can_import %}
                         <span x-data="{ open: false }">
                             <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
                             {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
                         </span>
+                        {% endif %}
                     </div>
                     <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
                         {{ library.description|linebreaksbr }}
