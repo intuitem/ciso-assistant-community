@@ -18,20 +18,20 @@
                 <div class="px-4 pt-2 pb-4 mb-2 mr-2 bg-white rounded-lg shadow w-3/4">
                     <h2 class="text-lg font-semibold mb-4">{% trans "Scope" %}</h2>
                     <section class="flex flex-col space-y-4">
-                        <div class="flex flex-row space-x-6 justify-between">
-                            <div class="flex-col w-1/4">
+                        <div class="flex flex-row justify-between space-x-4">
+                            <div class="flex-col w-3/12">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Project" %}: </p>
                                 <p class="text-sm font-semibold break-words">{{ scenario.analysis.project }}</p>
                             </div>
-                            <div class="flex-col w-1/3">
+                            <div class="flex-col w-4/12">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Analysis" %}: </p>
                                 <p class="text-red-500 text-xs font-semibold">{{ form.analysis.errors|striptags }}</p>
-                                <p class="text-sm font-semibold break-words">{{ scenario.analysis }}</p>
+                                <p class="text-sm font-semibold break-words">{{ form.analysis }}</p>
                                 {% if form.analysis.field.widget.attrs.disabled %}
                                         <input type="hidden" name="{{ form.analysis.name }}" value="{{ form.analysis.value }}">
                                 {% endif %}
                             </div>
-                            <div class="flex-col w-1/3">
+                            <div class="flex-col w-3/12">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Auditor" %}: </p>
                                 {% if scenario.analysis.auditor.get_full_name %}
                                     <p class="text-sm font-semibold break-words">{{ scenario.analysis.auditor.get_full_name }}</p>
@@ -39,7 +39,7 @@
                                     <p class="text-sm font-semibold break-words">{{ scenario.analysis.auditor }}</p>
                                 {% endif %}
                             </div>
-                            <div class="flex-col">
+                            <div class="flex-col w-2/12">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Version" %}: </p>
                                 <p class="text-sm font-semibold break-words">{{ scenario.analysis.version }}</p>
                             </div>
