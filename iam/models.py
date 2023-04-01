@@ -177,7 +177,7 @@ class UserManager(BaseUserManager):
         else:
             user.password = make_password(str(uuid.uuid4()))
             try:
-                user.mailing(email_template_name="registration/first_connexion_email.txt", subject=_("First Connexion"))
+                user.mailing(email_template_name="registration/first_connexion_email.html", subject=_("Welcome to Mira!"))
             except Exception as exception:
                 user.save(using=self._db)
                 raise exception
@@ -278,8 +278,10 @@ class User(AbstractBaseUser):
                 }
         email = render_to_string(email_template_name, header)
         try:
-            send_mail(subject, email, None, [self.email], fail_silently=False)
+            send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
         except Exception as e:
+            print(e)
+            #todo: move this to logger
             print("primary mailer failure")
             if EMAIL_HOST_RESCUE:
                 with get_connection(
