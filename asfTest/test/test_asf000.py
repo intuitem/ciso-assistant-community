@@ -7,6 +7,7 @@ from playwright import *
 import urlpatterns
 import pytest
 import time
+import re
 
 def test_asf001(page):
 	"""
@@ -146,7 +147,8 @@ def test_asf003(page):
 	# page.remove_listener("response", log_response)
 	page.goto(urlpatterns.MAILHOG)
 	page.click("text=root@gmail.com")
-	link = page.get_by_role("link", name="http://127.0.0.1:8000/reset/").inner_text()
+	# adapt to quoted-printable html in mail
+	link = page.get_by_text(re.compile("http://127.0.0.1:8000/reset/.*[^=]")).inner_text()
 	# 4 | Reset the password | Update user password
 	step += 1
 	page.goto(link)
