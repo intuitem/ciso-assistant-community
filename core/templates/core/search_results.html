@@ -28,8 +28,8 @@
         </div>
     </div>
 
-    <div class="bg-gray-50 shadow-xl px-8 py-10 flex flex-col space-y-4 rounded-lg">
-        <div class="px-2 py-4 bg-white rounded shadow-md">
+    <div class="bg-white shadow-xl px-8 py-10 flex flex-col space-y-4 rounded-lg">
+        <div class="px-2 py-4 bg-white rounded">
             <div class="text-lg font-black">
                 {% blocktrans count counter=context.Analysis|length %}
                 Risk analysis
@@ -48,7 +48,10 @@
                 </ul>
             </div>
         </div>
-        <div class="px-2 py-4 bg-white rounded shadow-md">
+
+        <div class="h-0 w-full border-t border-gray-300"></div>
+        
+        <div class="px-2 py-4 bg-white rounded">
             <div class="text-lg font-black">
             {% blocktrans count counter=context.RiskScenario|length %}
             Risk scenario
@@ -67,7 +70,10 @@
                 </ul>
             </div>
         </div>
-        <div class="px-2 py-4 bg-white rounded shadow-md">
+
+        <div class="h-0 w-full border-t border-gray-300"></div>
+
+        <div class="px-2 py-4 bg-white rounded">
             <div class="text-lg font-black">
                 {% blocktrans count counter=context.SecurityMeasure|length %}
                 Security measure
