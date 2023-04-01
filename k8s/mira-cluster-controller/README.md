@@ -53,12 +53,18 @@ CLUSTER_DOMAIN        | domain to append to client name | "alsigo.net"
 
 See cm.mira-cluster-controller-config-dev.yaml for an example.
 
-## Client template
+## Client template and config
 
 The template yaml file for client objects creation is stored in the configmap "templates-yaml". To create it, use:
 
 ```shell
 kubectl create configmap templates-yaml --from-file=templates/client_template.yaml
+````
+
+The configuration is stored in the mira-config configmap. To create nstall it, use:
+
+```shell
+kubectl apply -f cm.mira-config.yaml
 ````
 
 ## Observability
