@@ -244,6 +244,11 @@
             event.preventDefault(); // prevent 1st submit (modal) from firing right away, without this only the modal will be submitted
             $('#scenario_update_form, #securitymeasure-create-form').each(function() {
                 valuesToSend = $(this).serialize();
+                if ($(this).attr('id') == 'scenario_update_form') {
+                    valuesToSend += '&security_measure_name=' + $('#securitymeasure-create-form').serializeArray().filter(function(obj) {
+                        return obj.name === 'name';
+                    })[0].value;
+                }
                 $.ajax($(this).attr('action'),
                     {
                         type: $(this).attr('method'),

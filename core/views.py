@@ -1315,6 +1315,8 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
+        if 'security_measure_name' in self.request.POST:
+            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']))
         if "select_measures" in self.request.POST:
             return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
