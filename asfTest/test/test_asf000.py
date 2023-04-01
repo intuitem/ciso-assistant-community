@@ -148,8 +148,8 @@ def test_asf003(page):
 	page.goto(urlpatterns.MAILHOG)
 	page.click("text=root@gmail.com")
 	# adapt to quoted-printable html in mail
-#	re.search(r"http\:\/\/127\.0\.0\.1\:8000\/reset\/[^=]*", page.content()
-	link = page.get_by_text(re.compile(r"http\:\/\/127\.0\.0\.1\:8000\/reset\/[^=]*")).first()
+	link=re.search("http://127.0.0.1:8000/reset/[^=]*", page.content()).group()
+	#link = page.get_by_text(re.compile(r"http\:\/\/127\.0\.0\.1\:8000\/reset\/[^=]*")).first()
 	# 4 | Reset the password | Update user password
 	step += 1
 	page.goto(link)
