@@ -55,7 +55,7 @@ See cm.mira-cluster-controller-config-dev.yaml for an example.
 
 ## Client template
 
-The template yaml file for client objects creation is stored in the configmap "templates". To create it, use:
+The template yaml file for client objects creation is stored in the configmap "templates-yaml". To create it, use:
 
 ```shell
 kubectl create configmap templates-yaml --from-file=templates/client_template.yaml
@@ -81,4 +81,20 @@ kubectl port-forward --namespace monitoring service/grafana 3000:80
 ```
 
 In Grafana, add the Prometheus data source with path "http://prometheus-server".
- 
+
+## Tips
+
+To list all pods and their current version:
+
+```shell
+kubectl get pods -n default -o jsonpath='{range .items[*]}{@.metadata.name}{" "}{@.spec.containers[*].image}{"\n"}{end}'| column -t
+```
+
+## MIRA version update
+
+- push the new image
+- adjust the template file
+  - either delete it and replace it
+  - or edit it (kubectl edit cm templates-yaml) and simply change the version
+- For each client, do a save in the controller GUI. This will provoke the update
+- Use the command given in tips to list all pods and check the current version
