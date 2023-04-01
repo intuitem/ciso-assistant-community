@@ -18,7 +18,9 @@
                 </div>
                 <div class="w-3/4 mx-4 py-2 text-justify grid place-content-center">
                     <div class="text-sm mb-2">
-                        {% trans "As administrator, you are in charge to import at least one matrix. <br>You will need security functions and threats to perform a security analysis. You can either define custom" %}
+                        {% trans "As administrator, you are in charge to import at least one" %}
+                        <a href="{% url 'riskmatrix-list' %}" class="simple-link">{% trans "matrix" %}</a>. 
+                        <br>{% trans "You will need security functions and threats to perform a security analysis. You can either define custom" %}
                         <div class="inline" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                    {% trans "security functions" %}

@@ -34,8 +34,14 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
-
-    
+        {% if add_riskmatrix %}
+        <div class="grid mb-4 w-full">
+            <a class="add-button" href="{% url 'library-list' %}">
+                <i class="fas fa-file-import mr-2"></i>
+                {% trans "Import matrix" %}
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <div class="mt-4 relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
