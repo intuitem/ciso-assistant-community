@@ -53,7 +53,7 @@ CLUSTER_DOMAIN        | domain to append to client name | "alsigo.net"
 
 See cm.mira-cluster-controller-config-dev.yaml for an example.
 
-## Client template and config
+## Client templates, config and secrets
 
 The template yaml file for client objects creation is stored in the configmap "templates-yaml". To create it, use:
 
@@ -66,6 +66,16 @@ The configuration is stored in the mira-config configmap. To create nstall it, u
 ```shell
 kubectl apply -f cm.mira-config.yaml
 ````
+
+For recaptcha v2 private key, create the "recaptcha" secret with the following command:
+```shell
+kubectl create secret generic recaptcha -n default --from-literal=RECAPTCHA_PRIVATE_KEY=XXX
+```
+
+For SMTP passwords, create the "smtp-out" secret with the following command:
+```shell
+kubectl create secret generic smtp-out -n default --from-literal=EMAIL_HOST_PASSWORD=XXX --from-literal=EMAIL_HOST_PASSWORD_RESCUE=XXX
+```
 
 ## Observability
 
