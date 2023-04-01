@@ -4,6 +4,7 @@
 from collections import defaultdict
 from typing import Any, Tuple
 import uuid
+from smtplib import SMTPException
 from django.utils import timezone
 from django.db import connection, models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -280,7 +281,9 @@ class User(AbstractBaseUser):
         try:
             send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
         except Exception as e:
-            print(e)
+            send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
+        except SMTPException as ex1:
+            print(ex1)
             #todo: move this to logger
             print("primary mailer failure")
             if EMAIL_HOST_RESCUE:
@@ -290,9 +293,13 @@ class User(AbstractBaseUser):
                     username=EMAIL_HOST_USER_RESCUE, 
                     password=EMAIL_HOST_PASSWORD_RESCUE, 
                     use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False
-                ) as connection:
-                    EmailMessage(subject, email, None, [self.email],
-                                connection=connection).send()
+                ) as new_connection:
+                    try:
+                        EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
+                    except SMTPException as ex2:
+                        print(ex2)
+                        print("secondary mailer failure")
+
 
     @property
     def edit_url(self) -> str:
