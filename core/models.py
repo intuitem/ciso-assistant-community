@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from asf_rm import settings
 from core.base_models import AbstractBaseModel
-from iam.models import Folder
+from iam.models import Folder, FolderMixin, RootFolderMixin
 from openpyxl import load_workbook
 import pandas as pd
 import json
@@ -41,10 +41,8 @@ class Project(AbstractBaseModel):
         return self.name
 
 
-class Threat(AbstractBaseModel):
+class Threat(AbstractBaseModel, RootFolderMixin):
     is_published = models.BooleanField(_('published'), default=True)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
-                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         verbose_name = _("Threat")
@@ -54,7 +52,7 @@ class Threat(AbstractBaseModel):
         return self.name
 
 
-class Asset(AbstractBaseModel):
+class Asset(AbstractBaseModel, RootFolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -73,8 +71,6 @@ class Asset(AbstractBaseModel):
     parent_assets = models.ManyToManyField(
         'self', blank=True, verbose_name=_('parent assets'), symmetrical=False)
     is_published = models.BooleanField(_('published'), default=True)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
-                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         verbose_name_plural = _("Assets")
@@ -103,12 +99,10 @@ class Asset(AbstractBaseModel):
         return list(result)
 
 
-class SecurityFunction(AbstractBaseModel):
+class SecurityFunction(AbstractBaseModel, RootFolderMixin):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
     is_published = models.BooleanField(_('published'), default=True)
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
-                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
 
     class Meta:
         verbose_name = _("Security function")
@@ -118,13 +112,11 @@ class SecurityFunction(AbstractBaseModel):
         return self.name
 
 
-class RiskMatrix(AbstractBaseModel):
+class RiskMatrix(AbstractBaseModel, FolderMixin):
     json_definition = models.JSONField(verbose_name=_("JSON definition"), help_text=_("JSON definition of the matrix. \
         See the documentation for more information."), default=dict)
     is_enabled = models.BooleanField(_('enabled'), default=True, help_text=_(
         "If the matrix is set as disabled, it will not be available for selection for new risk analyses."))
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='%(class)s_folder',
-                               default=Folder.objects.get(content_type=Folder.ContentType.ROOT).pk)
     
     @property
     def is_used(self) -> bool:
