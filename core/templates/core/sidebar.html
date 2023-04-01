@@ -279,6 +279,16 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Backups" %}</span>
                     </a>
                 </li>
+                <li class="to-page">
+                    <a id="lic_tab" href="{% url 'lic-management' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "License management" %}</span>
+                    </a>
+                </li>
+
                 {% endif %}
                 {% comment %} <li class="to-page">
                     <a href="#"

@@ -2149,3 +2149,24 @@ class RiskMatrixUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskmatrix"), folder=Folder.get_folder(self.get_object()))
+
+
+def license_overview(request):
+    template = 'license/overview.html'
+    context = {}
+
+    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
+        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
+    context['matrices'] = list(
+        RiskMatrix.objects.all().values_list('json_definition', flat=True))
+    context['change_usergroup'] = RoleAssignment.has_permission(
+        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['view_user'] = RoleAssignment.has_permission(
+        request.user, "view_user")
+    context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+
+    context['users_number'] = User.objects.all().count()
+    context['users_number_limit'] = MAX_USERS
+
+
+    return render(request, template, context)
