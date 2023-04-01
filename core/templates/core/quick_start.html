@@ -29,14 +29,14 @@
                     </div>
                     <div class="text-sm mb-2 rounded text-center">
                         {% trans "You will need security functions and threats to perform a security analysis. You can either define custom" %}
-                        <div class="inline" x-data="{ open: false }">
+                        <div class="inline text-left" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                 {% trans "security functions" %}
                             </a>
                                 {% include "snippets/modal/modal.html" with modal_action="create" model="securityfunction" form=security_function_create_form header=_("Add security function") %}
                         </div>
                         {% trans "and" %} 
-                        <div class="inline" x-data="{ open: false }">
+                        <div class="inline text-left" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                 {% trans "threats" %}
                             </a>
@@ -52,7 +52,7 @@
                     </div>
                     <div class="text-sm mb-2 rounded text-center">
                         {% trans "It's time to define at least one" %}
-                        <div class="inline" x-data="{ open: false }">
+                        <div class="inline text-left" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                 {% trans "domain" %}
                             </a>
@@ -79,7 +79,7 @@
                     </div>
                     <div class="text-sm mb-2 rounded text-center">
                         {% trans "Finally, you can identify and create relevant" %}
-                        <div class="inline" x-data="{ open: false }">
+                        <div class="inline text-left" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
                                 {% trans "assets" %}
                             </a>
