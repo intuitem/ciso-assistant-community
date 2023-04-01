@@ -332,7 +332,7 @@ def password_reset_request(request):
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
-                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject=_("Password Reset Requested"))
+                    associated_user.mailing(email_template_name="registration/password_reset_email.html", subject=_("Mira: Password Reset"))
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     messages.error(
