@@ -1,3 +1,16 @@
+{% load forms_extras %}
+
+{% if widget.attrs.disabled %}
+
+<select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50" disabled>
+    <option value="">---------</option>
+    <option value="{{ widget.value.0 }}" selected>{{ widget.optgroups|selected_option_label }}</option>
+</select>
+
+<input type="hidden" name="{{ widget.name }}" value="{{ widget.value.0 }}">
+
+{% else %}
+
 <div class="{{ widget.attrs.class }}">
     <div x-data="{
         open: false,
@@ -18,9 +31,9 @@
             focusAfter && focusAfter.focus()
         },
         search: '',
-        selectedValue: {{ widget.value }},
+        selectedValue: {% if widget.value %}{{ widget.value }}{% else %}'{{ widget.optgroups.0.1.0.value }}'{% endif %},
+        selectedIndex: {{ widget.optgroups|selected_option_index }},
         selectedName: {% if widget.label %}{{ widget.label }}{% else %}document.querySelector('#{{ widget.attrs.id }} [d-selected]').innerHTML{% endif %},
-        selectedIndex: {% if widget.label %}{{ widget.label }}{% else %}0{% endif %},
         show_item(el) {
         return this.search === '' || el.textContent.toLowerCase().includes(this.search.toLowerCase())
         }
@@ -32,12 +45,12 @@
     
         <div class="flex flex-col border bg-gray-50 border-gray-300 text-gray-900 rounded-t-lg focus:ring-blue-500 focus:border-blue-500 w-full pt-2.5 disabled:opacity-50" :class="open === false ? 'rounded-b-lg' : ''">
             <div x-ref="button"
-            x-on:click="toggle()"
+            x-on:click="toggle(); $nextTick(() => { $refs.search.focus(); });"
             :aria-expanded="open"
             :aria-controls="$id('dropdown-button')"
             type="button" class="h-8 cursor-pointer w-full px-2.5 flex flex-row justify-between truncate">
                 <p x-text="selectedName" class="w-full truncate"></p><i class="fas fa-angle-down mt-1 mr-0.5 text-gray-800"></i>
-        </div>
+            </div>
         </div>
 
         <div x-ref="panel"
@@ -51,7 +64,7 @@
                 <div class="my-auto search-icon">
                     <i class="fas fa-search"></i>
                 </div>
-                <input class="border-none focus:ring-0 overflow-ellipsis bg-gray-50" type="search" placeholder="Search..." x-model="search">
+                <input class="border-none focus:ring-0 bg-transparent w-full" type="search" placeholder="Search..." x-ref="search" x-model="search">
             </div>
             <div class="{{ widget.attrs.wrapper_class }}">
 
@@ -60,7 +73,7 @@
             </div> {% endcomment %}
 
                 {% with id=widget.attrs.id %}
-                <div {% if id %} id="{{ id }}"{% endif %}>
+                <div {% if id %} id="{{ id }}"{% endif %} class="overflow-x-hidden break-words">
                     {% for group_name, group_choices, group_index in widget.optgroups %}
                         {% if group_name %}
                         <div>
@@ -81,3 +94,6 @@
 
     </div>
 </div>
+
+
+{% endif %}

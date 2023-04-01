@@ -1,4 +1,7 @@
-<div id="option_{{ widget.index }}" @click="selectedValue='{{ widget.value }}'; selectedName='{{ widget.label }}'; open = false"{% include "django/forms/widgets/attrs.html" %}
-    class="cursor-pointer hover:bg-indigo-300 px-4 py-2 w-full" {% if widget.selected %}d-selected{% endif %}>
+<div id="option_{{ widget.index }}" @click="selectedValue='{{ widget.value }}'; selectedName='{{ widget.label }}'; selectedIndex = {{ widget.index }}; submitDisabled = false; open = false"
+    class="cursor-pointer hover:bg-indigo-300 px-4 py-2 w-full"
+    :class="{ 'bg-indigo-600 hover:bg-indigo-700 text-white': selectedIndex === {{ widget.index }} }" 
+    {% include "django/forms/widgets/attrs.html" %} 
+    {% if widget.selected %}d-selected{% endif %}>
     {{ widget.label }}
 </div>
