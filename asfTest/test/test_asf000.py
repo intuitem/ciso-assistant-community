@@ -149,6 +149,7 @@ def test_asf003(page):
 	page.click("text=root@gmail.com")
 	# adapt to quoted-printable html in mail
 	link = page.get_by_text(re.compile("http://127.0.0.1:8000/reset/.*[^=]")).first()
+	print(link)
 	# 4 | Reset the password | Update user password
 	step += 1
 	page.goto(link)
