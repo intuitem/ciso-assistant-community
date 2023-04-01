@@ -2042,7 +2042,7 @@ msgstr "et allez dans les acceptations de risque"
 #: core/templates/registration/first_connexion_email.txt:14
 #: core/templates/registration/password_reset_email.txt:14
 msgid "Sincerely"
-msgstr "Coridalement"
+msgstr "Cordialement"
 
 #: core/templates/core/risk_acceptance_email.txt:13
 #: core/templates/registration/first_connexion_email.txt:15
