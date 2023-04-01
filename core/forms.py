@@ -337,34 +337,27 @@ class ProjectUpdateForm(StyledModelForm):
 class ThreatCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ThreatCreateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['disabled'] = True
         
 
     class Meta:
         model = Threat
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class ThreatUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ThreatUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].disabled = True
+
     class Meta:
         model = Threat
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class AssetForm(StyledModelForm):
     def __init__(self, *args, user=None, **kwargs):
         super(AssetForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['disabled'] = True
         self.fields['parent_assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
                      'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
@@ -390,21 +383,17 @@ class AssetForm(StyledModelForm):
 
     class Meta:
         model = Asset
-        fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class SecurityFunctionCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['disabled'] = True
 
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class SecurityFunctionUpdateForm(StyledModelForm):
@@ -415,4 +404,4 @@ class SecurityFunctionUpdateForm(StyledModelForm):
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']

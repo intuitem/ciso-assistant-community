@@ -5,7 +5,7 @@ from collections import defaultdict
 from typing import Any, Tuple
 import uuid
 from django.utils import timezone
-from django.db import models
+from django.db import connection, models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission
@@ -131,6 +131,33 @@ class FolderMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class RootFolderMixin(FolderMixin):
+    """
+    Add foreign key to Folder, defaults to root folder
+    """
+    def get_default_folder():
+        if not connection.introspection.table_names():
+            # Database tables haven't been created yet
+            return None
+        
+        try:
+            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        except Folder.DoesNotExist:
+            # ROOT folder doesn't exist yet
+            return None
+    
+    folder = models.ForeignKey(
+        Folder,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_folder',
+        default=get_default_folder,
+    )
+
+    class Meta:
+        abstract = True
+
 
 
 class UserManager(BaseUserManager):

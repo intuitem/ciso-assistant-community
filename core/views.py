@@ -256,14 +256,17 @@ class ProjectDetailView(GenericDetailView):
 
 class AssetDetailView(GenericDetailView):
     model = Asset
+    exclude = ['id', 'is_published', 'folder']
 
 
 class ThreatDetailView(GenericDetailView):
     model = Threat
+    exclude = ['id', 'is_published', 'folder']
 
 
 class SecurityFunctionDetailView(GenericDetailView):
     model = SecurityFunction
+    exclude = ['id', 'is_published', 'folder']
 
 
 class UserDetailView(GenericDetailView):
@@ -927,7 +930,7 @@ class AssetCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -941,7 +944,7 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return kwargs
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1476,7 +1479,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = SecurityFunctionCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class SecurityFunctionUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1554,7 +1557,7 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = ThreatCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class ThreatUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
