@@ -75,6 +75,8 @@ k create secret generic smtp-out --from-literal EMAIL_HOST_PASSWORD=<api_key>
 
 Note that EMAIL_HOST_USER shall be set to the UUID of the project.
 
+It is also necessary to enable SMTP in the security group in Compute/Instances.
+
 ## Recpatcha
 
 Note: this is not specific to scaleway.

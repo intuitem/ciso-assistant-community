@@ -4,7 +4,7 @@ metadata:
   name: mira-config
   namespace: default
 data:
-  DEFAULT_FROM_EMAIL: mira-demo@intuitem.com
+  DEFAULT_FROM_EMAIL: no-reply@miracloud.fr
   DJANGO_DEBUG: "False"
   EMAIL_HOST: smtp.sendgrid.net
   EMAIL_HOST_RESCUE: smtp.tem.scw.cloud
