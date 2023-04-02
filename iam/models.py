@@ -279,20 +279,26 @@ class User(AbstractBaseUser):
         email = render_to_string(email_template_name, header)
         try:
             send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
+            print("mail sent to", self.email)
         except Exception as e:
             print(e)
             #todo: move this to logger
             print("primary mailer failure")
             if EMAIL_HOST_RESCUE:
-                with get_connection(
-                    host=EMAIL_HOST_RESCUE, 
-                    port=EMAIL_PORT_RESCUE, 
-                    username=EMAIL_HOST_USER_RESCUE, 
-                    password=EMAIL_HOST_PASSWORD_RESCUE, 
-                    use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False
-                ) as connection:
-                    EmailMessage(subject, email, None, [self.email],
-                                connection=connection).send()
+                try:
+                    with get_connection(
+                        host=EMAIL_HOST_RESCUE, 
+                        port=EMAIL_PORT_RESCUE, 
+                        username=EMAIL_HOST_USER_RESCUE,
+                        password=EMAIL_HOST_PASSWORD_RESCUE, 
+                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                    ) as new_connection:
+                            EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
+                            print("mail sent to", self.email)
+                except Exception as ex2:
+                    print(ex2)
+                    print("secondary mailer failure")
+
 
     @property
     def edit_url(self) -> str:

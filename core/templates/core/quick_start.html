@@ -13,13 +13,13 @@
             </div>
             <div class="flex justify-center w-full p-4 mb-2">
                 <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
-                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Matrix" %}</div>
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Rating matrix" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-orange-500">
                         <i class="fa-solid fa-table"></i>
                     </div>
                     <div class="text-sm mb-2 rounded text-center">
                         {% trans "As administrator, you are in charge to import at least one" %}
-                        <a href="{% url 'riskmatrix-list' %}" class="simple-link">{% trans "matrix" %}</a>. 
+                        <a href="{% url 'riskmatrix-list' %}" class="simple-link">{% trans "rating matrix" %}</a>. 
                     </div>    
                 </div>
                 <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
@@ -46,15 +46,15 @@
                     </div> 
                 </div>
                 <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
-                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Domain" %}</div>
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Projects domains" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-zinc-500">
                         <i class="fas fa-project-diagram"></i>
                     </div>
                     <div class="text-sm mb-2 rounded text-center">
-                        {% trans "It's time to define at least one" %}
+                        {% trans "It's time to define some" %}
                         <div class="inline text-left" x-data="{ open: false }">
                             <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
-                                {% trans "domain" %}
+                                {% trans "projects domains" %}
                             </a>
                                 {% include "snippets/modal/modal.html" with modal_action="create" model="folder" form=projects_domain_create_form header=_("Add projects domain") %}
                         </div> 
@@ -92,7 +92,7 @@
         </div>
         <div class="flex flex-col">
             <div>
-                <h1 class="font-semibold text-indigo-800">{% trans "To start you risk assesment, you can:" %}</h1>
+                <h1 class="font-semibold text-indigo-800">{% trans "Now, you can start your risk assessment:" %}</h1>
             </div>
             <div class="flex justify-center w-full p-4 mb-2">
                 <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">

@@ -17,7 +17,7 @@ def test_BO001(page):
 	page.on("response", log_response)
 	# 1 | Go to the url and login | Opening of  home page |
 	step = 1
-	page.goto(urlpatterns.url)
+	page.goto(urlpatterns.URL)
 	message = page.locator('id=hellothere')
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
 	page.fill('id=id_username', 'root')
