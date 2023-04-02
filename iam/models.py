@@ -4,7 +4,6 @@
 from collections import defaultdict
 from typing import Any, Tuple
 import uuid
-from smtplib import SMTPException
 from django.utils import timezone
 from django.db import connection, models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
