@@ -2086,6 +2086,8 @@ class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
         context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[2]
+        context['add_riskmatrix'] = RoleAssignment.has_permission(
+            self.request.user, 'add_riskmatrix')
         queryset = self.get_queryset()
         filter = RiskMatrixFilter(self.request.GET, queryset)
         context['filter'] = filter
