@@ -77,33 +77,15 @@
                                 </div>
                                 <div>
                                     <p class="block text-sm font-medium text-gray-900">{% trans "Auditor" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.auditor }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {{ filter.form.auditor }}
                                 </div>
                                 <div>
                                     <p class="block text-sm font-medium text-gray-900">{% trans "Domain" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.project__folder }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {{ filter.form.project__folder }}
                                 </div>
                                 <div>
                                     <p class="block text-sm font-medium text-gray-900">{% trans "Project" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.project }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    {{ filter.form.project }}
                                 </div>
                                 <button type="submit" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>
