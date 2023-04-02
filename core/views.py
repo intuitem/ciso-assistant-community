@@ -1644,7 +1644,7 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
             self.object.save()
-            messages.success(self.request, _("Risk acceptance submited to: ") + self.object.validator.email)
+            messages.success(self.request, _("Risk acceptance submitted to: ") + self.object.validator.email)
         return super().form_valid(form)
 
     def test_func(self):
@@ -1669,7 +1669,7 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
             self.object.save()
-            messages.success(self.request, _("Risk acceptance submited to: ") + self.object.validator.email)
+            messages.success(self.request, _("Risk acceptance submitted to: ") + self.object.validator.email)
         elif not self.object.validator and self.object.state == 'submitted':
             # Mettre à jour le paramètre "state"
             self.object.set_state('created')
