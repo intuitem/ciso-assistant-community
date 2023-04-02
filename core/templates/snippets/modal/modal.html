@@ -28,7 +28,7 @@ x-transition:leave-end="opacity-0"
         class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto mb-8">
 
         <!-- MODAL CONTAINER -->
-        <div class="relative flex flex-col w-fit pointer-events-auto bg-white shadow-xl rounded-md overflow-hidden" id="new_{{ model|lower }}_modal">
+        <div class="relative flex flex-col w-fit pointer-events-auto bg-white shadow-xl rounded-md overflow-visible" id="new_{{ model|lower }}_modal">
           <div class="flex items-start justify-between p-4 bg-gradient-to-r from-slate-200">
             {% if topic == 'no_matrix' %}
             <div class="mb-4 text-xl text-gray-800"><span class="text-red-600"><i

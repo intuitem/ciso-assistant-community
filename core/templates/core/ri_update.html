@@ -10,37 +10,38 @@
 
 <div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
     <form method="POST" id="scenario_update_form" action="">{% csrf_token %}
-    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}{{ form.errors }}</p>
+    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}
+    </p>
     <div class="flex flex-col space-y-2">
         <section class="flex flex-col w-full">
             <div class="flex flex-row">
                 <div class="px-4 pt-2 pb-4 mb-2 mr-2 bg-white rounded-lg shadow w-3/4">
                     <h2 class="text-lg font-semibold mb-4">{% trans "Scope" %}</h2>
                     <section class="flex flex-col space-y-4">
-                        <div class="flex flex-row space-x-6">
-                            <div class="flex-1 flex-col">
+                        <div class="flex flex-row justify-between space-x-4">
+                            <div class="flex-col w-3/12">
                                 <p class="text-gray-400 text-sm font-semibold">{% trans "Project" %}: </p>
-                                <p class="text-sm font-semibold">{{ scenario.analysis.project }}</p>
+                                <p class="text-sm font-semibold break-words">{{ scenario.analysis.project }}</p>
                             </div>
-                            <div class="flex-1 flex-col">
-                                <p class="text-gray-400 text-sm font-semibold">{% trans "Auditor" %}: </p>
-                                {% if scenario.analysis.auditor.get_full_name %}
-                                    <p class="text-sm font-semibold">{{ scenario.analysis.auditor.get_full_name }}</p>
-                                {% else %}
-                                    <p class="text-sm font-semibold">{{ scenario.analysis.auditor }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="flex-1 flex-col">
-                                <p class="text-gray-400 text-sm font-semibold">{% trans "Version" %}: </p>
-                                <p class="text-sm font-semibold">{{ scenario.analysis.version }}</p>
-                            </div>
-                            <div class="flex-1 flex-col">
-                                <p class="text-sm font-semibold">{% trans "Analysis" %}: </p>
-                                <p class="text-red-500 text-xs font-semibold">{{ form.analysis.errors }}</p>
-                                {{ form.analysis }}
+                            <div class="flex-col w-4/12">
+                                <p class="text-gray-400 text-sm font-semibold">{% trans "Analysis" %}: </p>
+                                <p class="text-red-500 text-xs font-semibold">{{ form.analysis.errors|striptags }}</p>
+                                <p class="text-sm font-semibold break-words">{{ form.analysis }}</p>
                                 {% if form.analysis.field.widget.attrs.disabled %}
                                         <input type="hidden" name="{{ form.analysis.name }}" value="{{ form.analysis.value }}">
                                 {% endif %}
+                            </div>
+                            <div class="flex-col w-3/12">
+                                <p class="text-gray-400 text-sm font-semibold">{% trans "Auditor" %}: </p>
+                                {% if scenario.analysis.auditor.get_full_name %}
+                                    <p class="text-sm font-semibold break-words">{{ scenario.analysis.auditor.get_full_name }}</p>
+                                {% else %}
+                                    <p class="text-sm font-semibold break-words">{{ scenario.analysis.auditor }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="flex-col w-2/12">
+                                <p class="text-gray-400 text-sm font-semibold">{% trans "Version" %}: </p>
+                                <p class="text-sm font-semibold break-words">{{ scenario.analysis.version }}</p>
                             </div>
                         </div>
                     </section>
@@ -54,8 +55,8 @@
                         </div>
                         <div class="flex-1 flex-col">
                             <p class="text-sm font-semibold">{% trans "Treatment status" %}</p>
-                                {{ form.treatment.errors }}
-                                {{ form.treatment }}
+                            <p class="text-red-500 text-xs font-semibold">{{ form.treatment.errors|striptags }}</p>
+                            {{ form.treatment }}
                         </div>
                     </div>
                 </div>
@@ -65,17 +66,17 @@
                     <section class="flex flex-col space-y-4">
                         <div class="flex flex-col">
                             <p class="text-sm font-semibold">{% trans "Threat" %}</p>
-                            {{ form.threat.errors }}
+                            <p class="text-red-500 text-xs font-semibold">{{ form.threat.errors|striptags }}</p>
                             {{ form.threat }}
                         </div>
                         <div class="flex flex-col">
                             <p class="text-sm font-semibold">{% trans "Name" %}</p>
-                            {{ form.name.errors }}
+                            <p class="text-red-500 text-xs font-semibold">{{ form.name.errors|striptags }}</p>
                             {{ form.name }}
                         </div>
                         <div class="flex flex-col">
                             <p class="text-sm font-semibold">{% trans "Description" %}</p>
-                            {{ form.description.errors }}
+                            <p class="text-red-500 text-xs font-semibold">{{ form.description.errors|striptags }}</p>
                             {{ form.description }}
                             <p class="help_text">{{ form.description.help_text }}</p>
                         </div>
@@ -101,7 +102,7 @@
                     <div class="w-1/2 mr-2">
                         <h2 class="text-lg font-semibold mb-4">{% trans "Current risk" %}</h2>
                         <p class="text-sm font-semibold">{% trans "Existing measures" %}</p>
-                        {{ form.existing_measures.errors }}
+                        <p class="text-red-500 text-xs font-semibold">{{ form.existing_measures.errors|striptags }}</p>
                         {{ form.existing_measures }}
                         <p class="text-xs text-gray-400">{{ form.existing_measures.help_text|striptags|capfirst }}</p>
                     </div>
@@ -111,7 +112,7 @@
                             <div class="px-4 pt-2 pb-4 flex flex-row space-x-6 justify-center">
                                 <div>
                                     <p class="pl-1 text-sm font-semibold">{% trans "Current probability" %}</p>
-                                    {{ form.current_proba.errors }}
+                                    <p class="text-red-500 text-xs font-semibold">{{ form.current_proba.errors|striptags }}</p>
                                     {{ form.current_proba }}
                                 </div>
                                 <div class="items-center pt-7">
@@ -119,7 +120,7 @@
                                 </div>
                                 <div>
                                     <p class="pl-1 text-sm font-semibold">{% trans "Current impact" %}</p>
-                                    {{ form.current_impact.errors }}
+                                    <p class="text-red-500 text-xs font-semibold">{{ form.current_impact.errors|striptags }}</p>
                                     {{ form.current_impact }}
                                 </div>
                                 <div class="items-center pt-7">
@@ -148,7 +149,7 @@
                         
                     </div>
                     <div>
-                        {{ form.comments.errors }}
+                        <p class="text-red-500 text-xs font-semibold">{{ form.comments.errors|striptags }}</p>
                         {{ form.comments }}
                     </div>
                 </div>
@@ -160,7 +161,7 @@
                                 <div class="flex flex-row space-x-4 mt-4 justify-center">
                                     <div>
                                         <p class="text-sm font-semibold whitespace-nowrap">{% trans "Residual probability" %}</p>
-                                        {{ form.residual_proba.errors }}
+                                        <p class="text-red-500 text-xs font-semibold">{{ form.residual_proba.errors|striptags }}</p>
                                         {{ form.residual_proba }}
                                     </div>
                                     <div class="items-center pt-7">
@@ -168,7 +169,7 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold white">{% trans "Residual impact" %}</p>
-                                        {{ form.residual_impact.errors }}
+                                        <p class="text-red-500 text-xs font-semibold">{{ form.residual_impact.errors|striptags }}</p>
                                         {{ form.residual_impact }}
                                     </div>
                                     <div class="items-center pt-7">
