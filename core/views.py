@@ -705,8 +705,6 @@ def export_mp_csv(request, analysis):
 def scoring_assistant(request):
     template = 'core/scoring.html'
     context = {}
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
     context['change_usergroup'] = RoleAssignment.has_permission(
@@ -2155,8 +2153,6 @@ def license_overview(request):
     template = 'license/overview.html'
     context = {}
 
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
     context['change_usergroup'] = RoleAssignment.has_permission(
