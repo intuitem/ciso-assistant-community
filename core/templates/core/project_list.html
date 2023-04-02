@@ -49,8 +49,8 @@
                         :aria-expanded="open"
                         :aria-controls="$id('dropdown-button')"
                         type="button"
-                        class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
-                        :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
+                        class="px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
+                            :class="open === true ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-white hover:bg-indigo-600 hover:text-white'"
                     >
                         <i class="fas fa-filter"></i>
                         <span>{% trans "Filters" %}</span>
@@ -88,7 +88,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                            <button type="submit" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                         </div>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance, RiskMatrix
 from core.models import Asset, Folder, Project, Threat, SecurityFunction
+from core.forms import SearchableSelect, SearchableCheckboxSelectMultiple
 from iam.models import User, UserGroup, RoleAssignment
 from django.utils.translation import gettext_lazy as _
 
@@ -27,7 +28,7 @@ class GenericOrderingFilter(OrderingFilter):
 
 
 class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
-    widget = CheckboxSelectMultiple(
+    widget = SearchableCheckboxSelectMultiple(
         attrs={
             'class': 'text-sm rounded',
         }
@@ -38,7 +39,7 @@ class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
 
 
 class GenericMultipleChoiceFilter(MultipleChoiceFilter):
-    widget = CheckboxSelectMultiple(
+    widget = SearchableCheckboxSelectMultiple(
         attrs={
             'class': 'text-sm rounded',
         }
@@ -63,7 +64,7 @@ class GenericCharFilter(CharFilter):
 
 
 class GenericChoiceFilter(ChoiceFilter):
-    widget = Select(
+    widget = SearchableSelect(
         attrs={
             'class': 'rounded-lg w-full border-gray-200'
         }

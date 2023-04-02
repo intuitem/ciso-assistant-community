@@ -31,9 +31,8 @@ class SearchableSelect(Select):
     template_name = 'forms/widgets/searchable_select.html'
     option_template_name = 'forms/widgets/select_option.html'
 
-    def __init__(self, attrs = ..., choices: list[tuple] = ...) -> None:
-        super().__init__(attrs, choices)
-        # generate random id in a way that avoids collisions
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.id = f'searchable-select-{id(self)}'
 
 class DefaultDateInput(DateInput):
