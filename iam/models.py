@@ -280,6 +280,7 @@ class User(AbstractBaseUser):
         email = render_to_string(email_template_name, header)
         try:
             send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
+            print("mail sent to", email)
         except Exception as e:
             print(e)
             #todo: move this to logger
@@ -294,6 +295,7 @@ class User(AbstractBaseUser):
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
                     ) as new_connection:
                             EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
+                            print("mail sent to", email)
                 except Exception as ex2:
                     print(ex2)
                     print("secondary mailer failure")
