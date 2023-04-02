@@ -281,24 +281,22 @@ class User(AbstractBaseUser):
         try:
             send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
         except Exception as e:
-            send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
-        except SMTPException as ex1:
-            print(ex1)
+            print(e)
             #todo: move this to logger
             print("primary mailer failure")
             if EMAIL_HOST_RESCUE:
-                with get_connection(
-                    host=EMAIL_HOST_RESCUE, 
-                    port=EMAIL_PORT_RESCUE, 
-                    username=EMAIL_HOST_USER_RESCUE, 
-                    password=EMAIL_HOST_PASSWORD_RESCUE, 
-                    use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False
-                ) as new_connection:
-                    try:
-                        EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
-                    except SMTPException as ex2:
-                        print(ex2)
-                        print("secondary mailer failure")
+                try:
+                    with get_connection(
+                        host=EMAIL_HOST_RESCUE, 
+                        port=EMAIL_PORT_RESCUE, 
+                        username=EMAIL_HOST_USER_RESCUE,
+                        password=EMAIL_HOST_PASSWORD_RESCUE, 
+                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                    ) as new_connection:
+                            EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
+                except Exception as ex2:
+                    print(ex2)
+                    print("secondary mailer failure")
 
 
     @property
