@@ -343,7 +343,8 @@ class RoleAssignment(models.Model):
     @staticmethod
     def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
         """Determines if a user has specified permission on a specified folder
-           Note: the None value for folder is a kludge for the time being, an existing folder should be specified
+           TODO: the None value for folder is a kludge for the time being, an existing folder should be specified
+           for the relevant exceptions see has_permission
         """
         for ra in RoleAssignment.get_role_assignments(user):
             if (not folder or folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
@@ -439,7 +440,7 @@ class RoleAssignment(models.Model):
         return assignments
     
     def has_permission(user, codename):
-        """ Determines if a user has a specific permission """
+        """ Determines if a user has a specific permission. To be used cautiously with proper commenting """
         for ra in RoleAssignment.get_role_assignments(user):
             for perm in ra.role.permissions.all():
                 if perm.codename == codename:
