@@ -55,16 +55,15 @@ class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
                 # NOTE: This method is not safe, as we do not check the file extension and content.
                 #       Furthermore, this is not suitable to load data from selected folders
                 sys.stdin = io.StringIO(trimmed_content)
+                request.session.flush()
                 management.call_command('flush', interactive=False)
-
                 # Here we load the data from stdin
-                management.call_command(loaddata.Command(), '-', format="json", verbosity=0, exclude=['contenttypes', 'auth.permission'])
-                print(request, 'Database restored successfully.')
+                management.call_command(loaddata.Command(), '-', format="json", verbosity=0, exclude=['contenttypes', 'auth.permission', 'sessions.session'])
+                print('Database restored successfully.')
             else:
-                print(request, 'No file selected.')
+                print('No file selected for restore.')
             return self.form_valid(form)
         else:
-            print(request, 'Invalid form.')
             return self.form_invalid(form)
 
     def test_func(self):
