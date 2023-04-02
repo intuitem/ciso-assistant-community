@@ -184,7 +184,7 @@ def create_from_yaml_single_item(
         name = yml_object["metadata"]["name"]
         try:
             resp = getattr(k8s_api, "patch_namespaced_{0}".format(kind))(
-                name=name, body=DEFAULT_DELETION_BODY, **kwargs)
+                name=name, body=yml_object, **kwargs)
             print(f"patch {kind} {name}")
         except Exception as e:
             print(f"patch {kind} {name} failed", e)
@@ -194,7 +194,7 @@ def create_from_yaml_single_item(
     else:
         kwargs.pop('namespace', None)
         try:
-            resp = getattr(k8s_api, "patch_{0}".format(kind))(name, **kwargs)
+            resp = getattr(k8s_api, "patch_{0}".format(kind))(name, body=yml_object, **kwargs)
             print(f"patch {kind} {name}")
         except Exception as e:
             print(f"patch {kind} {name} failed", e)

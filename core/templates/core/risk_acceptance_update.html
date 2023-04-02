@@ -22,7 +22,7 @@
                 {% endfor %}
             </section>
             <div class="flex justify-end space-x-2 mt-4">
-                <button onclick="redirectToNext(); return false;" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
+                <button onclick="window.history.back(); return false;" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button>
                 <input type="hidden" name="next" value={{ request.GET.next }}>
                 <button action="submit" class="bg-indigo-700 text-white aliased font-medium p-5 w-18 py-1 rounded-lg hover:bg-indigo-600 disabled:bg-indigo-300"
                 :disabled="submitDisabled">{% trans "Save" %}</button>
@@ -30,5 +30,21 @@
         </div>
     </form>
 </div>
+<script>
+    var field1 = document.getElementById('id_riskacceptance_folder');
+    var parentDiv = document.getElementById('id_riskscenarios_select');
+    var labels = parentDiv.querySelectorAll('label');
 
+    function updateLabels() {
+    var selectedText = field1.options[field1.selectedIndex].textContent;
+    for (var i = 0; i < labels.length; i++) {
+        var isGlobal = (selectedText === 'Global');
+        var isVisible = (labels[i].innerText.includes(selectedText+"/") || isGlobal);
+        labels[i].classList.toggle('hidden', !isVisible);
+    }
+    }
+
+    window.onload = updateLabels;
+    field1.addEventListener('change', updateLabels);
+</script>
 {% endblock %}

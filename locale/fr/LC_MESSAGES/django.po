@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-20 16:33+0000\n"
+"POT-Creation-Date: 2023-03-31 23:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:28 iam/models.py:273
+#: iam/models.py:28 iam/models.py:276
 msgid "Domain"
 msgstr "Domaine"
 
@@ -45,7 +45,7 @@ msgstr "nom"
 msgid "user group"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:35 iam/models.py:199
+#: iam/models.py:35 iam/models.py:189
 msgid "user groups"
 msgstr "groupes d'utilisateurs"
 
@@ -65,7 +65,7 @@ msgstr "DOMAINE"
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:90 iam/models.py:284
+#: iam/models.py:90 iam/models.py:287
 msgid "Folder"
 msgstr "Dossier"
 
@@ -73,23 +73,23 @@ msgstr "Dossier"
 msgid "Folders"
 msgstr "Dossiers"
 
-#: iam/models.py:153
+#: iam/models.py:143
 msgid "First Connexion"
 msgstr "Première connexion"
 
-#: iam/models.py:177
+#: iam/models.py:167
 msgid "last name"
 msgstr "nom"
 
-#: iam/models.py:178
+#: iam/models.py:168
 msgid "first name"
 msgstr "prénom"
 
-#: iam/models.py:182
+#: iam/models.py:172
 msgid "active"
 msgstr "actif"
 
-#: iam/models.py:185
+#: iam/models.py:175
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
@@ -97,15 +97,15 @@ msgstr ""
 "Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
 "au lieu de supprimer les comptes."
 
-#: iam/models.py:189
+#: iam/models.py:179
 msgid "date joined"
 msgstr "date d'inscription"
 
-#: iam/models.py:191
+#: iam/models.py:181
 msgid "superuser status"
 msgstr "statut superutilisateur"
 
-#: iam/models.py:194
+#: iam/models.py:184
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
@@ -113,7 +113,7 @@ msgstr ""
 "Désigne que cet utilisateur a toutes les autorisations sans les assigner "
 "explicitement."
 
-#: iam/models.py:202
+#: iam/models.py:192
 #, fuzzy
 #| msgid ""
 #| "The user_groups this user belongs to. A user will get all permissions "
@@ -126,19 +126,19 @@ msgstr ""
 "utilisateur obtiendra toutes les autorisations accordées à chacun de ses "
 "groupes d'utilisateurs."
 
-#: iam/models.py:220
+#: iam/models.py:210
 msgid "user"
 msgstr "utilisateur"
 
-#: iam/models.py:221
+#: iam/models.py:211
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:279
+#: iam/models.py:282
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:281
+#: iam/models.py:284
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
@@ -146,33 +146,37 @@ msgstr "les sous-dossiers sont visibles"
 msgid "Select a file"
 msgstr "Sélectionner un fichier"
 
-#: library/utils.py:174
+#: library/utils.py:173
 msgid "Library was not imported: invalid matrix."
 msgstr "Bibliothèque non importée: matrice invalide."
 
-#: library/utils.py:199
+#: library/utils.py:198
 msgid "Library was not imported: invalid threat."
 msgstr "Bibliothèque non importée: menace invalide."
 
-#: library/utils.py:223
+#: library/utils.py:222
 msgid "Library was not imported: invalid security function."
 msgstr "Bibliothèque non importée: fonction de sécurité invalide."
 
-#: library/utils.py:273
+#: library/utils.py:271
 msgid "Unknown object type: {}"
 msgstr "Objet de type inconnu : {}"
 
-#: library/utils.py:297
+#: library/utils.py:295
 msgid "Library was not imported: permission denied for: {}"
 msgstr "Bibliothèque non importée: autorisation refusée pour : {}"
 
-#: library/utils.py:322
+#: library/utils.py:320
 msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu : {}"
 
-#: library/utils.py:343
+#: library/utils.py:341
+#, fuzzy
+#| msgid ""
+#| "Library \"{}\" imported successfully. {} objects imported and {} objects "
+#| "ignored."
 msgid ""
-"Library \"{}\" imported successfully. {} objects imported and {} objects "
+"Library \"{}\" imported successfully. {} object(s) imported and {} object(s) "
 "ignored."
 msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "

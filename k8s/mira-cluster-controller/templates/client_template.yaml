@@ -87,7 +87,8 @@ spec:
         envFrom:
         - configMapRef:
             name: mira-config
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:0.9.5
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:3.0beta1
+        imagePullPolicy: Always
         name: mira
         ports:
         - containerPort: 8000

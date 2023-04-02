@@ -19,9 +19,7 @@ else it is sqlite, and no env variable is required
 from pathlib import Path
 import os
 import json
-from django.utils.translation import gettext_lazy as _
 from urllib.parse import urlparse
-import passkeys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,6 +50,10 @@ MIRA_URL = os.environ['MIRA_URL']
 ALLOWED_HOSTS = [urlparse(MIRA_URL).hostname]
 CSRF_TRUSTED_ORIGINS = [MIRA_URL]
 
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,9 +73,15 @@ INSTALLED_APPS = [
     'django_filters',
     'library',
     'serdes',
-    'captcha',
     'passkeys',
 ]
+
+if RECAPTCHA_PUBLIC_KEY:
+    INSTALLED_APPS.append('captcha')
+    print("recaptcha enabled")
+else:
+    print("recaptcha disabled")
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -92,9 +100,9 @@ ROOT_URLCONF = 'asf_rm.urls'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
-RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
-RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
+SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', default=60*15))  # defaults to 15 minutes
+SESSION_SAVE_EVERY_REQUEST = os.environ.get('SESSION_SAVE_EVERY_REQUEST', default=True) # prevents session from expiring when user is active
+SESSION_EXPIRE_AT_BROWSER_CLOSE = os.environ.get('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True)
 
 MIRA_SUPERUSER_EMAIL = os.environ.get('MIRA_SUPERUSER_EMAIL')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
@@ -110,7 +118,8 @@ EMAIL_PORT_RESCUE = os.environ.get('EMAIL_PORT_RESCUE')
 EMAIL_HOST_USER_RESCUE = os.environ.get('EMAIL_HOST_USER_RESCUE')
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get('EMAIL_HOST_PASSWORD_RESCUE')
 EMAIL_USE_TLS_RESCUE = os.environ.get('EMAIL_USE_TLS_RESCUE')
-# NOTE: Mailhog cannot handle TLS so even if in .env EMAIL_USE_TLS=False, it will raise an error. Comment for now we will find a solution or wait a real SMTP server.
+
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', default="5")) # seconds
 
 TEMPLATES = [
     {

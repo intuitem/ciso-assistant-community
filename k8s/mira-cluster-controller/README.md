@@ -53,10 +53,64 @@ CLUSTER_DOMAIN        | domain to append to client name | "alsigo.net"
 
 See cm.mira-cluster-controller-config-dev.yaml for an example.
 
-## Client template
+## Client templates, config and secrets
 
-The template yaml file for client objects creation is stored in the configmap "templates". To create it, use:
+The template yaml file for client objects creation is stored in the configmap "templates-yaml". To create it, use:
 
 ```shell
-kubectl create configmap templates-yaml --from-file=templates/client_template.yaml
+kubectl create configmap -n controller templates-yaml --from-file=templates/client_template.yaml
 ````
+
+The configuration is stored in the mira-config configmap. To create nstall it, use:
+
+```shell
+kubectl apply -f cm.mira-config.yaml
+````
+
+For recaptcha v2 private key, create the "recaptcha" secret with the following command:
+```shell
+kubectl create secret generic recaptcha -n default --from-literal=RECAPTCHA_PRIVATE_KEY=XXX
+```
+
+For SMTP passwords, create the "smtp-out" secret with the following command:
+```shell
+kubectl create secret generic smtp-out -n default --from-literal=EMAIL_HOST_PASSWORD=XXX --from-literal=EMAIL_HOST_PASSWORD_RESCUE=XXX
+```
+
+## Observability
+
+Installing Prometheus and Grafana is recommended.
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo add stable "https://charts.helm.sh/stable" 
+helm repo update
+helm install prometheus prometheus-community/prometheus --create-namespace --namespace monitoring  --set server.persistentVolume.size=100Gi,server.retention=30d
+helm install prometheus prometheus-community/prometheus --create-namespace --namespace monitoring  --set server.persistentVolume.size=100Gi,server.retention=30d
+# export POD_NAME=$(kubectl get pods --namespace monitoring -l "app=prometheus,component=server" -o jsonpath="{.items[0].ta.name}")
+# kubectl --namespace monitoring port-forward $POD_NAME 9090
+helm repo add grafana https://grafana.github.io/helm-charts
+helm install grafana grafana/grafana --set persistence.enabled=true,persistence.type=pvc,tence.size=10Gi --namespace=monitoring
+kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+kubectl port-forward --namespace monitoring service/grafana 3000:80
+```
+
+In Grafana, add the Prometheus data source with path "http://prometheus-server".
+
+## Tips
+
+To list all pods and their current version:
+
+```shell
+kubectl get pods -n default -o jsonpath='{range .items[*]}{@.metadata.name}{" "}{@.spec.containers[*].image}{"\n"}{end}'| column -t
+```
+
+## MIRA version update
+
+- push the new image
+- adjust the template file
+  - either delete it and replace it
+  - or edit it (kubectl edit cm templates-yaml) and simply change the version
+- For each client, do a save in the controller GUI. This will provoke the update
+- Use the command given in tips to list all pods and check the current version

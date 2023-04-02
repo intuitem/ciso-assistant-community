@@ -18,6 +18,9 @@
                             {% for error in field.errors %}
                                 <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
                             {% endfor %}
+                            {% if field.field.widget.attrs.disabled %}
+                                <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+                            {% endif %}
                             {{ field }}
                             <div class="mt-1 text-xs text-gray-400">
                                 {{ field.help_text|safe }}
@@ -33,5 +36,30 @@
                 :disabled="submitDisabled">{% trans "Save" %}</button>
     </form>
 </div>
+<script>
+    var field1 = document.getElementById('id_riskacceptance_folder');
+    var parentDiv = document.getElementById('id_riskscenarios_select');
+    var labels = parentDiv.querySelectorAll('label');
 
+    const hideLabels = () => {
+        labels.forEach(label => label.classList.add('hidden'));
+    };
+    
+    const updateLabels = () => {
+        const selectedText = field1.options[field1.selectedIndex].textContent;
+        if (field1.value === '') {
+            hideLabels();
+        } else {
+            hideLabels();
+            labels.forEach(label => {
+                if ((label.textContent.includes(selectedText + "/")) || (selectedText === 'Global')) {
+                label.classList.remove('hidden');
+            }
+            });
+        }
+    };
+      
+    window.onload = updateLabels;
+    field1.addEventListener('change', updateLabels);
+</script>
 {% endblock %}

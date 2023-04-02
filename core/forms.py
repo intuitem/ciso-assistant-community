@@ -1,3 +1,4 @@
+from typing import Optional, Sequence
 from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, CheckboxSelectMultiple
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 from django import forms
@@ -5,9 +6,13 @@ from .models import *
 from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import Permission
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
+
+if RECAPTCHA_PUBLIC_KEY:
+    from captcha.fields import ReCaptchaField
+    from captcha.widgets import ReCaptchaV2Checkbox
 
 User = get_user_model()
 
@@ -21,6 +26,15 @@ class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
     """
     template_name = 'forms/widgets/select_multiple.html'
 
+
+class SearchableSelect(Select):
+    template_name = 'forms/widgets/searchable_select.html'
+    option_template_name = 'forms/widgets/select_option.html'
+
+    def __init__(self, attrs = ..., choices: list[tuple] = ...) -> None:
+        super().__init__(attrs, choices)
+        # generate random id in a way that avoids collisions
+        self.id = f'searchable-select-{id(self)}'
 
 class DefaultDateInput(DateInput):
     input_type = 'date'
@@ -93,7 +107,8 @@ class LoginForm(AuthenticationForm):
 
 class ResetForm(forms.Form):
     email = forms.EmailField(label=_("Email"), widget=forms.TextInput(attrs={'class': 'my-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'}))
-    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
+    if RECAPTCHA_PUBLIC_KEY:
+        captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox)
 
 
 class ResetConfirmForm(SetPasswordForm):
@@ -118,22 +133,34 @@ class RiskAnalysisCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
+        self.fields['rating_matrix'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['rating_matrix'].choices)
+        self.fields['project'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['project'].choices)
         self.default_if_one_all()
 
     class Meta:
         model = Analysis
-        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix', 'version']
         
 class RiskAnalysisCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['project'].widget.attrs['select_disabled'] = True
+        self.fields['project'].widget.attrs['disabled'] = True
         self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
+        self.fields['rating_matrix'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['rating_matrix'].choices)
         self.default_if_one_all()
         
     class Meta:
         model = Analysis
-        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix']
+        fields = ['project', 'name', 'description', 'auditor', 'is_draft', 'rating_matrix', 'version']
 
 
 class RiskMatrixUpdateForm(StyledModelForm):
@@ -147,6 +174,13 @@ class RiskMatrixUpdateForm(StyledModelForm):
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['project'].widget.attrs['disabled'] = True
+        self.fields['project'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['project'].choices)
 
     class Meta:
         model = Analysis
@@ -160,6 +194,14 @@ class SecurityMeasureCreateForm(StyledModelForm):
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['folder'].choices)
+        self.fields['security_function'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_function'].choices)
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -171,7 +213,11 @@ class SecurityMeasureCreateFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
+        self.fields['security_function'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_function'].choices)
 
     class Meta:
         model = SecurityMeasure
@@ -185,6 +231,14 @@ class SecurityMeasureUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['folder'].choices)
+        self.fields['security_function'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_function'].choices)
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -195,6 +249,11 @@ class SecurityMeasureUpdateForm(StyledModelForm):
 class RiskScenarioCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['threat'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['threat'].choices)
+
     class Meta:
         model = RiskScenario
         fields = ['analysis', 'threat', 'name', 'description']
@@ -223,8 +282,17 @@ class RiskScenarioUpdateForm(StyledModelForm):
         })
         self.fields['assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
-                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 overflow-y-scroll h-80'},
                    choices=self.fields['assets'].choices)
+        self.fields['threat'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['threat'].choices)
+        self.fields['analysis'].widget = SearchableSelect(attrs={'class': 'text-sm rounded w-64',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll',
+                   'id': 'analysis_select'},
+                   choices=self.fields['analysis'].choices)
 
     class Meta:
         model = RiskScenario
@@ -255,10 +323,15 @@ class RiskScenarioModalUpdateForm(StyledModelForm):
 class RiskAcceptanceCreateUpdateForm(StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['risk_scenarios'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
+        self.fields['risk_scenarios'].widget = SearchableCheckboxSelectMultiple(attrs={'id': 'id_riskscenarios_select', 'class': 'text-sm rounded',
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                    choices=self.fields['risk_scenarios'].choices)
+        validators_id = []
+        for candidate in User.objects.all():
+            if RoleAssignment.has_permission(candidate, 'validate_riskacceptance'):
+                validators_id.append(candidate.id)
+        self.fields['validator'].queryset = User.objects.filter(id__in=validators_id)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
         # else:
@@ -279,12 +352,17 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         cleaned_data = super().clean()
         risk_scenarios = cleaned_data.get('risk_scenarios')
         folder = cleaned_data.get('folder')
+        validator = cleaned_data.get('validator')
 
         folders = folder.sub_folders()
         folders.append(folder)
-        for obj in risk_scenarios:
-            if obj.analysis.project.folder not in folders:
-                raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
+        if validator:
+            if not RoleAssignment.is_access_allowed(validator, Permission.objects.get(codename='validate_riskacceptance'), folder):
+                raise ValidationError(_("This  validator cannot be assigned for this folder"))
+        if risk_scenarios:
+            for obj in risk_scenarios:
+                if obj.analysis.project.folder not in folders:
+                    raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
 
 
 class ProjectForm(StyledModelForm):
@@ -294,6 +372,10 @@ class ProjectForm(StyledModelForm):
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_project"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                choices=self.fields['folder'].choices)
 
 
     class Meta:
@@ -305,55 +387,46 @@ class ProjectFormInherited(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ProjectFormInherited, self).__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
+        self.fields['folder'].widget.attrs['disabled'] = True
 
     class Meta:
         model = Project
         fields = '__all__'
         labels = {'folder': _('Domain')}
 
-class ProjectUpdateForm(StyledModelForm):
-
-    class Meta:
-        model = Project
-        fields = '__all__'
-
 
 class ThreatCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ThreatCreateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
         
 
     class Meta:
         model = Threat
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class ThreatUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(ThreatUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].disabled = True
+
     class Meta:
         model = Threat
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class AssetForm(StyledModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super(AssetForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
         self.fields['parent_assets'].widget = SearchableCheckboxSelectMultiple(attrs={'class': 'text-sm rounded',
                      'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                         choices=self.fields['parent_assets'].choices)
+        viewable_assets = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Asset)[0] if user else Asset.objects.none()
+        self.fields['parent_assets'].queryset = Asset.objects.filter(id__in=viewable_assets
+            ).exclude(id=self.instance.id) if self.instance else Asset.objects.filter(id__in=viewable_assets)
 
     def clean(self):
         """ check the AssetForm values before submission to the model. This is required as we used manytomany """
@@ -371,25 +444,25 @@ class AssetForm(StyledModelForm):
 
     class Meta:
         model = Asset
-        fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class SecurityFunctionCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(SecurityFunctionCreateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].initial = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].widget.attrs['select_disabled'] = True
 
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']
 
 
 class SecurityFunctionUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SecurityFunctionUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
+        self.fields['folder'].disabled = True
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-        exclude = ['is_published']
+        exclude = ['is_published', 'folder']

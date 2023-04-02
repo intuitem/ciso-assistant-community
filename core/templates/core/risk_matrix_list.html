@@ -34,8 +34,14 @@
         </div>
         {% endif %}
         <!-- End Filters Dropdown Form -->
-
-    
+        {% if add_riskmatrix %}
+        <div class="grid mb-4 w-full">
+            <a class="add-button" href="{% url 'library-list' %}">
+                <i class="fas fa-file-import mr-2"></i>
+                {% trans "Import matrix" %}
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <div class="mt-4 relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
@@ -55,14 +61,14 @@
                                 <div>
                                     {% if not matrix.is_enabled %}<span class="bg-gray-200 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{% trans "disabled" %}</span>{% endif %}
                                     <p id="matrix{{ matrix.id }}" class="text-md font-semibold whitespace-no-wrap">
-                                        {{ matrix.name|capfirst }}
+                                        {{ matrix.name }}
                                     </p>
                                 </div>
                             </div>
                         </th>
                         <td class="px-6 py-4">
                             <p class="whitespace-no-wrap capitalize">
-                                {{ matrix.description|capfirst }}
+                                {{ matrix.description|linebreaksbr }}
                             </p>
                         </td>
                         <td class="px-6 py-4 text-center">

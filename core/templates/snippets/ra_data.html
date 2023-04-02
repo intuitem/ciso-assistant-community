@@ -29,7 +29,7 @@
                 </div>
                 <br>
                 <div class="text-sm"><span class="font-semibold">{% trans "Description" %}</div>
-                <div class="text-sm"> {{ analysis.description }}</div>
+                <div class="text-sm"> {{ analysis|linebreaksbr }}</div>
             </div>
 
         </div>
@@ -37,56 +37,7 @@
     <!--Risk analysis-->
     <div class="m-4 px-4 py-10 shadow rounded-lg bg-white">
         <div class="text-lg pb-2"> {% trans "Risk scenarios" %} ({{ context|length }})</div>
-        <table class="w-full border text-sm ">
-            <thead class="">
-            <tr class="border bg-gray-50 text-gray-700">
-                <th style="width: 3%;" class="py-3">#</th>
-                <th style="width: 10%;">{% trans "Threat" %}</th>
-                <th style="width: 12%;">{% trans "Name" %}</th>
-                <th style="width: 16%;">{% trans "Scenario" %}</th>
-                <th style="width: 16%;">{% trans "Existing measures" %}</th>
-                <th style="width: 10%;" class="text-center border py-1">{% trans "Current risk" %}</th>
-                <th style="width: 15%;">{% trans "Recommended measures" %}</th>
-                <th style="width: 10%;" class="text-center border py-1">{% trans "Residual risk" %}</th>
-                <th style="width: 8%;">{% trans "Treatment" %}</th>
-
-            </tr>
-            </thead>
-            <tbody>
-            {% if not context %}
-            <tr>
-                <td colspan="9" class="p-4 m-2 text-xl  text-center"><i class="fas fa-exclamation-circle"></i> {% trans "Risk analysis is empty" %}
-                </td>
-            </tr>
-            {% endif %}
-            {% for RI in context %}
-            <tr class="border-b tr-hover">
-                <td class="py-2 px-2 text-center text-xs font-bold" id="{{ RI.rid }}"><a class=""
-                                                               href="#{{ RI.id }}">{{ RI.rid }}</a></td>
-                <td class="p-2 capitalize">{{ RI.threat }}</td>
-                <td class="p-2">{{ RI.name }}</td>
-                <td class="text-xs p-2">{{ RI.description|linebreaksbr }}</td>
-                <td class="text-xs p-2">{{ RI.existing_measures|linebreaksbr }}</td>
-                <td class="text-center p-1 {{ RI.current_level }}"><span class="font-semibold">{{ RI.get_current_risk.name }}</span><br>
-                    <span class="text-xs">I={{ RI.get_current_impact.name }}, P={{ RI.get_current_proba.name }}</span>
-                </td>
-                <td class="text-xs p-1">
-                    <ul class="pl-3 ml-3 list-disc">
-                        {% for security_measure in RI.security_measures.all %}
-                        <li> {{ security_measure }}</li>
-                        {% endfor %}
-                    </ul>
-
-                </td>
-                <td class="text-center p-1 {{ RI.residual_level }}"><span class="font-semibold">{{ RI.get_residual_risk.name }}</span><br>
-                    <span class="text-xs">I={{ RI.get_residual_impact.name }}, P={{ RI.get_residual_proba.name }}</span>
-                </td>
-                <td class="text-center">{{ RI.get_treatment_display }}</td>
-            </tr>
-
-            {% endfor %}
-            </tbody>
-        </table>
+        {% include 'snippets/ri_list_nested.html' %}
     </div>
     <!--Matrix view-->
     <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break">

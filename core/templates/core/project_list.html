@@ -144,7 +144,7 @@
                                 </span>
                             <div class="ml-3">
                                 <p id="project{{ project.id }}" class="text-md font-semibold whitespace-no-wrap">
-                                {{ project.name|capfirst }}
+                                {{ project.name }}
                                 </p>
                             </div>
                         </div>
@@ -156,7 +156,7 @@
                     </td>
                     <td class="px-6 py-4">
                         <p class="whitespace-no-wrap">
-                        {{ project.description|capfirst }}
+                        {{ project.description|linebreaksbr }}
                         </p>
                     </td>
                     {% comment %} <td class="px-6 py-4">

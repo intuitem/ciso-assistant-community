@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: caudron-alsigo-net
+  name: caudron-miracloud-fr
   namespace: controller
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
@@ -9,7 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
   rules:
-  - host: caudron2.alsigo.net
+  - host: caudron.miracloud.fr
     http:
       paths:
       - path: /

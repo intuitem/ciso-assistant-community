@@ -565,8 +565,8 @@ msgid "{} risk accepted but no risk acceptance attached"
 msgstr "{} risque accepté sans acceptation de risque attachée"
 
 #: core/models.py:230
-msgid "{} does not have an ETA"
-msgstr "{} n'a pas d'heure d'arrivée estimée"
+msgid "{}/{} does not have an ETA"
+msgstr "{}/{} n'a pas d'heure d'arrivée estimée"
 
 #: core/models.py:235
 msgid "{} ETA is in the past now. Consider updating its status or the date"
@@ -574,16 +574,16 @@ msgstr "{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
 
 #: core/models.py:238
 msgid ""
-"{} does not have an estimated effort. This will help you for prioritization"
+"{}/{} does not have an estimated effort. This will help you for prioritization"
 msgstr ""
-"{} n'a pas d'effort estimé. Spécifier un effort estimé aidera à la "
+"{}/{} n'a pas d'effort estimé. Spécifier un effort estimé aidera à la "
 "priorisation des mesures de sécurité"
 
 #: core/models.py:241
 msgid ""
-"{} does not have an external link attached. This will help you for follow-up"
+"{}/{} does not have an external link attached. This will help you for follow-up"
 msgstr ""
-"{} n'a pas de lien externe attaché. Spécifier un lien externe aidera au "
+"{}/{} n'a pas de lien externe attaché. Spécifier un lien externe aidera au "
 "suivi du traitement"
 
 #: core/models.py:246
@@ -591,9 +591,9 @@ msgid "{}: Acceptance has no expiry date"
 msgstr "{} : Acceptation sans date d'expiration"
 
 #: core/models.py:251
-msgid "{}: Acceptance has expired. Consider updating the status or the date"
+msgid "{}/{}: Acceptance has expired. Consider updating the status or the date"
 msgstr ""
-"{} a une acceptation de risque expirée. Envisager de mettre à jour son "
+"{}/{} a une acceptation de risque expirée. Envisager de mettre à jour son "
 "statut ou sa date d'expiration"
 
 #: core/models.py:273 core/models.py:365
@@ -2042,7 +2042,7 @@ msgstr "et allez dans les acceptations de risque"
 #: core/templates/registration/first_connexion_email.txt:14
 #: core/templates/registration/password_reset_email.txt:14
 msgid "Sincerely"
-msgstr "Coridalement"
+msgstr "Cordialement"
 
 #: core/templates/core/risk_acceptance_email.txt:13
 #: core/templates/registration/first_connexion_email.txt:15

@@ -6,6 +6,7 @@ from django.core import management
 from django.core.management.commands import loaddata, dumpdata
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import user_passes_test
+from  datetime import datetime
 
 from iam.models import RoleAssignment
 from core.utils import UserGroupCodename
@@ -54,16 +55,15 @@ class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
                 # NOTE: This method is not safe, as we do not check the file extension and content.
                 #       Furthermore, this is not suitable to load data from selected folders
                 sys.stdin = io.StringIO(trimmed_content)
+                request.session.flush()
                 management.call_command('flush', interactive=False)
-
                 # Here we load the data from stdin
-                management.call_command(loaddata.Command(), '-', format="json", verbosity=0, exclude=['contenttypes', 'auth.permission'])
-                print(request, 'Database restored successfully.')
+                management.call_command(loaddata.Command(), '-', format="json", verbosity=0, exclude=['contenttypes', 'auth.permission', 'sessions.session'])
+                print('Database restored successfully.')
             else:
-                print(request, 'No file selected.')
+                print('No file selected for restore.')
             return self.form_valid(form)
         else:
-            print(request, f'Invalid form.')
             return self.form_invalid(form)
 
     def test_func(self):
@@ -73,11 +73,12 @@ class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
 @user_passes_test(is_superuser_check)
 def dump_db_view(request):
     response = HttpResponse(content_type='application/json')
-    response['Content-Disposition'] = 'attachment; filename="db.json"'
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    response['Content-Disposition'] = f'attachment; filename="mira-db-{timestamp}.json"'
 
     response.write(f'[{{"meta": [{{"media_version": "{VERSION}"}}]}},\n')
     # Here we dump th data to stdout
     # NOTE: We will not be able to dump selected folders with this method.
-    management.call_command(dumpdata.Command(), exclude=['contenttypes', 'auth.permission'], indent=4, stdout=response, natural_foreign=True)
+    management.call_command(dumpdata.Command(), exclude=['contenttypes', 'auth.permission', 'sessions.session'], indent=4, stdout=response, natural_foreign=True)
     response.write(']')
     return response

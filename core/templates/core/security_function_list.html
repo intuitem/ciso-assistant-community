@@ -108,7 +108,6 @@
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Name" %}</th>
             <th class="px-6 py-3">{% trans "Provider" %}</th>
-            <th class="px-6 py-3">{% trans "Contact" %}</th>
             <th class="px-6 py-3">{% trans "Actions" %}</th>
         </thead>
         <tbody>
@@ -127,15 +126,6 @@
                         <p class="whitespace-no-wrap">
                             {{ function.provider }}
                         </p>
-                    </td>
-                    <td class="px-6 py-4">
-                        <p class="whitespace-no-wrap">
-                            {% if function.contact %}
-                            {{ function.contact }}
-                            {% else %}
-                                --
-                            {% endif %}
-                        </p> 
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="">
