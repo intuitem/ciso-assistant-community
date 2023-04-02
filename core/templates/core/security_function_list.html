@@ -69,13 +69,7 @@
                         <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
                             <div>
                                 <p class="block text-sm font-medium text-gray-900">{% trans "Provider" %}</p>
-                                <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                    <div class="flex flex-col">
-                                        <div>
-                                            {{ filter.form.provider }}
-                                        </div>
-                                    </div>
-                                </div>
+                                {{ filter.form.provider }}
                             </div>
                             <button type="submit" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                         </div>
