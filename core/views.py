@@ -1956,7 +1956,7 @@ class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to go through groups to assign roles."))
+        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to attach users to groups to assign roles."))
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
