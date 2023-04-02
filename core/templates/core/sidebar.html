@@ -47,13 +47,22 @@
                     </a>
                 </li>
                 
+                <li class="to-page">
+                    <a id="quick_start_tab" href="{% url 'quick_start' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-fighter-jet"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
+                    </a>
+                </li>
+
 
                 <li class="nav-separator pt-4">
                     <div class="flex flex-row items-center">
                         <div class="">{% trans "Dashboard" %}</div>
                     </div>
                 </li>
-
 
                 <li class="to-page">
                     <a id="overview_tab" href="{% url 'overview' %}"
@@ -240,15 +249,6 @@
                             <i class="fas fa-bolt"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">X-Rays</span>
-                    </a>
-                </li>
-                <li class="to-page">
-                    <a id="quick_start_tab" href="{% url 'quick_start' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-fighter-jet"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
                     </a>
                 </li>
                 <li class="to-page">
