@@ -31,6 +31,8 @@ class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
     widget = SearchableCheckboxSelectMultiple(
         attrs={
             'class': 'text-sm rounded',
+            'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+            'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 overflow-y-scroll max-h-72'
         }
     )
 
@@ -42,6 +44,8 @@ class GenericMultipleChoiceFilter(MultipleChoiceFilter):
     widget = SearchableCheckboxSelectMultiple(
         attrs={
             'class': 'text-sm rounded',
+            'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+            'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 overflow-y-scroll max-h-72'
         }
     )
 
@@ -66,7 +70,9 @@ class GenericCharFilter(CharFilter):
 class GenericChoiceFilter(ChoiceFilter):
     widget = SearchableSelect(
         attrs={
-            'class': 'rounded-lg w-full border-gray-200'
+            'class': 'text-sm rounded',
+            'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+            'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'
         }
     )
 
@@ -124,11 +130,15 @@ class AnalysisFilter(GenericFilterSet):
             'placeholder': _('Search analysis...')
         }
     ))
-    is_draft = GenericChoiceFilter(choices=STATUS_CHOICES)
+    is_draft = GenericChoiceFilter(choices=STATUS_CHOICES, widget=Select(
+        attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
+        }
+    ))
     auditor = GenericMultipleChoiceFilter(
         choices=get_full_names(), label=('Auditor'))
 
-    project__folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.filter(content_type=Folder.ContentType.DOMAIN))
+    project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
 
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
 
@@ -147,7 +157,7 @@ class RiskScenarioFilter(GenericFilterSet):
     threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
     analysis__project = GenericModelMultipleChoiceFilter(
         queryset=Project.objects.all())
-    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.filter(content_type=Folder.ContentType.DOMAIN))
+    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
     treatment = GenericMultipleChoiceFilter(
         choices=RiskScenario.TREATMENT_OPTIONS)
 
