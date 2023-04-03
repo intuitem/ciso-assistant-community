@@ -9,10 +9,10 @@
 <main class="">
         <div class="flex flex-col">
             <div>
-                <h1 class="font-semibold text-blue-800">{% trans "To get started, you need:" %}</h1>
+                <h1 class="font-semibold text-gray-900">{% trans "To get started, you need:" %}</h1>
             </div>
             <div class="flex justify-center w-full p-4 mb-2">
-                <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Rating matrix" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-orange-500">
                         <i class="fa-solid fa-table"></i>
@@ -22,7 +22,7 @@
                         <a href="{% url 'riskmatrix-list' %}" class="simple-link">{% trans "rating matrix" %}</a>. 
                     </div>    
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Imports" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-teal-500">
                         <i class="fas fa-file-import"></i>
@@ -45,7 +45,7 @@
                         {% trans "or import them from a" %} <a href="{% url 'library-list' %}" class="simple-link">{% trans "library" %}</a>.
                     </div> 
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Projects domains" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-zinc-500">
                         <i class="fas fa-project-diagram"></i>
@@ -61,7 +61,7 @@
                         {% trans "to organize your projects" %}.
                     </div> 
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Users and groups" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-slate-500">
                         <i class="fas fa-users"></i>
@@ -72,7 +72,7 @@
                         {% trans "and assign them to groups corresponding to their roles (domain manager, analyst, auditor, ...)" %}. 
                     </div> 
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-blue-700 shadow-xl hover:border-blue-500 hover:shadow-blue-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Assets" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-purple-500">
                         <i class="fas fa-gem"></i>
@@ -92,10 +92,10 @@
         </div>
         <div class="flex flex-col">
             <div>
-                <h1 class="font-semibold text-indigo-800">{% trans "Now, you can start your risk assessment:" %}</h1>
+                <h1 class="font-semibold text-gray-900">{% trans "Now, you can start your risk assessment:" %}</h1>
             </div>
             <div class="flex justify-center w-full p-4 mb-2">
-                <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Project" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-green-600">
                         <i class="fas fa-cubes"></i>
@@ -111,7 +111,7 @@
                         {% trans "within an existing domain" %}.
                     </div>    
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Risk analysis" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-blue-500">
                         <i class="fas fa-glasses"></i>
@@ -136,7 +136,7 @@
                         {% trans "to help you if needed." %}
                     </div>
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Risk treatment" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-red-500">
                         <i class="fas fa-fire-extinguisher"></i>
@@ -152,7 +152,7 @@
                         {% trans "based on security functions, and assess the residual risk level." %}
                     </div>
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Check consistency" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-yellow-500">
                         <i class="fas fa-bolt"></i>
@@ -162,7 +162,7 @@
                         {% trans "will help you improve the quality of your analysis by pinpointing various inconsistencies." %}
                     </div>
                 </div>
-                <div class="w-1/5 rounded-lg bg-white border border-indigo-700 shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
                     <div class="text-lg font-semibold mb-2 text-center">{% trans "Report" %}</div>
                     <div class="flex mb-2 text-6xl justify-center text-stone-500">
                         <i class="fas fa-book-open"></i>
@@ -175,7 +175,7 @@
                 </div>
             </div>
             <div class="flex justify-center w-full p-4 mb-2">
-                <div class="flex w-full rounded-lg shadow-xl bg-white border border-indigo-700 hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 transition-all duration-500 mb-2">
+                <div class="flex w-full rounded-lg shadow-xl text-gray-700 hover:text-gray-900 bg-white border hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 transition-all duration-500 mb-2">
                     <div class="w-1/4 mx-4 py-2">
                         <div class="flex font-semibold justify-center mb-2">{% trans "Further steps" %}</div>
                         <div class="flex text-6xl justify-center text-gray-500">
