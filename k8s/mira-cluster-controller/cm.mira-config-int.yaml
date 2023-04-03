@@ -4,7 +4,7 @@ metadata:
   name: mira-config
   namespace: default
 data:
-  DEFAULT_FROM_EMAIL: mira-demo@intuitem.com
+  DEFAULT_FROM_EMAIL: no-reply@alsigo.net
   DJANGO_DEBUG: "False"
   EMAIL_HOST: smtp.sendgrid.net
   EMAIL_HOST_RESCUE: smtp.tem.scw.cloud
@@ -15,3 +15,4 @@ data:
   EMAIL_USE_TLS: "True"
   EMAIL_USE_TLS_RESCUE: "True"
   RECAPTCHA_PUBLIC_KEY: 6LddZk0lAAAAANNa0_TKEp3V6U2Cl0HHbNghQHVy
+  SESSION_COOKIE_AGE: "7200"

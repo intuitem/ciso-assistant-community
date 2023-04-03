@@ -119,7 +119,7 @@ EMAIL_HOST_USER_RESCUE = os.environ.get('EMAIL_HOST_USER_RESCUE')
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get('EMAIL_HOST_PASSWORD_RESCUE')
 EMAIL_USE_TLS_RESCUE = os.environ.get('EMAIL_USE_TLS_RESCUE')
 
-EMAIL_TIMEOUT = float(os.environ.get('EMAIL_TIMEOUT', default="10.0")) # seconds
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', default="5")) # seconds
 
 TEMPLATES = [
     {

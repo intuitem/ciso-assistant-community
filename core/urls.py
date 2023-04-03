@@ -30,6 +30,8 @@ urlpatterns = [
     path('scoring-assistant/', login_required(views.scoring_assistant), name='scoring'),
     path('risk-matrix/', login_required(views.show_risk_matrix), name='riskmatrix'), # obsolete, to be removed
 
+    path('license/', login_required(views.license_overview), name='lic-management'),
+
     path('browser/', login_required(views.Browser.as_view()), name='browser'),
     path('quick-start', login_required(views.QuickStartView.as_view()), name='quick_start'),
     path('scoring-assistant', login_required(views.scoring_assistant), name='scoring_bo'),

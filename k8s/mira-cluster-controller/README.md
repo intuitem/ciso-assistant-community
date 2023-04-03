@@ -58,7 +58,7 @@ See cm.mira-cluster-controller-config-dev.yaml for an example.
 The template yaml file for client objects creation is stored in the configmap "templates-yaml". To create it, use:
 
 ```shell
-kubectl create configmap templates-yaml --from-file=templates/client_template.yaml
+kubectl create configmap -n controller templates-yaml --from-file=templates/client_template.yaml
 ````
 
 The configuration is stored in the mira-config configmap. To create nstall it, use:

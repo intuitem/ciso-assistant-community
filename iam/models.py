@@ -177,7 +177,7 @@ class UserManager(BaseUserManager):
         else:
             user.password = make_password(str(uuid.uuid4()))
             try:
-                user.mailing(email_template_name="registration/first_connexion_email.txt", subject=_("First Connexion"))
+                user.mailing(email_template_name="registration/first_connexion_email.html", subject=_("Welcome to Mira!"))
             except Exception as exception:
                 user.save(using=self._db)
                 raise exception
@@ -278,19 +278,27 @@ class User(AbstractBaseUser):
                 }
         email = render_to_string(email_template_name, header)
         try:
-            send_mail(subject, email, None, [self.email], fail_silently=False)
+            send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
+            print("mail sent to", self.email)
         except Exception as e:
+            print(e)
+            #todo: move this to logger
             print("primary mailer failure")
             if EMAIL_HOST_RESCUE:
-                with get_connection(
-                    host=EMAIL_HOST_RESCUE, 
-                    port=EMAIL_PORT_RESCUE, 
-                    username=EMAIL_HOST_USER_RESCUE, 
-                    password=EMAIL_HOST_PASSWORD_RESCUE, 
-                    use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False
-                ) as connection:
-                    EmailMessage(subject, email, None, [self.email],
-                                connection=connection).send()
+                try:
+                    with get_connection(
+                        host=EMAIL_HOST_RESCUE, 
+                        port=EMAIL_PORT_RESCUE, 
+                        username=EMAIL_HOST_USER_RESCUE,
+                        password=EMAIL_HOST_PASSWORD_RESCUE, 
+                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                    ) as new_connection:
+                            EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
+                            print("mail sent to", self.email)
+                except Exception as ex2:
+                    print(ex2)
+                    print("secondary mailer failure")
+
 
     @property
     def edit_url(self) -> str:
@@ -335,7 +343,8 @@ class RoleAssignment(models.Model):
     @staticmethod
     def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
         """Determines if a user has specified permission on a specified folder
-           Note: the None value for folder is a kludge for the time being, an existing folder should be specified
+           TODO: the None value for folder is a kludge for the time being, an existing folder should be specified
+           for the relevant exceptions see has_permission
         """
         for ra in RoleAssignment.get_role_assignments(user):
             if (not folder or folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
@@ -431,7 +440,7 @@ class RoleAssignment(models.Model):
         return assignments
     
     def has_permission(user, codename):
-        """ Determines if a user has a specific permission """
+        """ Determines if a user has a specific permission. To be used cautiously with proper commenting """
         for ra in RoleAssignment.get_role_assignments(user):
             for perm in ra.role.permissions.all():
                 if perm.codename == codename:

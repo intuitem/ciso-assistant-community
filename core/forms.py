@@ -1,3 +1,4 @@
+from typing import Optional, Sequence
 from django.forms import CheckboxInput, DateInput, DateTimeInput, EmailInput, HiddenInput, ModelForm, NullBooleanSelect, NumberInput, PasswordInput, Select, SelectMultiple, TextInput, Textarea, TimeInput, URLInput, CheckboxSelectMultiple
 from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm
 from django import forms
@@ -25,6 +26,15 @@ class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
     """
     template_name = 'forms/widgets/select_multiple.html'
 
+
+class SearchableSelect(Select):
+    template_name = 'forms/widgets/searchable_select.html'
+    option_template_name = 'forms/widgets/select_option.html'
+
+    def __init__(self, attrs = ..., choices: list[tuple] = ...) -> None:
+        super().__init__(attrs, choices)
+        # generate random id in a way that avoids collisions
+        self.id = f'searchable-select-{id(self)}'
 
 class DefaultDateInput(DateInput):
     input_type = 'date'
@@ -123,6 +133,14 @@ class RiskAnalysisCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
+        self.fields['rating_matrix'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['rating_matrix'].choices)
+        self.fields['project'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['project'].choices)
         self.default_if_one_all()
 
     class Meta:
@@ -134,6 +152,10 @@ class RiskAnalysisCreateFormInherited(StyledModelForm):
         super().__init__(*args, **kwargs)
         self.fields['project'].widget.attrs['disabled'] = True
         self.fields['rating_matrix'].queryset = RiskMatrix.objects.filter(is_enabled=True)
+        self.fields['rating_matrix'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['rating_matrix'].choices)
         self.default_if_one_all()
         
     class Meta:
@@ -152,6 +174,13 @@ class RiskMatrixUpdateForm(StyledModelForm):
 
 
 class RiskAnalysisUpdateForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['project'].widget.attrs['disabled'] = True
+        self.fields['project'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['project'].choices)
 
     class Meta:
         model = Analysis
@@ -165,6 +194,14 @@ class SecurityMeasureCreateForm(StyledModelForm):
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['folder'].choices)
+        self.fields['security_function'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_function'].choices)
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -177,6 +214,10 @@ class SecurityMeasureCreateFormInherited(StyledModelForm):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         self.fields['folder'].widget.attrs['disabled'] = True
+        self.fields['security_function'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_function'].choices)
 
     class Meta:
         model = SecurityMeasure
@@ -190,6 +231,14 @@ class SecurityMeasureUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['folder'].choices)
+        self.fields['security_function'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['security_function'].choices)
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -200,6 +249,11 @@ class SecurityMeasureUpdateForm(StyledModelForm):
 class RiskScenarioCreateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['threat'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['threat'].choices)
+
     class Meta:
         model = RiskScenario
         fields = ['analysis', 'threat', 'name', 'description']
@@ -230,6 +284,15 @@ class RiskScenarioUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 overflow-y-scroll h-80'},
                    choices=self.fields['assets'].choices)
+        self.fields['threat'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['threat'].choices)
+        self.fields['analysis'].widget = SearchableSelect(attrs={'class': 'text-sm rounded w-64',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll',
+                   'id': 'analysis_select'},
+                   choices=self.fields['analysis'].choices)
 
     class Meta:
         model = RiskScenario
@@ -295,11 +358,11 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         folders.append(folder)
         if validator:
             if not RoleAssignment.is_access_allowed(validator, Permission.objects.get(codename='validate_riskacceptance'), folder):
-                raise ValidationError(_("This  validator cannot be assigned for this folder"))
+                raise ValidationError(_("This  validator cannot be assigned for this domain"))
         if risk_scenarios:
             for obj in risk_scenarios:
                 if obj.analysis.project.folder not in folders:
-                    raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
+                    raise ValidationError(_("Checked risk scenarios must be part of the selected domain"))
 
 
 class ProjectForm(StyledModelForm):
@@ -309,6 +372,10 @@ class ProjectForm(StyledModelForm):
             self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_project"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                choices=self.fields['folder'].choices)
 
 
     class Meta:
@@ -326,12 +393,6 @@ class ProjectFormInherited(StyledModelForm):
         model = Project
         fields = '__all__'
         labels = {'folder': _('Domain')}
-
-class ProjectUpdateForm(StyledModelForm):
-
-    class Meta:
-        model = Project
-        fields = '__all__'
 
 
 class ThreatCreateForm(StyledModelForm):

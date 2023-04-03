@@ -332,7 +332,7 @@ def password_reset_request(request):
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
-                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject=_("Password Reset Requested"))
+                    associated_user.mailing(email_template_name="registration/password_reset_email.html", subject=_("Mira: Password Reset"))
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
                 except Exception as e:
                     messages.error(
@@ -705,8 +705,6 @@ def export_mp_csv(request, analysis):
 def scoring_assistant(request):
     template = 'core/scoring.html'
     context = {}
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
     context['change_usergroup'] = RoleAssignment.has_permission(
@@ -1318,6 +1316,8 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
+        if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']).folder == self.get_object().analysis.project.folder:
+            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']))
         if "select_measures" in self.request.POST:
             return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
@@ -1644,12 +1644,7 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
             self.object.save()
-            try:
-                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
-                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
-            except:
-                messages.error(
-                    self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+            messages.success(self.request, _("Risk acceptance submitted to: ") + self.object.validator.email)
         return super().form_valid(form)
 
     def test_func(self):
@@ -1674,12 +1669,7 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
             self.object.save()
-            try:
-                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
-                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
-            except:
-                messages.error(
-                    self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+            messages.success(self.request, _("Risk acceptance submitted to: ") + self.object.validator.email)
         elif not self.object.validator and self.object.state == 'submitted':
             # Mettre à jour le paramètre "state"
             self.object.set_state('created')
@@ -1966,7 +1956,7 @@ class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to go through groups to assign roles."))
+        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to attach users to groups to assign roles."))
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
@@ -2086,6 +2076,8 @@ class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
         context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[2]
+        context['add_riskmatrix'] = RoleAssignment.has_permission(
+            self.request.user, 'add_riskmatrix')
         queryset = self.get_queryset()
         filter = RiskMatrixFilter(self.request.GET, queryset)
         context['filter'] = filter
@@ -2145,3 +2137,22 @@ class RiskMatrixUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskmatrix"), folder=Folder.get_folder(self.get_object()))
+
+
+def license_overview(request):
+    template = 'license/overview.html'
+    context = {}
+
+    context['matrices'] = list(
+        RiskMatrix.objects.all().values_list('json_definition', flat=True))
+    context['change_usergroup'] = RoleAssignment.has_permission(
+        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['view_user'] = RoleAssignment.has_permission(
+        request.user, "view_user")
+    context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+
+    context['users_number'] = User.objects.all().count()
+    context['users_number_limit'] = MAX_USERS
+
+
+    return render(request, template, context)

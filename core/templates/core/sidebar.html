@@ -47,13 +47,22 @@
                     </a>
                 </li>
                 
+                <li class="to-page">
+                    <a id="quick_start_tab" href="{% url 'quick_start' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-fighter-jet"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
+                    </a>
+                </li>
+
 
                 <li class="nav-separator pt-4">
                     <div class="flex flex-row items-center">
                         <div class="">{% trans "Dashboard" %}</div>
                     </div>
                 </li>
-
 
                 <li class="to-page">
                     <a id="overview_tab" href="{% url 'overview' %}"
@@ -243,15 +252,6 @@
                     </a>
                 </li>
                 <li class="to-page">
-                    <a id="quick_start_tab" href="{% url 'quick_start' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
-                            <i class="fas fa-fighter-jet"></i>
-                        </span>
-                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
-                    </a>
-                </li>
-                <li class="to-page">
                     <a id="scoring_tab" href="{% url 'scoring_bo' %}"
                         class="relative flex flex-row items-center pr-6 nav-link">
                         <span class="nav-link-icon">
@@ -279,6 +279,16 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Backups" %}</span>
                     </a>
                 </li>
+                <li class="to-page">
+                    <a id="lic_tab" href="{% url 'lic-management' %}"
+                        class="relative flex flex-row items-center pr-6 nav-link">
+                        <span class="nav-link-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </span>
+                        <span class="ml-2 text-sm tracking-wide truncate">{% trans "License management" %}</span>
+                    </a>
+                </li>
+
                 {% endif %}
                 {% comment %} <li class="to-page">
                     <a href="#"
