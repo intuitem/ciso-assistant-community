@@ -2,6 +2,7 @@ from core.models import *
 from core.helpers import *
 from iam.models import *
 from library.utils import *
+from django.utils.translation import gettext_lazy as _
 from django.db.models import Count
 import pytest
 
@@ -61,11 +62,11 @@ def test_get_rating_options_perm_to_view_matrix():
     role_assignment.save()
 
     assert get_rating_options(user) == [
-        (0, 'Very Low'),
-        (1, 'Low'),
-        (2, 'Medium'),
-        (3, 'High'),
-        (4, 'Very High'),
+        (0, _('Very Low')),
+        (1, _('Low')),
+        (2, _('Medium')),
+        (3, _('High')),
+        (4, _('Very High')),
     ]
 
 
@@ -117,9 +118,9 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
     role_assignment.save()
 
     assert get_rating_options_abbr(user) == [
-        ('VL','Very Low'),
-        ('L', 'Low'),
-        ('M', 'Medium'),
-        ('H', 'High'),
-        ('VH', 'Very High')
+        ('VL', _('Very Low')),
+        ('L', _('Low')),
+        ('M', _('Medium')),
+        ('H', _('High')),
+        ('VH', _('Very High'))
     ]
