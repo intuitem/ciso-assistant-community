@@ -81,7 +81,7 @@
     }
 
     .table-action{
-        @apply text-xl text-slate-500 hover:text-indigo-900 mx-2;
+        @apply text-xl text-slate-500 hover:text-indigo-700 mx-2;
     }
     
     .tooltip-custom {
