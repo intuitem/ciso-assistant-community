@@ -516,6 +516,14 @@ class Browser(ListView):
                 Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
             return {"type": _("security measures"), "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
         
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
