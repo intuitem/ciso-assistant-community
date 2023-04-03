@@ -433,6 +433,7 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_analysis"), folder=get_object_or_404(Analysis, id=self.kwargs['analysis']).project.folder)
 
 
+@login_required
 def generate_ra_pdf(request, analysis: Analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -449,7 +450,7 @@ def generate_ra_pdf(request, analysis: Analysis):
     else:
         raise PermissionDenied()
 
-
+@login_required
 def generate_mp_pdf(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -535,6 +536,7 @@ class Browser(ListView):
         return context
 
 
+@login_required
 def global_overview(request):
     template = 'core/overview.html'
 
