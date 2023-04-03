@@ -327,17 +327,17 @@ def password_reset_request(request):
                         if elapsed_time < timedelta(seconds=30):
                             # Si oui, retourner une réponse d'erreur
                             messages.error(
-                                request, "Please wait before requesting another password reset.")
+                                request, _("Please wait before requesting another password reset."))
                             context["password_reset_form"] = password_reset_form
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
                     associated_user.mailing(email_template_name="registration/password_reset_email.html", subject=_("Mira: Password Reset"))
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
-                except Exception as e:
+                except Exception as exception:
                     messages.error(
-                        request, 'An error has occured, please try later.')
-                    print("Exception:", e)
+                        request, _('An error has occured, please try later.'))
+                    print("Exception:", exception)
                     password_reset_form = ResetForm()
                     context["password_reset_form"] = password_reset_form
                     return render(request=request, template_name="registration/password_reset.html", context=context)
@@ -347,7 +347,7 @@ def password_reset_request(request):
                 print("wrong email reset:", data)
             return redirect("/password_reset/done/")
         else:
-            messages.error(request, "Invalid email or captcha.")
+            messages.error(request, _("Invalid email or captcha."))
     password_reset_form = ResetForm()
     context["password_reset_form"] = password_reset_form
     return render(request=request, template_name="registration/password_reset.html", context=context)

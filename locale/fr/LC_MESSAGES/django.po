@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-31 23:04+0000\n"
+"POT-Creation-Date: 2023-04-03 10:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:28 iam/models.py:276
+#: iam/models.py:28 iam/models.py:321
 msgid "Domain"
 msgstr "Domaine"
 
@@ -45,7 +45,7 @@ msgstr "nom"
 msgid "user group"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:35 iam/models.py:189
+#: iam/models.py:35 iam/models.py:226
 msgid "user groups"
 msgstr "groupes d'utilisateurs"
 
@@ -65,7 +65,7 @@ msgstr "DOMAINE"
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:90 iam/models.py:287
+#: iam/models.py:90 iam/models.py:332
 msgid "Folder"
 msgstr "Dossier"
 
@@ -73,23 +73,23 @@ msgstr "Dossier"
 msgid "Folders"
 msgstr "Dossiers"
 
-#: iam/models.py:143
-msgid "First Connexion"
-msgstr "Première connexion"
+#: iam/models.py:180
+msgid "Welcome to Mira!"
+msgstr "Bienvenue sur MIRA!"
 
-#: iam/models.py:167
+#: iam/models.py:204
 msgid "last name"
 msgstr "nom"
 
-#: iam/models.py:168
+#: iam/models.py:205
 msgid "first name"
 msgstr "prénom"
 
-#: iam/models.py:172
+#: iam/models.py:209
 msgid "active"
 msgstr "actif"
 
-#: iam/models.py:175
+#: iam/models.py:212
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
@@ -97,15 +97,15 @@ msgstr ""
 "Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
 "au lieu de supprimer les comptes."
 
-#: iam/models.py:179
+#: iam/models.py:216
 msgid "date joined"
 msgstr "date d'inscription"
 
-#: iam/models.py:181
+#: iam/models.py:218
 msgid "superuser status"
 msgstr "statut superutilisateur"
 
-#: iam/models.py:184
+#: iam/models.py:221
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
@@ -113,7 +113,7 @@ msgstr ""
 "Désigne que cet utilisateur a toutes les autorisations sans les assigner "
 "explicitement."
 
-#: iam/models.py:192
+#: iam/models.py:229
 #, fuzzy
 #| msgid ""
 #| "The user_groups this user belongs to. A user will get all permissions "
@@ -126,19 +126,19 @@ msgstr ""
 "utilisateur obtiendra toutes les autorisations accordées à chacun de ses "
 "groupes d'utilisateurs."
 
-#: iam/models.py:210
+#: iam/models.py:247
 msgid "user"
 msgstr "utilisateur"
 
-#: iam/models.py:211
+#: iam/models.py:248
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:282
+#: iam/models.py:327
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:284
+#: iam/models.py:329
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
@@ -146,31 +146,31 @@ msgstr "les sous-dossiers sont visibles"
 msgid "Select a file"
 msgstr "Sélectionner un fichier"
 
-#: library/utils.py:173
+#: library/utils.py:174
 msgid "Library was not imported: invalid matrix."
 msgstr "Bibliothèque non importée: matrice invalide."
 
-#: library/utils.py:198
+#: library/utils.py:199
 msgid "Library was not imported: invalid threat."
 msgstr "Bibliothèque non importée: menace invalide."
 
-#: library/utils.py:222
+#: library/utils.py:223
 msgid "Library was not imported: invalid security function."
 msgstr "Bibliothèque non importée: fonction de sécurité invalide."
 
-#: library/utils.py:271
+#: library/utils.py:272
 msgid "Unknown object type: {}"
 msgstr "Objet de type inconnu : {}"
 
-#: library/utils.py:295
+#: library/utils.py:296
 msgid "Library was not imported: permission denied for: {}"
 msgstr "Bibliothèque non importée: autorisation refusée pour : {}"
 
-#: library/utils.py:320
+#: library/utils.py:321
 msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu : {}"
 
-#: library/utils.py:341
+#: library/utils.py:342
 #, fuzzy
 #| msgid ""
 #| "Library \"{}\" imported successfully. {} objects imported and {} objects "
@@ -182,15 +182,15 @@ msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "
 "ignorés."
 
-#: library/views.py:48
+#: library/views.py:51
 msgid "Failed to import file: {}. {}"
 msgstr "Échec de l'importation du fichier : {}"
 
-#: library/views.py:61
+#: library/views.py:72
 msgid "Libraries"
 msgstr "Bibliothèques"
 
-#: library/views.py:82
+#: library/views.py:93
 msgid "Failed to import library: {}"
 msgstr "Échec de l'importation de la bibliothèque : {}"
 
@@ -219,14 +219,16 @@ msgid ""
 "This action cannot be undone. This will restore the database to a previous "
 "state. Are you sure you want to do this?"
 msgstr ""
+"Cette action ne peut être annulée. Cela restaurera la base de données à un état "
+"antérieur. Êtes-vous sûr de vouloir faire cela ?"
 
 #: serdes/templates/serdes/backup_restore.html:82
 msgid "No, take me back"
-msgstr ""
+msgstr "Non, revenir en arrière"
 
 #: serdes/templates/serdes/backup_restore.html:84
 msgid "Yes"
-msgstr ""
+msgstr "Oui"
 
 #: serdes/templates/serdes/backup_restore.html:107
 msgid "Export backup"
@@ -235,6 +237,9 @@ msgstr "Exporter une sauvegarde"
 #: serdes/templates/serdes/backup_restore.html:109
 msgid "Dump database"
 msgstr "Exporter la base de données"
+
+#~ msgid "First Connexion"
+#~ msgstr "Première connexion"
 
 #~ msgid "The two password fields didn’t match."
 #~ msgstr "Les deux champs de mot de passe ne correspondent pas."

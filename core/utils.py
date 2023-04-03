@@ -33,8 +33,8 @@ BUILTIN_ROLE_CODENAMES = {
 
 BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ADMINISTRATOR): _('Administrator'),
-    str(UserGroupCodename.GLOBAL_AUDITOR): _('Global auditor'),
-    str(UserGroupCodename.GLOBAL_VALIDATOR): _('Global validator'),
+    str(UserGroupCodename.GLOBAL_AUDITOR): _('Auditor'),
+    str(UserGroupCodename.GLOBAL_VALIDATOR): _('Validator'),
     str(UserGroupCodename.DOMAIN_MANAGER): _('Domain manager'),
     str(UserGroupCodename.ANALYST): _('Analyst'),
     str(UserGroupCodename.VALIDATOR): _('Validator'),
