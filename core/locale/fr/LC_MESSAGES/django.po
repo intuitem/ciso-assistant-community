@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-03 12:35+0000\n"
+"POT-Creation-Date: 2023-04-03 21:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -504,7 +504,7 @@ msgstr ""
 #: core/templates/core/analysis_list.html:142
 #: core/templates/core/ri_create.html:21 core/templates/core/ri_update.html:35
 #: core/templates/snippets/ra_list_nested.html:10 core/utils.py:31
-#: core/utils.py:41
+#: core/utils.py:36 core/utils.py:41
 msgid "Auditor"
 msgstr "Auditeur"
 
@@ -846,7 +846,7 @@ msgstr "Identité du propriétaire et validateur du risque"
 
 #: core/models.py:491 core/templates/core/acceptance_list.html:123
 #: core/templates/core/fragments/watchlist_exceptions.html:14 core/utils.py:30
-#: core/utils.py:40
+#: core/utils.py:37 core/utils.py:40
 msgid "Validator"
 msgstr "Validateur"
 
@@ -2031,8 +2031,8 @@ msgstr[0] ""
 "                        "
 msgstr[1] ""
 "\n"
-"                        %(counter)s <span class=\"font-bold"
-"\">avertissements</span> trouvés\n"
+"                        %(counter)s <span class=\"font-"
+"bold\">avertissements</span> trouvés\n"
 "                    "
 
 #: core/templates/core/review.html:54
@@ -3002,9 +3002,17 @@ msgstr "Télécharger une bibliothèque"
 msgid "Deployment mode"
 msgstr "Mode de déploiement"
 
+#: core/templates/license/overview.html:21
+msgid "Cloud instance"
+msgstr "Instance cloud"
+
 #: core/templates/license/overview.html:27
 msgid "License type"
 msgstr "Type de licence"
+
+#: core/templates/license/overview.html:30
+msgid "Trial"
+msgstr "Version d'essai"
 
 #: core/templates/license/overview.html:36
 msgid "Used seats"
@@ -3012,7 +3020,17 @@ msgstr "Emplacements utilisés"
 
 #: core/templates/license/overview.html:45
 msgid "Seats limit"
-msgstr "Limite d'emplacements"
+msgstr "Limite utilisateurs"
+
+#: core/templates/license/overview.html:48
+msgid "Disabled"
+msgstr "désactivée"
+
+#: core/templates/license/overview.html:57
+#, fuzzy
+#| msgid "calendar"
+msgid "Standard"
+msgstr "calendrier"
 
 #: core/templates/license/overview.html:63
 msgid "Expiration date"
@@ -3295,8 +3313,8 @@ msgstr "ainsi que tous les objets enfants."
 #, python-format
 msgid ""
 "\n"
-"        Are you sure you want to import the following library: <strong class="
-"\"font-semibold text-gray-700\">%(library)s</strong>?\n"
+"        Are you sure you want to import the following library: <strong "
+"class=\"font-semibold text-gray-700\">%(library)s</strong>?\n"
 "        "
 msgstr ""
 "\n"
@@ -3459,14 +3477,6 @@ msgstr "Responsable de domaine"
 msgid "Analyst"
 msgstr "Analyste"
 
-#: core/utils.py:36
-msgid "Global auditor"
-msgstr "Auditeur global"
-
-#: core/utils.py:37
-msgid "Global validator"
-msgstr "Validateur global"
-
 #: core/views.py:212
 msgid "Risk acceptance: {} accepted with success!"
 msgstr "Acceptation de risque: {} acceptée avec succés!"
@@ -3553,6 +3563,12 @@ msgstr ""
 "L'édition de l'attribution des rôles sera disponible dans une prochaine "
 "version. Actuellement, vous devez attacher les utilisateurs à des groupes "
 "pour leur attribuer des rôles."
+
+#~ msgid "Global auditor"
+#~ msgstr "Auditeur global"
+
+#~ msgid "Global validator"
+#~ msgstr "Validateur global"
 
 #~ msgid ""
 #~ "If you, or your organization, did not make this request, you can simply "
