@@ -179,7 +179,6 @@ def aggregate_risks_per_field(user: User, field: str, residual: bool = False, an
                 values[m['risk'][i][field]]['color'] = m['risk'][i]['hexcolor']
                 continue
             values[m['risk'][i][field]]['count'] += count
-    print(values)
     return values
 
 
