@@ -49,13 +49,13 @@ def get_risk_color_map_name(user: User):
     return dict(zip(risk_names, risk_colors))
 
 
-def get_risk_color_ordered_list(user: User):
+def get_risk_color_ordered_list(user: User, analyses_list: list=None):
     """
     Returns a list of hex colors ordered by matrix and risk
     """
     risk_colors = list()
     encountered_risks = set()
-    parsed_matrices = get_parsed_matrices(user)
+    parsed_matrices = get_parsed_matrices(user, analyses_list)
     for m in parsed_matrices:
         for i in range(len(m['risk'])):
             if m['risk'][i]['name'] in encountered_risks:
@@ -176,8 +176,10 @@ def aggregate_risks_per_field(user: User, field: str, residual: bool = False, an
 
             if 'count' not in values[m['risk'][i][field]]:
                 values[m['risk'][i][field]]['count'] = count
+                values[m['risk'][i][field]]['color'] = m['risk'][i]['hexcolor']
                 continue
             values[m['risk'][i][field]]['count'] += count
+    print(values)
     return values
 
 
@@ -188,10 +190,10 @@ def risks_count_per_level(user: User, analyses: list = None):
         Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
 
     for r in aggregate_risks_per_field(user, 'name', analyses=analyses).items():
-        current_level.append({'name': r[0], 'value': r[1]['count']})
+        current_level.append({'name': r[0], 'value': r[1]['count'], 'color': r[1]['color']})
 
     for r in aggregate_risks_per_field(user, 'name', residual=True, analyses=analyses).items():
-        residual_level.append({'name': r[0], 'value': r[1]['count']})
+        residual_level.append({'name': r[0], 'value': r[1]['count'], 'color': r[1]['color']})
 
     return {"current": current_level, "residual": residual_level}
 

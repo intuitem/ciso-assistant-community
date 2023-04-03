@@ -567,8 +567,8 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
 
     values = list()
     labels = list()
-    color_map = {"open": "#fac858", "in_progress": "#5470c6",
-                 "on_hold": "#ee6666", "done": "#91cc75"}
+    color_map = {"open": "#93c5fd", "in_progress": "#fdba74",
+                 "on_hold": "#f87171", "done": "#86efac"}
     for st in SecurityMeasure.MITIGATION_STATUS:
         count = SecurityMeasure.objects.filter(status=st[0]).filter(
             riskscenario__analysis__in=analysis_list).count()
@@ -589,8 +589,9 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
             count_c = _rc['current'][i]['value']
             count_r = _rc['residual'][i]['value']
             lvl = _rc['current'][i]['name']
+            color = _rc['current'][i]['color']
             synth_table.append(
-                {"lvl": lvl, "current": count_c, "residual": count_r})
+                {"lvl": lvl, "current": count_c, "residual": count_r, "color": color})
         hvh_risks = RiskScenario.objects.filter(
             analysis__id=_ra).filter(current_level__gte=2)
         analysis_objects.append(
@@ -608,7 +609,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
         "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
-        "colors": get_risk_color_ordered_list(user),
+        "colors": get_risk_color_ordered_list(user, analysis_list),
     }
 
 
