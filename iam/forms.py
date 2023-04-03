@@ -52,19 +52,11 @@ class FolderUpdateForm(StyledModelForm):
     """ form to update a folder """
     # pragma pylint: disable=no-member
 
-    def __init__(self, *args, **kwargs):
-        super(FolderUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['parent_folder'].queryset = Folder.objects.filter(
-            content_type=Folder.ContentType.ROOT)
-        self.fields['parent_folder'].initial = Folder.objects.get(
-            content_type=Folder.ContentType.ROOT)
-        self.fields['parent_folder'].widget.attrs['select_disabled'] = True
-
     class Meta:
         """ for Model """
         model = Folder
         exclude = ['content_type', 'builtin', 'hide_public_asset',
-                   'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function']
+                   'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function', 'parent_folder']
 
 
 class UserCreationForm(forms.ModelForm):
