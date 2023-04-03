@@ -114,8 +114,8 @@ def risk_per_status(user: User):
 def security_measure_per_status(user: User):
     values = list()
     labels = list()
-    color_map = {"open": "#fac858", "in_progress": "#5470c6",
-                 "on_hold": "#ee6666", "done": "#91cc75"}
+    color_map = {"open": "#93c5fd", "in_progress": "#fdba74",
+                 "on_hold": "#f87171", "done": "#86efac"}
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
     for st in SecurityMeasure.MITIGATION_STATUS:
