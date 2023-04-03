@@ -2,7 +2,7 @@
     Inspired from Azure IAM model """
 
 from collections import defaultdict
-from typing import Any, Tuple
+from typing import Any, Self, Tuple
 import uuid
 from django.utils import timezone
 from django.db import connection, models
@@ -75,10 +75,22 @@ class Folder(AbstractBaseModel):
         """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
+
+    def get_root_folder():
+        if not connection.introspection.table_names():
+            # Database tables haven't been created yet
+            return None
+        try:
+            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        except Folder.DoesNotExist:
+            # ROOT folder doesn't exist yet
+            return None
+
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
-        "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"))
+        "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"),
+        default=get_root_folder)
     builtin = models.BooleanField(default=False)
     hide_public_asset = models.BooleanField(default=False)
     hide_public_matrix = models.BooleanField(default=False)
@@ -93,7 +105,7 @@ class Folder(AbstractBaseModel):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def sub_folders(self) -> 'Self':  # type annotation Self to come in Python 3.11
+    def sub_folders(self) -> Self:
         """Return the list of subfolders"""
         def sub_folders_in(f, sub_folder_list):
             for sub_folder in f.folder_set.all():
@@ -102,13 +114,13 @@ class Folder(AbstractBaseModel):
             return sub_folder_list
         return sub_folders_in(self, [])
 
-    # type annotation Self to come in Python 3.11
-    def get_parent_folders(self) -> 'Self':
+
+    def get_parent_folders(self) -> Self:
         """Return the list of parent folders"""
         return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
 
     @staticmethod
-    def get_folder(obj: Any) -> 'Self':  # type annotation Self to come in Python 3.11
+    def get_folder(obj: Any) -> Self:
         """Return the folder of an object"""
         # todo: add a folder attribute to all objects to avoid introspection
         if hasattr(obj, 'folder'):
@@ -157,8 +169,6 @@ class RootFolderMixin(FolderMixin):
 
     class Meta:
         abstract = True
-
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -352,7 +362,7 @@ class RoleAssignment(models.Model):
         return False
 
     @staticmethod
-    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, codename: str="view_folder") -> 'list[Folder]':
+    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, codename: str="view_folder") -> list[Folder]:
         """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
            If the contentType is not specified, returns all accessible folders
            Returns the list of the ids of the matching folders

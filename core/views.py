@@ -226,7 +226,7 @@ class RiskAcceptanceDetailView(GenericDetailView):
 class FolderDetailView(GenericDetailView):
     model = Folder
     exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
-               "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
+               "hide_public_matrix", "hide_public_threat", "hide_public_security_function", "parent_folder"]
 
     template_name = "core/detail/folder_detail.html"
 
