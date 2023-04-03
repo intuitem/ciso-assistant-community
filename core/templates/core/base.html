@@ -97,16 +97,16 @@
 	<style>
 		[x-cloak] { display: none }
 	</style>
-	<div x-data="{ sidebarOpen: true, modalOpen: false, aboutModalOpen: false, sidebarAnimation: false }" class="flex h-screen">
+	<div x-data="{ sidebarOpen: true, modalOpen: false, aboutModalOpen: false }" class="flex h-screen">
 		{% include 'core/sidebar.html' %}
 		{% include 'snippets/messages.html' %}
 		<div class="flex-1">
 			{% if exceeded_users %}
-				<div class="grid place-content-center bg-red-600 text-white h-6 sticky top-0 z-10" :class="sidebarOpen == false ? 'ml-4' + (sidebarAnimation == false ? '' : ' transition-all duration-300') : 'ml-72' + (sidebarAnimation == false ? '' : ' transition-all duration-300')">
+				<div class="grid place-content-center bg-red-600 text-white h-6 sticky top-0 z-10 transition-all duration-300" :class="sidebarOpen == false ? 'ml-4' : 'ml-72'">
 					<p class="text-sm">{% trans "The maximum number of licensed users has been exceeded. Please reduce the number of users or acquire an appropriate license." %}</p>
 				</div>
 			{% endif %}
-			<main class="px-8 pb-8 ml-72" x-data="$el.classList.remove('ml-72')" :class="sidebarOpen == false ? 'ml-4' + (sidebarAnimation == false ? '' : ' transition-all duration-300') : 'ml-72' + (sidebarAnimation == false ? '' : ' transition-all duration-300')">
+			<main class="px-8 pb-8 ml-72 transition-all duration-300" x-data="$el.classList.remove('ml-72')" :class="sidebarOpen == false ? 'ml-4' : 'ml-72'">
 				{% block content %}
 					{% comment %} {% include 'snippets/breadcrumbs.html' %} {% endcomment %}
 				{% endblock %}
