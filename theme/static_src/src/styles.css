@@ -24,7 +24,7 @@
     }
 
     .calendar {
-        @apply p-4 m-4 w-full;
+        @apply p-4 m-4 w-full table-fixed;
     }
 
     .calendar tr td {
