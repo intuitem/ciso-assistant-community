@@ -31,18 +31,18 @@
     <div class="bg-white shadow-xl px-8 py-10 flex flex-col space-y-4 rounded-lg">
         <div class="px-2 py-4 bg-white rounded">
             <div class="text-lg font-black">
-                {% blocktrans count counter=context.Analysis|length %}
+                {% blocktrans count counter=results.Analysis|length %}
                 Risk analysis
                 {% plural %}
                 Risk analyses
-                {% endblocktrans %} ({{ context.Analysis|length }})
+                {% endblocktrans %} ({{ results.Analysis|length }})
             </div>
-            {% if not context.Analysis %}
+            {% if not results.Analysis %}
             <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
             {% endif %}
             <div>
                 <ul class="pl-3 ml-3 list-disc">
-                    {% for entry in context.Analysis %}
+                    {% for entry in results.Analysis %}
                     <li><a id="riskanalysis" href="{% url 'RA' entry.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
                     {% endfor %}
                 </ul>
@@ -53,18 +53,18 @@
         
         <div class="px-2 py-4 bg-white rounded">
             <div class="text-lg font-black">
-            {% blocktrans count counter=context.RiskScenario|length %}
+            {% blocktrans count counter=results.RiskScenario|length %}
             Risk scenario
             {% plural %}
             Risk scenarios
-            {% endblocktrans %} ({{ context.RiskScenario|length }})
+            {% endblocktrans %} ({{ results.RiskScenario|length }})
             </div>
-            {% if not context.RiskScenario %}
+            {% if not results.RiskScenario %}
             <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
             {% endif %}
             <div>
                 <ul class="pl-3 ml-3 list-disc">
-                    {% for entry in context.RiskScenario %}
+                    {% for entry in results.RiskScenario %}
                     <li><a id="riskscenario" href="{% url 'RA' entry.analysis.id %}#{{entry.id}}" class="text-gray-700 hover:text-blue-500">{{entry.rid}}: {{entry}}</a></li>
                     {% endfor %}
                 </ul>
@@ -75,18 +75,18 @@
 
         <div class="px-2 py-4 bg-white rounded">
             <div class="text-lg font-black">
-                {% blocktrans count counter=context.SecurityMeasure|length %}
+                {% blocktrans count counter=results.SecurityMeasure|length %}
                 Security measure
                 {% plural %}
                 Security measures
-                {% endblocktrans %} ({{ context.SecurityMeasure|length }})
+                {% endblocktrans %} ({{ results.SecurityMeasure|length }})
             </div>
-            {% if not context.SecurityMeasure %}
+            {% if not results.SecurityMeasure %}
             <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
             {% endif %}
             <div>
                 <ul class="pl-3 ml-3 list-disc">
-                    {% for entry in context.SecurityMeasure %}
+                    {% for entry in results.SecurityMeasure %}
                     <li><a id="security_measure" href="{% url 'MP' entry.folder.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
                     {% endfor %}
                 </ul>
