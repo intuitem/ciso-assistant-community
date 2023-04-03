@@ -68,7 +68,7 @@
                                 </div>
                             </th>
                             <td class="px-6 py-4">
-                                <p class="whitespace-no-wrap capitalize">
+                                <p class="whitespace-no-wrap">
                                     {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
                                 </p>
                             </td>
@@ -83,19 +83,22 @@
 
                                     <div class="flex justify-center">
                                         <div class="flex items-center">
-                                            <a href="{% url 'MP' analysis.id %}">
-                                                <span class="table-action" data-tooltip-target="tooltip-rp"><i class="fas fa-heartbeat"></i></span>
-                                                <div id="tooltip-rp" role="tooltip" class="inline-block absolute invisible z-10 p-2 text-2xs text-white bg-gray-600 rounded-xl shadow-sm opacity-0 transition-opacity duration-300 tooltip">
-                                                    {% trans "Remediation Plan" %}
-                                                    <div class="tooltip-arrow" data-popper-arrow></div>
+                                            <a href="{% url 'MP' analysis.id %}" class="group flex relative">
+                                                <span class="table-action" ><i class="fas fa-heartbeat"></i></span>
+                                                <div id="tooltip-rp" role="tooltip" class="group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs text-gray-100 rounded-md absolute left-1/2 
+                                                -translate-x-1/2 translate-y-full opacity-0 -mt-2 m-0 mx-auto">
+                                                    {% trans "Remediation plan" %}
+                                                    <div class="tooltip-arrow"></div>
                                                 </div>
                                             <a>
                                             <div x-data="{ dropdownOpen: false }" class="relative" onclick="event.stopPropagation();">
-                                                <button @click="dropdownOpen = !dropdownOpen" class="" data-tooltip-target="tooltip-export">
+                                                <button @click="dropdownOpen = !dropdownOpen" class="group flex relative">
                                                     <span class="table-action"><i class="fas fa-download"></i></span>
-                                                    <div id="tooltip-export" role="tooltip" class="inline-block absolute invisible z-10 p-2 text-2xs text-white bg-gray-600 rounded-xl shadow-sm opacity-0 transition-opacity duration-300 tooltip ">
+                                                    <div class=""></div>
+                                                    <div id="tooltip-export" role="tooltip" class="group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs text-gray-100 rounded-md absolute left-1/2 
+                                                        -translate-x-1/2 translate-y-full opacity-0 m-2 mx-auto">
                                                         {% trans "Export" %}
-                                                        <div class="tooltip-arrow" data-popper-arrow></div>
+                                                        <div class="tooltip-arrow"></div>
                                                     </div>
                                                     
                                                 </button>

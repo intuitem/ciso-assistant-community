@@ -26,7 +26,7 @@ urlpatterns = [
 
     path('accounts/login/', cv.UserLogin.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout'),
-    path('search/', cv.SearchResults.as_view(), name='search'),
+
     path('', login_required(cv.AnalysisListView.as_view()), name='home'),
     path('x-rays', login_required(cv.ReviewView.as_view()), name='xrays'),
     path('passkeys/', include('passkeys.urls')),

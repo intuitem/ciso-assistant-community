@@ -363,7 +363,6 @@ class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     form_class = FirstConnexionConfirmForm
 
 
-@method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
     context_object_name = 'context'
@@ -402,7 +401,6 @@ def build_ri_clusters(analysis: Analysis):
     return {'current': matrix_current, 'residual': matrix_residual}
 
 
-@method_decorator(login_required, name='dispatch')
 class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/ra.html'
     context_object_name = 'context'
@@ -436,7 +434,6 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
 
 
 @login_required
-# analysis parameter is the id of the chosen Analysis
 def generate_ra_pdf(request, analysis: Analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -453,9 +450,7 @@ def generate_ra_pdf(request, analysis: Analysis):
     else:
         raise PermissionDenied()
 
-
 @login_required
-# analysis parameter is the id of the choosen Analysis
 def generate_mp_pdf(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -472,9 +467,8 @@ def generate_mp_pdf(request, analysis):
         raise PermissionDenied()
 
 
-@method_decorator(login_required, name='dispatch')
 class SearchResults(ListView):
-    context_object_name = 'context'
+    context_object_name = 'results'
     template_name = 'core/search_results.html'
 
     def get_queryset(self):
@@ -492,9 +486,17 @@ class SearchResults(ListView):
         ra_list = Analysis.objects.filter(Q(name__icontains=query) | Q(project__name__icontains=query) | Q(
             project__folder__name__icontains=query) | Q(version__icontains=query)).filter(id__in=object_ids_view)[:10]
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+        return context
 
 
-@method_decorator(login_required, name='dispatch')
 class Browser(ListView):
     context_object_name = 'context'
     template_name = 'core/browser.html'
@@ -504,7 +506,6 @@ class Browser(ListView):
     map_mtg = {'0': "open", '1': "in_progress", '2': "on_hold", '3': "done"}
 
     def get_queryset(self):
-
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
@@ -515,6 +516,24 @@ class Browser(ListView):
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
                 Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
             return {"type": _("security measures"), "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
+        
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+        return context
 
 
 @login_required
@@ -639,7 +658,6 @@ def index(request):
     return HttpResponse("Hello, world. You're at the core index.")
 
 
-@login_required
 def export_risks_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -671,7 +689,6 @@ def export_risks_csv(request, analysis):
         raise PermissionDenied()
 
 
-@login_required
 def export_mp_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
