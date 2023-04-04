@@ -3472,7 +3472,7 @@ msgstr " \"Risque: ouvert\" "
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:7
 msgid " \"Risk: mitigated\" "
-msgstr " \"Risque: mitigé\" "
+msgstr " \"Risque: atténué\" "
 
 #: core/templates/snippets/treatment_progress_dual_bar.html:8
 msgid " \"Risk: accepted\" "
