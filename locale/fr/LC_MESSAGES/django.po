@@ -114,10 +114,6 @@ msgstr ""
 "explicitement."
 
 #: iam/models.py:239
-#, fuzzy
-#| msgid ""
-#| "The user_groups this user belongs to. A user will get all permissions "
-#| "granted to each of their user_groups."
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
@@ -171,10 +167,6 @@ msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu : {}"
 
 #: library/utils.py:342
-#, fuzzy
-#| msgid ""
-#| "Library \"{}\" imported successfully. {} objects imported and {} objects "
-#| "ignored."
 msgid ""
 "Library \"{}\" imported successfully. {} object(s) imported and {} object(s) "
 "ignored."
