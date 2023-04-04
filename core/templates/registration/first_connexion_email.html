@@ -35,10 +35,10 @@
 </p>
 
 <p>
-<a href="{{ root_url }}{% url 'first_connexion_confirm' uidb64=uid token=token %}" role="button"> Set my password</a> 
+<a href="{{ root_url }}{% url 'first_connexion_confirm' uidb64=uid token=token %}" role="button"> {% trans "Set my password" %}</a> 
 </p>
 
-<p>An issue with the link? copy and paste the following in your browser:</p>
+<p>{% trans "An issue with the link? copy and paste the following in your browser" %}:</p>
 
 <p>
     {{ root_url }}{% url 'first_connexion_confirm' uidb64=uid token=token %}
@@ -46,7 +46,7 @@
 
 <p>
 
-{% trans "This link can only be used once. In case of an issue, you can access your instance" %} <a href="{{root_url}}"><b>here</b></a>  {% trans "and request a password reset"%}.
+{% trans "This link can only be used once. In case of an issue, you can access your instance" %} <a href="{{root_url}}"><b>{% trans "here" %}</b></a>  {% trans "and request a password reset"%}.
 
 </p>
 
@@ -55,7 +55,7 @@
 </p>
 
 <p>
-    Learn more about Mira <a href="https://intuitem.com/mira"><b>here</b></a>.
+    {% trans "Learn more about Mira" %} <a href="https://intuitem.com/mira"><b>{% trans "here" %}</b></a>.
 </p>
 
 
