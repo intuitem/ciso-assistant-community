@@ -129,7 +129,7 @@
                     <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}'">
                         <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center max-w-full">
-                                <span class=" p-1 rounded-lg text-xs
+                                <span class=" p-1 rounded-md text-xs
                                 {% if acceptance.state == "created" %}
                                 bg-blue-200
                                 {% elif acceptance.state == "submitted" %}
@@ -142,6 +142,11 @@
                                 bg-gray-200
                                 {% endif %} text-gray-900">{{ acceptance.get_state_display|lower}}
                                 </span>
+                                {% if acceptance.validator == user %}
+                                <span class="ml-2 p-1 rounded-md text-xs bg-indigo-500 text-white">
+                                    {% trans "action requested" %}
+                                </span>
+                                {% endif %}
                                 <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
                                     <p id="acceptance{{ acceptance.id }}" class="text-md font-semibold">
                                         {{ acceptance }}
