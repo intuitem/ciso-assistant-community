@@ -5,7 +5,7 @@
 {% include 'snippets/breadcrumbs.html' %}
 {% endwith %}
 <div>
-    <form method="post" id="scenario_create_form" x-data="{ submitDisabled: true }" @change="submitDisabled = false">{% csrf_token %}
+    <form method="post" id="scenario_create_form" x-data="{ submitDisabled: true }" x-on:keyup="submitDisabled = false" @change="submitDisabled = false">{% csrf_token %}
         <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
         <div class="flex flex-row space-x-4">
             <div class="flex flex-col space-y-4">

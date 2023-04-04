@@ -1,20 +1,6 @@
 {% load i18n static core_extras %}
 <!-- MODAL CONTAINER WITH BACKDROP -->
-<div x-show="aboutModalOpen" x-cloak
->
-
-<!--
-<div x-show="open" x-cloak
-class="transition-opacity z-50 whitespace-normal"
-x-transition:enter="ease-out duration-100"
-x-transition:enter-start="opacity-0"
-x-transition:enter-end="opacity-100"
-x-transition:leave="ease-out duration-100"
-x-transition:leave-start="opacity-100"
-x-transition:leave-end="opacity-0"
->
--->
-
+<div x-show="aboutModalOpen" x-cloak>
 
   <div x-cloak>
 
@@ -25,10 +11,10 @@ x-transition:leave-end="opacity-0"
 
       <!-- MODAL DIALOG -->
       <div
-        class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto mb-8">
+        class="relative w-auto pointer-events-none max-w-4xl mt-8 mx-auto mb-8">
 
         <!-- MODAL CONTAINER -->
-        <div class="relative flex flex-col w-full pointer-events-auto bg-white shadow-xl rounded-md overflow-hidden" id="new_{{ model|lower }}_modal">
+        <div class="relative flex flex-col w-fit pointer-events-auto bg-white shadow-xl rounded-md overflow-hidden" id="new_{{ model|lower }}_modal">
           <div class="flex items-start justify-between p-4 bg-gradient-to-r from-slate-200">
             {% if topic == 'no_matrix' %}
             <div class="mb-4 text-xl text-gray-800"><span class="text-red-600"><i
@@ -60,7 +46,8 @@ x-transition:leave-end="opacity-0"
                 {% include 'snippets/modal/modal_text.html' %}
             {% else %}
                 <p class="text-sm"><strong class="inline">{% trans "Version:" %}</strong> {% mira_version %}</p>
-                <p class="text-sm whitespace-nowrap"><strong class="inline">{% trans "Build:" %}</strong> {% mira_build %}</p>
+                <p class="text-sm whitespace-normal"><strong class="inline">{% trans "Build:" %}</strong> {% mira_build %}</p>
+                <a class="text-sm whitespace-nowrap text-indigo-500 hover:text-indigo-600 underline" href="https://intuitem.com/cgu" target='_blank'><strong class="inline">{% trans "Terms of use" %}</strong></a>
             {% endif %}
 
           </div>

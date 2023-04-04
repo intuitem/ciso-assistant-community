@@ -295,17 +295,15 @@ msgstr "Rechercher un utilisateur..."
 
 #: core/filters.py:452 core/forms.py:83 core/forms.py:109
 #: core/templates/snippets/associated_users_list_nested.html:13
-#: core/templates/snippets/users_list_nested.html:13
+#: core/templates/snippets/users_list_nested.html:13 core/views.py:1738
 msgid "Email"
 msgstr "Adresse électronique"
 
 #: core/filters.py:453
-#, fuzzy
-#| msgid "Domain (descending)"
 msgid "Email (descending)"
-msgstr "Domaine (descendant)"
+msgstr "Courriel (descendant)"
 
-#: core/filters.py:454
+#: core/filters.py:454 core/views.py:1738
 msgid "First name"
 msgstr "Prénom"
 
@@ -313,7 +311,7 @@ msgstr "Prénom"
 msgid "First name (descending)"
 msgstr "Prénom (descendant)"
 
-#: core/filters.py:456
+#: core/filters.py:456 core/views.py:1738
 msgid "Last name"
 msgstr "Nom"
 
@@ -342,18 +340,11 @@ msgid "This  validator cannot be assigned for this domain"
 msgstr "Ce validateur ne peut pas être assigné à ce domaine"
 
 #: core/forms.py:365
-#, fuzzy
-#| msgid ""
-#| "Select the risk scenarios to be accepted, attention they must be part of "
-#| "the chosen domain"
 msgid "Checked risk scenarios must be part of the selected domain"
 msgstr ""
-"Sélectionner les scénarios de risque à accepter, attention ils doivent faire "
-"partis du domaine choisi"
+"Les scénarios de risque sélectionnés doivent faire partie du domaine sélectionné"
 
 #: core/forms.py:437
-#, fuzzy
-#| msgid "A primary asset cannot have a parent asset."
 msgid "A primary asset cannot have parent assets."
 msgstr "Un bien primaire ne peut pas avoir de bien parent."
 
@@ -440,10 +431,8 @@ msgid "business value"
 msgstr "valeur métier"
 
 #: core/models.py:72
-#, fuzzy
-#| msgid "parent asset"
 msgid "parent assets"
-msgstr "bien parent"
+msgstr "biens parents"
 
 #: core/models.py:76 core/models.py:373 core/templates/core/asset_list.html:7
 #: core/templates/core/quick_start.html:76 core/templates/core/sidebar.html:156
@@ -572,10 +561,8 @@ msgid "{}/{} does not have an ETA"
 msgstr "{}/{} n'a pas d'heure d'arrivée estimée"
 
 #: core/models.py:233
-#, fuzzy
-#| msgid "{} ETA is in the past now. Consider updating its status or the date"
 msgid "{}/{} ETA is in the past now. Consider updating its status or the date"
-msgstr "{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
+msgstr "{}/{} ETA dépassé. Envisaager de mettre à jour son statut ou son ETA"
 
 #: core/models.py:236
 msgid ""
@@ -586,22 +573,16 @@ msgstr ""
 "priorisation des mesures de sécurité"
 
 #: core/models.py:239
-#, fuzzy
-#| msgid ""
-#| "{}/{} does not have an external link attached. This will help you for "
-#| "follow-up"
 msgid ""
 "{}/{}: Security measure does not have an external link attached. This will "
 "help you for follow-up"
 msgstr ""
-"{}/{} n'a pas de lien externe attaché. Spécifier un lien externe aidera au "
+"{}/{} ne comporte pas de lien externe. Spécifier un lien externe aidera au "
 "suivi du traitement"
 
 #: core/models.py:244
-#, fuzzy
-#| msgid "{}: Acceptance has no expiry date"
 msgid "{}/{}: Acceptance has no expiry date"
-msgstr "{} : Acceptation sans date d'expiration"
+msgstr "{}/{]} : Acceptation sans date d'expiration"
 
 #: core/models.py:249
 msgid "{}/{}: Acceptance has expired. Consider updating the status or the date"
@@ -815,10 +796,8 @@ msgid ": "
 msgstr ""
 
 #: core/models.py:482
-#, fuzzy
-#| msgid "Created at"
 msgid "Created"
-msgstr "Créé le"
+msgstr "Créée"
 
 #: core/models.py:483
 msgid "Submitted"
@@ -851,17 +830,13 @@ msgid "Validator"
 msgstr "Validateur"
 
 #: core/models.py:492
-#, fuzzy
-#| msgid "Status"
 msgid "State"
-msgstr "Statut"
+msgstr "État"
 
 #: core/models.py:493
-#, fuzzy
-#| msgid "If temporary, specify when the risk acceptance will no longer apply"
 msgid "Specify when the risk acceptance will no longer apply"
 msgstr ""
-"Si temporaire, spécifier quand l'acceptation du risque ne s'appliquera plus"
+"Spécifier quand l'acceptation de risque ne sera plus applicable"
 
 #: core/models.py:494
 #: core/templates/core/fragments/watchlist_exceptions.html:17
@@ -1102,7 +1077,7 @@ msgid ""
 "number of users or acquire an appropriate license."
 msgstr ""
 "Le nombre maximum d'utilisateurs sur cette licence a été dépassé. Veuillez "
-"réduire le nombre d'utilisateurs ou d'acquérir une licence appropriée."
+"réduire le nombre d'utilisateurs ou acquérir une licence appropriée."
 
 #: core/templates/core/base.html:120 core/templates/core/sidebar.html:385
 msgid "About MIRA"
@@ -1458,7 +1433,7 @@ msgstr "Groupes"
 #: core/templates/core/group_list.html:44
 #: core/templates/core/my_profile_detailed.html:33
 msgid "Group Name"
-msgstr "NNom du groupe"
+msgstr "Nom du groupe"
 
 #: core/templates/core/group_list.html:54
 #: core/templates/core/my_profile_detailed.html:43
@@ -1504,10 +1479,8 @@ msgid "Assignee"
 msgstr "Responsable"
 
 #: core/templates/core/index.html:91
-#, fuzzy
-#| msgid "Remediation Plan"
 msgid "Remediation plan"
-msgstr "Plan de Remédiation"
+msgstr "Plan de remédiation"
 
 #: core/templates/core/index.html:101
 msgid "Export"
@@ -1528,10 +1501,8 @@ msgid "... as csv"
 msgstr "... format CSV"
 
 #: core/templates/core/index.html:117
-#, fuzzy
-#| msgid "Treatment Plan"
 msgid "Treatment plan"
-msgstr "Plan de Traitement"
+msgstr "Plan de traitement"
 
 #: core/templates/core/index.html:146 core/templates/core/user_list.html:195
 #: core/templates/snippets/paginator.html:4
@@ -2104,10 +2075,8 @@ msgid "Scope"
 msgstr "Périmètre"
 
 #: core/templates/core/ri_update.html:53
-#, fuzzy
-#| msgid "Last Update"
 msgid "Last update"
-msgstr "Dernière Mise à Jour"
+msgstr "Dernière mise à jour"
 
 #: core/templates/core/ri_update.html:103
 msgid "Current risk"
@@ -2692,21 +2661,10 @@ msgid "Impact"
 msgstr ""
 
 #: core/templates/core/search_results.html:8
-#, fuzzy
-#| msgid "Search threat..."
 msgid "Search results"
-msgstr "Rechercher une menace..."
+msgstr "Résultats de la recherche"
 
 #: core/templates/core/search_results.html:35
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "            Here is the overview for the selected analysis:\n"
-#| "            "
-#| msgid_plural ""
-#| "\n"
-#| "            Here is the overview for the %(counter)s selected analyses:\n"
-#| "            "
 msgid ""
 "\n"
 "                Risk analysis\n"
@@ -2717,11 +2675,11 @@ msgid_plural ""
 "                "
 msgstr[0] ""
 "\n"
-"            Voici l'aperçu de l'analyse sélectionnée :\n"
+"            Analyse de risque\n"
 "            "
 msgstr[1] ""
 "\n"
-"            Voici l'aperçu des %(counter)s analyses sélectionnées :\n"
+"            Analyses de risque\n"
 "            "
 
 #: core/templates/core/search_results.html:42
@@ -2733,15 +2691,6 @@ msgstr ""
 "spécifique."
 
 #: core/templates/core/search_results.html:57
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "            Here is the overview for the selected analysis:\n"
-#| "            "
-#| msgid_plural ""
-#| "\n"
-#| "            Here is the overview for the %(counter)s selected analyses:\n"
-#| "            "
 msgid ""
 "\n"
 "            Risk scenario\n"
@@ -2752,23 +2701,14 @@ msgid_plural ""
 "            "
 msgstr[0] ""
 "\n"
-"            Voici l'aperçu de l'analyse sélectionnée :\n"
+"            Scénario de risque\n"
 "            "
 msgstr[1] ""
 "\n"
-"            Voici l'aperçu des %(counter)s analyses sélectionnées :\n"
+"            Scénarios de risque\n"
 "            "
 
 #: core/templates/core/search_results.html:79
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "                        <b>%(counter)s</b> risk scenario accepted\n"
-#| "                    "
-#| msgid_plural ""
-#| "\n"
-#| "                        <b>%(counter)s</b> risk scenarios accepted\n"
-#| "                    "
 msgid ""
 "\n"
 "                Security measure\n"
@@ -2779,11 +2719,11 @@ msgid_plural ""
 "                "
 msgstr[0] ""
 "\n"
-"                        <b>%(counter)s</b> scénario de risque accepté\n"
+"                        Mesure de sécurité\n"
 "                    "
 msgstr[1] ""
 "\n"
-"                        <b>%(counter)s</b> scénarios de risque acceptés\n"
+"                        Mesures de sécurité\n"
 "                    "
 
 #: core/templates/core/security_function_list.html:103
@@ -2868,10 +2808,8 @@ msgid "Ranking score"
 msgstr "Évaluation"
 
 #: core/templates/core/treatment.html:56
-#, fuzzy
-#| msgid "Your pending measures"
 msgid "No pending measure."
-msgstr "Vos mesures en attente"
+msgstr "Aucune mesure en attente"
 
 #: core/templates/core/treatment.html:63
 msgid ""
@@ -2900,7 +2838,7 @@ msgstr "informations sur l'utilisateur"
 msgid "Send"
 msgstr "Envoyer"
 
-#: core/templates/core/user_list.html:71
+#: core/templates/core/user_list.html:71 core/views.py:1738
 msgid "Superuser"
 msgstr "Superutilisateur"
 
@@ -3112,41 +3050,43 @@ msgid "Disabled"
 msgstr "désactivée"
 
 #: core/templates/license/overview.html:57
-#, fuzzy
-#| msgid "calendar"
 msgid "Standard"
-msgstr "calendrier"
+msgstr "Standard"
 
 #: core/templates/license/overview.html:63
 msgid "Expiration date"
 msgstr "Date d'expiration"
 
-#: core/templates/registration/first_connexion_confirm.html:23
+#: core/templates/registration/first_connexion_confirm.html:31
 #: core/templates/registration/login.html:21
 msgid "Hello there"
 msgstr "Bonjour"
 
-#: core/templates/registration/first_connexion_confirm.html:25
+#: core/templates/registration/first_connexion_confirm.html:33
 #: core/templates/registration/login.html:23
 msgid "This is MIRA. Your streamlined"
 msgstr "Bienvenue dans MIRA. Votre "
 
-#: core/templates/registration/first_connexion_confirm.html:25
+#: core/templates/registration/first_connexion_confirm.html:33
 #: core/templates/registration/login.html:23
 msgid "one-stop shop"
 msgstr "solution complète"
 
-#: core/templates/registration/first_connexion_confirm.html:26
+#: core/templates/registration/first_connexion_confirm.html:34
 #: core/templates/registration/login.html:24
 msgid "for risk assessment and management."
 msgstr "sur mesure pour l'évaluation et la gestion du risque."
 
-#: core/templates/registration/first_connexion_confirm.html:28
+#: core/templates/registration/first_connexion_confirm.html:36
 msgid "In order to log in, you must create a password for your account."
 msgstr ""
 "Afin de vous connecter, vous devez créer un mot de passe pour votre compte."
 
-#: core/templates/registration/first_connexion_confirm.html:40
+#: core/templates/registration/first_connexion_confirm.html:48
+msgid "I agree and acccept"
+msgstr "Je suis d'accord et j'accepte les"
+
+#: core/templates/registration/first_connexion_confirm.html:49
 msgid "Terms and conditions of use"
 msgstr "Conditions générales d'utilisation"
 
@@ -3157,6 +3097,15 @@ msgstr "Oui, j'accepte:"
 #: core/templates/registration/first_connexion_confirm.html:70
 msgid "Confirm password"
 msgstr "Confirmer le mot de passe"
+
+#: core/templates/registration/first_connexion_email.html:14
+msgid "Welcome to Mira!"
+msgstr "Bienvenue sur Mira!"
+
+#: core/templates/registration/first_connexion_email.html:15
+#: core/templates/registration/password_reset_email.html:23
+msgid "Your all-in-one Risk Management Platform"
+msgstr ""
 
 #: core/templates/registration/first_connexion_email.html:33
 msgid ""
@@ -3235,11 +3184,11 @@ msgstr "Se connecter avec passkeys"
 msgid "Forgot password?"
 msgstr "Mot de passe oublié?"
 
-#: core/templates/registration/password_reset.html:11
+#: core/templates/registration/password_reset.html:20
 msgid "Password reset"
 msgstr "Réinitialisation du mot de passe"
 
-#: core/templates/registration/password_reset.html:13
+#: core/templates/registration/password_reset.html:22
 msgid ""
 "Forgotten your password? Enter your email address below, and we'll email "
 "instructions for setting a new one."
@@ -3247,39 +3196,39 @@ msgstr ""
 "Vous avez oublié votre mot de passe ? Entrez votre adresse électronique ci-"
 "dessous, et nous vous enverrons les instructions pour en définir un nouveau."
 
-#: core/templates/registration/password_reset.html:21
+#: core/templates/registration/password_reset.html:30
 msgid "Email:"
 msgstr "Adresse électronique :"
 
-#: core/templates/registration/password_reset.html:28
+#: core/templates/registration/password_reset.html:37
 msgid "Send Email"
 msgstr "Envoyer l'email"
 
-#: core/templates/registration/password_reset_complete.html:10
+#: core/templates/registration/password_reset_complete.html:19
 msgid "Password reset complete"
 msgstr "Réinitialisation du mot de passe terminée"
 
-#: core/templates/registration/password_reset_complete.html:12
+#: core/templates/registration/password_reset_complete.html:21
 msgid "Your password has been set. You may go ahead and"
 msgstr "Votre mot de passe a été défini. Vous pouvez"
 
-#: core/templates/registration/password_reset_complete.html:12
+#: core/templates/registration/password_reset_complete.html:21
 msgid "log in"
 msgstr "vous connecter"
 
-#: core/templates/registration/password_reset_complete.html:12
+#: core/templates/registration/password_reset_complete.html:21
 msgid "now."
 msgstr "maintenant."
 
-#: core/templates/registration/password_reset_confirm.html:30
+#: core/templates/registration/password_reset_confirm.html:40
 msgid "Reset password"
 msgstr "Réinitialiser le mot de passe"
 
-#: core/templates/registration/password_reset_done.html:10
+#: core/templates/registration/password_reset_done.html:19
 msgid "Password reset sent"
 msgstr "Réinitialisation du mot de passe envoyée"
 
-#: core/templates/registration/password_reset_done.html:12
+#: core/templates/registration/password_reset_done.html:21
 msgid ""
 "We've emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
@@ -3288,7 +3237,7 @@ msgstr ""
 "un compte existe avec l'adresse électronique que vous avez entrée. Vous "
 "devriez les recevoir sous peu."
 
-#: core/templates/registration/password_reset_done.html:12
+#: core/templates/registration/password_reset_done.html:21
 msgid ""
 "If you don't receive an email, please make sure you've entered the address "
 "you registered with, and check your spam folder."
@@ -3378,6 +3327,10 @@ msgstr "Version :"
 #: core/templates/snippets/modal/modal_about_mira.html:63
 msgid "Build:"
 msgstr "Build :"
+
+#: core/templates/snippets/modal/modal_about_mira.html:64
+msgid "Terms of use"
+msgstr "Conditions générales d'utilisation"
 
 #: core/templates/snippets/modal/modal_action_form.html:3
 msgid ""
@@ -3655,7 +3608,11 @@ msgstr ""
 "Attention ! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
 
-#: core/views.py:1834
+#: core/views.py:1738
+msgid "Entry date"
+msgstr "Date d'inscription"
+
+#: core/views.py:1828
 msgid "User created and email send successfully."
 msgstr ""
 "L'utilisateur a été créé et le courrier électronique a été envoyé avec "
@@ -3669,6 +3626,9 @@ msgstr ""
 "L'édition de l'attribution des rôles sera disponible dans une prochaine "
 "version. Actuellement, vous devez attacher les utilisateurs à des groupes "
 "pour leur attribuer des rôles."
+
+#~ msgid "Yes, I accept:"
+#~ msgstr "Oui, j'accepte:"
 
 #~ msgid "Associated risk"
 #~ msgstr "Risque associé"
