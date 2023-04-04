@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 09:52+0000\n"
+"POT-Creation-Date: 2023-04-04 12:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1732,13 +1732,13 @@ msgstr ""
 "vous voulez évaluer le risque d'un système spécifique, pour lequel vous avez "
 "besoin de l'évaluation du risque des composants sous-jacents"
 
-#: core/templates/core/project_select.html:52
-msgid "Select your targets"
-msgstr "Sélectionnez vos cibles"
-
-#: core/templates/core/project_select.html:104
+#: core/templates/core/project_select.html:29
 msgid "Process"
 msgstr "Traiter"
+
+#: core/templates/core/project_select.html:53
+msgid "Select your targets"
+msgstr "Sélectionnez vos cibles"
 
 #: core/templates/core/quick_start.html:5 core/templates/core/sidebar.html:56
 msgid "Quick start"
@@ -3142,14 +3142,14 @@ msgstr ""
 "Afin de vous connecter, vous devez créer un mot de passe pour votre compte."
 
 #: core/templates/registration/first_connexion_confirm.html:40
+msgid "I agree and acccept"
+msgstr "Je suis d'accord et j'accepte les"
+
+#: core/templates/registration/first_connexion_confirm.html:41
 msgid "Terms and conditions of use"
 msgstr "Conditions générales d'utilisation"
 
-#: core/templates/registration/first_connexion_confirm.html:40
-msgid "Yes, I accept:"
-msgstr "Oui, j'accepte:"
-
-#: core/templates/registration/first_connexion_confirm.html:68
+#: core/templates/registration/first_connexion_confirm.html:69
 msgid "Confirm password"
 msgstr "Confirmer le mot de passe"
 
@@ -3373,6 +3373,10 @@ msgstr "Version :"
 #: core/templates/snippets/modal/modal_about_mira.html:63
 msgid "Build:"
 msgstr "Build :"
+
+#: core/templates/snippets/modal/modal_about_mira.html:64
+msgid "Terms of use"
+msgstr "Conditions générales d'utilisation"
 
 #: core/templates/snippets/modal/modal_action_form.html:3
 msgid ""
@@ -3654,6 +3658,9 @@ msgstr ""
 "L'édition de l'attribution des rôles sera disponible dans une prochaine "
 "version. Actuellement, vous devez attacher les utilisateurs à des groupes "
 "pour leur attribuer des rôles."
+
+#~ msgid "Yes, I accept:"
+#~ msgstr "Oui, j'accepte:"
 
 #~ msgid "Associated risk"
 #~ msgstr "Risque associé"

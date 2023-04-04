@@ -35,10 +35,9 @@
                                     {% for field in form %}
                                     {% if field.name == "terms_service" %}
                                     <div class="">
-                                        <label class="text-md font-small">
-                                            <a href="https://intuitem.com/cgu" target='_blank' class="text-indigo-500 hover:text-indigo-600 underline">{% trans "Terms and conditions of use" %}</a>
-                                        </label>
-                                        <br>{% trans "Yes, I accept:" %} {{field}}
+                                        {{field}}
+                                        {% trans "I agree and acccept" %}
+                                        <a href="https://intuitem.com/cgu" target='_blank' class="text-indigo-500 hover:text-indigo-600 underline">{% trans "Terms and conditions of use" %}</a>
                                         <div class="w-auto">
                                             {% for error in field.errors %}
                                                 <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
