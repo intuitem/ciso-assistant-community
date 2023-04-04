@@ -127,7 +127,7 @@ class AnalysisFilter(GenericFilterSet):
     ))
     auditor = GenericModelMultipleChoiceFilter(queryset=User.objects.filter(analysis__auditor__isnull=False).distinct(), label=('Auditor'))
 
-    project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
+    project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders, label=_('Domain'))
 
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
 
@@ -145,8 +145,8 @@ class RiskScenarioFilter(GenericFilterSet):
     ))
     threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
     analysis__project = GenericModelMultipleChoiceFilter(
-        queryset=Project.objects.all())
-    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
+        queryset=Project.objects.all(), label=_('Project'))
+    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders, label=_('Domain'))
     treatment = GenericMultipleChoiceFilter(
         choices=RiskScenario.TREATMENT_OPTIONS)
 
@@ -335,6 +335,7 @@ class ProjectFilter(GenericFilterSet):
     class Meta:
         model = Project
         fields = '__all__'
+        exclude = ['created_at']
 
 
 class ThreatFilter(GenericFilterSet):
@@ -389,7 +390,7 @@ class SecurityFunctionFilter(GenericFilterSet):
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-
+        exclude = ['created_at', 'folder', 'is_published']
 
 class AssetFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
