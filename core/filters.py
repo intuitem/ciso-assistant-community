@@ -90,16 +90,6 @@ def viewable_folders(request):
     return Folder.objects.filter(id__in=accessible_folders)
 
 class AnalysisFilter(GenericFilterSet):
-    def get_full_names():
-        full_names = ()
-        users = User.objects.all()
-        try:
-            for user in users:
-                full_names += (user.id, user.get_full_name),
-        except Exception as e:
-            print(f"WORKAROUND: {e}")
-        return full_names
-
     orderby = GenericOrderingFilter(
         fields=(
             ('is_draft', 'is_draft'),
@@ -135,8 +125,7 @@ class AnalysisFilter(GenericFilterSet):
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
         }
     ))
-    auditor = GenericMultipleChoiceFilter(
-        choices=get_full_names(), label=('Auditor'))
+    auditor = GenericModelMultipleChoiceFilter(queryset=User.objects.filter(analysis__auditor__isnull=False).distinct(), label=('Auditor'))
 
     project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
 
