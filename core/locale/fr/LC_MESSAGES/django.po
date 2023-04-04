@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 12:25+0000\n"
+"POT-Creation-Date: 2023-04-04 12:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3116,42 +3116,51 @@ msgstr "calendrier"
 msgid "Expiration date"
 msgstr "Date d'expiration"
 
-#: core/templates/registration/first_connexion_confirm.html:23
+#: core/templates/registration/first_connexion_confirm.html:31
 #: core/templates/registration/login.html:21
 msgid "Hello there"
 msgstr "Bonjour"
 
-#: core/templates/registration/first_connexion_confirm.html:25
+#: core/templates/registration/first_connexion_confirm.html:33
 #: core/templates/registration/login.html:23
 msgid "This is MIRA. Your streamlined"
 msgstr "Bienvenue dans MIRA. Votre "
 
-#: core/templates/registration/first_connexion_confirm.html:25
+#: core/templates/registration/first_connexion_confirm.html:33
 #: core/templates/registration/login.html:23
 msgid "one-stop shop"
 msgstr "solution complète"
 
-#: core/templates/registration/first_connexion_confirm.html:26
+#: core/templates/registration/first_connexion_confirm.html:34
 #: core/templates/registration/login.html:24
 msgid "for risk assessment and management."
 msgstr "sur mesure pour l'évaluation et la gestion du risque."
 
-#: core/templates/registration/first_connexion_confirm.html:28
+#: core/templates/registration/first_connexion_confirm.html:36
 msgid "In order to log in, you must create a password for your account."
 msgstr ""
 "Afin de vous connecter, vous devez créer un mot de passe pour votre compte."
 
-#: core/templates/registration/first_connexion_confirm.html:40
+#: core/templates/registration/first_connexion_confirm.html:48
 msgid "I agree and acccept"
 msgstr "Je suis d'accord et j'accepte les"
 
-#: core/templates/registration/first_connexion_confirm.html:41
+#: core/templates/registration/first_connexion_confirm.html:49
 msgid "Terms and conditions of use"
 msgstr "Conditions générales d'utilisation"
 
-#: core/templates/registration/first_connexion_confirm.html:69
+#: core/templates/registration/first_connexion_confirm.html:77
 msgid "Confirm password"
 msgstr "Confirmer le mot de passe"
+
+#: core/templates/registration/first_connexion_email.html:14
+msgid "Welcome to Mira!"
+msgstr "Bienvenue sur Mira!"
+
+#: core/templates/registration/first_connexion_email.html:15
+#: core/templates/registration/password_reset_email.html:23
+msgid "Your all-in-one Risk Management Platform"
+msgstr ""
 
 #: core/templates/registration/first_connexion_email.html:33
 msgid ""
@@ -3230,11 +3239,11 @@ msgstr "Se connecter avec passkeys"
 msgid "Forgot password?"
 msgstr "Mot de passe oublié?"
 
-#: core/templates/registration/password_reset.html:11
+#: core/templates/registration/password_reset.html:20
 msgid "Password reset"
 msgstr "Réinitialisation du mot de passe"
 
-#: core/templates/registration/password_reset.html:13
+#: core/templates/registration/password_reset.html:22
 msgid ""
 "Forgotten your password? Enter your email address below, and we'll email "
 "instructions for setting a new one."
@@ -3242,39 +3251,39 @@ msgstr ""
 "Vous avez oublié votre mot de passe ? Entrez votre adresse électronique ci-"
 "dessous, et nous vous enverrons les instructions pour en définir un nouveau."
 
-#: core/templates/registration/password_reset.html:21
+#: core/templates/registration/password_reset.html:30
 msgid "Email:"
 msgstr "Adresse électronique :"
 
-#: core/templates/registration/password_reset.html:28
+#: core/templates/registration/password_reset.html:37
 msgid "Send Email"
 msgstr "Envoyer l'email"
 
-#: core/templates/registration/password_reset_complete.html:10
+#: core/templates/registration/password_reset_complete.html:19
 msgid "Password reset complete"
 msgstr "Réinitialisation du mot de passe terminée"
 
-#: core/templates/registration/password_reset_complete.html:12
+#: core/templates/registration/password_reset_complete.html:21
 msgid "Your password has been set. You may go ahead and"
 msgstr "Votre mot de passe a été défini. Vous pouvez"
 
-#: core/templates/registration/password_reset_complete.html:12
+#: core/templates/registration/password_reset_complete.html:21
 msgid "log in"
 msgstr "vous connecter"
 
-#: core/templates/registration/password_reset_complete.html:12
+#: core/templates/registration/password_reset_complete.html:21
 msgid "now."
 msgstr "maintenant."
 
-#: core/templates/registration/password_reset_confirm.html:30
+#: core/templates/registration/password_reset_confirm.html:40
 msgid "Reset password"
 msgstr "Réinitialiser le mot de passe"
 
-#: core/templates/registration/password_reset_done.html:10
+#: core/templates/registration/password_reset_done.html:19
 msgid "Password reset sent"
 msgstr "Réinitialisation du mot de passe envoyée"
 
-#: core/templates/registration/password_reset_done.html:12
+#: core/templates/registration/password_reset_done.html:21
 msgid ""
 "We've emailed you instructions for setting your password, if an account "
 "exists with the email you entered. You should receive them shortly."
@@ -3283,7 +3292,7 @@ msgstr ""
 "un compte existe avec l'adresse électronique que vous avez entrée. Vous "
 "devriez les recevoir sous peu."
 
-#: core/templates/registration/password_reset_done.html:12
+#: core/templates/registration/password_reset_done.html:21
 msgid ""
 "If you don't receive an email, please make sure you've entered the address "
 "you registered with, and check your spam folder."
