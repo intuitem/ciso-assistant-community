@@ -422,9 +422,9 @@ class UserFilter(GenericFilterSet):
 
     def user_search(queryset, name, value):
         return queryset.filter(
-            Q(username__icontains=value) | Q(
+            Q(email__icontains=value) | Q(
                 first_name__icontains=value) | Q(last_name__icontains=value)
-        ).order_by('-is_active', '-is_superuser', 'username', 'id')
+        ).order_by('-is_active', '-is_superuser', 'email', 'id')
 
     YES_NO_CHOICES = (
         (True, _('Yes')),
