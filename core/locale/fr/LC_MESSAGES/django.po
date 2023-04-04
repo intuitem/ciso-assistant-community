@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 09:52+0000\n"
+"POT-Creation-Date: 2023-04-04 13:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,7 +217,7 @@ msgid "Search acceptance..."
 msgstr "Rechercher une acceptation..."
 
 #: core/filters.py:240 core/templates/core/quick_start.html:130
-#: core/views.py:514
+#: core/views.py:520
 msgid "risk scenarios"
 msgstr "scénarios de risque"
 
@@ -406,7 +406,7 @@ msgstr "Statut"
 #: core/models.py:38 core/templates/core/mtg_list.html:147
 #: core/templates/core/project_list.html:6
 #: core/templates/core/risk_matrix_list.html:52
-#: core/templates/core/sidebar.html:147 core/views.py:249 core/views.py:878
+#: core/templates/core/sidebar.html:147 core/views.py:249 core/views.py:884
 msgid "Projects"
 msgstr "Projets"
 
@@ -423,7 +423,7 @@ msgid "Threat"
 msgstr "Menace"
 
 #: core/models.py:49 core/templates/core/sidebar.html:165
-#: core/templates/core/threat_list.html:5 core/views.py:1589
+#: core/templates/core/threat_list.html:5 core/views.py:1595
 msgid "Threats"
 msgstr "Menaces"
 
@@ -447,7 +447,7 @@ msgstr "bien parent"
 
 #: core/models.py:76 core/models.py:373 core/templates/core/asset_list.html:7
 #: core/templates/core/quick_start.html:76 core/templates/core/sidebar.html:156
-#: core/views.py:973
+#: core/views.py:979
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -469,7 +469,7 @@ msgid "Security function"
 msgstr "Fonction de sécurité"
 
 #: core/models.py:109 core/templates/core/security_function_list.html:5
-#: core/templates/core/sidebar.html:173 core/views.py:768 core/views.py:1511
+#: core/templates/core/sidebar.html:173 core/views.py:774 core/views.py:1517
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
@@ -530,7 +530,7 @@ msgid "Analysis"
 msgstr "Analyse"
 
 #: core/models.py:170 core/templates/core/mtg_list.html:146
-#: core/templates/core/overview.html:43 core/views.py:1197
+#: core/templates/core/overview.html:43 core/views.py:1203
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -701,7 +701,7 @@ msgstr "Mesure de sécurité"
 
 #: core/models.py:319 core/models.py:375 core/templates/core/mtg_list.html:6
 #: core/templates/core/overview.html:51 core/templates/core/sidebar.html:115
-#: core/views.py:1433
+#: core/views.py:1439
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -802,7 +802,7 @@ msgstr "Commentaires"
 #: core/templates/core/analysis_list.html:143
 #: core/templates/core/ri_list.html:6 core/templates/core/sidebar.html:106
 #: core/templates/snippets/ra_data.html:39
-#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1323
+#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1329
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -886,7 +886,7 @@ msgstr "Acceptation de risque"
 
 #: core/models.py:504 core/templates/core/acceptance_list.html:6
 #: core/templates/core/overview.html:55 core/templates/core/sidebar.html:124
-#: core/views.py:1699
+#: core/views.py:1705
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
@@ -952,11 +952,16 @@ msgstr "Date d'expiration"
 msgid "Actions"
 msgstr ""
 
-#: core/templates/core/acceptance_list.html:178
+#: core/templates/core/acceptance_list.html:147
+#: core/templates/core/fragments/watchlist_exceptions.html:27
+msgid "action requested"
+msgstr "action requise"
+
+#: core/templates/core/acceptance_list.html:183
 msgid "Delete risk acceptance?"
 msgstr "Supprimer l'acceptation de risque ?"
 
-#: core/templates/core/acceptance_list.html:188
+#: core/templates/core/acceptance_list.html:193
 msgid "No risk acceptance found."
 msgstr "Aucune acceptation de risque trouvée."
 
@@ -1417,12 +1422,12 @@ msgstr " \"Déc\" "
 msgid "Acceptance"
 msgstr "Acceptation"
 
-#: core/templates/core/fragments/watchlist_exceptions.html:35
+#: core/templates/core/fragments/watchlist_exceptions.html:40
 #: core/templates/core/fragments/watchlist_measures.html:35
 msgid "expired"
 msgstr "expiré"
 
-#: core/templates/core/fragments/watchlist_exceptions.html:44
+#: core/templates/core/fragments/watchlist_exceptions.html:49
 msgid "No exceptions yet."
 msgstr "Aucune exception pour le moment."
 
@@ -1593,7 +1598,7 @@ msgstr ""
 
 #: core/templates/core/my_profile_detailed.html:29
 #: core/templates/core/role_list.html:36 core/templates/core/user_list.html:79
-#: core/views.py:1940 core/views.py:2038
+#: core/views.py:1946 core/views.py:2044
 msgid "User groups"
 msgstr "Groupes utilisateurs"
 
@@ -1676,7 +1681,7 @@ msgstr "ID interne"
 
 #: core/templates/core/project_domain_list.html:5
 #: core/templates/core/quick_start.html:49 core/templates/core/sidebar.html:138
-#: core/views.py:235 core/views.py:765 core/views.py:1092
+#: core/views.py:235 core/views.py:771 core/views.py:1098
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
@@ -1732,13 +1737,13 @@ msgstr ""
 "vous voulez évaluer le risque d'un système spécifique, pour lequel vous avez "
 "besoin de l'évaluation du risque des composants sous-jacents"
 
-#: core/templates/core/project_select.html:52
-msgid "Select your targets"
-msgstr "Sélectionnez vos cibles"
-
-#: core/templates/core/project_select.html:104
+#: core/templates/core/project_select.html:29
 msgid "Process"
 msgstr "Traiter"
+
+#: core/templates/core/project_select.html:53
+msgid "Select your targets"
+msgstr "Sélectionnez vos cibles"
 
 #: core/templates/core/quick_start.html:5 core/templates/core/sidebar.html:56
 msgid "Quick start"
@@ -1893,7 +1898,7 @@ msgstr "traitement de risque"
 msgid "For each risk scenario, try to define and apply additional"
 msgstr "Pour chaque scénario de risque, essayez de définir et d'appliqer des "
 
-#: core/templates/core/quick_start.html:148 core/views.py:518
+#: core/templates/core/quick_start.html:148 core/views.py:524
 msgid "security measures"
 msgstr "mesures de sécurité"
 
@@ -2190,8 +2195,8 @@ msgid_plural "across <strong>%(projects)s</strong> projects"
 msgstr[0] "à travers <strong>%(projects)s</strong> project"
 msgstr[1] "à travers <strong>%(projects)s</strong> projects"
 
-#: core/templates/core/risk_matrix_list.html:7 core/views.py:2128
-#: core/views.py:2147
+#: core/templates/core/risk_matrix_list.html:7 core/views.py:2134
+#: core/views.py:2153
 msgid "Matrices"
 msgstr ""
 
@@ -2207,11 +2212,11 @@ msgstr "Matrice"
 msgid "disabled"
 msgstr "désactivée"
 
-#: core/templates/core/risk_matrix_list.html:105
+#: core/templates/core/risk_matrix_list.html:107
 msgid "Delete matrix?"
 msgstr "Supprimer la matrice ?"
 
-#: core/templates/core/risk_matrix_list.html:115
+#: core/templates/core/risk_matrix_list.html:117
 msgid "No matrix found."
 msgstr "Aucune matrice trouvée."
 
@@ -2231,7 +2236,7 @@ msgstr "Nouvelle assignation de rôle"
 #: core/templates/core/role_assignment_create.html:10
 #: core/templates/core/role_assignment_update.html:10
 #: core/templates/core/role_list.html:6 core/templates/core/sidebar.html:236
-#: core/views.py:2008
+#: core/views.py:2014
 msgid "Role assignment"
 msgstr "Assignation de rôle"
 
@@ -2267,7 +2272,7 @@ msgstr "Assignations de rôle"
 
 #: core/templates/core/role_list.html:35 core/templates/core/sidebar.html:197
 #: core/templates/core/sidebar.html:206 core/templates/core/user_list.html:6
-#: core/views.py:1816 core/views.py:1849 core/views.py:2065
+#: core/views.py:1822 core/views.py:1855 core/views.py:2071
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -3145,11 +3150,11 @@ msgstr ""
 msgid "Terms and conditions of use"
 msgstr "Conditions générales d'utilisation"
 
-#: core/templates/registration/first_connexion_confirm.html:40
+#: core/templates/registration/first_connexion_confirm.html:42
 msgid "Yes, I accept:"
 msgstr "Oui, j'accepte:"
 
-#: core/templates/registration/first_connexion_confirm.html:68
+#: core/templates/registration/first_connexion_confirm.html:70
 msgid "Confirm password"
 msgstr "Confirmer le mot de passe"
 
@@ -3598,29 +3603,39 @@ msgstr ""
 "Attention! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
 
-#: core/views.py:330
+#: core/views.py:313
+msgid ""
+"You have {} pending risk acceptance(s) waiting to be processed. Go to the "
+"list of <a class='text-blue-600 underline hover:text-blue-500' href={}>risk "
+"acceptances</a> to learn more."
+msgstr ""
+"Vous avez {} acceptation(s) de risque en attente de traitement. allez dans la "
+"liste des <a class='text-blue-600 underline hover:text-blue-500' href={}>acceptations "
+"de risque</a> pour en savoir plus."
+
+#: core/views.py:336
 msgid "Please wait before requesting another password reset."
 msgstr ""
 "Veuillez patienter avant de demander une nouvelle réinitialisation de votre "
 "mot de passe."
 
-#: core/views.py:335
+#: core/views.py:341
 msgid "Mira: Password Reset"
 msgstr "Mira: Réinitialisation de mot de passe"
 
-#: core/views.py:339
+#: core/views.py:345
 msgid "An error has occured, please try later."
 msgstr "Une erreur s'est produite, veuillez réessayer plus tard."
 
-#: core/views.py:350
+#: core/views.py:356
 msgid "Invalid email or captcha."
 msgstr "Email ou captcha invalide."
 
-#: core/views.py:775
+#: core/views.py:781
 msgid "Add "
 msgstr "Ajouter "
 
-#: core/views.py:1076
+#: core/views.py:1082
 msgid ""
 "User groups {} - Auditors, {} - Validators, {} - Analysts and {} - Domain "
 "Managers were created"
@@ -3628,11 +3643,11 @@ msgstr ""
 "Les groupes d'utilisateurs {} - Auditeurs, {} - Validateurs, {} - Analystes "
 "et {} - Responsables de domaine ont été créés"
 
-#: core/views.py:1665 core/views.py:1690
+#: core/views.py:1671 core/views.py:1696
 msgid "Risk acceptance submitted to: "
 msgstr "Acceptation de risque soumise à: "
 
-#: core/views.py:1736
+#: core/views.py:1742
 msgid ""
 "Warning! You are not assigned to any group. Without a group you will not "
 "have access to any functionality. Please contact you administrator."
@@ -3640,13 +3655,13 @@ msgstr ""
 "Attention ! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
 
-#: core/views.py:1828
+#: core/views.py:1834
 msgid "User created and email send successfully."
 msgstr ""
 "L'utilisateur a été créé et le courrier électronique a été envoyé avec "
 "succès."
 
-#: core/views.py:1977
+#: core/views.py:1983
 msgid ""
 "Role assignment editing will be available in a future release. Currently you "
 "have to attach users to groups to assign roles."
