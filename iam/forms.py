@@ -68,6 +68,10 @@ class UserCreationForm(forms.ModelForm):
         model = User
         fields = ('email',)
 
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        return email.lower()
+
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
