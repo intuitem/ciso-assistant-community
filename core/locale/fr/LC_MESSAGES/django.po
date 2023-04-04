@@ -1746,7 +1746,7 @@ msgstr "Démarrage rapide"
 
 #: core/templates/core/quick_start.html:12
 msgid "To get started, you need:"
-msgstr "Pour commencer, vous avez besoin:"
+msgstr "Pour débuter, vous avez besoin:"
 
 #: core/templates/core/quick_start.html:21
 msgid "As administrator, you are in charge to import at least one"
