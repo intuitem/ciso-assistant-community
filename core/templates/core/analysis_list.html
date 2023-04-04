@@ -151,9 +151,9 @@
                         <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if analysis.is_draft %}
-                                <span class="bg-blue-200 p-1 rounded-lg text-xs text-gray-900">{% trans "draft" %}</span>
+                                <span class="bg-blue-200 p-1 rounded-md text-xs text-gray-900">{% trans "draft" %}</span>
                                 {% else %}
-                                <span class="bg-green-200 p-1 rounded-lg text-xs text-gray-900">{% trans "ready" %}</span>
+                                <span class="bg-green-200 p-1 rounded-md text-xs text-gray-900">{% trans "ready" %}</span>
                                 {% endif %}
                                 <div class="ml-3">
                                     <p id="analysis{{ analysis.id }}" class="text-md font-semibold whitespace-no-wrap">

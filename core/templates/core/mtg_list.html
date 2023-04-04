@@ -152,7 +152,7 @@
                     <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition ease-in-out duration-100 hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'securitymeasure-detail' measure.id %}?next={{ request.path|urlencode }}'">
                         <td scope="row" class="px-6 py-4 font-medium">
                             <div class="flex items-center">                           
-                                <span class="whitespace-nowrap p-1 rounded-lg text-xs
+                                <span class="whitespace-nowrap p-1 rounded-md text-xs
                                 {% if measure.status == 'open' %}
                                 bg-blue-200 
                                 {% elif measure.status == 'in_progress' %}
