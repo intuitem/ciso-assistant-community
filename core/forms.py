@@ -31,9 +31,8 @@ class SearchableSelect(Select):
     template_name = 'forms/widgets/searchable_select.html'
     option_template_name = 'forms/widgets/select_option.html'
 
-    def __init__(self, attrs = ..., choices: list[tuple] = ...) -> None:
-        super().__init__(attrs, choices)
-        # generate random id in a way that avoids collisions
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.id = f'searchable-select-{id(self)}'
 
 class DefaultDateInput(DateInput):
@@ -181,6 +180,10 @@ class RiskAnalysisUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['project'].choices)
+        self.fields['auditor'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
+                   'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+                   'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
+                   choices=self.fields['auditor'].choices)
 
     class Meta:
         model = Analysis

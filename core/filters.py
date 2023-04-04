@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from core.models import Analysis, RiskScenario, SecurityMeasure, SecurityFunction, RiskAcceptance, RiskMatrix
 from core.models import Asset, Folder, Project, Threat, SecurityFunction
+from core.forms import SearchableSelect, SearchableCheckboxSelectMultiple
 from iam.models import User, UserGroup, RoleAssignment
 from django.utils.translation import gettext_lazy as _
 
@@ -27,9 +28,11 @@ class GenericOrderingFilter(OrderingFilter):
 
 
 class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
-    widget = CheckboxSelectMultiple(
+    widget = SearchableCheckboxSelectMultiple(
         attrs={
             'class': 'text-sm rounded',
+            'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+            'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 overflow-y-scroll max-h-72'
         }
     )
 
@@ -38,9 +41,11 @@ class GenericModelMultipleChoiceFilter(ModelMultipleChoiceFilter):
 
 
 class GenericMultipleChoiceFilter(MultipleChoiceFilter):
-    widget = CheckboxSelectMultiple(
+    widget = SearchableCheckboxSelectMultiple(
         attrs={
             'class': 'text-sm rounded',
+            'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm border border-gray-300 rounded-t-lg px-3',
+            'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 overflow-y-scroll max-h-72'
         }
     )
 
@@ -63,9 +68,11 @@ class GenericCharFilter(CharFilter):
 
 
 class GenericChoiceFilter(ChoiceFilter):
-    widget = Select(
+    widget = SearchableSelect(
         attrs={
-            'class': 'rounded-lg w-full border-gray-200'
+            'class': 'text-sm rounded',
+            'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
+            'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'
         }
     )
 
@@ -83,16 +90,6 @@ def viewable_folders(request):
     return Folder.objects.filter(id__in=accessible_folders)
 
 class AnalysisFilter(GenericFilterSet):
-    def get_full_names():
-        full_names = ()
-        users = User.objects.all()
-        try:
-            for user in users:
-                full_names += (user.id, user.get_full_name),
-        except Exception as e:
-            print(f"WORKAROUND: {e}")
-        return full_names
-
     orderby = GenericOrderingFilter(
         fields=(
             ('is_draft', 'is_draft'),
@@ -123,11 +120,14 @@ class AnalysisFilter(GenericFilterSet):
             'placeholder': _('Search analysis...')
         }
     ))
-    is_draft = GenericChoiceFilter(choices=STATUS_CHOICES)
-    auditor = GenericMultipleChoiceFilter(
-        choices=get_full_names(), label=('Auditor'))
+    is_draft = GenericChoiceFilter(choices=STATUS_CHOICES, widget=Select(
+        attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
+        }
+    ))
+    auditor = GenericModelMultipleChoiceFilter(queryset=User.objects.filter(analysis__auditor__isnull=False).distinct(), label=('Auditor'))
 
-    project__folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.filter(content_type=Folder.ContentType.DOMAIN))
+    project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders, label=_('Domain'))
 
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
 
@@ -145,8 +145,8 @@ class RiskScenarioFilter(GenericFilterSet):
     ))
     threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
     analysis__project = GenericModelMultipleChoiceFilter(
-        queryset=Project.objects.all())
-    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=Folder.objects.filter(content_type=Folder.ContentType.DOMAIN))
+        queryset=Project.objects.all(), label=_('Project'))
+    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders, label=_('Domain'))
     treatment = GenericMultipleChoiceFilter(
         choices=RiskScenario.TREATMENT_OPTIONS)
 
@@ -335,6 +335,7 @@ class ProjectFilter(GenericFilterSet):
     class Meta:
         model = Project
         fields = '__all__'
+        exclude = ['created_at']
 
 
 class ThreatFilter(GenericFilterSet):
@@ -389,7 +390,7 @@ class SecurityFunctionFilter(GenericFilterSet):
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-
+        exclude = ['created_at', 'folder', 'is_published']
 
 class AssetFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
