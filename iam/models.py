@@ -251,7 +251,7 @@ class User(AbstractBaseUser):
     def get_full_name(self) -> str:
         """get user's full name (i.e. first_name + last_name)"""
         try:
-            full_name = f'{self.first_name} {self.last_name}'
+            full_name = f'{self.first_name} {self.last_name}' if self.first_name and self.last_name else self.email
             return full_name.strip()
         except:
             return ""
