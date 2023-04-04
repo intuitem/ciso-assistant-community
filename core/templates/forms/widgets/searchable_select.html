@@ -89,7 +89,7 @@
                 </div>{% endwith %}
                 
             </div>
-            <input type="hidden" id="{{ id }}_selected" name="{{ widget.name }}" x-bind:value="selectedValue" @change="submitDisabled = false">
+            <input type="hidden" id="{{ id }}_selected" name="{{ widget.name }}" x-bind:value="selectedValue" x-on:keyup="submitDisabled = false" @change="submitDisabled = false">
         </div>
 
     </div>
