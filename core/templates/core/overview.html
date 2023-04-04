@@ -6,7 +6,7 @@
 <script src="/static/cache/echarts-5.4.1.min.js"></script>
 {% endblock %}
 {% block content %}
-<div class="h-screen" x-data="{ openTab: 1 }">
+<div class="h-screen w-auto" x-data="{ openTab: 1 }">
     {% with page_title=_('Overview') %}
     {% include 'snippets/breadcrumbs.html' %}
     {% endwith %}
@@ -106,5 +106,5 @@
         {% include 'core/treatment.html' with agg_data=agg_data measures=ord_security_measures %}
     </div>
 </div>
-</div>
+
 {% endblock %}

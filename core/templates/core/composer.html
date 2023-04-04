@@ -116,7 +116,7 @@
                                 {% for lvl in item.synth_table %}
 
                                 <tr>
-                                    <td class="border p-2">{{ lvl.lvl }}</td>
+                                    <td class="border p-2" style="background-color: {{ lvl.color }}">{{ lvl.lvl }}</td>
                                     <td class="border p-2 text-center">{{ lvl.current }}</td>
                                     <td class="border p-2 text-center">{{ lvl.residual }}</td>
                                 </tr>

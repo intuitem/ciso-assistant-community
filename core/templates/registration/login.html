@@ -1,43 +1,53 @@
-{% load i18n %}
-<script src="/static/cache/jquery-3.6.3.min.js"></script>
-{% load static %}
-{% load tailwind_tags %}
-{% tailwind_css %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    {% load i18n %}
+    {% load static %}
+    {% load tailwind_tags %}
+    <title>{% block title %}MIRA{% endblock title %}</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <script src="{% static 'cache/jquery-3.6.3.min.js' %}"></script>
+    {% tailwind_css %}
 
+</head>
 
-<div class="flex mx-auto justify-center items-center h-screen w-screen bg-gray-50">
-    <div class="flex p-10 space-x-4 ">
-        <div id="hellothere" class="w-2/4 py-5  pl-5 pr-10">
-            <div class="text-4xl py-4 font-black uppercase">{% trans "Hello there" %} 👋</div>
-            <div class="text-xl">
-                <p class="py-1">{% trans "This is MIRA. Your streamlined" %} <span class="font-semibold">{% trans "one-stop shop" %}</span>
-                {% trans "for risk assessment and management." %}
-                </p>
-                <p class="py-1">{% trans "You need to" %} <span class="font-semibold">{% trans "login" %}</span> {% trans "to access all the features." %}</p>
+<body>
+    {% block content %}
+    <div class="flex mx-auto justify-center items-center h-screen w-screen bg-gray-50">
+        <div class="flex p-10 space-x-4 ">
+            <div id="hellothere" class="w-2/4 py-5  pl-5 pr-10">
+                <div class="text-4xl py-4 font-black uppercase">{% trans "Hello there" %} 👋</div>
+                <div class="text-xl">
+                    <p class="py-1">{% trans "This is MIRA. Your streamlined" %} <span class="font-semibold">{% trans "one-stop shop" %}</span>
+                    {% trans "for risk assessment and management." %}
+                    </p>
+                    <p class="py-1">{% trans "You need to" %} <span class="font-semibold">{% trans "login" %}</span> {% trans "to access all the features." %}</p>
+                </div>
             </div>
-        </div>
-        <div class="w-2/4 p-6 shadow-lg rounded-lg bg-white ">
-                {% if invalid %}
-                    <div class="alert alert-danger">Invalid Username or password</div>
-                {% endif %}
-                <div id="login-div" class="flex flex-col">
-                <form id="login-form" method="post">
-                    {% csrf_token %}
-                    <p id="login-error" class="text-red-500 text-sm font-semibold">{{ form.non_field_errors|striptags }}</p>
-                    {% for field in form %}
-                    <div class="">
-                        <label class="">{{ field.label|striptags }}:</label>
-                        <div class="w-auto">
-                            {% for error in field.errors %}
-                                <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
-                            {% endfor %}
-                            {{ field }}
-                            <div class="mt-1 text-xs text-gray-400">
-                                {{ field.help_text|safe }}
+            <div class="w-2/4 p-6 shadow-lg rounded-lg bg-white ">
+                    {% if invalid %}
+                        <div class="alert alert-danger">{% trans "Invalid Username or password" %}</div>
+                    {% endif %}
+                    <div id="login-div" class="flex flex-col">
+                    <form id="login-form" method="post">
+                        {% csrf_token %}
+                        <p id="login-error" class="text-red-500 text-sm font-semibold">{{ form.non_field_errors|striptags }}</p>
+                        {% for field in form %}
+                        <div class="">
+                            <label class="">{{ field.label|striptags }}:</label>
+                            <div class="w-auto">
+                                {% for error in field.errors %}
+                                    <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
+                                {% endfor %}
+                                {{ field }}
+                                <div class="mt-1 text-xs text-gray-400">
+                                    {{ field.help_text|safe }}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
                     <input type="hidden" name="passkeys" id="passkeys"/>
                     <button id="login" type="submit"
                             class="bg-indigo-500 text-white font-semibold text-lg hover:bg-indigo-300 px-2 py-2 rounded shadow w-full my-2">
@@ -54,14 +64,16 @@
                     <a id="password_reset" href="{% url 'password_reset' %}" class="text-sg font-small underline text-indigo-500 hover:text-indigo-700 mb-4">{% trans "Forgot password?" %}</a>
                 </label>
             </div>
-        </div>
 
+
+        </div>
 
     </div>
 
-</div>
-
-<div>
+    <div>
 
 
-</div>
+    </div>
+    {% endblock content %}
+</body>
+</html>

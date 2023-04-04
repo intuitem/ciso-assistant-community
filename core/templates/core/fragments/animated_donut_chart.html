@@ -1,15 +1,21 @@
+{% load i18n %}
 <div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
 <script type="text/javascript">
 
     var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
     var option;
+    var vl = {% blocktrans %} "Very low" {% endblocktrans %};
+    var l = {% blocktrans %} "Low" {% endblocktrans %};
+    var m = {% blocktrans %} "Medium" {% endblocktrans %};
+    var h = {% blocktrans %} "High" {% endblocktrans %};
+    var vh = {% blocktrans %} "Very high" {% endblocktrans %};
 
     const data = [
-    { value: {{ values.0.value|safe }}, name: 'Very low' },
-    { value: {{ values.1.value|safe }}, name: 'Low' },
-    { value: {{ values.2.value|safe }}, name: 'Medium' },
-    { value: {{ values.3.value|safe }}, name: 'High' },
-    { value: {{ values.4.value|safe }}, name: 'Very high' }
+    { value: {{ values.0.value|safe }}, name: vl },
+    { value: {{ values.1.value|safe }}, name: l },
+    { value: {{ values.2.value|safe }}, name: m },
+    { value: {{ values.3.value|safe }}, name: h },
+    { value: {{ values.4.value|safe }}, name: vh }
     ];
     const defaultPalette = [
         // '#51689b', '#ce5c5c', '#fbc357', '#8fbf8f', '#659d84', '#fb8e6a', '#c77288', '#786090', '#91c4c5', '#6890ba'

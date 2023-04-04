@@ -357,11 +357,11 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
         folders.append(folder)
         if validator:
             if not RoleAssignment.is_access_allowed(validator, Permission.objects.get(codename='validate_riskacceptance'), folder):
-                raise ValidationError(_("This  validator cannot be assigned for this folder"))
+                raise ValidationError(_("This  validator cannot be assigned for this domain"))
         if risk_scenarios:
             for obj in risk_scenarios:
                 if obj.analysis.project.folder not in folders:
-                    raise ValidationError(_("Checked risk scenarios must be part of the selected folder"))
+                    raise ValidationError(_("Checked risk scenarios must be part of the selected domain"))
 
 
 class ProjectForm(StyledModelForm):

@@ -140,7 +140,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <ul class="whitespace-no-wrap capitalize">
+                            <ul class="whitespace-no-wrap">
                                 {% for group in user.user_groups.all %}
                                 <li class="list-none">
                                     {{ group }}
@@ -149,7 +149,7 @@
                             </ul>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="whitespace-no-wrap capitalize">
+                            <p class="whitespace-no-wrap">
                                 {{ user.get_full_name }}
                             </p>
                         </td>
