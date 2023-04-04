@@ -2152,7 +2152,7 @@ msgstr ""
 
 #: core/templates/core/risk_matrix_list.html:41
 msgid "Import matrix"
-msgstr "Importer une mamtrice"
+msgstr "Importer une matrice"
 
 #: core/templates/core/risk_matrix_list.html:53
 msgid "Matrix"
