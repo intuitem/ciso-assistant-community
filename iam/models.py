@@ -2,10 +2,10 @@
     Inspired from Azure IAM model """
 
 from collections import defaultdict
-from typing import Any, Tuple
+from typing import Any, Self, Tuple
 import uuid
 from django.utils import timezone
-from django.db import models
+from django.db import connection, models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission
@@ -18,8 +18,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from asf_rm.settings import MIRA_URL
+from django.core.mail import send_mail, get_connection, EmailMessage
+from asf_rm.settings import MIRA_URL, EMAIL_HOST_USER_RESCUE, EMAIL_HOST_PASSWORD_RESCUE, EMAIL_HOST_RESCUE, EMAIL_PORT_RESCUE, EMAIL_USE_TLS_RESCUE
 
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
@@ -75,10 +75,22 @@ class Folder(AbstractBaseModel):
         """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
+
+    def get_root_folder():
+        if not connection.introspection.table_names():
+            # Database tables haven't been created yet
+            return None
+        try:
+            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        except Folder.DoesNotExist:
+            # ROOT folder doesn't exist yet
+            return None
+
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
-        "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"))
+        "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"),
+        default=get_root_folder)
     builtin = models.BooleanField(default=False)
     hide_public_asset = models.BooleanField(default=False)
     hide_public_matrix = models.BooleanField(default=False)
@@ -93,7 +105,7 @@ class Folder(AbstractBaseModel):
     def __str__(self) -> str:
         return self.name.__str__()
 
-    def sub_folders(self) -> 'Self':  # type annotation Self to come in Python 3.11
+    def sub_folders(self) -> Self:
         """Return the list of subfolders"""
         def sub_folders_in(f, sub_folder_list):
             for sub_folder in f.folder_set.all():
@@ -102,13 +114,13 @@ class Folder(AbstractBaseModel):
             return sub_folder_list
         return sub_folders_in(self, [])
 
-    # type annotation Self to come in Python 3.11
-    def get_parent_folders(self) -> 'Self':
+
+    def get_parent_folders(self) -> Self:
         """Return the list of parent folders"""
         return [self.parent_folder] + Folder.get_parent_folders(self.parent_folder) if self.parent_folder else []
 
     @staticmethod
-    def get_folder(obj: Any) -> 'Self':  # type annotation Self to come in Python 3.11
+    def get_folder(obj: Any) -> Self:
         """Return the folder of an object"""
         # todo: add a folder attribute to all objects to avoid introspection
         if hasattr(obj, 'folder'):
@@ -133,6 +145,31 @@ class FolderMixin(models.Model):
         abstract = True
 
 
+class RootFolderMixin(FolderMixin):
+    """
+    Add foreign key to Folder, defaults to root folder
+    """
+    def get_default_folder():
+        if not connection.introspection.table_names():
+            # Database tables haven't been created yet
+            return None
+        
+        try:
+            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        except Folder.DoesNotExist:
+            # ROOT folder doesn't exist yet
+            return None
+    
+    folder = models.ForeignKey(
+        Folder,
+        on_delete=models.CASCADE,
+        related_name='%(class)s_folder',
+        default=get_default_folder,
+    )
+
+    class Meta:
+        abstract = True
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -150,7 +187,7 @@ class UserManager(BaseUserManager):
         else:
             user.password = make_password(str(uuid.uuid4()))
             try:
-                user.mailing(email_template_name="registration/first_connexion_email.txt", subject=_("First Connexion"))
+                user.mailing(email_template_name="registration/first_connexion_email.html", subject=_("Welcome to Mira!"))
             except Exception as exception:
                 user.save(using=self._db)
                 raise exception
@@ -221,11 +258,14 @@ class User(AbstractBaseUser):
         verbose_name_plural = _('users')
 #        swappable = 'AUTH_USER_MODEL'
 
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.email
+
     def get_full_name(self) -> str:
         """get user's full name (i.e. first_name + last_name)"""
         try:
             full_name = f'{self.first_name} {self.last_name}'
-            return full_name.strip()
+            return full_name
         except:
             return ""
         
@@ -250,7 +290,28 @@ class User(AbstractBaseUser):
                     'pk': str(pk) if pk else None
                 }
         email = render_to_string(email_template_name, header)
-        send_mail(subject, email, None, [self.email], fail_silently=False)
+        try:
+            send_mail(subject, email, None, [self.email], fail_silently=False, html_message=email)
+            print("mail sent to", self.email)
+        except Exception as e:
+            print(e)
+            #todo: move this to logger
+            print("primary mailer failure")
+            if EMAIL_HOST_RESCUE:
+                try:
+                    with get_connection(
+                        host=EMAIL_HOST_RESCUE, 
+                        port=EMAIL_PORT_RESCUE, 
+                        username=EMAIL_HOST_USER_RESCUE,
+                        password=EMAIL_HOST_PASSWORD_RESCUE, 
+                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                    ) as new_connection:
+                            EmailMessage(subject, email, None, [self.email],connection=new_connection).send()
+                            print("mail sent to", self.email)
+                except Exception as ex2:
+                    print(ex2)
+                    print("secondary mailer failure")
+
 
     @property
     def edit_url(self) -> str:
@@ -295,7 +356,8 @@ class RoleAssignment(models.Model):
     @staticmethod
     def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
         """Determines if a user has specified permission on a specified folder
-           Note: the None value for folder is a kludge for the time being, an existing folder should be specified
+           TODO: the None value for folder is a kludge for the time being, an existing folder should be specified
+           for the relevant exceptions see has_permission
         """
         for ra in RoleAssignment.get_role_assignments(user):
             if (not folder or folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
@@ -303,7 +365,7 @@ class RoleAssignment(models.Model):
         return False
 
     @staticmethod
-    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, codename: str="view_folder") -> 'list[Folder]':
+    def get_accessible_folders(folder: Folder, user: User, content_type: Folder.ContentType, codename: str="view_folder") -> list[Folder]:
         """Gets the list of folders with specified contentType that can be viewed by a user from a given folder
            If the contentType is not specified, returns all accessible folders
            Returns the list of the ids of the matching folders
@@ -391,7 +453,7 @@ class RoleAssignment(models.Model):
         return assignments
     
     def has_permission(user, codename):
-        """ Determines if a user has a specific permission """
+        """ Determines if a user has a specific permission. To be used cautiously with proper commenting """
         for ra in RoleAssignment.get_role_assignments(user):
             for perm in ra.role.permissions.all():
                 if perm.codename == codename:

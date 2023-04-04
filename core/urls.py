@@ -7,13 +7,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
+    path('search/', login_required(views.SearchResults.as_view()), name='search'),
+
     path('password_reset', views.password_reset_request, name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='registration/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', views.ResetPasswordConfirmView.as_view(), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'), name='password_reset_complete'),
     path('first_connexion/<uidb64>/<token>/', views.FirstConnexionPasswordConfirmView.as_view(), name='first_connexion_confirm'),
     path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
-    path('i18n/', include('django.conf.urls.i18n')),
 
     path('analyses-registry/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
     path('analysis/<analysis>.pdf', login_required(views.generate_ra_pdf), name='RA-PDF'),
@@ -29,6 +31,8 @@ urlpatterns = [
 
     path('scoring-assistant/', login_required(views.scoring_assistant), name='scoring'),
     path('risk-matrix/', login_required(views.show_risk_matrix), name='riskmatrix'), # obsolete, to be removed
+
+    path('license/', login_required(views.license_overview), name='lic-management'),
 
     path('browser/', login_required(views.Browser.as_view()), name='browser'),
     path('quick-start', login_required(views.QuickStartView.as_view()), name='quick_start'),

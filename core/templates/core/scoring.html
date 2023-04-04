@@ -2,12 +2,11 @@
 
 {% load i18n static %}
 
-{% block head %}
-{% endblock %}
-
 {% block content %}
 <script src="{% static 'js/risk.js' %}"></script>
-
+{% with page_title=_('Scoring assistant') %}
+    {% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
 <main class="text-sm h-full flex flex-col">
 
     <div class="mx-auto mt-4">

@@ -1,5 +1,6 @@
 from core.models import Threat, SecurityFunction, RiskMatrix
 from django.contrib import messages
+from django.contrib.auth.models import Permission
 from iam.models import Folder, RoleAssignment
 from asf_rm import settings
 from django.utils.translation import gettext_lazy as _
@@ -152,7 +153,6 @@ def import_security_function(fields):
         name=fields['name'],
         description=fields['description'],
         provider=fields['provider'],
-        contact=fields['contact'],
         folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
     )
 
@@ -227,7 +227,6 @@ def import_security_function_view(request, fields):
         name=fields['name'],
         description=fields['description'],
         provider=fields['provider'],
-        contact=fields['contact'],
         folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
     )
 
@@ -293,7 +292,7 @@ def is_import_permited(request, object_type):
     object_type = object_type.replace("_", "")
     if object_type == 'matrix':                 # dirty hack to avoid changing the library format
         object_type = 'riskmatrix'
-    if not RoleAssignment.has_permission(request.user, f"add_{object_type}"):
+    if not RoleAssignment.is_access_allowed(request.user, Permission.objects.get(codename=f"add_{object_type}"), Folder.objects.get(content_type=Folder.ContentType.ROOT)):
         messages.error(request, _("Library was not imported: permission denied for: {}").format(object_type))
         raise Exception(f"Permission denied for: {object_type}")
     return True
@@ -340,5 +339,5 @@ def import_library_view(request, library):
     for security_function in uploaded_list:
         import_security_function_view(request, security_function)
 
-    messages.success(request, _('Library "{}" imported successfully. {} objects imported and {} objects ignored.').format(library["name"], objects_uploaded, objects_ignored))
+    messages.success(request, _('Library "{}" imported successfully. {} object(s) imported and {} object(s) ignored.').format(library["name"], objects_uploaded, objects_ignored))
     return True

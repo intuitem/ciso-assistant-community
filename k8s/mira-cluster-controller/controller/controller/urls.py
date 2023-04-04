@@ -20,14 +20,16 @@ For simple 2FA, see: https://www.calazan.com/how-to-enable-2fa-in-the-django-adm
 from django.contrib import admin
 from django.urls import path, reverse_lazy
 from django.views.generic.base import RedirectView
+from controller.settings import CLUSTER_CONTROLLER_TITLE
 #from . import views
 
 from django_otp.admin import OTPAdminSite
 
 admin.site.__class__ = OTPAdminSite
-admin.site.site_header  =  "MIRA demo cluster"  
-admin.site.site_title  =  "MIRA demo cluster"
+admin.site.site_header  =  CLUSTER_CONTROLLER_TITLE  
+admin.site.site_title  =  CLUSTER_CONTROLLER_TITLE
 admin.site.index_title  =  "Dashboard"
+print("Title", CLUSTER_CONTROLLER_TITLE)
 
 urlpatterns = [
     path('', RedirectView.as_view(url=reverse_lazy('admin:index'))),

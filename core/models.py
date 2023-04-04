@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from asf_rm import settings
 from core.base_models import AbstractBaseModel
-from iam.models import Folder, FolderMixin
+from iam.models import Folder, FolderMixin, RootFolderMixin
 from openpyxl import load_workbook
 import pandas as pd
 import json
@@ -41,7 +41,7 @@ class Project(AbstractBaseModel):
         return self.name
 
 
-class Threat(AbstractBaseModel, FolderMixin):
+class Threat(AbstractBaseModel, RootFolderMixin):
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -52,7 +52,7 @@ class Threat(AbstractBaseModel, FolderMixin):
         return self.name
 
 
-class Asset(AbstractBaseModel, FolderMixin):
+class Asset(AbstractBaseModel, RootFolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -99,11 +99,9 @@ class Asset(AbstractBaseModel, FolderMixin):
         return list(result)
 
 
-class SecurityFunction(AbstractBaseModel, FolderMixin):
+class SecurityFunction(AbstractBaseModel, RootFolderMixin):
     provider = models.CharField(
         max_length=200, blank=True, null=True, verbose_name=_("Provider"))
-    contact = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Contact"))
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -205,50 +203,50 @@ class Analysis(AbstractBaseModel):
 
             if ri.residual_level > ri.current_level:
                 errors_lst.append({"msg": _("{} residual risk level is higher than the current one").format(
-                    ri.rid), "obj_type": "riskscenario", "object": ri})
+                    ri), "obj_type": "riskscenario", "object": ri})
             if ri.residual_proba > ri.current_proba:
                 errors_lst.append({"msg": _("{} residual risk probability is higher than the current one").format(
-                    ri.rid), "obj_type": "riskscenario", "object": ri})
+                    ri), "obj_type": "riskscenario", "object": ri})
             if ri.residual_impact > ri.current_impact:
                 errors_lst.append({"msg": _("{} residual risk impact is higher than the current one").format(
-                    ri.rid), "obj_type": "riskscenario", "object": ri})
+                    ri), "obj_type": "riskscenario", "object": ri})
 
             if ri.residual_level < ri.current_level or ri.residual_proba < ri.current_proba or ri.residual_impact < ri.current_impact:
                 if ri.security_measures.count() == 0:
                     errors_lst.append(
-                        {"msg": _("{}: residual risk level has been lowered without any specific measure").format(ri.rid), "obj_type": "riskscenario", "object": ri})
+                        {"msg": _("{}: residual risk level has been lowered without any specific measure").format(ri), "obj_type": "riskscenario", "object": ri})
 
             if ri.treatment == 'accepted':
                 if not ri.riskacceptance_set.exists():
                     warnings_lst.append({"msg": _("{} risk accepted but no risk acceptance attached").format(
-                        ri.rid), "obj_type": "riskscenario", "object": ri})
+                        ri), "obj_type": "riskscenario", "object": ri})
         # ---
 
         # --- checks on the security measures
         for mtg in SecurityMeasure.objects.filter(riskscenario__analysis=self):
             if not mtg.eta:
-                warnings_lst.append({"msg": _("{} does not have an ETA").format(
-                    mtg.mid), "obj_type": "securitymeasure", "object": mtg})
+                warnings_lst.append({"msg": _("{}/{} does not have an ETA").format(mtg.folder,
+                    mtg), "obj_type": "securitymeasure", "object": mtg})
             else:
                 if date.today() > mtg.eta:
                     errors_lst.append(
-                        {"msg": _("{} ETA is in the past now. Consider updating its status or the date").format(mtg.mid), "obj_type": "securitymeasure", "object": mtg})
+                        {"msg": _("{}/{} ETA is in the past now. Consider updating its status or the date").format(mtg.folder, mtg), "obj_type": "securitymeasure", "object": mtg})
             if not mtg.effort:
                 warnings_lst.append(
-                    {"msg": _("{} does not have an estimated effort. This will help you for prioritization").format(mtg.mid), "obj_type": "securitymeasure", "object": mtg})
+                    {"msg": _("{}/{} does not have an estimated effort. This will help you for prioritization").format(mtg.folder, mtg), "obj_type": "securitymeasure", "object": mtg})
             if not mtg.link:
                 info_lst.append(
-                    {"msg": _("{} does not have an external link attached. This will help you for follow-up").format(mtg.mid), "obj_type": "securitymeasure", "object": mtg})
+                    {"msg": _("{}/{}: Security measure does not have an external link attached. This will help you for follow-up").format(mtg.folder, mtg), "obj_type": "securitymeasure", "object": mtg})
 
         # --- checks on the risk acceptances
         for ra in RiskAcceptance.objects.filter(risk_scenarios__analysis=self):
             if not ra.expiry_date:
-                warnings_lst.append({"msg": _("{}: Acceptance has no expiry date").format(
+                warnings_lst.append({"msg": _("{}/{}: Acceptance has no expiry date").format(ra.folder,
                     ra), "obj_type": "securitymeasure", "object": ra})
                 continue
             if date.today() > ra.expiry_date:
                 errors_lst.append(
-                    {"msg": _("{}: Acceptance has expired. Consider updating the status or the date").format(ra), "obj_type": "securitymeasure", "object": ra})
+                    {"msg": _("{}/{}: Acceptance has expired. Consider updating the status or the date").format(ra.folder, ra), "obj_type": "riskacceptance", "object": ra})
 
         findings = {
             "errors": errors_lst,

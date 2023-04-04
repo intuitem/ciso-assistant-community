@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load i18n static %}
+{% load i18n static core_extras %}
 
 {% block content %}
 <div class="">
@@ -50,7 +50,7 @@
                             <div class="flex items-center">
                                 <div class="ml-0">
                                     {% if user_group.builtin %}
-                                    <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "built-in" %}</span>
+                                    <span class="bg-red-300 p-1 rounded-md text-xs mr-2">{% trans "built-in" %}</span>
                                     {% endif %}
                                     {% if object_ids_change %}
                                     <a id="user_group{{ user_group.id }}" href="{% url 'usergroup-update' user_group.id %}"

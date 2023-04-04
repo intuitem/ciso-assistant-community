@@ -16,7 +16,6 @@ Including another URLconf
 from django.urls import include, path
 import core.views as cv
 from django.contrib.auth import views as auth_views
-from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
@@ -27,7 +26,7 @@ urlpatterns = [
 
     path('accounts/login/', cv.UserLogin.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), {'next_page': '/'}, name='logout'),
-    path('search/', cv.SearchResults.as_view(), name='search'),
+
     path('', login_required(cv.AnalysisListView.as_view()), name='home'),
     path('x-rays', login_required(cv.ReviewView.as_view()), name='xrays'),
     path('passkeys/', include('passkeys.urls')),

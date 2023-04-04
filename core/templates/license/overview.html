@@ -1,0 +1,74 @@
+{% extends 'core/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+
+{% with page_title=_('License management') %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<main>
+    <div class=" rounded shadow font-serif bg-gradient-to-bl from-slate-100 to-white relative">
+        <div class="absolute right-0 p-4 text-5xl text-indigo-700">
+            <i class="fas fa-handshake"></i>
+        </div>
+    <table class="border-separate border-spacing-y-4">
+        <tr class="py-6">
+            <td class="text-lg font-bold px-6">
+                {% trans "Deployment mode" %}
+            </td>
+            <td>
+                {% trans "Cloud instance" %}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="text-lg font-bold px-6">
+                {% trans "License type" %}
+            </td>
+            <td>
+                {% trans "Trial" %}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="text-lg font-bold px-6">
+                {% trans "Used seats" %}
+            </td>
+            <td>
+                {{ users_number }} {% trans "out of" %} {{ users_number_limit }}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="text-lg font-bold px-6">
+                {% trans "Seats limit" %}
+            </td>
+            <td>
+                {% trans "Disabled" %}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="text-lg font-bold px-6">
+                {% trans "Support" %}
+            </td>
+            <td>
+                {% trans "Standard" %}
+            </td>
+        </tr>
+
+        <tr class="">
+            <td class="text-lg font-bold px-6">
+                {% trans "Expiration date" %}
+            </td>
+            <td>
+                31/12/2023
+            </td>
+        </tr>
+
+    </table>
+</div>
+</main>
+
+{% endblock %}

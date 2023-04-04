@@ -14,7 +14,7 @@ def test_ASF006(page):
 			#print("a response was received:", intercepted_response.status, intercepted_response.status_text)
 		assert intercepted_response.status != 500 and intercepted_response.status != 404, "Step "+str(step)+": not Ok"
 	page.on("response", log_response)
-	page.goto(urlpatterns.url)
+	page.goto(urlpatterns.URL)
 	message = page.locator('id=hellothere')
 	assert message.is_visible() == True, "Step "+str(step)+": not Ok"
 	page.fill('id=id_username', 'root')

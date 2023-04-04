@@ -52,19 +52,11 @@ class FolderUpdateForm(StyledModelForm):
     """ form to update a folder """
     # pragma pylint: disable=no-member
 
-    def __init__(self, *args, **kwargs):
-        super(FolderUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['parent_folder'].queryset = Folder.objects.filter(
-            content_type=Folder.ContentType.ROOT)
-        self.fields['parent_folder'].initial = Folder.objects.get(
-            content_type=Folder.ContentType.ROOT)
-        self.fields['parent_folder'].widget.attrs['select_disabled'] = True
-
     class Meta:
         """ for Model """
         model = Folder
         exclude = ['content_type', 'builtin', 'hide_public_asset',
-                   'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function']
+                   'hide_public_matrix', 'hide_public_threat', 'hide_public_security_function', 'parent_folder']
 
 
 class UserCreationForm(forms.ModelForm):
@@ -75,6 +67,10 @@ class UserCreationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('email',)
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        return email.lower()
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -138,6 +134,10 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
                         ))
 
     field_order = ['email', 'password', 'first_name', 'last_name', 'is_active']
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        return email.lower()
 
     class Meta:
         """ for Model """

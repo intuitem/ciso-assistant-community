@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load i18n static %}
+{% load i18n static core_extras %}
 
 {% block content %}
 {% with page_title=_('Projects domains') %}
@@ -57,8 +57,8 @@
                             </div>
                         </th>
                         <td class="px-6 py-4">
-                            <p class="whitespace-no-wrap capitalize">
-                                {% if domain.description%}{{ domain.description }}{% else %}--{% endif %}
+                            <p class="whitespace-no-wrap">
+                                {% if domain.description%}{{ domain.description|linebreaksbr }}{% else %}--{% endif %}
                             </p>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

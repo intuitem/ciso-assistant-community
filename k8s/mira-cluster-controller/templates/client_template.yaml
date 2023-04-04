@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mira-%CLIENT_NAME%
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    client: %CLIENT_NAME%
+  type: ClusterIP
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  name: mira-%CLIENT_NAME%
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: %CLIENT_NAME%.%CLUSTER_DOMAIN%
+    http:
+      paths:
+      - backend:
+          service:
+            name: mira-%CLIENT_NAME%
+            port:
+              number: 443
+        path: /
+        pathType: Prefix
+status:
+  loadBalancer:
+    ingress:
+    - ip: 10.45.135.198
+
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mira-%CLIENT_NAME%
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mira
+  serviceName: svc-mira-%CLIENT_NAME%
+  template:
+    metadata:
+      labels:
+        app: mira
+        client: %CLIENT_NAME%
+    spec:
+      containers:
+      - env:
+        - name: MIRA_SUPERUSER_EMAIL
+          value: %EMAIL_ADMIN%
+        - name: MIRA_URL
+          value: https://%CLIENT_NAME%.%CLUSTER_DOMAIN%
+        - name: EMAIL_HOST_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: EMAIL_HOST_PASSWORD
+              name: smtp-out
+        - name: RECAPTCHA_PRIVATE_KEY
+          valueFrom:
+            secretKeyRef:
+              key: RECAPTCHA_PRIVATE_KEY
+              name: recaptcha
+        - name: EMAIL_HOST_PASSWORD_RESCUE
+          valueFrom:
+            secretKeyRef:
+              key: EMAIL_HOST_PASSWORD_RESCUE
+              name: smtp-out
+        envFrom:
+        - configMapRef:
+            name: mira-config
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira:3.0beta1
+        imagePullPolicy: Always
+        name: mira
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /code/db
+          name: db-data
+      - command:
+        - caddy
+        - reverse-proxy
+        - --from
+        - https://%CLIENT_NAME%.%CLUSTER_DOMAIN%
+        - --to
+        - localhost:8000
+        image: caddy:2.6.4
+        name: caddy
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /data
+          name: db-data
+          subPath: caddy
+      enableServiceLinks: false
+      imagePullSecrets:
+      - name: registry-secret
+      restartPolicy: Always
+      volumes:
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: mira
+      name: db-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      volumeMode: Filesystem

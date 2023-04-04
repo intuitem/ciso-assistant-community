@@ -45,12 +45,12 @@
                     </div>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
-                    <p class="whitespace-no-wrap capitalize">
+                    <p class="whitespace-no-wrap">
                         {% if scenario.threat %}{{ scenario.threat }}{% else %}--{% endif %}
                     </p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
-                    <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_measures }}</p>
+                    <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_measures|linebreaksbr }}</p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                     <p class="whitespace-no-wrap">

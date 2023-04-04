@@ -2,8 +2,6 @@
 
 {% load i18n static %}
 
-<!-- {% block title %}{{ library.name }}{% endblock %} -->
-
 {% block content %}
 
 <div>
@@ -18,13 +16,15 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900">
                             {{ library.name }}
                         </h3>
+                        {% if can_import %}
                         <span x-data="{ open: false }">
                             <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
                             {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
                         </span>
+                        {% endif %}
                     </div>
                     <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-                        {{ library.description }}
+                        {{ library.description|linebreaksbr }}
                     </p>
                 </div>
             </div>
@@ -41,8 +41,8 @@
                             {% for object in library.objects %}
                                 {% if object.type == type %}
                                     <tr>
-                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name|capfirst }}</td>
-                                        <td class="px-6 py-3">{{ object.fields.description|capfirst }}</td>
+                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
+                                        <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}
@@ -57,23 +57,23 @@
                             {% for object in library.objects %}
                                 {% if object.type == type %}
                                     <tr class="even:bg-white odd:bg-gray-50">
-                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name|capfirst }}</td>
-                                        <td class="px-6 py-3">{{ object.fields.description|capfirst }}</td>
+                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
+                                        <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
                                         <td class="px-6 py-3">
                                             {% for probability in object.fields.probability %}
                                                 <div class="flex flex-row space-x-2">
-                                                    <div class="">{{ probability.abbreviation|capfirst }}</div>
-                                                    <div class="">{{ probability.name|capfirst }}</div>
-                                                    <div class="">{{ probability.description|capfirst }}</div>
+                                                    <div class="">{{ probability.abbreviation }}</div>
+                                                    <div class="">{{ probability.name }}</div>
+                                                    <div class="">{{ probability.description|linebreaksbr }}</div>
                                                 </div>
                                             {% endfor %}
                                         </td>
                                         <td class="px-6 py-3">
                                         {% for impact in object.fields.impact %}
                                             <div class="flex flex-row space-x-2">
-                                                <div class="">{{ impact.abbreviation|capfirst }}</div>
-                                                <div class="">{{ impact.name|capfirst }}</div>
-                                                <div class="">{{ impact.description|capfirst }}</div>
+                                                <div class="">{{ impact.abbreviation }}</div>
+                                                <div class="">{{ impact.name }}</div>
+                                                <div class="">{{ impact.description|linebreaksbr }}</div>
                                             </div>
                                         {% endfor %}
                                         </td>
@@ -83,9 +83,9 @@
                                                 {% for risk in object.fields.risk %}
                                                     <div class="flex flex-row space-x-2">
                                                         <div class="w-fit p-1 rounded" style="background-color: {{ risk.hexcolor }};"></div>
-                                                        <div class="w-fit">{{ risk.abbreviation|capfirst }}</div>
-                                                        <div class="w-fit">{{ risk.name|capfirst }}</div>
-                                                        <div class="w-fit">{{ risk.description|capfirst }}</div>
+                                                        <div class="w-fit">{{ risk.abbreviation }}</div>
+                                                        <div class="w-fit">{{ risk.name }}</div>
+                                                        <div class="w-fit">{{ risk.description|linebreaksbr }}</div>
                                                     </div>
                                                 {% endfor %}
                                                 </div>
@@ -113,10 +113,10 @@
                         {% for object in library.objects %}
                             {% if object.type == type %}
                                 <tr class="even:bg-white odd:bg-gray-50">
-                                    <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name|capfirst }}</td>
-                                    <td class="px-6 py-3">{{ object.fields.description|capfirst }}</td>
-                                    <td class="px-6 py-3">{{ object.fields.provider|capfirst }}</td>
-                                    <td class="px-6 py-3">{{ object.fields.contact|capfirst }}</td>
+                                    <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
+                                    <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
+                                    <td class="px-6 py-3">{{ object.fields.provider }}</td>
+                                    <td class="px-6 py-3">{{ object.fields.contact }}</td>
                                 </tr>
                             {% endif %}
                         {% endfor %}

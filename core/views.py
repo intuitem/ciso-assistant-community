@@ -35,6 +35,7 @@ from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 import logging
 import csv
+import time, random
 
 from typing import Optional, Any
 from django.urls import reverse, reverse_lazy
@@ -61,7 +62,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from captcha.fields import ReCaptchaField
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
+if RECAPTCHA_PUBLIC_KEY:
+    from captcha.fields import ReCaptchaField
+
 from datetime import datetime, timedelta
 import re
 
@@ -69,6 +73,7 @@ import json
 
 User = get_user_model()
 
+MAX_USERS = 20
 
 class BaseContextMixin:
 
@@ -78,6 +83,7 @@ class BaseContextMixin:
             self.request.user, "change_usergroup")
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
+        context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
         return context
 
 
@@ -220,7 +226,7 @@ class RiskAcceptanceDetailView(GenericDetailView):
 class FolderDetailView(GenericDetailView):
     model = Folder
     exclude = ['id', 'content_type', 'builtin', "hide_public_asset",
-               "hide_public_matrix", "hide_public_threat", "hide_public_security_function"]
+               "hide_public_matrix", "hide_public_threat", "hide_public_security_function", "parent_folder"]
 
     template_name = "core/detail/folder_detail.html"
 
@@ -250,14 +256,17 @@ class ProjectDetailView(GenericDetailView):
 
 class AssetDetailView(GenericDetailView):
     model = Asset
+    exclude = ['id', 'is_published', 'folder']
 
 
 class ThreatDetailView(GenericDetailView):
     model = Threat
+    exclude = ['id', 'is_published', 'folder']
 
 
 class SecurityFunctionDetailView(GenericDetailView):
     model = SecurityFunction
+    exclude = ['id', 'is_published', 'folder']
 
 
 class UserDetailView(GenericDetailView):
@@ -298,6 +307,13 @@ class UserLogin(LoginView):
     template_name = 'registration/login.html'
     form_class = LoginForm
 
+    def form_valid(self, form):
+        user = form.get_user()
+        nb_pending_acceptances = RiskAcceptance.objects.filter(validator=user).count()
+        if nb_pending_acceptances > 0:
+            messages.info(self.request, format_html(_("You have {} pending risk acceptance(s) waiting to be processed. Go to the list of <a class='text-blue-600 underline hover:text-blue-500' href={}>risk acceptances</a> to learn more."), nb_pending_acceptances, reverse('riskacceptance-list')))
+        return super().form_valid(form)
+
 
 def password_reset_request(request):
     context = {}
@@ -318,28 +334,27 @@ def password_reset_request(request):
                         if elapsed_time < timedelta(seconds=30):
                             # Si oui, retourner une réponse d'erreur
                             messages.error(
-                                request, "Please wait before requesting another password reset.")
+                                request, _("Please wait before requesting another password reset."))
                             context["password_reset_form"] = password_reset_form
                             return render(request=request, template_name="registration/password_reset.html", context=context)
                     # Si tout est OK, envoyer l'email et enregistrer la date et l'heure actuelle dans la session
                     print("Sending reset mail to", data)
-                    associated_user.mailing(email_template_name="registration/password_reset_email.txt", subject=_("Password Reset Requested"))
+                    associated_user.mailing(email_template_name="registration/password_reset_email.html", subject=_("Mira: Password Reset"))
                     request.session['last_email_sent'] = now.strftime('%Y-%m-%d %H:%M:%S')
-                except Exception as e:
+                except Exception as exception:
                     messages.error(
-                        request, 'An error has occured, please try later.')
-                    print("Exception:", e)
+                        request, _('An error has occured, please try later.'))
+                    print("Exception:", exception)
                     password_reset_form = ResetForm()
                     context["password_reset_form"] = password_reset_form
                     return render(request=request, template_name="registration/password_reset.html", context=context)
             else:
-                messages.error(request, "This user doesn't exist.")
-                password_reset_form = ResetForm()
-                context["password_reset_form"] = password_reset_form
-                return render(request=request, template_name="registration/password_reset.html", context=context)
+                # wrong, but we won't tell the requester for security reasons
+                time.sleep(random.random()*1.5)
+                print("wrong email reset:", data)
             return redirect("/password_reset/done/")
         else:
-            messages.error(request, "Invalid email or captcha.")
+            messages.error(request, _("Invalid email or captcha."))
     password_reset_form = ResetForm()
     context["password_reset_form"] = password_reset_form
     return render(request=request, template_name="registration/password_reset.html", context=context)
@@ -355,7 +370,6 @@ class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     form_class = FirstConnexionConfirmForm
 
 
-@method_decorator(login_required, name='dispatch')
 class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
     context_object_name = 'context'
@@ -394,7 +408,6 @@ def build_ri_clusters(analysis: Analysis):
     return {'current': matrix_current, 'residual': matrix_residual}
 
 
-@method_decorator(login_required, name='dispatch')
 class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/ra.html'
     context_object_name = 'context'
@@ -416,6 +429,8 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
         # then Add in
         context['analysis'] = self.analysis
         context['ri_clusters'] = build_ri_clusters(self.analysis)
+        context['scenarios'] = RiskScenario.objects.filter(
+            analysis=self.analysis).order_by('created_at')
         context['matrix'] = self.analysis.rating_matrix
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
@@ -426,13 +441,12 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
 
 
 @login_required
-# analysis parameter is the id of the chosen Analysis
 def generate_ra_pdf(request, analysis: Analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
-        context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
         data = {'context': context, 'analysis': ra,
                 'ri_clusters': build_ri_clusters(ra), 'matrix': ra.rating_matrix}
         html = render_to_string('core/ra_pdf.html', data)
@@ -443,15 +457,13 @@ def generate_ra_pdf(request, analysis: Analysis):
     else:
         raise PermissionDenied()
 
-
 @login_required
-# analysis parameter is the id of the choosen Analysis
 def generate_mp_pdf(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
-        context = RiskScenario.objects.filter(analysis=analysis).order_by('id')
+        context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
         data = {'context': context, 'analysis': ra}
         html = render_to_string('core/mp_pdf.html', data)
         pdf_file = HTML(string=html).write_pdf()
@@ -462,9 +474,8 @@ def generate_mp_pdf(request, analysis):
         raise PermissionDenied()
 
 
-@method_decorator(login_required, name='dispatch')
 class SearchResults(ListView):
-    context_object_name = 'context'
+    context_object_name = 'results'
     template_name = 'core/search_results.html'
 
     def get_queryset(self):
@@ -482,9 +493,17 @@ class SearchResults(ListView):
         ra_list = Analysis.objects.filter(Q(name__icontains=query) | Q(project__name__icontains=query) | Q(
             project__folder__name__icontains=query) | Q(version__icontains=query)).filter(id__in=object_ids_view)[:10]
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+        return context
 
 
-@method_decorator(login_required, name='dispatch')
 class Browser(ListView):
     context_object_name = 'context'
     template_name = 'core/browser.html'
@@ -494,7 +513,6 @@ class Browser(ListView):
     map_mtg = {'0': "open", '1': "in_progress", '2': "on_hold", '3': "done"}
 
     def get_queryset(self):
-
         rsk = self.request.GET.get('rsk')
         mtg = self.request.GET.get('mtg')
         if rsk:
@@ -505,6 +523,24 @@ class Browser(ListView):
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
                 Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
             return {"type": _("security measures"), "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
+        
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        return context
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['change_usergroup'] = RoleAssignment.has_permission(
+            self.request.user, "change_usergroup")
+        context['view_user'] = RoleAssignment.has_permission(
+            self.request.user, "view_user")
+        context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+        return context
 
 
 @login_required
@@ -517,10 +553,7 @@ def global_overview(request):
     viewable_analyses = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)[0]
 
-    object_ids_view += [analysis for analysis in viewable_analyses]
-
-    _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(
-        riskscenario__analysis__auditor=request.user).exclude(status='done').order_by('eta')
+    _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).exclude(status='done').order_by('eta')
 
     context = {
         "counters": get_counters(request.user),
@@ -529,12 +562,15 @@ def global_overview(request):
         "measures_to_review": measures_to_review(request.user),
         "acceptances_to_review": acceptances_to_review(request.user),
         "today": date.today(),
-        "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
-        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
-        "agg_data": risk_status(request.user, Analysis.objects.all().filter(auditor=request.user)),
+        "agg_data": risk_status(request.user, Analysis.objects.filter(id__in=viewable_analyses)),
         "ord_security_measures": sorted(_ord_security_measures, key=lambda mtg: mtg.get_ranking_score(), reverse=True),
-        "analyses": Analysis.objects.filter(id__in=object_ids_view).filter(auditor=request.user).order_by('created_at'),
+        "analyses": Analysis.objects.filter(id__in=viewable_analyses).order_by('created_at'),
         "colors": get_risk_color_ordered_list(request.user),
+        "viewable_measures": object_ids_view,
+        "updatable_measures": object_ids_change,
+        "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
+        "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
+        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
     }
 
     return render(request, template, context)
@@ -557,8 +593,8 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
 
     values = list()
     labels = list()
-    color_map = {"open": "#fac858", "in_progress": "#5470c6",
-                 "on_hold": "#ee6666", "done": "#91cc75"}
+    color_map = {"open": "#93c5fd", "in_progress": "#fdba74",
+                 "on_hold": "#f87171", "done": "#86efac"}
     for st in SecurityMeasure.MITIGATION_STATUS:
         count = SecurityMeasure.objects.filter(status=st[0]).filter(
             riskscenario__analysis__in=analysis_list).count()
@@ -579,8 +615,9 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
             count_c = _rc['current'][i]['value']
             count_r = _rc['residual'][i]['value']
             lvl = _rc['current'][i]['name']
+            color = _rc['current'][i]['color']
             synth_table.append(
-                {"lvl": lvl, "current": count_c, "residual": count_r})
+                {"lvl": lvl, "current": count_c, "residual": count_r, "color": color})
         hvh_risks = RiskScenario.objects.filter(
             analysis__id=_ra).filter(current_level__gte=2)
         analysis_objects.append(
@@ -592,10 +629,13 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "analysis_objects": analysis_objects,
         "current_level": current_level,
         "residual_level": residual_level,
+        "view_user": RoleAssignment.has_permission(user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
+        "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
+        "change_usergroup": RoleAssignment.has_permission(user, "change_usergroup"),
         "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
         "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
-        "colors": get_risk_color_ordered_list(user),
+        "colors": get_risk_color_ordered_list(user, analysis_list),
     }
 
 
@@ -607,8 +647,12 @@ class ComposerListView(ListView):
             request_list = request.GET.getlist('analysis')[0]
             data = [item for item in request_list.split(',')]
             # debug print(f"got {len(data)} analysis in {data}")
-            context = {'context': compile_analysis_for_composer(
-                self.request.user, data)}
+            context = {
+                "context": compile_analysis_for_composer(self.request.user, data),
+                "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
+                "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
+                "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+            }
             return render(request, 'core/composer.html', context)
         else:
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
@@ -622,7 +666,6 @@ def index(request):
     return HttpResponse("Hello, world. You're at the core index.")
 
 
-@login_required
 def export_risks_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -638,7 +681,7 @@ def export_risks_csv(request, analysis):
                    'treatment']
         writer.writerow(columns)
 
-        for ri in ra.riskscenario_set.all():
+        for ri in ra.riskscenario_set.all().order_by('created_at'):
             security_measures = ''
             for mtg in ri.security_measures.all():
                 security_measures += f"[{mtg.status}]{mtg.name} \n"
@@ -654,7 +697,6 @@ def export_risks_csv(request, analysis):
         raise PermissionDenied()
 
 
-@login_required
 def export_mp_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
         Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
@@ -688,14 +730,13 @@ def export_mp_csv(request, analysis):
 def scoring_assistant(request):
     template = 'core/scoring.html'
     context = {}
-    (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, RiskMatrix)
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
     context['change_usergroup'] = RoleAssignment.has_permission(
         request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
+    context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
     return render(request, template, context)
 
 
@@ -718,10 +759,7 @@ class ReviewView(BaseContextMixin, ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
-        mode = self.request.GET.get('mode')
-        if mode == "all":
-            return Analysis.objects.filter(id__in=object_ids_view)
-        return Analysis.objects.filter(id__in=object_ids_view).filter(auditor=self.request.user)
+        return Analysis.objects.filter(id__in=object_ids_view)
 
 
 class CreateViewModal(BaseContextMixin, CreateView):
@@ -757,9 +795,11 @@ class QuickStartView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['projects_domain_create_form'] = FolderUpdateForm
         context['project_create_form'] = ProjectForm
         context['analysis_create_form'] = RiskAnalysisCreateForm
+        context['riskscenario_create_form'] = RiskScenarioCreateForm
+        context['securitymeasure_create_form'] = SecurityMeasureCreateForm
         context['threat_create_form'] = ThreatCreateForm
         context['security_function_create_form'] = SecurityFunctionCreateForm
-        context['asset_create_form'] = AssetForm
+        context['asset_create_form'] = AssetForm(user=self.request.user)
         return context
 
     def get_queryset(self):
@@ -785,14 +825,13 @@ class ProjectListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = ProjectFilter(
-            self.request.GET, queryset=qs, request=self.request)
+        filtered_list = ProjectFilter(self.request.GET, queryset=qs, request=self.request)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = ProjectFilter(self.request.GET, queryset)
+        filter = ProjectFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         context['project_create_form'] = ProjectForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
@@ -887,9 +926,9 @@ class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = AssetFilter(self.request.GET, queryset)
+        filter = AssetFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
-        context['asset_create_form'] = AssetForm
+        context['asset_create_form'] = AssetForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
         context['add_asset'] = RoleAssignment.has_permission(
@@ -913,7 +952,7 @@ class AssetCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -921,8 +960,13 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'asset'
     form_class = AssetForm
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -934,6 +978,11 @@ class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['crumbs'] = {'asset-list': _('Assets')}
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_success_url(self) -> str:
         return reverse_lazy('asset-list')
@@ -973,7 +1022,7 @@ class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = ProjectsDomainFilter(self.request.GET, queryset)
+        filter = ProjectsDomainFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         context['projects_domain_create_form'] = FolderUpdateForm
         context['add_folder'] = RoleAssignment.has_permission(
@@ -1087,13 +1136,13 @@ class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = AnalysisFilter(
-            self.request.GET, queryset=qs, request=self.request)
+            self.request.GET, request=self.request, queryset=qs)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = AnalysisFilter(self.request.GET, queryset)
+        filter = AnalysisFilter(self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
         # self.model._meta.verbose_name # TODO: Find a way to get unlocalized model verbose_name, as localization may break stuff e.g. urls
         context['model'] = 'analysis'
@@ -1205,14 +1254,13 @@ class RiskScenarioListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = RiskScenarioFilter(
-            self.request.GET, queryset=qs, request=self.request)
+        filtered_list = RiskScenarioFilter(self.request.GET, request=self.request, queryset=qs)
         return filtered_list.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = RiskScenarioFilter(self.request.GET, queryset)
+        filter = RiskScenarioFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         context['model'] = 'riskscenario'
         context['risk_scenario_create_form'] = RiskScenarioCreateForm
@@ -1291,6 +1339,8 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
+        if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']).folder == self.get_object().analysis.project.folder:
+            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']))
         if "select_measures" in self.request.POST:
             return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
@@ -1339,8 +1389,7 @@ class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = SecurityMeasureFilter(
-            self.request.GET, queryset=queryset, request=self.request)
+        filter = SecurityMeasureFilter(self.request.GET, queryset=queryset, request=self.request)
         context['filter'] = filter
         context['measure_create_form'] = SecurityMeasureCreateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
@@ -1354,8 +1403,7 @@ class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
-        filtered_list = SecurityMeasureFilter(
-            request=self.request.GET, queryset=qs)
+        filtered_list = SecurityMeasureFilter(self.request.GET, request=self.request, queryset=qs)
         return filtered_list.qs
 
     def test_func(self):
@@ -1430,7 +1478,7 @@ class SecurityFunctionListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = SecurityFunctionFilter(self.request.GET, queryset)
+        filter = SecurityFunctionFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         context['security_function_create_form'] = SecurityFunctionCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
@@ -1452,7 +1500,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = SecurityFunctionCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class SecurityFunctionUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1508,7 +1556,7 @@ class ThreatListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = ThreatFilter(self.request.GET, queryset)
+        filter = ThreatFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         context['threat_create_form'] = ThreatCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
@@ -1530,7 +1578,7 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = ThreatCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(id=self.request.POST['folder']))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
 
 
 class ThreatUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1606,18 +1654,18 @@ class RiskAcceptanceCreateViewModal(UserPassesTestMixin, CreateViewModal):
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def get_form_kwargs(self):
+        form = super().get_form_kwargs()
+        form['user'] = self.request.user
+        return form
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         if self.object.validator:
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
             self.object.save()
-            try:
-                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
-                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
-            except:
-                messages.error(
-                    self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+            messages.success(self.request, _("Risk acceptance submitted to: ") + self.object.validator.email)
         return super().form_valid(form)
 
     def test_func(self):
@@ -1631,18 +1679,18 @@ class RiskAcceptanceUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
     context_object_name = 'acceptance'
     form_class = RiskAcceptanceCreateUpdateForm
 
+    def get_form_kwargs(self):
+        form = super().get_form_kwargs()
+        form['user'] = self.request.user
+        return form
+
     def form_valid(self, form):
         self.object = form.save(commit=False)
         if self.object.validator and self.object.state == 'created':
             # Mettre à jour le paramètre "state"
             self.object.set_state('submitted')
             self.object.save()
-            try:
-                self.object.validator.mailing("core/risk_acceptance_email.txt", _("Pending risk acceptance: ") + self.object.name, self.object.pk)
-                messages.success(self.request, "Risk acceptance created and mail send successfully to: " + self.object.validator.email)
-            except:
-                messages.error(
-                    self.request, "An error has occured, mail was not send to: " + self.object.validator.email)
+            messages.success(self.request, _("Risk acceptance submitted to: ") + self.object.validator.email)
         elif not self.object.validator and self.object.state == 'submitted':
             # Mettre à jour le paramètre "state"
             self.object.set_state('created')
@@ -1690,7 +1738,7 @@ class MyProfileDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
             messages.warning(self.request, _(
                 "Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
         context['user_groups'] = self.object.user_groups.all()
-        keys = ['Last name', 'First name', 'Email', 'Entry date', 'Superuser']
+        keys = [_('Last name'), _('First name'), _('Email'), _('Entry date'), _('Superuser')]
         values = []
         for key, value in model_to_dict(self.object, fields=['last_name', 'first_name', 'email', 'date_joined']).items():
             values.append(value)
@@ -1751,8 +1799,10 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = UserFilter(self.request.GET, queryset)
+        filter = UserFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
+        context['users_number'] = User.objects.all().count()
+        context['users_number_limit'] = MAX_USERS
         return context
 
     def test_func(self):
@@ -1852,7 +1902,7 @@ class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = UserGroupFilter(self.request.GET, queryset)
+        filter = UserGroupFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(
@@ -1927,7 +1977,7 @@ class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to go through groups to assign roles."))
+        messages.info(self.request, _("Role assignment editing will be available in a future release. Currently you have to attach users to groups to assign roles."))
 
     def get_queryset(self):
         qs = self.model.objects.all().order_by('id')
@@ -1938,7 +1988,7 @@ class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queryset = self.get_queryset()
-        filter = UserGroupFilter(self.request.GET, queryset)
+        filter = UserGroupFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         context['roles'] = Role.objects.all().order_by('id')
         return context
@@ -2047,8 +2097,10 @@ class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
         context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[2]
+        context['add_riskmatrix'] = RoleAssignment.has_permission(
+            self.request.user, 'add_riskmatrix')
         queryset = self.get_queryset()
-        filter = RiskMatrixFilter(self.request.GET, queryset)
+        filter = RiskMatrixFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         return context
 
@@ -2106,3 +2158,22 @@ class RiskMatrixUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_riskmatrix"), folder=Folder.get_folder(self.get_object()))
+
+
+def license_overview(request):
+    template = 'license/overview.html'
+    context = {}
+
+    context['matrices'] = list(
+        RiskMatrix.objects.all().values_list('json_definition', flat=True))
+    context['change_usergroup'] = RoleAssignment.has_permission(
+        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['view_user'] = RoleAssignment.has_permission(
+        request.user, "view_user")
+    context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+
+    context['users_number'] = User.objects.all().count()
+    context['users_number_limit'] = MAX_USERS
+
+
+    return render(request, template, context)

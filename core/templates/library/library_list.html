@@ -1,8 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% load i18n static %}
-
-<!-- {% block title %}{% trans "Libraries"|title %}{% endblock %} -->
+{% load i18n static core_extras %}
 
 {% block content %}
 
@@ -35,8 +33,8 @@
                                     </div>
                                 </th>
                                 <td class="px-6 py-4">
-                                    <p class="whitespace-no-wrap capitalize">
-                                        {{ library.description }}
+                                    <p class="whitespace-no-wrap">
+                                        {{ library.description|linebreaksbr }}
                                     </p>
                                 </td>
                                 <td class="px-6 py-4">
@@ -75,10 +73,12 @@
                                         <span>
                                             <a title="detailed view" href="{% url 'library-detail' library.name %}" class="table-action cursor-pointer"><i class="far fa-eye"></i></a>
                                         </span>
+                                        {% if library.security_functions > 0 and securityfunction_import or library.matrices > 0 and matrix_import or library.threats > 0 and threat_import %}
                                         <span x-data="{ open: false }" onclick="event.stopPropagation();">
                                             <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
                                             {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
                                         </span>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>

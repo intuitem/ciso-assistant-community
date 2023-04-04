@@ -46,7 +46,7 @@ class AbstractBaseModel(models.Model):
         # to avoid false positives as a result of the object being compared to itself
         if self.pk:
             scope = scope.exclude(pk=self.pk)
-        return not scope.filter(**{field: getattr(self, field) for field in fields_to_check if hasattr(self, field)}).exists()
+        return not scope.filter(**{f"{field}__iexact": getattr(self, field) for field in fields_to_check if hasattr(self, field)}).exists()
 
     def display_path(self):
         pass

@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-{% load i18n static %}
+{% load i18n static core_extras %}
 
 {% block content %}
 <div class="">
@@ -49,8 +49,8 @@
                             :aria-expanded="open"
                             :aria-controls="$id('dropdown-button')"
                             type="button"
-                            class="bg-white hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
-                            :class="{ 'bg-blue-600 hover:bg-blue-700 text-white': open }"
+                            class="px-4 py-2 rounded-lg shadow w-fit flex flex-row items-center space-x-1.5"
+                            :class="open === true ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-white hover:bg-indigo-600 hover:text-white'"
                         >
                             <i class="fas fa-filter"></i>
                             <span>{% trans "Filters" %}</span>
@@ -64,51 +64,19 @@
                             x-on:click.outside="close($refs.button)"
                             :id="$id('dropdown-button')"
                             style="display: none;"
-                            class="absolute left-0 mt-2 w-64 bg-white rounded shadow-2xl overflow-hidden z-10"
+                            class="absolute left-0 mt-2 z-10 w-96 max-h-96 p-2 bg-white rounded shadow-2xl overflow-y-scroll"
                         >
                     
                             <div class="flex flex-col space-y-2 w-full overflow-visible px-4 py-2">
+                                {% for field in filter.form %}
+                                {% if field.field.widget|class != "TextInput" and field.field.label != "Ordering" %}
                                 <div>
-                                    <p class="block text-sm font-medium text-gray-900">{% trans "Status" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.status }}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <p class="block text-sm font-medium text-gray-900">{{ field.label }}</p>
+                                    {{ field }}
                                 </div>
-                                <div>
-                                    <p class="block text-sm font-medium text-gray-900">{% trans "Domain" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.folder }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="block text-sm font-medium text-gray-900">{% trans "Type" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.type }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="block text-sm font-medium text-gray-900">{% trans "Security function" %}</p>
-                                    <div class="w-auto text-sm focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll rounded-lg px-4 py-2 border">
-                                        <div class="flex flex-col">
-                                            <div>
-                                                {{ filter.form.security_function }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button type="submit" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
+                                {% endif %}
+                                {% endfor %}
+                                <button type="submit" class="sticky bottom-0 mt-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2">{% trans "Apply" %}</button>
                             </div>
                         </div>
                     </div>
@@ -152,11 +120,11 @@
                     <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition ease-in-out duration-100 hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'securitymeasure-detail' measure.id %}?next={{ request.path|urlencode }}'">
                         <td scope="row" class="px-6 py-4 font-medium">
                             <div class="flex items-center">                           
-                                <span class="whitespace-nowrap p-1 rounded-lg text-xs
+                                <span class="whitespace-nowrap p-1 rounded-md text-xs
                                 {% if measure.status == 'open' %}
-                                bg-orange-200 
-                                {% elif measure.status == 'in_progress' %}
                                 bg-blue-200 
+                                {% elif measure.status == 'in_progress' %}
+                                bg-orange-200 
                                 {% elif measure.status == 'on_hold' %}
                                 bg-red-300 
                                 {% else %}

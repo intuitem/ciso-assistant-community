@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mira-cluster-controller
+  namespace: controller
 spec:
   serviceName: mira-cluster-controller
   replicas: 1
@@ -17,35 +18,29 @@ spec:
       - name: db-data
         persistentVolumeClaim:
           claimName: db-data
+      - name: templates-yaml
+        configMap:
+          name: templates-yaml
       imagePullSecrets:
         - name: registry-secret
       serviceAccountName: controller
       enableServiceLinks: false
       containers:
       - name: mira-cluster-controller
-        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:latest
+        image: rg.fr-par.scw.cloud/funcscwmiraj3whjdnx/mira-cluster-controller:0.2
         ports:
         - containerPort: 8000
         volumeMounts:
         - name: db-data
           mountPath: /code/db
+        - name: templates-yaml
+          mountPath: /code/templates
         envFrom:
         - configMapRef:
             name: mira-cluster-controller-config
-        env:
-        - name: EMAIL_HOST_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: smtp-out
-              key: EMAIL_HOST_PASSWORD
-        - name: RECAPTCHA_PRIVATE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: recaptcha
-              key: RECAPTCHA_PRIVATE_KEY
       - name: caddy
-        image: caddy:latest
-        command: ["caddy", "reverse-proxy", "--from", $(MIRA_CLUSTER_CONTROLLER_DOMAIN), "--to", "localhost:8000"]
+        image: caddy:2.6.4
+        command: ["caddy", "reverse-proxy", "--from", $(CLUSTER_CONTROLLER_URL), "--to", "localhost:8000"]
         ports:
         - containerPort: 80
         - containerPort: 443
@@ -54,11 +49,11 @@ spec:
           mountPath: /data
           subPath: caddy
         env:
-        - name: MIRA_CLUSTER_CONTROLLER_DOMAIN
+        - name: CLUSTER_CONTROLLER_URL
           valueFrom:
             configMapKeyRef:
               name: mira-cluster-controller-config
-              key: MIRA_CLUSTER_CONTROLLER_DOMAIN
+              key: CLUSTER_CONTROLLER_URL
   volumeClaimTemplates:
   - metadata:
       name: db-data
