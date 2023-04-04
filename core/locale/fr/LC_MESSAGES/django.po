@@ -1097,7 +1097,7 @@ msgid ""
 "number of users or acquire an appropriate license."
 msgstr ""
 "Le nombre maximum d'utilisateurs sur cette licence a été dépassé. Veuillez "
-"réduire le nombre d'utilisateurs ou d'acquérir une licence appropriée."
+"réduire le nombre d'utilisateurs ou acquérir une licence appropriée."
 
 #: core/templates/core/base.html:120 core/templates/core/sidebar.html:385
 msgid "About MIRA"
