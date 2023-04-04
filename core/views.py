@@ -1735,7 +1735,7 @@ class MyProfileDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
             messages.warning(self.request, _(
                 "Warning! You are not assigned to any group. Without a group you will not have access to any functionality. Please contact you administrator."))
         context['user_groups'] = self.object.user_groups.all()
-        keys = ['Last name', 'First name', 'Email', 'Entry date', 'Superuser']
+        keys = [_('Last name'), _('First name'), _('Email'), _('Entry date'), _('Superuser')]
         values = []
         for key, value in model_to_dict(self.object, fields=['last_name', 'first_name', 'email', 'date_joined']).items():
             values.append(value)

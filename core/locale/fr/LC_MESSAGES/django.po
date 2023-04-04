@@ -1453,7 +1453,7 @@ msgstr "Groupes"
 #: core/templates/core/group_list.html:44
 #: core/templates/core/my_profile_detailed.html:33
 msgid "Group Name"
-msgstr "NNom du groupe"
+msgstr "Nom du groupe"
 
 #: core/templates/core/group_list.html:54
 #: core/templates/core/my_profile_detailed.html:43
