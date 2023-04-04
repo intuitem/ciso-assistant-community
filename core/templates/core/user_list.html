@@ -123,10 +123,10 @@
                         <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                             <div class="flex items-center">
                                 {% if not user.is_active %}
-                                <span class="bg-orange-300 p-1 rounded-lg text-xs mr-2 text-gray-900">{% trans "inactive" %}</span>
+                                <span class="bg-orange-300 p-1 rounded-md text-xs mr-2 text-gray-900">{% trans "inactive" %}</span>
                                 {% endif %}
                                 {% if user.is_superuser %}
-                                <span class="bg-red-300 p-1 rounded-lg text-xs mr-2 text-gray-900">{% trans "superuser" %}</span>
+                                <span class="bg-red-300 p-1 rounded-md text-xs mr-2 text-gray-900">{% trans "superuser" %}</span>
                                 {% endif %}
                                 <div class="">
                                     <p id="users" class="text-md font-semibold whitespace-no-wrap">

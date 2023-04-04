@@ -56,14 +56,16 @@
             <tbody>
                 {% for matrix in matrices %}
                     <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'riskmatrix-detail' matrix.id %}?next={{ request.path|urlencode }}'">
-                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div>
-                                    {% if not matrix.is_enabled %}<span class="bg-gray-200 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{% trans "disabled" %}</span>{% endif %}
-                                    <p id="matrix{{ matrix.id }}" class="text-md font-semibold whitespace-no-wrap">
-                                        {{ matrix.name }}
-                                    </p>
-                                </div>
+                        <th scope="col" class="px-6 py-4 font-medium whitespace-nowrap">
+                            <div class="flex items-center max-w-full">
+                                    {% if not matrix.is_enabled %}
+                                    <span class="bg-gray-200 p-1 rounded-md text-xs text-gray-900">{% trans "disabled" %}</span>
+                                    {% endif %}
+                                    <div class="ml-3 max-w-lg text-ellipsis overflow-hidden">
+                                        <p id="matrix{{ matrix.id }}" class="text-md font-semibold whitespace-no-wrap">
+                                            {{ matrix.name }}
+                                        </p>
+                                    </div>
                             </div>
                         </th>
                         <td class="px-6 py-4">

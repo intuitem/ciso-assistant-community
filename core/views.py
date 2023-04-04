@@ -307,6 +307,13 @@ class UserLogin(LoginView):
     template_name = 'registration/login.html'
     form_class = LoginForm
 
+    def form_valid(self, form):
+        user = form.get_user()
+        nb_pending_acceptances = RiskAcceptance.objects.filter(validator=user).count()
+        if nb_pending_acceptances > 0:
+            messages.info(self.request, format_html(_("You have {} pending risk acceptance(s) waiting to be processed. Go to the list of <a class='text-blue-600 underline hover:text-blue-500' href={}>risk acceptances</a> to learn more."), nb_pending_acceptances, reverse('riskacceptance-list')))
+        return super().form_valid(form)
+
 
 def password_reset_request(request):
     context = {}

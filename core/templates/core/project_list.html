@@ -116,7 +116,7 @@
                 <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'project-detail' project.id %}?next={{ request.path|urlencode }}'">
                     <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
                         <div class="flex items-center">
-                            <span class=" p-1 rounded-lg text-xs
+                            <span class=" p-1 rounded-md text-xs
                                 {% if project.lc_status == 'in_design' %}
                                 bg-orange-200 
                                 {% elif project.lc_status == 'in_dev' %}
