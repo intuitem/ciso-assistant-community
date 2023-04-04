@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 09:52+0000\n"
+"POT-Creation-Date: 2023-04-04 11:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: iam/forms.py:114 iam/forms.py:154
+#: iam/forms.py:118 iam/forms.py:162
 msgid ""
 "Raw passwords are not stored, so there is no way to see this user’s "
 "password, but you can change the password using <a class=\"help_text-link\" "
@@ -28,7 +28,7 @@ msgstr ""
 "voir le mot de passe de cet utilisateur, mais vous pouvez modifier le mot de "
 "passe en utilisant <a class=\"help_text-link\" href=\"{}\">ce formulaire</a>."
 
-#: iam/forms.py:149
+#: iam/forms.py:157
 msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
@@ -114,10 +114,6 @@ msgstr ""
 "explicitement."
 
 #: iam/models.py:239
-#, fuzzy
-#| msgid ""
-#| "The user_groups this user belongs to. A user will get all permissions "
-#| "granted to each of their user_groups."
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
@@ -171,10 +167,6 @@ msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu : {}"
 
 #: library/utils.py:342
-#, fuzzy
-#| msgid ""
-#| "Library \"{}\" imported successfully. {} objects imported and {} objects "
-#| "ignored."
 msgid ""
 "Library \"{}\" imported successfully. {} object(s) imported and {} object(s) "
 "ignored."

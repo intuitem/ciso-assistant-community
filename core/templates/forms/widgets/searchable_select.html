@@ -11,6 +11,7 @@
 
 {% else %}
 
+
 <div class="{{ widget.attrs.class }}">
     <div x-data="{
         open: false,
@@ -33,7 +34,7 @@
         search: '',
         selectedValue: {% if widget.value %}{{ widget.value }}{% else %}'{{ widget.optgroups.0.1.0.value }}'{% endif %},
         selectedIndex: {{ widget.optgroups|selected_option_index }},
-        selectedName: {% if widget.label %}{{ widget.label }}{% else %}document.querySelector('#{{ widget.attrs.id }} [d-selected]').innerHTML{% endif %},
+        selectedName: {% if widget.label %}{{ widget.label }}{% else %}document.querySelector('#{{ widget.attrs.id }} [d-selected]').textContent{% endif %},
         show_item(el) {
         return this.search === '' || el.textContent.toLowerCase().includes(this.search.toLowerCase())
         }
@@ -89,7 +90,7 @@
                 </div>{% endwith %}
                 
             </div>
-            <input type="hidden" id="{{ id }}_selected" name="{{ widget.name }}" x-bind:value="selectedValue" @change="submitDisabled = false">
+            <input type="hidden" id="{{ id }}_selected" name="{{ widget.name }}" x-bind:value="selectedValue" x-on:keyup="submitDisabled = false" @change="submitDisabled = false">
         </div>
 
     </div>

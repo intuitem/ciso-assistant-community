@@ -8,7 +8,7 @@
 {% endwith %}
 
 
-<div x-data="{ submitDisabled: true }" @change="submitDisabled = false">
+<div x-data="{ submitDisabled: true }" x-on:keyup="submitDisabled = false" @change="submitDisabled = false">
     <form method="POST" id="scenario_update_form" action="">{% csrf_token %}
     <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}
     </p>
