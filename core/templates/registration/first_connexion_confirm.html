@@ -1,9 +1,18 @@
-{% comment %} {% extends 'core/base.html' %} {% endcomment %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    {% load i18n %}
+    {% load static %}
+    {% load tailwind_tags %}
+    <title>{% block title %}MIRA{% endblock title %}</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <script src="{% static 'cache/jquery-3.6.3.min.js' %}"></script>
+    {% tailwind_css %}
+
+</head>
 {% block content %}
-{% load i18n %}
-{% load static %}
-{% load tailwind_tags %}
-{% tailwind_css %}
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="/static/cache/fontawesome-free-6.3.0-web/css/all.min.css" rel="stylesheet">
@@ -35,10 +44,9 @@
                                     {% for field in form %}
                                     {% if field.name == "terms_service" %}
                                     <div class="">
-                                        <label class="text-md font-small">
-                                            <a href="https://intuitem.com/cgu" target='_blank' class="text-indigo-500 hover:text-indigo-600 underline">{% trans "Terms and conditions of use" %}</a>
-                                        </label>
-                                        <br>{% trans "Yes, I accept:" %} {{field}}
+                                        {{field}}
+                                        {% trans "I agree and acccept" %}
+                                        <a href="https://intuitem.com/cgu" target='_blank' class="text-indigo-500 hover:text-indigo-600 underline">{% trans "Terms and conditions of use" %}</a>
                                         <div class="w-auto">
                                             {% for error in field.errors %}
                                                 <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
