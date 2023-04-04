@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 09:52+0000\n"
+"POT-Creation-Date: 2023-04-04 11:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -295,17 +295,15 @@ msgstr "Rechercher un utilisateur..."
 
 #: core/filters.py:452 core/forms.py:83 core/forms.py:109
 #: core/templates/snippets/associated_users_list_nested.html:13
-#: core/templates/snippets/users_list_nested.html:13
+#: core/templates/snippets/users_list_nested.html:13 core/views.py:1738
 msgid "Email"
 msgstr "Adresse électronique"
 
 #: core/filters.py:453
-#, fuzzy
-#| msgid "Domain (descending)"
 msgid "Email (descending)"
-msgstr "Domaine (descendant)"
+msgstr "Courriel (descendant)"
 
-#: core/filters.py:454
+#: core/filters.py:454 core/views.py:1738
 msgid "First name"
 msgstr "Prénom"
 
@@ -313,7 +311,7 @@ msgstr "Prénom"
 msgid "First name (descending)"
 msgstr "Prénom (descendant)"
 
-#: core/filters.py:456
+#: core/filters.py:456 core/views.py:1738
 msgid "Last name"
 msgstr "Nom"
 
@@ -1453,7 +1451,7 @@ msgstr "Groupes"
 #: core/templates/core/group_list.html:44
 #: core/templates/core/my_profile_detailed.html:33
 msgid "Group Name"
-msgstr "NNom du groupe"
+msgstr "Nom du groupe"
 
 #: core/templates/core/group_list.html:54
 #: core/templates/core/my_profile_detailed.html:43
@@ -1732,13 +1730,13 @@ msgstr ""
 "vous voulez évaluer le risque d'un système spécifique, pour lequel vous avez "
 "besoin de l'évaluation du risque des composants sous-jacents"
 
-#: core/templates/core/project_select.html:52
-msgid "Select your targets"
-msgstr "Sélectionnez vos cibles"
-
-#: core/templates/core/project_select.html:104
+#: core/templates/core/project_select.html:29
 msgid "Process"
 msgstr "Traiter"
+
+#: core/templates/core/project_select.html:53
+msgid "Select your targets"
+msgstr "Sélectionnez vos cibles"
 
 #: core/templates/core/quick_start.html:5 core/templates/core/sidebar.html:56
 msgid "Quick start"
@@ -2895,7 +2893,7 @@ msgstr "informations sur l'utilisateur"
 msgid "Send"
 msgstr "Envoyer"
 
-#: core/templates/core/user_list.html:71
+#: core/templates/core/user_list.html:71 core/views.py:1738
 msgid "Superuser"
 msgstr "Superutilisateur"
 
@@ -3145,11 +3143,11 @@ msgstr ""
 msgid "Terms and conditions of use"
 msgstr "Conditions générales d'utilisation"
 
-#: core/templates/registration/first_connexion_confirm.html:40
+#: core/templates/registration/first_connexion_confirm.html:42
 msgid "Yes, I accept:"
 msgstr "Oui, j'accepte:"
 
-#: core/templates/registration/first_connexion_confirm.html:68
+#: core/templates/registration/first_connexion_confirm.html:70
 msgid "Confirm password"
 msgstr "Confirmer le mot de passe"
 
@@ -3639,6 +3637,10 @@ msgid ""
 msgstr ""
 "Attention ! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
+
+#: core/views.py:1738
+msgid "Entry date"
+msgstr "Date d'inscription"
 
 #: core/views.py:1828
 msgid "User created and email send successfully."
