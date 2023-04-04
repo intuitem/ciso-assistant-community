@@ -22,6 +22,11 @@
             {% for acceptance in acceptances_to_review %}
             <tr class="bg-white border-b text-ellipsis overflow-hidden hover:text-indigo-500 hover:bg-gray-200 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}'">
                 <td scope="row" class="px-3 py-4 font-medium">
+                    {% if acceptance.validator == user %}
+                        <span class="mr-1 p-1 rounded-md text-xs bg-indigo-500 text-white">
+                            {% trans "action requested" %}
+                        </span>
+                    {% endif %}
                     {{ acceptance }}
                 </td>
                 <td class="px-3 py-4">
@@ -32,7 +37,7 @@
                 </td>
                 <td class="px-3 py-4">
                     {% if acceptance.expiry_date < today %}
-                        <span class="rounded bg-red-400 text-white p-1 text-xs mr-1">{% trans "expired" %}</span>
+                        <span class="rounded-md bg-red-400 text-white p-1 text-xs mr-1">{% trans "expired" %}</span>
                     {% endif %}
                     {{ acceptance.expiry_date }}
                 </td>
