@@ -135,6 +135,10 @@ class UserUpdateForm(UserChangeForm, StyledModelForm):
 
     field_order = ['email', 'password', 'first_name', 'last_name', 'is_active']
 
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        return email.lower()
+
     class Meta:
         """ for Model """
         model = User
