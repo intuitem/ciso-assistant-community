@@ -36,7 +36,9 @@
                                     {% if field.name == "terms_service" %}
                                     <div class="">
                                         <label class="text-md font-small">
-                                            {% include 'snippets/link_modal.html' with header=_("Terms and conditions of use") content=_("Terms and conditions of use") topic="cgu" %} {% trans "Yes, I accept:" %} {{field}}</label>
+                                            <a href="https://intuitem.com/cgu" target='_blank' class="text-indigo-500 hover:text-indigo-600 underline">{% trans "Terms and conditions of use" %}</a>
+                                        </label>
+                                        <br>{% trans "Yes, I accept:" %} {{field}}
                                         <div class="w-auto">
                                             {% for error in field.errors %}
                                                 <p class="text-red-500 text-xs font-semibold">{{ error|striptags }}</p>
