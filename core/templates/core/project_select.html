@@ -26,6 +26,7 @@
     <form action="{% url 'composer' %}" class="bg-gray-50 m-2 p-4 rounded-lg shadow-lg">
         <input name="analysis" type="hidden" x-bind:value="selectedValues()">
         <div class="inline-block relative w-96">
+            <button id="process" class="text-md text-white p-2 rounded w-full" type="submit">{% trans "Process" %}</button>
             <div class="flex flex-col items-center relative">
                 <div x-on:click="open" class="w-full svelte-1l8159u cursor-pointer">
                     <div class="my-2 p-1 flex border border-gray-200 bg-white rounded svelte-1l8159u">
@@ -100,8 +101,6 @@
                     </div>
                 </div>
             </div>
-
-            <button id="process" class="text-md text-white p-2 rounded w-full" type="submit">{% trans "Process" %}</button>
         </form>
         </div>
 
