@@ -7,7 +7,6 @@
 const colors = require("tailwindcss/colors");
 
 module.exports = {
-    important: true,
     /**
      * Stylesheet generation mode.
      *
