@@ -22,7 +22,7 @@
             {% for acceptance in acceptances_to_review %}
             <tr class="bg-white border-b text-ellipsis overflow-hidden hover:text-indigo-500 hover:bg-gray-200 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'riskacceptance-detail' acceptance.id %}?next={{ request.path|urlencode }}'">
                 <td scope="row" class="px-3 py-4 font-medium">
-                    {% if acceptance.validator == user %}
+                    {% if acceptance.validator == user and acceptance.state == 'submitted' %}
                         <span class="mr-1 p-1 rounded-md text-xs bg-indigo-500 text-white">
                             {% trans "action requested" %}
                         </span>

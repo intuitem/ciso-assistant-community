@@ -29,7 +29,7 @@
             <div class="text-blue-900">
                 {% trans "This risk acceptance is currently accepted. You can revoke it at any time, but this will be <strong>irrevocable</strong>. You will need to duplicate it with a different verison if necessary." %}
             </div>
-            <div class="ml-auto">
+            <div class="ml-auto whitespace-nowrap">
                 {% include 'snippets/action_button_modal.html' with header=_("Revoke risk acceptance") content=_("Revoke") name="revoked" %}
             </div>
         </div>
