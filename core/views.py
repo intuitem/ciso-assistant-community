@@ -1339,8 +1339,8 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         return context
 
     def get_success_url(self) -> str:
-        if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.filter(name=self.request.POST['security_measure_name'], folder=self.get_object().analysis.project.folder).exists():
-            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name'], folder=self.get_object().analysis.project.folder))
+        if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']).folder == self.get_object().analysis.project.folder:
+            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']))
         if "select_measures" in self.request.POST:
             return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
