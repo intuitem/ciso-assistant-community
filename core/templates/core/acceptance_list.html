@@ -209,13 +209,6 @@
             }
             });
         }
-        items = document.querySelectorAll("ul#sidebar-items li.to-page a");
-        items.forEach(function(element) {
-            if (window.location.pathname.includes(element.getAttribute("href"))) {
-                element.classList.remove("nav-link");
-                element.classList.add("nav-link-active");
-            }
-        });
     };
       
     window.onload = updateLabels;
