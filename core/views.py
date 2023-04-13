@@ -370,7 +370,7 @@ class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     form_class = FirstConnexionConfirmForm
 
 
-class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
+class SecurityMeasurePlanView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
     context_object_name = 'context'
 
