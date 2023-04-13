@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.models import User
@@ -75,6 +75,11 @@ User = get_user_model()
 
 MAX_USERS = 20
 
+def is_ajax(request):
+    """
+    Method to know if it's an ajax request or not
+    """
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 class BaseContextMixin:
 
     def get_context_data(self, **kwargs):
@@ -1339,11 +1344,10 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         return context
     
     def form_valid(self, form):
-        res = super().form_valid(form)
-        form.save()
+        response = super().form_valid(form)
         if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.filter(name=self.request.POST['security_measure_name'], folder=self.get_object().analysis.project.folder).exists():
             self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name'], folder=self.get_object().analysis.project.folder))
-        return res
+        return response
 
     def get_success_url(self) -> str:
         if "select_measures" in self.request.POST:
@@ -1418,11 +1422,17 @@ class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
         return True
 
 
-class SecurityMeasureCreateViewModal(UserPassesTestMixin, CreateViewModal):
+class SecurityMeasureCreateViewModal(CreateViewModal, UserPassesTestMixin):
     permission_required = 'core.add_securitymeasure'
     model = SecurityMeasure
     context_object_name = 'measure'
     form_class = SecurityMeasureCreateForm
+
+    def form_invalid(self, form):
+        if is_ajax(request=self.request):
+            errors = form.errors.as_json()
+            return JsonResponse({'success': False, 'errors': errors})
+        return super().form_invalid(form)
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securitymeasure"), folder=Folder.objects.get(id=self.request.POST['folder']))
