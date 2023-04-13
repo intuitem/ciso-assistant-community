@@ -131,7 +131,7 @@
                                 bg-gray-200
                                 {% endif %} text-gray-900">{{ acceptance.get_state_display|lower}}
                                 </span>
-                                {% if acceptance.validator == user %}
+                                {% if acceptance.validator == user and acceptance.state == "submitted" %}
                                 <span class="ml-2 p-1 rounded-md text-xs bg-indigo-500 text-white">
                                     {% trans "action requested" %}
                                 </span>
@@ -209,13 +209,6 @@
             }
             });
         }
-        items = document.querySelectorAll("ul#sidebar-items li.to-page a");
-        items.forEach(function(element) {
-            if (window.location.pathname.includes(element.getAttribute("href"))) {
-                element.classList.remove("nav-link");
-                element.classList.add("nav-link-active");
-            }
-        });
     };
       
     window.onload = updateLabels;
