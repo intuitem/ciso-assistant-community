@@ -242,23 +242,43 @@
     // patch for *THAT* risk scenario update form issue:
     $(document).ready(function() {
         $('button#securitymeasure_save').click(function(event) {
-            event.preventDefault(); // prevent 1st submit (modal) from firing right away, without this only the modal will be submitted
-            $('#scenario_update_form, #securitymeasure-create-form').each(function() {
-                valuesToSend = $(this).serialize();
-                if ($(this).attr('id') == 'scenario_update_form') {
-                    valuesToSend += '&security_measure_name=' + $('#securitymeasure-create-form').serializeArray().filter(function(obj) {
-                        return obj.name === 'name';
-                    })[0].value;
-                }
-                $.ajax($(this).attr('action'),
-                    {
-                        type: $(this).attr('method'),
-                        data: valuesToSend,
-                        success: function(data) {
-                            location.reload();
+            event.preventDefault();
+            var securityMeasureFormData = $('#securitymeasure-create-form').serialize();
+            $.ajax({
+                url: $('#securitymeasure-create-form').attr('action'),
+                type: $('#securitymeasure-create-form').attr('method'),
+                data: securityMeasureFormData,
+                success: function(data) {
+                    var success = data['success']
+                    console.log(success)
+                    if (success === false){
+                        var errors = JSON.parse(data.errors);
+                        $('#securitymeasure-create-form').find('.error').remove();
+                        for (var key in errors) {
+                            if (errors.hasOwnProperty(key)) {
+                                var errorElement = '<div class="error text-red-500 text-xs font-semibold">' + errors[key][0].message + '</div>';
+                                $('#securitymeasure-create-form').find('[name=' + key + ']').before(errorElement);
+                            }
                         }
+                        var formElement = document.querySelector('#securitymeasure-create-form');
+                        formElement.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'smooth' });
                     }
-                )
+                    else {
+                        var securityMeasureName = $('#securitymeasure-create-form input[name="name"]').val();
+                        var scenarioUpdateFormData = $('#scenario_update_form').serialize() + '&security_measure_name=' + securityMeasureName;
+                        $.ajax({
+                            url: $('#scenario_update_form').attr('action'),
+                            type: $('#scenario_update_form').attr('method'),
+                            data: scenarioUpdateFormData,
+                            success: function(data) {
+                                location.reload();
+                            }
+                        });
+                    }
+                },
+                failure: function(error){
+                    alert('Error')
+                }
             });
         });
     });
