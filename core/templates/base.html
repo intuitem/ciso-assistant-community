@@ -66,6 +66,7 @@
 				if (window.location.pathname.includes(element.getAttribute("href"))) {
 					element.classList.remove("nav-link");
 					element.classList.add("nav-link-active");
+					element.classList.remove("hover:bg-gray-200");
 				}
 			});
 		}
