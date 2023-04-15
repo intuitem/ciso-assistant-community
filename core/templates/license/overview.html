@@ -18,7 +18,7 @@
                 {% trans "Deployment mode" %}
             </td>
             <td>
-                {% trans "Cloud instance" %}
+                {{ licence_deployment }}
             </td>
         </tr>
 
@@ -27,7 +27,7 @@
                 {% trans "License type" %}
             </td>
             <td>
-                {% trans "Trial" %}
+                {{ licence_type }}
             </td>
         </tr>
 
@@ -54,7 +54,7 @@
                 {% trans "Support" %}
             </td>
             <td>
-                {% trans "Standard" %}
+                {{ licence_support }}
             </td>
         </tr>
 
@@ -63,7 +63,7 @@
                 {% trans "Expiration date" %}
             </td>
             <td>
-                31/12/2023
+                {{ licence_expiration }}
             </td>
         </tr>
 
