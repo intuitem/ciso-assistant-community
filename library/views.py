@@ -13,6 +13,7 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
 from core.views import BaseContextMixin
+import json
 
 class LibraryListView(BaseContextMixin, FormView):
     template_name = 'library/library_list.html'
@@ -60,7 +61,13 @@ class LibraryDetailView(BaseContextMixin, TemplateView):
         library = get_library(kwargs['library'])
         context['library'] = library
         context['types'] = self.get_object_types(library)
-        context['matrices'] = self.get_matrices(library)
+        matrices_list = []
+        for matrices in self.get_matrices(library):
+            fields = matrices['fields']
+            matrices_list.append(RiskMatrix(name=fields['name'],
+                                                    description=fields['description'],
+                                                    json_definition=json.dumps(fields)))
+        context['matrices'] = matrices_list
         object_type = self.get_object_types(library).pop().replace("_", "")
         if object_type == "matrix":
             object_type = "riskmatrix"
