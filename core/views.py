@@ -62,7 +62,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY, LICENCE_DEPLOYMENT, LICENCE_EXPIRATION, LICENCE_SUPPORT, LICENCE_TYPE
 if RECAPTCHA_PUBLIC_KEY:
     from captcha.fields import ReCaptchaField
 
@@ -2189,6 +2189,9 @@ def license_overview(request):
 
     context['users_number'] = User.objects.all().count()
     context['users_number_limit'] = MAX_USERS
-
-
+    context['licence_deployment'] = LICENCE_DEPLOYMENT
+    context['licence_expiration'] = LICENCE_EXPIRATION
+    context['licence_support'] = LICENCE_SUPPORT
+    context['licence_type'] = LICENCE_TYPE
+ 
     return render(request, template, context)

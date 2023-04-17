@@ -121,6 +121,13 @@ EMAIL_USE_TLS_RESCUE = os.environ.get('EMAIL_USE_TLS_RESCUE')
 
 EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', default="5")) # seconds
 
+## Licence management
+LICENCE_DEPLOYMENT = os.environ.get('LICENCE_DEPLOYMENT', default="On-premises")
+LICENCE_TYPE = os.environ.get('LICENCE_TYPE', default="Standard")
+LICENCE_SUPPORT = os.environ.get('LICENCE_SUPPORT', default="Standard")
+LICENCE_EXPIRATION = os.environ.get('LICENCE_EXPIRATION', default="-")
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -3020,7 +3020,7 @@ msgstr "Limite utilisateurs"
 
 #: core/templates/license/overview.html:48
 msgid "Disabled"
-msgstr "désactivée"
+msgstr "Désactivée"
 
 #: core/templates/license/overview.html:57
 msgid "Standard"
