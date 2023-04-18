@@ -244,3 +244,11 @@ AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend']
 FIDO_SERVER_ID=urlparse(MIRA_URL).hostname
 FIDO_SERVER_NAME="FidoMira"
 # leave KEY_ATTACHMENT undefined to allow both platform and roaming authenticators
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]
