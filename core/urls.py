@@ -21,7 +21,7 @@ urlpatterns = [
     path('analysis/<analysis>.pdf', login_required(views.generate_ra_pdf), name='RA-PDF'),
     path('analysis/<analysis>.csv', login_required(views.export_risks_csv), name='RA-CSV'),
 
-    path('analyses-registry/plan/<folder>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
+    path('analyses-registry/plan/<analysis>/', login_required(views.SecurityMeasurePlanView.as_view()), name='MP'),
     path('treatment/<analysis>.pdf', login_required(views.generate_mp_pdf), name='MP-PDF'),
     path('treatment/<analysis>.csv', login_required(views.export_mp_csv), name='MP-CSV'),
 

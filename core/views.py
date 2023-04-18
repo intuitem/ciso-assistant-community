@@ -385,9 +385,15 @@ class SecurityMeasurePlanView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
-        qs = self.model.objects.filter(
+        qs = self.model.objects.filter(analysis=self.kwargs['analysis']).filter(
             id__in=object_ids_view).order_by(self.ordering)
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['analysis'] = get_object_or_404(Analysis, pk=self.kwargs['analysis'])
+        context['crumbs'] = {'analysis_list': _('Analysis registry')}
+        return context
 
     def test_func(self):
         """
