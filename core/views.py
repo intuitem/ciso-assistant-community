@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetConfirmView
 from django.contrib.auth.models import User
@@ -62,7 +62,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import RECAPTCHA_PUBLIC_KEY
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY, LICENCE_DEPLOYMENT, LICENCE_EXPIRATION, LICENCE_SUPPORT, LICENCE_TYPE
 if RECAPTCHA_PUBLIC_KEY:
     from captcha.fields import ReCaptchaField
 
@@ -75,6 +75,11 @@ User = get_user_model()
 
 MAX_USERS = 20
 
+def is_ajax(request):
+    """
+    Method to know if it's an ajax request or not
+    """
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 class BaseContextMixin:
 
     def get_context_data(self, **kwargs):
@@ -135,7 +140,7 @@ class GenericDetailView(BaseContextMixin, DetailView):
             context['change'] = RoleAssignment.has_permission(self.request.user, 'change_user')
             context['delete'] = RoleAssignment.has_permission(self.request.user, 'delete_user')
         context['data'] = self.get_object_data()
-        context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural}
+        context['crumbs'] = {self.model.__name__.lower() + "-list": self.model._meta.verbose_name_plural.capitalize()}
 
         return context
 
@@ -309,7 +314,7 @@ class UserLogin(LoginView):
 
     def form_valid(self, form):
         user = form.get_user()
-        nb_pending_acceptances = RiskAcceptance.objects.filter(validator=user).count()
+        nb_pending_acceptances = RiskAcceptance.objects.filter(validator=user, state='submitted').count()
         if nb_pending_acceptances > 0:
             messages.info(self.request, format_html(_("You have {} pending risk acceptance(s) waiting to be processed. Go to the list of <a class='text-blue-600 underline hover:text-blue-500' href={}>risk acceptances</a> to learn more."), nb_pending_acceptances, reverse('riskacceptance-list')))
         return super().form_valid(form)
@@ -370,7 +375,7 @@ class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     form_class = FirstConnexionConfirmForm
 
 
-class SecurityMeasurePlanView(UserPassesTestMixin, ListView):
+class SecurityMeasurePlanView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
     context_object_name = 'context'
 
@@ -1337,10 +1342,14 @@ class RiskScenarioUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
 
         context['matrix'] = self.get_object().get_matrix()
         return context
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.filter(name=self.request.POST['security_measure_name'], folder=self.get_object().analysis.project.folder).exists():
+            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name'], folder=self.get_object().analysis.project.folder))
+        return response
 
     def get_success_url(self) -> str:
-        if 'security_measure_name' in self.request.POST and SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']).folder == self.get_object().analysis.project.folder:
-            self.get_object().security_measures.add(SecurityMeasure.objects.get(name=self.request.POST['security_measure_name']))
         if "select_measures" in self.request.POST:
             return reverse_lazy('riskscenario-update', kwargs={'pk': self.kwargs['pk']})
         else:
@@ -1413,11 +1422,17 @@ class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
         return True
 
 
-class SecurityMeasureCreateViewModal(UserPassesTestMixin, CreateViewModal):
+class SecurityMeasureCreateViewModal(CreateViewModal, UserPassesTestMixin):
     permission_required = 'core.add_securitymeasure'
     model = SecurityMeasure
     context_object_name = 'measure'
     form_class = SecurityMeasureCreateForm
+
+    def form_invalid(self, form):
+        if is_ajax(request=self.request):
+            errors = form.errors.as_json()
+            return JsonResponse({'success': False, 'errors': errors})
+        return super().form_invalid(form)
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securitymeasure"), folder=Folder.objects.get(id=self.request.POST['folder']))
@@ -2174,6 +2189,9 @@ def license_overview(request):
 
     context['users_number'] = User.objects.all().count()
     context['users_number_limit'] = MAX_USERS
-
-
+    context['licence_deployment'] = LICENCE_DEPLOYMENT
+    context['licence_expiration'] = LICENCE_EXPIRATION
+    context['licence_support'] = LICENCE_SUPPORT
+    context['licence_type'] = LICENCE_TYPE
+ 
     return render(request, template, context)

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 14:38+0000\n"
+"POT-Creation-Date: 2023-04-17 10:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,9 +49,8 @@ msgstr "Nom"
 #: core/templates/core/project_update.html:37
 #: core/templates/core/ri_update.html:78
 #: core/templates/core/risk_matrix_list.html:51
-#: core/templates/library/library_detail.html:39
-#: core/templates/library/library_detail.html:52
-#: core/templates/library/library_detail.html:110
+#: core/templates/library/library_detail.html:46
+#: core/templates/library/library_detail.html:59
 #: core/templates/library/library_list.html:19
 #: core/templates/snippets/mp_data.html:42
 #: core/templates/snippets/project_list_nested.html:10
@@ -214,7 +213,7 @@ msgid "Search acceptance..."
 msgstr "Rechercher une acceptation..."
 
 #: core/filters.py:240 core/templates/core/quick_start.html:130
-#: core/views.py:521
+#: core/views.py:526
 msgid "risk scenarios"
 msgstr "scénarios de risque"
 
@@ -292,7 +291,7 @@ msgstr "Rechercher un utilisateur..."
 
 #: core/filters.py:453 core/forms.py:82 core/forms.py:108
 #: core/templates/snippets/associated_users_list_nested.html:13
-#: core/templates/snippets/users_list_nested.html:13 core/views.py:1741
+#: core/templates/snippets/users_list_nested.html:13 core/views.py:1756
 msgid "Email"
 msgstr "Adresse électronique"
 
@@ -300,7 +299,7 @@ msgstr "Adresse électronique"
 msgid "Email (descending)"
 msgstr "Courriel (descendant)"
 
-#: core/filters.py:455 core/views.py:1741
+#: core/filters.py:455 core/views.py:1756
 msgid "First name"
 msgstr "Prénom"
 
@@ -308,7 +307,7 @@ msgstr "Prénom"
 msgid "First name (descending)"
 msgstr "Prénom (descendant)"
 
-#: core/filters.py:457 core/views.py:1741
+#: core/filters.py:457 core/views.py:1756
 msgid "Last name"
 msgstr "Nom"
 
@@ -393,7 +392,7 @@ msgstr "Statut"
 #: core/models.py:38 core/templates/core/mtg_list.html:115
 #: core/templates/core/project_list.html:6
 #: core/templates/core/risk_matrix_list.html:52
-#: core/templates/core/sidebar.html:147 core/views.py:249 core/views.py:884
+#: core/templates/core/sidebar.html:147 core/views.py:254 core/views.py:889
 msgid "Projects"
 msgstr "Projets"
 
@@ -409,7 +408,7 @@ msgid "Threat"
 msgstr "Menace"
 
 #: core/models.py:49 core/templates/core/sidebar.html:165
-#: core/templates/core/threat_list.html:5 core/views.py:1592
+#: core/templates/core/threat_list.html:5 core/views.py:1607
 msgid "Threats"
 msgstr "Menaces"
 
@@ -431,7 +430,7 @@ msgstr "biens parents"
 
 #: core/models.py:76 core/models.py:373 core/templates/core/asset_list.html:7
 #: core/templates/core/quick_start.html:76 core/templates/core/sidebar.html:156
-#: core/views.py:979
+#: core/views.py:984
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -440,7 +439,7 @@ msgid "Asset"
 msgstr "Bien sensible"
 
 #: core/models.py:104 core/templates/core/security_function_list.html:108
-#: core/templates/library/library_detail.html:111
+#: core/templates/library/library_detail.html:60
 msgid "Provider"
 msgstr "Fournisseur"
 
@@ -451,7 +450,7 @@ msgid "Security function"
 msgstr "Fonction de sécurité"
 
 #: core/models.py:109 core/templates/core/security_function_list.html:5
-#: core/templates/core/sidebar.html:173 core/views.py:775 core/views.py:1514
+#: core/templates/core/sidebar.html:173 core/views.py:780 core/views.py:1529
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
@@ -511,7 +510,7 @@ msgid "Analysis"
 msgstr "Analyse"
 
 #: core/models.py:170 core/templates/core/mtg_list.html:114
-#: core/templates/core/overview.html:43 core/views.py:1203
+#: core/templates/core/overview.html:43 core/views.py:1208
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -674,7 +673,7 @@ msgstr "Mesure de sécurité"
 
 #: core/models.py:319 core/models.py:375 core/templates/core/mtg_list.html:6
 #: core/templates/core/overview.html:51 core/templates/core/sidebar.html:115
-#: core/views.py:1436
+#: core/views.py:1451
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -773,7 +772,7 @@ msgstr "Commentaires"
 #: core/templates/core/analysis_list.html:117
 #: core/templates/core/ri_list.html:7 core/templates/core/sidebar.html:106
 #: core/templates/snippets/ra_data.html:39
-#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1328
+#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1333
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -850,9 +849,22 @@ msgstr "Acceptation de risque"
 
 #: core/models.py:504 core/templates/core/acceptance_list.html:6
 #: core/templates/core/overview.html:55 core/templates/core/sidebar.html:124
-#: core/views.py:1702
+#: core/views.py:1717
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
+
+#: core/templates/base.html:94 core/templates/core/base.html:92
+msgid ""
+"The maximum number of licensed users has been exceeded. Please reduce the "
+"number of users or acquire an appropriate license."
+msgstr ""
+"Le nombre maximum d'utilisateurs sur cette licence a été dépassé. Veuillez "
+"réduire le nombre d'utilisateurs ou acquérir une licence appropriée."
+
+#: core/templates/base.html:104 core/templates/core/base.html:102
+#: core/templates/core/sidebar.html:385
+msgid "About MIRA"
+msgstr "À propos de MIRA"
 
 #: core/templates/core/acceptance_list.html:57
 #: core/templates/core/analysis_list.html:57
@@ -1052,18 +1064,6 @@ msgstr "Supprimer le bien sensible ?"
 #: core/templates/core/asset_list.html:101
 msgid "No asset found."
 msgstr "Aucun bien sensible trouvé."
-
-#: core/templates/core/base.html:108
-msgid ""
-"The maximum number of licensed users has been exceeded. Please reduce the "
-"number of users or acquire an appropriate license."
-msgstr ""
-"Le nombre maximum d'utilisateurs sur cette licence a été dépassé. Veuillez "
-"réduire le nombre d'utilisateurs ou acquérir une licence appropriée."
-
-#: core/templates/core/base.html:118 core/templates/core/sidebar.html:385
-msgid "About MIRA"
-msgstr "À propos de MIRA"
 
 #: core/templates/core/browser.html:15
 #, python-format
@@ -1550,7 +1550,7 @@ msgid "Passkeys"
 msgstr ""
 
 #: core/templates/core/my_profile_detailed.html:29
-#: core/templates/core/role_list.html:36 core/views.py:1943 core/views.py:2041
+#: core/templates/core/role_list.html:36 core/views.py:1958 core/views.py:2056
 msgid "User groups"
 msgstr "Groupes utilisateurs"
 
@@ -1633,7 +1633,7 @@ msgstr "ID interne"
 
 #: core/templates/core/project_domain_list.html:5
 #: core/templates/core/quick_start.html:49 core/templates/core/sidebar.html:138
-#: core/views.py:235 core/views.py:772 core/views.py:1098
+#: core/views.py:240 core/views.py:777 core/views.py:1103
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
@@ -1850,7 +1850,7 @@ msgstr "traitement de risque"
 msgid "For each risk scenario, try to define and apply additional"
 msgstr "Pour chaque scénario de risque, essayez de définir et d'appliqer des "
 
-#: core/templates/core/quick_start.html:148 core/views.py:525
+#: core/templates/core/quick_start.html:148 core/views.py:530
 msgid "security measures"
 msgstr "mesures de sécurité"
 
@@ -1985,8 +1985,8 @@ msgstr[0] ""
 "                        "
 msgstr[1] ""
 "\n"
-"                        %(counter)s <span class=\"font-"
-"bold\">avertissements</span> trouvés\n"
+"                        %(counter)s <span class=\"font-bold"
+"\">avertissements</span> trouvés\n"
 "                    "
 
 #: core/templates/core/review.html:54
@@ -2145,14 +2145,14 @@ msgid_plural "across <strong>%(projects)s</strong> projects"
 msgstr[0] "à travers <strong>%(projects)s</strong> project"
 msgstr[1] "à travers <strong>%(projects)s</strong> projects"
 
-#: core/templates/core/risk_matrix_list.html:7 core/views.py:2131
-#: core/views.py:2150
+#: core/templates/core/risk_matrix_list.html:7 core/views.py:2146
+#: core/views.py:2165
 msgid "Matrices"
 msgstr ""
 
 #: core/templates/core/risk_matrix_list.html:41
 msgid "Import matrix"
-msgstr "Importer une mamtrice"
+msgstr "Importer une matrice"
 
 #: core/templates/core/risk_matrix_list.html:53
 msgid "Matrix"
@@ -2186,7 +2186,7 @@ msgstr "Nouvelle assignation de rôle"
 #: core/templates/core/role_assignment_create.html:10
 #: core/templates/core/role_assignment_update.html:10
 #: core/templates/core/role_list.html:6 core/templates/core/sidebar.html:236
-#: core/views.py:2011
+#: core/views.py:2026
 msgid "Role assignment"
 msgstr "Assignation de rôle"
 
@@ -2222,7 +2222,7 @@ msgstr "Assignations de rôle"
 
 #: core/templates/core/role_list.html:35 core/templates/core/sidebar.html:197
 #: core/templates/core/sidebar.html:206 core/templates/core/user_list.html:6
-#: core/views.py:1819 core/views.py:1852 core/views.py:2068
+#: core/views.py:1834 core/views.py:1867 core/views.py:2083
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -2626,7 +2626,6 @@ msgid "Assessment vector:"
 msgstr "Vecteurs d'évaluation :"
 
 #: core/templates/core/scoring.html:290
-#: core/templates/library/library_detail.html:53
 #: core/templates/snippets/risk_matrix.html:75
 msgid "Probability"
 msgstr "Probabilité"
@@ -2636,7 +2635,6 @@ msgid "Risk level"
 msgstr "Niveau de risque"
 
 #: core/templates/core/scoring.html:307
-#: core/templates/library/library_detail.html:54
 #: core/templates/snippets/risk_matrix.html:35
 msgid "Impact"
 msgstr ""
@@ -2891,23 +2889,26 @@ msgstr "Importer une bibliothèque"
 msgid "Objects of type:"
 msgstr "Objets de type :"
 
+#: core/templates/library/library_detail.html:37
+#| msgid "Name"
+msgid "Name:"
+msgstr "Nom"
+
 #: core/templates/library/library_detail.html:38
+#, fuzzy
+#| msgid "Description (descending)"
+msgid "Description:"
+msgstr "Description (descendant)"
+
+#: core/templates/library/library_detail.html:45
 msgid "Threat name"
 msgstr "Nom de la menace"
 
-#: core/templates/library/library_detail.html:51
-msgid "Matrix name"
-msgstr "Nom de la matrice"
-
-#: core/templates/library/library_detail.html:55
-msgid "Risk"
-msgstr "Risque"
-
-#: core/templates/library/library_detail.html:109
+#: core/templates/library/library_detail.html:58
 msgid "Security function name"
 msgstr "Nom de la fonction de sécurité"
 
-#: core/templates/library/library_detail.html:112
+#: core/templates/library/library_detail.html:61
 msgid "Contact"
 msgstr ""
 
@@ -3020,7 +3021,7 @@ msgstr "Limite utilisateurs"
 
 #: core/templates/license/overview.html:48
 msgid "Disabled"
-msgstr "désactivée"
+msgstr "Désactivée"
 
 #: core/templates/license/overview.html:57
 msgid "Standard"
@@ -3331,8 +3332,8 @@ msgstr "ainsi que tous les objets enfants."
 #, python-format
 msgid ""
 "\n"
-"        Are you sure you want to import the following library: <strong "
-"class=\"font-semibold text-gray-700\">%(library)s</strong>?\n"
+"        Are you sure you want to import the following library: <strong class="
+"\"font-semibold text-gray-700\">%(library)s</strong>?\n"
 "        "
 msgstr ""
 "\n"
@@ -3499,19 +3500,19 @@ msgstr "Responsable de domaine"
 msgid "Analyst"
 msgstr "Analyste"
 
-#: core/views.py:212
+#: core/views.py:217
 msgid "Risk acceptance: {} accepted with success!"
 msgstr "Acceptation de risque: {} acceptée avec succés!"
 
-#: core/views.py:215
+#: core/views.py:220
 msgid "Risk acceptance: {} rejected with success!"
 msgstr "Acceptation de risque : {} rejetée avec succès!"
 
-#: core/views.py:218
+#: core/views.py:223
 msgid "Risk acceptance: {} revoked with success!"
 msgstr "Acceptation de risque : {} révoquée avec succès!"
 
-#: core/views.py:290
+#: core/views.py:295
 msgid ""
 "Welcome to MIRA! 👋<br>Question or feedback? click <a class='text-blue-600 "
 "underline hover:text-blue-500' target='_blank' href='https://intuitem.com/"
@@ -3521,7 +3522,7 @@ msgstr ""
 "class='text-blue-600 underline hover:text-blue-500' target='_blank' "
 "href='https://intuitem.com/contact/'>ici</a>"
 
-#: core/views.py:295
+#: core/views.py:300
 msgid ""
 "Warning! You are not assigned to any group. Without a group you will not "
 "have access to any functionality. Please contact your administrator."
@@ -3529,7 +3530,7 @@ msgstr ""
 "Attention! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
 
-#: core/views.py:314
+#: core/views.py:319
 msgid ""
 "You have {} pending risk acceptance(s) waiting to be processed. Go to the "
 "list of <a class='text-blue-600 underline hover:text-blue-500' href={}>risk "
@@ -3539,29 +3540,29 @@ msgstr ""
 "la liste des <a class='text-blue-600 underline hover:text-blue-500' href={}"
 ">acceptations de risque</a> pour en savoir plus."
 
-#: core/views.py:337
+#: core/views.py:342
 msgid "Please wait before requesting another password reset."
 msgstr ""
 "Veuillez patienter avant de demander une nouvelle réinitialisation de votre "
 "mot de passe."
 
-#: core/views.py:342
+#: core/views.py:347
 msgid "Mira: Password Reset"
 msgstr "Mira: Réinitialisation de mot de passe"
 
-#: core/views.py:346
+#: core/views.py:351
 msgid "An error has occured, please try later."
 msgstr "Une erreur s'est produite, veuillez réessayer plus tard."
 
-#: core/views.py:357
+#: core/views.py:362
 msgid "Invalid email or captcha."
 msgstr "Email ou captcha invalide."
 
-#: core/views.py:782
+#: core/views.py:787
 msgid "Add "
 msgstr "Ajouter "
 
-#: core/views.py:1082
+#: core/views.py:1087
 msgid ""
 "User groups {} - Auditors, {} - Validators, {} - Analysts and {} - Domain "
 "Managers were created"
@@ -3569,11 +3570,11 @@ msgstr ""
 "Les groupes d'utilisateurs {} - Auditeurs, {} - Validateurs, {} - Analystes "
 "et {} - Responsables de domaine ont été créés"
 
-#: core/views.py:1668 core/views.py:1693
+#: core/views.py:1683 core/views.py:1708
 msgid "Risk acceptance submitted to: "
 msgstr "Acceptation de risque soumise à: "
 
-#: core/views.py:1739
+#: core/views.py:1754
 msgid ""
 "Warning! You are not assigned to any group. Without a group you will not "
 "have access to any functionality. Please contact you administrator."
@@ -3581,21 +3582,21 @@ msgstr ""
 "Attention ! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
 
-#: core/views.py:1741
+#: core/views.py:1756
 msgid "Entry date"
 msgstr "Date d'inscription"
 
-#: core/views.py:1741
+#: core/views.py:1756
 msgid "Superuser"
 msgstr "Superutilisateur"
 
-#: core/views.py:1831
+#: core/views.py:1846
 msgid "User created and email send successfully."
 msgstr ""
 "L'utilisateur a été créé et le courrier électronique a été envoyé avec "
 "succès."
 
-#: core/views.py:1980
+#: core/views.py:1995
 msgid ""
 "Role assignment editing will be available in a future release. Currently you "
 "have to attach users to groups to assign roles."
@@ -3603,6 +3604,12 @@ msgstr ""
 "L'édition de l'attribution des rôles sera disponible dans une prochaine "
 "version. Actuellement, vous devez attacher les utilisateurs à des groupes "
 "pour leur attribuer des rôles."
+
+#~ msgid "Matrix name"
+#~ msgstr "Nom de la matrice"
+
+#~ msgid "Risk"
+#~ msgstr "Risque"
 
 #~ msgid "Active"
 #~ msgstr "Actif"

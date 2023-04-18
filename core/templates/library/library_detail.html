@@ -32,6 +32,13 @@
                 {% for type in types %}
                 <div class="bg-white shadow border border-gray-100 text-left p-4 font-semibold rounded">
                     <h2>{% trans "Objects of type:" %} {{ type|upper }}</h2>
+                    {% if type == "matrix" %}
+                        {% for matrix in matrices %}
+                            <p class="font-normal">{% trans "Name" %}: {{ matrix.name }}</p>
+                            <p class="font-normal">{% trans "Description" %}: {{ matrix.description }}</p>
+                            {% include 'snippets/risk_matrix.html'%}
+                        {% endfor %}
+                    {% endif %}
                     <table class="w-full text-sm text-left text-gray-500">
                         {% if type == "threat" %}
                             <tr class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -43,63 +50,6 @@
                                     <tr>
                                         <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
                                         <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        {% elif type == "matrix" %}
-                            <tr class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <th class="px-6 py-3">{% trans "Matrix name" %}</th>
-                                <th class="px-6 py-3">{% trans "Description" %}</th>
-                                <th class="px-6 py-3">{% trans "Probability" %}</th>
-                                <th class="px-6 py-3">{% trans "Impact" %}</th>
-                                <th class="px-6 py-3">{% trans "Risk" %}</th>
-                            </tr>
-                            {% for object in library.objects %}
-                                {% if object.type == type %}
-                                    <tr class="even:bg-white odd:bg-gray-50">
-                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
-                                        <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
-                                        <td class="px-6 py-3">
-                                            {% for probability in object.fields.probability %}
-                                                <div class="flex flex-row space-x-2">
-                                                    <div class="">{{ probability.abbreviation }}</div>
-                                                    <div class="">{{ probability.name }}</div>
-                                                    <div class="">{{ probability.description|linebreaksbr }}</div>
-                                                </div>
-                                            {% endfor %}
-                                        </td>
-                                        <td class="px-6 py-3">
-                                        {% for impact in object.fields.impact %}
-                                            <div class="flex flex-row space-x-2">
-                                                <div class="">{{ impact.abbreviation }}</div>
-                                                <div class="">{{ impact.name }}</div>
-                                                <div class="">{{ impact.description|linebreaksbr }}</div>
-                                            </div>
-                                        {% endfor %}
-                                        </td>
-                                        <td class="px-6 py-3">
-                                            <div class="flex flex-row space-x-4">
-                                                <div class="flex flex-col">
-                                                {% for risk in object.fields.risk %}
-                                                    <div class="flex flex-row space-x-2">
-                                                        <div class="w-fit p-1 rounded" style="background-color: {{ risk.hexcolor }};"></div>
-                                                        <div class="w-fit">{{ risk.abbreviation }}</div>
-                                                        <div class="w-fit">{{ risk.name }}</div>
-                                                        <div class="w-fit">{{ risk.description|linebreaksbr }}</div>
-                                                    </div>
-                                                {% endfor %}
-                                                </div>
-                                                {% comment %} <div>
-                                                    {% for row in object.fields.grid %}
-                                                    <div class="grid grid-flow-col space-x-2">
-                                                        {% for item in row %}
-                                                            <div>{{ item }}</div>
-                                                        {% endfor %}
-                                                    </div>
-                                                    {% endfor %}
-                                                </div> {% endcomment %}
-                                            </div>
-                                        </td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}
