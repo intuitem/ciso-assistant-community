@@ -9,8 +9,10 @@
 {% if not matrix.is_enabled %}
 <div class="flex flex-row items-center bg-blue-100 rounded-xl shadow-lg px-6 py-2 mb-2">
     <div class="text-gray-800">
-        This risk matrix is <strong>disabled</strong>, therefore it cannot be used in any new analyses.
-        In order to enable it, you can edit it and change its status.
+        {% blocktrans %}
+            This risk matrix is <strong>disabled</strong>, therefore it cannot be used in any new analyses.
+            In order to enable it, you can edit it and change its status.
+        {% endblocktrans %}
     </div>
 </div>
 {% endif %}
