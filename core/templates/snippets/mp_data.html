@@ -74,7 +74,7 @@
                 <td class="px-2 py-3">{% if securitymeasure.security_function %}{{ securitymeasure.security_function }}{% else %}--{% endif %}</td>
                 <td class="px-2 py-3">{% if securitymeasure.eta %}{{ securitymeasure.eta }}{% else %}--{%endif%}</td>
                 <td class="px-2 py-3">{% if securitymeasure.effort %}{{ securitymeasure.effort }}{% else %}--{%endif%}</td>
-                <td class="px-2 py-3 text-center">{% if securitymeasure.link %}<a href="{{ securitymeasure.link }}"
+                <td class="px-2 py-3 text-center">{% if securitymeasure.link %}<a onclick="event.stopPropagation();" href="{{ securitymeasure.link }}"
                                                                    class="hover:text-blue-400"><i
                         class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
                 </td>
