@@ -274,10 +274,13 @@ class SecurityFunctionDetailView(GenericDetailView):
     exclude = ['id', 'is_published', 'folder']
 
 
-class UserDetailView(GenericDetailView):
+class UserDetailView(UserPassesTestMixin, GenericDetailView):
     model = User
-
     exclude = ['id', 'password', 'first_login']
+
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user")) or self.request.user == self.get_object()
+
 
 
 class AnalysisListView(BaseContextMixin, ListView):
@@ -2065,7 +2068,7 @@ class RoleAssignmentUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView
                                                                      perm=Permission.objects.get(codename="change_roleassignment"), folder=Folder.get_folder(ra))
 
 
-class UserPasswordChangeView(BaseContextMixin, PasswordChangeView):
+class UserPasswordChangeView(BaseContextMixin, UserPassesTestMixin, PasswordChangeView):
     """ view to change user password """
     template_name = 'core/password_change.html'
     form_class = UserPasswordChangeForm
@@ -2088,6 +2091,9 @@ class UserPasswordChangeView(BaseContextMixin, PasswordChangeView):
         kwargs["user"] = get_object_or_404(User, pk=self.kwargs['pk'])
         # print('DEBUG: User =', get_object_or_404(User, pk=self.kwargs['pk']))
         return kwargs
+    
+    def test_func(self):
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user")) or self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
 
 
 class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
