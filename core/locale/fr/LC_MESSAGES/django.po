@@ -2142,8 +2142,8 @@ msgstr[1] "Utilisée dans <strong>%(analyses)s</strong> analyses"
 #, python-format
 msgid "across <strong>%(projects)s</strong> project"
 msgid_plural "across <strong>%(projects)s</strong> projects"
-msgstr[0] "à travers <strong>%(projects)s</strong> project"
-msgstr[1] "à travers <strong>%(projects)s</strong> projects"
+msgstr[0] "à travers <strong>%(projects)s</strong> projet"
+msgstr[1] "à travers <strong>%(projects)s</strong> projets"
 
 #: core/templates/core/risk_matrix_list.html:7 core/views.py:2146
 #: core/views.py:2165

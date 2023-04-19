@@ -924,7 +924,7 @@ class ProjectDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('project-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_project"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_project"), folder=self.get_object().folder)
 
 
 class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1021,7 +1021,7 @@ class AssetDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_asset"), folder=self.get_object().folder)
 
 
 class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1140,7 +1140,7 @@ class FolderDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('folder-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_folder"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_folder"), folder=self.get_object())
 
 
 class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1258,7 +1258,7 @@ class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('analysis-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_analysis"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_analysis"), folder=self.get_object().project.folder)
 
 
 class RiskScenarioListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1400,7 +1400,7 @@ class RiskScenarioDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('riskscenario-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskscenario"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskscenario"), folder=self.get_object().analysis.project.folder)
 
 
 class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1486,7 +1486,7 @@ class SecurityMeasureDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('securitymeasure-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securitymeasure"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securitymeasure"), folder=self.get_object().folder)
 
 
 class SecurityFunctionListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1564,7 +1564,7 @@ class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('securityfunction-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securityfunction"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_securityfunction"), folder=self.get_object().folder)
 
 
 class ThreatListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1630,7 +1630,7 @@ class ThreatUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_threat"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_threat"), folder=self.get_object().folder)
 
 
 class ThreatDeleteView(UserPassesTestMixin, DeleteView):
@@ -1639,7 +1639,7 @@ class ThreatDeleteView(UserPassesTestMixin, DeleteView):
     template_name = 'snippets/threat_delete_modal.html'
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_threat"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_threat"), folder=self.get_object().folder)
 
 
 class RiskAcceptanceListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1751,7 +1751,7 @@ class RiskAcceptanceDeleteView(UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('riskacceptance-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskacceptance"), folder=self.get_object().folder)
 
 
 class MyProfileDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
@@ -2153,6 +2153,8 @@ class RiskMatrixDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['change_riskmatrix'] = RoleAssignment.get_accessible_object_ids(
+            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
         context['viewable_projects'] = Project.objects.filter(
             id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)[0]).filter(
             id__in=(self.get_object().projects.all().values_list('id', flat=True)))
