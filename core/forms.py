@@ -5,6 +5,7 @@ from django import forms
 from .models import *
 from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
+from django.utils.html import escape
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
@@ -205,6 +206,17 @@ class SecurityMeasureCreateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['security_function'].choices)
+        
+    def clean_link(self):
+        """
+        Method to verify if we enter a real link and not javascript
+        """
+        link = self.cleaned_data.get('link')
+        if link:
+            link = escape(link)
+            if not link.startswith(('https://', 'ftps://')) or link.startswith('javascript:'):
+                raise ValidationError(_('Invalid link'))
+        return link
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -242,6 +254,18 @@ class SecurityMeasureUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['security_function'].choices)
+        
+    def clean_link(self):
+        """
+        Method to check link
+        """
+        link = self.cleaned_data.get('link')
+        if link:
+            link = escape(link)
+            if not link.startswith(('https://', 'ftps://')) or link.startswith('javascript:'):
+                raise ValidationError(_('Invalid link'))
+        return link
+    
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
