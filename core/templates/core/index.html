@@ -25,143 +25,140 @@
                 </search>
             </div>
         </div>
+        <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg mt-2">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3">
+                            {% trans "ID" %}
+                        </th>
+                        <th class="px-6 py-3">
+                            {% trans "Assignee" %}
+                        </th>
+                        <th class="px-6 py-3">
+                            {% trans "Last Update" %}
+                        </th>
+                        <th class="px-6 py-3">
+                            
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analysis in page_obj %}
+                    <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'RA' analysis.id %}?next={{ request.path|urlencode }}'">
+                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
+                            <div class="flex items-center">
 
-        <div class="rounded-lg mt-2">
-            <div class="relative shadow-md rounded-lg">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3">
-                                {% trans "ID" %}
-                            </th>
-                            <th class="px-6 py-3">
-                                {% trans "Assignee" %}
-                            </th>
-                            <th class="px-6 py-3">
-                                {% trans "Last Update" %}
-                            </th>
-                            <th class="px-6 py-3">
-                                
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for analysis in page_obj %}
-                        <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'RA' analysis.id %}?next={{ request.path|urlencode }}'">
-                            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
-                                <div class="flex items-center">
+                                {% if analysis.is_draft %}
+                                <span class="bg-blue-200 p-1 rounded-md text-xs text-gray-900">{% trans "draft" %}</span>
 
-                                    {% if analysis.is_draft %}
-                                    <span class="bg-blue-200 p-1 rounded-md text-xs text-gray-900">{% trans "draft" %}</span>
+                                {% else %}
+                                <span class="bg-green-200 p-1 rounded-md text-xs text-gray-900">{% trans "ready" %}</span>
 
-                                    {% else %}
-                                    <span class="bg-green-200 p-1 rounded-md text-xs text-gray-900">{% trans "ready" %}</span>
-
-                                    {% endif %}
+                                {% endif %}
 
 
-                                    <div class="ml-3">
-                                        <p id="analysis{{analysis.id}}" class="text-md font-semibold whitespace-no-wrap">
-                                            {{ analysis }}
-                                        </p>
-                                    </div>
+                                <div class="ml-3">
+                                    <p id="analysis{{analysis.id}}" class="text-md font-semibold whitespace-no-wrap">
+                                        {{ analysis }}
+                                    </p>
                                 </div>
-                            </th>
-                            <td class="px-6 py-4">
-                                <p class="whitespace-no-wrap">
-                                    {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
-                                </p>
-                            </td>
-                            <td class="px-6 py-4">
-                                <p class="whitespace-no-wrap">
-                                    {{ analysis.updated_at|date }}
-                                </p>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
+                            </div>
+                        </th>
+                        <td class="px-6 py-4">
+                            <p class="whitespace-no-wrap">
+                                {% if analysis.auditor %}{{ analysis.auditor }}{% else %}--{% endif %}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="whitespace-no-wrap">
+                                {{ analysis.updated_at|date }}
+                            </p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
 
 
-                                    <div class="flex justify-center">
-                                        <div class="flex items-center">
-                                            <a href="{% url 'MP' analysis.id %}" class="group flex relative">
-                                                <span class="table-action" ><i class="fas fa-heartbeat"></i></span>
-                                                <div id="tooltip-rp" role="tooltip" class="group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs text-gray-100 rounded-md absolute left-1/2 
-                                                -translate-x-1/2 translate-y-full opacity-0 -mt-2 m-0 mx-auto">
-                                                    {% trans "Remediation plan" %}
+                                <div class="flex justify-center">
+                                    <div class="flex items-center">
+                                        <a href="{% url 'MP' analysis.id %}" class="group flex relative">
+                                            <span class="table-action" ><i class="fas fa-heartbeat"></i></span>
+                                            <div id="tooltip-rp" role="tooltip" class="group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs text-gray-100 rounded-md absolute left-1/2 
+                                            -translate-x-1/2 translate-y-full opacity-0 -mt-2 m-0 mx-auto">
+                                                {% trans "Remediation plan" %}
+                                                <div class="tooltip-arrow"></div>
+                                            </div>
+                                        <a>
+                                        <div x-data="{ dropdownOpen: false }" class="relative" onclick="event.stopPropagation();">
+                                            <button @click="dropdownOpen = !dropdownOpen" class="group flex relative">
+                                                <span class="table-action"><i class="fas fa-download"></i></span>
+                                                <div class=""></div>
+                                                <div id="tooltip-export" role="tooltip" class="group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs text-gray-100 rounded-md absolute left-1/2 
+                                                    -translate-x-1/2 translate-y-full opacity-0 m-2 mx-auto">
+                                                    {% trans "Export" %}
                                                     <div class="tooltip-arrow"></div>
                                                 </div>
-                                            <a>
-                                            <div x-data="{ dropdownOpen: false }" class="relative" onclick="event.stopPropagation();">
-                                                <button @click="dropdownOpen = !dropdownOpen" class="group flex relative">
-                                                    <span class="table-action"><i class="fas fa-download"></i></span>
-                                                    <div class=""></div>
-                                                    <div id="tooltip-export" role="tooltip" class="group-hover:opacity-100 transition-opacity bg-gray-800 px-2 py-1 text-xs text-gray-100 rounded-md absolute left-1/2 
-                                                        -translate-x-1/2 translate-y-full opacity-0 m-2 mx-auto">
-                                                        {% trans "Export" %}
-                                                        <div class="tooltip-arrow"></div>
-                                                    </div>
-                                                    
-                                                </button>
+                                                
+                                            </button>
 
-                                                <div x-show="dropdownOpen" @click="dropdownOpen = false"
-                                                    class="fixed inset-0 h-full w-full z-10"></div>
+                                            <div x-show="dropdownOpen" @click="dropdownOpen = false"
+                                                class="fixed inset-0 h-full w-full z-10"></div>
 
-                                                <div x-show="dropdownOpen"
-                                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-20">
-                                                    <a class="block px-4 py-2 text-sm text-gray-800">{% trans "Risk analysis" %}</a>
-                                                    <a href="{% url 'RA-PDF' analysis.id %}"
-                                                        class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
-                                                    <a href="{% url 'RA-CSV' analysis.id %}"
-                                                        class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
-                                                    <a class="block px-4 py-2 text-sm text-gray-800">{% trans "Treatment plan" %}</a>
-                                                    <a href="{% url 'MP-PDF' analysis.id %}"
-                                                        class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
-                                                    <a href="{% url 'MP-CSV' analysis.id %}"
-                                                        class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
+                                            <div x-show="dropdownOpen"
+                                                class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-20">
+                                                <a class="block px-4 py-2 text-sm text-gray-800">{% trans "Risk analysis" %}</a>
+                                                <a href="{% url 'RA-PDF' analysis.id %}"
+                                                    class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
+                                                <a href="{% url 'RA-CSV' analysis.id %}"
+                                                    class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
+                                                <a class="block px-4 py-2 text-sm text-gray-800">{% trans "Treatment plan" %}</a>
+                                                <a href="{% url 'MP-PDF' analysis.id %}"
+                                                    class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">{% trans "... as PDF" %}</a>
+                                                <a href="{% url 'MP-CSV' analysis.id %}"
+                                                    class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">{% trans "... as csv" %}</a>
 
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                    <tr>
-                        <td>
-                            <div class="text-black p-4">
-                                <i class="inline fas fa-exclamation-triangle"></i>
-                                <p class="inline test-gray-900">{% trans "No analysis found." %} {{ model.verbose_name }}</p>
+
                             </div>
                         </td>
                     </tr>
-                        {% endfor %}
+                    {% empty %}
+                <tr>
+                    <td>
+                        <div class="text-black p-4">
+                            <i class="inline fas fa-exclamation-triangle"></i>
+                            <p class="inline test-gray-900">{% trans "No analysis found." %} {{ model.verbose_name }}</p>
+                        </div>
+                    </td>
+                </tr>
+                    {% endfor %}
 
-                    </tbody>
-                </table>
-                <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-                    <span id="pagenum" class="text-xs xs:text-sm text-gray-900">
-                        {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
-                    </span>
-                    <div class="inline-flex mt-2 xs:mt-0 space-x-2">
-                        {% if page_obj.has_previous %}
-                        <a href="?page=1"
-                            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i
-                                class="fas fa-angle-double-left"></i>
-                            {% trans "First" %}</a>
-                        <a href="?page={{ page_obj.previous_page_number }}"
-                            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i
-                                class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
-                        {% endif %}
-                        {% if page_obj.has_next %}
-                        <a id="next"
-                            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
-                            href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
-                        <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
-                            href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
+                </tbody>
+            </table>
+            <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
+                <span id="pagenum" class="text-xs xs:text-sm text-gray-900">
+                    {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                </span>
+                <div class="inline-flex mt-2 xs:mt-0 space-x-2">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1"
+                        class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i
+                            class="fas fa-angle-double-left"></i>
+                        {% trans "First" %}</a>
+                    <a href="?page={{ page_obj.previous_page_number }}"
+                        class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i
+                            class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <a id="next"
+                        class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                        href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
+                    <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+                        href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
 
-                    </div>
                 </div>
             </div>
         </div>
