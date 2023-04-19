@@ -45,13 +45,13 @@
             </tr>
             {% else %}
             <tr>
-                <td class="text-md pl-3 pb-3 font-medium" colspan="9"> {% trans "Existing measures" %}: </td>
+                <td class="text-md pl-6 pb-3 font-medium" colspan="9"> {% trans "Existing measures" %}: </td>
             </tr>
             <tr>
-                <td class="text-sm pl-3 pb-3" colspan="9"> {{ scenario.existing_measures }} </td>
+                <td class="text-sm pl-6 pb-3" colspan="9"> {{ scenario.existing_measures }} </td>
             </tr>
             <tr>
-                <td class="text-md pl-3 pb-3 font-medium" colspan="9"> {% trans "Additional measures" %}: </td>
+                <td class="text-md pl-6 pb-3 font-medium" colspan="9"> {% trans "Additional measures" %}: </td>
             </tr>
             <tr class="text-sm uppercase">
                 <td class="px-2 text-center">#</td>
@@ -66,10 +66,10 @@
             </tr>
             {% endif %}
             {% for securitymeasure in scenario.security_measures.all %}
-            <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition duration-500 hover:ease-in-out hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'securitymeasure-update' securitymeasure.id %}?next={{ request.path|urlencode }}'">
-                <td class="px-2 py-3 text-center">{{ securitymeasure.mid }}</td>
+            <tr class="hover:text-indigo-500 border-b cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'securitymeasure-update' securitymeasure.id %}?next={{ request.path|urlencode }}'">
+                <td class="px-2 py-3 text-center pl-4">{{ securitymeasure.mid }}</td>
                 <td class="px-2 py-3">{{ securitymeasure.name }}</td>
-                <td class="px-2 py-3">{% if securitymeasure.description %}{{ securitymeasure.description|linebreaksbr }}{% endif %}</td>
+                <td class="px-2 py-3 max-w-md">{% if securitymeasure.description %}{{ securitymeasure.description|linebreaksbr }}{% endif %}</td>
                 <td class="px-2 py-3">{{ securitymeasure.get_type_display }}</td>
                 <td class="px-2 py-3">{% if securitymeasure.security_function %}{{ securitymeasure.security_function }}{% else %}--{% endif %}</td>
                 <td class="px-2 py-3">{% if securitymeasure.eta %}{{ securitymeasure.eta }}{% else %}--{%endif%}</td>
@@ -78,7 +78,7 @@
                                                                    class="hover:text-blue-400"><i
                         class="fas fa-external-link-square-alt"></i></a>{% else %}--{% endif %}
                 </td>
-                <td class="text-center"><span class="text-xs text-gray-900 text-center p-1 mx-1 rounded
+                <td class="text-center"><span class="text-xs text-gray-900 whitespace-nowrap text-center p-1 mx-1 rounded
                     {% if securitymeasure.status == 'open' %}
                     bg-orange-200 
                     {% elif securitymeasure.status == 'in_progress' %}
