@@ -883,6 +883,12 @@ class ProjectUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
     context_object_name = 'project'
     form_class = ProjectForm
 
+    def get_form_kwargs(self):
+        # Récupérer les arguments à passer à la classe de formulaire
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['analyses'] = Analysis.objects.filter(
@@ -897,6 +903,13 @@ class ProjectUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
             return reverse_lazy('project-list')
         else:
             return self.request.POST.get('next', '/')
+        
+    def form_valid(self, form):
+        folder = form.cleaned_data['folder']
+        if not RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='change_project'), folder=folder):
+            raise PermissionDenied()
+        return super().form_valid(form)
+
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='change_project'), folder=self.get_object().folder)
