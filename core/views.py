@@ -379,7 +379,7 @@ class SecurityMeasurePlanView(BaseContextMixin, UserPassesTestMixin, ListView):
     template_name = 'core/mp.html'
     context_object_name = 'context'
 
-    ordering = 'id'
+    ordering = 'created_at'
     model = RiskScenario
 
     def get_queryset(self):
