@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-19 13:23+0000\n"
+"POT-Creation-Date: 2023-04-20 10:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -60,7 +60,7 @@ msgstr "Nom"
 msgid "Description"
 msgstr ""
 
-#: core/base_models.py:11 core/models.py:314
+#: core/base_models.py:11 core/filters.py:460 core/models.py:313
 msgid "Created at"
 msgstr "Créé le"
 
@@ -73,7 +73,7 @@ msgid "Order by"
 msgstr "Trier par"
 
 #: core/filters.py:101 core/templates/core/analysis_list.html:128
-#: core/templates/core/index.html:56
+#: core/templates/core/index.html:54
 #: core/templates/snippets/ra_list_nested.html:28
 msgid "draft"
 msgstr "brouillon"
@@ -151,14 +151,14 @@ msgstr "Projet"
 #: core/filters.py:161 core/filters.py:202 core/filters.py:238
 #: core/filters.py:274 core/filters.py:298 core/filters.py:326
 #: core/filters.py:353 core/filters.py:381 core/filters.py:407
-#: core/filters.py:481
+#: core/filters.py:484
 msgid "name"
 msgstr "nom"
 
 #: core/filters.py:162 core/filters.py:203 core/filters.py:239
 #: core/filters.py:275 core/filters.py:299 core/filters.py:327
 #: core/filters.py:354 core/filters.py:382 core/filters.py:408
-#: core/filters.py:482
+#: core/filters.py:485
 msgid "Name (descending)"
 msgstr "Nom (descendant)"
 
@@ -215,7 +215,7 @@ msgid "Search acceptance..."
 msgstr "Rechercher une acceptation..."
 
 #: core/filters.py:240 core/templates/core/quick_start.html:130
-#: core/views.py:529
+#: core/views.py:527
 msgid "risk scenarios"
 msgstr "scénarios de risque"
 
@@ -291,33 +291,37 @@ msgstr "Rechercher un bien sensible..."
 msgid "Search user..."
 msgstr "Rechercher un utilisateur..."
 
-#: core/filters.py:453 core/forms.py:82 core/forms.py:108
+#: core/filters.py:454 core/forms.py:82 core/forms.py:108
 #: core/templates/snippets/associated_users_list_nested.html:13
-#: core/templates/snippets/users_list_nested.html:13 core/views.py:1772
+#: core/templates/snippets/users_list_nested.html:13 core/views.py:1757
 msgid "Email"
 msgstr "Adresse électronique"
 
-#: core/filters.py:454
+#: core/filters.py:455
 msgid "Email (descending)"
-msgstr "Courriel (descendant)"
+msgstr "Adresse électronique (descendant)"
 
-#: core/filters.py:455 core/views.py:1772
+#: core/filters.py:456 core/views.py:1757
 msgid "First name"
 msgstr "Prénom"
 
-#: core/filters.py:456
+#: core/filters.py:457
 msgid "First name (descending)"
 msgstr "Prénom (descendant)"
 
-#: core/filters.py:457 core/views.py:1772
+#: core/filters.py:458 core/views.py:1757
 msgid "Last name"
 msgstr "Nom"
 
-#: core/filters.py:458
+#: core/filters.py:459
 msgid "Last name (descending)"
 msgstr "Nom (descendant)"
 
-#: core/filters.py:472
+#: core/filters.py:461
+msgid "Created at (descending)"
+msgstr "Créé le (descendant)"
+
+#: core/filters.py:475
 msgid "Search user group..."
 msgstr "Rechercher un groupe utilisateur..."
 
@@ -394,7 +398,7 @@ msgstr "Statut"
 #: core/models.py:39 core/templates/core/mtg_list.html:115
 #: core/templates/core/project_list.html:6
 #: core/templates/core/risk_matrix_list.html:52
-#: core/templates/core/sidebar.html:147 core/views.py:254 core/views.py:898
+#: core/templates/core/sidebar.html:147 core/views.py:254 core/views.py:890
 msgid "Projects"
 msgstr "Projets"
 
@@ -409,8 +413,8 @@ msgstr "publié"
 msgid "Threat"
 msgstr "Menace"
 
-#: core/models.py:50 core/templates/core/sidebar.html:165
-#: core/templates/core/threat_list.html:5 core/views.py:1623
+#: core/models.py:49 core/templates/core/sidebar.html:165
+#: core/templates/core/threat_list.html:5 core/views.py:1608
 msgid "Threats"
 msgstr "Menaces"
 
@@ -432,7 +436,7 @@ msgstr "biens parents"
 
 #: core/models.py:77 core/models.py:374 core/templates/core/asset_list.html:7
 #: core/templates/core/quick_start.html:76 core/templates/core/sidebar.html:156
-#: core/views.py:1000
+#: core/views.py:985
 msgid "Assets"
 msgstr "Biens sensibles"
 
@@ -451,8 +455,8 @@ msgstr "Fournisseur"
 msgid "Security function"
 msgstr "Fonction de sécurité"
 
-#: core/models.py:110 core/templates/core/security_function_list.html:5
-#: core/templates/core/sidebar.html:173 core/views.py:783 core/views.py:1545
+#: core/models.py:109 core/templates/core/security_function_list.html:5
+#: core/templates/core/sidebar.html:173 core/views.py:781 core/views.py:1530
 msgid "Security functions"
 msgstr "Fonctions de sécurité"
 
@@ -511,8 +515,8 @@ msgstr "Matrice d'évaluation"
 msgid "Analysis"
 msgstr "Analyse"
 
-#: core/models.py:171 core/templates/core/mtg_list.html:114
-#: core/templates/core/overview.html:43 core/views.py:1224
+#: core/models.py:170 core/templates/core/mtg_list.html:114
+#: core/templates/core/overview.html:43 core/views.py:1209
 msgid "Analyses"
 msgstr "Analyses"
 
@@ -675,7 +679,7 @@ msgstr "Mesure de sécurité"
 
 #: core/models.py:320 core/models.py:376 core/templates/core/mtg_list.html:6
 #: core/templates/core/overview.html:51 core/templates/core/sidebar.html:115
-#: core/views.py:1467
+#: core/views.py:1452
 msgid "Security measures"
 msgstr "Mesures de sécurité"
 
@@ -774,7 +778,7 @@ msgstr "Commentaires"
 #: core/templates/core/analysis_list.html:117
 #: core/templates/core/ri_list.html:7 core/templates/core/sidebar.html:106
 #: core/templates/snippets/ra_data.html:39
-#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1349
+#: core/templates/snippets/ra_list_nested.html:13 core/views.py:1334
 msgid "Risk scenarios"
 msgstr "Scénarios de risque"
 
@@ -851,7 +855,7 @@ msgstr "Acceptation de risque"
 
 #: core/models.py:505 core/templates/core/acceptance_list.html:6
 #: core/templates/core/overview.html:55 core/templates/core/sidebar.html:124
-#: core/views.py:1733
+#: core/views.py:1718
 msgid "Risk acceptances"
 msgstr "Acceptations de risque"
 
@@ -942,6 +946,7 @@ msgid "No risk acceptance found."
 msgstr "Aucune acceptation de risque trouvée."
 
 #: core/templates/core/analysis_list.html:7 core/templates/core/sidebar.html:97
+#: core/views.py:442
 msgid "Risk analyses"
 msgstr "Analyses de risque"
 
@@ -966,19 +971,19 @@ msgstr "Nouvelle analyse de risque"
 msgid "Add analysis"
 msgstr "Ajouter une analyse"
 
-#: core/templates/core/analysis_list.html:115 core/templates/core/index.html:36
+#: core/templates/core/analysis_list.html:115 core/templates/core/index.html:34
 #: core/templates/snippets/mtg_list_nested.html:7
 #: core/templates/snippets/ra_list_nested.html:7
 #: core/templates/snippets/ri_list_nested.html:7
 msgid "ID"
 msgstr "Identifiant"
 
-#: core/templates/core/analysis_list.html:119 core/templates/core/index.html:42
+#: core/templates/core/analysis_list.html:119 core/templates/core/index.html:40
 #: core/templates/snippets/ra_list_nested.html:19
 msgid "Last Update"
 msgstr "Dernière Mise à Jour"
 
-#: core/templates/core/analysis_list.html:130 core/templates/core/index.html:59
+#: core/templates/core/analysis_list.html:130 core/templates/core/index.html:57
 #: core/templates/snippets/ra_list_nested.html:30
 msgid "ready"
 msgstr "prêt"
@@ -988,7 +993,7 @@ msgid "Delete risk analysis?"
 msgstr "Supprimer l'analyse de risque ?"
 
 #: core/templates/core/analysis_list.html:186
-#: core/templates/core/index.html:136 core/templates/core/review.html:73
+#: core/templates/core/index.html:134 core/templates/core/review.html:73
 #: core/templates/snippets/ra_list_nested.html:64
 msgid "No analysis found."
 msgstr "Aucune analyse trouvée."
@@ -1458,62 +1463,62 @@ msgstr ""
 "risque..."
 
 # debatable, I took the same as jira for consistency
-#: core/templates/core/index.html:39
+#: core/templates/core/index.html:37
 msgid "Assignee"
 msgstr "Responsable"
 
-#: core/templates/core/index.html:91
+#: core/templates/core/index.html:89
 msgid "Remediation plan"
 msgstr "Plan de remédiation"
 
-#: core/templates/core/index.html:101
+#: core/templates/core/index.html:99
 msgid "Export"
 msgstr "Exporter"
 
-#: core/templates/core/index.html:112 core/templates/core/quick_start.html:115
+#: core/templates/core/index.html:110 core/templates/core/quick_start.html:115
 #: core/templates/core/ra_update.html:16
 #: core/templates/snippets/ra_data.html:13
 msgid "Risk analysis"
 msgstr "Analyse de risque"
 
-#: core/templates/core/index.html:114 core/templates/core/index.html:119
+#: core/templates/core/index.html:112 core/templates/core/index.html:117
 msgid "... as PDF"
 msgstr "... format PDF"
 
-#: core/templates/core/index.html:116 core/templates/core/index.html:121
+#: core/templates/core/index.html:114 core/templates/core/index.html:119
 msgid "... as csv"
 msgstr "... format CSV"
 
-#: core/templates/core/index.html:117
+#: core/templates/core/index.html:115
 msgid "Treatment plan"
 msgstr "Plan de traitement"
 
-#: core/templates/core/index.html:146 core/templates/core/user_list.html:185
+#: core/templates/core/index.html:144 core/templates/core/user_list.html:185
 #: core/templates/snippets/paginator.html:4
 msgid "Showing Page"
 msgstr "Page"
 
-#: core/templates/core/index.html:146 core/templates/core/user_list.html:185
+#: core/templates/core/index.html:144 core/templates/core/user_list.html:185
 #: core/templates/snippets/paginator.html:4
 msgid "of"
 msgstr "sur"
 
-#: core/templates/core/index.html:153 core/templates/core/user_list.html:191
+#: core/templates/core/index.html:151 core/templates/core/user_list.html:191
 #: core/templates/snippets/paginator.html:10
 msgid "First"
 msgstr "Prem."
 
-#: core/templates/core/index.html:156 core/templates/core/user_list.html:193
+#: core/templates/core/index.html:154 core/templates/core/user_list.html:193
 #: core/templates/snippets/paginator.html:12
 msgid "Prev"
 msgstr "Préc."
 
-#: core/templates/core/index.html:161 core/templates/core/user_list.html:196
+#: core/templates/core/index.html:159 core/templates/core/user_list.html:196
 #: core/templates/snippets/paginator.html:15
 msgid "Next"
 msgstr "Suiv."
 
-#: core/templates/core/index.html:163 core/templates/core/user_list.html:198
+#: core/templates/core/index.html:161 core/templates/core/user_list.html:198
 #: core/templates/snippets/paginator.html:17
 msgid "Last"
 msgstr "Fin"
@@ -1552,7 +1557,7 @@ msgid "Passkeys"
 msgstr ""
 
 #: core/templates/core/my_profile_detailed.html:29
-#: core/templates/core/role_list.html:36 core/views.py:1974 core/views.py:2072
+#: core/templates/core/role_list.html:36 core/views.py:1959 core/views.py:2057
 msgid "User groups"
 msgstr "Groupes utilisateurs"
 
@@ -1635,7 +1640,7 @@ msgstr "ID interne"
 
 #: core/templates/core/project_domain_list.html:5
 #: core/templates/core/quick_start.html:49 core/templates/core/sidebar.html:138
-#: core/views.py:240 core/views.py:780 core/views.py:1119
+#: core/views.py:240 core/views.py:778 core/views.py:1104
 msgid "Projects domains"
 msgstr "Domaines de projets"
 
@@ -1852,7 +1857,7 @@ msgstr "traitement de risque"
 msgid "For each risk scenario, try to define and apply additional"
 msgstr "Pour chaque scénario de risque, essayez de définir et d'appliqer des "
 
-#: core/templates/core/quick_start.html:148 core/views.py:533
+#: core/templates/core/quick_start.html:148 core/views.py:531
 msgid "security measures"
 msgstr "mesures de sécurité"
 
@@ -2161,8 +2166,8 @@ msgid_plural "across <strong>%(projects)s</strong> projects"
 msgstr[0] "à travers <strong>%(projects)s</strong> projet"
 msgstr[1] "à travers <strong>%(projects)s</strong> projets"
 
-#: core/templates/core/risk_matrix_list.html:7 core/views.py:2167
-#: core/views.py:2186
+#: core/templates/core/risk_matrix_list.html:7 core/views.py:2147
+#: core/views.py:2166
 msgid "Matrices"
 msgstr ""
 
@@ -2202,7 +2207,7 @@ msgstr "Nouvelle assignation de rôle"
 #: core/templates/core/role_assignment_create.html:10
 #: core/templates/core/role_assignment_update.html:10
 #: core/templates/core/role_list.html:6 core/templates/core/sidebar.html:236
-#: core/views.py:2042
+#: core/views.py:2027
 msgid "Role assignment"
 msgstr "Assignation de rôle"
 
@@ -2238,7 +2243,7 @@ msgstr "Assignations de rôle"
 
 #: core/templates/core/role_list.html:35 core/templates/core/sidebar.html:197
 #: core/templates/core/sidebar.html:206 core/templates/core/user_list.html:6
-#: core/views.py:1850 core/views.py:1883 core/views.py:2099
+#: core/views.py:1835 core/views.py:1868 core/views.py:2084
 msgid "Users"
 msgstr "Utilisateurs"
 
@@ -3551,11 +3556,11 @@ msgstr "Une erreur s'est produite, veuillez réessayer plus tard."
 msgid "Invalid email or captcha."
 msgstr "Email ou captcha invalide."
 
-#: core/views.py:790
+#: core/views.py:788
 msgid "Add "
 msgstr "Ajouter "
 
-#: core/views.py:1103
+#: core/views.py:1088
 msgid ""
 "User groups {} - Auditors, {} - Validators, {} - Analysts and {} - Domain "
 "Managers were created"
@@ -3563,11 +3568,11 @@ msgstr ""
 "Les groupes d'utilisateurs {} - Auditeurs, {} - Validateurs, {} - Analystes "
 "et {} - Responsables de domaine ont été créés"
 
-#: core/views.py:1699 core/views.py:1724
+#: core/views.py:1684 core/views.py:1709
 msgid "Risk acceptance submitted to: "
 msgstr "Acceptation de risque soumise à: "
 
-#: core/views.py:1770
+#: core/views.py:1755
 msgid ""
 "Warning! You are not assigned to any group. Without a group you will not "
 "have access to any functionality. Please contact you administrator."
@@ -3575,21 +3580,21 @@ msgstr ""
 "Attention ! Vous n'êtes assigné à aucun groupe. Sans groupe, vous n'aurez "
 "accès à aucune fonctionnalité. Veuillez contacter votre administrateur."
 
-#: core/views.py:1772
+#: core/views.py:1757
 msgid "Entry date"
 msgstr "Date d'inscription"
 
-#: core/views.py:1772
+#: core/views.py:1757
 msgid "Superuser"
 msgstr "Superutilisateur"
 
-#: core/views.py:1862
+#: core/views.py:1847
 msgid "User created and email send successfully."
 msgstr ""
 "L'utilisateur a été créé et le courrier électronique a été envoyé avec "
 "succès."
 
-#: core/views.py:2011
+#: core/views.py:1996
 msgid ""
 "Role assignment editing will be available in a future release. Currently you "
 "have to attach users to groups to assign roles."
@@ -3597,6 +3602,16 @@ msgstr ""
 "L'édition de l'attribution des rôles sera disponible dans une prochaine "
 "version. Actuellement, vous devez attacher les utilisateurs à des groupes "
 "pour leur attribuer des rôles."
+
+#, fuzzy
+#~| msgid "Created"
+#~ msgid "Creation"
+#~ msgstr "Créée"
+
+#, fuzzy
+#~| msgid "Threat (descending)"
+#~ msgid "Creation (descending)"
+#~ msgstr "Menace (descendant)"
 
 #~| msgid "Name"
 #~ msgid "Name:"
