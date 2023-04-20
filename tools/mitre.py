@@ -1,6 +1,16 @@
 from mitreattack.stix20 import MitreAttackData
 import json
 
+MITRE_COPYRIGHT="""
+Terms of Use
+LICENSE
+The MITRE Corporation (MITRE) hereby grants you a non-exclusive, royalty-free license to use ATT&CK® for research, development, and commercial purposes. Any copy you make for such purposes is authorized provided that you reproduce MITRE's copyright designation and this license in any such copy.
+"© 2022 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation."
+DISCLAIMERS
+MITRE does not claim ATT&CK enumerates all possibilities for the types of actions and behaviors documented as part of its adversary model and framework of techniques. Using the information contained within ATT&CK to address or cover full categories of techniques will not guarantee full defensive coverage as there may be undisclosed techniques or variations on existing techniques not documented by ATT&CK.
+ALL DOCUMENTS AND THE INFORMATION CONTAINED THEREIN ARE PROVIDED ON AN "AS IS" BASIS AND THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS OR IS SPONSORED BY (IF ANY), THE MITRE CORPORATION, ITS BOARD OF TRUSTEES, OFFICERS, AGENTS, AND EMPLOYEES, DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION THEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+"""
+
 def main():
     mitre_attack_data = MitreAttackData("enterprise-attack.json")
 
@@ -11,6 +21,7 @@ def main():
     mylib['name'] = "MITRE ATT&CK 2.1 - Mitigations"
     mylib['description'] = "Mitigations from MITRE ATT&CK 2.1"
     mylib["format_version"] = "1.0"
+    mylib["copyright"] = MITRE_COPYRIGHT
     mylib["objects"] = []
     for m in mitigations:
         name = m.name
@@ -21,7 +32,7 @@ def main():
         secfunc = {"type": "security_function", "fields": {
             "name": f"{id} - {name}", 
             "description": description + "\n" + url + "\n", 
-            "provider": "Mitre Att&ck"}}
+            "provider": "MITRE ATT&CK"}}
         mylib["objects"].append(secfunc)
 
     with open("mitre-mitigations.json", "w") as f:
@@ -34,6 +45,7 @@ def main():
     mylib['name'] = "MITRE ATT&CK 2.1 - Techniques"
     mylib['description'] = "Main techniques from MITRE ATT&CK 2.1"
     mylib["format_version"] = "1.0"
+    mylib["copyright"] = MITRE_COPYRIGHT
     mylib["objects"] = []
     main_techniques = [t for t in techniques if not t.x_mitre_is_subtechnique]
     print(len(main_techniques))
@@ -46,7 +58,7 @@ def main():
         threat = {"type": "threat", "fields": {
             "name": f"{id} - {name}", 
             "description": description + "\n" + url + "\n",
-            "provider": "Mitre Att&ck"}}
+            "provider": "MITRE ATT&CK"}}
         mylib["objects"].append(threat)
 
     with open("mitre-techniques.json", "w") as f:
