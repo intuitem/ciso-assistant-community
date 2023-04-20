@@ -375,15 +375,12 @@ class SecurityFunctionFilter(GenericFilterSet):
         fields=(
             ('name', 'name'),
             ('provider', 'provider'),
-            ('contact', 'contact'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
             'provider': _('provider'.capitalize()),
             '-provider': _('Provider (descending)'),
-            'contact': _('contact'.capitalize()),
-            '-contact': _('Contact (descending)'),
         }
     )
 

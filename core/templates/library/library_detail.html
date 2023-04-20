@@ -58,7 +58,6 @@
                             <th class="px-6 py-3">{% trans "Security function name" %}</th>
                             <th class="px-6 py-3">{% trans "Description" %}</th>
                             <th class="px-6 py-3">{% trans "Provider" %}</th>
-                            <th class="px-6 py-3">{% trans "Contact" %}</th>
                         </tr>
                         {% for object in library.objects %}
                             {% if object.type == type %}
@@ -66,7 +65,6 @@
                                     <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
                                     <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
                                     <td class="px-6 py-3">{{ object.fields.provider }}</td>
-                                    <td class="px-6 py-3">{{ object.fields.contact }}</td>
                                 </tr>
                             {% endif %}
                         {% endfor %}
