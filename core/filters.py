@@ -448,6 +448,7 @@ class UserFilter(GenericFilterSet):
             ('email', 'email'),
             ('first_name', 'first_name'),
             ('last_name', 'last_name'),
+            ('date_joined', 'date_joined')
         ),
         field_labels={
             'email': _('Email'),
@@ -456,6 +457,8 @@ class UserFilter(GenericFilterSet):
             '-first_name': _('First name (descending)'),
             'last_name': _('Last name'),
             '-last_name': _('Last name (descending)'),
+            'date_joined': _('Created at'),
+            '-date_joined': _('Created at (descending)')
         }
     )
 
