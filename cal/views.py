@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, request
 from django.views import generic
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from django.utils.translation import get_language
 import calendar
 
@@ -34,7 +34,7 @@ class CalendarView(BaseContextMixin, generic.ListView):
 
         cal = Calendar(d.year, d.month, calendar.MONDAY, cal_locale)
         html_cal = cal.formatmonth(withyear=True)
-        context['calendar'] = mark_safe(html_cal)
+        context['calendar'] = format_html(html_cal)
         context['prev_month'] = prev_month(d)
         context['next_month'] = next_month(d)
         # print('Calendar Locale: '+ cal_locale ) # DEBUG
