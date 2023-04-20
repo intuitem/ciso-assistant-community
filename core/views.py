@@ -439,6 +439,7 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['matrix'] = self.analysis.rating_matrix
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+        context['crumbs'] = {'analysis-list': _('Risk analyses')}
         return context
 
     def test_func(self):

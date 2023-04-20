@@ -28,8 +28,8 @@
                 <div class="text-sm"><span class="font-semibold">{% trans "Matrix:" %}</span> <a href="{% url 'riskmatrix-detail' analysis.rating_matrix.id %}?next={{ request.path|urlencode }}" class="py-1 px-2 text-blue-600 hover:text-blue-500">{{ analysis.rating_matrix }}</a>
                 </div>
                 <br>
-                <div class="text-sm"><span class="font-semibold">{% trans "Description" %}</div>
-                <div class="text-sm"> {{ analysis|linebreaksbr }}</div>
+                <div class="text-sm"><span class="font-semibold">{% trans "Description" %} :</div>
+                <div class="text-sm"> {{ analysis.description|linebreaksbr }}</div>
             </div>
 
         </div>
