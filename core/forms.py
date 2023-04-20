@@ -5,6 +5,7 @@ from django import forms
 from .models import *
 from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
+from django.utils.html import escape
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
@@ -15,6 +16,21 @@ if RECAPTCHA_PUBLIC_KEY:
     from captcha.widgets import ReCaptchaV2Checkbox
 
 User = get_user_model()
+
+class LinkCleanMixin:
+    """
+    Prevent code injection in link field
+    """
+    def clean_link(self):
+        """
+        Method to check if a link is valid
+        """
+        link = self.cleaned_data.get('link')
+        if link:
+            link = escape(link)
+            if not link.startswith(('https://', 'ftps://')):
+                raise ValidationError(_('Invalid link'))
+        return link
 
 class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
     """
@@ -190,7 +206,7 @@ class RiskAnalysisUpdateForm(StyledModelForm):
         fields = ['project', 'auditor', 'name', 'description', 'version', 'is_draft']
 
 
-class SecurityMeasureCreateForm(StyledModelForm):
+class SecurityMeasureCreateForm(LinkCleanMixin, StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
@@ -205,6 +221,7 @@ class SecurityMeasureCreateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['security_function'].choices)
+
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -212,7 +229,7 @@ class SecurityMeasureCreateForm(StyledModelForm):
             'eta': DefaultDateInput()
         }
 
-class SecurityMeasureCreateFormInherited(StyledModelForm):
+class SecurityMeasureCreateFormInherited(LinkCleanMixin, StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
@@ -230,7 +247,7 @@ class SecurityMeasureCreateFormInherited(StyledModelForm):
         }
 
 
-class SecurityMeasureUpdateForm(StyledModelForm):
+class SecurityMeasureUpdateForm(LinkCleanMixin, StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
@@ -242,6 +259,7 @@ class SecurityMeasureUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['security_function'].choices)
+    
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
