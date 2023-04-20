@@ -1009,7 +1009,7 @@ class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_asset"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_asset"), folder=self.get_object().folder)
 
 
 class AssetDeleteView(UserPassesTestMixin, DeleteView):
@@ -1246,7 +1246,7 @@ class RiskMatrixDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('riskmatrix-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskmatrix"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_riskmatrix"), folder=self.get_object().folder)
 
 
 class RiskAnalysisDeleteView(UserPassesTestMixin, DeleteView):
@@ -1552,7 +1552,7 @@ class SecurityFunctionUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateVi
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securityfunction"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_securityfunction"), folder=self.get_object().folder)
 
 
 class SecurityFunctionDeleteView(UserPassesTestMixin, DeleteView):
@@ -1956,7 +1956,7 @@ class UserGroupCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('usergroup-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"), folder=Folder.objects.get(id=self.request.POST['folder']))
 
 
 class UserGroupUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1994,7 +1994,7 @@ class UserGroupDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('usergroup-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_usergroup"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_usergroup"), folder=self.get_object().folder)
 
 
 class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
