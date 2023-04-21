@@ -14,6 +14,7 @@
                         <i class="fas fa-search"></i>
                     </div>
                     {{ filter.form.name }}
+
             </div>
             
             <div class="flex flex-row space-x-0 rounded-lg h-fit overflow-hidden shadow focus-within:ring-2 focus-within:ring-blue-700">
@@ -41,6 +42,7 @@
     <table class="w-full text-sm text-left">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <th class="px-6 py-3">{% trans "Threat" %}</th>
+            <th class="px-6 py-3">{% trans "Provider" %}</th>
             <th class="px-6 py-3">{% trans "Actions" %}</th>
         </thead>
         <tbody>
@@ -55,6 +57,11 @@
                             </div>
                         </div>
                     </th>
+                    <td class="px-6 py-4">
+                        <p class="whitespace-no-wrap">
+                            {{ threat.provider }}
+                        </p>
+                    </td>
                     <td class="px-6 py-4">
                         <div class="">
                             <span><a href="{% url 'threat-detail' threat.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
