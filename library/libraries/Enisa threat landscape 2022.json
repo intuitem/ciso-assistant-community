@@ -1,0 +1,72 @@
+{
+      "name": "ENISA threat landscape 2022",
+      "description": "threats from Enisa Threat Landscape 2022 report",
+      "format_version": "1.0",
+      "copyright": "COPYRIGHT NOTICE\n© European Union Agency for Cybersecurity (ENISA), 2022\nReproduction is authorised provided the source is acknowledged.",
+      "objects": [
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Ransomware",
+                        "description": "According to ENISA’s Threat Landscape for Ransomware Attacks report, ransomware is defined as a type of attack where threat actors take control of a target’s assets and demand a ransom in exchange for the return of the asset’s availability. This action-agnostic definition is needed to cover the changing ransomware threat landscape, the prevalence of multiple extortion techniques and the various goals, other than solely financial gains, of the perpetrators. Ransomware has been, once more, one of the prime threats during the reporting period, with several high profile and highly publicised incidents.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Malware",
+                        "description": "Malware, also referred to as malicious code and malicious logic, is an overarching term used to describe any software or firmware intended to perform an unauthorised process that will have an adverse impact on the confidentiality, integrity or availability of a system. Traditionally, examples of malicious code types include viruses, worms, trojan horses or other code-based entities that infect a host. Spyware and some forms of adware are also examples of malicious code. During this reporting period, we again observed a large number of incidents involving malware. The incidents analysed are mainly focused on EU countries.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Social Engineering",
+                        "description": "Social engineering encompasses a broad range of activities that attempt to exploit a human error or human behaviour with the objective of gaining access to information or services. It uses various forms of manipulation to trick victims into making mistakes or handing over sensitive or secret information. In cybersecurity, social engineering lures users into opening documents, files or e-mails, visiting websites or granting unauthorised persons access to systems or services. And although these tricks can abuse technology they always rely on a human element to be successful. This threat canvas consists mainly of the following vectors: phishing, spear- phishing, whaling, smishing, vishing, business e-mail compromise (BEC), fraud, impersonation and counterfeit, which are analysed in the relevant chapter.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Threats against data",
+                        "description": "Threats against data form a collection of threats that target sources of data with the aim of gaining unauthorised access and disclosure, as well as manipulating data to interfere with the behaviour of systems. These threats are also the basis of many other threats, also discussed in this report. For instance, ransomware, RDoS (Ransomware Denial of Service), DDoS (Distributed Denial of Service) aim to deny access to data and possibly collect a payment to restore this access. Technically speaking, threats against data can be mainly classified as data breach and data leak. Data breach is an intentional attack brought by a cybercriminal with the goal of gaining unauthorised access and the release of sensitive, confidential or protected data. Data leak is an event that can cause the unintentional release of sensitive, confidential or protected data due to, for example, misconfigurations, vulnerabilities or human errors.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Threats against availability: Denial of Service",
+                        "description": "Availability is the target of a plethora of threats and attacks, among which DDoS stands out. DDoS targets system and data availability and, though it is not a new threat, it has a significant role in the cybersecurity threat landscape. Attacks occur when users of a system or service are not able to access relevant data, services or other resources. This can be accomplished by exhausting the service and its resources or overloading the components of the network infrastructure. During the reporting period, threats against availability and ransomware rank the highest among the prime threats, which signals a change from ETL 2021 where ransomware was clearly at the top.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Threats against availability: Internet threats",
+                        "description": "Internet use and the free flow of information impacts the lives of everyone. For many people, access to the internet has become a basic necessity to work, study, and to exercise freedom of expression, political freedom, and to interact socially. This group covers the threats that have an impact on the availability of the internet, such as BGP (Border Gateway Protocol) highjacking. Denial of Service (DoS) is covered in a separate section due to its individual impact in the threat landscape.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Disinformation - misinformation",
+                        "description": "Disinformation and misinformation campaigns are still on the rise, spurred by the increased use of social media platforms and online media. Digital platforms are nowadays the norm for news and media. Social sites, news and media outlets, even search engines, are now sources of information for many people. Due to the nature of how these sites operate, which is by attracting people and generating traffic to their sites, the information that generates more viewers is usually the one promoted, sometimes without it being validated. The war between Russia and Ukraine has shown new ways to use this threat, targeting people’s perception of the status of the war and the responsibilities of the parties involved. Various motives underlie the differences between wrong and purposely falsified information. This is where the definitions of misinformation and disinformation come into play.",
+                        "provider": "ENISA"
+                  }
+            },
+            {
+                  "type": "threat",
+                  "fields": {
+                        "name": "Supply Chain Attacks",
+                        "description": "A supply chain attack targets the relationship between organisations and their suppliers17. For this ETL report we use the definition as stated in the ENISA Threat Landscape for Supply Chain18 where an attack is considered to have a supply chain component when it consists of a combination of at least two attacks. For an attack to be classified as a supply chain attack, both the supplier and the customer have to be targets. SolarWinds was one of the first revelation of this kind of attack and showed the potential impact of supply chain attacks. It seems that threat actors are continuing19 to feed on this source to conduct their operations and gain a foothold within organisations, in an attempt to benefit from the widespread impact and potential victim base of such attacks.",
+                        "provider": "ENISA"
+                  }
+            }
+      ]
+}
