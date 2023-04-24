@@ -43,6 +43,10 @@ class Project(AbstractBaseModel):
 
 
 class Threat(AbstractBaseModel, RootFolderMixin):
+
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider"))
+
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:

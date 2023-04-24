@@ -7,238 +7,273 @@
                   "type": "threat",
                   "fields": {
                         "name": "M1. MAT-USG ",
-                        "description": " D\u00e9tournement de l\u2019usage pr\u00e9vu d'un mat\u00e9riel"
+                        "description": " D\u00e9tournement de l\u2019usage pr\u00e9vu d'un mat\u00e9riel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M2. MAT-ESP ",
-                        "description": " Espionnage d'un mat\u00e9riel"
+                        "description": " Espionnage d'un mat\u00e9riel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M3. MAT-DEP ",
-                        "description": " D\u00e9passement des limites de fonctionnement d'un mat\u00e9riel"
+                        "description": " D\u00e9passement des limites de fonctionnement d'un mat\u00e9riel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M4. MAT-DET ",
-                        "description": " D\u00e9t\u00e9rioration d'un mat\u00e9riel"
+                        "description": " D\u00e9t\u00e9rioration d'un mat\u00e9riel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M5. MAT-MOD ",
-                        "description": " Modification d'un mat\u00e9riel"
+                        "description": " Modification d'un mat\u00e9riel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M6. MAT-PTE ",
-                        "description": " Perte d'un mat\u00e9riel"
+                        "description": " Perte d'un mat\u00e9riel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M7. LOG-USG ",
-                        "description": " D\u00e9tournement de l'usage pr\u00e9vu d'un logiciel"
+                        "description": " D\u00e9tournement de l'usage pr\u00e9vu d'un logiciel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M8. LOG-ESP ",
-                        "description": " Analyse d'un logiciel"
+                        "description": " Analyse d'un logiciel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M9. LOG-DEP ",
-                        "description": " D\u00e9passement des limites d'un logiciel"
+                        "description": " D\u00e9passement des limites d'un logiciel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M10. LOG-DET ",
-                        "description": " Suppression de tout ou partie d'un logiciel"
+                        "description": " Suppression de tout ou partie d'un logiciel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M11. LOG-MOD ",
-                        "description": " Modification d'un logiciel"
+                        "description": " Modification d'un logiciel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M12. LOG-PTE ",
-                        "description": " Disparition d'un logicie"
+                        "description": " Disparition d'un logicie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M13. RSX-USG ",
-                        "description": " Attaque du milieu sur un canal informatique ou de t\u00e9l\u00e9phonie"
+                        "description": " Attaque du milieu sur un canal informatique ou de t\u00e9l\u00e9phonie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M14. RSX-ESP ",
-                        "description": " \u00c9coute passive d'un canal informatique ou de t\u00e9l\u00e9phonie"
+                        "description": " \u00c9coute passive d'un canal informatique ou de t\u00e9l\u00e9phonie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M15. RSX-DEP ",
-                        "description": " Saturation d'un canal informatique ou de t\u00e9l\u00e9phonie"
+                        "description": " Saturation d'un canal informatique ou de t\u00e9l\u00e9phonie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M16. RSX-DET ",
-                        "description": " D\u00e9gradation d'un canal informatique ou de t\u00e9l\u00e9phonie"
+                        "description": " D\u00e9gradation d'un canal informatique ou de t\u00e9l\u00e9phonie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M17. RSX-MOD ",
-                        "description": " Modification d'un canal informatique ou de t\u00e9l\u00e9phonie"
+                        "description": " Modification d'un canal informatique ou de t\u00e9l\u00e9phonie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M18. RSX-PTE ",
-                        "description": " Disparition d'un canal informatique ou de t\u00e9l\u00e9phonie"
+                        "description": " Disparition d'un canal informatique ou de t\u00e9l\u00e9phonie",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M19. PER-USG ",
-                        "description": " Dissipation de l'activit\u00e9 d'une personne"
+                        "description": " Dissipation de l'activit\u00e9 d'une personne",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M20. PER-ESP ",
-                        "description": " Espionnage d'une personne \u00e0 distance"
+                        "description": " Espionnage d'une personne \u00e0 distance",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M21. PER-DEP ",
-                        "description": " Surcharge des capacit\u00e9s d'une personne"
+                        "description": " Surcharge des capacit\u00e9s d'une personne",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M22. PER-DET ",
-                        "description": " D\u00e9gradation d'une personne"
+                        "description": " D\u00e9gradation d'une personne",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M23. PER-MOD ",
-                        "description": " Influence sur une personne"
+                        "description": " Influence sur une personne",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M24. PER-PTE ",
-                        "description": " D\u00e9part d'une personne"
+                        "description": " D\u00e9part d'une personne",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M25. PAP-USG ",
-                        "description": " D\u00e9tournement de l\u2019usage pr\u00e9vu d'un support papier"
+                        "description": " D\u00e9tournement de l\u2019usage pr\u00e9vu d'un support papier",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M26. PAP-ESP ",
-                        "description": " Espionnage d'un support papier"
+                        "description": " Espionnage d'un support papier",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M27. PAP-DET ",
-                        "description": " D\u00e9t\u00e9rioration d'un support papier"
+                        "description": " D\u00e9t\u00e9rioration d'un support papier",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M28. PAP-PTE ",
-                        "description": " Perte d'un support papier"
+                        "description": " Perte d'un support papier",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M29. CAN-USG ",
-                        "description": " Manipulation via un canal interpersonnel"
+                        "description": " Manipulation via un canal interpersonnel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M30. CAN-ESP ",
-                        "description": " Espionnage d'un canal interpersonnel"
+                        "description": " Espionnage d'un canal interpersonnel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M31. CAN-DEP ",
-                        "description": " Saturation d'un canal interpersonnel"
+                        "description": " Saturation d'un canal interpersonnel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M32. CAN-DET ",
-                        "description": " D\u00e9gradation d'un canal interpersonnel"
+                        "description": " D\u00e9gradation d'un canal interpersonnel",
+                        "provider": "EBIOS 2010"
                   }
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M33. CAN-MOD ",
-                        "description": " Modification d'un canal interpersonnel"
-                  }
+                        "description": " Modification d'un canal interpersonnel",
+                        "provider": "EBIOS 2010"
+                  },
+                        "provider": "EBIOS 2010"
             },
             {
                   "type": "threat",
                   "fields": {
                         "name": "M34. CAN-PTE ",
-                        "description": " Disparition d'un canal interpersonnel"
+                        "description": " Disparition d'un canal interpersonnel",
+                        "provider": "EBIOS 2010"
                   }
             }
       ]

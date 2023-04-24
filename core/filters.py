@@ -339,19 +339,26 @@ class ProjectFilter(GenericFilterSet):
 
 
 class ThreatFilter(GenericFilterSet):
+    PROVIDER_CHOICES = Threat.objects.values_list(
+        'provider', 'provider').distinct()
+
     name = GenericCharFilter(widget=TextInput(
         attrs={
             'class': 'h-10 rounded-r-lg border-none focus:ring-0',
             'placeholder': _('Search threat...')
         }
     ))
+    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES)
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
+            ('provider', 'provider'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
+            'provider': _('provider'.capitalize()),
+            '-provider': _('Provider (descending)'),
         }
     )
 
@@ -375,22 +382,19 @@ class SecurityFunctionFilter(GenericFilterSet):
         fields=(
             ('name', 'name'),
             ('provider', 'provider'),
-            ('contact', 'contact'),
         ),
         field_labels={
             'name': _('name'.capitalize()),
             '-name': _('Name (descending)'),
             'provider': _('provider'.capitalize()),
             '-provider': _('Provider (descending)'),
-            'contact': _('contact'.capitalize()),
-            '-contact': _('Contact (descending)'),
         }
     )
 
     class Meta:
         model = SecurityFunction
         fields = '__all__'
-        exclude = ['created_at', 'folder', 'is_published']
+        exclude = ['created_at', 'folder', 'is_published']  # TODO: is this necessary?
 
 class AssetFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(

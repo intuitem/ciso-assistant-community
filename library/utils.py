@@ -129,6 +129,7 @@ def import_threat(fields):
     threat = Threat.objects.create(
         name=fields['name'],
         description=fields['description'],
+        provider=fields['provider'],
         folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
     )
 
@@ -202,6 +203,7 @@ def import_threat_view(request, fields):
     threat = Threat.objects.create(
         name=fields['name'],
         description=fields['description'],
+        provider=fields['provider'],
         folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
     )
 
