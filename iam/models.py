@@ -12,7 +12,7 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from asf_rm import settings
-from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
+from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES, UserGroupCodename
 from core.base_models import AbstractBaseModel
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
@@ -311,6 +311,10 @@ class User(AbstractBaseUser):
                 except Exception as ex2:
                     print(ex2)
                     print("secondary mailer failure")
+
+    @property
+    def is_admin(self):
+        return self.user_groups.filter(name=UserGroupCodename.ADMINISTRATOR).exists()
 
 
     @property
