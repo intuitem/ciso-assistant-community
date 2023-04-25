@@ -374,7 +374,7 @@ class ThreatFilter(GenericFilterSet):
 
 class SecurityFunctionFilter(GenericFilterSet):
     PROVIDER_CHOICES = SecurityFunction.objects.exclude(
-        provider__isnull=True).distinct('provider').values_list('provider', 'provider')
+        provider__isnull=True).values_list('provider', 'provider').distinct()
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
@@ -383,7 +383,7 @@ class SecurityFunctionFilter(GenericFilterSet):
         }
     ))
     provider = GenericMultipleChoiceFilter(
-        choices=PROVIDER_CHOICES, null_label=_('None'))
+        choices=PROVIDER_CHOICES, null_label='--')
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
