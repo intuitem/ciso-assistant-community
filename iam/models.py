@@ -257,6 +257,7 @@ class User(AbstractBaseUser):
         verbose_name = _('user')
         verbose_name_plural = _('users')
 #        swappable = 'AUTH_USER_MODEL'
+        permissions = (("backup", "backup"), ("restore", "restore"))
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.email

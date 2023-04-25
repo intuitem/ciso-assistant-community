@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import user_passes_test
 from  datetime import datetime
 
 from iam.models import RoleAssignment
-from core.utils import UserGroupCodename
 from asf_rm.settings import VERSION
 from core.views import BaseContextMixin
 
@@ -20,7 +19,7 @@ import io
 from .forms import *
 
 def is_admin_check(user):
-    return user.is_admin
+    return RoleAssignment.has_permission(user, "backup")
 
 
 class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
@@ -38,6 +37,8 @@ class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):
         return super().dispatch(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
+        if not RoleAssignment.has_permission(request.user, "restore"):
+            return HttpResponse(status=403)
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         file = request.FILES.get('file')
