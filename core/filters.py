@@ -383,7 +383,7 @@ class SecurityFunctionFilter(GenericFilterSet):
         }
     ))
     provider = GenericMultipleChoiceFilter(
-        choices=PROVIDER_CHOICES, null_label='None')
+        choices=PROVIDER_CHOICES, null_label=_('None'))
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
