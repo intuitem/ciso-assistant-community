@@ -344,8 +344,7 @@ class ProjectFilter(GenericFilterSet):
 
 
 class ThreatFilter(GenericFilterSet):
-    PROVIDER_CHOICES = Threat.objects.exclude(provider__isnull=True).distinct(
-        'provider').values_list('provider', 'provider')
+    PROVIDER_CHOICES = Threat.objects.exclude(provider__isnull=True).values_list('provider', 'provider').distinct()
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
