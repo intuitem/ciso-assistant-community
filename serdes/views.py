@@ -19,7 +19,7 @@ import io
 from .forms import *
 
 def is_admin_check(user):
-    return RoleAssignment.has_permission(user, "backup")
+    return user.has_backup_permission
 
 
 class BackupRestoreView(BaseContextMixin, FormView, UserPassesTestMixin):

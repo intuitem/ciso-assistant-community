@@ -314,8 +314,8 @@ class User(AbstractBaseUser):
                     print("secondary mailer failure")
 
     @property
-    def is_admin(self):
-        return self.user_groups.filter(name=UserGroupCodename.ADMINISTRATOR).exists()
+    def has_backup_permission(self) -> bool:
+        return RoleAssignment.has_permission(self, "backup")
 
 
     @property
