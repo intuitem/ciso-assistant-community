@@ -399,9 +399,7 @@ class SecurityFunctionFilter(GenericFilterSet):
 
     class Meta:
         model = SecurityFunction
-        fields = '__all__'
-        # TODO: is this necessary?
-        exclude = ['created_at', 'folder', 'is_published']
+        fields = ['provider']
 
 
 class AssetFilter(GenericFilterSet):
