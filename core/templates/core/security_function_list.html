@@ -122,7 +122,7 @@
                     </th>
                     <td class="px-6 py-4">
                         <p class="whitespace-no-wrap">
-                            {{ function.provider }}
+                            {% if function.provider %} {{ function.provider }} {% else %} -- {% endif %}
                         </p>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">

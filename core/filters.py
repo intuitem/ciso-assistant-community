@@ -372,8 +372,8 @@ class ThreatFilter(GenericFilterSet):
 
 
 class SecurityFunctionFilter(GenericFilterSet):
-    PROVIDER_CHOICES = SecurityFunction.objects.values_list(
-        'provider', 'provider').distinct()
+    PROVIDER_CHOICES = SecurityFunction.objects.exclude(
+        provider__isnull=True).values_list('provider', 'provider').distinct()
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
@@ -381,7 +381,8 @@ class SecurityFunctionFilter(GenericFilterSet):
             'placeholder': _('Search function...')
         }
     ))
-    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES)
+    provider = GenericMultipleChoiceFilter(
+        choices=PROVIDER_CHOICES, null_label='--')
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
@@ -397,9 +398,7 @@ class SecurityFunctionFilter(GenericFilterSet):
 
     class Meta:
         model = SecurityFunction
-        fields = '__all__'
-        # TODO: is this necessary?
-        exclude = ['created_at', 'folder', 'is_published']
+        fields = ['provider']
 
 
 class AssetFilter(GenericFilterSet):
