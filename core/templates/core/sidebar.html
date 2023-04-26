@@ -269,7 +269,7 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Libraries" %}</span>
                     </a>
                 </li>
-                {% if request.user.is_superuser %}
+                {% if request.user.has_backup_permission %}
                 <li class="to-page">
                     <a id="bacup_tab" href="{% url 'backup-restore' %}"
                         class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
@@ -288,7 +288,6 @@
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "License management" %}</span>
                     </a>
                 </li>
-
                 {% endif %}
                 {% comment %} <li class="to-page">
                     <a href="#"
