@@ -344,8 +344,7 @@ class ProjectFilter(GenericFilterSet):
 
 
 class ThreatFilter(GenericFilterSet):
-    PROVIDER_CHOICES = Threat.objects.values_list(
-        'provider', 'provider').distinct()
+    PROVIDER_CHOICES = Threat.objects.exclude(provider__isnull=True).values_list('provider', 'provider').distinct()
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
@@ -353,7 +352,7 @@ class ThreatFilter(GenericFilterSet):
             'placeholder': _('Search threat...')
         }
     ))
-    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES)
+    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES, null_label=_('None'))
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
@@ -369,7 +368,7 @@ class ThreatFilter(GenericFilterSet):
 
     class Meta:
         model = Threat
-        fields = '__all__'
+        fields = ['provider']
 
 
 class SecurityFunctionFilter(GenericFilterSet):
