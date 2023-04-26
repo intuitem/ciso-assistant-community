@@ -17,7 +17,6 @@ class GenericFilterSet(FilterSet):
         #     print(f[0], f[1].field.widget)
 
 
-
 class GenericOrderingFilter(OrderingFilter):
     def __init__(self, *args, empty_label=_("Order by"), **kwargs):
         super().__init__(self, *args, empty_label=_("Order by"), widget=Select, **kwargs)
@@ -89,6 +88,7 @@ def viewable_folders(request):
     )
     return Folder.objects.filter(id__in=accessible_folders)
 
+
 class AnalysisFilter(GenericFilterSet):
     orderby = GenericOrderingFilter(
         fields=(
@@ -125,9 +125,11 @@ class AnalysisFilter(GenericFilterSet):
             'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
         }
     ))
-    auditor = GenericModelMultipleChoiceFilter(queryset=User.objects.filter(analysis__auditor__isnull=False).distinct(), label=('Auditor'))
+    auditor = GenericModelMultipleChoiceFilter(queryset=User.objects.filter(
+        analysis__auditor__isnull=False).distinct(), label=('Auditor'))
 
-    project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders, label=_('Domain'))
+    project__folder = GenericModelMultipleChoiceFilter(
+        queryset=viewable_folders, label=_('Domain'))
 
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
 
@@ -146,7 +148,8 @@ class RiskScenarioFilter(GenericFilterSet):
     threat = GenericModelMultipleChoiceFilter(queryset=Threat.objects.all())
     analysis__project = GenericModelMultipleChoiceFilter(
         queryset=Project.objects.all(), label=_('Project'))
-    analysis__project__folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders, label=_('Domain'))
+    analysis__project__folder = GenericModelMultipleChoiceFilter(
+        queryset=viewable_folders, label=_('Domain'))
     treatment = GenericMultipleChoiceFilter(
         choices=RiskScenario.TREATMENT_OPTIONS)
 
@@ -254,7 +257,8 @@ class RiskAcceptanceFilter(GenericFilterSet):
 
     def acceptance_search(self, queryset, name, search_query):
         return queryset.filter(
-            Q(name__icontains=search_query) | Q(risk_scenarios__name__icontains=search_query)
+            Q(name__icontains=search_query) | Q(
+                risk_scenarios__name__icontains=search_query)
         ).distinct()
 
 
@@ -281,6 +285,7 @@ class ProjectsDomainFilter(GenericFilterSet):
     class Meta:
         model = Folder
         fields = ['name', 'description']
+
 
 class RiskMatrixFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -339,8 +344,7 @@ class ProjectFilter(GenericFilterSet):
 
 
 class ThreatFilter(GenericFilterSet):
-    PROVIDER_CHOICES = Threat.objects.values_list(
-        'provider', 'provider').distinct()
+    PROVIDER_CHOICES = Threat.objects.exclude(provider__isnull=True).values_list('provider', 'provider').distinct()
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
@@ -348,7 +352,7 @@ class ThreatFilter(GenericFilterSet):
             'placeholder': _('Search threat...')
         }
     ))
-    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES)
+    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES, null_label=_('None'))
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
@@ -364,12 +368,12 @@ class ThreatFilter(GenericFilterSet):
 
     class Meta:
         model = Threat
-        fields = '__all__'
+        fields = ['provider']
 
 
 class SecurityFunctionFilter(GenericFilterSet):
-    PROVIDER_CHOICES = SecurityFunction.objects.values_list(
-        'provider', 'provider').distinct()
+    PROVIDER_CHOICES = SecurityFunction.objects.exclude(
+        provider__isnull=True).values_list('provider', 'provider').distinct()
 
     name = GenericCharFilter(widget=TextInput(
         attrs={
@@ -377,7 +381,8 @@ class SecurityFunctionFilter(GenericFilterSet):
             'placeholder': _('Search function...')
         }
     ))
-    provider = GenericMultipleChoiceFilter(choices=PROVIDER_CHOICES)
+    provider = GenericMultipleChoiceFilter(
+        choices=PROVIDER_CHOICES, null_label='--')
     orderby = GenericOrderingFilter(
         fields=(
             ('name', 'name'),
@@ -393,8 +398,8 @@ class SecurityFunctionFilter(GenericFilterSet):
 
     class Meta:
         model = SecurityFunction
-        fields = '__all__'
-        exclude = ['created_at', 'folder', 'is_published']  # TODO: is this necessary?
+        fields = ['provider']
+
 
 class AssetFilter(GenericFilterSet):
     name = GenericCharFilter(widget=TextInput(
@@ -435,8 +440,14 @@ class UserFilter(GenericFilterSet):
         (False, _('No')),
     )
 
-    is_superuser = GenericChoiceFilter(choices=YES_NO_CHOICES)
-    is_active = GenericChoiceFilter(choices=YES_NO_CHOICES)
+    is_superuser = GenericChoiceFilter(choices=YES_NO_CHOICES, widget=Select(
+        attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
+        }))
+    is_active = GenericChoiceFilter(choices=YES_NO_CHOICES, widget=Select(
+        attrs={
+            'class': 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50'
+        }))
 
     user_groups = GenericModelMultipleChoiceFilter(
         queryset=UserGroup.objects.all())
