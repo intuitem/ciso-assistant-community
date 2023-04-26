@@ -23,6 +23,7 @@ from core.models import Project
 from iam.models import Folder, RoleAssignment, User
 
 from django.contrib.auth.views import LoginView
+from django.core.paginator import Paginator
 from .forms import LoginForm
 
 from django.db.models import Q
@@ -80,6 +81,20 @@ def is_ajax(request):
     Method to know if it's an ajax request or not
     """
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+
+def get_pagination_url(request):
+    url = request.path
+
+    # Append the current GET parameters to the base URL
+    get_params = request.GET.copy()
+    if 'page' in get_params:
+        del get_params['page']
+    if get_params:
+        return url + '?' + get_params.urlencode() + '&page='
+    else:
+        return url + '?page='
+
 class BaseContextMixin:
 
     def get_context_data(self, **kwargs):
@@ -89,6 +104,10 @@ class BaseContextMixin:
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
+
+        # Set the pagination URL in the context
+        context['pagination_url'] = get_pagination_url(self.request)
+
         return context
 
 
@@ -1841,7 +1860,9 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['users_number'] = User.objects.all().count()
         context['users_number_limit'] = MAX_USERS
+
         return context
+
 
     def test_func(self):
         return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user"))

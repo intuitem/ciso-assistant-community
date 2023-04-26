@@ -4,17 +4,23 @@
             {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
         </span>
     <div class="inline-flex mt-2 xs:mt-0 space-x-2">
+
         {% if page_obj.has_previous %}
-        <a href="?page=1"
-           class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-double-left"></i>
-            {% trans "First" %}</a>
-        <a href="?page={{ page_obj.previous_page_number }}"
-           class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
-        {% endif %} {% if page_obj.has_next %}
-        <a id ="next" class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
-           href="?page={{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
-        <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
-           href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a> {% endif %}
+            <a href="{{ pagination_url }}1"
+            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-double-left"></i>
+                {% trans "First" %}</a>
+
+            <a href="{{ pagination_url }}{{ page_obj.previous_page_number }}"
+            class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"><i class="fas fa-angle-left"></i> {% trans "Prev" %}</a>
+        {% endif %} 
+
+        {% if page_obj.has_next %}
+            <a id="next" class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+            href="{{ pagination_url }}{{ page_obj.next_page_number }}">{% trans "Next" %} <i class="fas fa-angle-right"></i></a>
+
+            <a class="text-sm bg-indigo-500 text-white hover:bg-indigo-400 font-semibold py-2 px-4 rounded"
+            href="{{ pagination_url }}{{ page_obj.paginator.num_pages }}">{% trans "Last" %} <i class="fas fa-angle-double-right"></i></a>
+        {% endif %}
 
     </div>
 </div>
