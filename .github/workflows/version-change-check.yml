@@ -1,0 +1,22 @@
+name: Version change checker
+on:
+  pull_request:
+    branches: [main]
+    types: [opened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      - name: Check if VERSION file was modified
+        run: |
+          version_file="asf_rm/VERSION"
+          if git diff --name-only HEAD^1 HEAD | grep -q "$version_file"; then
+            echo "$version_file has been modified in this pull request."
+          else
+            echo "::error::$version_file must be modified in this pull request."
+            exit 1
+          fi

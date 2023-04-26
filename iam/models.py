@@ -12,7 +12,7 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from asf_rm import settings
-from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
+from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES, UserGroupCodename
 from core.base_models import AbstractBaseModel
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
@@ -257,6 +257,7 @@ class User(AbstractBaseUser):
         verbose_name = _('user')
         verbose_name_plural = _('users')
 #        swappable = 'AUTH_USER_MODEL'
+        permissions = (("backup", "backup"), ("restore", "restore"))
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.email
@@ -311,6 +312,10 @@ class User(AbstractBaseUser):
                 except Exception as ex2:
                     print(ex2)
                     print("secondary mailer failure")
+
+    @property
+    def has_backup_permission(self) -> bool:
+        return RoleAssignment.has_permission(self, "backup")
 
 
     @property

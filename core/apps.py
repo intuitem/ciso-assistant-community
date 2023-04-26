@@ -183,6 +183,9 @@ def startup():
             "view_riskmatrix",
             "change_riskmatrix",
             "delete_riskmatrix",
+
+            "backup",
+            "restore"
         ])
 
         # if superuser defined and does not exist, then create it
@@ -230,6 +233,9 @@ def startup():
         # add any superuser to the global administrors group, in case it is not yet done
         for superuser in User.objects.filter(is_superuser=True):
                 UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
+        # fix administrator role, to facilitate migrations
+        administrator = Role.objects.filter(name="BI-RL-ADM").first()
+        administrator.permissions.set(administrator_permissions)
 
 
 class CoreConfig(AppConfig):
