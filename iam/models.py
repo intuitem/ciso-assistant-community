@@ -354,13 +354,13 @@ class RoleAssignment(models.Model):
                                 if self.user_group else "/")
 
     @staticmethod
-    def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
-        """Determines if a user has specified permission on a specified folder
-           TODO: the None value for folder is a kludge for the time being, an existing folder should be specified
-           for the relevant exceptions see has_permission
+    def is_access_allowed(user: User, perm: Permission, folder: Folder) -> bool:
+        """
+        Determines if a user has specified permission on a specified folder
         """
         for ra in RoleAssignment.get_role_assignments(user):
-            if (not folder or folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
+            # TODO: Add recursive call when we allow picking a parent folder other than ROOT
+            if (folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
                 return True
         return False
 

@@ -17,7 +17,6 @@ urlpatterns = [
     path('first_connexion/<uidb64>/<token>/', views.FirstConnexionPasswordConfirmView.as_view(), name='first_connexion_confirm'),
     path('analyses-registry', login_required(views.AnalysisListView.as_view()), name='analysis_list'),
 
-    path('risk-analyses/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
     path('analysis/<analysis>.pdf', login_required(views.generate_ra_pdf), name='RA-PDF'),
     path('analysis/<analysis>.csv', login_required(views.export_risks_csv), name='RA-CSV'),
 
@@ -138,4 +137,6 @@ urlpatterns = [
     path('security-functions/<str:pk>', login_required(views.SecurityFunctionDetailView.as_view()), name='securityfunction-detail'),
 
     path('users/<str:pk>', login_required(views.UserDetailView.as_view()), name='user-detail'),
+
+    path('risk-analyses/<analysis>/', login_required(views.RiskAnalysisView.as_view()), name='RA'),
 ]

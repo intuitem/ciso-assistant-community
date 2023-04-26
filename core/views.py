@@ -18,6 +18,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 
+from core.constants import ROOT_FOLDER
 from core.models import Analysis, RiskScenario, SecurityMeasure, RiskMatrix
 from core.models import Project
 from iam.models import Folder, RoleAssignment, User
@@ -279,7 +280,7 @@ class UserDetailView(UserPassesTestMixin, GenericDetailView):
     exclude = ['id', 'password', 'first_login']
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user")) or self.request.user == self.get_object()
+        return RoleAssignment.has_permission(user=self.request.user, codename="view_user") or self.request.user == self.get_object()
 
 
 
@@ -1076,7 +1077,8 @@ class FolderCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('folder-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
+        # TODO: Change this when we allow picking a folder for role assignments
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"), folder=ROOT_FOLDER)
 
 
 class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1111,7 +1113,8 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return self.request.POST.get('next', reverse_lazy('folder-list'))
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
+        # TODO: Change this when we allow picking a folder for role assignments
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"), folder=ROOT_FOLDER)
 
 
 class FolderUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1844,7 +1847,7 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="view_user")
 
 
 class UserCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
@@ -1875,7 +1878,7 @@ class UserCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="add_user")
 
 
 class UserUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1903,7 +1906,7 @@ class UserUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="change_user")
 
 
 class UserDeleteView(UserPassesTestMixin, DeleteView):
@@ -1915,7 +1918,7 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('user-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="delete_user")
 
 
 class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1951,7 +1954,7 @@ class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='view_usergroup'))
+        return RoleAssignment.has_permission(user=self.request.user, codename="view_usergroup")
 
 
 class UserGroupCreateView(UserPassesTestMixin, CreateView):
@@ -2050,7 +2053,8 @@ class RoleAssignmentCreateView(BaseContextMixin, UserPassesTestMixin, CreateView
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_roleassignment"))
+        # TODO: Change this when we allow picking a folder for role assignments
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_roleassignment"), folder=ROOT_FOLDER)
 
 
 class RoleAssignmentDeleteView(UserPassesTestMixin, DeleteView):
@@ -2063,7 +2067,7 @@ class RoleAssignmentDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('role-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_roleassignment"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_roleassignment"), folder=Folder.get_folder(self.get_object()))
 
 
 class RoleAssignmentUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -2113,7 +2117,7 @@ class UserPasswordChangeView(BaseContextMixin, UserPassesTestMixin, PasswordChan
         return kwargs
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user")) or self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
+        return RoleAssignment.has_permission(user=self.request.user, codename="change_user") or self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
 
 
 class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
