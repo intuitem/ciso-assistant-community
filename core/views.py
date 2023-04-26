@@ -84,7 +84,7 @@ def is_ajax(request):
 
 
 def get_pagination_url(request):
-    url = reverse(request.resolver_match.view_name)
+    url = request.path
 
     # Append the current GET parameters to the base URL
     get_params = request.GET.copy()
