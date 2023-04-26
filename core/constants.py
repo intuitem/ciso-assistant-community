@@ -1,4 +1,8 @@
-from django.shortcuts import get_object_or_404
+from django.db import connection
 from iam.models import Folder
 
-ROOT_FOLDER = get_object_or_404(Folder, content_type=Folder.ContentType.ROOT)
+
+def ROOT_FOLDER(): return None if not connection.introspection.table_names() else (
+    Folder.objects.get(content_type=Folder.ContentType.ROOT) if Folder.objects.filter(
+        content_type=Folder.ContentType.ROOT).exists() else None
+)
