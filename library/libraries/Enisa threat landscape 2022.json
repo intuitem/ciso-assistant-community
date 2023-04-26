@@ -1,4 +1,5 @@
 {
+      "locale": "en",
       "name": "ENISA threat landscape 2022",
       "description": "threats from Enisa Threat Landscape 2022 report",
       "format_version": "1.0",
