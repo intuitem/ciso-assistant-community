@@ -83,9 +83,8 @@ class GenericChoiceFilter(ChoiceFilter):
 def viewable_folders(request):
     if request is None:
         return Folder.objects.none()
-    root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
     accessible_folders = RoleAssignment.get_accessible_folders(
-        root_folder, request.user, Folder.ContentType.DOMAIN
+        Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
     )
     return Folder.objects.filter(id__in=accessible_folders)
 

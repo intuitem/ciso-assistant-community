@@ -32,9 +32,9 @@ class LibraryListView(BaseContextMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['libraries'] = self.get_queryset()
-        context['matrix_import'] = RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="add_riskmatrix"), Folder.objects.get(content_type=Folder.ContentType.ROOT))
-        context['threat_import'] = RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="add_threat"), Folder.objects.get(content_type=Folder.ContentType.ROOT))
-        context['securityfunction_import'] = RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="add_securityfunction"), Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        context['matrix_import'] = RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="add_riskmatrix"), Folder.get_root_folder())
+        context['threat_import'] = RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="add_threat"), Folder.get_root_folder())
+        context['securityfunction_import'] = RoleAssignment.is_access_allowed(self.request.user, Permission.objects.get(codename="add_securityfunction"), Folder.get_root_folder())
         context['form'] = UploadFileForm()
         return context
 
@@ -74,8 +74,7 @@ class LibraryDetailView(BaseContextMixin, TemplateView):
         context['can_import'] = RoleAssignment.is_access_allowed(
                                 self.request.user,
                                 Permission.objects.get(codename="add_"+object_type),
-                                Folder.objects.get(content_type=Folder.ContentType.ROOT)
-                                )
+                                Folder.get_root_folder())
         context['crumbs'] = {'library-list': _('Libraries')}
         return context
 

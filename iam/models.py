@@ -21,6 +21,7 @@ from django.template.loader import render_to_string
 from django.core.mail import send_mail, get_connection, EmailMessage
 from asf_rm.settings import MIRA_URL, EMAIL_HOST_USER_RESCUE, EMAIL_HOST_PASSWORD_RESCUE, EMAIL_HOST_RESCUE, EMAIL_PORT_RESCUE, EMAIL_USE_TLS_RESCUE
 
+
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -66,31 +67,36 @@ class Role(models.Model):
         return self.name
 
 
+def _get_root_folder():
+    """ helper function outside of class to facilitate serialization
+        to be used only in Folder class """
+    try:
+        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    except:
+        return None
+
+
 class Folder(AbstractBaseModel):
     """ A folder is a container for other folders or any object
         Folders are organized in a tree structure, with a single root folder
         Folders are the base perimeter for role assignments
         """
+    @staticmethod
+    def get_root_folder() -> Self:
+        """ class function for general use """
+        return _get_root_folder()
+
+
     class ContentType(models.TextChoices):
         """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
 
-    def get_root_folder():
-        if not connection.introspection.table_names():
-            # Database tables haven't been created yet
-            return None
-        try:
-            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        except Folder.DoesNotExist:
-            # ROOT folder doesn't exist yet
-            return None
-
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
         "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"),
-        default=get_root_folder)
+        default=_get_root_folder)
     builtin = models.BooleanField(default=False)
     hide_public_asset = models.BooleanField(default=False)
     hide_public_matrix = models.BooleanField(default=False)
@@ -134,7 +140,6 @@ class Folder(AbstractBaseModel):
         if hasattr(obj, 'risk_scenario'):
             return obj.risk_scenario.analysis.project.folder
 
-
 class FolderMixin(models.Model):
     """
     Add foreign key to Folder
@@ -149,22 +154,11 @@ class RootFolderMixin(FolderMixin):
     """
     Add foreign key to Folder, defaults to root folder
     """
-    def get_default_folder():
-        if not connection.introspection.table_names():
-            # Database tables haven't been created yet
-            return None
-        
-        try:
-            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        except Folder.DoesNotExist:
-            # ROOT folder doesn't exist yet
-            return None
-    
     folder = models.ForeignKey(
         Folder,
         on_delete=models.CASCADE,
         related_name='%(class)s_folder',
-        default=get_default_folder,
+        default=Folder.get_root_folder,
     )
 
     class Meta:
