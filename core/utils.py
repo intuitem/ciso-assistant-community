@@ -45,3 +45,8 @@ COUNTRY_FLAGS = {
     'fr': '🇫🇷',
     'en': '🇬🇧',
 }
+
+LANGUAGES = {
+    'fr': _('French'),
+    'en': _('English'),
+}

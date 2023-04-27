@@ -1,7 +1,7 @@
 from django import template
 
 from asf_rm.settings import VERSION, BUILD, DEBUG
-from core.utils import COUNTRY_FLAGS
+from core.utils import COUNTRY_FLAGS, LANGUAGES
 
 register = template.Library()
 
@@ -28,3 +28,7 @@ def entry_num_array(List):
 @register.filter('country_flag')
 def country_flag(country_code):
     return COUNTRY_FLAGS.get(country_code, '🌐')
+
+@register.filter('language_name')
+def country_name(country_code):
+    return LANGUAGES.get(country_code, 'Unknown')
