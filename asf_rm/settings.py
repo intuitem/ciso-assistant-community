@@ -54,7 +54,7 @@ RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
 
-PAGINATE_BY = os.environ.get('PAGINATE_BY', default=1000)
+PAGINATE_BY = os.environ.get('PAGINATE_BY', default=500)
 
 
 # Application definition
