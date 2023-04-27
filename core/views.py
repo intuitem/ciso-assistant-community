@@ -84,8 +84,7 @@ class BaseContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -511,8 +510,7 @@ class SearchResults(ListView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -541,8 +539,7 @@ class Browser(ListView):
         
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         return context
@@ -550,8 +547,7 @@ class Browser(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -585,7 +581,7 @@ def global_overview(request):
         "updatable_measures": object_ids_change,
         "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+        "change_usergroup": RoleAssignment.is_access_allowed(user=request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
     }
 
     return render(request, template, context)
@@ -646,7 +642,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "residual_level": residual_level,
         "view_user": RoleAssignment.has_permission(user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-        "change_usergroup": RoleAssignment.has_permission(user, "change_usergroup"),
+        "change_usergroup": RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
         "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
         "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
@@ -666,7 +662,7 @@ class ComposerListView(ListView):
                 "context": compile_analysis_for_composer(self.request.user, data),
                 "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
                 "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-                "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+                "change_usergroup": RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
             }
             return render(request, 'core/composer.html', context)
         else:
@@ -747,8 +743,7 @@ def scoring_assistant(request):
     context = {}
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
-    context['change_usergroup'] = RoleAssignment.has_permission(
-        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['change_usergroup'] = RoleAssignment.is_access_allowed(user=request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
     context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -1947,8 +1942,7 @@ class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), self.request.user, UserGroup
         )
-        context['add_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, 'add_usergroup')
+        context['add_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"), folder=Folder.get_root_folder())
         return context
 
     def test_func(self):
@@ -2211,8 +2205,7 @@ def license_overview(request):
 
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
-    context['change_usergroup'] = RoleAssignment.has_permission(
-        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['change_usergroup'] = RoleAssignment.is_access_allowed(user=request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
     context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
