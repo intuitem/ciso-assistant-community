@@ -1,8 +1,10 @@
 {% load i18n %}
 <div class="px-5 py-3 bg-white border-t flex flex-col xs:flex-row items-center xs:justify-between">
-    <span class="text-xs xs:text-sm text-gray-900">
+    {% if page_obj.paginator.num_pages > 1 %}
+        <span class="text-xs xs:text-sm text-gray-900">
             {% trans "Showing Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
         </span>
+    {% endif %} 
     <div class="inline-flex mt-2 xs:mt-0 space-x-2">
 
         {% if page_obj.has_previous %}
