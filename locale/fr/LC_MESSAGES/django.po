@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-26 21:49+0000\n"
+"POT-Creation-Date: 2023-04-27 13:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,7 +33,7 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:29 iam/models.py:328
+#: iam/models.py:28 iam/models.py:339
 msgid "Domain"
 msgstr "Domaine"
 
@@ -65,7 +65,7 @@ msgstr "DOMAINE"
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:108 iam/models.py:339
+#: iam/models.py:102 iam/models.py:350
 msgid "Folder"
 msgstr "Dossier"
 
@@ -130,11 +130,11 @@ msgstr "utilisateur"
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:334
+#: iam/models.py:345
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:336
+#: iam/models.py:347
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
@@ -195,18 +195,26 @@ msgid "Backup Restore"
 msgstr "Sauvegarde et restauration"
 
 #: serdes/templates/serdes/backup_restore.html:14
+msgid "Export backup"
+msgstr "Exporter une sauvegarde"
+
+#: serdes/templates/serdes/backup_restore.html:16
+msgid "Dump database"
+msgstr "Exporter la base de données"
+
+#: serdes/templates/serdes/backup_restore.html:20
 msgid "Import backup"
 msgstr "Importer une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:29
+#: serdes/templates/serdes/backup_restore.html:35
 msgid "Upload"
 msgstr "Télécharger"
 
-#: serdes/templates/serdes/backup_restore.html:65
+#: serdes/templates/serdes/backup_restore.html:71
 msgid "Import backup?"
 msgstr "Importer une sauvegarde ?"
 
-#: serdes/templates/serdes/backup_restore.html:75
+#: serdes/templates/serdes/backup_restore.html:80
 msgid ""
 "This action cannot be undone. This will restore the database to a previous "
 "state. Are you sure you want to do this?"
@@ -214,21 +222,13 @@ msgstr ""
 "Cette action ne peut être annulée. Cela restaurera la base de données à un "
 "état antérieur. Êtes-vous sûr de vouloir faire cela ?"
 
-#: serdes/templates/serdes/backup_restore.html:82
+#: serdes/templates/serdes/backup_restore.html:86
 msgid "No, take me back"
 msgstr "Non, revenir en arrière"
 
-#: serdes/templates/serdes/backup_restore.html:84
+#: serdes/templates/serdes/backup_restore.html:88
 msgid "Yes"
 msgstr "Oui"
-
-#: serdes/templates/serdes/backup_restore.html:107
-msgid "Export backup"
-msgstr "Exporter une sauvegarde"
-
-#: serdes/templates/serdes/backup_restore.html:109
-msgid "Dump database"
-msgstr "Exporter la base de données"
 
 #~ msgid "First Connexion"
 #~ msgstr "Première connexion"

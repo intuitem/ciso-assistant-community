@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-26 21:41+0000\n"
+"POT-Creation-Date: 2023-04-27 13:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr "Éditeur"
 msgid "Menu"
 msgstr ""
 
-#: core/apps.py:238
+#: core/apps.py:244
 msgid "Core"
 msgstr "Coeur"
 
@@ -36,6 +36,7 @@ msgstr "Coeur"
 #: core/templates/core/risk_matrix_list.html:50
 #: core/templates/core/risk_matrix_update.html:13
 #: core/templates/core/security_function_list.html:107
+#: core/templates/library/library_detail.html:33
 #: core/templates/library/library_detail.html:33
 #: core/templates/snippets/mp_data.html:58
 #: core/templates/snippets/project_list_nested.html:7
@@ -53,14 +54,14 @@ msgstr "Nom"
 #: core/templates/library/library_detail.html:34
 #: core/templates/library/library_detail.html:42
 #: core/templates/library/library_detail.html:57
-#: core/templates/library/library_list.html:19
+#: core/templates/library/library_list.html:20
 #: core/templates/snippets/mp_data.html:59
 #: core/templates/snippets/project_list_nested.html:10
 #: core/templates/snippets/ra_data.html:31
 msgid "Description"
 msgstr ""
 
-#: core/base_models.py:11 core/filters.py:463 core/models.py:318
+#: core/base_models.py:11 core/filters.py:475 core/models.py:318
 msgid "Created at"
 msgstr "Créé le"
 
@@ -68,7 +69,7 @@ msgstr "Créé le"
 msgid "This name is already in use."
 msgstr "Ce nom est déjà utilisé."
 
-#: core/filters.py:22 core/filters.py:23
+#: core/filters.py:21 core/filters.py:22
 msgid "Order by"
 msgstr "Trier par"
 
@@ -86,7 +87,7 @@ msgstr "Brouillon (descendant)"
 msgid "project"
 msgstr "projet"
 
-#: core/filters.py:103 core/filters.py:165
+#: core/filters.py:104 core/filters.py:169
 msgid "Project (descending)"
 msgstr "Projet (descendant)"
 
@@ -106,14 +107,14 @@ msgstr "mis à jour le"
 msgid "Updated at (descending)"
 msgstr "Mis à jour le (descendant)"
 
-#: core/filters.py:112 core/filters.py:433
+#: core/filters.py:113 core/filters.py:439
 #: core/templates/snippets/modal/modal_action_form.html:20
 #: core/templates/snippets/modal/modal_delete_form.html:21
 #: core/templates/snippets/modal/modal_import_library_form.html:19
 msgid "Yes"
 msgstr "Oui"
 
-#: core/filters.py:113 core/filters.py:434
+#: core/filters.py:114 core/filters.py:440
 msgid "No"
 msgstr "Non"
 
@@ -121,8 +122,8 @@ msgstr "Non"
 msgid "Search analysis..."
 msgstr "Rechercher une analyse..."
 
-#: core/filters.py:129 core/filters.py:148 core/filters.py:205
-#: core/filters.py:245 core/filters.py:329 core/forms.py:405 core/forms.py:416
+#: core/filters.py:132 core/filters.py:152 core/filters.py:209
+#: core/filters.py:249 core/filters.py:335 core/forms.py:405 core/forms.py:416
 #: core/models.py:33 core/models.py:299 core/models.py:494
 #: core/templates/core/acceptance_list.html:111
 #: core/templates/core/browser.html:47
@@ -137,183 +138,187 @@ msgstr "Rechercher une analyse..."
 msgid "Domain"
 msgstr "Domaine"
 
-#: core/filters.py:142
+#: core/filters.py:145
 msgid "Search scenario..."
 msgstr "Rechercher un scénario..."
 
-#: core/filters.py:147 core/filters.py:164 core/models.py:38 core/models.py:161
+#: core/filters.py:150 core/filters.py:168 core/models.py:38 core/models.py:161
 #: core/models.py:422 core/templates/core/browser.html:21
 #: core/templates/core/quick_start.html:99 core/templates/core/ri_list.html:113
 #: core/templates/core/ri_update.html:23 core/templates/snippets/mp_data.html:7
 msgid "Project"
 msgstr "Projet"
 
-#: core/filters.py:160 core/filters.py:201 core/filters.py:237
-#: core/filters.py:273 core/filters.py:297 core/filters.py:325
-#: core/filters.py:357 core/filters.py:386 core/filters.py:410
-#: core/filters.py:487
+#: core/filters.py:164 core/filters.py:205 core/filters.py:241
+#: core/filters.py:278 core/filters.py:303 core/filters.py:331
+#: core/filters.py:362 core/filters.py:392 core/filters.py:416
+#: core/filters.py:499
 msgid "name"
 msgstr "nom"
 
-#: core/filters.py:161 core/filters.py:202 core/filters.py:238
-#: core/filters.py:274 core/filters.py:298 core/filters.py:326
-#: core/filters.py:358 core/filters.py:387 core/filters.py:411
-#: core/filters.py:488
+#: core/filters.py:165 core/filters.py:206 core/filters.py:242
+#: core/filters.py:279 core/filters.py:304 core/filters.py:332
+#: core/filters.py:363 core/filters.py:393 core/filters.py:417
+#: core/filters.py:500
 msgid "Name (descending)"
 msgstr "Nom (descendant)"
 
-#: core/filters.py:162
+#: core/filters.py:166
 msgid "threat"
 msgstr "menace"
 
-#: core/filters.py:163
+#: core/filters.py:167
 msgid "Threat (descending)"
 msgstr "Menace (descendant)"
 
-#: core/filters.py:166
+#: core/filters.py:170
 msgid "treatment"
 msgstr "traitement"
 
-#: core/filters.py:167
+#: core/filters.py:171
 msgid "Treatment (descending)"
 msgstr "Traitement (descendant)"
 
-#: core/filters.py:180
+#: core/filters.py:184
 msgid "Search security measure..."
 msgstr "Rechercher une mesure de sécurité..."
 
-#: core/filters.py:199 core/filters.py:327
+#: core/filters.py:203 core/filters.py:333
 msgid "status"
 msgstr "statut"
 
-#: core/filters.py:200 core/filters.py:328
+#: core/filters.py:204 core/filters.py:334
 msgid "Status (descending)"
 msgstr "Statut (descendant)"
 
-#: core/filters.py:203 core/models.py:75
+#: core/filters.py:207 core/models.py:75
 msgid "type"
 msgstr ""
 
-#: core/filters.py:204
+#: core/filters.py:208
 msgid "Type (descending)"
 msgstr "Type (descendant)"
 
-#: core/filters.py:206 core/filters.py:246 core/filters.py:330
+#: core/filters.py:210 core/filters.py:250 core/filters.py:336
 msgid "Domain (descending)"
 msgstr "Domaine (descendant)"
 
-#: core/filters.py:207
+#: core/filters.py:211
 msgid "security function"
 msgstr "fonction de sécurité"
 
-#: core/filters.py:208
+#: core/filters.py:212
 msgid "Security function (descending)"
 msgstr "Fonction de sécurité (descendant)"
 
-#: core/filters.py:222
+#: core/filters.py:226
 msgid "Search acceptance..."
 msgstr "Rechercher une acceptation..."
 
-#: core/filters.py:239 core/templates/core/quick_start.html:130
+#: core/filters.py:243 core/templates/core/quick_start.html:130
 #: core/views.py:536
 msgid "risk scenarios"
 msgstr "scénarios de risque"
 
-#: core/filters.py:240
+#: core/filters.py:244
 msgid "Risk scenarios (descending)"
 msgstr "Scénarios de risque (descendant)"
 
-#: core/filters.py:241
+#: core/filters.py:245
 msgid "expiry"
 msgstr "expiration"
 
-#: core/filters.py:242
+#: core/filters.py:246
 msgid "Expiry date (descending)"
 msgstr "Date d'expiration (descendant)"
 
-#: core/filters.py:243
+#: core/filters.py:247
 msgid "validator"
 msgstr "validateur"
 
-#: core/filters.py:244
+#: core/filters.py:248
 msgid "Validator (descending)"
 msgstr "Validateur (descendant)"
 
-#: core/filters.py:264
+#: core/filters.py:269
 msgid "Search domain..."
 msgstr "Rechercher un domaine..."
 
-#: core/filters.py:275 core/filters.py:299
+#: core/filters.py:280 core/filters.py:305
 msgid "description"
 msgstr ""
 
-#: core/filters.py:276 core/filters.py:300
+#: core/filters.py:281 core/filters.py:306
 msgid "Description (descending)"
 msgstr "Description (descendant)"
 
-#: core/filters.py:288
+#: core/filters.py:294
 msgid "Search matrices..."
 msgstr "Rechercher des matrices..."
 
-#: core/filters.py:313
+#: core/filters.py:319
 msgid "Search project..."
 msgstr "Rechercher un projet..."
 
-#: core/filters.py:347
+#: core/filters.py:352
 msgid "Search threat..."
 msgstr "Rechercher une menace..."
 
-#: core/filters.py:359 core/filters.py:388
+#: core/filters.py:355
+msgid "None"
+msgstr ""
+
+#: core/filters.py:364 core/filters.py:394
 msgid "provider"
 msgstr "fournisseur"
 
-#: core/filters.py:360 core/filters.py:389
+#: core/filters.py:365 core/filters.py:395
 msgid "Provider (descending)"
 msgstr "Fournisseur (descendant)"
 
-#: core/filters.py:376
+#: core/filters.py:381
 msgid "Search function..."
 msgstr "Rechercher une fonction..."
 
-#: core/filters.py:402
+#: core/filters.py:408
 msgid "Search asset..."
 msgstr "Rechercher un bien sensible..."
 
-#: core/filters.py:446
+#: core/filters.py:458
 msgid "Search user..."
 msgstr "Rechercher un utilisateur..."
 
-#: core/filters.py:457 core/forms.py:98 core/forms.py:124
+#: core/filters.py:469 core/forms.py:98 core/forms.py:124
 #: core/templates/snippets/associated_users_list_nested.html:13
 #: core/templates/snippets/users_list_nested.html:13 core/views.py:1782
 msgid "Email"
 msgstr "Adresse électronique"
 
-#: core/filters.py:458
+#: core/filters.py:470
 msgid "Email (descending)"
 msgstr "Adresse électronique (descendant)"
 
-#: core/filters.py:459 core/views.py:1782
+#: core/filters.py:471 core/views.py:1779
 msgid "First name"
 msgstr "Prénom"
 
-#: core/filters.py:460
+#: core/filters.py:472
 msgid "First name (descending)"
 msgstr "Prénom (descendant)"
 
-#: core/filters.py:461 core/views.py:1782
+#: core/filters.py:473 core/views.py:1779
 msgid "Last name"
 msgstr "Nom"
 
-#: core/filters.py:462
+#: core/filters.py:474
 msgid "Last name (descending)"
 msgstr "Nom (descendant)"
 
-#: core/filters.py:464
+#: core/filters.py:476
 msgid "Created at (descending)"
 msgstr "Créé le (descendant)"
 
-#: core/filters.py:478
+#: core/filters.py:490
 msgid "Search user group..."
 msgstr "Rechercher un groupe utilisateur..."
 
@@ -400,7 +405,7 @@ msgstr "Projets"
 
 #: core/models.py:48 core/models.py:109
 #: core/templates/core/security_function_list.html:108
-#: core/templates/core/threat_list.html:45
+#: core/templates/core/threat_list.html:110
 #: core/templates/library/library_detail.html:43
 #: core/templates/library/library_detail.html:58
 msgid "Provider"
@@ -412,7 +417,7 @@ msgstr "publié"
 
 #: core/models.py:53 core/models.py:382 core/templates/core/ri_create.html:31
 #: core/templates/core/ri_list.html:112 core/templates/core/ri_update.html:68
-#: core/templates/core/threat_list.html:44
+#: core/templates/core/threat_list.html:109
 #: core/templates/snippets/ri_list_nested.html:13
 msgid "Threat"
 msgstr "Menace"
@@ -868,7 +873,7 @@ msgstr ""
 "réduire le nombre d'utilisateurs ou acquérir une licence appropriée."
 
 #: core/templates/base.html:104 core/templates/core/base.html:102
-#: core/templates/core/sidebar.html:385
+#: core/templates/core/sidebar.html:384
 msgid "About MIRA"
 msgstr "À propos de MIRA"
 
@@ -877,6 +882,7 @@ msgstr "À propos de MIRA"
 #: core/templates/core/mtg_list.html:56
 #: core/templates/core/project_list.html:56 core/templates/core/ri_list.html:57
 #: core/templates/core/security_function_list.html:55
+#: core/templates/core/threat_list.html:56
 #: core/templates/core/user_list.html:55
 msgid "Filters"
 msgstr "Filtres"
@@ -886,6 +892,7 @@ msgstr "Filtres"
 #: core/templates/core/mtg_list.html:79
 #: core/templates/core/project_list.html:79 core/templates/core/ri_list.html:80
 #: core/templates/core/security_function_list.html:78
+#: core/templates/core/threat_list.html:79
 #: core/templates/core/user_list.html:78
 msgid "Apply"
 msgstr "Appliquer"
@@ -898,7 +905,7 @@ msgstr "Appliquer"
 #: core/templates/core/project_list.html:96 core/templates/core/ri_list.html:97
 #: core/templates/core/risk_matrix_list.html:32
 #: core/templates/core/security_function_list.html:95
-#: core/templates/core/threat_list.html:32
+#: core/templates/core/threat_list.html:97
 #: core/templates/core/user_list.html:95
 msgid "Clear Filters"
 msgstr "Effacer les filtres"
@@ -926,9 +933,9 @@ msgstr "Date d'expiration"
 #: core/templates/core/risk_matrix_list.html:54
 #: core/templates/core/role_list.html:45 core/templates/core/role_list.html:125
 #: core/templates/core/security_function_list.html:109
-#: core/templates/core/threat_list.html:46
+#: core/templates/core/threat_list.html:111
 #: core/templates/core/treatment.html:35 core/templates/core/user_list.html:118
-#: core/templates/library/library_list.html:21
+#: core/templates/library/library_list.html:22
 msgid "Actions"
 msgstr ""
 
@@ -988,11 +995,11 @@ msgstr "Dernière Mise à Jour"
 msgid "ready"
 msgstr "prêt"
 
-#: core/templates/core/analysis_list.html:177
+#: core/templates/core/analysis_list.html:173
 msgid "Delete risk analysis?"
 msgstr "Supprimer l'analyse de risque ?"
 
-#: core/templates/core/analysis_list.html:186
+#: core/templates/core/analysis_list.html:182
 #: core/templates/core/index.html:134 core/templates/core/review.html:73
 #: core/templates/snippets/ra_list_nested.html:64
 msgid "No analysis found."
@@ -1495,33 +1502,27 @@ msgstr "... format CSV"
 msgid "Treatment plan"
 msgstr "Plan de traitement"
 
-#: core/templates/core/index.html:144 core/templates/core/user_list.html:185
-#: core/templates/snippets/paginator.html:4
+#: core/templates/core/index.html:144 core/templates/snippets/paginator.html:4
 msgid "Showing Page"
 msgstr "Page"
 
-#: core/templates/core/index.html:144 core/templates/core/user_list.html:185
-#: core/templates/snippets/paginator.html:4
+#: core/templates/core/index.html:144 core/templates/snippets/paginator.html:4
 msgid "of"
 msgstr "sur"
 
-#: core/templates/core/index.html:151 core/templates/core/user_list.html:191
-#: core/templates/snippets/paginator.html:10
+#: core/templates/core/index.html:151 core/templates/snippets/paginator.html:10
 msgid "First"
 msgstr "Prem."
 
-#: core/templates/core/index.html:154 core/templates/core/user_list.html:193
-#: core/templates/snippets/paginator.html:12
+#: core/templates/core/index.html:154 core/templates/snippets/paginator.html:12
 msgid "Prev"
 msgstr "Préc."
 
-#: core/templates/core/index.html:159 core/templates/core/user_list.html:196
-#: core/templates/snippets/paginator.html:15
+#: core/templates/core/index.html:159 core/templates/snippets/paginator.html:15
 msgid "Next"
 msgstr "Suiv."
 
-#: core/templates/core/index.html:161 core/templates/core/user_list.html:198
-#: core/templates/snippets/paginator.html:17
+#: core/templates/core/index.html:161 core/templates/snippets/paginator.html:17
 msgid "Last"
 msgstr "Fin"
 
@@ -1550,7 +1551,7 @@ msgid "Measure summary"
 msgstr "Résumé de la mesure"
 
 #: core/templates/core/my_profile_detailed.html:5
-#: core/templates/core/sidebar.html:355
+#: core/templates/core/sidebar.html:354
 msgid "My profile"
 msgstr "Mon profil"
 
@@ -1565,7 +1566,7 @@ msgstr "Groupes utilisateurs"
 
 #: core/templates/core/overview.html:10 core/templates/core/overview.html:19
 #: core/templates/core/sidebar.html:73
-#: core/templates/library/library_list.html:20
+#: core/templates/library/library_list.html:21
 msgid "Overview"
 msgstr "Vue d'ensemble"
 
@@ -1750,7 +1751,7 @@ msgid "threats"
 msgstr "menaces"
 
 #: core/templates/core/quick_start.html:43
-#: core/templates/core/threat_list.html:38
+#: core/templates/core/threat_list.html:103
 msgid "Add threat"
 msgstr "Ajouter une menace"
 
@@ -2778,19 +2779,19 @@ msgstr "Sauvegardes"
 msgid "License management"
 msgstr "Gestion de la licence"
 
-#: core/templates/core/sidebar.html:395
+#: core/templates/core/sidebar.html:394
 msgid "Log out"
 msgstr "Déconnexion"
 
-#: core/templates/core/threat_list.html:38
+#: core/templates/core/threat_list.html:103
 msgid "New threat"
 msgstr "Nouvelle menace"
 
-#: core/templates/core/threat_list.html:76
+#: core/templates/core/threat_list.html:141
 msgid "Delete threat?"
 msgstr "Supprimer la menace ?"
 
-#: core/templates/core/threat_list.html:86
+#: core/templates/core/threat_list.html:151
 msgid "No threat found."
 msgstr "Aucune menace trouvée."
 
@@ -2905,18 +2906,21 @@ msgid "Edit user"
 msgstr "Modifier l'utilisateur"
 
 #: core/templates/library/library_detail.html:20
-#: core/templates/library/library_list.html:79
+#: core/templates/library/library_list.html:81
 msgid "Import library"
 msgstr "Importer une bibliothèque"
 
+#: core/templates/library/library_detail.html:30
 #: core/templates/library/library_detail.html:30
 msgid "Objects of type:"
 msgstr "Objets de type :"
 
 #: core/templates/library/library_detail.html:41
+#: core/templates/library/library_detail.html:41
 msgid "Threat name"
 msgstr "Nom de la menace"
 
+#: core/templates/library/library_detail.html:56
 #: core/templates/library/library_detail.html:56
 msgid "Security function name"
 msgstr "Nom de la fonction de sécurité"
@@ -2929,7 +2933,11 @@ msgstr "Bibliothèques par défaut"
 msgid "Library name"
 msgstr "Nom de la bibliothèque"
 
-#: core/templates/library/library_list.html:44
+#: core/templates/library/library_list.html:19
+msgid "Language"
+msgstr "Langue"
+
+#: core/templates/library/library_list.html:46
 #, python-format
 msgid ""
 "\n"
@@ -2948,7 +2956,7 @@ msgstr[1] ""
 "                        %(counter)s menaces\n"
 "                    "
 
-#: core/templates/library/library_list.html:53
+#: core/templates/library/library_list.html:55
 #, python-format
 msgid ""
 "\n"
@@ -2967,7 +2975,7 @@ msgstr[1] ""
 "                        %(counter)s matrices\n"
 "                    "
 
-#: core/templates/library/library_list.html:62
+#: core/templates/library/library_list.html:64
 #, python-format
 msgid ""
 "\n"
@@ -2988,15 +2996,15 @@ msgstr[1] ""
 "                        %(counter)s fonctions de sécurité\n"
 "                    "
 
-#: core/templates/library/library_list.html:89
+#: core/templates/library/library_list.html:91
 msgid "No library found."
 msgstr "Aucune bibliothèque trouvée."
 
-#: core/templates/library/library_list.html:101
+#: core/templates/library/library_list.html:103
 msgid "Upload your own library"
 msgstr "Télécharger votre propre bibliothèque"
 
-#: core/templates/library/library_list.html:114
+#: core/templates/library/library_list.html:116
 msgid "Upload"
 msgstr "Télécharger"
 
@@ -3496,6 +3504,14 @@ msgstr "Responsable de domaine"
 #: core/utils.py:29 core/utils.py:39
 msgid "Analyst"
 msgstr "Analyste"
+
+#: core/utils.py:50
+msgid "French"
+msgstr ""
+
+#: core/utils.py:51
+msgid "English"
+msgstr ""
 
 #: core/views.py:217
 msgid "Risk acceptance: {} accepted with success!"

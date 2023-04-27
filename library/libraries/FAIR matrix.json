@@ -1,4 +1,5 @@
 {
+    "locale": "en",
     "name": "FAIR matrix",
     "description": "Balanced 3x3 matrix inspired from FAIR",
     "format_version": "1.0",
