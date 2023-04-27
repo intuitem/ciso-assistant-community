@@ -210,7 +210,7 @@ class SecurityMeasureCreateForm(LinkCleanMixin, StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.get_root_folder(), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
@@ -354,7 +354,7 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
                 validators_id.append(candidate.id)
         self.fields['validator'].queryset = User.objects.filter(id__in=validators_id)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.get_root_folder(), user, None, codename="add_riskacceptance"))
         # else:
         #     self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         # Else statement causes a problem because during submition for global folder
@@ -390,7 +390,7 @@ class ProjectForm(StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):   
         super(ProjectForm, self).__init__(*args, **kwargs)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_project"))
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.get_root_folder(), user, Folder.ContentType.DOMAIN, codename="add_project"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
@@ -445,7 +445,7 @@ class AssetForm(StyledModelForm):
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                         choices=self.fields['parent_assets'].choices)
         viewable_assets = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Asset)[0] if user else Asset.objects.none()
+            Folder.get_root_folder(), user, Asset)[0] if user else Asset.objects.none()
         self.fields['parent_assets'].queryset = Asset.objects.filter(id__in=viewable_assets
             ).exclude(id=self.instance.id) if self.instance else Asset.objects.filter(id__in=viewable_assets)
 

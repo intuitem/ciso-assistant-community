@@ -99,8 +99,7 @@ class BaseContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -151,7 +150,7 @@ class GenericDetailView(BaseContextMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, self.model)
+            Folder.get_root_folder(), self.request.user, self.model)
         context['change'] = self.object.id in object_ids_change
         context['delete'] = self.object.id in object_ids_delete
         if self.model is User:
@@ -298,7 +297,7 @@ class UserDetailView(UserPassesTestMixin, GenericDetailView):
     exclude = ['id', 'password', 'first_login']
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user")) or self.request.user == self.get_object()
+        return RoleAssignment.has_permission(user=self.request.user, codename="view_user") or self.request.user == self.get_object()
 
 
 
@@ -324,7 +323,7 @@ class AnalysisListView(BaseContextMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            Folder.get_root_folder(), self.request.user, Analysis)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         return qs
@@ -406,7 +405,7 @@ class SecurityMeasurePlanView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            Folder.get_root_folder(), self.request.user, RiskScenario)
         qs = self.model.objects.filter(analysis=self.kwargs['analysis']).filter(
             id__in=object_ids_view).order_by(self.ordering)
         return qs
@@ -451,7 +450,7 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_queryset(self):
         self.analysis = get_object_or_404(Analysis, id=self.kwargs['analysis'])
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            Folder.get_root_folder(), self.request.user, RiskScenario)
         qs = self.model.objects.filter(id__in=object_ids_view).filter(
             analysis=self.analysis).order_by(self.ordering)
         return qs
@@ -466,7 +465,7 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
             analysis=self.analysis).order_by('created_at')
         context['matrix'] = self.analysis.rating_matrix
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            Folder.get_root_folder(), self.request.user, Analysis)
         context['crumbs'] = {'analysis-list': _('Risk analyses')}
         return context
 
@@ -477,7 +476,7 @@ class RiskAnalysisView(BaseContextMixin, UserPassesTestMixin, ListView):
 @login_required
 def generate_ra_pdf(request, analysis: Analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+        Folder.get_root_folder(), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
@@ -494,7 +493,7 @@ def generate_ra_pdf(request, analysis: Analysis):
 @login_required
 def generate_mp_pdf(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+        Folder.get_root_folder(), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
         context = RiskScenario.objects.filter(analysis=analysis).order_by('created_at')
@@ -515,23 +514,22 @@ class SearchResults(ListView):
     def get_queryset(self):
         query = self.request.GET.get('q')
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            Folder.get_root_folder(), self.request.user, RiskScenario)
         ri_list = RiskScenario.objects.filter(Q(name__icontains=query) | Q(
             threat__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+            Folder.get_root_folder(), self.request.user, SecurityMeasure)
         mtg_list = SecurityMeasure.objects.filter(Q(name__icontains=query) | Q(
             security_function__name__icontains=query)).filter(id__in=object_ids_view)[:10]
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            Folder.get_root_folder(), self.request.user, Analysis)
         ra_list = Analysis.objects.filter(Q(name__icontains=query) | Q(project__name__icontains=query) | Q(
             project__folder__name__icontains=query) | Q(version__icontains=query)).filter(id__in=object_ids_view)[:10]
         return {"Analysis": ra_list, "RiskScenario": ri_list, "SecurityMeasure": mtg_list}
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -551,17 +549,16 @@ class Browser(ListView):
         mtg = self.request.GET.get('mtg')
         if rsk:
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+                Folder.get_root_folder(), self.request.user, RiskScenario)
             return {"type": _("risk scenarios"), "filter": self.map_rsk[rsk], "items": RiskScenario.objects.filter(treatment=self.map_rsk[rsk]).filter(id__in=object_ids_view)}
         if mtg:
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+                Folder.get_root_folder(), self.request.user, SecurityMeasure)
             return {"type": _("security measures"), "filter": self.map_mtg[mtg], "items": SecurityMeasure.objects.filter(status=self.map_mtg[mtg]).filter(id__in=object_ids_view)}
         
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         return context
@@ -569,8 +566,7 @@ class Browser(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['change_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, "change_usergroup")
+        context['change_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
         context['view_user'] = RoleAssignment.has_permission(
             self.request.user, "view_user")
         context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -582,10 +578,10 @@ def global_overview(request):
     template = 'core/overview.html'
 
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)
+        Folder.get_root_folder(), request.user, SecurityMeasure)
 
     viewable_analyses = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)[0]
+        Folder.get_root_folder(), request.user, Analysis)[0]
 
     _ord_security_measures = SecurityMeasure.objects.filter(id__in=object_ids_view).exclude(status='done').order_by('eta')
 
@@ -604,7 +600,7 @@ def global_overview(request):
         "updatable_measures": object_ids_change,
         "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-        "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+        "change_usergroup": RoleAssignment.is_access_allowed(user=request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
     }
 
     return render(request, template, context)
@@ -612,7 +608,7 @@ def global_overview(request):
 
 def compile_analysis_for_composer(user: User, analysis_list: list):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Analysis)
+        Folder.get_root_folder(), user, Analysis)
 
     rc = risks_count_per_level(user, analysis_list)
     current_level = rc['current']
@@ -665,7 +661,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "residual_level": residual_level,
         "view_user": RoleAssignment.has_permission(user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-        "change_usergroup": RoleAssignment.has_permission(user, "change_usergroup"),
+        "change_usergroup": RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
         "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
         "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
@@ -685,12 +681,12 @@ class ComposerListView(ListView):
                 "context": compile_analysis_for_composer(self.request.user, data),
                 "view_user": RoleAssignment.has_permission(request.user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
                 "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-                "change_usergroup": RoleAssignment.has_permission(request.user, "change_usergroup"),
+                "change_usergroup": RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
             }
             return render(request, 'core/composer.html', context)
         else:
             (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-                Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+                Folder.get_root_folder(), self.request.user, Analysis)
             context = {'context': Analysis.objects.filter(
                 id__in=object_ids_view)}
             return render(request, 'core/project_select.html', context)
@@ -702,7 +698,7 @@ def index(request):
 
 def export_risks_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+        Folder.get_root_folder(), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
 
@@ -733,7 +729,7 @@ def export_risks_csv(request, analysis):
 
 def export_mp_csv(request, analysis):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, Analysis)
+        Folder.get_root_folder(), request.user, Analysis)
     if UUID(analysis) in object_ids_view:
         ra = get_object_or_404(Analysis, pk=analysis)
 
@@ -746,7 +742,7 @@ def export_mp_csv(request, analysis):
                    ]
         writer.writerow(columns)
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), request.user, SecurityMeasure)
+            Folder.get_root_folder(), request.user, SecurityMeasure)
         for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view).filter(riskscenario__analysis=analysis):
             risk_scenarios = []
             for rs in mtg.riskscenario_set.all():
@@ -766,8 +762,7 @@ def scoring_assistant(request):
     context = {}
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
-    context['change_usergroup'] = RoleAssignment.has_permission(
-        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['change_usergroup'] = RoleAssignment.is_access_allowed(user=request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
     context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0
@@ -792,7 +787,7 @@ class ReviewView(BaseContextMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            Folder.get_root_folder(), self.request.user, Analysis)
         return Analysis.objects.filter(id__in=object_ids_view)
 
 
@@ -856,7 +851,7 @@ class ProjectListView(BaseContextMixin, UserPassesTestMixin, ListView):
     
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
+            Folder.get_root_folder(), self.request.user, Project)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = ProjectFilter(self.request.GET, queryset=qs, request=self.request)
@@ -869,7 +864,7 @@ class ProjectListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['project_create_form'] = ProjectForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)
+            Folder.get_root_folder(), self.request.user, Project)
         context['add_project'] = RoleAssignment.has_permission(
             self.request.user, 'add_project')
         return context
@@ -963,7 +958,7 @@ class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
+            Folder.get_root_folder(), self.request.user, Asset)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = AssetFilter(
@@ -977,7 +972,7 @@ class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['asset_create_form'] = AssetForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Asset)
+            Folder.get_root_folder(), self.request.user, Asset)
         context['add_asset'] = RoleAssignment.has_permission(
             self.request.user, 'add_asset')
         return context
@@ -999,7 +994,7 @@ class AssetCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('asset-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.get_root_folder())
 
 
 class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1013,7 +1008,7 @@ class AssetCreateViewModal(UserPassesTestMixin, CreateViewModal):
         return kwargs
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_asset"), folder=Folder.get_root_folder())
 
 
 class AssetUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1060,7 +1055,7 @@ class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder.ContentType.DOMAIN, codename="change_folder")
+            Folder.get_root_folder(), self.request.user, Folder.ContentType.DOMAIN, codename="change_folder")
         qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(
             self.request.GET, queryset=qs, request=self.request)
@@ -1075,7 +1070,7 @@ class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['add_folder'] = RoleAssignment.has_permission(
             self.request.user, 'add_folder')
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Folder)
+            Folder.get_root_folder(), self.request.user, Folder)
         return context
 
     def test_func(self):
@@ -1095,7 +1090,8 @@ class FolderCreateView(UserPassesTestMixin, CreateView):
         return reverse_lazy('folder-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
+        # TODO: Change this when we allow picking a folder for role assignments
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"), folder=Folder.get_root_folder())
 
 
 class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
@@ -1104,7 +1100,7 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = FolderUpdateForm
 
     def get_success_url(self) -> str:
-        folder = Folder.objects.latest("created_at")
+        folder = self.object
         auditors = UserGroup.objects.create(
             name=UserGroupCodename.AUDITOR, folder=folder, builtin=True)
         validators = UserGroup.objects.create(
@@ -1114,23 +1110,24 @@ class FolderCreateViewModal(UserPassesTestMixin, CreateViewModal):
         managers = UserGroup.objects.create(
             name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True)
         ra1 = RoleAssignment.objects.create(user_group=auditors, role=Role.objects.get(
-            name=RoleCodename.AUDITOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            name=RoleCodename.AUDITOR), builtin=True, folder=Folder.get_root_folder())
         ra1.perimeter_folders.add(folder)
         ra2 = RoleAssignment.objects.create(user_group=validators, role=Role.objects.get(
-            name=RoleCodename.VALIDATOR), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            name=RoleCodename.VALIDATOR), builtin=True, folder=Folder.get_root_folder())
         ra2.perimeter_folders.add(folder)
         ra3 = RoleAssignment.objects.create(user_group=analysts, role=Role.objects.get(
-            name=RoleCodename.ANALYST), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            name=RoleCodename.ANALYST), builtin=True, folder=Folder.get_root_folder())
         ra3.perimeter_folders.add(folder)
         ra4 = RoleAssignment.objects.create(user_group=managers, role=Role.objects.get(
-            name=RoleCodename.DOMAIN_MANAGER), builtin=True, folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+            name=RoleCodename.DOMAIN_MANAGER), builtin=True, folder=Folder.get_root_folder())
         ra4.perimeter_folders.add(folder)
         messages.info(self.request, _(
             'User groups {} - Auditors, {} - Validators, {} - Analysts and {} - Domain Managers were created').format(folder.name, folder.name, folder.name, folder.name))
         return self.request.POST.get('next', reverse_lazy('folder-list'))
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"))
+        # TODO: Change this when we allow picking a folder for role assignments
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_folder"), folder=Folder.get_root_folder())
 
 
 class FolderUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1179,7 +1176,7 @@ class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            Folder.get_root_folder(), self.request.user, Analysis)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = AnalysisFilter(
@@ -1195,7 +1192,7 @@ class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['model'] = 'analysis'
         context['analysis_create_form'] = RiskAnalysisCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)
+            Folder.get_root_folder(), self.request.user, Analysis)
         context['add_analysis'] = RoleAssignment.has_permission(
             self.request.user, 'add_analysis')
         context['no_matrix'] = (RiskMatrix.objects.all().count() - RiskMatrix.objects.filter(is_enabled=False).count()) < 1
@@ -1298,7 +1295,7 @@ class RiskScenarioListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            Folder.get_root_folder(), self.request.user, RiskScenario)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = RiskScenarioFilter(self.request.GET, request=self.request, queryset=qs)
@@ -1312,7 +1309,7 @@ class RiskScenarioListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['model'] = 'riskscenario'
         context['risk_scenario_create_form'] = RiskScenarioCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskScenario)
+            Folder.get_root_folder(), self.request.user, RiskScenario)
         context['add_riskscenario'] = RoleAssignment.has_permission(
             self.request.user, 'add_riskscenario')
         return context
@@ -1444,14 +1441,14 @@ class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['measure_create_form'] = SecurityMeasureCreateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+            Folder.get_root_folder(), self.request.user, SecurityMeasure)
         context['add_securitymeasure'] = RoleAssignment.has_permission(
             self.request.user, 'add_securitymeasure')
         return context
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityMeasure)
+            Folder.get_root_folder(), self.request.user, SecurityMeasure)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = SecurityMeasureFilter(self.request.GET, request=self.request, queryset=qs)
@@ -1525,7 +1522,7 @@ class SecurityFunctionListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
+            Folder.get_root_folder(), self.request.user, SecurityFunction)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = SecurityFunctionFilter(
@@ -1539,7 +1536,7 @@ class SecurityFunctionListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['security_function_create_form'] = SecurityFunctionCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, SecurityFunction)
+            Folder.get_root_folder(), self.request.user, SecurityFunction)
         context['add_securityfunction'] = RoleAssignment.has_permission(
             self.request.user, 'add_securityfunction')
         return context
@@ -1557,7 +1554,7 @@ class SecurityFunctionCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = SecurityFunctionCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_securityfunction"), folder=Folder.get_root_folder())
 
 
 class SecurityFunctionUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1603,7 +1600,7 @@ class ThreatListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
+            Folder.get_root_folder(), self.request.user, Threat)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = ThreatFilter(
@@ -1617,7 +1614,7 @@ class ThreatListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['threat_create_form'] = ThreatCreateForm
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Threat)
+            Folder.get_root_folder(), self.request.user, Threat)
         context['add_threat'] = RoleAssignment.has_permission(
             self.request.user, 'add_threat')
         return context
@@ -1635,7 +1632,7 @@ class ThreatCreateViewModal(UserPassesTestMixin, CreateViewModal):
     form_class = ThreatCreateForm
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_threat"), folder=Folder.get_root_folder())
 
 
 class ThreatUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1684,7 +1681,7 @@ class RiskAcceptanceListView(BaseContextMixin, UserPassesTestMixin, ListView):
         context['filter'] = filter
         context['risk_acceptance_create_form'] = RiskAcceptanceCreateUpdateForm(user=self.request.user)
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
+            Folder.get_root_folder(), self.request.user, RiskAcceptance)
         context['add_riskacceptance'] = RoleAssignment.has_permission(
             self.request.user, 'add_riskacceptance')
         context['blocked_states'] = ('accepted', 'rejected', 'revoked')
@@ -1692,7 +1689,7 @@ class RiskAcceptanceListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskAcceptance)
+            Folder.get_root_folder(), self.request.user, RiskAcceptance)
         qs = self.model.objects.filter(
             id__in=object_ids_view).order_by(self.ordering)
         filtered_list = RiskAcceptanceFilter(
@@ -1865,7 +1862,7 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="view_user")
 
 
 class UserCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
@@ -1896,7 +1893,7 @@ class UserCreateView(BaseContextMixin, UserPassesTestMixin, CreateView):
         return render(request, self.template_name, {'form': form})
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="add_user")
 
 
 class UserUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -1924,7 +1921,7 @@ class UserUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
             return self.request.POST.get('next', '/')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="change_user")
 
 
 class UserDeleteView(UserPassesTestMixin, DeleteView):
@@ -1936,7 +1933,7 @@ class UserDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('user-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_user"))
+        return RoleAssignment.has_permission(user=self.request.user, codename="delete_user")
 
 
 class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -1964,15 +1961,13 @@ class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
         filter = UserGroupFilter(self.request.GET, request=self.request, queryset=queryset)
         context['filter'] = filter
         (context['object_ids_view'], context['object_ids_change'], context['object_ids_delete']) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(
-                content_type=Folder.ContentType.ROOT), self.request.user, UserGroup
+            Folder.get_root_folder(), self.request.user, UserGroup
         )
-        context['add_usergroup'] = RoleAssignment.has_permission(
-            self.request.user, 'add_usergroup')
+        context['add_usergroup'] = RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_usergroup"), folder=Folder.get_root_folder())
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename='view_usergroup'))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="view_usergroup"), folder=Folder.get_root_folder())
 
 
 class UserGroupCreateView(UserPassesTestMixin, CreateView):
@@ -2071,7 +2066,8 @@ class RoleAssignmentCreateView(BaseContextMixin, UserPassesTestMixin, CreateView
         return context
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_roleassignment"))
+        # TODO: Change this when we allow picking a folder for role assignments
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="add_roleassignment"), folder=Folder.get_root_folder())
 
 
 class RoleAssignmentDeleteView(UserPassesTestMixin, DeleteView):
@@ -2084,7 +2080,7 @@ class RoleAssignmentDeleteView(UserPassesTestMixin, DeleteView):
         return reverse_lazy('role-list')
 
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_roleassignment"))
+        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="delete_roleassignment"), folder=Folder.get_folder(self.get_object()))
 
 
 class RoleAssignmentUpdateView(BaseContextMixin, UserPassesTestMixin, UpdateView):
@@ -2134,7 +2130,7 @@ class UserPasswordChangeView(BaseContextMixin, UserPassesTestMixin, PasswordChan
         return kwargs
     
     def test_func(self):
-        return RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_user")) or self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
+        return RoleAssignment.has_permission(user=self.request.user, codename="change_user") or self.request.user == get_object_or_404(User, pk=self.kwargs['pk'])
 
 
 class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
@@ -2147,7 +2143,7 @@ class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)
+            Folder.get_root_folder(), self.request.user, RiskMatrix)
         qs = self.model.objects.all().order_by('created_at')
         filtered_list = RiskMatrixFilter(
             self.request.GET, queryset=qs, request=self.request)
@@ -2156,9 +2152,9 @@ class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["object_ids_change"] = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
+            Folder.get_root_folder(), self.request.user, RiskMatrix)[1]
         context["object_ids_delete"] = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[2]
+            Folder.get_root_folder(), self.request.user, RiskMatrix)[2]
         context['add_riskmatrix'] = RoleAssignment.has_permission(
             self.request.user, 'add_riskmatrix')
         queryset = self.get_queryset()
@@ -2182,15 +2178,15 @@ class RiskMatrixDetailView(BaseContextMixin, UserPassesTestMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['change_riskmatrix'] = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, RiskMatrix)[1]
+            Folder.get_root_folder(), self.request.user, RiskMatrix)[1]
         context['viewable_projects'] = Project.objects.filter(
-            id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Project)[0]).filter(
+            id__in=RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), self.request.user, Project)[0]).filter(
             id__in=(self.get_object().projects.all().values_list('id', flat=True)))
         context['viewable_analyses'] = Analysis.objects.filter(
-            id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)[0]).filter(
+            id__in=RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), self.request.user, Analysis)[0]).filter(
             id__in=(self.get_object().analyses.all().values_list('id', flat=True)))
         context['changeable_analyses'] = Analysis.objects.filter(
-            id__in=RoleAssignment.get_accessible_object_ids(Folder.objects.get(content_type=Folder.ContentType.ROOT), self.request.user, Analysis)[1]).filter(
+            id__in=RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), self.request.user, Analysis)[1]).filter(
             id__in=(self.get_object().analyses.all().values_list('id', flat=True)))
         context["crumbs"] = {'riskmatrix-list': _('Matrices')}
         return context
@@ -2230,8 +2226,7 @@ def license_overview(request):
 
     context['matrices'] = list(
         RiskMatrix.objects.all().values_list('json_definition', flat=True))
-    context['change_usergroup'] = RoleAssignment.has_permission(
-        request.user, "change_usergroup") # NOTE: Need to factorize with BaseContextMixin
+    context['change_usergroup'] = RoleAssignment.is_access_allowed(user=request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder())
     context['view_user'] = RoleAssignment.has_permission(
         request.user, "view_user")
     context['exceeded_users'] = (MAX_USERS - User.objects.all().count()) < 0

@@ -207,28 +207,28 @@ def startup():
             administrator = Role.objects.create(name="BI-RL-ADM", builtin=True)
             administrator.permissions.set(administrator_permissions)
         # if global administrators user group does not exist, then create it
-        if not UserGroup.objects.filter(name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+        if not UserGroup.objects.filter(name="BI-UG-ADM", folder=Folder.get_root_folder()).exists():
             administrators = UserGroup.objects.create(
-                name="BI-UG-ADM", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT), builtin=True)
+                name="BI-UG-ADM", folder=Folder.get_root_folder(), builtin=True)
             ra1 = RoleAssignment.objects.create(
                 user_group=administrators, role=Role.objects.get(name="BI-RL-ADM"), is_recursive=True, builtin=True,
-                folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+                folder=Folder.get_root_folder())
             ra1.perimeter_folders.add(administrators.folder)
         # if global auditors user group does not exist, then create it
-        if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+        if not UserGroup.objects.filter(name="BI-UG-GAD", folder=Folder.get_root_folder()).exists():
             global_auditors = UserGroup.objects.create(name="BI-UG-GAD", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)
             ra2 = RoleAssignment.objects.create(user_group=global_auditors, role=Role.objects.get(
                 name="BI-RL-AUD"), is_recursive=True, builtin=True,
-                folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+                folder=Folder.get_root_folder())
             ra2.perimeter_folders.add(global_auditors.folder)
         # if global validators user group does not exist, then create it
-        if not UserGroup.objects.filter(name="BI-UG-GVA", folder=Folder.objects.get(content_type=Folder.ContentType.ROOT)).exists():
+        if not UserGroup.objects.filter(name="BI-UG-GVA", folder=Folder.get_root_folder()).exists():
             global_validators = UserGroup.objects.create(name="BI-UG-GVA", folder=Folder.objects.get(
                 content_type=Folder.ContentType.ROOT), builtin=True)
             ra2 = RoleAssignment.objects.create(user_group=global_validators, role=Role.objects.get(
                 name="BI-RL-VAL"), is_recursive=True, builtin=True,
-                folder=Folder.objects.get(content_type=Folder.ContentType.ROOT))
+                folder=Folder.get_root_folder())
             ra2.perimeter_folders.add(global_validators.folder)
         # add any superuser to the global administrors group, in case it is not yet done
         for superuser in User.objects.filter(is_superuser=True):
