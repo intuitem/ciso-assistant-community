@@ -20,3 +20,5 @@ styles.css
 k8s/scaleway/kubeconfig-k8s-mira-demo.yaml
 k8s/scaleway/kubeconfig-k8s-mira-int.yaml
 tools/enterprise-attack.json
+tools/measures.csv
+tools/measures_fr.csv

@@ -1,0 +1,353 @@
+{
+  "name": "MITRE ATT&CK 2.1 - Fonctions de s\u00e9curit\u00e9",
+  "description": "Fonctions de s\u00e9curit\u00e9 depuis MITRE ATT&CK 2.1",
+  "format_version": "1.0",
+  "copyright": "\nTerms of Use\nLICENSE\nThe MITRE Corporation (MITRE) hereby grants you a non-exclusive, royalty-free license to use ATT&CK\u00ae for research, development, and commercial purposes. Any copy you make for such purposes is authorized provided that you reproduce MITRE's copyright designation and this license in any such copy.\n\"\u00a9 2022 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation.\"\nDISCLAIMERS\nMITRE does not claim ATT&CK enumerates all possibilities for the types of actions and behaviors documented as part of its adversary model and framework of techniques. Using the information contained within ATT&CK to address or cover full categories of techniques will not guarantee full defensive coverage as there may be undisclosed techniques or variations on existing techniques not documented by ATT&CK.\nALL DOCUMENTS AND THE INFORMATION CONTAINED THEREIN ARE PROVIDED ON AN \"AS IS\" BASIS AND THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS OR IS SPONSORED BY (IF ANY), THE MITRE CORPORATION, ITS BOARD OF TRUSTEES, OFFICERS, AGENTS, AND EMPLOYEES, DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION THEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.\n",
+  "locale": "fr",
+  "objects": [
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "\ufeffM1031 - Pr\u00e9vention des intrusions sur le r\u00e9seau",
+        "description": "Utilisez des signatures de d\u00e9tection d\u2019intrusion pour bloquer le trafic aux limites du r\u00e9seau.\nhttps://attack.mitre.org/mitigations/M1031\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1016 - Analyse des vuln\u00e9rabilit\u00e9s",
+        "description": "L\u2019analyse des vuln\u00e9rabilit\u00e9s est utilis\u00e9e pour trouver des vuln\u00e9rabilit\u00e9s logicielles potentiellement exploitables afin de les corriger.\nhttps://attack.mitre.org/mitigations/M1016\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1035 - Limiter l\u2019acc\u00e8s aux ressources sur le r\u00e9seau",
+        "description": "Emp\u00eacher l\u2019acc\u00e8s aux partages de fichiers, l\u2019acc\u00e8s \u00e0 distance aux syst\u00e8mes, les services inutiles. Les m\u00e9canismes visant \u00e0 limiter l\u2019acc\u00e8s peuvent inclure l\u2019utilisation de concentrateurs de r\u00e9seau, de passerelles RDP, etc.\nhttps://attack.mitre.org/mitigations/M1035\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1029 - Stockage de donn\u00e9es \u00e0 distance",
+        "description": "Utilisez le journal de s\u00e9curit\u00e9 \u00e0 distance et le stockage de fichiers sensibles o\u00f9 l\u2019acc\u00e8s peut \u00eatre mieux contr\u00f4l\u00e9 pour \u00e9viter l\u2019exposition des donn\u00e9es du journal de d\u00e9tection d\u2019intrusion ou des informations sensibles.\nhttps://attack.mitre.org/mitigations/M1029\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1037 - Filtrer le trafic r\u00e9seau",
+        "description": "Utilisez des \u00e9quipements r\u00e9seau pour filtrer le trafic entrant ou sortant et effectuer un filtrage bas\u00e9 sur un protocole. Configurez le logiciel sur les points de terminaison pour filtrer le trafic r\u00e9seau.\nhttps://attack.mitre.org/mitigations/M1037\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1021 - Restreindre le contenu Web",
+        "description": "Restreindre l\u2019utilisation de certains sites Web, bloquer les t\u00e9l\u00e9chargements / pi\u00e8ces jointes, bloquer Javascript, restreindre les extensions de navigateur, etc.\nhttps://attack.mitre.org/mitigations/M1021\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1033 - Limiter l\u2019installation du logiciel",
+        "description": "Emp\u00eacher les utilisateurs ou les groupes d\u2019installer des logiciels non approuv\u00e9s.\nhttps://attack.mitre.org/mitigations/M1033\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1013 - Conseils aux d\u00e9veloppeurs d\u2019applications",
+        "description": "Cette att\u00e9nuation d\u00e9crit toute orientation ou formation donn\u00e9e aux d\u00e9veloppeurs d\u2019applications pour \u00e9viter d\u2019introduire des faiblesses de s\u00e9curit\u00e9 dont un adversaire pourrait \u00eatre en mesure de tirer parti.\nhttps://attack.mitre.org/mitigations/M1013\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1034 - Limiter l\u2019installation mat\u00e9rielle",
+        "description": "Emp\u00eachez les utilisateurs ou les groupes d\u2019installer ou d\u2019utiliser du mat\u00e9riel non approuv\u00e9 sur les syst\u00e8mes, y compris les p\u00e9riph\u00e9riques USB.\nhttps://attack.mitre.org/mitigations/M1034\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1017 - Formation des utilisateurs",
+        "description": "Formez les utilisateurs \u00e0 \u00eatre conscients des tentatives d\u2019acc\u00e8s ou de manipulation par un adversaire afin de r\u00e9duire le risque de r\u00e9ussite du hame\u00e7onnage, de l\u2019ing\u00e9nierie sociale et d\u2019autres techniques impliquant une interaction de l\u2019utilisateur.\nhttps://attack.mitre.org/mitigations/M1017\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1052 - Contr\u00f4le de compte d\u2019utilisateur",
+        "description": "Configurez le contr\u00f4le de compte d\u2019utilisateur Windows pour att\u00e9nuer le risque que des adversaires obtiennent un acc\u00e8s \u00e9lev\u00e9 aux processus.\nhttps://attack.mitre.org/mitigations/M1052\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1028 - Configuration du syst\u00e8me d\u2019exploitation",
+        "description": "Apportez des modifications de configuration li\u00e9es au syst\u00e8me d\u2019exploitation ou \u00e0 une caract\u00e9ristique commune du syst\u00e8me d\u2019exploitation qui entra\u00eenent un renforcement du syst\u00e8me par rapport aux techniques.\nhttps://attack.mitre.org/mitigations/M1028\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1053 - Sauvegarde des donn\u00e9es",
+        "description": "Prenez et stockez des sauvegardes de donn\u00e9es \u00e0 partir des syst\u00e8mes des utilisateurs finaux et des serveurs critiques. Assurez-vous que les syst\u00e8mes de sauvegarde et de stockage sont renforc\u00e9s et s\u00e9par\u00e9s du r\u00e9seau de l\u2019entreprise afin d\u2019\u00e9viter toute compromission.\nhttps://attack.mitre.org/mitigations/M1053\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1038 - Pr\u00e9vention de l\u2019ex\u00e9cution",
+        "description": "Bloquer l\u2019ex\u00e9cution du code sur un syst\u00e8me via le contr\u00f4le des applications et/ou le blocage des scripts.\nhttps://attack.mitre.org/mitigations/M1038\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1043 - Protection d\u2019acc\u00e8s aux informations d\u2019identification",
+        "description": "Utiliser des fonctionnalit\u00e9s pour emp\u00eacher les adversaires d\u2019acc\u00e9der avec succ\u00e8s aux informations d\u2019identification ; y compris le blocage des formes de dumping des informations d\u2019identification.\nhttps://attack.mitre.org/mitigations/M1043\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1045 - Signature de code",
+        "description": "Appliquez l\u2019int\u00e9grit\u00e9 binaire et applicative avec la v\u00e9rification de signature num\u00e9rique pour emp\u00eacher l\u2019ex\u00e9cution de code non approuv\u00e9.\nhttps://attack.mitre.org/mitigations/M1045\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1039 - Autorisations des variables d\u2019environnement",
+        "description": "Emp\u00eachez la modification des variables d\u2019environnement par des utilisateurs et des groupes non autoris\u00e9s.\nhttps://attack.mitre.org/mitigations/M1039\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1057 - Protection contre la perte de donn\u00e9es",
+        "description": "Utilisez une strat\u00e9gie de protection contre la perte de donn\u00e9es (DLP) pour cat\u00e9goriser les donn\u00e9es sensibles, identifier les formats de donn\u00e9es indicatifs des informations personnelles identifiables (PII) et restreindre l\u2019exfiltration de donn\u00e9es sensibles. (Citation : PurpleSec Data Loss Prevention)\nhttps://attack.mitre.org/mitigations/M1057\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1025 - Int\u00e9grit\u00e9 privil\u00e9gi\u00e9e des processus",
+        "description": "Prot\u00e9gez les processus avec des privil\u00e8ges \u00e9lev\u00e9s qui peuvent \u00eatre utilis\u00e9s pour interagir avec les composants critiques du syst\u00e8me gr\u00e2ce \u00e0 l\u2019utilisation de la lumi\u00e8re de processus prot\u00e9g\u00e9e, des d\u00e9fenses contre l\u2019injection anti-processus ou d\u2019autres mesures d\u2019application de l\u2019int\u00e9grit\u00e9 des processus.\nhttps://attack.mitre.org/mitigations/M1025\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1055 - Ne pas att\u00e9nuer",
+        "description": "Cette cat\u00e9gorie consiste \u00e0 associer des techniques d\u2019att\u00e9nuation susceptibles d\u2019augmenter le risque de compromission et que, par cons\u00e9quent, l\u2019att\u00e9nuation n\u2019est pas recommand\u00e9e.\nhttps://attack.mitre.org/mitigations/M1055\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1056 - Pr\u00e9-compromis",
+        "description": "Cette cat\u00e9gorie est utilis\u00e9e pour toutes les activit\u00e9s d\u2019att\u00e9nuation applicables qui s\u2019appliquent aux techniques qui se produisent avant qu\u2019un adversaire n\u2019obtienne l\u2019acc\u00e8s initial, telles que les techniques de reconnaissance et de d\u00e9veloppement des ressources.\nhttps://attack.mitre.org/mitigations/M1056\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1020 - SSL/TLS Inspection",
+        "description": "Interrompez et inspectez les sessions SSL/TLS pour examiner le trafic Web chiffr\u00e9 \u00e0 la recherche d\u2019activit\u00e9s adverses.\nhttps://attack.mitre.org/mitigations/M1020\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1046 - Int\u00e9grit\u00e9 du d\u00e9marrage",
+        "description": "Utilisez des m\u00e9thodes s\u00e9curis\u00e9es pour d\u00e9marrer un syst\u00e8me et v\u00e9rifier l\u2019int\u00e9grit\u00e9 du syst\u00e8me d\u2019exploitation et des m\u00e9canismes de chargement.\nhttps://attack.mitre.org/mitigations/M1046\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1030 - Segmentation du r\u00e9seau",
+        "description": "Concevez des sections du r\u00e9seau pour isoler les syst\u00e8mes, fonctions ou ressources critiques. Utilisez la segmentation physique et logique pour emp\u00eacher l\u2019acc\u00e8s \u00e0 des syst\u00e8mes et des informations potentiellement sensibles. Utilisez une DMZ pour contenir tous les services connect\u00e9s \u00e0 Internet qui ne doivent pas \u00eatre expos\u00e9s \u00e0 partir du r\u00e9seau interne. Configurez des instances de Virtual Private Cloud (VPC) distinctes pour isoler les syst\u00e8mes cloud critiques.\nhttps://attack.mitre.org/mitigations/M1030\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1019 - Programme de renseignements sur les menaces",
+        "description": "Un programme de renseignements sur les menaces aide une organisation \u00e0 g\u00e9n\u00e9rer ses propres renseignements sur les menaces et \u00e0 suivre les tendances afin d\u2019\u00e9clairer les priorit\u00e9s d\u00e9fensives afin d\u2019att\u00e9nuer les risques.\nhttps://attack.mitre.org/mitigations/M1019\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1027 - Strat\u00e9gies de mot de passe",
+        "description": "D\u00e9finissez et appliquez des strat\u00e9gies de mot de passe s\u00e9curis\u00e9 pour les comptes.\nhttps://attack.mitre.org/mitigations/M1027\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1040 - Pr\u00e9vention du comportement sur le point de terminaison",
+        "description": "Utilisez des fonctionnalit\u00e9s pour emp\u00eacher les mod\u00e8les de comportement suspects de se produire sur les syst\u00e8mes de point de terminaison. Cela peut inclure un processus suspect, un fichier, un appel d\u2019API, etc. comportement.\nhttps://attack.mitre.org/mitigations/M1040\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1018 - Gestion des comptes utilisateurs",
+        "description": "G\u00e9rez la cr\u00e9ation, la modification, l\u2019utilisation et les autorisations associ\u00e9es aux comptes d\u2019utilisateurs.\nhttps://attack.mitre.org/mitigations/M1018\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1022 - Restreindre les autorisations de fichiers et de r\u00e9pertoires",
+        "description": "Limitez l\u2019acc\u00e8s en d\u00e9finissant des autorisations de r\u00e9pertoire et de fichier qui ne sont pas sp\u00e9cifiques aux utilisateurs ou aux comptes privil\u00e9gi\u00e9s.\nhttps://attack.mitre.org/mitigations/M1022\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1026 - Gestion des comptes privil\u00e9gi\u00e9s",
+        "description": "G\u00e9rez la cr\u00e9ation, la modification, l\u2019utilisation et les autorisations associ\u00e9es aux comptes privil\u00e9gi\u00e9s, y compris SYSTEM et root.\nhttps://attack.mitre.org/mitigations/M1026\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1024 - Restreindre les autorisations du Registre",
+        "description": "Limitez la possibilit\u00e9 de modifier certaines ruches ou cl\u00e9s dans le Registre Windows.\nhttps://attack.mitre.org/mitigations/M1024\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1049 - Antivirus/Antimalware",
+        "description": "Utilisez des signatures ou des heuristiques pour d\u00e9tecter les logiciels malveillants.\nhttps://attack.mitre.org/mitigations/M1049\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1032 - Authentification multifacteur",
+        "description": "Utiliser deux \u00e9l\u00e9ments de preuve ou plus pour s\u2019authentifier aupr\u00e8s d\u2019un syst\u00e8me; tels que le nom d\u2019utilisateur et le mot de passe en plus d\u2019un jeton provenant d\u2019une carte \u00e0 puce physique ou d\u2019un g\u00e9n\u00e9rateur de jetons.\nhttps://attack.mitre.org/mitigations/M1032\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1054 - Configuration du logiciel",
+        "description": "Mettre en \u0153uvre des modifications de configuration au logiciel (autre que le syst\u00e8me d\u2019exploitation) pour att\u00e9nuer les risques de s\u00e9curit\u00e9 associ\u00e9s au fonctionnement du logiciel.\nhttps://attack.mitre.org/mitigations/M1054\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1048 - Isolation des applications et bac \u00e0 sable",
+        "description": "Limitez l\u2019ex\u00e9cution du code \u00e0 un environnement virtuel sur ou en transit vers un syst\u00e8me de point de terminaison.\nhttps://attack.mitre.org/mitigations/M1048\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1047 - Audit",
+        "description": "Effectuer des audits ou des analyses de syst\u00e8mes, d\u2019autorisations, de logiciels non s\u00e9curis\u00e9s, de configurations non s\u00e9curis\u00e9es, etc. pour identifier les faiblesses potentielles.\nhttps://attack.mitre.org/mitigations/M1047\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1050 - Protection contre les exploits",
+        "description": "Utilisez des fonctionnalit\u00e9s pour d\u00e9tecter et bloquer les conditions susceptibles d\u2019entra\u00eener ou d\u2019indiquer un exploit logiciel.\nhttps://attack.mitre.org/mitigations/M1050\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1015 - Configuration d\u2019Active Directory",
+        "description": "Configurer Active Directory pour emp\u00eacher l\u2019utilisation de certaines techniques ; utiliser le filtrage SID, etc.\nhttps://attack.mitre.org/mitigations/M1015\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1051 - Mettre \u00e0 jour le logiciel",
+        "description": "Effectuez des mises \u00e0 jour logicielles r\u00e9guli\u00e8res pour att\u00e9nuer les risques d\u2019exploitation.\nhttps://attack.mitre.org/mitigations/M1051\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1044 - Restreindre le chargement de la biblioth\u00e8que",
+        "description": "Emp\u00eachez l\u2019utilisation abusive des m\u00e9canismes de chargement de biblioth\u00e8que dans le syst\u00e8me d\u2019exploitation et les logiciels pour charger du code non fiable en configurant les m\u00e9canismes de chargement de biblioth\u00e8que appropri\u00e9s et en examinant les logiciels potentiellement vuln\u00e9rables.\nhttps://attack.mitre.org/mitigations/M1044\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1042 - D\u00e9sactiver ou supprimer une fonctionnalit\u00e9 ou un programme",
+        "description": "Supprimez ou refusez l\u2019acc\u00e8s aux logiciels inutiles et potentiellement vuln\u00e9rables afin d\u2019\u00e9viter les abus par des adversaires.\nhttps://attack.mitre.org/mitigations/M1042\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1036 - Politiques d\u2019utilisation du compte",
+        "description": "Configurez les fonctionnalit\u00e9s li\u00e9es \u00e0 l\u2019utilisation du compte, telles que les tentatives de verrouillage de connexion, les heures de connexion sp\u00e9cifiques, etc.\nhttps://attack.mitre.org/mitigations/M1036\n",
+        "provider": "MITRE ATT&CK"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "M1041 - Chiffrer les informations sensibles",
+        "description": "Prot\u00e9gez les informations sensibles gr\u00e2ce \u00e0 un chiffrement fort.\nhttps://attack.mitre.org/mitigations/M1041\n",
+        "provider": "MITRE ATT&CK"
+      }
+    }
+  ]
+}
