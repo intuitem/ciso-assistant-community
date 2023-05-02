@@ -63,7 +63,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 
-from asf_rm.settings import RECAPTCHA_PUBLIC_KEY, LICENCE_DEPLOYMENT, LICENCE_EXPIRATION, LICENCE_SUPPORT, LICENCE_TYPE
+from asf_rm.settings import RECAPTCHA_PUBLIC_KEY, LICENCE_DEPLOYMENT, LICENCE_EXPIRATION, LICENCE_SUPPORT, LICENCE_TYPE, PAGINATE_BY
 if RECAPTCHA_PUBLIC_KEY:
     from captcha.fields import ReCaptchaField
 
@@ -306,7 +306,7 @@ class AnalysisListView(BaseContextMixin, ListView):
     context_object_name = 'context'
 
     ordering = 'id'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = Analysis
 
     def get_context_data(self, **kwargs):
@@ -846,7 +846,7 @@ class ProjectListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'projects'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = Project
     
     def get_queryset(self):
@@ -953,7 +953,7 @@ class AssetListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'assets'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = Asset
 
     def get_queryset(self):
@@ -1050,7 +1050,7 @@ class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'domains'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = Folder
 
     def get_queryset(self):
@@ -1171,7 +1171,7 @@ class RiskAnalysisListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'analyses'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = Analysis
 
     def get_queryset(self):
@@ -1290,7 +1290,7 @@ class RiskScenarioListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'scenarios'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = RiskScenario
 
     def get_queryset(self):
@@ -1431,7 +1431,7 @@ class SecurityMeasureListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'measures'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = SecurityMeasure
 
     def get_context_data(self, **kwargs):
@@ -1517,7 +1517,7 @@ class SecurityFunctionListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'functions'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = SecurityFunction
 
     def get_queryset(self):
@@ -1595,7 +1595,7 @@ class ThreatListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'threats'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = Threat
 
     def get_queryset(self):
@@ -1670,7 +1670,7 @@ class RiskAcceptanceListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'acceptances'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = RiskAcceptance
 
     def get_context_data(self, **kwargs):
@@ -1840,7 +1840,7 @@ class UserListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'users'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = User
 
     def get_queryset(self):
@@ -1941,7 +1941,7 @@ class UserGroupListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'user_groups'
 
     ordering = 'folder'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = UserGroup
 
     def get_queryset(self):
@@ -2026,7 +2026,7 @@ class RoleAssignmentListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'assignments'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = RoleAssignment
 
     def setup(self, request, *args, **kwargs):
@@ -2138,7 +2138,7 @@ class RiskMatrixListView(BaseContextMixin, UserPassesTestMixin, ListView):
     context_object_name = 'matrices'
 
     ordering = 'created_at'
-    paginate_by = 1000
+    paginate_by = PAGINATE_BY
     model = RiskMatrix
 
     def get_queryset(self):

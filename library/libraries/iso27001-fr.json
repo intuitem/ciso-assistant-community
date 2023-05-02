@@ -1,0 +1,920 @@
+{
+  "name": "ISO27001:2013 - Annexe A",
+  "description": "Fonctions de s\u00e9curit\u00e9 depuis l'annexe A de l'ISO27001:2013",
+  "copyright": "\u00a9ISO/CEI 2013 \u2013 All rights reserved",
+  "locale": "fr",
+  "objects": [
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "\ufeffA.5.1.1 - Politiques de s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Un ensemble de politiques de s\u00e9curit\u00e9 de l\u2019information doit \u00eatre d\u00e9fini, approuv\u00e9 par la direction, diffus\u00e9 et communiqu\u00e9 aux salari\u00e9s et aux tiers concern\u00e9s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.5.1.2 - Revue des politiques de s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Les politiques de s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre revues \u00e0 intervalles programm\u00e9s ou en cas de changements majeurs pour garantir leur pertinence, leur ad\u00e9quation et leur effectivit\u00e9 dans le temps.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.1.1 - Fonctions et responsabilit\u00e9s li\u00e9es \u00e0 la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Toutes les responsabilit\u00e9s en mati\u00e8re de s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre d\u00e9finies et attribu\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.1.2 - S\u00e9paration des t\u00e2ches",
+        "description": "Les t\u00e2ches et les domaines de responsabilit\u00e9 incompatibles doivent \u00eatre cloisonn\u00e9s pour limiter les possibilit\u00e9s de modification ou de mauvais usage, non autoris\u00e9(e) ou involontaire, des actifs de l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.1.3 - Relations avec les autorit\u00e9s",
+        "description": "Des relations appropri\u00e9es avec les autorit\u00e9s comp\u00e9tentes doivent \u00eatre entretenues.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.1.4 - Relations avec des groupes de travail sp\u00e9cialis\u00e9s",
+        "description": "Des relations appropri\u00e9es avec des groupes d\u2019int\u00e9r\u00eat, des forums sp\u00e9cialis\u00e9s dans la s\u00e9curit\u00e9 et des associations professionnelles doivent \u00eatre entretenues.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.1.5 - La s\u00e9curit\u00e9 de l\u2019information dans la gestion de projet",
+        "description": "La s\u00e9curit\u00e9 de l\u2019information doit \u00eatre consid\u00e9r\u00e9e dans la gestion de projet, quel que soit le type de projet concern\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.2.1 - Politique en mati\u00e8re d\u2019appareils mobiles",
+        "description": "Une politique et des mesures de s\u00e9curit\u00e9 compl\u00e9mentaires doivent \u00eatre adopt\u00e9es pour g\u00e9rer les risques d\u00e9coulant de l\u2019utilisation des appareils mobiles.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.6.2.2 - T\u00e9l\u00e9travail",
+        "description": "Une politique et des mesures de s\u00e9curit\u00e9 compl\u00e9mentaires doivent \u00eatre mises en \u0153uvre pour prot\u00e9ger les informations consult\u00e9es, trait\u00e9es ou stock\u00e9es sur des sites de t\u00e9l\u00e9travail.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.7.1.1 - S\u00e9lection des candidats",
+        "description": "Des v\u00e9rifications doivent \u00eatre effectu\u00e9es sur tous les candidats \u00e0 l\u2019embauche conform\u00e9ment aux lois, aux r\u00e8glements et \u00e0 l\u2019\u00e9thique et \u00eatre proportionn\u00e9es aux exigences m\u00e9tier, \u00e0 la classification des informations accessibles et aux risques identifi\u00e9s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.7.1.2 - Termes et conditions d\u2019embauche",
+        "description": "Les accords contractuels entre les salari\u00e9s et les sous-traitants doivent pr\u00e9ciser leurs responsabilit\u00e9s et celles de l\u2019organisation en mati\u00e8re de s\u00e9curit\u00e9 de l\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.7.2.1 - Responsabilit\u00e9s de la direction",
+        "description": "La direction doit demander \u00e0 tous les salari\u00e9s et sous-traitants d\u2019appliquer les r\u00e8gles de s\u00e9curit\u00e9 de l\u2019information conform\u00e9ment aux politiques et aux proc\u00e9dures en vigueur dans l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.7.2.2 - Sensibilisation, apprentissage et formation \u00e0 la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "L\u2019ensemble des salari\u00e9s de l\u2019organisation et, quand cela est pertinent, des sous-traitants, doit b\u00e9n\u00e9ficier d\u2019une sensibilisation et de formations adapt\u00e9es et recevoir r\u00e9guli\u00e8rement les mises \u00e0 jour des politiques et proc\u00e9dures de l\u2019organisation s\u2019appliquant \u00e0 leurs fonctions.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.7.2.3 - Processus disciplinaire",
+        "description": "Un processus disciplinaire formel et connu de tous doit exister pour prendre des mesures \u00e0 l\u2019encontre des salari\u00e9s ayant enfreint les r\u00e8gles li\u00e9es \u00e0 la s\u00e9curit\u00e9 de l\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.7.3.1 - Ach\u00e8vement ou modification des responsabilit\u00e9s associ\u00e9es au contrat de travail",
+        "description": "Les responsabilit\u00e9s et les missions li\u00e9es \u00e0 la s\u00e9curit\u00e9 de l\u2019information qui restent valables \u00e0 l\u2019issue de la rupture, du terme ou de la modification du contrat de travail, doivent \u00eatre d\u00e9finies, communiqu\u00e9es au salari\u00e9 ou au sous-traitant, et appliqu\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.1.1 - Inventaire des actifs",
+        "description": "Les actifs associ\u00e9s \u00e0 l\u2019information et aux moyens de traitement de l\u2019information doivent \u00eatre identifi\u00e9s et un inventaire de ces actifs doit \u00eatre dress\u00e9 et tenu \u00e0 jour.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.1.2 - Propri\u00e9t\u00e9 des actifs",
+        "description": "Les actifs figurant \u00e0 l\u2019inventaire doivent \u00eatre attribu\u00e9s \u00e0 un propri\u00e9taire.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.1.3 - Utilisation correcte des actifs",
+        "description": "Les r\u00e8gles d\u2019utilisation correcte de l\u2019information, les actifs associ\u00e9s \u00e0 l\u2019information et les moyens de traitement de l\u2019information doivent \u00eatre identifi\u00e9s, document\u00e9s et mis en \u0153uvre.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.1.4 - Restitution des actifs",
+        "description": "Tous les salari\u00e9s et les utilisateurs tiers doivent restituer la totalit\u00e9 des actifs de l\u2019organisation qu\u2019ils ont en leur possession au terme de la p\u00e9riode d\u2019emploi, du contrat ou de l\u2019accord.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.2.1 - Classification des informations",
+        "description": "Les informations doivent \u00eatre classifi\u00e9es en termes d\u2019exigences l\u00e9gales, de valeur, de caract\u00e8re critique et de sensibilit\u00e9 au regard d\u2019une divulgation ou modification non autoris\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.2.2 - Marquage des informations",
+        "description": "Un ensemble appropri\u00e9 de proc\u00e9dures pour le marquage de l\u2019information doit \u00eatre \u00e9labor\u00e9 et mis en \u0153uvre conform\u00e9ment au plan de classification adopt\u00e9 par l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.2.3 - Manipulation des actifs",
+        "description": "Des proc\u00e9dures de traitement de l\u2019information doivent \u00eatre \u00e9labor\u00e9es et mises en \u0153uvre conform\u00e9ment au plan de classification de l\u2019information adopt\u00e9 par l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.3.1 - Gestion des supports amovibles",
+        "description": "Des proc\u00e9dures de gestion des supports amovibles doivent \u00eatre mises en \u0153uvre conform\u00e9ment au plan de classification adopt\u00e9 par l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.3.2 - Mise au rebut des supports",
+        "description": "Les supports qui ne sont plus n\u00e9cessaires doivent \u00eatre mis au rebut de mani\u00e8re s\u00e9curis\u00e9e en suivant des proc\u00e9dures formelles.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.8.3.3 - Transfert physique des supports",
+        "description": "Les supports contenant de l\u2019information doivent \u00eatre prot\u00e9g\u00e9s contre les acc\u00e8s non autoris\u00e9s, les erreurs d\u2019utilisation et l\u2019alt\u00e9ration lors du transport.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.1.1 - Politique de contr\u00f4le d\u2019acc\u00e8s",
+        "description": "Une politique de contr\u00f4le d\u2019acc\u00e8s doit \u00eatre \u00e9tablie, document\u00e9e et revue sur la base des exigences m\u00e9tier et de s\u00e9curit\u00e9 de l\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.1.2 - Acc\u00e8s aux r\u00e9seaux et aux services r\u00e9seau",
+        "description": "Les utilisateurs doivent avoir uniquement acc\u00e8s au r\u00e9seau et aux services r\u00e9seau pour lesquels ils ont sp\u00e9cifiquement re\u00e7u une autorisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.2.1 - Enregistrement et d\u00e9sinscription des utilisateurs",
+        "description": "Un processus formel d\u2019enregistrement et de d\u00e9sinscription des utilisateurs doit \u00eatre mis en \u0153uvre pour permettre l\u2019attribution des droits d\u2019acc\u00e8s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.2.2 - Distribution des acc\u00e8s aux utilisateurs",
+        "description": "Un processus formel de distribution des acc\u00e8s aux utilisateurs doit \u00eatre mis en \u0153uvre pour attribuer et retirer des droits d\u2019acc\u00e8s \u00e0 tous types d\u2019utilisateurs sur l\u2019ensemble des services et des syst\u00e8mes.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.2.3 - Gestion des droits d\u2019acc\u00e8s \u00e0 privil\u00e8ges",
+        "description": "L\u2019allocation et l\u2019utilisation des droits d\u2019acc\u00e8s \u00e0 privil\u00e8ges doivent \u00eatre restreintes et contr\u00f4l\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.2.4 - Gestion des informations secr\u00e8tes d\u2019authentification des utilisateurs",
+        "description": "L\u2019attribution des informations secr\u00e8tes d\u2019authentification doit \u00eatre r\u00e9alis\u00e9e dans le cadre d\u2019un processus de gestion formel.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.2.5 - Revue des droits d\u2019acc\u00e8s utilisateurs",
+        "description": "Les propri\u00e9taires d\u2019actifs doivent v\u00e9rifier les droits d\u2019acc\u00e8s des utilisateurs \u00e0 intervalles r\u00e9guliers.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.2.6 - Suppression ou adaptation des droits d\u2019acc\u00e8s",
+        "description": "Les droits d\u2019acc\u00e8s aux informations et aux moyens de traitement des informations de l\u2019ensemble des salari\u00e9s et utilisateurs tiers doivent \u00eatre supprim\u00e9s \u00e0 la fin de leur p\u00e9riode d\u2019emploi, ou adapt\u00e9s en cas de modification du contrat ou de l\u2019accord.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.3.1 - Utilisation d\u2019informations secr\u00e8tes d\u2019authentification",
+        "description": "Les utilisateurs doivent suivre les pratiques de l\u2019organisation pour l\u2019utilisation des informations secr\u00e8tes d\u2019authentification.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.4.1 - Restriction d\u2019acc\u00e8s \u00e0 l\u2019information",
+        "description": "L\u2019acc\u00e8s \u00e0 l\u2019information et aux fonctions d\u2019application syst\u00e8me doit \u00eatre restreint conform\u00e9ment \u00e0 la politique de contr\u00f4le d\u2019acc\u00e8s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.4.2 - S\u00e9curiser les proc\u00e9dures de connexion",
+        "description": "Lorsque la politique de contr\u00f4le d\u2019acc\u00e8s l\u2019exige, l\u2019acc\u00e8s aux syst\u00e8mes et aux applications doit \u00eatre contr\u00f4l\u00e9 par une proc\u00e9dure de connexion s\u00e9curis\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.4.3 - Syst\u00e8me de gestion des mots de passe",
+        "description": "Les syst\u00e8mes qui g\u00e8rent les mots de passe doivent \u00eatre interactifs et doivent garantir la qualit\u00e9 des mots de passe.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.4.4 - Utilisation de programmes utilitaires \u00e0 privil\u00e8ges",
+        "description": "L\u2019utilisation des programmes utilitaires permettant de contourner les mesures de s\u00e9curit\u00e9 d\u2019un syst\u00e8me ou d\u2019une application doit \u00eatre limit\u00e9e et \u00e9troitement contr\u00f4l\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.9.4.5 - Contr\u00f4le d\u2019acc\u00e8s au code source des programmes",
+        "description": "L\u2019acc\u00e8s au code source des programmes doit \u00eatre restreint.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.10.1.1 - Politique d\u2019utilisation des mesures cryptographiques",
+        "description": "Une politique d\u2019utilisation des mesures cryptographiques en vue de prot\u00e9ger l\u2019information doit \u00eatre \u00e9labor\u00e9e et mise en \u0153uvre.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.10.1.2 - Gestion des cl\u00e9s",
+        "description": "Une politique sur l\u2019utilisation, la protection et la dur\u00e9e de vie des cl\u00e9s cryptographiques doit \u00eatre \u00e9labor\u00e9e et mise en \u0153uvre tout au long de leur cycle de vie.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.1.1 - P\u00e9rim\u00e8tre de s\u00e9curit\u00e9 physique",
+        "description": "Des p\u00e9rim\u00e8tres de s\u00e9curit\u00e9 doivent \u00eatre d\u00e9finis et utilis\u00e9s pour prot\u00e9ger les zones contenant l\u2019information sensible ou critique et les moyens de traitement de l\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.1.2 - Contr\u00f4le d\u2019acc\u00e8s physique",
+        "description": "Les zones s\u00e9curis\u00e9es doivent \u00eatre prot\u00e9g\u00e9es par des contr\u00f4les ad\u00e9quats \u00e0 l\u2019entr\u00e9e pour s\u2019assurer que seul le personnel autoris\u00e9 est admis.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.1.3 - S\u00e9curisation des bureaux, des salles et des \u00e9quipements",
+        "description": "Des mesures de s\u00e9curit\u00e9 physique aux bureaux, aux salles et aux \u00e9quipements doivent \u00eatre con\u00e7ues et appliqu\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.1.4 - Protection contre les menaces ext\u00e9rieures et environnementales",
+        "description": "Des mesures de protection physique contre les d\u00e9sastres naturels, les attaques malveillantes ou les accidents doivent \u00eatre con\u00e7ues et appliqu\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.1.5 - Travail dans les zones s\u00e9curis\u00e9es",
+        "description": "Des proc\u00e9dures pour le travail dans les zones s\u00e9curis\u00e9es doivent \u00eatre con\u00e7ues et appliqu\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.1.6 - Zones de livraison et de chargement",
+        "description": "Les points d\u2019acc\u00e8s tels que les zones de livraison et de chargement et les autres points par lesquels des personnes non autoris\u00e9es peuvent p\u00e9n\u00e9trer dans les locaux doivent \u00eatre contr\u00f4l\u00e9s et, si possible, isol\u00e9s des moyens de traitement de l\u2019information, de fa\u00e7on \u00e0 \u00e9viter les acc\u00e8s non autoris\u00e9s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.1 - Emplacement et protection des mat\u00e9riels",
+        "description": "Les mat\u00e9riels doivent \u00eatre localis\u00e9s et prot\u00e9g\u00e9s de mani\u00e8re \u00e0 r\u00e9duire les risques li\u00e9s \u00e0 des menaces et des dangers environnementaux et les possibilit\u00e9s d\u2019acc\u00e8s non autoris\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.2 - Services g\u00e9n\u00e9raux",
+        "description": "Les mat\u00e9riels doivent \u00eatre prot\u00e9g\u00e9s des coupures de courant et autres perturbations dues \u00e0 une d\u00e9faillance des services g\u00e9n\u00e9raux.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.3 - S\u00e9curit\u00e9 du c\u00e2blage",
+        "description": "Les c\u00e2bles \u00e9lectriques ou de t\u00e9l\u00e9communication transportant des donn\u00e9es ou supportant les services d\u2019information doivent \u00eatre prot\u00e9g\u00e9s contre toute interception ou tout dommage.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.4 - Maintenance des mat\u00e9riels",
+        "description": "Les mat\u00e9riels doivent \u00eatre entretenus correctement pour garantir leur disponibilit\u00e9 permanente et leur int\u00e9grit\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.5 - Sortie des actifs",
+        "description": "Les mat\u00e9riels, les informations ou les logiciels des locaux de l\u2019organisation ne doivent pas sortir sans autorisation pr\u00e9alable.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.6 - S\u00e9curit\u00e9 des mat\u00e9riels et des actifs hors des locaux",
+        "description": "Des mesures de s\u00e9curit\u00e9 doivent \u00eatre appliqu\u00e9es aux mat\u00e9riels utilis\u00e9s hors des locaux de l\u2019organisation en tenant compte des diff\u00e9rents risques associ\u00e9s au travail hors site.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.7 - Mise au rebut ou recyclage s\u00e9curis\u00e9(e) des mat\u00e9riels",
+        "description": "Tous les composants des mat\u00e9riels contenant des supports de stockage doivent \u00eatre v\u00e9rifi\u00e9s pour s\u2019assurer que toute donn\u00e9e sensible a bien \u00e9t\u00e9 supprim\u00e9e et que tout logiciel sous licence a bien \u00e9t\u00e9 d\u00e9sinstall\u00e9 ou \u00e9cras\u00e9 de fa\u00e7on s\u00e9curis\u00e9e, avant leur mise au rebut ou leur r\u00e9utilisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.8 - Mat\u00e9riels utilisateur laiss\u00e9s sans surveillance",
+        "description": "Les utilisateurs doivent s\u2019assurer que les mat\u00e9riels non surveill\u00e9s sont dot\u00e9s d\u2019une protection appropri\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.11.2.9 - Politique du bureau propre et de l\u2019\u00e9cran verrouill\u00e9",
+        "description": "Une politique du bureau propre pour les documents papier et les supports de stockage amovibles, et une politique de l\u2019\u00e9cran verrouill\u00e9 pour les moyens de traitement de l\u2019information doivent \u00eatre adopt\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.1.1 - Proc\u00e9dures d\u2019exploitation document\u00e9es",
+        "description": "Les proc\u00e9dures d\u2019exploitation doivent \u00eatre document\u00e9es et mises \u00e0 disposition de tous les utilisateurs concern\u00e9s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.1.2 - Gestion des changements",
+        "description": "Les changements apport\u00e9s \u00e0 l\u2019organisation, aux processus m\u00e9tier, aux syst\u00e8mes et moyens de traitement de l\u2019information ayant une incidence sur la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre contr\u00f4l\u00e9s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.1.3 - Dimensionnement",
+        "description": "L\u2019utilisation des ressources doit \u00eatre surveill\u00e9e et ajust\u00e9e et des projections sur les dimensionnements futurs doivent \u00eatre effectu\u00e9es pour garantir les performances exig\u00e9es du syst\u00e8me.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.1.4 - S\u00e9paration des environnements de d\u00e9veloppement, de test et d\u2019exploitation",
+        "description": "Les environnements de d\u00e9veloppement, de test et d\u2019exploitation doivent \u00eatre s\u00e9par\u00e9s pour r\u00e9duire les risques d\u2019acc\u00e8s ou de changements non autoris\u00e9s dans l\u2019environnement en exploitation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.2.1 - Mesures contre les logiciels malveillants",
+        "description": "Des mesures de d\u00e9tection, de pr\u00e9vention et de r\u00e9cup\u00e9ration conjugu\u00e9es \u00e0 une sensibilisation des utilisateurs adapt\u00e9e, doivent \u00eatre mises en \u0153uvre pour se prot\u00e9ger contre les logiciels malveillants.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.3.1 - Sauvegarde des informations",
+        "description": "Des copies de sauvegarde de l\u2019information, des logiciels et des images syst\u00e8mes doivent \u00eatre r\u00e9alis\u00e9s et test\u00e9s r\u00e9guli\u00e8rement conform\u00e9ment \u00e0 une politique de sauvegarde convenue.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.4.1 - Journalisation des \u00e9v\u00e9nements",
+        "description": "Des journaux d\u2019\u00e9v\u00e9nements enregistrant les activit\u00e9s de l\u2019utilisateur, les exceptions, les d\u00e9faillances et les \u00e9v\u00e9nements li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre cr\u00e9\u00e9s, tenus \u00e0 jour et v\u00e9rifi\u00e9s r\u00e9guli\u00e8rement.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.4.2 - Protection de l\u2019information journalis\u00e9e",
+        "description": "Les moyens de journalisation et d\u2019information journalis\u00e9e doivent \u00eatre prot\u00e9g\u00e9s contre les risques de falsification ou d\u2019acc\u00e8s non autoris\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.4.3 - Journaux administrateur et op\u00e9rateur",
+        "description": "Les activit\u00e9s de l\u2019administrateur syst\u00e8me et de l\u2019op\u00e9rateur syst\u00e8me doivent \u00eatre journalis\u00e9es, prot\u00e9g\u00e9es et v\u00e9rifi\u00e9es r\u00e9guli\u00e8rement.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.4.4 - Synchronisation des horloges",
+        "description": "Les horloges de l\u2019ensemble des syst\u00e8mes de traitement de l\u2019information concern\u00e9s d\u2019une organisation ou d\u2019un domaine de s\u00e9curit\u00e9 doivent \u00eatre synchronis\u00e9es sur une source de r\u00e9f\u00e9rence temporelle unique.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.5.1 - Installation de logiciels sur des syst\u00e8mes en exploitation",
+        "description": "Des proc\u00e9dures doivent \u00eatre mises en \u0153uvre pour contr\u00f4ler l\u2019installation de logiciel sur des syst\u00e8mes en exploitation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.6.1 - Gestion des vuln\u00e9rabilit\u00e9s techniques",
+        "description": "Des informations sur les vuln\u00e9rabilit\u00e9s techniques des syst\u00e8mes d\u2019information en exploitation doivent \u00eatre obtenues en temps opportun, l\u2019exposition de l\u2019organisation \u00e0 ces vuln\u00e9rabilit\u00e9s doit \u00eatre \u00e9valu\u00e9e et les mesures appropri\u00e9es doivent \u00eatre prises pour traiter le risque associ\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.6.2 - Restrictions li\u00e9es \u00e0 l\u2019installation de logiciels",
+        "description": "Des r\u00e8gles r\u00e9gissant l\u2019installation de logiciels par les utilisateurs doivent \u00eatre \u00e9tablies et mises en \u0153uvre.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.12.7.1 - Mesures relatives \u00e0 l\u2019audit des syst\u00e8mes d\u2019information",
+        "description": "Les exigences et activit\u00e9s d\u2019audit impliquant des v\u00e9rifications sur des syst\u00e8mes en exploitation doivent \u00eatre pr\u00e9vues avec soin et valid\u00e9es afin de r\u00e9duire au minimum les perturbations subies par les processus m\u00e9tier.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.1.1 - Contr\u00f4le des r\u00e9seaux",
+        "description": "Les r\u00e9seaux doivent \u00eatre g\u00e9r\u00e9s et contr\u00f4l\u00e9s pour prot\u00e9ger l\u2019information contenue dans les syst\u00e8mes et les applications.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.1.2 - S\u00e9curit\u00e9 des services de r\u00e9seau",
+        "description": "Pour tous les services de r\u00e9seau, les m\u00e9canismes de s\u00e9curit\u00e9, les niveaux de service et les exigences de gestion, doivent \u00eatre identifi\u00e9s et int\u00e9gr\u00e9s dans les accords de services de r\u00e9seau, que ces services soient fournis en interne ou externalis\u00e9s.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.1.3 - Cloisonnement des r\u00e9seaux",
+        "description": "Les groupes de services d\u2019information, d\u2019utilisateurs et de syst\u00e8mes d\u2019information doivent \u00eatre cloisonn\u00e9s sur les r\u00e9seaux.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.2.1 - Politiques et proc\u00e9dures de transfert de l\u2019information",
+        "description": "Des politiques, des proc\u00e9dures et des mesures de transfert formelles doivent \u00eatre mises en place pour prot\u00e9ger les transferts d\u2019information transitant par tous types d\u2019\u00e9quipements de communication.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.2.2 - Accords en mati\u00e8re de transfert d\u2019information",
+        "description": "Des accords doivent traiter du transfert s\u00e9curis\u00e9 de l\u2019information li\u00e9e \u00e0 l\u2019activit\u00e9 entre l\u2019organisation et les tiers.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.2.3 - Messagerie \u00e9lectronique",
+        "description": "L\u2019information transitant par la messagerie \u00e9lectronique doit \u00eatre prot\u00e9g\u00e9e de mani\u00e8re appropri\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.13.2.4 - Engagements de confidentialit\u00e9 ou de non-divulgation",
+        "description": "Les exigences en mati\u00e8re d\u2019engagements de confidentialit\u00e9 ou de non-divulgation, doivent \u00eatre identifi\u00e9es, v\u00e9rifi\u00e9es r\u00e9guli\u00e8rement et document\u00e9es conform\u00e9ment aux besoins de l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.1.1 - Analyse et sp\u00e9cification des exigences de s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Les exigences li\u00e9es \u00e0 la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre int\u00e9gr\u00e9es aux exigences des nouveaux syst\u00e8mes d\u2019information ou des am\u00e9liorations de syst\u00e8mes d\u2019information existants.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.1.2 - S\u00e9curisation des services d\u2019application sur les r\u00e9seaux publics",
+        "description": "Les informations li\u00e9es aux services d\u2019application transmises sur les r\u00e9seaux publics doivent \u00eatre prot\u00e9g\u00e9es contre les activit\u00e9s frauduleuses, les diff\u00e9rents contractuels, ainsi que la divulgation et la modification non autoris\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.1.3 - Protection des transactions li\u00e9es aux services d\u2019application",
+        "description": "Les informations impliqu\u00e9es dans les transactions li\u00e9es aux services d\u2019application doivent \u00eatre prot\u00e9g\u00e9es pour emp\u00eacher une transmission incompl\u00e8te, des erreurs d\u2019acheminement, la modification non autoris\u00e9e, la divulgation non autoris\u00e9e, la duplication non autoris\u00e9e du message ou sa r\u00e9\u00e9mission.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.1 - Politique de d\u00e9veloppement s\u00e9curis\u00e9",
+        "description": "Des r\u00e8gles de d\u00e9veloppement des logiciels et des syst\u00e8mes doivent \u00eatre \u00e9tablies et appliqu\u00e9es aux d\u00e9veloppements de l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.2 - Proc\u00e9dures de contr\u00f4le des changements de syst\u00e8me",
+        "description": "Les changements des syst\u00e8mes dans le cadre du cycle de d\u00e9veloppement doivent \u00eatre contr\u00f4l\u00e9s par le biais de proc\u00e9dures formelles.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.3 - Revue technique des applications apr\u00e8s changement apport\u00e9 \u00e0 la plateforme d\u2019exploitation",
+        "description": "Lorsque des changements sont apport\u00e9s aux plateformes d\u2019exploitation, les applications critiques m\u00e9tier doivent \u00eatre v\u00e9rifi\u00e9es et test\u00e9es afin de v\u00e9rifier l\u2019absence de tout effet ind\u00e9sirable sur l\u2019activit\u00e9 ou sur la s\u00e9curit\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.4 - Restrictions relatives aux changements apport\u00e9s aux progiciels",
+        "description": "Les modifications des progiciels ne doivent pas \u00eatre encourag\u00e9es, \u00eatre limit\u00e9es aux changements n\u00e9cessaires et tout changement doit \u00eatre strictement contr\u00f4l\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.5 - Principes d\u2019ing\u00e9nierie de la s\u00e9curit\u00e9 des syst\u00e8mes",
+        "description": "Des principes d\u2019ing\u00e9nierie de la s\u00e9curit\u00e9 des syst\u00e8mes doivent \u00eatre \u00e9tablis, document\u00e9s, tenus \u00e0 jour et appliqu\u00e9s \u00e0 tous les travaux de mise en \u0153uvre des syst\u00e8mes d\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.6 - Environnement de d\u00e9veloppement s\u00e9curis\u00e9",
+        "description": "Les organisations doivent \u00e9tablir des environnements de d\u00e9veloppement s\u00e9curis\u00e9s pour les t\u00e2ches de d\u00e9veloppement et d\u2019int\u00e9gration du syst\u00e8me, qui englobe l\u2019int\u00e9gralit\u00e9 du cycle de vie du d\u00e9veloppement du syst\u00e8me, et en assurer la protection de mani\u00e8re appropri\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.7 - D\u00e9veloppement externalis\u00e9",
+        "description": "L\u2019organisation doit superviser et contr\u00f4ler l\u2019activit\u00e9 de d\u00e9veloppement du syst\u00e8me externalis\u00e9e.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.8 - Test de la s\u00e9curit\u00e9 du syst\u00e8me",
+        "description": "Les tests de fonctionnalit\u00e9 de la s\u00e9curit\u00e9 doivent \u00eatre r\u00e9alis\u00e9s pendant le d\u00e9veloppement.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.2.9 - Test de conformit\u00e9 du syst\u00e8me",
+        "description": "Des programmes de test de conformit\u00e9 et des crit\u00e8res associ\u00e9s doivent \u00eatre d\u00e9termin\u00e9s pour les nouveaux syst\u00e8mes d\u2019information, les mises \u00e0 jour et les nouvelles versions.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.14.3.1 - Protection des donn\u00e9es de test",
+        "description": "Les donn\u00e9es de test doivent \u00eatre s\u00e9lectionn\u00e9es avec soin, prot\u00e9g\u00e9es et contr\u00f4l\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.15.1.1 - Politique de s\u00e9curit\u00e9 de l\u2019information dans les relations avec les fournisseurs",
+        "description": "Des exigences de s\u00e9curit\u00e9 de l\u2019information pour limiter les risques r\u00e9sultant de l\u2019acc\u00e8s des fournisseurs aux actifs de l\u2019organisation doivent \u00eatre accept\u00e9es par le fournisseur et document\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.15.1.2 - La s\u00e9curit\u00e9 dans les accords conclus avec les fournisseurs",
+        "description": "Les exigences applicables li\u00e9es \u00e0 la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre \u00e9tablies et convenues avec chaque fournisseur pouvant acc\u00e9der, traiter, stocker, communiquer ou fournir des composants de l\u2019infrastructure informatique destin\u00e9s \u00e0 l\u2019information de l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.15.1.3 - Cha\u00eene d\u2019approvisionnement des produits et des services informatiques",
+        "description": "Les accords conclus avec les fournisseurs doivent inclure des exigences sur le traitement des risques li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information associ\u00e9 \u00e0 la cha\u00eene d\u2019approvisionnement des produits et des services informatiques.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.15.2.1 - Surveillance et revue des services des fournisseurs",
+        "description": "Les organisations doivent surveiller, v\u00e9rifier et auditer \u00e0 intervalles r\u00e9guliers la prestation des services assur\u00e9s par les fournisseurs.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.15.2.2 - Gestion des changements apport\u00e9s dans les services des fournisseurs",
+        "description": "Les changements effectu\u00e9s dans les prestations de service des fournisseurs, comprenant le maintien et l\u2019am\u00e9lioration des politiques, proc\u00e9dures et mesures existant en mati\u00e8re de s\u00e9curit\u00e9 de l\u2019information, doivent \u00eatre g\u00e9r\u00e9s en tenant compte du caract\u00e8re critique de l\u2019information, des syst\u00e8mes et des processus concern\u00e9s et de la r\u00e9appr\u00e9ciation des risques.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.1 - Responsabilit\u00e9s et proc\u00e9dures",
+        "description": "Des responsabilit\u00e9s et des proc\u00e9dures permettant de garantir une r\u00e9ponse rapide, efficace et pertinente doivent \u00eatre \u00e9tablies en cas d\u2019incident li\u00e9 \u00e0 la s\u00e9curit\u00e9 de l\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.2 - Signalement des \u00e9v\u00e9nements li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Les \u00e9v\u00e9nements li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre signal\u00e9s dans les meilleurs d\u00e9lais par les voies hi\u00e9rarchiques appropri\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.3 - Signalement des failles li\u00e9es \u00e0 la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Les salari\u00e9s et les sous-traitants utilisant les syst\u00e8mes et services d\u2019information de l\u2019organisation doivent noter et signaler toute faille de s\u00e9curit\u00e9 observ\u00e9e ou soup\u00e7onn\u00e9e dans les syst\u00e8mes ou services.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.4 - Appr\u00e9ciation des \u00e9v\u00e9nements li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information et prise de d\u00e9cision",
+        "description": "Les \u00e9v\u00e9nements li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre appr\u00e9ci\u00e9s et il doit \u00eatre d\u00e9cid\u00e9 s\u2019il faut les classer comme incidents li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.5 - R\u00e9ponse aux incidents li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Les incidents li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information doivent \u00eatre trait\u00e9s conform\u00e9ment aux proc\u00e9dures document\u00e9es.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.6 - Tirer des enseignements des incidents li\u00e9s \u00e0 la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Les connaissances recueillies suite \u00e0 l\u2019analyse et la r\u00e9solution d\u2019incidents doivent \u00eatre utilis\u00e9es pour r\u00e9duire la probabilit\u00e9 ou l\u2019impact d\u2019incidents ult\u00e9rieurs.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.16.1.7 - Collecte de preuves",
+        "description": "L\u2019organisation doit d\u00e9finir et appliquer des proc\u00e9dures d\u2019identification, de collecte, d\u2019acquisition et de protection de l\u2019information pouvant servir de preuve.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.17.1.1 - Organisation de la continuit\u00e9 de la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "L\u2019organisation doit d\u00e9terminer ses exigences en mati\u00e8re de s\u00e9curit\u00e9 de l\u2019information et de continuit\u00e9 de management de la s\u00e9curit\u00e9 de l\u2019information dans des situations d\u00e9favorables, comme lors d\u2019une crise ou d\u2019un sinistre\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.17.1.2 - Mise en \u0153uvre de la continuit\u00e9 de la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "L\u2019organisation doit \u00e9tablir, documenter, mettre en \u0153uvre et tenir \u00e0 jour des processus, des proc\u00e9dures et des mesures permettant de fournir le niveau requis de continuit\u00e9 de s\u00e9curit\u00e9 de l\u2019information au cours d\u2019une situation d\u00e9favorable.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.17.1.3 - V\u00e9rifier, revoir et \u00e9valuer la continuit\u00e9 de la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "L\u2019organisation doit v\u00e9rifier les mesures de continuit\u00e9 de la s\u00e9curit\u00e9 de l\u2019information mises en \u0153uvre \u00e0 intervalles r\u00e9guliers afin de s\u2019assurer qu\u2019elles sont valables et efficaces dans des situations d\u00e9favorables.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.17.2.1 - Disponibilit\u00e9 des moyens de traitement de l\u2019information",
+        "description": "Des moyens de traitement de l\u2019information doivent \u00eatre mis en \u0153uvre avec suffisamment de redondances pour r\u00e9pondre aux exigences de disponibilit\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.1.1 - Identification de la l\u00e9gislation et des exigences contractuelles applicables",
+        "description": "Toutes les exigences l\u00e9gales, statutaires, r\u00e9glementaires et contractuelles en vigueur, ainsi que l\u2019approche adopt\u00e9e par l\u2019organisation pour satisfaire \u00e0 ces exigences, doivent \u00eatre explicitement d\u00e9finies, document\u00e9es et mises \u00e0 jour pour chaque syst\u00e8me d\u2019information et pour l\u2019organisation elle-m\u00eame.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.1.2 - Droits de propri\u00e9t\u00e9 intellectuelle",
+        "description": "Des proc\u00e9dures appropri\u00e9es doivent \u00eatre mises en \u0153uvre pour garantir la conformit\u00e9 avec les exigences l\u00e9gales, r\u00e9glementaires et contractuelles relatives \u00e0 la propri\u00e9t\u00e9 intellectuelle et \u00e0 l\u2019usage des licences de logiciels propri\u00e9taires.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.1.3 - Protection des enregistrements",
+        "description": "Les enregistrements doivent \u00eatre prot\u00e9g\u00e9s de la perte, de la destruction, de la falsification, des acc\u00e8s non autoris\u00e9s et des diffusions non autoris\u00e9es, conform\u00e9ment aux exigences l\u00e9gales, r\u00e9glementaires, contractuelles et aux exigences m\u00e9tier.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.1.4 - Protection de la vie priv\u00e9e et protection des donn\u00e9es \u00e0 caract\u00e8re personnel",
+        "description": "La protection de la vie priv\u00e9e et la protection des donn\u00e9es \u00e0 caract\u00e8re personnel doivent \u00eatre garanties telles que l\u2019exigent la l\u00e9gislation ou les r\u00e9glementations applicables, et les clauses contractuelles le cas \u00e9ch\u00e9ant.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.1.5 - R\u00e9glementation relative aux mesures cryptographiques",
+        "description": "Des mesures cryptographiques doivent \u00eatre prises conform\u00e9ment aux accords, l\u00e9gislation et r\u00e9glementations applicables.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.2.1 - Revue ind\u00e9pendante de la s\u00e9curit\u00e9 de l\u2019information",
+        "description": "Des revues r\u00e9guli\u00e8res et ind\u00e9pendantes de l\u2019approche retenue par l\u2019organisme pour g\u00e9rer et mettre en \u0153uvre la s\u00e9curit\u00e9 de l\u2019information (\u00e0 savoir le suivi des objectifs de s\u00e9curit\u00e9, les mesures, les politiques, les proc\u00e9dures et les processus relatifs \u00e0 la s\u00e9curit\u00e9 de l\u2019information) doivent \u00eatre effectu\u00e9es \u00e0 intervalles d\u00e9finis ou lorsque des changements importants sont intervenus.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.2.2 - Conformit\u00e9 avec les politiques et les normes de s\u00e9curit\u00e9",
+        "description": "Les responsables doivent r\u00e9guli\u00e8rement v\u00e9rifier la conformit\u00e9 du traite- ment de l\u2019information et des proc\u00e9dures dont ils sont charg\u00e9s au regard des politiques, des normes de s\u00e9curit\u00e9 applicables et autres exigences de s\u00e9curit\u00e9.\n",
+        "provider": "ISO 27001:2013"
+      }
+    },
+    {
+      "type": "security_function",
+      "fields": {
+        "name": "A.18.2.3 - V\u00e9rification de la conformit\u00e9 technique",
+        "description": "Les syst\u00e8mes d\u2019information doivent \u00eatre examin\u00e9s r\u00e9guli\u00e8rement quant \u00e0 leur conformit\u00e9 avec les politiques et les normes de s\u00e9curit\u00e9 de l\u2019information de l\u2019organisation.\n",
+        "provider": "ISO 27001:2013"
+      }
+    }
+  ]
+}
