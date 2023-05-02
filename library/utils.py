@@ -39,6 +39,7 @@ def get_available_libraries():
     for f in files:
         with open(path / f, 'r', encoding='utf-8') as file:
             libraries.append(json.load(file))
+    libraries.sort(key=lambda x: x['locale'] + x['name'].lower())
     return libraries
 
 def get_library_names():
