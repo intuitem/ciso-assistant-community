@@ -661,7 +661,7 @@ def compile_analysis_for_composer(user: User, analysis_list: list):
         "residual_level": residual_level,
         "view_user": RoleAssignment.has_permission(user, "view_user"), # NOTE: Need to factorize with BaseContextMixin
         "exceeded_users": (MAX_USERS - User.objects.all().count()) < 0,
-        "change_usergroup": RoleAssignment.is_access_allowed(user=self.request.user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
+        "change_usergroup": RoleAssignment.is_access_allowed(user=user, perm=Permission.objects.get(codename="change_usergroup"), folder=Folder.get_root_folder()),
         "counters": {"untreated": untreated.count(), "untreated_h_vh": untreated_h_vh.count(), "accepted": accepted.count()},
         "riskscenarios": {"untreated": untreated, "untreated_h_vh": untreated_h_vh, "accepted": accepted},
         "security_measure_status": {"labels": labels, "values": values},
