@@ -1,6 +1,4 @@
-*migrations/
-!__init__.py
-*.pyc
+__pycache__
 *.DS_Store
 *~$*
 staticfiles/*
