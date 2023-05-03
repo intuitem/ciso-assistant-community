@@ -16,7 +16,6 @@ while ! python manage.py showmigrations iam > /dev/null; do
 done
 
 python manage.py collectstatic --noinput
-python manage.py makemigrations cal core iam passkeys
 python manage.py migrate
 python manage.py makemessages -i venv -l fr
 python manage.py compilemessages -i venv -l fr
