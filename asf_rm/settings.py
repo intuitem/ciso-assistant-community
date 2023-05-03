@@ -202,7 +202,7 @@ LOCALE_PATHS = (
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'   # for collectstatic
 STATICFILES_DIRS = [
-    BASE_DIR / "static",  # the js files are here
+ #   BASE_DIR / "static",  # the js files are here
 ]
 
 STATIC_URL = '/static/'
