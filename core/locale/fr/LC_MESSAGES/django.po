@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-27 17:15+0000\n"
+"POT-Creation-Date: 2023-05-03 23:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -999,7 +999,7 @@ msgid "Delete risk analysis?"
 msgstr "Supprimer l'analyse de risque ?"
 
 #: core/templates/core/analysis_list.html:182
-#: core/templates/core/index.html:134 core/templates/core/review.html:73
+#: core/templates/core/index.html:132 core/templates/core/review.html:73
 #: core/templates/snippets/ra_list_nested.html:64
 msgid "No analysis found."
 msgstr "Aucune analyse trouvée."
@@ -1475,53 +1475,53 @@ msgstr ""
 msgid "Assignee"
 msgstr "Responsable"
 
-#: core/templates/core/index.html:89 core/templates/core/mp.html:11
+#: core/templates/core/index.html:87 core/templates/core/mp.html:11
 msgid "Remediation plan"
 msgstr "Plan de remédiation"
 
-#: core/templates/core/index.html:99
+#: core/templates/core/index.html:97
 msgid "Export"
 msgstr "Exporter"
 
-#: core/templates/core/index.html:110 core/templates/core/quick_start.html:115
+#: core/templates/core/index.html:108 core/templates/core/quick_start.html:115
 #: core/templates/core/ra_update.html:16
 #: core/templates/snippets/ra_data.html:13
 msgid "Risk analysis"
 msgstr "Analyse de risque"
 
-#: core/templates/core/index.html:112 core/templates/core/index.html:117
+#: core/templates/core/index.html:110 core/templates/core/index.html:115
 msgid "... as PDF"
 msgstr "... format PDF"
 
-#: core/templates/core/index.html:114 core/templates/core/index.html:119
+#: core/templates/core/index.html:112 core/templates/core/index.html:117
 msgid "... as csv"
 msgstr "... format CSV"
 
-#: core/templates/core/index.html:115
+#: core/templates/core/index.html:113
 msgid "Treatment plan"
 msgstr "Plan de traitement"
 
-#: core/templates/core/index.html:144 core/templates/snippets/paginator.html:5
+#: core/templates/core/index.html:142 core/templates/snippets/paginator.html:5
 msgid "Showing Page"
 msgstr "Page"
 
-#: core/templates/core/index.html:144 core/templates/snippets/paginator.html:5
+#: core/templates/core/index.html:142 core/templates/snippets/paginator.html:5
 msgid "of"
 msgstr "sur"
 
-#: core/templates/core/index.html:151 core/templates/snippets/paginator.html:13
+#: core/templates/core/index.html:149 core/templates/snippets/paginator.html:13
 msgid "First"
 msgstr "Prem."
 
-#: core/templates/core/index.html:154 core/templates/snippets/paginator.html:16
+#: core/templates/core/index.html:152 core/templates/snippets/paginator.html:16
 msgid "Prev"
 msgstr "Préc."
 
-#: core/templates/core/index.html:159 core/templates/snippets/paginator.html:21
+#: core/templates/core/index.html:157 core/templates/snippets/paginator.html:21
 msgid "Next"
 msgstr "Suiv."
 
-#: core/templates/core/index.html:161 core/templates/snippets/paginator.html:24
+#: core/templates/core/index.html:159 core/templates/snippets/paginator.html:24
 msgid "Last"
 msgstr "Fin"
 
