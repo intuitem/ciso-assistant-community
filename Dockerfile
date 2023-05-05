@@ -22,9 +22,8 @@ COPY iam /code/iam
 COPY library /code/library
 COPY locale /code/locale
 COPY serdes /code/serdes
-COPY staticfiles /code/staticfiles
+COPY static /code/static
 COPY theme /code/theme
-COPY tools /code/tools
 COPY manage.py startup.sh /code/
 
 RUN django-admin makemessages --all -i venv && \
