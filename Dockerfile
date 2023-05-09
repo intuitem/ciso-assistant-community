@@ -15,7 +15,6 @@ RUN apt update && \
 
 COPY asf_rm /code/asf_rm
 COPY cal /code/cal
-COPY config /code/config
 COPY core /code/core
 COPY db/readme.txt /code/db/readme.txt
 COPY iam /code/iam
