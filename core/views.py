@@ -1055,7 +1055,7 @@ class FolderListView(BaseContextMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         folders_list = RoleAssignment.get_accessible_folders(
-            Folder.get_root_folder(), self.request.user, Folder.ContentType.DOMAIN, codename="change_folder")
+            Folder.get_root_folder(), self.request.user, Folder.ContentType.DOMAIN, codename="view_folder")
         qs = self.model.objects.filter(id__in=folders_list)
         filtered_list = ProjectsDomainFilter(
             self.request.GET, queryset=qs, request=self.request)
