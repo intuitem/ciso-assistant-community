@@ -10,8 +10,14 @@
     {% endwith %}
 
     <div class="flex flex-col space-y-6">
-        <div class="shadow-md sm:rounded-lg bg-white py-4 px-6">
-            <h1 class="text-xl font-semibold">{% trans "Import backup" %}</h1>
+      <div class="shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-2">
+        <h1 class="text-xl font-semibold">{% trans "Export backup" %}</h1>
+        <button class="bg-indigo-600 text-white aliased font-medium p-2 rounded-lg hover:bg-indigo-500 disabled:bg-indigo-300">
+            <a href={% url 'dump-db' %}>{% trans "Dump database" %}</a>
+        </button>
+      </div>
+      <div class="shadow-md sm:rounded-lg bg-white py-4 px-6">
+            <h1 class="text-xl font-semibold">{% trans "Import backup" %} <span class="text-red-500 text-3xl font-semibold">⚠</span></h1>
             <form enctype="multipart/form-data" method="post" x-data="{
                     open: false,
                     uploadDisabled: document.getElementById('file_upload').value == '',
@@ -63,8 +69,7 @@
                               <div class="flex items-start justify-between p-4 bg-gradient-to-r from-slate-200">
                                 <div class="mb-4 text-xl text-gray-800"><span class="text-indigo-900"><i
                                       class="fas fa-hashtag"></i></span><span class="ml-2 font-medium">{% trans "Import backup?" %}</span></div>
-                                <button type="button" class="close" @click="open = !open,
-modalOpen = !modalOpen">
+                                <button type="button" class="close" @click="open = !open, modalOpen = !modalOpen">
                                   <span class="text-lg text-gray-600 hover:bg-gray-200 py-2 px-3 rounded">
                                     <i class="fas fa-times"></i></span>
                                 </button>
@@ -75,8 +80,7 @@ modalOpen = !modalOpen">
                                     <p class="text-sm relative whitespace-normal">{% trans "This action cannot be undone. This will restore the database to a previous state. Are you sure you want to do this?" %}</p>
                                     <div class="flex items-center justify-end">
                                         <button
-                                        @click="open = !open,
-modalOpen = !modalOpen"
+                                        @click="open = !open, modalOpen = !modalOpen"
                                         type="button"
                                         class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gray-600 hover:bg-gray-500 mr-2"
                                         >{% trans "No, take me back" %}</button>
@@ -101,13 +105,6 @@ modalOpen = !modalOpen"
 
                 </div>
             </form>
-            
-        </div>
-        <div class="shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-2">
-            <h1 class="text-xl font-semibold">{% trans "Export backup" %}</h1>
-            <button class="bg-indigo-600 text-white aliased font-medium p-2 rounded-lg hover:bg-indigo-500 disabled:bg-indigo-300">
-                <a href={% url 'dump-db' %}>{% trans "Dump database" %}</a>
-            </button>
         </div>
     </div>
 </div>

@@ -1,6 +1,4 @@
-*migrations/
-!__init__.py
-*.pyc
+__pycache__
 *.DS_Store
 *~$*
 staticfiles/*
@@ -19,3 +17,12 @@ k8s/mira-cluster-controller/controller/db/django_secret_key
 styles.css
 k8s/scaleway/kubeconfig-k8s-mira-demo.yaml
 k8s/scaleway/kubeconfig-k8s-mira-int.yaml
+tools/enterprise-attack.json
+tools/measures.csv
+tools/measures_fr.csv
+tools/techniques.csv
+tools/mitre-techniques.json
+tools/mitre-mitigations.json
+tools/mitre-mitigations-fr.json
+tools/enterprise-attack.txt
+tools/iso27001-fr.json

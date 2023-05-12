@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-04 14:38+0000\n"
+"POT-Creation-Date: 2023-05-03 23:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,63 +33,63 @@ msgid "To change your email address, please contact your administrator."
 msgstr ""
 "Pour changer votre adresse email, veuillez contacter votre administrateur."
 
-#: iam/models.py:28 iam/models.py:334
+#: iam/models.py:29 iam/models.py:333
 msgid "Domain"
 msgstr "Domaine"
 
-#: iam/models.py:29 iam/models.py:60
+#: iam/models.py:30 iam/models.py:61
 msgid "name"
 msgstr "nom"
 
-#: iam/models.py:34
+#: iam/models.py:35
 msgid "user group"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:35 iam/models.py:236
+#: iam/models.py:36 iam/models.py:230
 msgid "user groups"
 msgstr "groupes d'utilisateurs"
 
-#: iam/models.py:57
+#: iam/models.py:58
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:76
+#: iam/models.py:92
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:77
+#: iam/models.py:93
 msgid "DOMAIN"
 msgstr "DOMAINE"
 
-#: iam/models.py:92
+#: iam/models.py:98
 msgid "parent folder"
 msgstr "dosier parent"
 
-#: iam/models.py:102 iam/models.py:345
+#: iam/models.py:108 iam/models.py:344
 msgid "Folder"
 msgstr "Dossier"
 
-#: iam/models.py:103
+#: iam/models.py:109
 msgid "Folders"
 msgstr "Dossiers"
 
-#: iam/models.py:190
+#: iam/models.py:184
 msgid "Welcome to Mira!"
 msgstr "Bienvenue sur MIRA!"
 
-#: iam/models.py:214
+#: iam/models.py:208
 msgid "last name"
 msgstr "nom"
 
-#: iam/models.py:215
+#: iam/models.py:209
 msgid "first name"
 msgstr "prénom"
 
-#: iam/models.py:219
+#: iam/models.py:213
 msgid "active"
 msgstr "actif"
 
-#: iam/models.py:222
+#: iam/models.py:216
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
@@ -97,15 +97,15 @@ msgstr ""
 "Désigne si cet utilisateur doit être traité comme actif. Désélectionnez ceci "
 "au lieu de supprimer les comptes."
 
-#: iam/models.py:226
+#: iam/models.py:220
 msgid "date joined"
 msgstr "date d'inscription"
 
-#: iam/models.py:228
+#: iam/models.py:222
 msgid "superuser status"
 msgstr "statut superutilisateur"
 
-#: iam/models.py:231
+#: iam/models.py:225
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
@@ -113,7 +113,7 @@ msgstr ""
 "Désigne que cet utilisateur a toutes les autorisations sans les assigner "
 "explicitement."
 
-#: iam/models.py:239
+#: iam/models.py:233
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
@@ -122,19 +122,19 @@ msgstr ""
 "utilisateur obtiendra toutes les autorisations accordées à chacun de ses "
 "groupes d'utilisateurs."
 
-#: iam/models.py:257
+#: iam/models.py:251
 msgid "user"
 msgstr "utilisateur"
 
-#: iam/models.py:258
+#: iam/models.py:252
 msgid "users"
 msgstr "utilisateurs"
 
-#: iam/models.py:340
+#: iam/models.py:339
 msgid "Role"
 msgstr "Rôle"
 
-#: iam/models.py:342
+#: iam/models.py:341
 msgid "sub folders are visible"
 msgstr "les sous-dossiers sont visibles"
 
@@ -142,31 +142,31 @@ msgstr "les sous-dossiers sont visibles"
 msgid "Select a file"
 msgstr "Sélectionner un fichier"
 
-#: library/utils.py:174
+#: library/utils.py:176
 msgid "Library was not imported: invalid matrix."
 msgstr "Bibliothèque non importée: matrice invalide."
 
-#: library/utils.py:199
+#: library/utils.py:201
 msgid "Library was not imported: invalid threat."
 msgstr "Bibliothèque non importée: menace invalide."
 
-#: library/utils.py:223
+#: library/utils.py:226
 msgid "Library was not imported: invalid security function."
 msgstr "Bibliothèque non importée: fonction de sécurité invalide."
 
-#: library/utils.py:272
+#: library/utils.py:275
 msgid "Unknown object type: {}"
 msgstr "Objet de type inconnu : {}"
 
-#: library/utils.py:296
+#: library/utils.py:299
 msgid "Library was not imported: permission denied for: {}"
 msgstr "Bibliothèque non importée: autorisation refusée pour : {}"
 
-#: library/utils.py:321
+#: library/utils.py:324
 msgid "Library was not imported: unknown object type: {}"
 msgstr "Bibliothèque non importée: objet de type inconnu : {}"
 
-#: library/utils.py:342
+#: library/utils.py:345
 msgid ""
 "Library \"{}\" imported successfully. {} object(s) imported and {} object(s) "
 "ignored."
@@ -174,15 +174,15 @@ msgstr ""
 "Bibliothèque \"{}\" importée avec succès. {} objets importés et {} objets "
 "ignorés."
 
-#: library/views.py:51
+#: library/views.py:52
 msgid "Failed to import file: {}. {}"
 msgstr "Échec de l'importation du fichier : {}"
 
-#: library/views.py:72
+#: library/views.py:78
 msgid "Libraries"
 msgstr "Bibliothèques"
 
-#: library/views.py:93
+#: library/views.py:99
 msgid "Failed to import library: {}"
 msgstr "Échec de l'importation de la bibliothèque : {}"
 
@@ -195,18 +195,26 @@ msgid "Backup Restore"
 msgstr "Sauvegarde et restauration"
 
 #: serdes/templates/serdes/backup_restore.html:14
+msgid "Export backup"
+msgstr "Exporter une sauvegarde"
+
+#: serdes/templates/serdes/backup_restore.html:16
+msgid "Dump database"
+msgstr "Exporter la base de données"
+
+#: serdes/templates/serdes/backup_restore.html:20
 msgid "Import backup"
 msgstr "Importer une sauvegarde"
 
-#: serdes/templates/serdes/backup_restore.html:29
+#: serdes/templates/serdes/backup_restore.html:35
 msgid "Upload"
 msgstr "Télécharger"
 
-#: serdes/templates/serdes/backup_restore.html:65
+#: serdes/templates/serdes/backup_restore.html:71
 msgid "Import backup?"
 msgstr "Importer une sauvegarde ?"
 
-#: serdes/templates/serdes/backup_restore.html:75
+#: serdes/templates/serdes/backup_restore.html:80
 msgid ""
 "This action cannot be undone. This will restore the database to a previous "
 "state. Are you sure you want to do this?"
@@ -214,21 +222,13 @@ msgstr ""
 "Cette action ne peut être annulée. Cela restaurera la base de données à un "
 "état antérieur. Êtes-vous sûr de vouloir faire cela ?"
 
-#: serdes/templates/serdes/backup_restore.html:82
+#: serdes/templates/serdes/backup_restore.html:86
 msgid "No, take me back"
 msgstr "Non, revenir en arrière"
 
-#: serdes/templates/serdes/backup_restore.html:84
+#: serdes/templates/serdes/backup_restore.html:88
 msgid "Yes"
 msgstr "Oui"
-
-#: serdes/templates/serdes/backup_restore.html:107
-msgid "Export backup"
-msgstr "Exporter une sauvegarde"
-
-#: serdes/templates/serdes/backup_restore.html:109
-msgid "Dump database"
-msgstr "Exporter la base de données"
 
 #~ msgid "First Connexion"
 #~ msgstr "Première connexion"

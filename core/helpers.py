@@ -11,7 +11,7 @@ STATUS_COLOR_MAP = {'open': '#fac858', 'mitigated': '#91cc75', 'accepted': '#73c
 
 def get_parsed_matrices(user: User, analyses: list = None):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+        Folder.get_root_folder(), user, RiskScenario)
     risk_matrices = list()
     if analyses is None:
         risk_matrices= RiskScenario.objects.filter(id__in=object_ids_view).values_list(
@@ -97,7 +97,7 @@ def risk_per_status(user: User):
                  "accepted": "#73c0de", "blocker": "#ee6666", "transferred": "#91cc75"}
 
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+        Folder.get_root_folder(), user, RiskScenario)
     for st in RiskScenario.TREATMENT_OPTIONS:
         count = RiskScenario.objects.filter(
             id__in=object_ids_view).filter(treatment=st[0]).count()
@@ -117,7 +117,7 @@ def security_measure_per_status(user: User):
     color_map = {"open": "#93c5fd", "in_progress": "#fdba74",
                  "on_hold": "#f87171", "done": "#86efac"}
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
+        Folder.get_root_folder(), user, SecurityMeasure)
     for st in SecurityMeasure.MITIGATION_STATUS:
         count = SecurityMeasure.objects.filter(
             id__in=object_ids_view).filter(status=st[0]).count()
@@ -133,7 +133,7 @@ def security_measure_per_status(user: User):
 def security_measure_per_cur_risk(user: User):
     output = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
+        Folder.get_root_folder(), user, SecurityMeasure)
     for lvl in get_rating_options(user):
         cnt = SecurityMeasure.objects.filter(id__in=object_ids_view).exclude(
             status='done').filter(riskscenario__current_level=lvl[0]).count()
@@ -146,7 +146,7 @@ def security_measure_per_security_function(user: User):
     indicators = list()
     values = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
+        Folder.get_root_folder(), user, SecurityMeasure)
 
     tmp = SecurityMeasure.objects.filter(id__in=object_ids_view).values(
         'security_function__name').annotate(total=Count('security_function')).order_by('security_function')
@@ -159,7 +159,7 @@ def security_measure_per_security_function(user: User):
 
 def aggregate_risks_per_field(user: User, field: str, residual: bool = False, analyses: list = None):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+        Folder.get_root_folder(), user, RiskScenario)
     parsed_matrices: list = get_parsed_matrices(user=user, analyses=analyses)
     values = dict()
     for m in parsed_matrices:
@@ -186,7 +186,7 @@ def risks_count_per_level(user: User, analyses: list = None):
     current_level = list()
     residual_level = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+        Folder.get_root_folder(), user, RiskScenario)
 
     for r in aggregate_risks_per_field(user, 'name', analyses=analyses).items():
         current_level.append({'name': r[0], 'value': r[1]['count'], 'color': r[1]['color']})
@@ -201,7 +201,7 @@ def p_risks(user: User):
     p_risks_labels = list()
     p_risks_counts = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Threat)
+        Folder.get_root_folder(), user, Threat)
     for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by('name'):
         p_risks_labels.append(p_risk.name)
         p_risks_counts.append(
@@ -218,7 +218,7 @@ def p_risks(user: User):
 def p_risks_2(user: User):
     data = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Threat)
+        Folder.get_root_folder(), user, Threat)
     for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by('name'):
         cnt = RiskScenario.objects.filter(threat=p_risk).count()
         if cnt > 0:
@@ -230,7 +230,7 @@ def p_risks_2(user: User):
 def risks_per_project_groups(user: User):
     output = list()
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskScenario)
+        Folder.get_root_folder(), user, RiskScenario)
     for folder in Folder.objects.all().order_by('name'):
         ri_level = RiskScenario.objects.filter(id__in=object_ids_view).filter(analysis__project__folder=folder).values(
             'current_level').annotate(total=Count('current_level'))
@@ -249,7 +249,7 @@ def get_counters(user: User):
                     "Threat": Threat}
     for name, type in objects_dict.items():
         (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, type)
+            Folder.get_root_folder(), user, type)
         if type == RiskScenario:
             output["ShowStopper"] = type.objects.filter(
                 id__in=object_ids_view).filter(treatment="blocker").count()
@@ -281,7 +281,7 @@ def security_measure_priority(user: User):
     clusters = {"1st": list(), "2nd": list(), "3rd": list(),
                 "4th": list(), "undefined": list()}
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
+        Folder.get_root_folder(), user, SecurityMeasure)
 
     for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view):
         clusters[get_quadrant(mtg)].append(mtg)
@@ -388,7 +388,7 @@ def risks_levels_per_prj_grp(user: User):
 
 def measures_to_review(user: User):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, SecurityMeasure)
+        Folder.get_root_folder(), user, SecurityMeasure)
     measures = SecurityMeasure.objects.filter(id__in=object_ids_view).filter(
         eta__lte=date.today()+timedelta(days=30)
     ).exclude(status__iexact='done'
@@ -399,11 +399,11 @@ def measures_to_review(user: User):
 
 def acceptances_to_review(user: User):
     (object_ids_view, object_ids_change, object_ids_delete) = RoleAssignment.get_accessible_object_ids(
-        Folder.objects.get(content_type=Folder.ContentType.ROOT), user, RiskAcceptance)
+        Folder.get_root_folder(), user, RiskAcceptance)
     acceptances = RiskAcceptance.objects.filter(id__in=object_ids_view).filter(
         expiry_date__lte=date.today()+timedelta(days=30)
     ).order_by('expiry_date')
     acceptances |= RiskAcceptance.objects.filter(id__in=object_ids_view).filter(
-        validator = user)
+        validator=user).filter(state='submitted')
 
     return acceptances

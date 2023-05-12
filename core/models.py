@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import date, datetime
 from django.contrib.auth import get_user_model
 from typing import Self
+from django.utils.html import format_html
 
 User = get_user_model()
 
@@ -42,6 +43,10 @@ class Project(AbstractBaseModel):
 
 
 class Threat(AbstractBaseModel, RootFolderMixin):
+
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider"))
+
     is_published = models.BooleanField(_('published'), default=True)
 
     class Meta:
@@ -355,7 +360,7 @@ class SecurityMeasure(AbstractBaseModel):
     @property
     def get_html_url(self):
         url = reverse('securitymeasure-detail', args=(self.id,))
-        return f'<a class="" href="{url}"> <b>[MT-eta]</b> {self.folder.name}: {self.name} </a>'
+        return format_html('<a class="" href="{}"> <b>[MT-eta]</b> {}: {} </a>', url, self.folder.name, self.name)
 
 
 class RiskScenario(AbstractBaseModel):
@@ -513,7 +518,7 @@ class RiskAcceptance(AbstractBaseModel):
     @property
     def get_html_url(self):
         url = reverse('riskacceptance-detail', args=(self.id,))
-        return f'<a class="" href="{url}"> <b>[RA-exp]</b> {self.folder.name}: {self.name} </a>'
+        return format_html('<a class="" href="{}"> <b>[RA-exp]</b> {}: {} </a>', url, self.folder.name, self.name)
 
     def set_state(self, state):
         self.state = state

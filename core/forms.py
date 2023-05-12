@@ -5,6 +5,7 @@ from django import forms
 from .models import *
 from iam.models import RoleAssignment
 from django.utils.translation import gettext_lazy as _
+from django.utils.html import escape
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import Permission
@@ -15,6 +16,21 @@ if RECAPTCHA_PUBLIC_KEY:
     from captcha.widgets import ReCaptchaV2Checkbox
 
 User = get_user_model()
+
+class LinkCleanMixin:
+    """
+    Prevent code injection in link field
+    """
+    def clean_link(self):
+        """
+        Method to check if a link is valid
+        """
+        link = self.cleaned_data.get('link')
+        if link:
+            link = escape(link)
+            if not link.startswith(('https://', 'ftps://')):
+                raise ValidationError(_('Invalid link'))
+        return link
 
 class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
     """
@@ -190,11 +206,11 @@ class RiskAnalysisUpdateForm(StyledModelForm):
         fields = ['project', 'auditor', 'name', 'description', 'version', 'is_draft']
 
 
-class SecurityMeasureCreateForm(StyledModelForm):
+class SecurityMeasureCreateForm(LinkCleanMixin, StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.get_root_folder(), user, Folder.ContentType.DOMAIN, codename="add_securitymeasure"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
@@ -205,6 +221,7 @@ class SecurityMeasureCreateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['security_function'].choices)
+
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -212,7 +229,7 @@ class SecurityMeasureCreateForm(StyledModelForm):
             'eta': DefaultDateInput()
         }
 
-class SecurityMeasureCreateFormInherited(StyledModelForm):
+class SecurityMeasureCreateFormInherited(LinkCleanMixin, StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
@@ -230,7 +247,7 @@ class SecurityMeasureCreateFormInherited(StyledModelForm):
         }
 
 
-class SecurityMeasureUpdateForm(StyledModelForm):
+class SecurityMeasureUpdateForm(LinkCleanMixin, StyledModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
@@ -242,6 +259,7 @@ class SecurityMeasureUpdateForm(StyledModelForm):
                    'searchbar_class': '[&_.search-icon]:text-gray-500 text-sm px-3',
                    'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 max-h-56 overflow-y-scroll'},
                    choices=self.fields['security_function'].choices)
+    
     class Meta:
         model = SecurityMeasure
         fields = '__all__'
@@ -336,7 +354,7 @@ class RiskAcceptanceCreateUpdateForm(StyledModelForm):
                 validators_id.append(candidate.id)
         self.fields['validator'].queryset = User.objects.filter(id__in=validators_id)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, None, codename="add_riskacceptance"))
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.get_root_folder(), user, None, codename="add_riskacceptance"))
         # else:
         #     self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         # Else statement causes a problem because during submition for global folder
@@ -372,7 +390,7 @@ class ProjectForm(StyledModelForm):
     def __init__(self, user=None, *args, **kwargs):   
         super(ProjectForm, self).__init__(*args, **kwargs)
         if user:
-            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Folder.ContentType.DOMAIN, codename="add_project"))
+            self.fields['folder'].queryset = Folder.objects.filter(id__in=RoleAssignment.get_accessible_folders(Folder.get_root_folder(), user, Folder.ContentType.DOMAIN, codename="add_project"))
         else:
             self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
         self.fields['folder'].widget = SearchableSelect(attrs={'class': 'text-sm rounded',
@@ -427,7 +445,7 @@ class AssetForm(StyledModelForm):
                         'wrapper_class': 'border border-gray-300 bg-gray-50 text-gray-900 text-sm rounded-b-lg focus:ring-blue-500 focus:border-blue-500 py-2 px-4 max-h-56 overflow-y-scroll'},
                         choices=self.fields['parent_assets'].choices)
         viewable_assets = RoleAssignment.get_accessible_object_ids(
-            Folder.objects.get(content_type=Folder.ContentType.ROOT), user, Asset)[0] if user else Asset.objects.none()
+            Folder.get_root_folder(), user, Asset)[0] if user else Asset.objects.none()
         self.fields['parent_assets'].queryset = Asset.objects.filter(id__in=viewable_assets
             ).exclude(id=self.instance.id) if self.instance else Asset.objects.filter(id__in=viewable_assets)
 
@@ -463,8 +481,6 @@ class SecurityFunctionCreateForm(StyledModelForm):
 class SecurityFunctionUpdateForm(StyledModelForm):
     def __init__(self, *args, **kwargs):
         super(SecurityFunctionUpdateForm, self).__init__(*args, **kwargs)
-        self.fields['folder'].queryset = Folder.objects.filter(content_type=Folder.ContentType.ROOT)
-        self.fields['folder'].disabled = True
     class Meta:
         model = SecurityFunction
         fields = '__all__'

@@ -2,7 +2,7 @@
 {% load static i18n %}
 {% load core_extras %}
 <aside
-    class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-visible left-0 z-20" :class="{ '-ml-66': !sidebarOpen }">
+    class="flex-shrink-0 w-72 flex flex-col shadow transition-all duration-300 fixed h-screen overflow-visible top-0 left-0 z-20" :class="{ '-ml-66': !sidebarOpen }">
     <nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50  py-4 px-3">
         <div class="flex flex-row space-x-4 border-b pb-3" aria-label="logo">
             <div class="flex items-center justify-left rounded">
@@ -39,8 +39,8 @@
         <div class="scrollbar overflow-x-visible flex-grow mr-4" id="sidebar-scroll">
             <ul class="flex flex-col py-4 space-y-1" id="sidebar-items">
                 <li class="to-page">
-                    <a id="analyses_tab" href="{% url 'analysis_list' %}" class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                    <a id="analyses_tab" href="{% url 'analysis_list' %}" class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-book-open"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Analysis registry" %}</span>
@@ -49,8 +49,8 @@
                 
                 <li class="to-page">
                     <a id="quick_start_tab" href="{% url 'quick_start' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-fighter-jet"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Quick start" %}</span>
@@ -66,8 +66,8 @@
 
                 <li class="to-page">
                     <a id="overview_tab" href="{% url 'overview' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-tachometer-alt"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Overview" %}</span>
@@ -75,8 +75,8 @@
                 </li>
                 <li class="to-page">
                     <a id="calendar_tab" href="{% url 'calendar' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-calendar-alt"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Calendar" %}</span>
@@ -90,8 +90,8 @@
                 </li>
                 <li class="to-page">
                     <a id="analyses_registry_tab" href="{% url 'analysis-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-glasses"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk analyses" %}</span>
@@ -99,8 +99,8 @@
                 </li>
                 <li class="to-page">
                     <a id="risk_scenarios_tab" href="{% url 'riskscenario-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-clone"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk scenarios" %}</span>
@@ -108,8 +108,8 @@
                 </li>
                 <li class="to-page">
                     <a id="security_measures_tab" href="{% url 'securitymeasure-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-fire-extinguisher"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security measures" %}</span>
@@ -117,8 +117,8 @@
                 </li>
                 <li class="to-page">
                     <a id="risk_acceptances_tab" href="{% url 'riskacceptance-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-user-tie"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Risk acceptances" %}</span>
@@ -131,8 +131,8 @@
                 </li>
                 <li class="to-page">
                     <a id="projects_domains_tab" href="{% url 'folder-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-project-diagram"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects domains" %}</span>
@@ -140,8 +140,8 @@
                 </li>
                 <li class="to-page">
                     <a id="projects_tab" href="{% url 'project-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-cubes"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Projects" %}</span>
@@ -149,8 +149,8 @@
                 </li>
                 <li class="to-page">
                     <a id="assets_tab" href="{% url 'asset-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-gem"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Assets" %}</span>
@@ -158,16 +158,16 @@
                 </li>
                 <li class="to-page">
                     <a id="threats_tab" href="{% url 'threat-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-biohazard"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Threats" %}</span>
                     </a>
                 </li>
                 <li class="to-page">
-                    <a id="security_functions_tab" href="{% url 'securityfunction-list' %}" class="relative flex flex-row items-center pr-6 nav-link">
-                    <span class="nav-link-icon">
+                    <a id="security_functions_tab" href="{% url 'securityfunction-list' %}" class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                    <span class="ml-4 w-1/12 text-center">
                         <i class="fas fa-cogs"></i>
                     </span>
                     <span class="ml-2 text-sm tracking-wide truncate">{% trans "Security functions" %}</span>
@@ -175,8 +175,8 @@
                 </li>
                 <li class="to-page">
                     <a id="matrices_tab" href="{% url 'riskmatrix-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-border-all"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Rating matrices" %}</span>
@@ -190,8 +190,8 @@
                 {% if view_user %}
                 <li class="to-page">
                     <a id="users_tab" href="{% url 'user-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-user"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Users" %}</span>
@@ -200,7 +200,7 @@
                 {% else %}
                 <li class="to-page">
                     <a id="users_tab" class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
-                        <span class="nav-link-icon">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fa fa-user"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Users" %} </span>
@@ -210,8 +210,8 @@
                 {% if change_usergroup %}
                 <li class="to-page">
                     <a id="user_groups_tab" href="{% url 'usergroup-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-users"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Groups" %}</span>
@@ -220,7 +220,7 @@
                 {% else %}
                 <li class="to-page">
                     <a id="user_groups_tab" class="relative flex flex-row items-center pr-6 nav-link bg-gray-100">
-                        <span class="nav-link-icon">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-users"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate text-gray-300">{% trans "Groups" %}</span>
@@ -229,8 +229,8 @@
                 {% endif %}
                 <li class="to-page">
                     <a href="{% url 'role-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-sitemap"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Role assignment" %}</span>
@@ -244,8 +244,8 @@
                 </li>
                 <li class="to-page">
                     <a id="xrays_tab" href="{% url 'xrays' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-bolt"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">X-Rays</span>
@@ -253,8 +253,8 @@
                 </li>
                 <li class="to-page">
                     <a id="scoring_tab" href="{% url 'scoring_bo' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-star-half-alt"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Scoring assistant" %}</span>
@@ -262,18 +262,18 @@
                 </li>
                 <li class="to-page">
                     <a id="library_tab" href="{% url 'library-list' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-folder-plus"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Libraries" %}</span>
                     </a>
                 </li>
-                {% if request.user.is_superuser %}
+                {% if request.user.has_backup_permission %}
                 <li class="to-page">
                     <a id="bacup_tab" href="{% url 'backup-restore' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-save"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "Backups" %}</span>
@@ -281,19 +281,18 @@
                 </li>
                 <li class="to-page">
                     <a id="lic_tab" href="{% url 'lic-management' %}"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-file-invoice-dollar"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "License management" %}</span>
                     </a>
                 </li>
-
                 {% endif %}
                 {% comment %} <li class="to-page">
                     <a href="#"
-                        class="relative flex flex-row items-center pr-6 nav-link">
-                        <span class="nav-link-icon">
+                        class="relative flex flex-row items-center pr-6 nav-link hover:bg-gray-200">
+                        <span class="ml-4 w-1/12 text-center">
                             <i class="fas fa-question-circle"></i>
                         </span>
                         <span class="ml-2 text-sm tracking-wide truncate">{% trans "User guide" %}</span>

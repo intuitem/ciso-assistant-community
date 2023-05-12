@@ -30,7 +30,8 @@
     </thead>
     <tbody>
         {% for scenario in scenarios %}
-            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500" onclick="window.location='{% url 'riskscenario-update' scenario.id %}?next={{ request.path|urlencode }}'">
+            <tr class="hover:text-indigo-500 cursor-pointer hover:scale-[0.99] duration-500" 
+                onclick="window.location='{% if not edit %}{% url 'riskscenario-detail' scenario.id %}{% else %}{% url 'riskscenario-update' scenario.id %}{% endif %}?next={{ request.path|urlencode }}'">
                 <td class="px-5 py-5 border-b border-gray-200 text-sm">
                     {{ scenario.rid }}
                 </td>
@@ -67,7 +68,7 @@
                     <ul class="list-disc space-y-4 ml-4">
                         {% for measure in scenario.security_measures.all %}
                             <li class="text-gray-900">
-                                <a href="{% url 'securitymeasure-update' measure.id %}"
+                                <a href="{% url 'securitymeasure-detail' measure.id %}"
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-400">
                                     {{ measure }}
                                 </a>

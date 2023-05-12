@@ -12,7 +12,7 @@ from django.contrib.auth.models import Permission
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from asf_rm import settings
-from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES
+from core.utils import BUILTIN_USERGROUP_CODENAMES, BUILTIN_ROLE_CODENAMES, UserGroupCodename
 from core.base_models import AbstractBaseModel
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
@@ -20,6 +20,7 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, get_connection, EmailMessage
 from asf_rm.settings import MIRA_URL, EMAIL_HOST_USER_RESCUE, EMAIL_HOST_PASSWORD_RESCUE, EMAIL_HOST_RESCUE, EMAIL_PORT_RESCUE, EMAIL_USE_TLS_RESCUE
+
 
 class UserGroup(models.Model):
     """ UserGroup objects contain users and can be used as principals in role assignments """
@@ -66,31 +67,36 @@ class Role(models.Model):
         return self.name
 
 
+def _get_root_folder():
+    """ helper function outside of class to facilitate serialization
+        to be used only in Folder class """
+    try:
+        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+    except:
+        return None
+
+
 class Folder(AbstractBaseModel):
     """ A folder is a container for other folders or any object
         Folders are organized in a tree structure, with a single root folder
         Folders are the base perimeter for role assignments
         """
+    @staticmethod
+    def get_root_folder() -> Self:
+        """ class function for general use """
+        return _get_root_folder()
+
+
     class ContentType(models.TextChoices):
         """ content type for a folder """
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
 
-    def get_root_folder():
-        if not connection.introspection.table_names():
-            # Database tables haven't been created yet
-            return None
-        try:
-            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        except Folder.DoesNotExist:
-            # ROOT folder doesn't exist yet
-            return None
-
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN)
     parent_folder = models.ForeignKey(
         "self", null=True, on_delete=models.CASCADE, verbose_name=_("parent folder"),
-        default=get_root_folder)
+        default=_get_root_folder)
     builtin = models.BooleanField(default=False)
     hide_public_asset = models.BooleanField(default=False)
     hide_public_matrix = models.BooleanField(default=False)
@@ -134,7 +140,6 @@ class Folder(AbstractBaseModel):
         if hasattr(obj, 'risk_scenario'):
             return obj.risk_scenario.analysis.project.folder
 
-
 class FolderMixin(models.Model):
     """
     Add foreign key to Folder
@@ -149,22 +154,11 @@ class RootFolderMixin(FolderMixin):
     """
     Add foreign key to Folder, defaults to root folder
     """
-    def get_default_folder():
-        if not connection.introspection.table_names():
-            # Database tables haven't been created yet
-            return None
-        
-        try:
-            return Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        except Folder.DoesNotExist:
-            # ROOT folder doesn't exist yet
-            return None
-    
     folder = models.ForeignKey(
         Folder,
         on_delete=models.CASCADE,
         related_name='%(class)s_folder',
-        default=get_default_folder,
+        default=Folder.get_root_folder,
     )
 
     class Meta:
@@ -257,6 +251,7 @@ class User(AbstractBaseUser):
         verbose_name = _('user')
         verbose_name_plural = _('users')
 #        swappable = 'AUTH_USER_MODEL'
+        permissions = (("backup", "backup"), ("restore", "restore"))
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}" if self.first_name and self.last_name else self.email
@@ -312,6 +307,10 @@ class User(AbstractBaseUser):
                     print(ex2)
                     print("secondary mailer failure")
 
+    @property
+    def has_backup_permission(self) -> bool:
+        return RoleAssignment.has_permission(self, "backup")
+
 
     @property
     def edit_url(self) -> str:
@@ -354,13 +353,13 @@ class RoleAssignment(models.Model):
                                 if self.user_group else "/")
 
     @staticmethod
-    def is_access_allowed(user: User, perm: Permission, folder: Folder = None) -> bool:
-        """Determines if a user has specified permission on a specified folder
-           TODO: the None value for folder is a kludge for the time being, an existing folder should be specified
-           for the relevant exceptions see has_permission
+    def is_access_allowed(user: User, perm: Permission, folder: Folder) -> bool:
+        """
+        Determines if a user has specified permission on a specified folder
         """
         for ra in RoleAssignment.get_role_assignments(user):
-            if (not folder or folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
+            # TODO: Add recursive call when we allow picking a parent folder other than ROOT
+            if (folder in ra.perimeter_folders.all() or folder.parent_folder in ra.perimeter_folders.all()) and perm in ra.role.permissions.all():
                 return True
         return False
 

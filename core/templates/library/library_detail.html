@@ -10,96 +10,44 @@
     {% endwith %}
     <div class="relative overflow-x-auto overflow-y-auto shadow-md rounded-lg bg-white">
         <div class="py-5 px-6 flex flex-col space-y-2">
-            <div>
-                <div class="flex flex-col">
-                    <div class="flex justify-between w-full">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">
-                            {{ library.name }}
-                        </h3>
-                        {% if can_import %}
-                        <span x-data="{ open: false }">
-                            <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
-                            {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
-                        </span>
-                        {% endif %}
-                    </div>
-                    <p class="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-                        {{ library.description|linebreaksbr }}
-                    </p>
-                </div>
+            <div class="flex justify-between w-full shadow border rounded p-4">
+                <p class="mt-1 text-sm leading-5 text-gray-500">
+                    {{ library.description|linebreaksbr }}
+                </p>
+                {% if can_import %}
+                <span x-data="{ open: false }">
+                    <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
+                    {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") library=library.name %}
+                </span>
+                {% endif %}
+            </div>
+            <div class="bg-white shadow border rounded border-gray-100 text-left p-4 text-sm font-normal text-gray-5">
+                <p>{{ library.copyright |linebreaksbr }}</p>
             </div>
             <div class="flex flex-col space-y-4">
                 {% for type in types %}
                 <div class="bg-white shadow border border-gray-100 text-left p-4 font-semibold rounded">
                     <h2>{% trans "Objects of type:" %} {{ type|upper }}</h2>
+                    {% if type == "matrix" %}
+                        {% for matrix in matrices %}
+                            <p class="font-normal">{% trans "Name" %}: {{ matrix.name }}</p>
+                            <p class="font-normal">{% trans "Description" %}: {{ matrix.description }}</p>
+                            {% include 'snippets/risk_matrix.html'%}
+                        {% endfor %}
+                    {% endif %}
                     <table class="w-full text-sm text-left text-gray-500">
                         {% if type == "threat" %}
                             <tr class="text-xs text-gray-700 uppercase bg-gray-50">
                                 <th class="px-6 py-3">{% trans "Threat name" %}</th>
                                 <th class="px-6 py-3">{% trans "Description" %}</th>
+                                <th class="px-6 py-3">{% trans "Provider" %}</th>
                             </tr>
                             {% for object in library.objects %}
                                 {% if object.type == type %}
                                     <tr>
                                         <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
                                         <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
-                        {% elif type == "matrix" %}
-                            <tr class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <th class="px-6 py-3">{% trans "Matrix name" %}</th>
-                                <th class="px-6 py-3">{% trans "Description" %}</th>
-                                <th class="px-6 py-3">{% trans "Probability" %}</th>
-                                <th class="px-6 py-3">{% trans "Impact" %}</th>
-                                <th class="px-6 py-3">{% trans "Risk" %}</th>
-                            </tr>
-                            {% for object in library.objects %}
-                                {% if object.type == type %}
-                                    <tr class="even:bg-white odd:bg-gray-50">
-                                        <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
-                                        <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
-                                        <td class="px-6 py-3">
-                                            {% for probability in object.fields.probability %}
-                                                <div class="flex flex-row space-x-2">
-                                                    <div class="">{{ probability.abbreviation }}</div>
-                                                    <div class="">{{ probability.name }}</div>
-                                                    <div class="">{{ probability.description|linebreaksbr }}</div>
-                                                </div>
-                                            {% endfor %}
-                                        </td>
-                                        <td class="px-6 py-3">
-                                        {% for impact in object.fields.impact %}
-                                            <div class="flex flex-row space-x-2">
-                                                <div class="">{{ impact.abbreviation }}</div>
-                                                <div class="">{{ impact.name }}</div>
-                                                <div class="">{{ impact.description|linebreaksbr }}</div>
-                                            </div>
-                                        {% endfor %}
-                                        </td>
-                                        <td class="px-6 py-3">
-                                            <div class="flex flex-row space-x-4">
-                                                <div class="flex flex-col">
-                                                {% for risk in object.fields.risk %}
-                                                    <div class="flex flex-row space-x-2">
-                                                        <div class="w-fit p-1 rounded" style="background-color: {{ risk.hexcolor }};"></div>
-                                                        <div class="w-fit">{{ risk.abbreviation }}</div>
-                                                        <div class="w-fit">{{ risk.name }}</div>
-                                                        <div class="w-fit">{{ risk.description|linebreaksbr }}</div>
-                                                    </div>
-                                                {% endfor %}
-                                                </div>
-                                                {% comment %} <div>
-                                                    {% for row in object.fields.grid %}
-                                                    <div class="grid grid-flow-col space-x-2">
-                                                        {% for item in row %}
-                                                            <div>{{ item }}</div>
-                                                        {% endfor %}
-                                                    </div>
-                                                    {% endfor %}
-                                                </div> {% endcomment %}
-                                            </div>
-                                        </td>
+                                        <td class="px-6 py-3">{{ object.fields.provider }}</td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}
@@ -108,7 +56,6 @@
                             <th class="px-6 py-3">{% trans "Security function name" %}</th>
                             <th class="px-6 py-3">{% trans "Description" %}</th>
                             <th class="px-6 py-3">{% trans "Provider" %}</th>
-                            <th class="px-6 py-3">{% trans "Contact" %}</th>
                         </tr>
                         {% for object in library.objects %}
                             {% if object.type == type %}
@@ -116,7 +63,6 @@
                                     <td class="px-6 py-3 font-medium text-gray-7">{{ object.fields.name }}</td>
                                     <td class="px-6 py-3">{{ object.fields.description|linebreaksbr }}</td>
                                     <td class="px-6 py-3">{{ object.fields.provider }}</td>
-                                    <td class="px-6 py-3">{{ object.fields.contact }}</td>
                                 </tr>
                             {% endif %}
                         {% endfor %}

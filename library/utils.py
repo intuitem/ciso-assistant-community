@@ -39,6 +39,7 @@ def get_available_libraries():
     for f in files:
         with open(path / f, 'r', encoding='utf-8') as file:
             libraries.append(json.load(file))
+    libraries.sort(key=lambda x: x['locale'] + x['name'].lower())
     return libraries
 
 def get_library_names():
@@ -106,7 +107,7 @@ def import_matrix(fields):
         name=fields['name'],
         description=fields['description'],
         json_definition=json.dumps(fields),
-        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+        folder=Folder.get_root_folder() # TODO: make this configurable
     )
 
     return matrix
@@ -129,7 +130,8 @@ def import_threat(fields):
     threat = Threat.objects.create(
         name=fields['name'],
         description=fields['description'],
-        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+        provider=fields['provider'],
+        folder=Folder.get_root_folder() # TODO: make this configurable
     )
 
     return threat
@@ -153,7 +155,7 @@ def import_security_function(fields):
         name=fields['name'],
         description=fields['description'],
         provider=fields['provider'],
-        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+        folder=Folder.get_root_folder() # TODO: make this configurable
     )
 
     return security_function
@@ -178,7 +180,7 @@ def import_matrix_view(request, fields):
         name=fields['name'],
         description=fields['description'],
         json_definition=json.dumps(fields),
-        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+        folder=Folder.get_root_folder() # TODO: make this configurable
     )
 
     return matrix
@@ -202,7 +204,8 @@ def import_threat_view(request, fields):
     threat = Threat.objects.create(
         name=fields['name'],
         description=fields['description'],
-        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+        provider=fields['provider'],
+        folder=Folder.get_root_folder() # TODO: make this configurable
     )
 
     return threat
@@ -227,7 +230,7 @@ def import_security_function_view(request, fields):
         name=fields['name'],
         description=fields['description'],
         provider=fields['provider'],
-        folder=Folder.objects.get(content_type=Folder.ContentType.ROOT) # TODO: make this configurable
+        folder=Folder.get_root_folder() # TODO: make this configurable
     )
 
     return security_function
@@ -292,7 +295,7 @@ def is_import_permited(request, object_type):
     object_type = object_type.replace("_", "")
     if object_type == 'matrix':                 # dirty hack to avoid changing the library format
         object_type = 'riskmatrix'
-    if not RoleAssignment.is_access_allowed(request.user, Permission.objects.get(codename=f"add_{object_type}"), Folder.objects.get(content_type=Folder.ContentType.ROOT)):
+    if not RoleAssignment.is_access_allowed(request.user, Permission.objects.get(codename=f"add_{object_type}"), Folder.get_root_folder()):
         messages.error(request, _("Library was not imported: permission denied for: {}").format(object_type))
         raise Exception(f"Permission denied for: {object_type}")
     return True

@@ -35,8 +35,7 @@ for row in range(0, dataframe1.max_row):
                 "fields": {
                     "name": f"{id} {short_description}", 
                     "description": long_description, 
-                    "provider": "ISO", 
-                    "contact": ""
+                    "provider": "ISO"
                 }
             }
         )

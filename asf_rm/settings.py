@@ -54,6 +54,9 @@ RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY')
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error'] # see https://developers.google.com/recaptcha/docs/faq
 
+PAGINATE_BY = os.environ.get('PAGINATE_BY', default=500)
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -120,6 +123,13 @@ EMAIL_HOST_PASSWORD_RESCUE = os.environ.get('EMAIL_HOST_PASSWORD_RESCUE')
 EMAIL_USE_TLS_RESCUE = os.environ.get('EMAIL_USE_TLS_RESCUE')
 
 EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', default="5")) # seconds
+
+## Licence management
+LICENCE_DEPLOYMENT = os.environ.get('LICENCE_DEPLOYMENT', default="On-premises")
+LICENCE_TYPE = os.environ.get('LICENCE_TYPE', default="Standard")
+LICENCE_SUPPORT = os.environ.get('LICENCE_SUPPORT', default="Standard")
+LICENCE_EXPIRATION = os.environ.get('LICENCE_EXPIRATION', default="-")
+
 
 TEMPLATES = [
     {
@@ -237,3 +247,11 @@ AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend']
 FIDO_SERVER_ID=urlparse(MIRA_URL).hostname
 FIDO_SERVER_NAME="FidoMira"
 # leave KEY_ATTACHMENT undefined to allow both platform and roaming authenticators
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.ScryptPasswordHasher',
+]

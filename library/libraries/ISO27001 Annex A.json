@@ -1,7 +1,9 @@
 {
+      "locale": "en",
       "name": "ISO 27001:2013 Annex A",
       "description": "security functions from ISO27001 Annex A",
       "format_version": "1.0",
+      "copyright": "©ISO/CEI 2013 – All rights reserved",
       "objects": [
             {
                   "type": "security_function",

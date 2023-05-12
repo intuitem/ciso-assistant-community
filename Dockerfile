@@ -15,16 +15,14 @@ RUN apt update && \
 
 COPY asf_rm /code/asf_rm
 COPY cal /code/cal
-COPY config /code/config
 COPY core /code/core
 COPY db/readme.txt /code/db/readme.txt
 COPY iam /code/iam
 COPY library /code/library
 COPY locale /code/locale
 COPY serdes /code/serdes
-COPY staticfiles /code/staticfiles
+COPY static /code/static
 COPY theme /code/theme
-COPY tools /code/tools
 COPY manage.py startup.sh /code/
 
 RUN django-admin makemessages --all -i venv && \

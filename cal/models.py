@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.html import format_html
 from django.urls import reverse
 
 
@@ -11,4 +12,4 @@ class Event(models.Model):
     @property
     def get_html_url(self):
         url = ""
-        return f'<a class="bg-blue-100" href="{url}"> {self.name} </a>'
+        return format_html('<a class="bg-blue-100" href="{}"> {} </a>', url, self.name)

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from calendar import HTMLCalendar, LocaleHTMLCalendar
 from .models import Event
 from core.models import SecurityMeasure, RiskAcceptance
+from django.utils.html import format_html
 
 class Calendar(LocaleHTMLCalendar):
     def __init__(self, year=None, month=None, *args, **kwargs):
@@ -16,7 +17,7 @@ class Calendar(LocaleHTMLCalendar):
         events_per_day += list(events['ra'].filter(expiry_date__day=day))
         d = ''
         for event in events_per_day:
-            d += f'<li> {event.get_html_url} </li>'
+            d += format_html('<li> {} </li>', event.get_html_url)
 
         if day != 0:
             return f"<td><span class='date'>{day}</span><ul> {d} </ul></td>"

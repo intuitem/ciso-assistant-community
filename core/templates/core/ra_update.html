@@ -65,7 +65,7 @@
                     {% include 'snippets/add_button_modal.html' with form=risk_scenario_create_form header=_("Add Risk Scenario") model="riskscenario" content=_("New risk scenario") %}
                 </div>
             </div>
-            {% include 'snippets/ri_list_nested.html' %}
+            {% include 'snippets/ri_list_nested.html' with edit=True %}
         </div>
     </div>
 </div>

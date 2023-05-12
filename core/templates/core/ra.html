@@ -8,5 +8,8 @@
 </style>
 {% endblock %}
 {% block content %}
+{% with page_title=analysis %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
 {% include 'snippets/ra_data.html' %}
 {% endblock %}
