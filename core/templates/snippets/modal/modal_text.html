@@ -1,0 +1,29 @@
+{% load static i18n core_extras %}
+
+<!-- BEGIN UPDATE FORM -->
+    <div class="flex items-center">
+        {% if topic == "cgu" %}
+            {% include 'registration/cgu.html' %}
+        {% elif topic == "BI-RL-AUD" %}
+        <div class="p-2 m-2 flex content-center">
+            <div class="text-5xl text-yellow-900"><i class="fa-solid fa-book"></i></div>
+        </div>
+            <p>{% trans "This role gives read access to selected projects and domains." %}</p>
+        {% elif topic == "BI-RL-ANA" %}
+        <div class="p-2 m-2 flex content-center">
+            <div class="text-5xl text-indigo-500"><i class="fa-solid fa-chart-simple"></i></div>
+        </div>
+            <p>{% trans "This role gives read and write access to selected projects and domains. It has also read access on global and domain objects." %}</p>
+        {% elif topic == "BI-RL-DMA" %}
+        <div class="p-2 m-2 flex content-center">
+            <div class="text-5xl text-amber-400"><i class="fa-solid fa-folder-open"></i></div>
+        </div>
+            <p>{% trans "This role gives full access to selected domains. Like an analyst, it has also read access on global and domain objects." %}</p>
+        {% elif topic == "BI-RL-ADM" %}
+        <div class="p-2 m-2 flex content-center">
+            <div class="text-5xl text-blue-800"><i class="fa-solid fa-building-shield"></i></div>
+        </div>
+            <p>{% trans "This role has all permissions, specifically to manage project domains, users and users rights." %}</p>
+        {% endif %}
+    </div>
+  <!-- END UPDATE FORM -->

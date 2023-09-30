@@ -1,0 +1,54 @@
+<div id="{{name}}_div" class="bg-white w-auto h-full"></div>
+<script type="text/javascript">
+
+        var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+
+        // specify chart configuration item and data
+        var option = {
+            toolbox: {
+            show: true,
+            feature: {
+                mark: {show: true},
+                dataView: {show: false, readOnly: true},
+                saveAsImage: {show: true}
+                }
+            },
+            tooltip:{},
+            xAxis: {
+                type: 'category',
+                data: {{labels|safe}},
+                axisTick: {
+                        alignWithLabel: true
+                    },
+                axisLabel: {
+                    formatter: function(value) {
+                        return value.replace(/\s+/g, '\n');
+                    }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                allowDecimals: false,
+                minInterval: 1
+            },
+            series: [{
+                data: {{values|safe}},
+                type: 'bar'
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
+
+        {% comment %} {{name}}_ch.on('click', function (params) {
+        console.log('{{name}} '+params.dataIndex);
+        window.open(`/browser?{{name}}=${params.dataIndex}`);
+        }); {% endcomment %}
+
+        
+
+</script>

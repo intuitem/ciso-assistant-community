@@ -1,0 +1,152 @@
+{% extends 'core/base.html' %}
+
+{% load i18n %}
+
+{% block head %}
+<script src="/static/cache/echarts-5.4.1.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="h-screen w-auto" x-data="{ openTab: $persist(1).using(sessionStorage) }">
+    {% with page_title=_('Overview') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+
+    <div class="px-4 flex flex-row mb-0">
+        <div @click="openTab = 1" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 1 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
+                <i class="fas fa-chart-pie"></i>
+            </span>
+            <div class="w-full">{% trans "Overview" %}</div>
+        </div>
+        <div @click="openTab = 2" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 2 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
+                <i class="fas fa-star"></i>
+            </span>
+            <div class="w-full">{% trans "Compliance" %}</div>
+        </div>
+        <div @click="openTab = 3" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 3 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
+                <i class="fas fa-heartbeat"></i>
+            </span>
+            <div class="w-full">{% trans "Treatment" %}</div>
+        </div>
+        <div @click="openTab = 4" class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center" :class="openTab !== 4 ? 'border-b' : ' bg-white border-b-0'">
+            <span class="">
+                <i class="fas fa-drafting-compass"></i>
+            </span>
+            <div class="w-full">{% trans "Composer" %}</div>
+        </div>
+    </div>
+
+    <div x-show="openTab === 1">
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="stats">
+            <div class="p-2 m-2">
+                <span class="text-2xl font-extrabold text-slate-700">{% trans "Statistics" %}</span>
+            </div>
+            <div class="flex items-center content-center">
+                <div class="w-1/3 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-blue-500 mr-2"><i class="fas fa-glasses"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Assessment }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Assessments" %}</div></div>
+                </div>
+                <div class="w-1/3 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">{{ counters.SecurityMeasure }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Security measures" %}</div></div>
+                </div>
+                <div class="w-1/3 p-2 m-2  flex content-center bg-white">
+                    <div class="text-5xl text-green-500 mr-2"><i class="fas fa-file"></i></div>
+                    <div class=" text-left"><div class="text-4xl font-bold">{{ counters.Evidence }}</div> <div class="font-semibold text-slate-500 text-sm">{% trans "Evidences" %}</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
+            <div class="p-2 m-2">
+                <div class="text-2xl font-extrabold text-slate-700">{% trans "My projects" %}</div>
+                <div class="text-sm text-slate-500 font-semibold">{% trans "Assigned to" %} <span class="font-bold text-slate-700">{{ counters.Project }}</span> {% trans "projects" %}</div>
+                <div class="overflow-x-auto shadow-md sm:rounded-lg mt-2">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-3 py-3">
+                                    {% trans "Project" %}
+                                </th>
+                                <th scope="col" class="px-3 py-3">
+                                    {% trans "Assessment" %}
+                                </th>
+                                <th scope="col" class="px-3 py-3">
+                                    {% trans "Framework" %}
+                                </th>
+                                <th scope="col" class="px-3 py-3">
+                                    {% trans "Overall compliance" %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in projects %}
+                            <tr class="bg-white border-b text-ellipsis overflow-hidden hover:text-indigo-500 hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'project-detail' project.id %}?next={{ request.path|urlencode }}'">
+                                <th scope="row" class="px-3 py-4 font-medium">
+                                    {{ project }}
+                                </th>
+                                <td class="px-3 py-4">
+                                    {% for assessment in project.assessment_set.all %}
+                                        <li>
+                                            {{ assessment }}
+                                        </li>
+                                    {% endfor %}
+                                </td>
+                                <td class="px-3 py-4">
+                                    {% for assessment in project.assessment_set.all %}
+                                        <li>
+                                            {{ assessment.framework }}
+                                        </li>
+                                    {% endfor %}
+                                </td>
+                                <td class="px-3 py-4 w-1/4">
+                                    <div class="flex bg-gray-300 rounded-full overflow-hidden text-center text-gray-900">
+                                        <div class="flex flex-col justify-center overflow-hidden
+                                        {% if project.overall_compliance <= 25 and project.overall_compliance > 0 %}
+                                            bg-red-500 
+                                        {% elif project.overall_compliance > 25 and project.overall_compliance <= 75 %}
+                                            bg-yellow-400 
+                                        {% elif project.overall_compliance > 75 %}
+                                            bg-green-500 
+                                        {% endif %}
+                                        " style="width: {% if project.overall_compliance == 0 %}100{% else %}{{ project.overall_compliance }}{% endif %}%"> {{ project.overall_compliance }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
+            <div class="p-2 m-2">
+                <div class="text-2xl font-extrabold text-slate-700">{% trans "Watch list" %}</div>
+                <div class="text-sm text-slate-500 font-semibold">{% trans "Items that have expired or with close ETA" %}</div>
+            </div>
+            <div class="p-2 m-2 flex flex-col space-y-5 items-center content-center">
+                <div class="w-full">
+                    <span class="text-md font-semibold">{% trans "Measures to review" %}</span>
+                    <div>{% include 'core/fragments/watchlist_measures.html' %}</div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div x-show="openTab === 4">
+        {% include 'core/project_select.html' with projects=projects %}
+    </div>
+    <div x-show="openTab === 2">
+        {% include 'core/compliance.html' %}
+    </div>
+    <div x-show="openTab === 3">
+        {% include 'core/treatment.html' with agg_data=agg_data measures=ord_security_measures %}
+    </div>
+    {% comment %} Don't know why but when we put openTab === 2 before openTab === 4 the tab 2 (composer) is not displayed {% endcomment %}
+    
+</div>
+
+{% endblock %}

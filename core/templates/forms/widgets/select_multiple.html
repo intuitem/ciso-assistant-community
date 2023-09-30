@@ -1,0 +1,46 @@
+{% load i18n %}
+
+<div x-data="{
+    search: '',
+    show_item(el) {
+      return this.search === '' || el.textContent.toLowerCase().includes(this.search.toLowerCase())
+    }
+  }" x-class="flex flex-col">
+  
+    <div class="flex flex-row space-x-0 {{ widget.attrs.searchbar_class }}">
+        <div class="my-auto search-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <input class="border-none focus:ring-0 overflow-ellipsis" type="search" placeholder="Search..." x-model="search">
+    </div>
+
+    <div class="{{ widget.attrs.wrapper_class }}">
+  
+    {% comment %} <div>
+      <p>Search Input: <span x-text="search"></span></p>
+    </div> {% endcomment %}
+
+        {% with id=widget.attrs.id %}
+        <div{% if id %} id="{{ id }}"{% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }}"{% endif %}>
+            {% for group, options, index in widget.optgroups %}
+                {% if group %}
+                <div>
+                    <label>{{ group }}</label>
+                {% endif %}
+                {% for option in options %}
+                    {% if option.value in recommended_security_measures %}
+                    <div class="text-indigo-700 rounded" x-show="show_item($el)">
+                    {% else %}
+                    <div x-show="show_item($el)">
+                    {% endif %}
+                        {% include option.template_name with widget=option %}
+                        {% if option.value in recommended_security_measures %}  <span class="text-gray-500">({% trans "suggested" %})</span> {% endif %}
+                    </div>
+                {% endfor %}
+                {% if group %}</div>{% endif %}
+            {% endfor %}
+        </div>{% endwith %}
+
+    </div>
+
+</div>

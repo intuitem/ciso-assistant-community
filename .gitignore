@@ -1,0 +1,13 @@
+__pycache__
+*.DS_Store
+*~$*
+staticfiles/*
+*.mo
+.env
+dump.json
+node_modules/
+.vscode
+ciso_assistant/build.json
+*.sqlite3
+db/django_secret_key
+db/attachments/

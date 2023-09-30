@@ -1,0 +1,55 @@
+{% extends 'core/base.html' %}
+
+{% load i18n %}
+
+{% block content %}
+
+<div>
+    {% with page_title=_('Search results') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+
+    <div class="flex justify-center">
+        <div class="flex-grow max-w-4xl mx-14 mb-14 mt-8">
+            <search>
+                <form action="{% url 'search' %}" class="">
+                    <span class="flex flex-row space-x-0 rounded-lg h-fit shadow-lg focus-within:ring-2 focus-within:ring-blue-700">
+                        <div class="h-10 rounded-l-lg bg-white py-2 pl-3 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <input id="search" required type="search" name="q" placeholder="{% trans "Security measure" %}" value="{{ request.GET.q }}"
+                                class="flex-grow text-sm h-10 rounded-r-lg border-none focus:ring-0 overflow-ellipsis">
+                        {% comment %} <button id="submit" type="submit" class="text-gray-700">
+                                <i class="fas fa-search text-lg w-4 h-4 ml-2 mr-4"></i>
+                        </button> {% endcomment %}
+                    </span>
+                </form>
+            </search>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-xl px-8 py-10 flex flex-col space-y-4 rounded-lg">
+
+        <div class="px-2 py-4 bg-white rounded">
+            <div class="text-lg font-black">
+                {% blocktrans count counter=results.SecurityMeasure|length %}
+                Security measure
+                {% plural %}
+                Security measures
+                {% endblocktrans %} ({{ results.SecurityMeasure|length }})
+            </div>
+            {% if not results.SecurityMeasure %}
+            <div class="text-amber-600"><i class="fas fa-exclamation-circle"></i> {% trans "No results matched your query. Try something more specific." %}</div>
+            {% endif %}
+            <div>
+                <ul class="pl-3 ml-3 list-disc">
+                    {% for entry in results.SecurityMeasure %}
+                    <li><a id="security_measure" href="{% url 'MP' entry.folder.id %}" class="text-gray-700 hover:text-blue-500">{{entry}}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

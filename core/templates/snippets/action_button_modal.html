@@ -1,0 +1,16 @@
+{% load i18n static %}
+
+<div class="my-2 mx-2" x-data="{ open: false }">
+    <a @click="open = !open,
+            modalOpen = !modalOpen"
+            {% if name == "accepted" %}
+            class="bg-green-600 px-4 py-2 cursor-pointer text-white hover:bg-green-500 rounded-md font-medium"> <i class="fas fa-check mr-2"></i>
+            {% elif name == "rejected" %}
+            class="bg-red-600 px-4 py-2 cursor-pointer text-white hover:bg-red-400 rounded-md font-medium"> <i class="fas fa-xmark mr-3"></i>
+            {% elif name == "revoked" %}
+            class="bg-red-700 px-4 py-2 cursor-pointer text-white hover:bg-red-500 rounded-lg justify-self-end w-fit h-fit font-medium"> <i class="fas fa-xmark mr-3"></i>
+            {% endif %}
+            {{ content }}
+    </a>
+        {% include "snippets/modal/modal.html" with modal_action="action"%}
+</div>

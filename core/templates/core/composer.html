@@ -1,0 +1,146 @@
+{% extends 'core/base.html' %}
+
+{% load i18n %}
+
+{% block head %}
+<script src="/static/cache/echarts-5.4.1.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="p-4 mx-auto min-h-screen">
+    <div class="px-2 mx-2 font-semibold text-xl">{% trans "Your selection" %}</div>
+    <div class="px-2 mx-2 text-sm"><i class="fas fa-info-circle"></i> {% trans "Hint: you can bookmark this page for future usage" %}</div>
+    <div class="p-4 mt-4 mx-2 bg-white shadow rounded">
+        <div class="p-2 font-semibold text-lg">
+            {% blocktrans count counter=context.project_objects|length %}
+            Here is the overview for the selected project:
+            {% plural %}
+            Here is the overview for the {{ counter }} selected projects:
+            {% endblocktrans %}
+        </div>
+        <div class="flex space-x-2">
+            <div class="w-1/2">
+                <div class="p-2 text-sm font-semibold">{% trans "Status of requirements assessed" %}</div>
+                <div>
+                    <div class="items-center justify-center h-96">
+                        {% include 'snippets/bar_chart.html' with name='ra' labels=context.assessments_status.labels values=context.assessments_status.values %}
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/2">
+                <div class="p-2 text-sm font-semibold">{% trans "Status of associated measures" %}</div>
+                <div>
+                    <div class="items-center justify-center h-96">
+                        {% include 'snippets/bar_chart.html' with name='mtg' labels=context.security_measure_status.labels values=context.security_measure_status.values %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 px-2 flex flex-col space-y-2">
+        {% for item in context.project_objects %}
+        <div id="show_{{ item.project }}" x-data="{ show: $persist(false).using(sessionStorage).as($el.id) }">
+            <div class="bg-white rounded-lg overflow-hidden shadow" id="headingOne">
+                <div class="flex flex-row space-x-4 px-8 py-4 w-full hover:bg-gray-100 cursor-pointer items-center" @click="show=!show">
+                    <div class="text-gray-700">
+                        <i x-show="!show" class="fas fa-angle-down"></i>
+                        <i x-show="show" class="fas fa-angle-up"></i>
+                    </div>
+                    <button class="flex flex-row space-x-2 items-center text-gray-700 font-semibold focus:outline-none w-full" type="button">
+                        <p>{{ item.project }}</p>
+                        <div class="flex bg-gray-300 rounded-full overflow-hidden text-center text-gray-900 w-1/2 h-4">
+                            <div class="flex flex-col justify-center overflow-hidden
+                            {% if item.project.overall_compliance <= 25 and item.project.overall_compliance > 0 %}
+                                bg-red-500 
+                            {% elif item.project.overall_compliance > 25 and item.project.overall_compliance <= 75 %}
+                                bg-yellow-400 
+                            {% elif item.project.overall_compliance > 75 %}
+                                bg-green-500 
+                            {% endif %}
+                            " style="width: {% if item.project.overall_compliance == 0 %}100{% else %}{{ item.project.overall_compliance }}{% endif %}%"> {{ item.project.overall_compliance }}%
+                            </div>
+                        </div>
+                    </button>
+                </div>
+                <div x-show="show" x-transition.origin.top class="border-t px-10 py-4 bg-white flex flex-row space-x-4">
+                    <div class="w-full">
+                        <div class="flex flex-col pb-2 w-full">
+                            {% for assessment in item.project.assessment_set.all %}
+                            <div class="shadow-md border rounded-lg p-3 mb-2">
+                                <a href="{% url 'assessment-detail' assessment.id %}?next={{ request.path|urlencode }}" class="text-indigo-500 hover:text-indigo-400 font-semibold">{{ assessment }}: {{ assessment.requirementassessment_set.all.count }} {% trans 'requirements' %}</a>
+                                <div class="flex flex-col w-full space-y-2 mb-2">
+                                    <div class="items-center space-y-2">
+                                        <p class="text-gray-700 font-medium text-sm">{% trans 'Status of requirements assessed' %}</p>
+                                        <div class="flex flex-row">
+                                            {% for status in assessment.get_requirements_status_count %}
+                                                <div class="px-3 text-sm
+                                                {% if status.1 == 'to_do' %}
+                                                    text-gray-500
+                                                {% elif status.1 == 'in_progress' %}
+                                                    text-blue-500
+                                                {% elif status.1 == 'non_compliant' %}
+                                                    text-red-500
+                                                {% elif status.1 == 'partially_compliant' %}
+                                                    text-yellow-400
+                                                {% elif status.1 == 'compliant' %}
+                                                    text-green-500
+                                                {% elif status.1 == 'not_applicable' %}
+                                                    text-black
+                                                {% endif %}
+                                                ">
+                                                {{status.1.label}}: {{status.0}}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="items-center space-y-2">
+                                        <p class="text-gray-700 font-medium text-sm">{% trans 'Status of associated measures' %}</p>
+                                        <div class="flex flex-row">
+                                            {% for status in assessment.get_measures_status_count %}
+                                                <div class="px-3 text-sm
+                                                {% if status.1.0 == 'open' %}
+                                                    text-blue-500
+                                                {% elif status.1.0 == 'in_progress' %}
+                                                    text-orange-500
+                                                {% elif status.1.0 == 'on_hold' %}
+                                                    text-red-500
+                                                {% elif status.1.0 == 'done' %}
+                                                    text-green-500
+                                                {% endif %}
+                                                ">
+                                                {{status.1.1}}: {{status.0}}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% comment %} {% if assessment.quality_check.count > 0 %} 
+                                    <span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{% trans "Review needed" %}</span>
+                                    {% else %} 
+                                    <span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{% trans "Ok" %}</span> 
+                                {% endif %}
+                                </p>
+                                {% if assessment.quality_check.count > 0 %}➡️ <span class="text-sm">{% trans "Found" %}
+                                    {% blocktrans count counter=assessment.quality_check.count %}
+                                        <b>{{ counter }}</b> inconsistency that you need to check (use <a class="simple-link hover:underline visited:text-indigo-600" href="/x-rays">x-rays</a> for more information).</span>
+                                    {% plural %}
+                                        <b>{{ counter }}</b> inconsistencies that you need to check (use <a class="simple-link hover:underline visited:text-indigo-600" href="/x-rays">x-rays</a> for more information).</span>
+                                    {% endblocktrans %}
+                                {% endif %} {% endcomment %}
+                            </div>
+                            {% empty %}
+                                <div class="flex items-center justify-center space-x-2 p-4">
+                                    <i class="inline fas fa-exclamation-triangle"></i>
+                                    <p class="inline test-gray-900">{% trans "No assessment found." %}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <a class="text-indigo-800 hover:text-indigo-600 py-2 my-2" href="{% url 'project-detail' item.project.id %}"><i class="fas fa-external-link-square-alt"></i> {% trans "Jump to project details" %}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

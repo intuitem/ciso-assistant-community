@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+
+{% load i18n %}
+
+{% block content %}
+{% with page_title=_('Calendar') %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
+    <div class="container mx-auto">
+        <div class="relative space-x-2">
+            <a class="absolute left-0 bg-indigo-600 hover:bg-indigo-400 text-white text-center rounded p-2" href="{% url 'calendar' %}?{{ prev_month }}"> <i class="fas fa-arrow-alt-circle-left"></i> <span class="text-sm">{% trans "Previous month" %}</span> </a>
+            <a class="absolute right-0 bg-indigo-600 hover:bg-indigo-400 text-white text-center rounded p-2" href="{% url 'calendar' %}?{{ next_month }}"> <span class="text-sm">{% trans "Next month" %}</span> <i class="fas fa-arrow-alt-circle-right"></i> </a>
+        </div>
+        <div class="bg-white rounded shadow-lg w-auto flex break-words">
+            {{ calendar }}
+        </div>
+    </div>
+{% endblock %}
