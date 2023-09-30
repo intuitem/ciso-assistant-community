@@ -1,9 +1,34 @@
 # CISO Assistant
 
-CISO Assistant is your streamlined one-stop shop for compliance assessment and management. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
+CISO Assistant brings a different take on Cyber Security Posture Management:
+
+- by explicitly decoupling compliance from cybersecurity practices implementation
+- providing simplified tools for decision making
+- while providing capabilities for a program, product or an organization assessment against standard frameworks.
+- you can bring your own framework as well using a simplified DSL
+
+![](posture.png)
+
+This decoupling allows you to save considerable amount of time:
+- reuse previous assessments,
+- assess a scope against multiple frameworks at the same time, 
+- leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
 
 Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) about the community editions on our blog.
 
+## Supported frameworks
+
+- ISO 27001
+- NIST Cyber Security Framework (CSF) v1.1
+- NIS2
+
+Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
+### Coming soon
+
+- CMMC
+- GDPR checklist
+- ANSSI CyberScore
+- NIST CSF v2
 ## Community
 
 Join our [open Discord community](https://discord.gg/7ubENCPF) to interact with the team and other GRC experts.
