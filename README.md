@@ -31,7 +31,7 @@ Checkout the [library](/library/libraries/) for the Domain Specific Language use
 - NIST CSF v2
 ## Community
 
-Join our [open Discord community](https://discord.gg/7ubENCPF) to interact with the team and other GRC experts.
+Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.
 
 ## Installation
 
