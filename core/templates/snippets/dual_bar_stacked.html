@@ -1,0 +1,178 @@
+{% load i18n %}
+<div id="stacked_div" class="bg-white p-2 m-2 w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+        var stacked_ch = echarts.init(document.getElementById('stacked_div'), null, {renderer: 'svg'});
+        var current_vl = {% blocktrans %} "Current: Very low" {% endblocktrans %};
+        var current_l = {% blocktrans %} "Current: Low" {% endblocktrans %};
+        var current_m = {% blocktrans %} "Current: Medium" {% endblocktrans %};
+        var current_h = {% blocktrans %} "Current: High" {% endblocktrans %};
+        var current_vh = {% blocktrans %} "Current: Very high" {% endblocktrans %};
+        var residual_vl = {% blocktrans %} "Residual: Very low" {% endblocktrans %};
+        var residual_l = {% blocktrans %} "Residual: Low" {% endblocktrans %};
+        var residual_m = {% blocktrans %} "Residual: Medium" {% endblocktrans %};
+        var residual_h = {% blocktrans %} "Residual: High" {% endblocktrans %};
+        var residual_vh = {% blocktrans %} "Residual: Very high" {% endblocktrans %};
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'        // 'line' | 'shadow'
+                }
+            },
+            toolbox: {
+        show: true,
+        feature: {
+            mark: {show: true},
+            dataView: {show: false, readOnly: true},
+            saveAsImage: {show: true}
+            }
+        },
+            legend: {
+                data: [
+                    {name: current_vl, 'itemStyle': {'color': '#BBF7D0' }},
+                    {name: current_l, 'itemStyle': {'color': '#BEF264' }},
+                    {name: current_m, 'itemStyle': {'color': '#FEF08A' }},
+                    {name: current_h, 'itemStyle': {'color': '#FBBF24' }},
+                    {name: current_vh, 'itemStyle': {'color': '#F87171' }},
+                    {name: residual_vl, 'itemStyle': {'color': '#BBF7D0' }},
+                    {name: residual_l, 'itemStyle': {'color': '#BEF264' }},
+                    {name: residual_m, 'itemStyle': {'color': '#FEF08A' }},
+                    {name: residual_h, 'itemStyle': {'color': '#FBBF24' }},
+                    {name: residual_vh, 'itemStyle': {'color': '#F87171' }},
+                    ],
+                show: true
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    axisTick: {
+                    alignWithLabel: true,
+
+                    },
+                    axisLabel: {
+                        width: 80,
+                        interval: 0,
+                        overflow: 'break',
+                    },
+                    type: 'category',
+                    data: {{ch_context.names|safe}}
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+
+                    minInterval: 1,
+                    show: false,
+                }
+            ],
+            series: [
+                {
+                    name: current_vl,
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.VL|safe}}
+                },
+                {
+                    name: current_l,
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.L|safe}}
+                },
+                {
+                    name: current_m,
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.M|safe}}
+                },
+                {
+                    name: current_h,
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.H|safe}}
+                },
+                {
+                    name: current_vl,
+                    type: 'bar',
+                    stack: 'CurrentRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.current_out.VH|safe}}
+                },
+
+                {
+                    name: residual_vl,
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.VL|safe}}
+                },
+                {
+                    name: residual_l,
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.L|safe}}
+                },
+                {
+                    name: residual_m,
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.M|safe}}
+                },
+                {
+                    name: residual_h,
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.H|safe}}
+                },
+                {
+                    name: residual_vh,
+                    type: 'bar',
+                    stack: 'ResidualRisks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{ch_context.residual_out.VH|safe}}
+                },
+            ]
+        };
+        // use configuration item and data specified to show chart
+        stacked_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            stacked_ch.resize();
+        });
+
+</script>

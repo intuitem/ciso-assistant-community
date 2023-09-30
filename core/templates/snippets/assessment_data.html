@@ -1,0 +1,34 @@
+{% load i18n %}
+
+<main class="flex-grow main">
+    <!--Information banner-->
+    <div class="">
+        <div class="bg-white py-4 px-12 m-4 shadow rounded-lg flex space-x-2 relative">
+            {% if object_ids_change %}
+            <a href="{% url 'assessment-update' assessment.id %}?next={{ request.path|urlencode }}" class="absolute right-2 top-2 py-2 px-4 m-1 add-button">
+                <i class="fas fa-edit"></i>
+                {% trans "Edit" %}</a>
+            {% endif %}
+            <div class="container w-1/3 ">
+                <div class="text-sm font-semibold ">{% trans "Assessment" %}</div>
+                <div id="name" class="text-lg font-semibold ">{{ assessment }}</div>
+                <br>
+                <div class="text-sm">
+                    <ul class="">
+                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> {% if assessment.is_draft %} 
+                        <span class="bg-blue-200 py-1 px-2 rounded-lg">{% trans "Draft" %}</span> {% else %} <span class="bg-green-200 py-1 px-2 rounded-lg">{% trans "Ready" %} </span>{% endif %}
+                        </li>
+                        <li class="pb-1"><span class="font-semibold">{% trans "Created at:" %}</span> {{ assessment.created_at|date }}</li>
+                        <li class="pb-1"><span class="font-semibold">{% trans "Updated at:" %}</span> {{ assessment.updated_at|date }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="container w-2/3 rounded">
+                <div class="text-sm"><span class="font-semibold">{% trans "Description" %} :</div>
+                <div class="text-sm"> {{ assessment.description|linebreaksbr }}</div>
+            </div>
+
+        </div>
+    </div>
+
+</main>

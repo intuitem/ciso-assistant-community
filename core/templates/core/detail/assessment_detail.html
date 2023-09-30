@@ -1,0 +1,67 @@
+{% extends 'generic/detail.html' %}
+{% load static i18n %}
+
+{% block head %}
+<script src="/static/cache/echarts-5.4.1.min.js"></script>
+{% endblock %}
+
+{% block content %}
+{% with page_title=object %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
+<div class="bg-white rounded-lg shadow-lg px-4 py-3 w-full mt-2 flex flex-col space-y-2">
+    <div class="relative">
+        <h2 class="text-xl font-semibold mb-4">{% trans 'Summary' %}</h3>
+        <div class="flex flex-row">
+            <div class="p-2 w-1/5">
+                <div class="flex flex-col space-y-2">
+                    <div class="flex flex-col w-fit">
+                        <p class="text-gray-800 text-sm font-medium">{% trans "Name" %}</p>
+                        <p class="text-gray-600 text-sm">{{ object.name }}</p>
+                    </div>
+                    <div class="flex flex-col w-fit">
+                        <p class="text-gray-800 text-sm font-medium">{% trans "Domain" %}</p>
+                        <p class="text-gray-600 text-sm">{{ object.project.folder }}</p>
+                    </div>
+                    <div class="flex flex-col w-fit">
+                        <p class="text-gray-800 text-sm font-medium">{% trans "Project" %}</p>
+                        <p class="text-gray-600 text-sm">{{ object.project }}</p>
+                    </div>
+                    <div class="flex flex-col w-fit">
+                        <p class="text-gray-800 text-sm font-medium">{% trans "Framework" %}</p>
+                        <p class="text-gray-600 text-sm">{{ object.framework }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 w-3/5">
+                {% include 'core/fragments/basic_donut.html' with labels=assessments_status.labels values=assessments_status.values %}
+            </div>
+            <div class="absolute top-0 right-0 mt-2 space-x-2">
+                <a href="{% url "export-assessment" object.id %}"
+                    class="whitespace-nowrap bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg w-fit h-fit font-medium">
+                    <i class="fas fa-download mr-2"></i>{% trans "Export" %}
+                </a>
+                {% if change %}
+                <a href="{{ object.edit_url }}?next={{ request.path|urlencode }}"
+                    class="whitespace-nowrap bg-indigo-700 px-4 py-2 cursor-pointer text-white hover:bg-indigo-600 rounded-lg w-fit h-fit font-medium">
+                    <i class="fas fa-edit mr-2"></i>{% trans "Edit" %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% if object.description %}
+<div class="bg-white rounded-lg shadow-lg px-4 py-6 w-full mt-2">
+    <h2 class="text-xl font-semibold mb-4">{% trans "Description" %}</h2>
+    <p class="text-gray-600">{{ object.description }}</p>
+</div>
+{% endif %}
+<div class="bg-white rounded-lg shadow-lg px-4 py-6 w-full mt-2">
+    <div class="grid grid-rows-1 grid-cols-2 mb-2">
+        <h2 class="text-xl font-semibold mb-4">{% trans "Requirements" %}</h2>
+    </div>
+    {% include 'snippets/requirementassessment_list_nested.html' with page='assessment' %}
+</div>
+{% endblock content %}

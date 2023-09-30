@@ -1,0 +1,53 @@
+{% load i18n %}
+{% load static tailwind_tags %}
+
+<table class="min-w-full leading-normal border-x-2 border-b-2">
+    {% if tree %}
+    <ul>
+        {% include "snippets/tree.html" with assessment=True %}
+    </ul> 
+    {% else %}
+    <div class="grid grid-cols-1 pb-4">
+        {% for item in requirement_assessments %}
+            <div class="bg-gray-50 shadow-md border
+            {% if item.status == 'non_compliant' %}
+            border-t-red-500 hover:border-red-500 hover:shadow-red-500/70
+            {% elif item.status == 'in_porgress' %}
+            border-t-blue-500 hover:border-blue-500 hover:shadow-blue-500/70
+            {% elif item.status == 'compliant' %}
+            border-t-green-500 hover:border-green-500 hover:shadow-green-500/70
+            {% elif item.status == 'to_do' %}
+            border-t-gray-300 hover:border-gray-300 hover:shadow-gray-500/70
+            {% elif item.status == 'partially_compliant' %}
+            border-t-yellow-400 hover:border-yellow-400 hover:shadow-yellow-400/70
+            {% elif item.status == 'not_applicable' %}
+            border-t-black hover:border-black hover:shadow-black
+            {% endif %}
+            border-t-2 rounded-lg px-4 py-2 m-2 cursor-pointer transition-all duration-500" 
+            onclick="window.location='{% url 'requirementassessment-update' item.id %}?next={{ request.path|urlencode }}'">
+                <div class="flex flex-row justify-between mb-2">
+                    <p class="font-semibold">{{ item }}</p>
+                    <p class="text-white rounded-md px-2 whitespace-nowrap
+                    {% if item.status == 'non_compliant' %}
+                    bg-red-500
+                    {% elif item.status == 'in_progress' %}
+                    bg-blue-500
+                    {% elif item.status == 'compliant' %}
+                    bg-green-500
+                    {% elif item.status == 'to_do' %}
+                    bg-gray-300
+                    {% elif item.status == 'partially_compliant' %}
+                    bg-yellow-400
+                    {% elif item.status == 'not_applicable' %}
+                                            bg-black text-white
+                    {% endif %}
+                    ">{{ item.get_status_display }}</p>
+                </div>
+                {{ item.requirement.description }}
+            </div>
+        {% empty %}
+            <p class="text-center text-gray-500 py-4">{{ _("No requirements found") }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</table>

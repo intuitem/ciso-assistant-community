@@ -1,0 +1,55 @@
+{% load i18n static %}
+<div class="space-y-4">
+    <p class="relative whitespace-normal text-gray-800">
+        {% blocktrans %}
+        Are you sure you want to import the following library: <strong class="font-semibold text-gray-700">{{ lib_name }}</strong>?
+        {% endblocktrans %}
+    </p>
+    <div class="whitespace-normal">
+        {{ extra_text }}
+    </div>
+    <div class="flex items-center justify-end">
+        <button id="back"
+        @click="open = !open, modalOpen = !modalOpen"
+        type="button"
+        class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gray-600 hover:bg-gray-700 mr-2"
+        >{% trans "No, take me back" %}</button>
+        <form action="{% url 'import-default-library' lib_urn %}" method="POST">{% csrf_token %}
+            <input id="yes" class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-indigo-600 hover:bg-indigo-700 mr-2"
+            type="submit" value={% trans "Yes" %}>
+        </form>
+        <div id="loading_{{lib_urn}}" class="flex items-center justify-center">
+            <button type="button"
+                class="inline-flex items-center px-4 py-2 text-sm font-semibold leading-6 text-white transition duration-150 ease-in-out bg-indigo-600 rounded shadow cursor-not-allowed"
+                disabled="">
+                <svg class="w-5 h-5 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                {% trans 'Loading' %}...
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){ /// hide and show button
+        $('[id^="loading"]').each(function() {
+            $(this).hide();
+          });
+        $('[id^="yes"]').each(function() {
+            $(this).click(function() {
+                $(this).hide();
+                $('[id^="loading"]').each(function() {
+                    $(this).show();
+                  });
+                $(':button').prop('disabled', true);
+                $('[id^="back"]').each(function() {
+                    $(this).hide();
+                  });
+            });
+          });
+    });
+</script>

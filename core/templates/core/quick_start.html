@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+{% load i18n static %}
+
+{% block content %}
+{% with page_title=_('Quick start') %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
+
+<main class="">
+        <div class="flex flex-col">
+            <div>
+                <h1 class="font-semibold text-gray-900">{% trans "To get started, you need:" %}</h1>
+            </div>
+            <div class="flex justify-center w-full p-4 mb-2">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Imports" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-teal-500">
+                        <i class="fas fa-file-import"></i>
+                    </div>
+                    <div class="text-sm mb-2 rounded text-center">
+                        {% trans "You will need security functions and threats to perform a security analysis. You can either define custom" %}
+                        <div class="inline text-left" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                {% trans "security functions" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="securityfunction" form=security_function_create_form header=_("Add security function") %}
+                        </div>
+                        {% trans "and" %} 
+                        <div class="inline text-left" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                {% trans "threats" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="threat" form=threat_create_form header=_("Add threat") %}
+                        </div>  
+                        {% trans "or import them from a" %} <a href="{% url 'library-list' %}" class="simple-link">{% trans "library" %}</a>.
+                    </div> 
+                </div>
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Projects domains" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-zinc-500">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="text-sm mb-2 rounded text-center">
+                        {% trans "It's time to define some" %}
+                        <div class="inline text-left" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                {% trans "projects domains" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="folder" form=projects_domain_create_form header=_("Add projects domain") %}
+                        </div> 
+                        {% trans "to organize your projects" %}.
+                    </div> 
+                </div>
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Users and groups" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-slate-500">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="text-sm mb-2 rounded text-center">
+                        {% trans "Now declare a few" %}
+                        <a href="{% url 'user-create' %}" class="simple-link">{% trans "users" %}</a> 
+                        {% trans "and assign them to groups corresponding to their roles (domain manager, analyst, auditor, ...)" %}. 
+                    </div> 
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-col">
+            <div>
+                <h1 class="font-semibold text-gray-900">{% trans "Now, you can start your risk assessment:" %}</h1>
+            </div>
+            <div class="flex justify-center w-full p-4 mb-2">
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Project" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-green-600">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="text-sm mb-2 rounded text-center">
+                        {% trans "As domain manager, create a" %} 
+                        <div class="inline text-left" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                   {% trans "project" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="project" form=project_create_form header=_("Add project") %}
+                        </div>
+                        {% trans "within an existing domain" %}.
+                    </div>    
+                </div>
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Risk treatment" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-red-500">
+                        <i class="fas fa-fire-extinguisher"></i>
+                    </div>
+                    <div class="text-sm mb-2 text-center">
+                        {% trans "For each risk scenario, try to define and apply additional" %}
+                        <div class="inline text-left" x-data="{ open: false }">
+                            <a @click="open = !open, modalOpen = !modalOpen" class="simple-link cursor-pointer">
+                                   {% trans "security measures" %}
+                            </a>
+                                {% include "snippets/modal/modal.html" with modal_action="create" model="securitymeasure" form=securitymeasure_create_form header=_("Add security measure") %}
+                        </div>
+                        {% trans "based on security functions, and assess the residual risk level." %}
+                    </div>
+                </div>
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Check consistency" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-yellow-500">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="text-sm mb-2 rounded text-center">
+                        <a href="{% url 'xrays' %}" class="simple-link">{% trans "X-Rays" %}</a>
+                        {% trans "will help you improve the quality of your analysis by pinpointing various inconsistencies." %}
+                    </div>
+                </div>
+                <div class="w-1/5 rounded-lg text-gray-700 hover:text-gray-900 bg-white border shadow-xl hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 p-4 transition-all duration-500">
+                    <div class="text-lg font-semibold mb-2 text-center">{% trans "Report" %}</div>
+                    <div class="flex mb-2 text-6xl justify-center text-stone-500">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center w-full p-4 mb-2">
+                <div class="flex w-full rounded-lg shadow-xl text-gray-700 hover:text-gray-900 bg-white border hover:border-indigo-500 hover:shadow-indigo-500/70 mx-4 transition-all duration-500 mb-2">
+                    <div class="w-1/4 mx-4 py-2">
+                        <div class="flex font-semibold justify-center mb-2">{% trans "Further steps" %}</div>
+                        <div class="flex text-6xl justify-center text-gray-500">
+                            <i class="fa-solid fa-shoe-prints"></i>
+                        </div>
+                    </div>
+                    <div class="w-3/4 mx-4 py-2 text-justify grid place-content-center">
+                        <div class="text-sm mb-2">
+                            {% trans "Explore the dashboard to have an" %}
+                            <a href="{% url 'overview' %}" class="simple-link">{% trans "overview" %}</a>
+                            {% trans "of your analyses and check for coming deadlines with the" %}
+                            <a href="{% url 'calendar' %}" class="simple-link">{% trans "calendar" %}</a>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</main>
+{% endblock %}

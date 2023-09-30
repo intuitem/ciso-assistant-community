@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link href="/static/cache/fontawesome-free-6.3.0-web/css/all.min.css" rel="stylesheet">
+    <style>
+@page {
+    size: A3 landscape; /* Change from the default size of A4 */
+    margin: 0.3cm; /* Set margin on each page */
+    }
+
+@media print {
+    .page-break {
+        page-break-before: always;
+    }
+}
+
+.main {
+font-family: 'Source Sans Pro', sans-serif;
+//font-family: 'Open Sans Condensed', sans-serif;
+//font-family: 'Barlow Condensed', sans-serif;
+
+}
+.flex {
+  display: flex;
+}
+.table {
+  display: table;
+}
+.container {
+  width: 100%;
+}
+.w-full {
+  width: 100%;
+}
+
+.VL {
+  background-color: rgb(187, 247, 208);
+}
+.L {
+  background-color: rgb(190, 242, 100);
+}
+.M {
+  background-color: rgb(254, 240, 138);
+}
+.H {
+  background-color: rgb(251, 191, 36);
+}
+.VH {
+  background-color: rgb(248, 113, 113);
+}
+
+.bg-gray-50 {
+  background-color: rgb(255, 255, 255); //switched to white
+}
+.bg-gray-100 {
+  background-color: rgb(244, 244, 245);
+}
+.bg-gray-600 {
+  background-color: rgb(82, 82, 91);
+}
+
+.bg-blue-600 {
+  background-color: rgb(37, 99, 235);
+}
+
+.bg-white {
+  background-color: rgb(255, 255, 255);
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.static {
+  position: static;
+}
+.fixed {
+  position: fixed;
+}
+.absolute {
+  position: absolute;
+}
+.relative {
+  position: relative;
+}
+
+.w-full {
+  width: 100%;
+}
+.w-1\/6 {
+  width: 16.666667%;
+}
+.w-auto {
+  width: auto;
+}
+.w-1\/2 {
+  width: 50%;
+}
+.w-1\/3 {
+  width: 33.333333%;
+}
+.w-3\/4 {
+  width: 75%;
+  padding-left: 0.5rem;
+}
+
+.border-gray-300 {
+  border-color: rgb(212, 212, 216);
+}
+
+.border-gray-200 {
+  border-color: rgb(228, 228, 231);
+}
+
+.text-white {
+  color: rgb(255, 255, 255);
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.align-middle {
+  vertical-align: middle;
+}
+
+th {
+  text-align: center;
+}
+.border {
+  border: 1px solid #A8A29E;
+  border-collapse: collapse;
+}
+
+tr.border-b td {
+  border-bottom: 1px solid #A8A29E;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.font-black {
+  font-weight: 900;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+
+a {
+  color: black;
+  text-decoration: none;
+}
+
+.h-16 {
+  height: 4rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.m-4 {
+  margin: 1rem;
+}
+.p-2 {
+  padding: 0.5rem;
+}
+.m-2 {
+  margin: 0.5rem;
+}
+.pb-4 {
+  padding-bottom: 1rem;
+}
+.p-3 {
+  padding: 0.75rem;
+}
+.p-4 {
+  padding: 1rem;
+}
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+.pl-3 {
+  padding-left: 0.75rem;
+}
+.ml-3 {
+  margin-left: 0.75rem;
+}
+.p-1 {
+  padding: 0.25rem;
+}
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.list-disc {
+  list-style-type: disc;
+}
+
+.space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  margin-right: 0;
+  margin-left: 0.75rem;
+}
+
+.-rotate-90 {
+  transform: rotate(-90deg);
+}
+
+.mt-36 {
+  margin-top: 9rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.w-12 {
+  width: 2rem;
+}
+
+.h-12 {
+  height: 2rem;
+}
+
+</style>
+</head>
+<body>
+
+{% block content %}{% endblock %}
+
+</body>

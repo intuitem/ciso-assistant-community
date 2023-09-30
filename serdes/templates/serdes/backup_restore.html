@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+
+{% load i18n static %}
+
+{% block content %}
+
+<div>
+    {% with page_title=_('Backup Restore') %}
+        {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+
+    <div class="flex flex-col space-y-6">
+      <div class="shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-2">
+        <h1 class="text-xl font-semibold">{% trans "Export backup" %}</h1>
+        <button class="bg-indigo-600 text-white aliased font-medium p-2 rounded-lg hover:bg-indigo-500 disabled:bg-indigo-300">
+            <a href={% url 'dump-db' %}>{% trans "Dump database" %}</a>
+        </button>
+      </div>
+      <div class="shadow-md sm:rounded-lg bg-white py-4 px-6">
+            <h1 class="text-xl font-semibold">{% trans "Import backup" %} <span class="text-red-500 text-3xl font-semibold">⚠</span></h1>
+            <form enctype="multipart/form-data" method="post" x-data="{
+                    open: false,
+                    uploadDisabled: document.getElementById('file_upload').value == '',
+                }" @change="uploadDisabled = document.getElementById('file_upload').value == ''">
+                {% csrf_token %}
+                <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
+                <label class="block mb-2 text-sm font-medium text-gray-900" for="multiple_files">{{ form.file.label }}</label>
+                <div class="flex flex-row">
+                    <input class="block w-full text-sm text-gray-900 bg-gray-50 
+                                rounded-l-lg border border-gray-300 cursor-pointer focus:outline-none
+                                file:border-0 file:p-2 file:text-sm file:font-medium file:bg-gray-200 file:mr-2 file:text-gray-800
+                                hover:file:bg-gray-300" id="file_upload" type="file" name="{{ form.file.name }}">
+                    <a @click="!uploadDisabled ? open = !open : open" class="bg-indigo-600 text-white rounded-r-lg px-6 table cursor-pointer hover:bg-indigo-500"
+                        :class="{'opacity-70 cursor-not-allowed': uploadDisabled}">
+                        <p class="h-full table-cell align-middle font-semibold antialiased">{% trans "Upload" %}</p>
+                    </a>
+                    
+                    {% load i18n static core_extras %}
+                    <!-- MODAL CONTAINER WITH BACKDROP -->
+                    <div x-show="open" x-cloak
+                    >
+                    
+                    <!--
+                    <div x-show="open" x-cloak
+                    class="transition-opacity z-50 whitespace-normal"
+                    x-transition:enter="ease-out duration-100"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="ease-out duration-100"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    >
+                    -->
+                    
+                    
+                      <div x-cloak>
+                    
+                        <!-- MODAL -->
+                        <div
+                          class="fixed z-50 inset-0 w-full h-full outline-none overflow-y-auto"
+                          tabindex="-1" role="dialog">
+                    
+                          <!-- MODAL DIALOG -->
+                          <div
+                            class="relative w-auto pointer-events-none max-w-lg mt-8 mx-auto mb-8">
+                    
+                            <!-- MODAL CONTAINER -->
+                            <div class="relative flex flex-col w-fit pointer-events-auto bg-white shadow-xl rounded-md overflow-hidden" id="import_backup_modal">
+                              <div class="flex items-start justify-between p-4 bg-gradient-to-r from-slate-200">
+                                <div class="mb-4 text-xl text-gray-800"><span class="text-indigo-900"><i
+                                      class="fas fa-hashtag"></i></span><span class="ml-2 font-medium">{% trans "Import backup?" %}</span></div>
+                                <button type="button" class="close" @click="open = !open, modalOpen = !modalOpen">
+                                  <span class="text-lg text-gray-600 hover:bg-gray-200 py-2 px-3 rounded">
+                                    <i class="fas fa-times"></i></span>
+                                </button>
+                              </div>
+                              <div class="flex flex-col p-8">
+                    
+                                <div class="space-y-4">
+                                    <p class="text-sm relative whitespace-normal">{% trans "This action cannot be undone. This will restore the database to a previous state. Are you sure you want to do this?" %}</p>
+                                    <div class="flex items-center justify-end">
+                                        <button
+                                        @click="open = !open, modalOpen = !modalOpen"
+                                        type="button"
+                                        class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-gray-600 hover:bg-gray-500 mr-2"
+                                        >{% trans "No, take me back" %}</button>
+                                        <input class="inline-block font-normal text-center px-4 py-2 leading-normal text-base rounded cursor-pointer text-white bg-red-600 hover:bg-red-700 mr-2"
+                                        type="submit" value={% trans "Yes" %}>
+                                    </div>
+                                </div>
+                    
+                              </div>
+                            </div>
+                            <!-- END MODAL CONTAINER -->
+                          </div>
+                          <!-- END MODAL DIALOG -->
+                        </div>
+                    
+                        <!-- BACKDROP -->
+                        <div
+                        class="z-40 fixed top-0 left-0 bottom-0 right-0 opacity-25 bg-black backdrop-blur-lg">
+                        </div>
+                      </div>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

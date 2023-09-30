@@ -1,0 +1,129 @@
+{% load i18n %}
+<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+    var option;
+    var vl = {% blocktrans %} "Very low" {% endblocktrans %};
+    var l = {% blocktrans %} "Low" {% endblocktrans %};
+    var m = {% blocktrans %} "Medium" {% endblocktrans %};
+    var h = {% blocktrans %} "High" {% endblocktrans %};
+    var vh = {% blocktrans %} "Very high" {% endblocktrans %};
+    var jan = {% blocktrans %} "Jan" {% endblocktrans %};
+    var feb = {% blocktrans %} "Feb" {% endblocktrans %};
+    var mar = {% blocktrans %} "Mar" {% endblocktrans %};
+    var apr = {% blocktrans %} "Apr" {% endblocktrans %};
+    var may = {% blocktrans %} "May" {% endblocktrans %};
+    var jun = {% blocktrans %} "Jun" {% endblocktrans %};
+    var jul = {% blocktrans %} "Jul" {% endblocktrans %};
+    var aug = {% blocktrans %} "Aug" {% endblocktrans %};
+    var sep = {% blocktrans %} "Sep" {% endblocktrans %};
+    var oct = {% blocktrans %} "Oct" {% endblocktrans %};
+    var nov = {% blocktrans %} "Nov" {% endblocktrans %};
+    var dec = {% blocktrans %} "Dec" {% endblocktrans %};
+
+    option = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#6a7985'
+                }
+            }
+        },
+        legend: {
+            data: [vl, l, m, h, vh]
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                data: [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series: [
+            {
+                name: vl,
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [120, 132, 101, 134, 90, 230, 210, 120, 132, 101, 134, 90],
+                color: ["#BBF7D0"]
+            },
+            {
+                name: l,
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [220, 182, 191, 234, 290, 330, 310, 220, 182, 191, 234, 290],
+                color: ["#BEF264"]
+            },
+            {
+                name: m,
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [150, 232, 201, 154, 190, 330, 410, 150, 232, 201, 154, 190],
+                color: ["#FEF08A"]
+            },
+            {
+                name: h,
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [320, 332, 301, 334, 390, 330, 320, 320, 332, 301, 334, 390],
+                color: ["#FBBF24"]
+            },
+            {
+                name: vh,
+                type: 'line',
+                stack: 'Total',
+                label: {
+                    show: true,
+                    position: 'top'
+                },
+                areaStyle: {},
+                emphasis: {
+                    focus: 'series'
+                },
+                data: [820, 932, 901, 934, 1290, 1330, 1320, 820, 932, 901, 934, 1290],
+                color: ["#F87171"]
+            }
+        ]
+    };
+
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
+</script>

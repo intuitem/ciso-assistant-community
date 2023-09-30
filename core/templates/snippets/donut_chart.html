@@ -1,0 +1,64 @@
+<div id="{{name}}_div" class="bg-white w-auto h-full" ></div>
+<script type="text/javascript">
+
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+
+    // specify chart configuration item and data
+    var option = {
+        tooltip: {
+            trigger: 'item'
+    },
+    toolbox: {
+        show: true,
+        feature: {
+            mark: {show: true},
+            dataView: {show: false, readOnly: true},
+            saveAsImage: {show: true}
+            }
+        },
+    legend: {
+        top: '5%',
+        left: 'center'
+    },
+    series: [
+        {
+            name: '{{ s_label }}',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+                borderRadius: 10,
+                borderColor: '#fff',
+                borderWidth: 2
+            },
+            label: {
+                show: false,
+                position: 'center'
+            },
+            emphasis: {
+                label: {
+                    show: true,
+                    fontSize: '40',
+                    fontWeight: 'bold'
+                }
+            },
+            labelLine: {
+                show: false
+            },
+            data: {{ values|safe }},
+            color: {{ colors|safe }},
+        }
+    ]
+};
+console.debug(option);
+
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
+
+
+
+</script>

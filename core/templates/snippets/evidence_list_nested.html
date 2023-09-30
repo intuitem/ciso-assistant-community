@@ -1,0 +1,71 @@
+{% load i18n %}
+{% load static tailwind_tags %}
+
+<table class="min-w-full leading-normal">
+    <thead>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Name" %}
+        </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "File" %}
+        </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Description" %}
+        </th>
+        <th class="px-5 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            {% trans "Actions" %}
+        </th>
+    </thead>
+    <tbody>
+        {% for evidence in evidences %}
+            <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 cursor-pointer border-b" onclick="window.location='{% url 'evidence-detail' evidence.id %}?next={{ request.path|urlencode }}'">
+                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap">
+                    <div>
+                        <p id="evidence{{ evidence.id }}" class="text-md font-semibold whitespace-no-wrap">
+                        {{ evidence }}
+                        </p>
+                    </div>
+                </th>
+                <td class="px-6 py-4 flex">
+                    {% if evidence.preview.0 == "text" %}
+                    <p class="whitespace-no-wrap max-h-36 w-96 overflow-y-scroll bg-white border shadow rounded-lg text-black">
+                    {% elif evidence.preview.0 == "icon" %}
+                    <p class="whitespace-no-wrap w-10">
+                    {% else %}
+                    <p class="whitespace-no-wrap w-36">
+                    {% endif %}
+                        {{ evidence.preview.1|linebreaksbr }}
+                    </p>
+                </td>
+                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                    <p class="whitespace-no-wrap">
+                        {{ evidence.description|linebreaksbr|truncatechars:100 }}
+                    </p>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="">
+                        <span><a href="{% url 'evidence-detail' evidence.id %}" class="table-action"><i class="far fa-eye"></i></a></span>
+                        {% if evidence.id in evidence_ids_change %}
+                        <span>
+                            <a href="{% url 'evidence-update' evidence.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </span>
+                        {% endif %}
+                        {% if evidence.id in evidence_ids_delete %}
+                            {% include 'snippets/delete_button_modal.html' with object=evidence header=_("Delete evidence?") model='evidence' next=request.path %}
+                        {% endif %}
+
+                    </div>
+                </td>
+            </tr>
+        {% empty %}
+            <tr class="text-black p-4 text-center">
+                <td colspan="4">
+                <i class="inline fas fa-exclamation-triangle"></i>
+                <p class="inline test-gray-900">{% trans "No evidence found." %}</p>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+
+{% load i18n static core_extras %}
+
+{% block content %}
+
+<div>
+    {% with page_title=_('Libraries') %}
+    {% include 'snippets/breadcrumbs.html' %}
+    {% endwith %}
+
+    <div class="flex flex-col space-y-6">
+        <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-4">
+            <h1 class="text-xl font-semibold">{% trans "Default libraries" %}</h1>
+            <div class="rounded shadow-md">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <th class="px-6 py-3">{% trans "Name" %}</th>
+                        <th class="px-6 py-3">{% trans "Language" %}</th>
+                        <th class="px-6 py-3">{% trans "Description" %}</th>
+                        <th class="px-6 py-3">{% trans "Overview" %}</th>
+                        <th class="px-6 py-3">{% trans "Actions" %}</th>
+                    </thead>
+                    <tbody>
+                        {% for library in libraries %}
+                            <tr class="odd:bg-white even:bg-gray-100 hover:text-indigo-500 transition hover:bg-gray-200 cursor-pointer" onclick="window.location='{% url 'library-detail' library.urn %}?next={{ request.path|urlencode }}'">
+                                <td class="px-6 py-4 font-medium whitespace-nowrap">
+                                    <p id="library{{ library.name }}" class="text-md font-semibold whitespace-no-wrap">
+                                        {{ library.name }}
+                                    </p>
+                                </td>
+                                <td class="px-6 py-4 font-medium whitespace-nowrap">
+                                    <p id="library{{ library.name }}" class="text-md font-semibold whitespace-no-wrap">
+                                        {{ library.locale|country_flag }} {{ library.locale|language_name }} ({{ library.locale }})
+                                    </p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="whitespace-no-wrap">
+                                        {{ library.description|linebreaksbr }}
+                                    </p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <ul>
+                                        {% if library.threats > 0 %}
+                                        <li class="whitespace-no-wrap">
+                                            {% blocktrans count counter=library.threats %}
+                                                {{ counter }} threat
+                                            {% plural %}
+                                                {{ counter }} threats
+                                            {% endblocktrans %}
+                                        </li>
+                                        {% endif %}
+                                        {% if library.security_functions > 0 %}
+                                        <li class="whitespace-no-wrap">
+                                            {% blocktrans count counter=library.security_functions %}
+                                                {{ counter }} security function
+                                            {% plural %}
+                                                {{ counter }} security functions
+                                            {% endblocktrans %}
+                                        </li>
+                                        {% endif %}
+                                        {% if library.requirements > 0 %}
+                                        <li class="whitespace-no-wrap">
+                                            {% blocktrans count counter=library.requirements %}
+                                                {{ counter }} requirement
+                                            {% plural %}
+                                                {{ counter }} requirements
+                                            {% endblocktrans %}
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="w-full flex flex-row">
+                                        <span>
+                                            <a title="detailed view" href="{% url 'library-detail' library.urn %}" class="table-action cursor-pointer"><i class="far fa-eye"></i></a>
+                                        </span>
+                                        {% comment %} {% if library.security_functions > 0 and securityfunction_import or library.threats > 0 and threat_import %} {% endcomment %}
+                                        <span x-data="{ open: false }" onclick="event.stopPropagation();">
+                                            <a title="Import" @click="open = !open, modalOpen = !modalOpen" class="table-action cursor-pointer"><i class="fas fa-file-import"></i></a>
+                                            {% include "snippets/modal/modal.html" with modal_action="import_library" header=_("Import library") lib_name=library.name lib_urn=library.urn %}
+                                        </span>
+                                        {% comment %} {% endif %} {% endcomment %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                        <tr class="text-black p-4 text-center">
+                            <td colspan="8" class="py-2">
+                                <i class="inline fas fa-exclamation-triangle"></i>
+                                <p class="inline test-gray-900">{% trans "No library found." %}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% comment %} {% include 'snippets/paginator.html' %} {% endcomment %}
+        </div>
+
+        <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg bg-white py-4 px-6 space-y-4">
+            <h1 class="text-xl font-semibold">{% trans "Upload your own library" %}</h1>
+            
+            <div class="relative overflow-x-auto overflow-y-auto">
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                    <p class="text-red-500 text-xs font-semibold">{{ form.non_field_errors|striptags }}</p>
+                    <label class="block mb-2 text-sm font-medium text-gray-900" for="multiple_files">{{ form.file.label }}</label>
+                    <div class="flex flex-row">
+                        <input class="block w-full text-sm text-gray-900 bg-gray-50 
+                                    rounded-l-lg border border-gray-300 cursor-pointer focus:outline-none
+                                    file:border-0 file:p-2 file:text-sm file:font-medium file:bg-gray-200 file:mr-2 file:text-gray-800
+                                    hover:file:bg-gray-300" id="file_upload" type="file" name="{{ form.file.name }}">
+                        <button class="bg-indigo-600 text-white aliased font-medium p-5 w-18 py-1 rounded-r-lg hover:bg-indigo-500 disabled:bg-indigo-300">
+                            {% trans "Upload" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

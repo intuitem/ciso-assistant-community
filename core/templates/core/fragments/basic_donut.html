@@ -1,0 +1,43 @@
+<div id="{{name}}_div" class="bg-white w-auto h-full"></div>
+<script type="text/javascript">
+    var {{ name }}_ch = echarts.init(document.getElementById('{{name}}_div'), null, { renderer: 'svg' });
+    var option;
+    option = {
+        legend: {
+            x: 'left',
+        },
+        series: [
+            {
+                name: "{{name|safe}}",
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 10,
+                    borderColor: '#fff',
+                    borderWidth: 2
+                },
+                label: {
+                    show: false,
+                    position: 'center'
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: 40,
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: {{values|safe}}
+            }
+        ]
+    };
+    {{name}}_ch.setOption(option);
+
+    window.addEventListener("resize", function() {
+        {{name}}_ch.resize();
+    });
+</script>

@@ -1,0 +1,167 @@
+{% load i18n %}
+<div id="progress_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+        var progress_ch = echarts.init(document.getElementById('progress_div'), null, {renderer: 'svg'});
+        var risk_open = {% blocktrans %} "Risk: open" {% endblocktrans %};
+        var risk_mitigated = {% blocktrans %} "Risk: mitigated" {% endblocktrans %};
+        var risk_accepted = {% blocktrans %} "Risk: accepted" {% endblocktrans %};
+        var risk_blocking = {% blocktrans %} "Risk: blocking" {% endblocktrans %};
+        var measure_open = {% blocktrans %} "Measure: open" {% endblocktrans %};
+        var measure_progress = {% blocktrans %} "Measure: in progress" {% endblocktrans %};
+        var measure_hold = {% blocktrans %} "Measure: on hold" {% endblocktrans %};
+        var measure_done = {% blocktrans %} "Measure: done" {% endblocktrans %};
+
+        // specify chart configuration item and data
+        var option = {
+        aria: {
+    enabled: true,
+    decal: {
+        show: true
+    }
+},
+toolbox: {
+        show: true,
+        feature: {
+            mark: {show: true},
+            dataView: {show: false, readOnly: true},
+            saveAsImage: {show: true}
+            }
+        },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            legend: {
+                data: [
+                    {name: risk_open, 'itemStyle': {'color': '#fac858' }},
+                    {name: risk_mitigated, 'itemStyle': {'color': '#91cc75' }},
+                    {name: risk_accepted, 'itemStyle': {'color': '#73c0de' }},
+                    {name: risk_blocking, 'itemStyle': {'color': '#ee6666' }},
+                    {name: measure_open, 'itemStyle': {'color': '#fac858' }},
+                    {name: measure_progress, 'itemStyle': {'color': '#5470c6' }},
+                    {name: measure_hold, 'itemStyle': {'color': '#ee6666' }},
+                    {name: measure_done, 'itemStyle': {'color': '#91cc75' }},
+
+                    ],
+                show: true
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    axisTick: {
+                    alignWithLabel: true,
+
+                    },
+                    axisLabel: {
+                        width: 80,
+                        interval: 0,
+                        overflow: 'break',
+                    },
+                    type: 'category',
+                    data: {{agg_data.names|safe}}
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+
+                    minInterval: 1,
+                    show: false,
+                }
+            ],
+            series: [
+                {
+                    name: risk_open,
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.rsk_status_out.open|safe}}
+                },
+                {
+                    name: risk_mitigated,
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.rsk_status_out.mitigated|safe}}
+                },
+                {
+                    name: risk_accepted,
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.rsk_status_out.accepted|safe}}
+                },
+                {
+                    name: risk_blocking,
+                    type: 'bar',
+                    stack: 'risks',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.rsk_status_out.blocker|safe}}
+                },
+                {
+                    name: measure_open,
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'security_measures',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.mtg_status_out.open|safe}}
+                },
+                {
+                    name: measure_progress,
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'security_measures',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.mtg_status_out.in_progress|safe}}
+                },
+                {
+                    name: measure_hold,
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'security_measures',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.mtg_status_out.on_hold|safe}}
+                },
+                {
+                    name: measure_done,
+                    type: 'bar',
+                    barWidth: 20,
+                    stack: 'security_measures',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    data: {{agg_data.mtg_status_out.done|safe}}
+                },
+
+            ]
+        };
+        // use configuration item and data specified to show chart
+        progress_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            progress_ch.resize();
+        });
+
+</script>

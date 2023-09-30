@@ -1,0 +1,89 @@
+{% extends 'core/base.html' %}
+{% block content %}
+{% load i18n static %}
+{% load core_extras %}
+{% with page_title=_('My profile') %}
+{% include 'snippets/breadcrumbs.html' %}
+{% endwith %}
+<div>
+    <div class="px-4 pt-2 pb-4 mb-2 bg-white rounded-lg shadow relative">
+        <h2 class="text-xl mb-1 font-semibold">{{ user.last_name }} {{ user.first_name }}</h2>
+        <div class="flex flex-col space-y-4 border shadow py-4 rounded-lg">
+            {% for field_label, field in user_fields.items %}
+                    <div class="flex flex-col ml-4">
+                        <label class="text-sm font-semibold">{{ field_label |striptags }}</label>
+                        <div class="text-sm">
+                                {{ field }} 
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+        <div class="mt-4 flex space-x-2 justify-end">
+            {% comment %} <button onclick="window.location.href='{% url 'index' %}';" class="bg-gray-300 text-black aliased font-medium p-4 py-1.5 w-18 rounded-lg hover:bg-gray-200">{% trans "Cancel" %}</button> {% endcomment %}
+            <input type="hidden" name="next" value={{ request.GET.next }}>
+            <a href="{% url 'me-update' user.id %}?next={{ request.path|urlencode }}" class="add-button"><i class="fas fa-edit"></i>{% trans "Edit" %}</a>
+            <a href="{% url 'passkeys:home' %}?next={{ request.path|urlencode }}" class="add-button"> <i class="fas fa-edit"></i>{% trans "Passkeys" %}</a>
+            </div>
+    <div class="px-4 pt-2 pb-4 bg-white rounded-lg shadow relative">
+        <h2 class="text-xl mb-1 font-semibold">{% trans "User groups" %}</h2>
+        <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-2">
+            <table class="w-full text-sm text-left text-gray-500">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                    <th class="px-6 py-3">{% trans "Group Name" %}</th>
+                    <th class="px-6 py-3">{% trans "Actions" %}</th>
+                </thead>
+                <tbody>
+                    {% for user_group in user_groups %}
+                        <tr class="odd:bg-white even:bg-gray-50">
+                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="ml-0">
+                                        {% if user_group.builtin %}
+                                        <span class="bg-red-300 p-1 rounded-lg text-xs mr-2">{% trans "built-in" %}</span>
+                                        {% endif %}
+                                        {% if object_ids_change %}
+                                        <a id="user_group{{ user_group.id }}" href="{% url 'usergroup-update' user_group.id %}"
+                                        class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-indigo-500">
+                                            {{ user_group|capfirst }}
+                                        </a>
+                                        {% else %}
+                                        <a id="user_group{{ user_group.id }}"
+                                        class="text-gray-900 text-md font-semibold whitespace-no-wrap">
+                                            {{ user_group|capfirst }}
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                {% if user_group.id in object_ids_change %}
+                                    <span>
+                                        <a href="{% url 'usergroup-update' user_group.id %}?next={{ request.path|urlencode }}" class="cursor-pointer table-action">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </span>
+                                {% endif %}
+                                {% if user_group.id in object_ids_delete %}
+                                    {% include 'snippets/delete_button_modal.html' with object=user_group header=_("Delete user group?") model="usergroup" %}
+                                {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>
+                                <div class="text-black p-4">
+                                    <i class="inline fas fa-exclamation-triangle"></i>
+                                    <p class="inline test-gray-900">{% trans "No user group found." %}</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% include 'snippets/paginator.html' %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

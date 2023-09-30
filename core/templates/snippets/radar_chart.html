@@ -1,0 +1,46 @@
+<div id="{{name}}_div" class="bg-white w-auto h-[600px]"></div>
+<script type="text/javascript">
+
+        var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+
+        // specify chart configuration item and data
+        var option = {
+            tooltip: {},
+            radar: {
+                name:{
+                    fontSize: 14,
+                    color: '#3F3F46',
+                    overflow: 'break',
+                },
+                shape: 'circle',
+                indicator : [
+                {% for ind in data.indicators %}
+                { 
+                name: '{{ind}}', 
+                max:  {{data.max}}, 
+                min: {{data.min}}},
+                {% endfor %}
+                ],
+            },
+            series: [{
+                name: 'Threats',
+                type: 'radar',
+                label: {
+                    show: false,
+                },
+                areaStyle:{},
+                data: [{
+                value: {{data.values|safe}},
+                name: '{{s_label}}'
+                }]
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        {{name}}_ch.setOption(option);
+
+        window.addEventListener("resize", function() {
+            {{name}}_ch.resize();
+        });
+
+</script>

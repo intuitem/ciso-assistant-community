@@ -1,0 +1,31 @@
+<div id="{{name}}_div" class="bg-white w-auto h-full"></div>
+
+<script type="text/javascript">
+    var {{name}}_ch = echarts.init(document.getElementById('{{name}}_div'), null, {renderer: 'svg'});
+    var option;
+
+    option = {
+        xAxis: {
+            type: 'category',
+            data: {{labels|safe}},
+        },
+        yAxis: {
+            type: 'value',
+            allowDecimals: false,
+            minInterval: 1
+        },
+        series: [
+            {
+                data: {{values|safe}},
+                type: 'bar'
+            }
+        ]
+    };
+
+    // use configuration item and data specified to show chart
+    {{name}}_ch.setOption(option);
+
+    window.addEventListener("resize", function() {
+        {{name}}_ch.resize();
+    });
+</script>
