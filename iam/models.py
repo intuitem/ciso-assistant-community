@@ -82,7 +82,7 @@ def _get_root_folder():
         return None
 
 
-class Folder(AbstractBaseModel, I18nMixin, NameDescriptionMixin):
+class Folder(I18nMixin, NameDescriptionMixin, AbstractBaseModel):
     """ A folder is a container for other folders or any object
         Folders are organized in a tree structure, with a single root folder
         Folders are the base perimeter for role assignments
