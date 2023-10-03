@@ -1,7 +1,7 @@
 from cal.models import *
 from cal.utils import *
 from calendar import LocaleHTMLCalendar
-from core.models import SecurityMeasure, RiskAcceptance
+from core.models import SecurityMeasure
 import pytest
 
 """
