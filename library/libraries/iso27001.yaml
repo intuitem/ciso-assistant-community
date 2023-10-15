@@ -5,2438 +5,2438 @@ description: Information security management systems - Requirements
 version: 1
 objects:
   framework:
-    urn: urn:intuitem:risk:library:iso27001-2022
+    urn: urn:intuitem:risk:framework:iso27001-2022
     provider: ISO/IEC
     name: ISO/IEC 27001:2022
     description: Information security management systems - Requirements
     version: '1.1'
     requirement_groups:
-    - urn: urn:intuitem:risk:library:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core
       name: Core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4
       name: '4'
       description: Context of the organization
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.1
       name: '4.1'
       description: Understanding the organization and its context
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.2
       name: '4.2'
       description: Understanding the needs and expectations of interested parties
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.3
       name: '4.3'
       description: Determining the scope of the information security management system
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.4
       name: '4.4'
       description: Information security management system
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5
       name: '5'
       description: Leadership
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       name: '5.1'
       description: Leadership and commitment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       name: '5.2'
       description: Policy
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.3
       name: '5.3'
       description: Organizational roles, responsibilities and authorities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6
       name: '6'
       description: Planning
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1
       name: '6.1'
       description: Actions to address risks and opportunities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       name: 6.1.1
       description: General
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       name: 6.1.2
       description: Information security risk assessment requirement
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       name: 6.1.3
       description: Information security risk treatment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       name: '6.2'
       description: Information security objectives and planning to achieve them
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7
       name: '7'
       description: Support
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.1
       name: '7.1'
       description: Resources
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.2
       name: '7.2'
       description: Competence
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.3
       name: '7.3'
       description: Awareness
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.4
       name: '7.4'
       description: Communication
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5
       name: '7.5'
       description: Documented Information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.1
       name: 7.5.1
       description: General
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.2
       name: 7.5.2
       description: Creating and Updating documented information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       name: 7.5.3
       description: Control of documented information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8
       name: '8'
       description: Operations
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.1
       name: '8.1'
       description: Operational planning and control
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.2
       name: '8.2'
       description: Information security risk assessment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.3
       name: '8.3'
       description: Information security risk treatment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9
       name: '9'
       description: Performance evaluation
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
       name: '9.1'
       description: Monitoring, measurement, analysis, evaluation
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2
       name: '9.2'
       description: Internal audit
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.1
       name: 9.2.1
       description: General
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       name: 9.2.2
       description: Internal audit programme
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3
       name: '9.3'
       description: Management review
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.1
       name: 9.3.1
       description: General
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       name: 9.3.2
       description: Management review inputs
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.3
       name: 9.3.3
       description: Management review results
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10
       name: '10'
       description: Improvement
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.1
       name: '10.1'
       description: Continual improvement
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       name: '10.2'
       description: Nonconformity and corrective action
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a
       name: Annex A
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
       name: '5'
       description: Organisational controls
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.1
       name: '5.1'
       description: Policies for information security
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.2
       name: '5.2'
       description: Information security roles and responsibilities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.3
       name: '5.3'
       description: Segregation of duties
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.4
       name: '5.4'
       description: Management responsibilities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.5
       name: '5.5'
       description: Contact with authorities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.6
       name: '5.6'
       description: Contact with special interest groups
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.7
       name: '5.7'
       description: Threat intelligence
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.8
       name: '5.8'
       description: Information security in project management
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.9
       name: '5.9'
       description: Inventory of information and other associated assets
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.10
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.10
       name: '5.10'
       description: Acceptable use of information and other associated assets
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.11
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.11
       name: '5.11'
       description: Return of assets
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.12
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.12
       name: '5.12'
       description: Classification of information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.13
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.13
       name: '5.13'
       description: Labelling of information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.14
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.14
       name: '5.14'
       description: Information transfer
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.15
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.15
       name: '5.15'
       description: Access control
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.16
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.16
       name: '5.16'
       description: Identity management
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.17
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.17
       name: '5.17'
       description: Authentication information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.18
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.18
       name: '5.18'
       description: Access rights
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.19
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.19
       name: '5.19'
       description: Information security in supplier relationships
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.20
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.20
       name: '5.20'
       description: Addressing information security within supplier agreements
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.21
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.21
       name: '5.21'
       description: Managing information security in the ICT supply chain
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.22
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.22
       name: '5.22'
       description: Monitor, review and change management of supplier services
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.23
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.23
       name: '5.23'
       description: Information security for use of cloud services
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.24
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.24
       name: '5.24'
       description: Information security incident management planning and preparation
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.25
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.25
       name: '5.25'
       description: Assessment and decision on information security events
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.26
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.26
       name: '5.26'
       description: Response to information security incidents
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.27
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.27
       name: '5.27'
       description: Learning from information security incidents
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.28
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.28
       name: '5.28'
       description: Collection of evidence
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.29
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.29
       name: '5.29'
       description: Information security during disruption
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.30
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.30
       name: '5.30'
       description: ICT readiness for business continuity
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.31
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.31
       name: '5.31'
       description: Legal, statutory, regulatory and contractual requirements
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.32
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.32
       name: '5.32'
       description: Intellectual property rights
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.33
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.33
       name: '5.33'
       description: Protection of records
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.34
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.34
       name: '5.34'
       description: Privacy and protection of PII
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.35
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.35
       name: '5.35'
       description: Independent review of information security
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.36
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.36
       name: '5.36'
       description: Compliance with policies, rules and standards for information security
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.37
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.37
       name: '5.37'
       description: Documented operating procedures
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
       name: '6'
       description: People controls
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.1
       name: '6.1'
       description: Screening
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.2
       name: '6.2'
       description: Terms and conditions of employment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.3
       name: '6.3'
       description: Information security awareness, education and training
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.4
       name: '6.4'
       description: Disciplinary process
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.5
       name: '6.5'
       description: Responsibilities after termination or change of employment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.6
       name: '6.6'
       description: Confidentiality or non-disclosure agreements
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.7
       name: '6.7'
       description: Remote working
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.8
       name: '6.8'
       description: Information security event reporting
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
       name: '7'
       description: Physical controls
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.1
       name: '7.1'
       description: Physical security perimeters
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.2
       name: '7.2'
       description: Physical entry
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.3
       name: '7.3'
       description: Securing offices, rooms and facilities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.4
       name: '7.4'
       description: Physical security monitoring
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.5
       name: '7.5'
       description: Protecting against physical and environmental threats
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.6
       name: '7.6'
       description: Working In secure areas
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.7
       name: '7.7'
       description: Clear desk and clear screen
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.8
       name: '7.8'
       description: Equipment siting and protection
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.9
       name: '7.9'
       description: Security of assets off-premises
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.10
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.10
       name: '7.10'
       description: Storage media
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.11
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.11
       name: '7.11'
       description: Supporting utilities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.12
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.12
       name: '7.12'
       description: Cabling security
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.13
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.13
       name: '7.13'
       description: Equipment maintenance
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.14
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.14
       name: '7.14'
       description: Secure disposal or re-use of equipment
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
       name: '8'
       description: Technological controls
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.1
       name: '8.1'
       description: User end point devices
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.2
       name: '8.2'
       description: Privileged access rights
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.3
       name: '8.3'
       description: Information access restriction
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.4
       name: '8.4'
       description: Access to source code
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.5
       name: '8.5'
       description: Secure authentication
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.6
       name: '8.6'
       description: Capacity management
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.7
       name: '8.7'
       description: Protection against malware
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.8
       name: '8.8'
       description: Management of technical vulnerabilities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.9
       name: '8.9'
       description: Configuration management
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.10
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.10
       name: '8.10'
       description: Information deletion
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.11
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.11
       name: '8.11'
       description: Data masking
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.12
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.12
       name: '8.12'
       description: Data leakage prevention
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.13
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.13
       name: '8.13'
       description: Information backup
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.14
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.14
       name: '8.14'
       description: Redundancy of information processing facilities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.15
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.15
       name: '8.15'
       description: Logging
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.16
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.16
       name: '8.16'
       description: Monitoring activities
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.17
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.17
       name: '8.17'
       description: Clock synchronization
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.18
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.18
       name: '8.18'
       description: Use of privileged utility programs
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.19
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.19
       name: '8.19'
       description: Installation of software on operational systems
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.20
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.20
       name: '8.20'
       description: Networks security
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.21
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.21
       name: '8.21'
       description: Security of network services
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.22
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.22
       name: '8.22'
       description: Segregation of networks
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.23
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.23
       name: '8.23'
       description: Web filtering
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.24
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.24
       name: '8.24'
       description: Use of cryptography
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.25
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.25
       name: '8.25'
       description: Secure development life cycle
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.26
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.26
       name: '8.26'
       description: Application security requirements
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.27
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.27
       name: '8.27'
       description: Secure system architecture and engineering principles
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.28
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.28
       name: '8.28'
       description: Secure coding
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.29
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.29
       name: '8.29'
       description: Security testing in development and acceptance
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.30
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.30
       name: '8.30'
       description: Outsourced development
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.31
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.31
       name: '8.31'
       description: Separation of development, test and production environments
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.32
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.32
       name: '8.32'
       description: Change management
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.33
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.33
       name: '8.33'
       description: Test information
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.34
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
+    - urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.34
       name: '8.34'
       description: Protection of information systems during audit testing
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8
     requirements:
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.1:1
       name: '-'
       description: The organization shall determine external and internal issues that
         are relevant to its purpose and that affect its ability to achieve the intended
         outcome(s) of its information security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.1
       security_functions:
       - urn:intuitem:risk:function:D.CONTEXT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.2:1
       name: 4.2.a
       description: The organization shall determine interested parties that are relevant
         to the information security management system
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.2
       security_functions:
       - urn:intuitem:risk:function:D.CONTEXT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.2:2
       name: 4.2.b
       description: The organization shall determine the relevant requirements of these
         interested parties
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.2
       security_functions:
       - urn:intuitem:risk:function:D.CONTEXT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.2:3
       name: 4.2.c
       description: The organization shall determine which of these requirements will
         be addressed through the information security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.2
       security_functions:
       - urn:intuitem:risk:function:D.CONTEXT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.3:1
       name: '-'
       description: The organization shall determine the boundaries and applicability
         of the information security management system to establish its scope.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.3
       security_functions:
       - urn:intuitem:risk:function:D.SCOPE
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.3:2
       name: 4.3.a
       description: When determining this scope, the organization shall consider the
         external and internal issues referred to in 4.1
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.3
       security_functions:
       - urn:intuitem:risk:function:D.SCOPE
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.3:3
       name: 4.3.b
       description: When determining this scope, the organization shall consider the
         requirements referred to in 4.2
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.3
       security_functions:
       - urn:intuitem:risk:function:D.SCOPE
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.3:4
       name: 4.3.c
       description: When determining this scope, the organization shall consider interfaces
         and dependencies between activities performed by the organization, and those
         that are performed by other organizations.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.3
       security_functions:
       - urn:intuitem:risk:function:D.SCOPE
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.3:5
       name: '-'
       description: The scope shall be available as documented information.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.3
       security_functions:
       - urn:intuitem:risk:function:D.SCOPE
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.4:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:4:4.4:1
       name: '-'
       description: The organization shall establish, implement, maintain and continually
         improve an information security management system, including the processes
         needed and their interactions, in accordance with the requirements of this
         document.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:4:4.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:4:4.4
       security_functions:
       - urn:intuitem:risk:function:D.OVERVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:1
       name: 5.1.a
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by ensuring the information
         security policy and the information security objectives are established and
         are compatible with the strategic direction of the organization.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.OVERVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:2
       name: 5.1.b
       description: "Top management shall demonstrate leadership and commitment with\
         \ respect to the information security management system by ensuring the integration\
         \ of the information security management system requirements into the organization\u2019\
         s processes."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.OVERVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:3
       name: 5.1.c
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by ensuring that the
         resources needed for the information security management system are available.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.CONTROLS
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:4
       name: 5.1.d
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by communicating the
         importance of effective information security management and of conforming
         to the information security management system requirements.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.COM
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:5
       name: 5.1.e
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by ensuring that the
         information security management system achieves its intended outcome(s).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:6
       name: 5.1.f
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by directing and supporting
         persons to contribute to the effectiveness of the information security management
         system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.COMPETENCY
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:7
       name: 5.1.g
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by promoting continual
         improvement.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.1:8
       name: 5.1.h
       description: Top management shall demonstrate leadership and commitment with
         respect to the information security management system by supporting other
         relevant management roles to demonstrate their leadership as it applies to
         their areas of responsibility.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.1
       security_functions:
       - urn:intuitem:risk:function:D.COMPETENCY
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:1
       name: 5.2.a
       description: Top management shall establish an information security policy that
         is appropriate to the purpose of the organization.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:2
       name: 5.2.b
       description: Top management shall establish an information security policy that
         includes information security objectives or provides the framework for setting
         information security objectives.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:3
       name: 5.2.c
       description: Top management shall establish an information security policy that
         includes a commitment to satisfy applicable requirements related to information
         security.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:4
       name: 5.2.d
       description: Top management shall establish an information security policy that
         includes a commitment to continual improvement of the information security
         management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:5
       name: 5.2.e
       description: The information security policy shall be available as documented
         information.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:6
       name: 5.2.f
       description: The information security policy shall be communicated within the
         organization.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.2:7
       name: 5.2.g
       description: The information security policy shall be available to interested
         parties, as appropriate.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.3:1
       name: '-'
       description: Top management shall ensure that the responsibilities and authorities
         for roles relevant to information security are assigned and communicated within
         the organization.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.3
       security_functions:
       - urn:intuitem:risk:function:D.RACI
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.3:2
       name: 5.3.a
       description: Top management shall assign the responsibility and authority for
         ensuring that the information security management system conforms to the requirements
         of this document.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.3
       security_functions:
       - urn:intuitem:risk:function:D.RACI
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:5:5.3:3
       name: 5.3.b
       description: Top management shall assign the responsibility and authority for
         reporting on the performance of the information security management system
         to top management.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:5:5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:5:5.3
       security_functions:
       - urn:intuitem:risk:function:D.RACI
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:1
       name: '-'
       description: When planning for the information security management system, the
         organization shall consider the issues referred to in 4.1.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:2
       name: '-'
       description: When planning for the information security management system, the
         organization shall consider the requirements referred to in 4.2.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:3
       name: 6.1.1.a
       description: When planning for the information security management system, the
         organization shall determine the risks and opportunities that need to be addressed
         to ensure the information security management system can achieve its intended
         outcome(s).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:4
       name: 6.1.1.b
       description: When planning for the information security management system, the
         organization shall determine the risks and opportunities that need to be addressed
         to prevent, or reduce, undesired effects.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:5
       name: 6.1.1.c
       description: When planning for the information security management system, the
         organization shall determine the risks and opportunities that need to be addressed
         to achieve continual improvement.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:6
       name: 6.1.1.d
       description: The organization shall plan actions to address these risks and
         opportunities.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:7
       name: 6.1.1.e.1
       description: The organization shall plan how to integrate and implement these
         actions into its information security management system processes.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1:6.1.1:8
       name: 6.1.1.e.2
       description: The organization shall plan how to evaluate the effectiveness of
         these actions.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1:6.1.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1:6.1.1
       security_functions:
       - urn:intuitem:risk:function:POL.AUDIT
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:1
       name: 6.1.2.a.1
       description: The organization shall define and apply an information security
         risk assessment process that establishes and maintains information security
         risk criteria that include the risk acceptance criteria.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:2
       name: 6.1.2.a.2
       description: The organization shall define and apply an information security
         risk assessment process that establishes and maintains information security
         risk criteria that include criteria for performing information security risk
         assessments.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:3
       name: 6.1.2.b
       description: The organization shall define and apply an information security
         risk assessment process that ensures that repeated information security risk
         assessments produce consistent, valid and comparable results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:4
       name: 6.1.2.c.1
       description: The organization shall define and apply an information security
         risk assessment process that identifies the information security risks by
         applying the information security risk assessment process to identify risks
         associated with the loss of confidentiality, integrity and availability for
         information within the scope of the information security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:5
       name: 6.1.2.c.2
       description: The organization shall define and apply an information security
         risk assessment process that identifies the information security risks by
         identifying the risk owners.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:6
       name: 6.1.2.d.1
       description: The organization shall define and apply an information security
         risk assessment process that analyses the information security risks by assessing
         the potential consequences that would result if the risks identified in 6.1.2.c.1
         were to materialise.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:7
       name: 6.1.2.d.2
       description: The organization shall define and apply an information security
         risk assessment process that analyses the information security risks by assessing
         the realistic likelihood of the occurrence of the risks identified in 6.1.2.c.1.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:8
       name: 6.1.2.d.3
       description: The organization shall define and apply an information security
         risk assessment process that analyses the information security risks by determining
         the levels of risk.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:9
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:9
       name: 6.1.2.e.1
       description: The organization shall define and apply an information security
         risk assessment process that evaluates the information security risks by comparing
         the results of risk analysis with the risk criteria established in 6.1.2.a.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:10
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:10
       name: 6.1.2.e.2
       description: The organization shall define and apply an information security
         risk assessment process that evaluates the information security risks by prioritizing
         the analysed risks for risk treatment.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2:11
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.2:11
       name: '-'
       description: The organization shall retain documented information about the
         information security risk assessment process.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.2
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:1
       name: 6.1.3.a
       description: The organization shall define and apply an information security
         risk treatment process to select appropriate information security risk treatment
         options, taking account of the risk assessment results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:2
       name: 6.1.3.b
       description: The organization shall define and apply an information security
         risk treatment process to determine all controls that are necessary to implement
         the information security risk treatment option(s) chosen.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:3
       name: 6.1.3.c
       description: The organization shall define and apply an information security
         risk treatment process to compare the controls determined in 6.1.3.b with
         those in Annex A and verify that no necessary controls have been omitted.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:4
       name: 6.1.3.d.1
       description: The organization shall define and apply an information security
         risk treatment process to produce a Statement of Applicability that contains
         the necessary controls (see 6.1.3.b and 6.1.3.c.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:5
       name: 6.1.3.d.2
       description: The organization shall define and apply an information security
         risk treatment process to produce a Statement of Applicability that contains
         justification for their inclusion.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:D.SOA
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:6
       name: 6.1.3.d.3
       description: The organization shall define and apply an information security
         risk treatment process to produce a Statement of Applicability that contains
         whether the necessary controls are implemented or not.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:D.SOA
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:7
       name: 6.1.3.d.4
       description: The organization shall define and apply an information security
         risk treatment process to produce a Statement of Applicability that contains
         the justification for excluding any of the Annex A controls.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:D.SOA
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:8
       name: 6.1.3.e
       description: The organization shall define and apply an information security
         risk treatment process to formulate an information security risk treatment
         plan.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:9
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:9
       name: 6.1.3.f
       description: "The organization shall define and apply an information security\
         \ risk treatment process to obtain risk owners\u2019 approval of the information\
         \ security risk treatment plan and acceptance of the residual information\
         \ security risks."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3:10
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.1.3:10
       name: '-'
       description: The organization shall retain documented information about the
         information security risk treatment process.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.1.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.1.3
       security_functions:
       - urn:intuitem:risk:function:POL.RISK
       - urn:intuitem:risk:function:D.RISK_REGISTER
       - urn:intuitem:risk:function:D.SOA
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:1
       name: '-'
       description: The organization shall establish information security objectives
         at relevant functions and levels.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:2
       name: 6.2.a
       description: The information security objectives shall be consistent with the
         information security policy.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:3
       name: 6.2.b
       description: The information security objectives shall be measurable (if practicable).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:4
       name: 6.2.c
       description: The information security objectives shall take into account applicable
         information security requirements, and results from risk assessment and risk
         treatment.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.RISK_REGISTER
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:5
       name: 6.2.d
       description: The information security objectives shall be monitored.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:6
       name: 6.2.e
       description: The information security objectives shall  be communicated.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:7
       name: 6.2.f
       description: The information security objectives shall  be updated as appropriate.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:8
       name: 6.2.g
       description: The information security objectives shall  be available as documented
         information.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:9
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:9
       name: '-'
       description: The organization shall retain documented information on the information
         security objectives.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:10
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:10
       name: 6.2.h
       description: When planning how to achieve its information security objectives,
         the organization shall determine what will be done.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:11
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:11
       name: 6.2.i
       description: When planning how to achieve its information security objectives,
         the organization shall determine what resources will be required.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:12
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:12
       name: 6.2.j
       description: When planning how to achieve its information security objectives,
         the organization shall determine who will be responsible.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:13
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:13
       name: 6.2.k
       description: When planning how to achieve its information security objectives,
         the organization shall determine  when it will be completed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2:14
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:6:6.2:14
       name: 6.2.l
       description: When planning how to achieve its information security objectives,
         the organization shall determine  how the results will be evaluated.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.SO_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.1:1
       name: '-'
       description: The organization shall determine and provide the resources needed
         for the establishment, implementation, maintenance and continual improvement
         of the information security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.1
       security_functions:
       - urn:intuitem:risk:function:D.RACI
       - urn:intuitem:risk:function:D.COMPETENCY
       - urn:intuitem:risk:function:D.CONTROLS
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.2:1
       name: 7.2.a
       description: The organization shall determine the necessary competence of person(s)
         doing work under its control that affects its information security performance.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.2
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.2:2
       name: 7.2.b
       description: The organization shall ensure that these persons are competent
         on the basis of appropriate education, training, or experience.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.2
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.2:3
       name: 7.2.c
       description: The organization shall where applicable, take actions to acquire
         the necessary competence, and evaluate the effectiveness of the actions taken.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.2
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.2:4
       name: 7.2.d
       description: The organization shall retain appropriate documented information
         as evidence of competence.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.2
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.3:1
       name: 7.3.a
       description: "Persons doing work under the organization\u2019s control shall\
         \ be aware of the information security policy."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.3
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.3:2
       name: 7.3.b
       description: "Persons doing work under the organization\u2019s control shall\
         \ be aware of their contribution to the effectiveness of the information security\
         \ management system, including the benefits of improved information security\
         \ performance."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.3
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.3:3
       name: 7.3.c
       description: "Persons doing work under the organization\u2019s control shall\
         \ be aware of the implications of not conforming with the information security\
         \ management system requirements."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.3
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
       - urn:intuitem:risk:function:D.EDUC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.4:1
       name: 7.4.a
       description: The organization shall determine the need for internal and external
         communications relevant to the information security management system including
         on what to communicate.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.4
       security_functions:
       - urn:intuitem:risk:function:D.COM
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.4:2
       name: 7.4.b
       description: The organization shall determine the need for internal and external
         communications relevant to the information security management system including
         when to communicate.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.4
       security_functions:
       - urn:intuitem:risk:function:D.COM
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.4:3
       name: 7.4.c
       description: The organization shall determine the need for internal and external
         communications relevant to the information security management system including
         with whom to communicate.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.4
       security_functions:
       - urn:intuitem:risk:function:D.COM
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.4:4
       name: 7.4.d
       description: "The organization shall determine the need for internal and external\
         \ communications relevant to the information security management system including\_\
         how to communicate"
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.4
       security_functions:
       - urn:intuitem:risk:function:D.COM
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.1:1
       name: 7.5.1.a
       description: "The organization\u2019s information security management system\
         \ shall include documented information required by this International Standard."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.1
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.1:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.1:2
       name: 7.5.1.b
       description: "The organization\u2019s information security management system\
         \ shall include documented information determined by the organization as being\
         \ necessary for the effectiveness of the information security management system."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.1
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.2:1
       name: 7.5.2.a
       description: When creating and updating documented information the organization
         shall ensure appropriate identification and description (e.g. a title, date,
         author, or reference number).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.2
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.2:2
       name: 7.5.2.b
       description: When creating and updating documented information the organization
         shall ensure appropriate format (e.g. language, software version, graphics)
         and media (e.g. paper, electronic).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.2
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.2:3
       name: 7.5.2.c
       description: When creating and updating documented information the organization
         shall ensure appropriate review and approval for suitability and adequacy.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.2
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:1
       name: 7.5.3.a
       description: Documented information required by the information security management
         system and by this International Standard shall be controlled to ensure it
         is available and suitable for use, where and when it is needed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:2
       name: 7.5.3.b
       description: Documented information required by the information security management
         system and by this International Standard shall be controlled to ensure it
         is adequately protected (e.g. from loss of confidentiality, improper use,
         or loss of integrity).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:3
       name: 7.5.3.c
       description: For the control of documented information, the organization shall
         address, as applicable, distribution, access, retrieval and use.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:4
       name: 7.5.3.d
       description: For the control of documented information, the organization shall
         address, as applicable, storage and preservation, including the preservation
         of legibility.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:5
       name: 7.5.3.e
       description: For the control of documented information, the organization shall
         address, as applicable, control of changes (e.g. version control).
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:6
       name: 7.5.3.f
       description: For the control of documented information, the organization shall
         address, as applicable, retention and disposition.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:7:7.5:7.5.3:7
       name: '-'
       description: Documented information of external origin, determined by the organization
         to be necessary for the planning and operation of the information security
         management system, shall be identified as appropriate, and controlled.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:7:7.5:7.5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:7:7.5:7.5.3
       security_functions:
       - urn:intuitem:risk:function:D.DOC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.1:1
       name: '-'
       description: The organization shall plan, implement and control the processes
         needed to meet information security requirements, and to implement the actions
         determined in clause 6 by establishing criteria for processes.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.1
       security_functions:
       - urn:intuitem:risk:function:D.RACI
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.1:2
       name: '-'
       description: The organization shall plan, implement and control the processes
         needed to meet information security requirements, and to implement the actions
         determined in clause 6 by implementing control of the processes in accordance
         with the criteria.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.1
       security_functions:
       - urn:intuitem:risk:function:D.RACI
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.1:3
       name: '-'
       description: Documented information shall be available to the extent necessary
         to have confidence that the processes have been carried out as planned.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.1
       security_functions:
       - urn:intuitem:risk:function:D.RACI
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.1:4
       name: '-'
       description: The organization shall control planned changes and review the consequences
         of unintended changes, taking action to mitigate any adverse effects, as necessary.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.1
       security_functions:
       - urn:intuitem:risk:function:D.RACI
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.1:5
       name: '-'
       description: "The organization shall ensure that\_externally provided processes,\
         \ products or services that are relevant to the information security management\
         \ system are controlled."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.1
       security_functions:
       - urn:intuitem:risk:function:D.RACI
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.2:1
       name: '-'
       description: "The organization shall perform information security risk assessments\
         \ at planned intervals or when significant changes are proposed or occur,\
         \ taking account of the criteria established in\_6.1.2.a."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.2
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.2:2
       name: '-'
       description: The organization shall retain documented information of the results
         of the information security risk assessments.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.2
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.3:1
       name: '-'
       description: The organization shall implement the information security risk
         treatment plan.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.3
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:8:8.3:2
       name: '-'
       description: The organization shall retain documented information of the results
         of the information security risk treatment.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:8:8.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:8:8.3
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
       - urn:intuitem:risk:function:D.RISK_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:1
       name: 9.1.a
       description: The organization shall determine what needs to be monitored and
         measured, including information security processes and controls.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
       security_functions:
       - urn:intuitem:risk:function:POL.MONITOR
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:2
       name: 9.1.b
       description: The organization shall determine the methods for monitoring, measurement,
         analysis and evaluation, as applicable, to ensure valid results. The methods
         selected should produce comparable and reproducible results to be considered
         valid.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
       security_functions:
       - urn:intuitem:risk:function:POL.MONITOR
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:3
       name: 9.1.c
       description: The organization shall determine when the monitoring and measuring
         shall be performed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:4
       name: 9.1.d
       description: The organization shall determine who shall monitor and measure.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:5
       name: 9.1.e
       description: The organization shall determine when the results from monitoring
         and measurement shall be analysed and evaluated.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:6
       name: 9.1.f
       description: The organization shall determine who shall analyse and evaluate
         these results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:7
       name: '-'
       description: Documented information shall be available as evidence of the results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1:8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.1:8
       name: '-'
       description: The organization shall evaluate the information security performance
         and effectiveness of the information security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.1
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.1:1
       name: 9.2.1.a.1
       description: "The organization shall conduct internal audits at planned intervals\
         \ to provide information on whether the information security management system\
         \ conforms to the organization\u2019s own requirements for its information\
         \ security management system."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.1
       security_functions:
       - urn:intuitem:risk:function:POL.AUDIT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.1:2
       name: 9.2.1.a.2
       description: The organization shall conduct internal audits at planned intervals
         to provide information on whether the information security management system
         conforms to the requirements of this document.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.1
       security_functions:
       - urn:intuitem:risk:function:POL.AUDIT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.1:3
       name: 9.2.1.b
       description: The organization shall conduct internal audits at planned intervals
         to provide information on whether the information security management system
         is effectively implemented and maintained.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.1
       security_functions:
       - urn:intuitem:risk:function:POL.AUDIT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.2:1
       name: '-'
       description: The organization shall plan, establish, implement and maintain
         an audit programme(s),  including the frequency, methods, responsibilities,
         planning requirements and reporting.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.2:2
       name: '-'
       description: When establishing the internal audit programme(s), the organization
         shall consider the importance of the processes concerned and the results of
         previous audits.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.2:3
       name: 9.2.2.a
       description: The organization shall define the audit criteria and scope for
         each audit.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.2:4
       name: 9.2.2.b
       description: The organization shall select auditors and conduct audits that
         ensure objectivity and the impartiality of the audit process.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.2:5
       name: 9.2.2.c
       description: The organization shall ensure that the results of the audits are
         reported to relevant management.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.2:9.2.2:6
       name: '-'
       description: Documented information shall be available as evidence of the implementation
         of the audit programme and the audit results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.2:9.2.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.2:9.2.2
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.1:1
       name: '-'
       description: "Top management shall review the organization\u2019s information\
         \ security management system at planned intervals to ensure its continuing\
         \ suitability, adequacy and effectiveness."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.1
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:1
       name: 9.3.2.a
       description: The management review shall include consideration of the status
         of actions from previous management reviews.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:2
       name: 9.3.2.b
       description: The management review shall include consideration of changes in
         external and internal issues that are relevant to the information security
         management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:3
       name: 9.3.2.c
       description: The management review shall include consideration of changes in
         needs and expectations of interested parties that are relevant to the information
         security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:4
       name: 9.3.2.d.1
       description: The management review shall include consideration of feedback on
         the information security performance, including trends in nonconformities
         and corrective actions.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:5
       name: 9.3.2.d.2
       description: The management review shall include consideration of feedback on
         the information security performance, including trends in monitoring and measurement
         results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:6
       name: 9.3.2.d.3
       description: The management review shall include consideration of feedback on
         the information security performance, including trends in audit results.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:7
       name: 9.3.2.d.4
       description: The management review shall include consideration of feedback on
         the information security performance, including trends in fulfilment of information
         security objectives.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:8
       name: 9.3.2.e
       description: The management review shall include consideration of feedback from
         interested parties.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:9
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:9
       name: 9.3.2.f
       description: The management review shall include consideration of results of
         risk assessment and status of risk treatment plan.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2:10
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.2:10
       name: 9.3.2.g
       description: The management review shall include consideration of opportunities
         for continual improvement.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.3:1
       name: '-'
       description: The results of the management review shall include decisions related
         to continual improvement opportunities and any needs for changes to the information
         security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.3
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.3:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:9:9.3:9.3.3:2
       name: '-'
       description: Documented information shall be available as evidence of the results
         of management reviews.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:9:9.3:9.3.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:9:9.3:9.3.3
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.1:1
       name: '-'
       description: The organization shall continually improve the suitability, adequacy
         and effectiveness of the information security management system.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.1
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:1
       name: 10.2.a.1
       description: When a nonconformity occurs, the organization shall react to the
         nonconformity, and as applicable, take action to control and correct it.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:2
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:2
       name: 10.2.a.2
       description: When a nonconformity occurs, the organization shall react to the
         nonconformity, and as applicable, deal with the consequences.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:3
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:3
       name: 10.2.b.1
       description: When a nonconformity occurs, the organization shall evaluate the
         need for action to eliminate the causes of nonconformity, in order that it
         does not recur or occur elsewhere, by reviewing the nonconformity.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:4
       name: 10.2.b.2
       description: When a nonconformity occurs, the organization shall evaluate the
         need for action to eliminate the causes of nonconformity, in order that it
         does not recur or occur elsewhere, by determining the causes of the nonconformity.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:5
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:5
       name: 10.2.b.3
       description: When a nonconformity occurs, the organization shall evaluate the
         need for action to eliminate the causes of nonconformity, in order that it
         does not recur or occur elsewhere, by determining if similar nonconformities
         exist, or could potentially occur.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:6
       name: 10.2.c
       description: When a nonconformity occurs, the organization shall implement any
         action needed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
       - urn:intuitem:risk:function:D.RACI
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:7
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:7
       name: 10.2.d
       description: When a nonconformity occurs, the organization shall review the
         effectiveness of any corrective action taken.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:D.MGMT_REVIEW
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:8
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:8
       name: 10.2.e
       description: When a nonconformity occurs, the organization shall make changes
         to the information security management system, if necessary.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:9
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:9
       name: '-'
       description: Corrective actions shall be appropriate to the effects of the nonconformities
         encountered.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:10
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:10
       name: 10.2.f
       description: The organization shall retain documented information as evidence
         of the nature of the nonconformities and any subsequent actions taken.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:11
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:11
       name: 10.2.g
       description: The organization shall retain documented information as evidence
         of the results of any corrective action.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2
       security_functions:
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.1:1
       name: '-'
       description: Information security policy and topic-specific policies should
         be defined, approved by management, published, communicated to and acknowledged
         by relevant personnel and relevant interested parties, and reviewed at planned
         intervals and if significant changes occur.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.1
       security_functions:
       - urn:intuitem:risk:function:POL.MAIN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.2:1
       name: '-'
       description: Information security roles and responsibilities should be defined
         and allocated according to the organisation needs.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.2
       security_functions:
       - urn:intuitem:risk:function:D.RACI
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.3:1
       name: '-'
       description: Conflicting duties and conflicting areas of responsibility should
         be segregated.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.3
       security_functions:
       - urn:intuitem:risk:function:POL.SEG_DUTY
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.4:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.4:1
       name: '-'
       description: Management should require all personnel to apply information security
         in accordance with the established information security policy, topic-specific
         policies and procedures of the organization.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.4
       security_functions:
       - urn:intuitem:risk:function:D.INTERNAL_RULES
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.5:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.5:1
       name: '-'
       description: The organisation should establish and maintain contact with relevant
         authorities.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.5
       security_functions:
       - urn:intuitem:risk:function:D.CONTEXT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.6:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.6:1
       name: '-'
       description: The organisation should establish and maintain contact with special
         interest groups or other specialist security forums and professional associations.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.6
       security_functions:
       - urn:intuitem:risk:function:D.CONTEXT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.7:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.7:1
       name: '-'
       description: Information relating to information security threats should be
         collected and analysed to produce threat intelligence.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.7
       security_functions:
       - urn:intuitem:risk:function:POL.THREAT_INTEL
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.8:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.8:1
       name: '-'
       description: Information security should be integrated into project management.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.8
       security_functions:
       - urn:intuitem:risk:function:POL.PROJECT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.9:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.9:1
       name: '-'
       description: An inventory of information and other associated assets, including
         owners, should be developed and maintained.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.9
       security_functions:
       - urn:intuitem:risk:function:D.ASSET_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.10:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.10:1
       name: '-'
       description: Rules for the acceptable use and procedures for handling information
         and other associated assets should be identified, documented and implemented.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.10
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.10
       security_functions:
       - urn:intuitem:risk:function:POL.ACCEPT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.11:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.11:1
       name: '-'
       description: "Personnel and other interested parties as appropriate should return\
         \ all the organisation\u2019s assets in their possession upon change or termination\
         \ of their employment, contract or agreement."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.11
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.11
       security_functions:
       - urn:intuitem:risk:function:POL.WORK
       - urn:intuitem:risk:function:POL.ASSET
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.12:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.12:1
       name: '-'
       description: Information should be classified according to the information security
         needs of the organisation based on confidentiality, integrity, availability
         and relevant interested party requirements.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.12
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.12
       security_functions:
       - urn:intuitem:risk:function:POL.CLASSIF
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.13:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.13:1
       name: '-'
       description: An appropriate set of procedures for information labelling should
         be developed and implemented in accordance with the information classification
         scheme adopted by the organization.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.13
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.13
       security_functions:
       - urn:intuitem:risk:function:POL.CLASSIF
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.14:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.14:1
       name: '-'
       description: Information transfer rules, procedures, or agreements should be
         in place for all types of transfer facilities within the organisation and
         between the organisation and other parties.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.14
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.14
       security_functions:
       - urn:intuitem:risk:function:POL.TRANSFER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.15:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.15:1
       name: '-'
       description: Rules to control physical and logical access to information and
         other associated assets should be established
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.15
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.15
       security_functions:
       - urn:intuitem:risk:function:POL.ACCESS
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.16:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.16:1
       name: '-'
       description: The full lifecycle of identities should be managed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.16
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.16
       security_functions:
       - urn:intuitem:risk:function:POL.ACCESS
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.17:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.17:1
       name: '-'
       description: Allocation and management of authentication information should
         be controlled by a management process, including advising personnel on the
         appropriate handling of authentication information.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.17
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.17
       security_functions:
       - urn:intuitem:risk:function:POL.ACCESS
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.18:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.18:1
       name: '-'
       description: "Access rights to information and other associated assets should\
         \ be provisioned, reviewed, modified and removed in accordance with the organisation\u2019\
         s topic-specific policy on and rules for access control."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.18
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.18
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.19:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.19:1
       name: '-'
       description: "Processes and procedures should be defined and implemented to\
         \ manage the information security risks associated with the use of supplier\u2019\
         s products or services."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.19
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.19
       security_functions:
       - urn:intuitem:risk:function:POL.SUPPLIER
       - urn:intuitem:risk:function:D.SUPPLIER_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.20:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.20:1
       name: '-'
       description: Relevant information security requirements should be established
         and agreed with each supplier based on the type of supplier relationship.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.20
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.20
       security_functions:
       - urn:intuitem:risk:function:POL.SUPPLIER
       - urn:intuitem:risk:function:D.SUPPLIER_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.21:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.21:1
       name: '-'
       description: Processes and procedures should be defined and implemented to manage
         the information security risks associated with the ICT products and services
         supply chain.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.21
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.21
       security_functions:
       - urn:intuitem:risk:function:POL.SUPPLIER
       - urn:intuitem:risk:function:D.SUPPLIER_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.22:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.22:1
       name: '-'
       description: The organisation should regularly monitor, review, evaluate and
         manage change in supplier information security practices and service delivery.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.22
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.22
       security_functions:
       - urn:intuitem:risk:function:POL.SUPPLIER
       - urn:intuitem:risk:function:D.SUPPLIER_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.23:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.23:1
       name: '-'
       description: "Processes for acquisition, use, management and exit from cloud\
         \ services should be established in accordance with the organisation\u2019\
         s information security requirements."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.23
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.23
       security_functions:
       - urn:intuitem:risk:function:POL.SUPPLIER
       - urn:intuitem:risk:function:D.SUPPLIER_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.24:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.24:1
       name: '-'
       description: The organization should plan and prepare for managing information
         security incidents by defining, establishing and communicating information
         security incident management processes, roles and responsibilities.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.24
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.24
       security_functions:
       - urn:intuitem:risk:function:POL.INCIDENT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.25:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.25:1
       name: '-'
       description: The organisation should assess information security events and
         decide if they are to be categorised as information security incidents.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.25
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.25
       security_functions:
       - urn:intuitem:risk:function:POL.INCIDENT
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.26:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.26:1
       name: '-'
       description: Information security incidents should be responded to in accordance
         with the documented procedures.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.26
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.26
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.27:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.27:1
       name: '-'
       description: Knowledge gained from information security incidents should be
         used to strengthen and improve the information security controls.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.27
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.27
       security_functions:
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.28:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.28:1
       name: '-'
       description: The organisation should establish and implement procedures for
         the identification, collection, acquisition and preservation of evidence related
         to information security events.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.28
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.28
       security_functions:
       - urn:intuitem:risk:function:D.NC_LOG
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.29:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.29:1
       name: '-'
       description: The organisation should plan how to maintain information security
         at an appropriate level during disruption.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.29
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.29
       security_functions:
       - urn:intuitem:risk:function:POL.INCIDENT
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.30:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.30:1
       name: '-'
       description: ICT readiness should be planned, implemented, maintained and tested
         based on business continuity objectives and ICT continuity requirements.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.30
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.30
       security_functions:
       - urn:intuitem:risk:function:POL.BCP
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.31:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.31:1
       name: '-'
       description: Legal, statutory, regulatory and contractual requirements relevant
         to information security and the organisations approach to meet these requirements
         should be identified, documented and kept up to date.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.31
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.31
       security_functions:
       - urn:intuitem:risk:function:D.LEGAL
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.32:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.32:1
       name: '-'
       description: The organisation should implement appropriate procedures to protect
         intellectual property rights.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.32
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.32
       security_functions:
       - urn:intuitem:risk:function:D.LEGAL
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.33:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.33:1
       name: '-'
       description: Records should be protected from loss, destruction, falsification,
         unauthorised access and unauthorised release.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.33
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.33
       security_functions:
       - urn:intuitem:risk:function:POL.CLASSIF
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.34:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.34:1
       name: '-'
       description: The organisation should identify and meet the requirements regarding
         the preservation of privacy and protection of PII according to applicable
         laws and regulations and contractual requirements.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.34
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.34
       security_functions:
       - urn:intuitem:risk:function:POL.CLASSIF
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.35:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.35:1
       name: '-'
       description: The organisations approach to managing information security and
         its implementation including people, processes and technologies should be
         reviewed independently at planned intervals, or when significant changes occur.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.35
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.35
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.36:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.36:1
       name: '-'
       description: Compliance with the organisations information security policy,
         topic-specific policies, rules and standards should be regularly reviewed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.36
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.36
       security_functions:
       - urn:intuitem:risk:function:D.AUDIT_PLAN
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.37:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:5:5.37:1
       name: '-'
       description: Operating procedures for information processing facilities should
         be documented and made available to personnel who need them.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:5:5.37
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:5:5.37
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.1:1
       name: '-'
       description: Background verification checks on all candidates to become personnel
         should be carried out prior to joining the organisation and on an ongoing
         basis taking into consideration applicable laws, regulations and ethics and
         be proportional to the business requirements, the classification of the information
         to be accessed and the perceived risks.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.1
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.2:1
       name: '-'
       description: "The employment contractual agreements should state the personnel\u2019\
         s and the organisations responsibilities for information security."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.2
       security_functions:
       - urn:intuitem:risk:function:D.INTERNAL_RULES
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.3:1
       name: '-'
       description: Personnel of the organisation and relevant interested parties should
         receive appropriate information security awareness, education and training
         and regular updates of the organisations information security policy, topic-specific
         policies and procedures, as relevant for their job function.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.3
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.4:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.4:1
       name: '-'
       description: A disciplinary process should be formalised and communicated to
         take actions against personnel and other relevant interested parties who have
         committed an information security policy violation.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.4
       security_functions:
       - urn:intuitem:risk:function:D.INTERNAL_RULES
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.5:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.5:1
       name: '-'
       description: Information security responsibilities and duties that remain valid
         after termination or change of employment should be defined, enforced and
         communicated to relevant personnel and other interested parties.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.5
       security_functions:
       - urn:intuitem:risk:function:D.LEGAL
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.6:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.6:1
       name: '-'
       description: "Confidentiality or non-disclosure agreements reflecting the organisation\u2019\
         s needs for the protection of information should be identified, documented,\
         \ regularly reviewed and signed by personnel and other relevant interested\
         \ parties."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.6
       security_functions:
       - urn:intuitem:risk:function:D.LEGAL
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.7:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.7:1
       name: '-'
       description: "Security measures should be implemented when personnel are working\
         \ remotely to protect information accessed, processed or stored outside the\
         \ organisation\u2019s premises."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.7
       security_functions:
       - urn:intuitem:risk:function:POL.WORK
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.8:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:6:6.8:1
       name: '-'
       description: The organisation should provide a mechanism for personnel to report
         observed or suspected information security events through appropriate channels
         in a timely manner.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:6:6.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:6:6.8
       security_functions:
       - urn:intuitem:risk:function:POL.EDUC
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.1:1
       name: '-'
       description: To prevent unauthorised physical access, damage and interference
         to the organisations information and other associated assets.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.1
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.2:1
       name: '-'
       description: Secure areas should be protected by appropriate entry controls
         and access points.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.2
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.3:1
       name: '-'
       description: Physical security for offices, rooms and facilities should be designed
         and implemented.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.3
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.4:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.4:1
       name: '-'
       description: Premises should be continuously monitored for unauthorised physical
         access.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.4
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.4
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.5:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.5:1
       name: '-'
       description: Protection against physical and environmental threats, such as
         natural disasters and other intentional or unintentional physical threats
         to infrastructure should be designed and implemented.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.5
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.6:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.6:1
       name: '-'
       description: Security measures for working in secure areas should be designed
         and implemented.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.6
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.6
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.7:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.7:1
       name: '-'
       description: "Clear desk rules for papers and removable storage media and clear\
         \ screen rules for information\_processing facilities should be defined and\
         \ appropriately enforced."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.7
       security_functions:
       - urn:intuitem:risk:function:POL.CLASSIF
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.8:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.8:1
       name: '-'
       description: Equipment should be sited securely and protected.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.8
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.9:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.9:1
       name: '-'
       description: Off-site assets should be protected.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.9
       security_functions:
       - urn:intuitem:risk:function:POL.WORK
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.10:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.10:1
       name: '-'
       description: "Storage media should be managed through their life cycle of acquisition,\
         \ use, transportation and\_disposal in accordance with the organisations classification\
         \ scheme and handling requirements."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.10
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.10
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.11:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.11:1
       name: '-'
       description: Information processing facilities should be protected from power
         failures and other disruptions caused by failures in supporting utilities.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.11
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.11
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.12:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.12:1
       name: '-'
       description: "Cables carrying power, data or supporting information services\
         \ should be protected from interception, interference or damage [in order]\
         \ to prevent loss, damage, theft or compromise of information and other associated\
         \ assets and interruption to the organization\u2019s operations related to\
         \ power and communications cabling."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.12
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.12
       security_functions:
       - urn:intuitem:risk:function:POL.PHYSICAL
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.13:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.13:1
       name: '-'
       description: Equipment shall be maintained correctly to ensure availability,
         integrity and confidentiality of information.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.13
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.13
       security_functions:
       - urn:intuitem:risk:function:POL.MAINTENANCE
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.14:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:7:7.14:1
       name: '-'
       description: Items of equipment containing storage media shall be verified to
         ensure that any sensitive data and licensed software has been removed or securely
         overwritten prior to disposal or re-use.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:7:7.14
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:7:7.14
       security_functions:
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.1:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.1:1
       name: '-'
       description: Information stored on, processed by or accessible via user end
         point devices shall be protected.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.1
       security_functions:
       - urn:intuitem:risk:function:M1040
       - urn:intuitem:risk:function:M1049
       - urn:intuitem:risk:function:M1041
       - urn:intuitem:risk:function:M1046
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.2:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.2:1
       name: '-'
       description: The allocation and use of privileged access rights shall be restricted
         and managed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.2
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.2
       security_functions:
       - urn:intuitem:risk:function:M1026
       - urn:intuitem:risk:function:M1043
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.3:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.3:1
       name: '-'
       description: Access to information and other associated assets shall be restricted
         in accordance with the established topic-specific policy on access control.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.3
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.3
       security_functions:
       - urn:intuitem:risk:function:M1052
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.4:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.4:1
       name: '-'
       description: Read and write access to source code, development tools and software
         libraries shall be appropriately managed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.4
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.5:1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.4
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.5:1
       name: '-'
       description: Secure authentication technologies and procedures shall be implemented
         based on information access restrictions and the topic-specific policy on
         access control.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.5
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.5
       security_functions:
       - urn:intuitem:risk:function:M1032
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.6:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.6:1
       name: '-'
       description: The use of resources shall be monitored and adjusted in line with
         current and expected capacity requirements.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.6
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.7:1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.6
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.7:1
       name: '-'
       description: Protection against malware shall be implemented and supported by
         appropriate user awareness.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.7
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.7
       security_functions:
       - urn:intuitem:risk:function:M1041
       - urn:intuitem:risk:function:M1017
       - urn:intuitem:risk:function:M1038
       - urn:intuitem:risk:function:M1039
       - urn:intuitem:risk:function:M1045
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.8:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.8:1
       name: '-'
       description: "Information about technical vulnerabilities of information systems\
         \ in use shall be obtained, the organization\u2019s exposure to such vulnerabilities\
         \ shall be evaluated and appropriate measures shall be taken."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.8
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.8
       security_functions:
       - urn:intuitem:risk:function:M1016
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.9:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.9:1
       name: '-'
       description: Configurations, including security configurations, of hardware,
         software, services and networks shall be established, documented, implemented,
         monitored and reviewed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.9
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.9
       security_functions:
       - urn:intuitem:risk:function:M1028
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.10:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.10:1
       name: '-'
       description: Information stored in information systems, devices or in any other
         storage media shall be deleted when no longer required.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.10
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.11:1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.10
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.11:1
       name: '-'
       description: "Data masking shall be used in accordance with the organization\u2019\
         s topic-specific policy on access control and other related topic-specific\
         \ policies, and business requirements, taking applicable legislation into\
         \ consideration."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.11
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.11
       security_functions:
       - urn:intuitem:risk:function:M1041
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.12:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.12:1
       name: '-'
       description: Data leakage prevention measures shall be applied to systems, net-
         works and any other devices that process, store or transmit sensitive information.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.12
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.12
       security_functions:
       - urn:intuitem:risk:function:M1057
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.13:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.13:1
       name: '-'
       description: Backup copies of information, software and systems shall be maintained
         and regularly tested in accordance with the agreed topic-specific policy on
         backup.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.13
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.13
       threats:
       - urn:intuitem:risk:threat:T1485
       security_functions:
       - urn:intuitem:risk:function:M1053
       - urn:intuitem:risk:function:M1029
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.14:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.14:1
       name: '-'
       description: Information processing facilities shall be implemented with redundancy
         sufficient to meet availability requirements.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.14
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.15:1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.14
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.15:1
       name: '-'
       description: Logs that record activities, exceptions, faults and other relevant
         events shall be produced, stored, protected and analysed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.15
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.16:1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.15
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.16:1
       name: '-'
       description: Networks, systems and applications shall be monitored for anomalous
         behaviour and appropriate actions taken to evaluate potential information
         security incidents.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.16
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.16
       security_functions:
       - urn:intuitem:risk:function:M1031
       - urn:intuitem:risk:function:M1020
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.17:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.17:1
       name: '-'
       description: The clocks of information processing systems used by the organization
         shall be synchronized to approved time sources.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.17
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.18:1
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.17
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.18:1
       name: '-'
       description: The use of utility programs that can be capable of overriding system
         and application controls shall be restricted and tightly controlled.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.18
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.18
       security_functions:
       - urn:intuitem:risk:function:M1025
       - urn:intuitem:risk:function:M1039
       - urn:intuitem:risk:function:M1045
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.19:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.19:1
       name: '-'
       description: Procedures and measures shall be implemented to securely manage
         software installation on operational systems
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.19
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.19
       security_functions:
       - urn:intuitem:risk:function:M1033
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.20:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.20:1
       name: '-'
       description: Networks and network devices shall be secured, managed and controlled
         to protect information in systems and applications.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.20
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.20
       security_functions:
       - urn:intuitem:risk:function:M1035
       - urn:intuitem:risk:function:M1037
       - urn:intuitem:risk:function:M1034
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.21:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.21:1
       name: '-'
       description: Security mechanisms, service levels and service requirements of
         network services shall be identified, implemented and monitored.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.21
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.21
       security_functions:
       - urn:intuitem:risk:function:M1035
       - urn:intuitem:risk:function:M1037
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.22:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.22:1
       name: '-'
       description: "Groups of information services, users and information systems\
         \ shall be segregated in the organization\u2019s networks."
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.22
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.22
       security_functions:
       - urn:intuitem:risk:function:M1030
       - urn:intuitem:risk:function:M1037
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.23:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.23:1
       name: '-'
       description: Access to external websites shall be managed to reduce exposure
         to malicious content.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.23
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.23
       security_functions:
       - urn:intuitem:risk:function:M1021
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.24:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.24:1
       name: '-'
       description: Rules for the effective use of cryptography, including cryptographic
         key management, shall be defined and implemented.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.24
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.24
       security_functions:
       - urn:intuitem:risk:function:M1041
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.25:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.25:1
       name: '-'
       description: Rules for the secure development of software and systems shall
         be established and applied.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.25
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.25
       security_functions:
       - urn:intuitem:risk:function:M1013
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.26:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.26:1
       name: '-'
       description: Information security requirements shall be identified, specified
         and approved when developing or acquiring applications.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.26
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.26
       security_functions:
       - urn:intuitem:risk:function:M1013
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.27:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.27:1
       name: '-'
       description: Principles for engineering secure systems shall be established,
         documented, maintained and applied to any information system development activities.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.27
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.27
       security_functions:
       - urn:intuitem:risk:function:M1013
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.28:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.28:1
       name: '-'
       description: Secure coding principles shall be applied to software development.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.28
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.28
       security_functions:
       - urn:intuitem:risk:function:M1013
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.29:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.29:1
       name: '-'
       description: Security testing processes shall be defined and implemented in
         the development life cycle.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.29
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.29
       security_functions:
       - urn:intuitem:risk:function:M1013
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.30:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.30:1
       name: '-'
       description: The organization shall direct, monitor and review the activities
         related to outsourced system development.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.30
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.30
       security_functions:
       - urn:intuitem:risk:function:POL.SUPPLIER
       - urn:intuitem:risk:function:D.SUPPLIER_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.31:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.31:1
       name: '-'
       description: Development, testing and production environments shall be separated
         and secured.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.31
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.31
       security_functions:
       - urn:intuitem:risk:function:M1030
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.32:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.32:1
       name: '-'
       description: Changes to information processing facilities and information systems
         shall be subject to change management procedures.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.32
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.32
       security_functions:
       - urn:intuitem:risk:function:POL.MAINTENANCE
       - urn:intuitem:risk:function:D.PROC_REGISTER
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.33:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.33:1
       name: '-'
       description: Test information shall be appropriately selected, protected and
         managed.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.33
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.33
       security_functions:
       - urn:intuitem:risk:function:POL.CLASSIF
-    - urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.34:1
+    - urn: urn:intuitem:risk:reqs:iso27001-2022:core:10:10.2:annex-a:8:8.34:1
       name: '-'
       description: Audit tests and other assurance activities involving assessment
         of operational systems shall be planned and agreed between the tester and
         appropriate management.
-      parent_urn: urn:intuitem:risk:library:iso27001-2022:core:10:10.2:annex-a:8:8.34
+      parent_urn: urn:intuitem:risk:req_groups:iso27001-2022:core:10:10.2:annex-a:8:8.34
       security_functions:
       - urn:intuitem:risk:function:POL.AUDIT
   security_functions:
