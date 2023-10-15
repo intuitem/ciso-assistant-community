@@ -237,7 +237,7 @@ msgstr "Rechercher une preuve..."
 
 #: core/filters.py:490
 msgid "Search framework..."
-msgstr "Rechercher un cadre..."
+msgstr "Rechercher un référentiel..."
 
 #: core/forms.py:32
 msgid "Invalid link"
@@ -295,7 +295,7 @@ msgstr "Menaces"
 
 #: core/models.py:77
 msgid "Version of the framework (eg. 1.0, 2.0, etc.)"
-msgstr "Version du cadre (eg. 1.0, 2.0, etc.)"
+msgstr "Version du référentiel (eg. 1.0, 2.0, etc.)"
 
 #: core/models.py:83 core/models.py:110 core/models.py:128 core/models.py:152
 #: core/models.py:331 core/templates/core/assessment_list.html:109
@@ -305,14 +305,14 @@ msgstr "Version du cadre (eg. 1.0, 2.0, etc.)"
 #: core/templates/core/requirement_list.html:110
 #: core/templates/library/library_detail.html:97
 msgid "Framework"
-msgstr "Cadre"
+msgstr "Référentiel"
 
 #: core/models.py:84 core/templates/core/framework_list.html:6
 #: core/templates/core/security_function_list.html:109
 #: core/templates/core/sidebar.html:119
 #: core/templates/core/threat_list.html:111 core/views.py:2422
 msgid "Frameworks"
-msgstr "Cadres"
+msgstr "Référentiels"
 
 #: core/models.py:116 core/models.py:158
 msgid "Parent URN"
@@ -987,23 +987,23 @@ msgstr "Aucune mesure pour le moment."
 
 #: core/templates/core/framework_list.html:105
 msgid "Import framework"
-msgstr "Importer un cadre"
+msgstr "Importer un référentiel"
 
 #: core/templates/core/framework_list.html:155
 msgid "Delete framework?"
-msgstr "Supprimer le cadre ?"
+msgstr "Supprimer le référentiel ?"
 
 #: core/templates/core/framework_list.html:165
 msgid "No framework found."
-msgstr "Aucun cadre trouvé."
+msgstr "Aucun référentiel trouvé."
 
 #: core/templates/core/framework_update.html:4
 msgid "Edit framework"
-msgstr "Modifier le cadre"
+msgstr "Modifier le référentiel"
 
 #: core/templates/core/framework_update.html:10
 msgid "Framework information"
-msgstr "Informations du cadre"
+msgstr "Informations du référentiel"
 
 #: core/templates/core/group_create.html:4
 msgid "New user group"
@@ -2520,7 +2520,7 @@ msgstr ""
 #~ msgstr "Nom de la preuve"
 
 #~ msgid "Framework Name"
-#~ msgstr "Nom du cadre"
+#~ msgstr "Nom du référentiel"
 
 #~ msgid "Library name"
 #~ msgstr "Nom de la bibliothèque"
