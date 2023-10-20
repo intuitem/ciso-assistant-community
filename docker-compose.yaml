@@ -1,0 +1,46 @@
+version: "3.5"
+services:
+    ciso-assistant:
+      image: ciso-assistant:0.9.1 
+      container_name: "ciso-assistant"
+      ports:
+            - "8800:8000"
+      networks:
+            - ciso_network
+      depends_on:
+        - ciso-postgres
+      environment:
+            CREATE_SUPERUSER: "True"  
+            DJANGO_DEBUG: "True"
+            CISO_URL: http://127.0.0.1:8800
+            POSTGRES_NAME: postgres
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: root
+            CISO_SUPERUSER_EMAIL: ciso@assistant.local
+            EMAIL_HOST: your.mail.server
+            EMAIL_PORT: 1025
+            EMAIL_HOST_USER: ''
+            EMAIL_HOST_PASSWORD: ''
+            EMAIL_USE_TLS: "False"
+            EMAIL_USE_SSL: "False"
+            DEFAULT_FROM_EMAIL: ciso@assistant.local
+            DB_HOST: ciso-postgres
+      volumes:
+            - ./db:/code/db
+
+    ciso-postgres:
+        image: postgres
+        container_name: "ciso-postgres"
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: root
+            PGDATA: /var/lib/postgresql/data/pgdata
+        networks:
+            - ciso_network
+        volumes:
+            - ./data/pgdata:/var/lib/postgresql/data/pgdata
+
+
+networks:
+  ciso_network:
+
