@@ -1,0 +1,42 @@
+version: "3.5"
+services:
+    ciso-assistant:
+      build: .
+      image: ciso-assistant:0.9.1 
+      container_name: "ciso-assistant"
+      ports:
+        - "8000:8000"
+      depends_on:
+        postgres:
+          condition: service_healthy
+      environment:
+        DJANGO_DEBUG: "True"
+        CISO_URL: http://127.0.0.1:8000
+        POSTGRES_NAME: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+#        CISO_SUPERUSER_EMAIL: ciso@assistant.local
+        EMAIL_HOST: your.mail.server
+        EMAIL_PORT: 1025
+        EMAIL_HOST_USER: ''
+        EMAIL_HOST_PASSWORD: ''
+        EMAIL_USE_TLS: "False"
+        EMAIL_USE_SSL: "False"
+        DEFAULT_FROM_EMAIL: ciso@assistant.local
+        DB_HOST: ciso-postgres
+      volumes:
+        - ./db:/code/db
+
+    postgres:
+      image: postgres
+      container_name: "ciso-postgres"
+      restart: always
+      environment:
+        POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      volumes:
+        - ./db/data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
