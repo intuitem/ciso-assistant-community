@@ -14,7 +14,7 @@ services:
         CISO_URL: http://127.0.0.1:8000
         POSTGRES_NAME: postgres
         POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+        POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
 #        CISO_SUPERUSER_EMAIL: ciso@assistant.local
         EMAIL_HOST: your.mail.server
         EMAIL_PORT: 1025
@@ -26,13 +26,15 @@ services:
         DB_HOST: ciso-postgres
       volumes:
         - ./db:/code/db
+      secrets:
+        - pg_password
 
     postgres:
       image: postgres
       container_name: "ciso-postgres"
       restart: always
       environment:
-        POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+        POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
       volumes:
         - ./db/data:/var/lib/postgresql/data
       healthcheck:
@@ -40,3 +42,8 @@ services:
         interval: 5s
         timeout: 5s
         retries: 5
+      secrets:
+        - pg_password
+secrets:
+   pg_password:
+     file: ./db/pg_password.txt
