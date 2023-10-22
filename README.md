@@ -102,12 +102,12 @@ python manage.py collectstatic
 python manage.py createsuperuser
 ```
 
-5. Run CISO
+5. Run CISO Assistant
 
 ```sh
 python manage.py runserver
 ```
-You can then reach CISO using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 #### Using Docker
 
@@ -127,7 +127,7 @@ docker run --rm -it --env CREATE_SUPERUSER=true -p 8000:8000 -v ./db:/code/db  c
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 For the following executions, simply run:
 
@@ -137,7 +137,21 @@ docker run --rm -p 8000:8000 -v ./db:/code/db  ciso-assistant:$(<ciso_assistant/
 
 ⚠️ *WARNING*: If you're using WSL you'll need to activate *Systemd*. Check out this [topic](https://stackoverflow.com/questions/65400999/enable-systemd-in-wsl-2) to do it.
 
-### How to set up CISO for development? ✍️
+
+#### Using docker-compose with a Postgres database
+
+Simply launch:
+```sh
+./docker-compose-pg.sh
+```
+
+When asked for, enter your email and password for your superuser.
+
+You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+For following executions, use "docker-compose up" directly.
+
+### How to set up CISO Assistant for development? ✍️
 
 1. Clone the repository.
 
