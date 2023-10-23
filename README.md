@@ -50,7 +50,7 @@ To install gettext and pango, do `sudo apt update && sudo apt install gettext li
 
 ### Quick start 🚀
 
-There are two methods to run CISO locally: using Python or using Docker.
+There are three methods to run CISO locally: using Python, using Docker or using docker-compose.
 
 By default, Django secret key is generated randomly at each start of Mira. This is convenient for quick test, but not recommended for production, as it can break the sessions (see this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information). To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
 
@@ -102,12 +102,12 @@ python manage.py collectstatic
 python manage.py createsuperuser
 ```
 
-5. Run CISO
+5. Run CISO Assistant
 
 ```sh
 python manage.py runserver
 ```
-You can then reach CISO using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 #### Using Docker
 
@@ -127,7 +127,7 @@ docker run --rm -it --env CREATE_SUPERUSER=true -p 8000:8000 -v ./db:/code/db  c
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 For the following executions, simply run:
 
@@ -137,7 +137,21 @@ docker run --rm -p 8000:8000 -v ./db:/code/db  ciso-assistant:$(<ciso_assistant/
 
 ⚠️ *WARNING*: If you're using WSL you'll need to activate *Systemd*. Check out this [topic](https://stackoverflow.com/questions/65400999/enable-systemd-in-wsl-2) to do it.
 
-### How to set up CISO for development? ✍️
+
+#### Using docker-compose with a Postgres database
+
+Simply launch:
+```sh
+./docker-compose-pg.sh
+```
+
+When asked for, enter your email and password for your superuser.
+
+You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+
+For the following executions, use "docker-compose up" directly.
+
+### How to set up CISO Assistant for development? ✍️
 
 1. Clone the repository.
 
@@ -168,15 +182,16 @@ export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
 
 ```
-> As said in the quickstart section, CISO generates a random Django secret key if not specified. To avoid broken sessions, it is preferable to set a fixed random value using the DJANGO_SECRET_KEY environment variable.
+> As said in the quickstart section, CISO Assistant generates a random Django secret key if not specified. To avoid broken sessions, it is preferable to set a fixed random value using the DJANGO_SECRET_KEY environment variable.
 
 **Optional variables**
 
 ```sh
-# CISO will use SQLite by default, but you can setup PostgreSQL by declaring these variables
+# CISO Assistant will use SQLite by default, but you can setup PostgreSQL by declaring these variables
 export POSTGRES_NAME=ciso-assistant
 export POSTGRES_USER=ciso-assistantuser
 export POSTGRES_PASSWORD=<XXX>
+export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
