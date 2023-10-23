@@ -82,7 +82,6 @@ class AbstractBaseModel(models.Model):
         field_errors = {}
         _fields_to_check = self.fields_to_check if hasattr(self, 'fields_to_check') else ['name']
         if not self.is_unique_in_scope(scope=scope, fields_to_check=_fields_to_check):
-            print(_fields_to_check, self)
             for field in _fields_to_check:
                 field_errors[field] = ValidationError(
                     _("Value already used in this scope."),
