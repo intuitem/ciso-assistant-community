@@ -11,3 +11,5 @@ ciso_assistant/build.json
 *.sqlite3
 db/django_secret_key
 db/attachments/
+db/data/
+db/pg_password.txt
