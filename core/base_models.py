@@ -80,16 +80,14 @@ class AbstractBaseModel(models.Model):
     def clean(self) -> None:
         scope = self.get_scope()
         field_errors = {}
-        _fields_to_check = self.fields_to_check if hasattr(self, 'fields_to_check') else []
+        _fields_to_check = self.fields_to_check if hasattr(self, 'fields_to_check') else ['name']
         if not self.is_unique_in_scope(scope=scope, fields_to_check=_fields_to_check):
+            print(_fields_to_check, self)
             for field in _fields_to_check:
-                if not self.is_unique_in_scope(scope=scope, fields_to_check=[field]):
-                    field_errors[field] = ValidationError(
-                        _(
-                            f"{getattr(self, field)} is already in use in this scope. Please choose another value."
-                        ),
-                        code="unique",
-                    )
+                field_errors[field] = ValidationError(
+                    _("Value already used in this scope."),
+                    code="unique",
+                )
         super().clean()
         if field_errors:
             raise ValidationError(field_errors)
