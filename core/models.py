@@ -459,6 +459,8 @@ class RequirementAssessment(AbstractBaseModel, I18nMixin, FolderMixin):
         related_name="requirement_assessments",
     )
 
+    fields_to_check = []
+
     def __str__(self) -> str:
         if self.requirement.name not in ("", "-"):
             return f"{self.assessment} - {self.requirement.get_requirement_group()}. {self.requirement.get_requirement_group().description}/{self.requirement}"
