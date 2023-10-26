@@ -18,9 +18,11 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 
 ## Supported frameworks
 
-- ISO 27001
+- ISO 27001:2022
 - NIST Cyber Security Framework (CSF) v1.1
 - NIS2
+- SOC2
+- PCI DSS 4.0
 
 Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
 ### Coming soon
@@ -29,6 +31,7 @@ Checkout the [library](/library/libraries/) for the Domain Specific Language use
 - GDPR checklist
 - ANSSI CyberScore
 - NIST CSF v2
+
 ## Community
 
 Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.
