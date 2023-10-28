@@ -23,11 +23,11 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - NIS2
 - SOC2
 - PCI DSS 4.0
+- CMMC v2
 
 Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
 ### Coming soon
 
-- CMMC
 - GDPR checklist
 - ANSSI CyberScore
 - NIST CSF v2
