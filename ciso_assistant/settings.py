@@ -238,6 +238,9 @@ INTERNAL_IPS = [
 
 if 'POSTGRES_NAME' in os.environ:
     print("Postgresql database engine")
+    fp = os.environ.get('POSTGRES_PASSWORD_FILE')
+    if fp:
+        os.environ['POSTGRES_PASSWORD'] = Path(fp).read_text().strip()
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -248,7 +251,6 @@ if 'POSTGRES_NAME' in os.environ:
             'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
-    print("Postgresql database engine")
 else:
     print("sqlite database engine")
     DATABASES = {

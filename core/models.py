@@ -83,6 +83,8 @@ class Framework(AbstractBaseModel, I18nMixin, NameDescriptionMixin, FolderMixin)
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
+    fields_to_check = ['urn']
+
     def get_next_order_id(self, obj_type: models.Model, _parent_urn: str = None) -> int:
         """
         Returns the next order id for a given object type
@@ -117,6 +119,7 @@ class RequirementGroup(AbstractBaseModel, I18nMixin, NameDescriptionMixin, Folde
     )
     order_id = models.IntegerField(null=True, blank=True, verbose_name=_("Order ID"))
     level = models.IntegerField(null=True, blank=True, verbose_name=_("Level"))
+    fields_to_check = ['urn']
 
 
 class RequirementLevel(AbstractBaseModel, I18nMixin, FolderMixin):
@@ -132,6 +135,7 @@ class RequirementLevel(AbstractBaseModel, I18nMixin, FolderMixin):
     )
     level = models.IntegerField(null=False, blank=False, verbose_name=_("Level"))
     description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
+    fields_to_check = ['urn']
 
 
 class Requirement(AbstractBaseModel, I18nMixin, NameDescriptionMixin, FolderMixin):
@@ -165,6 +169,7 @@ class Requirement(AbstractBaseModel, I18nMixin, NameDescriptionMixin, FolderMixi
         blank=True,
         verbose_name=_("Informative reference"),
     )
+    fields_to_check = ['urn']
 
     class Meta:
         verbose_name = _("Requirement")
@@ -453,6 +458,8 @@ class RequirementAssessment(AbstractBaseModel, I18nMixin, FolderMixin):
         verbose_name=_("Security measures"),
         related_name="requirement_assessments",
     )
+
+    fields_to_check = []
 
     def __str__(self) -> str:
         if self.requirement.name not in ("", "-"):
