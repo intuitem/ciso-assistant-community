@@ -47,7 +47,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG') == 'True'
 
-CISO_URL = os.environ.get('MIRA_URL', 'http://127.0.0.1:8000')
+CISO_URL = os.environ.get('CISO_URL', 'http://127.0.0.1:8000')
+print("coucou", CISO_URL)
 ALLOWED_HOSTS = [urlparse(CISO_URL).hostname]
 CSRF_TRUSTED_ORIGINS = [CISO_URL]
 
@@ -262,7 +263,7 @@ else:
 
 AUTHENTICATION_BACKENDS = ['passkeys.backend.PasskeyModelBackend'] 
 FIDO_SERVER_ID=urlparse(CISO_URL).hostname
-FIDO_SERVER_NAME="FidoMira"
+FIDO_SERVER_NAME="FidoCiso"
 # leave KEY_ATTACHMENT undefined to allow both platform and roaming authenticators
 
 PASSWORD_HASHERS = [
