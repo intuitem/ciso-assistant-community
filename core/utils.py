@@ -36,11 +36,13 @@ BUILTIN_USERGROUP_CODENAMES = {
 }
 
 COUNTRY_FLAGS = {
+    'ar': '🇸🇦',
     'fr': '🇫🇷',
     'en': '🇬🇧',
 }
 
 LANGUAGES = {
+    'ar': _('Arabic'),
     'fr': _('French'),
     'en': _('English'),
 }
