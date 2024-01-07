@@ -26,10 +26,10 @@ jobs:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
-          path-to-document: 'https://github.com/cla-assistant/github-action/blob/master/SAPCLA.md' # e.g. a CLA or a DCO document
+          path-to-document: 'https://github.com/intuitem/ciso-assistant-community/blob/154b96e4e7879845567cdedfbd6c326af56afe29/Contributor%20License%20Agreement.md' # e.g. a CLA or a DCO document
           # branch should not be protected
           branch: 'main'
-          allowlist: user1,bot*
+          allowlist: bot*
 
          # the followings are the optional inputs - If the optional inputs are not given, then default values will be taken
           #remote-organization-name: enter the remote organization name where the signatures should be stored (Default is storing the signatures in the same repository)
