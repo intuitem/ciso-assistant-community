@@ -16,12 +16,12 @@ services:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
 #        CISO_SUPERUSER_EMAIL: ciso@assistant.local
-        EMAIL_HOST: your.mail.server
+        EMAIL_HOST: host.docker.internal
         EMAIL_PORT: 1025
         EMAIL_HOST_USER: ''
         EMAIL_HOST_PASSWORD: ''
-        EMAIL_USE_TLS: "False"
-        EMAIL_USE_SSL: "False"
+#        EMAIL_USE_TLS: True
+#        EMAIL_USE_SSL: True
         DEFAULT_FROM_EMAIL: ciso@assistant.local
         DB_HOST: ciso-postgres
       volumes:
