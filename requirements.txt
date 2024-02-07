@@ -1,4 +1,4 @@
-django==4.2.7
+django==4.2.10
 pandas==2.1.2
 weasyprint==60.1
 django-tailwind==3.6.0
