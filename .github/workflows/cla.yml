@@ -28,7 +28,7 @@ jobs:
           path-to-signatures: 'signatures/version1/cla.json'
           path-to-document: 'https://github.com/intuitem/ciso-assistant-community/blob/154b96e4e7879845567cdedfbd6c326af56afe29/Contributor%20License%20Agreement.md' # e.g. a CLA or a DCO document
           # branch should not be protected
-          branch: 'main'
+          branch: 'cla-signatures'
           allowlist: bot*
 
          # the followings are the optional inputs - If the optional inputs are not given, then default values will be taken
