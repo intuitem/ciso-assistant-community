@@ -468,9 +468,7 @@ class LibraryImporter:
         
         if self._library_data.get("dependencies"):
             for dependency in self._library_data["dependencies"]:
-                print("dependency", dependency)
                 if not Library.objects.filter(urn=dependency).exists():
-                    print("import dependency", dependency)
                     import_library_view(get_library(dependency))
 
         _urn = self._library_data["urn"]
