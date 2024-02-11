@@ -16,4 +16,4 @@ temp/
 backend/db/attachments/
 backend/db/django_secret_key
 backend/db/pg_password.txt
-db/
+./db/
