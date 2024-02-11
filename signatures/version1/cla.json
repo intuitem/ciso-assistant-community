@@ -1,3 +1,12 @@
 {
-   "signedContributors": []
+  "signedContributors": [
+    {
+      "name": "eric-intuitem",
+      "id": 71850047,
+      "comment_id": 1937879200,
+      "created_at": "2024-02-11T21:38:57Z",
+      "repoId": 694266896,
+      "pullRequestNo": 34
+    }
+  ]
 }
