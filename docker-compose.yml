@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    container_name: backend
+    build: ./backend
+    restart: always
+    environment:
+      - ALLOWED_HOSTS=backend
+      - CISO_ASSISTANT_URL=http://localhost:3000
+      - DJANGO_DEBUG=True
+    volumes:
+      - ./db:/code/db
+
+  frontend:
+    container_name: frontend
+    environment:
+        - ORIGIN=http://localhost:3000
+    build: 
+      context: ./frontend
+      args:
+        - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+

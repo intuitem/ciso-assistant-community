@@ -24,137 +24,57 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - SOC2
 - PCI DSS 4.0
 - CMMC v2
+- PSPF
 
 Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
 ### Coming soon
 
 - GDPR checklist
 - ANSSI CyberScore
-- NIST CSF v2
+- DFS 500
+- DORA
+- and much more!
 
 ## Community
 
 Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.
 
-## Installation
+## Testing in the cloud
 
 > The fastest and easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
-This part is divided in two sections, the quick start if you simply want to run CISO to see what it's made of, and the development setup if you want to go further.
+## Testing locally - Quick start 🚀
 
-### Requirements
+To run CISO Assistant locally in a straightforward way, you can use Docker compose.
 
-- Python 3.8+
-- pip 20.3+
-- gettext 0.21+
-- pango 1.0+
-
-To install gettext and pango, do `sudo apt update && sudo apt install gettext libpangocairo-1.0-0 -y`
-
-### Quick start 🚀
-
-There are three methods to run CISO locally: using Python, using Docker or using docker-compose.
-
-By default, Django secret key is generated randomly at each start of Mira. This is convenient for quick test, but not recommended for production, as it can break the sessions (see this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information). To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
-
-0. Clone the repository
+1. Clone the repository
 
 ```sh
 git clone git@github.com:intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
-#### Using Python
-
-💡 *Advice*: run everything inside a virtual environment. It is a good practice concerning python projects!
-
-Choose the tool of your choice, either python-venv or virtualenv. For example:
+2. Launch docker-compose script
 
 ```sh
-# Install python-venv
-sudo apt install python-venv # or python3-venv
-# Create the virtual environment venv
-python -m venv venv # or python3 -m venv venv
-# To enter inside the virtual environment
-source venv/bin/activate
-# If you want to exit the virtual environment once finished
-deactivate
-```
-
-1. Install dependencies
-
-```sh
-pip install -r requirements.txt
-```
-
-2. Run migrations
-
-```sh
-python manage.py migrate
-```
-
-3. Collect static files
-
-```sh
-python manage.py collectstatic
-```
-
-4. Create your superuser
-
-```sh
-python manage.py createsuperuser
-```
-
-5. Run CISO Assistant
-
-```sh
-python manage.py runserver
-```
-You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-
-#### Using Docker
-
-1. Upgrade or install docker and if you don't have it. [Read the official docs for your own OS/distro](https://docs.docker.com/get-docker/).
-
-2. Build the image with an appropriate tag (e.g. *ciso-assistant:[version](ciso_assistant/VERSION)*), for example:
-
-```sh
-docker build . -t ciso-assistant:$(<ciso_assistant/VERSION)
-```
-
-3. Once this is done, you can simply start-up CISO by running:
-
-```sh
-docker run --rm -it --env CREATE_SUPERUSER=true -p 8000:8000 -v ./db:/code/db  ciso-assistant:$(<ciso_assistant/VERSION)
+./docker-compose.sh
 ```
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
-
-For the following executions, simply run:
-
-```sh
-docker run --rm -p 8000:8000 -v ./db:/code/db  ciso-assistant:$(<ciso_assistant/VERSION)
-```
-
-⚠️ *WARNING*: If you're using WSL you'll need to activate *Systemd*. Check out this [topic](https://stackoverflow.com/questions/65400999/enable-systemd-in-wsl-2) to do it.
-
-
-#### Using docker-compose with a Postgres database
-
-Simply launch:
-```sh
-./docker-compose-pg.sh
-```
-
-When asked for, enter your email and password for your superuser.
-
-You can then reach CISO Assistant using your web brower at [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+You can then reach CISO Assistant using your web brower at [http://localhost:3000/](http://localhost:3000/)
 
 For the following executions, use "docker-compose up" directly.
 
-### How to set up CISO Assistant for development? ✍️
+## Setting up CISO Assistant for development
+
+### Requirements
+
+- Python 3.11+
+- pip 20.3+
+- npm 10.2+
+
+### Running the backend
 
 1. Clone the repository.
 
@@ -163,19 +83,19 @@ git clone git@github.com:intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
-2. Create a file in the parent folder (e.g. ../myvars) and store your environment variables within it by copying and modifying the following code and replace `"<XXX>"` by your private values. Take car not to commit this file in your git repo.
+2. Create a file in the parent folder (e.g. ../myvars) and store your environment variables within it by copying and modifying the following code and replace `"<XXX>"` by your private values. Take care not to commit this file in your git repo.
+
+**Mandatory variables**
+
+All variables in the backend have handy default values.
 
 **Recommended variables**
 
 ```sh
-export DJANGO_SECRET_KEY=<XXX>
 export DJANGO_DEBUG=True
 
-# Default url is set to http://127.0.0.1:8000 but you can change it, e.g. to use https with a caddy proxy
-export CISO_URL=https://localhost:8443
-
-# You can define the email of the first superuser
-export CISO_SUPERUSER_EMAIL=<XXX>
+# Default url is set to http://localhost:5173 but you can change it, e.g. to use https with a caddy proxy
+export CISO_ASSISTANT_URL=https://localhost:8443
 
 # Setup a development mailer with Mailhog for example
 export EMAIL_HOST_USER=''
@@ -183,11 +103,9 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-
 ```
-> As said in the quickstart section, CISO Assistant generates a random Django secret key if not specified. To avoid broken sessions, it is preferable to set a fixed random value using the DJANGO_SECRET_KEY environment variable.
 
-**Optional variables**
+**Other variables**
 
 ```sh
 # CISO Assistant will use SQLite by default, but you can setup PostgreSQL by declaring these variables
@@ -198,10 +116,6 @@ export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
 export DB_HOST=localhost
 export DB_PORT=5432  # optional, default value is 5432
 
-# Captcha, if you want to disable it just put empty strings
-export RECAPTCHA_PUBLIC_KEY=<XXX>
-export RECAPTCHA_PRIVATE_KEY=<XXX>
-
 # Add a second backup mailer
 export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
@@ -209,10 +123,14 @@ export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
 
-# Idle session timeout management
-export SESSION_COOKIE_AGE=900 # in seconds, (default 900, i.e. 15 minutes)
-export SESSION_EXPIRE_AT_BROWSER_CLOSE=True # (default True)
-export SESSION_SAVE_EVERY_REQUEST=True # (default True)
+# You can define the email of the first superuser, useful for automation
+export CISO_SUPERUSER_EMAIL=<XXX>
+
+# By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test, 
+# but not recommended for production, as it can break the sessions (see 
+# this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information). 
+# To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
+export DJANGO_SECRET_KEY=...
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
@@ -246,48 +164,113 @@ pip install -r requirements.txt
   - ```create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';```
   -  ```grant all privileges on database ciso-assistant to ciso-assistantuser;```
 
-6. Prepare and apply migrations.
+6. Apply migrations.
 
 ```sh
-python manage.py makemigrations
 python manage.py migrate
 ```
 
-7. Create a superuser, that will be CISO administrator.
+7. Create a Django superuser, that will be CISO Assistant administrator.
 
-> If you have set a mailer and CISO_SUPERUSER_EMAIL variables, there's no need to create a Django superuser with createsuperuser, as it will be created automatically on first start. You should receive an email with a link to setup your password.
+> If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with createsuperuser, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
 python manage.py createsuperuser
 ```
 
-8. install Tailwind CSS.
 
-```sh
-npm install tailwindcss postcss postcss-import
-python manage.py tailwind install
-```
-
-9. Compile strings.
-
-```sh
-python manage.py makemessages -i venv -l fr
-python manage.py compilemessages -i venv -l fr
-```
-
-10. Run development server.
+8.  Run development server.
 
 ```sh
 python manage.py runserver
 ```
 
-11.   Configure the git hooks for generating the build name.
+9.   Configure the git hooks for generating the build name.
 
 ```sh
 cd .git/hooks 
 ln -fs ../../git_hooks/post-commit .
 ln -fs ../../git_hooks/post-merge .
 ```
+
+### Running the frontend
+
+1. cd into the frontend directory
+
+```shell
+cd frontend
+```
+
+2. Declare the PUBLIC_BACKEND_API_URL environment variable.
+
+EITHER
+
+```bash
+echo "PUBLIC_BACKEND_API_URL=http://localhost:8000/api" > .env
+```
+
+OR
+
+```bash
+export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
+```
+Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
+
+
+3. Install dependencies
+
+```bash
+npm install
+```
+
+4. Start a development server (make sure that the django app is running)
+
+```bash
+npm run dev
+```
+
+5. If you want to setup Postgres:
+
+- Launch one of these commands to enter in Postgres:
+  - ```psql as superadmin```
+  - ```sudo su postgres```
+  - ```psql```
+- Create the database "mira"
+  - ```create database mira;```
+- Create user "mirauser" and grant it access
+  - ```create user mirauser with password '<POSTGRES_PASSWORD>';```
+  -  ```grant all privileges on database mira to mirauser;```
+
+6. Prepare and apply migrations.
+
+```sh
+(venv)$ cd backend
+(venv)$ pytest
+```
+
+Coming soon.
+
+## Managing migrations
+
+The migrations are tracked by version control, https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control
+
+For the first version of the product, it is recommended to start from a clean migration.
+
+Note: to clean existing migrations, type:
+
+```sh
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find . -path "*/migrations/*.pyc"  -delete
+```
+
+After a change (or a clean), it is necessary to re-generate migration files:
+
+```sh
+python manage.py makemigrations
+python manage.py migrate
+```
+
+These migration files should be tracked by version control.
 
 ## Built With
 
@@ -296,8 +279,7 @@ ln -fs ../../git_hooks/post-merge .
 
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
-- [Tailwind CSS](https://tailwindcss.com/) - CSS Framework
-- [AlpineJS](https://alpinejs.dev/) - Minimalist JS framework
+- [SvelteKit](https://kit.svelte.dev/) - Frontend framework
 - [Docker](https://www.docker.com/) - Container Engine
 
 ## Security

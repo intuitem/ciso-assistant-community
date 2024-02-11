@@ -1,3 +1,5 @@
+!__init__.py
+*.pyc
 __pycache__
 *.DS_Store
 *~$*
@@ -7,9 +9,11 @@ staticfiles/*
 dump.json
 node_modules/
 .vscode
-ciso_assistant/build.json
 *.sqlite3
-db/django_secret_key
-db/attachments/
-db/data/
-db/pg_password.txt
+backend/staticfiles/
+backend/venv/
+temp/
+backend/db/attachments/
+backend/db/django_secret_key
+backend/db/pg_password.txt
+db/

@@ -1,0 +1,890 @@
+urn: urn:intuitem:risk:library:nist-csf-1.1
+locale: en
+ref_id: NIST-CSF-1.1
+name: NIST CSF version 1.1
+description: National Institute of Standards and Technology - Cybersecurity Framework
+copyright: With the exception of material marked as copyrighted, information presented
+  on NIST sites are considered public information and may be distributed or copied.
+version: 1
+provider: NIST
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nist-csf-1.1
+    ref_id: NIST-CSF-1.1
+    name: NIST CSF v1.1
+    description: NIST Cybersecurity Framework
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      assessable: false
+      depth: 1
+      ref_id: ID
+      name: Identify
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      ref_id: ID.AM
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      ref_id: ID.AM-1
+      description: Physical devices and systems within the organization are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      ref_id: ID.AM-2
+      description: Software platforms and applications within the organization are
+        inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      ref_id: ID.AM-3
+      description: Organizational communication and data flows are mapped.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      ref_id: ID.AM-4
+      description: External information systems are catalogued.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      ref_id: ID.AM-5
+      description: Resources (e.g., hardware, devices, data, time, personnel, and
+        software) are prioritized based on their classification, criticality, and
+        business value.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.am
+      ref_id: ID.AM-6
+      description: Cybersecurity roles and responsibilities for the entire workforce
+        and third-party stakeholders (e.g., suppliers, customers, partners) are established.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      ref_id: ID.BE
+      name: Business Environment
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      ref_id: ID.BE-1
+      description: "The organization\u2019s role in the supply chain is identified\
+        \ and communicated."
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      ref_id: ID.BE-2
+      description: "The organization\u2019s place in critical infrastructure and its\
+        \ industry sector is identified and communicated."
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      ref_id: ID.BE-3
+      description: Priorities for organizational mission, objectives, and activities
+        are established and communicated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      ref_id: ID.BE-4
+      description: Dependencies and critical functions for delivery of critical services
+        are established.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.be
+      ref_id: ID.BE-5
+      description: Resilience requirements to support delivery of critical services
+        are established for all operating states (e.g. under duress/attack, during
+        recovery, normal operations).
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      ref_id: ID.GV
+      name: Governance
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
+      ref_id: ID.GV-1
+      description: Organizational cybersecurity policy is established and communicated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
+      ref_id: ID.GV-2
+      description: Cybersecurity roles and responsibilities are coordinated and aligned
+        with internal roles and external partners.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
+      ref_id: ID.GV-3
+      description: Legal and regulatory requirements regarding cybersecurity, including
+        privacy and civil liberties obligations, are understood and managed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.gv
+      ref_id: ID.GV-4
+      description: Governance and risk management processes address cybersecurity
+        risks.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      ref_id: ID.RA
+      name: Risk Assessment
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      ref_id: ID.RA-1
+      description: Asset vulnerabilities are identified and documented.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      ref_id: ID.RA-2
+      description: Cyber threat intelligence is received from information sharing
+        forums and sources.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      ref_id: ID.RA-3
+      description: Threats, both internal and external, are identified and documented.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      ref_id: ID.RA-4
+      description: Potential business impacts and likelihoods are identified.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      ref_id: ID.RA-5
+      description: Threats, vulnerabilities, likelihoods, and impacts are used to
+        determine risk.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.ra
+      ref_id: ID.RA-6
+      description: Risk responses are identified and prioritized.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      ref_id: ID.RM
+      name: Risk Management Strategy
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
+      ref_id: ID.RM-1
+      description: Risk management processes are established, managed, and agreed
+        to by organizational stakeholders.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
+      ref_id: ID.RM-2
+      description: Organizational risk tolerance is determined and clearly expressed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.rm
+      ref_id: ID.RM-3
+      description: "The organization\u2019s determination of risk tolerance is informed\
+        \ by its role in critical infrastructure and sector specific risk analysis."
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
+      ref_id: ID.SC
+      name: Supply Chain Risk Management
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      ref_id: ID.SC-1
+      description: Cyber supply chain risk management processes are identified, established,
+        assessed, managed, and agreed to by organizational stakeholders.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      ref_id: ID.SC-2
+      description: Suppliers and third party partners of information systems, components,
+        and services are identified, prioritized, and assessed using a cyber supply
+        chain risk assessment process.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      ref_id: ID.SC-3
+      description: "Contracts with suppliers and third-party partners are used to\
+        \ implement appropriate measures designed to meet the objectives of an organization\u2019\
+        s cybersecurity program and Cyber Supply Chain Risk Management Plan."
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      ref_id: ID.SC-4
+      description: Suppliers and third-party partners are routinely assessed using
+        audits, test results, or other forms of evaluations to confirm they are meeting
+        their contractual obligations.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:id.sc
+      ref_id: ID.SC-5
+      description: Response and recovery planning and testing are conducted with suppliers
+        and third-party providers.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      assessable: false
+      depth: 1
+      ref_id: PR
+      name: Protect
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      ref_id: PR.AC
+      name: Identity Management, Authentication and Access Control
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-1
+      description: Identities and credentials are issued, managed, verified, revoked,
+        and audited for authorized devices, users and processes.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-2
+      description: Physical access to assets is managed and protected.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-3
+      description: Remote access is managed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-4
+      description: Access permissions and authorizations are managed, incorporating
+        the principles of least privilege and separation of duties.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-5
+      description: Network integrity is protected (e.g., network segregation, network
+        segmentation).
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-6
+      description: Identities are proofed and bound to credentials and asserted in
+        interactions.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ac
+      ref_id: PR.AC-7
+      description: "Users, devices, and other assets are authenticated (e.g., single-factor,\
+        \ multi-factor) commensurate with the risk of the transaction (e.g., individuals\u2019\
+        \ security and privacy risks and other organizational risks)."
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      ref_id: PR.AT
+      name: Awareness and Training
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      ref_id: PR.AT-1
+      description: All users are informed and trained.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      ref_id: PR.AT-2
+      description: Privileged users understand their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      ref_id: PR.AT-3
+      description: Third-party stakeholders (e.g., suppliers, customers, partners)
+        understand their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      ref_id: PR.AT-4
+      description: Senior executives understand their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.at
+      ref_id: PR.AT-5
+      description: Physical and cybersecurity personnel understand their roles and
+        responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      ref_id: PR.DS
+      name: Data Security
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-1
+      description: Data-at-rest is protected.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-2
+      description: Data-in-transit is protected.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-3
+      description: Assets are formally managed throughout removal, transfers, and
+        disposition.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-4
+      description: Adequate capacity to ensure availability is maintained.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-5
+      description: Protections against data leaks are implemented.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-6
+      description: Integrity checking mechanisms are used to verify software, firmware,
+        and information integrity.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-7
+      description: The development and testing environment(s) are separate from the
+        production environment.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ds
+      ref_id: PR.DS-8
+      description: Integrity checking mechanisms are used to verify hardware integrity.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      ref_id: PR.IP
+      name: Information Protection Processes and Procedures
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-1
+      description: A baseline configuration of information technology/industrial control
+        systems is created and maintained incorporating security principles (e.g.
+        concept of least functionality).
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-2
+      description: A System Development Life Cycle to manage systems is implemented.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-3
+      description: Configuration change control processes are in place.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-4
+      description: Backups of information are conducted, maintained, and tested.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-5
+      description: Policy and regulations regarding the physical operating environment
+        for organizational assets are met.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-6
+      description: Data is destroyed according to policy.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-7
+      description: Protection processes are improved.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-8
+      description: Effectiveness of protection technologies is shared.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-9
+      description: Response plans (Incident Response and Business Continuity) and
+        recovery plans (Incident Recovery and Disaster Recovery) are in place and
+        managed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-10
+      description: Response and recovery plans are tested.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-11
+      description: Cybersecurity is included in human resources practices (e.g., deprovisioning,
+        personnel screening).
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip-12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ip
+      ref_id: PR.IP-12
+      description: A vulnerability management plan is developed and implemented.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      ref_id: PR.MA
+      name: Maintenance
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma
+      ref_id: PR.MA-1
+      description: Maintenance and repair of organizational assets are performed and
+        logged, with approved and controlled tools.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.ma
+      ref_id: PR.MA-2
+      description: Remote maintenance of organizational assets is approved, logged,
+        and performed in a manner that prevents unauthorized access.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr
+      ref_id: PR.PT
+      name: Protective Technology
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
+      ref_id: PR.PT-1
+      description: Audit/log records are determined, documented, implemented, and
+        reviewed in accordance with policy.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
+      ref_id: PR.PT-2
+      description: Removable media is protected and its use restricted according to
+        policy.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
+      ref_id: PR.PT-3
+      description: The principle of least functionality is incorporated by configuring
+        systems to provide only essential capabilities.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
+      ref_id: PR.PT-4
+      description: Communications and control networks are protected.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:pr.pt
+      ref_id: PR.PT-5
+      description: Mechanisms (e.g., failsafe, load balancing, hot swap) are implemented
+        to achieve resilience requirements in normal and adverse situations.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
+      assessable: false
+      depth: 1
+      ref_id: DE
+      name: Detect
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
+      ref_id: DE.AE
+      name: Anomalies and Events
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      ref_id: DE.AE-1
+      description: A baseline of network operations and expected data flows for users
+        and systems is established and managed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      ref_id: DE.AE-2
+      description: Detected events are analyzed to understand attack targets and methods.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      ref_id: DE.AE-3
+      description: Event data are collected and correlated from multiple sources and
+        sensors.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      ref_id: DE.AE-4
+      description: Impact of events is determined.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.ae
+      ref_id: DE.AE-5
+      description: Incident alert thresholds are established.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
+      ref_id: DE.CM
+      name: Security Continuous Monitoring
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-1
+      description: The network is monitored to detect potential cybersecurity events.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-2
+      description: The physical environment is monitored to detect potential cybersecurity
+        events.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-3
+      description: Personnel activity is monitored to detect potential cybersecurity
+        events.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-4
+      description: Malicious code is detected.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-5
+      description: Unauthorized mobile code is detected.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-6
+      description: External service provider activity is monitored to detect potential
+        cybersecurity events.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-7
+      description: Monitoring for unauthorized personnel, connections, devices, and
+        software is performed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm-8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.cm
+      ref_id: DE.CM-8
+      description: Vulnerability scans are performed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de
+      ref_id: DE.DP
+      name: Detection Processes
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
+      ref_id: DE.DP-1
+      description: Roles and responsibilities for detection are well defined to ensure
+        accountability.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
+      ref_id: DE.DP-2
+      description: Detection activities comply with all applicable requirements.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
+      ref_id: DE.DP-3
+      description: Detection processes are tested.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
+      ref_id: DE.DP-4
+      description: Event detection information is communicated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:de.dp
+      ref_id: DE.DP-5
+      description: Detection processes are continuously improved.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      assessable: false
+      depth: 1
+      ref_id: RS
+      name: Respond
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      ref_id: RS.RP
+      name: Response Planning
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.rp
+      ref_id: RS.RP-1
+      description: Response plan is executed during or after an incident.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      ref_id: RS.CO
+      name: Communications
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      ref_id: RS.CO-1
+      description: Personnel know their roles and order of operations when a response
+        is needed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      ref_id: RS.CO-2
+      description: Incidents are reported consistent with established criteria.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      ref_id: RS.CO-3
+      description: Information is shared consistent with response plans.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      ref_id: RS.CO-4
+      description: Coordination with stakeholders occurs consistent with response
+        plans.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.co
+      ref_id: RS.CO-5
+      description: Voluntary information sharing occurs with external stakeholders
+        to achieve broader cybersecurity situational awareness.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      ref_id: RS.AN
+      name: Analysis
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      ref_id: RS.AN-1
+      description: Notifications from detection systems are investigated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      ref_id: RS.AN-2
+      description: The impact of the incident is understood.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      ref_id: RS.AN-3
+      description: Forensics are performed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      ref_id: RS.AN-4
+      description: Incidents are categorized consistent with response plans.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.an
+      ref_id: RS.AN-5
+      description: Processes are established to receive, analyze and respond to vulnerabilities
+        disclosed to the organization from internal and external sources (e.g. internal
+        testing, security bulletins, or security researchers)
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      ref_id: RS.MI
+      name: Mitigation
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
+      ref_id: RS.MI-1
+      description: Incidents are contained.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
+      ref_id: RS.MI-2
+      description: Incidents are mitigated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.mi
+      ref_id: RS.MI-3
+      description: Newly identified vulnerabilities are mitigated or documented as
+        accepted risks.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs
+      ref_id: RS.IM
+      name: Improvements
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
+      ref_id: RS.IM-1
+      description: Response plans incorporate lessons learned.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rs.im
+      ref_id: RS.IM-2
+      description: Response strategies are updated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
+      assessable: false
+      depth: 1
+      ref_id: RC
+      name: Recover
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
+      ref_id: RC.RP
+      name: Recovery Planning
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.rp
+      ref_id: RC.RP-1
+      description: Recovery plan is executed during or after a cybersecurity incident.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
+      ref_id: RC.IM
+      name: Improvements
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
+      ref_id: RC.IM-1
+      description: Recovery plans incorporate lessons learned.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.im
+      ref_id: RC.IM-2
+      description: Recovery strategies are updated.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc
+      ref_id: RC.CO
+      name: Communications
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
+      ref_id: RC.CO-1
+      description: Public relations are managed.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
+      ref_id: RC.CO-2
+      description: Reputation is repaired after an incident.
+    - urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co-3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-csf-1.1:rc.co
+      ref_id: RC.CO-3
+      description: Recovery activities are communicated to internal and external stakeholders
+        as well as executive and management teams.
