@@ -1,0 +1,109 @@
+{% load i18n core_extras %}
+
+<div class="bg-white rounded-lg p-6">
+{% if data %}
+    <table class="w-full">
+        {% for row in risk_matrix.render_grid_as_colors reversed %}
+            {% with row_index=forloop.revcounter0 %}
+                <tr class="w-full">
+                    <td class="w-1/6 text-right pr-2 border-4 border-white">
+                        {% with impact=matrix.parse_json.impact|index:row_index %}
+                        {{ impact.name }}
+                        {% endwith %}
+                    </td>
+                    {% for item in row %}
+                        <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.hexcolor }}">
+                            {{ data|index:row_index|index:forloop.counter0|join:", " }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endwith %}
+        {% endfor %}
+        <tr>
+            <td></td>
+            {% for probability in risk_matrix.parse_json.probability %}
+                <td class="w-1/6 h-16 text-center border-4 border-white">
+                    {{ probability.name }}
+                </td>
+            {% endfor %}
+            <tr>
+                <td></td>
+                {% for probability in matrix.parse_json.probability %}
+                    <td class="w-1/6 h-16 text-center border-4 border-white">
+                        {{ probability.name }}
+                    </td>
+                {% endfor %}
+            </tr>
+        </table>
+    </div>
+    <div class="text-black font-bold text-center mx-auto mt-2">
+        <p>{% trans "Impact" %}</p>
+    </div>
+{% else %}
+    <div class="w-full">
+        <div class="flex flex-row justify-center">
+            <div class="text-black font-bold text-center print-impact flex items-center">
+                <p class="-rotate-90">{% trans "Probability" %}</p>
+            </div>
+            <table class="w-3/4 mt-10">
+                {% for row in risk_matrix.render_grid_as_colors reversed %}
+                    {% with row_index=forloop.revcounter0 %}
+                        <tr>
+                            <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
+                                {% with impact=risk_matrix.parse_json.impact|index:row_index %}
+                                {{ impact.name }}:
+                                {{ impact.description|linebreaksbr }}
+                                {% endwith %}
+                            </td>
+                            {% if enriched_data %}
+                                {% for item in row %}
+                                    <td class="w-1/6 h-16 text-center border-4 border-white" style="background-color: {{ item.hexcolor }}">
+                                        {{ enriched_data|index:row_index|index:forloop.counter0|join:", " }}
+                                    </td>
+                                {% endfor %}
+                            {% else %}
+                                {% for item in row %}
+                                <td class="w-1/6 h-16 text-left border-4 border-white" style="background-color: {{ item.hexcolor }}">
+                                </td>
+                                {% endfor %}
+                            {% endif %}
+                            </td>
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    {% for probability in risk_matrix.parse_json.probability %}
+                        <td class="w-1/6 h-16 text-center text-black bg-gray-200 border-4 border-white">
+                            {{ impact.name }}:
+                            {{ impact.description|linebreaksbr }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
+        </div>
+        <div class="text-black font-bold text-center mx-auto mt-4">
+            {% trans "Impact" %}
+        </div>
+    </div>   
+    <div class="w-full flex flex-col justify-start">
+        <h3 class="flex font-semibold p-2 m-2 text-md">{% trans "Risk levels" %}</h3>
+        <div class="flex justify-start mx-2">
+            <table class="w-3/4 border-separate">
+                {% for risk in risk_matrix.parse_json.risk %}
+                    <tr class="row">
+                        <td class="w-12 h-12 text-left border-4 border-white" style="background-color: {{ risk.hexcolor }}">
+                        </td>
+                        <td class="col font-medium">
+                            {{ risk.name }}
+                        </td>
+                        <td class="col italic">
+                            {{ risk.description|linebreaksbr }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endif %}
+</div>

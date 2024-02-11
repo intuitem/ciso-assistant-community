@@ -1,8 +1,0 @@
-{% load i18n %}
-<div id="option_{{ widget.index }}" @click="selectedValue='{{ widget.value }}'; selectedName='{{ widget.label }}'; selectedIndex = {{ widget.index }}; submitDisabled = false; open = false"
-    class="cursor-pointer hover:bg-indigo-300 px-4 py-2 w-full {% if widget.value in recommended_security_functions %} bg-indigo-200 {% endif %}"
-    :class="{ 'bg-indigo-600 hover:bg-indigo-700 text-white': selectedIndex === {{ widget.index }} }" 
-    {% include "django/forms/widgets/attrs.html" %} 
-    {% if widget.selected %}d-selected{% endif %}>
-    {{ widget.label}} {% if widget.value in recommended_security_functions %} <span class="text-gray-500">({% trans "suggested" %})</span> {% endif %}
-</div>

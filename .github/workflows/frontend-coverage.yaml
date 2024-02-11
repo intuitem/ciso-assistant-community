@@ -1,0 +1,40 @@
+name: Frontend code coverage
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+
+env:
+  GITHUB_WORKFLOW: github_actions
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: ./frontend
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        node-version: ["20"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install latest npm
+        working-directory: ${{env.working-directory}}
+        run: |
+          npm install -g npm &&
+          npm --version &&
+          npm list -g --depth 0
+      - name: Install dependencies
+        working-directory: ${{env.working-directory}}
+        run: npm ci
+      - name: Run coverage
+        working-directory: ${{env.working-directory}}
+        run: npm run coverage

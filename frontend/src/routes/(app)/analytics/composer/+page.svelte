@@ -1,0 +1,170 @@
+<script lang="ts">
+	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import { RISK_COLOR_PALETTE } from '$lib/utils/constants.js';
+
+	export let data;
+	data.risk_assessment_objects.forEach((risk_assessment: Record<string, any>) => {
+		risk_assessment.show = false;
+	});
+</script>
+
+<div class="flex flex-col space-y-4">
+	<div>
+		<div class="px-2 mx-2 font-semibold text-xl">Your selection</div>
+		<div class="px-2 mx-2 text-sm">
+			<i class="fa-solid fa-info-circle mr-2" />Hint: you can bookmark this page for future usage
+		</div>
+	</div>
+	<div class="card p-4 bg-white shadow">
+		<div class="p-2 font-semibold text-lg">
+			Here is the overview for the {data.risk_assessment_objects.length <= 1
+				? 'selected risk_assessment'
+				: `${data.risk_assessment_objects.length} selected risk assessments`}:
+		</div>
+		<div class="flex space-x-2">
+			<div class="w-1/3">
+				<div>
+					<div class="p-2 text-sm font-semibold">Current risk level per risk scenario</div>
+
+					<div class="items-center h-96">
+						<DonutChart
+							s_label="Current risk level per risk scenario"
+							values={data.current_level}
+							colors={RISK_COLOR_PALETTE}
+						/>
+					</div>
+				</div>
+			</div>
+			<div class="w-1/3">
+				<div class="p-2 text-sm font-semibold">Status of associated measures</div>
+				<div>
+					<div class="items-center justify-center h-96">
+						<BarChart
+							name="mtg"
+							labels={data.security_measure_status.labels}
+							values={data.security_measure_status.values}
+						/>
+					</div>
+				</div>
+			</div>
+			<div class="w-1/3">
+				<div class="p-2 text-sm font-semibold">Residual risk level per risk scenario</div>
+				<div class="items-center h-96">
+					<DonutChart
+						s_label="Residual risk level per risk scenario"
+						values={data.residual_level}
+						colors={RISK_COLOR_PALETTE}
+					/>
+				</div>
+			</div>
+		</div>
+		<div class="bg-zinc-100 shadow rounded p-3 flex flex-col space-y-2">
+			<div>
+				<i class="far fa-lightbulb mr-1" />&nbsp;<span class="font-semibold"
+					>For the selected scope, you have:</span
+				>
+			</div>
+			<ul class="list-disc px-6">
+				<li>
+					<b>{data.counters.untreated}</b> untreated risk scenario{data.counters.untreated > 1
+						? 's'
+						: ''}
+					<ul class="list-circle ml-4">
+						{#each data.riskscenarios.untreated as scenario}
+							<li>{scenario.name}</li>
+						{/each}
+					</ul>
+				</li>
+				<li>
+					and
+					<b>{data.counters.accepted}</b> risk scenario{data.counters.accepted > 1 ? 's' : ''} accepted
+					<ul class="list-circle ml-4">
+						{#each data.riskscenarios.accepted as scenario}
+							<li>{scenario.name}</li>
+						{/each}
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<!-- SECOND PART -->
+	<div class="flex flex-col space-y-2">
+		{#each data.risk_assessment_objects as item}
+			<div>
+				<div class="card bg-white overflow-hidden shadow" id="headingOne">
+					<div
+						class="flex flex-row space-x-4 px-8 py-4 w-full hover:bg-gray-100 cursor-pointer items-center"
+						on:click={() => {
+							item.show = !item.show;
+						}}
+						role="button"
+						tabindex="0"
+						on:keypress
+					>
+						<div class="text-gray-700">
+							{#if item.show}
+								<i class="fas fa-angle-up" />
+							{:else}
+								<i class="fas fa-angle-down" />
+							{/if}
+						</div>
+						<button class=" text-gray-700 font-semibold focus:outline-none" type="button">
+							{item.risk_assessment.name}
+						</button>
+						<div>
+							{#if item.risk_assessment.quality_check.count > 0}
+								<span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">Review needed</span>
+							{:else}
+								<span class="text-xs px-2 py-1 rounded bg-green-200 shadow">Ok</span>
+							{/if}
+						</div>
+					</div>
+					{#if item.show}
+						<div class="border-t px-10 py-4 bg-white flex flex-row space-x-4">
+							<div>
+								<div class="pb-2">
+									{#if item.risk_assessment.quality_check.count > 0}➡️ <span class="text-sm"
+											>Found
+											<b>{item.risk_assessment.quality_check.count}</b> inconsistenc{item
+												.risk_assessment.quality_check.count > 1
+												? 'es'
+												: 'y'} that you need to check (use
+											<a class="simple-link hover:underline visited:text-indigo-600" href="/x-rays"
+												>x-rays</a
+											> for more information).</span
+										>
+									{/if}
+								</div>
+								<div>
+									<table class="border border-collapse my-2 p-2 rounded">
+										<tr class="">
+											<th class="border p-2 bg-gray-200" />
+											<th class="border p-2 bg-gray-200">Current</th>
+											<th class="border p-2 bg-gray-200">Residual</th>
+										</tr>
+										{#each item.synth_table as lvl}
+											<tr>
+												<td class="border p-2" style="background-color: {lvl.color}">{lvl.lvl}</td>
+												<td class="border p-2 text-center">{lvl.current}</td>
+												<td class="border p-2 text-center">{lvl.residual}</td>
+											</tr>
+										{/each}
+									</table>
+								</div>
+
+								<div>
+									<a
+										class="text-indigo-800 hover:text-indigo-600 py-2 my-2"
+										href="/risk-assessments/{item.risk_assessment.id}/"
+										><i class="fas fa-external-link-square-alt" />Jump to full risk risk_assessment</a
+									>
+								</div>
+							</div>
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/each}
+	</div>
+</div>

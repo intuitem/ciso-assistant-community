@@ -1,0 +1,3131 @@
+urn: urn:intuitem:risk:library:soc2-2017
+locale: en
+ref_id: SOC2-2017
+name: 'SOC2-2017 Trust Services Criteria '
+description: 'TSP Section 100
+
+  2017 Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality,
+  and Privacy'
+copyright: "\xA9 2023 Association of International Certified Professional Accountants\xAE"
+version: 1
+provider: AICPA
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:soc2-2017
+    ref_id: SOC2-2017
+    name: 'SOC2-2017 Trust Services Criteria '
+    description: a+B13
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:soc2-2017:control-environment
+      assessable: false
+      depth: 1
+      name: Control Environment
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:control-environment
+      ref_id: CC1.1
+      name: COSO Principle 1
+      description: The entity demonstrates a commitment to integrity and ethical values.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1
+      ref_id: CC1.1.1
+      description: "Sets the Tone at the Top \u2014 The board of directors and management,\
+        \ at all levels, demonstrate through their directives, actions, and behavior\
+        \ the importance of integrity and ethical values to support the functioning\
+        \ of the system of internal control."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1
+      ref_id: CC1.1.2
+      description: "Establishes Standards of Conduct \u2014 The expectations of the\
+        \ board of directors and senior management concerning integrity and ethical\
+        \ values are defined in the entity\u2019s standards of conduct and understood\
+        \ at all levels of the entity and by outsourced service providers and business\
+        \ partners."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1
+      ref_id: CC1.1.3
+      description: "Evaluates Adherence to Standards of Conduct \u2014 Processes are\
+        \ in place to evaluate the performance of individuals and teams against the\
+        \ entity\u2019s expected standards of conduct."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1
+      ref_id: CC1.1.4
+      description: "Addresses Deviations in a Timely Manner \u2014 Deviations from\
+        \ the entity\u2019s expected standards of conduct are identified and remedied\
+        \ in a timely and consistent manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.1
+      ref_id: CC1.1.5
+      description: "Considers Contractors and Vendor Employees in Demonstrating Its\
+        \ Commitment \u2014 Management and the board of directors consider the use\
+        \ of contractors and vendor employees in its processes for establishing standards\
+        \ of conduct, evaluating adherence to those standards, and addressing deviations\
+        \ in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:control-environment
+      ref_id: CC1.2
+      name: COSO Principle 2
+      description: The board of directors demonstrates independence from management
+        and exercises oversight of the development and performance of internal control.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2
+      ref_id: CC1.2.1
+      description: "Establishes Oversight Responsibilities \u2014 The board of directors\
+        \ identifies and accepts its oversight responsibilities in relation to established\
+        \ requirements and expectations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2
+      ref_id: CC1.2.2
+      description: "Applies Relevant Expertise \u2014 The board of directors defines,\
+        \ maintains, and periodically evaluates the skills and expertise needed among\
+        \ its members to enable them to ask probing questions of senior management\
+        \ and take commensurate action."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2
+      ref_id: CC1.2.3
+      description: "Operates Independently \u2014 The board of directors has sufficient\
+        \ members who are independent from management and objective in evaluations\
+        \ and decision making."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.2
+      ref_id: CC1.2.4
+      description: "Supplements Board Expertise \u2014 The board of directors supplements\
+        \ its expertise relevant to security, availability, processing integrity,\
+        \ confidentiality, and privacy, as needed, through the use of a subcommittee\
+        \ or consultants."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:control-environment
+      ref_id: CC1.3
+      name: COSO Principle 3
+      description: Management establishes, with board oversight, structures, reporting
+        lines, and appropriate authorities and responsibilities in the pursuit of
+        objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3
+      ref_id: CC1.3.1
+      description: "Considers All Structures of the Entity \u2014 Management and the\
+        \ board of directors consider the multiple structures used (including operating\
+        \ units, legal entities, geographic distribution, and outsourced service providers)\
+        \ to support the achievement of objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3
+      ref_id: CC1.3.2
+      description: "Establishes Reporting Lines \u2014 Management designs and evaluates\
+        \ lines of reporting for each entity structure to enable execution of authorities\
+        \ and responsibilities and flow of information to manage the activities of\
+        \ the entity."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3
+      ref_id: CC1.3.3
+      description: "Defines, Assigns, and Limits Authorities and Responsibilities\
+        \ \u2014 Management and the board of directors delegate authority, define\
+        \ responsibilities, and use appropriate processes and technology to assign\
+        \ responsibility and segregate duties as necessary at the various levels of\
+        \ the organization."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3
+      ref_id: CC1.3.4
+      description: "Addresses Specific Requirements When Defining Authorities and\
+        \ Responsibilities \u2014 Management and the board of directors consider requirements\
+        \ relevant to security, availability, processing integrity, confidentiality,\
+        \ and privacy when defining authorities and responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.3
+      ref_id: CC1.3.5
+      description: "Considers Interactions With External Parties When Establishing\
+        \ Structures, Reporting Lines, Authorities, and Responsibilities \u2014 Management\
+        \ and the board of directors consider the need for the entity to interact\
+        \ with and monitor the activities of external parties when establishing structures,\
+        \ reporting lines, authorities, and responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:control-environment
+      ref_id: CC1.4
+      name: COSO Principle 4
+      description: The entity demonstrates a commitment to attract, develop, and retain
+        competent individuals in alignment with objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.1
+      description: "Establishes Policies and Practices \u2014 Policies and practices\
+        \ reflect expectations of competence necessary to support the achievement\
+        \ of objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.2
+      description: "Evaluates Competence and Addresses Shortcomings \u2014 The board\
+        \ of directors and management evaluate competence across the entity and in\
+        \ outsourced service providers in relation to established policies and practices\
+        \ and act as necessary to address shortcomings."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.3
+      description: "Attracts, Develops, and Retains Individuals \u2014 The entity\
+        \ provides the mentoring and training needed to attract, develop, and retain\
+        \ sufficient and competent personnel and outsourced service providers to support\
+        \ the achievement of objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.4
+      description: "Plans and Prepares for Succession \u2014 Senior management and\
+        \ the board of directors develop contingency plans for assignments of responsibility\
+        \ important for internal control."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.5
+      description: "Considers the Background of Individuals \u2014 The entity considers\
+        \ the background of potential and existing personnel, contractors, and vendor\
+        \ employees when determining whether to employ and retain the individuals."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.6
+      description: "Considers the Technical Competency of Individuals \u2014 The entity\
+        \ considers the technical competency of potential and existing personnel,\
+        \ contractors, and vendor employees when determining whether to employ and\
+        \ retain the individuals."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.4
+      ref_id: CC1.4.7
+      description: "Provides Training to Maintain Technical Competencies \u2014 The\
+        \ entity provides training programs, including continuing education and training,\
+        \ to ensure skill sets and technical competency of existing personnel, contractors,\
+        \ and vendor employees are developed and maintained."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:control-environment
+      ref_id: CC1.5
+      name: COSO Principle 5
+      description: The entity holds individuals accountable for their internal control
+        responsibilities in the pursuit of objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5
+      ref_id: CC1.5.1
+      description: "Enforces Accountability Through Structures, Authorities, and Responsibilities\
+        \ \u2014 Management and the board of directors establish the mechanisms to\
+        \ communicate and hold individuals accountable for performance of internal\
+        \ control responsibilities across the entity and implement corrective action\
+        \ as necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5
+      ref_id: CC1.5.2
+      description: "Establishes Performance Measures, Incentives, and Rewards \u2014\
+        \ Management and the board of directors establish performance measures, incentives,\
+        \ and other rewards appropriate for responsibilities at all levels of the\
+        \ entity, reflecting appropriate dimensions of performance and expected standards\
+        \ of conduct, and considering the achievement of both short-term and longer-term\
+        \ objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5
+      ref_id: CC1.5.3
+      description: "Evaluates Performance Measures, Incentives, and Rewards for Ongoing\
+        \ Relevance \u2014 Management and the board of directors align incentives\
+        \ and rewards with the fulfillment of internal control responsibilities in\
+        \ the achievement of objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5
+      ref_id: CC1.5.4
+      description: "Considers Excessive Pressures \u2014 Management and the board\
+        \ of directors evaluate and adjust pressures associated with the achievement\
+        \ of objectives as they assign responsibilities, develop performance measures,\
+        \ and evaluate performance."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc1.5
+      ref_id: CC1.5.5
+      description: "Evaluates Performance and Rewards or Disciplines Individuals \u2014\
+        \ Management and the board of directors evaluate performance of internal control\
+        \ responsibilities, including adherence to standards of conduct and expected\
+        \ levels of competence, and provide rewards or exercise disciplinary action,\
+        \ as appropriate."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2
+      assessable: false
+      depth: 1
+      ref_id: CC2
+      name: Communication and Information
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2
+      ref_id: CC2.1
+      name: COSO Principle 13
+      description: The entity obtains or generates and uses relevant, quality information
+        to support the functioning of internal control.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1
+      ref_id: CC2.1.1
+      description: "Identifies Information Requirements \u2014 A process is in place\
+        \ to identify the information required and expected to support the functioning\
+        \ of the other components of internal control and the achievement of the entity\u2019\
+        s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1
+      ref_id: CC2.1.2
+      description: "Captures Internal and External Sources of Data \u2014 Information\
+        \ systems capture internal and external sources of data."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1
+      ref_id: CC2.1.3
+      description: "Processes Relevant Data Into Information \u2014 Information systems\
+        \ process and transform relevant data into information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.1
+      ref_id: CC2.1.4
+      description: "Maintains Quality Throughout Processing \u2014 Information systems\
+        \ produce information that is timely, current, accurate, complete, accessible,\
+        \ protected, verifiable, and retained. Information is reviewed to assess its\
+        \ relevance in supporting the internal control components."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2
+      ref_id: CC2.2
+      name: COSO Principle 14
+      description: The entity internally communicates information, including objectives
+        and responsibilities for internal control, necessary to support the functioning
+        of internal control.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.1
+      description: "Communicates Internal Control Information \u2014 A process is\
+        \ in place to communicate required information to enable all personnel to\
+        \ understand and carry out their internal control responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.2
+      description: "Communicates With the Board of Directors \u2014 Communication\
+        \ exists between management and the board of directors so that both have information\
+        \ needed to fulfill their roles with respect to the entity\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.3
+      description: "Provides Separate Communication Lines \u2014 Separate communication\
+        \ channels, such as whistle-blower hotlines, are in place and serve as fail-safe\
+        \ mechanisms to enable anonymous or confidential communication when normal\
+        \ channels are inoperative or ineffective."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.4
+      description: "Selects Relevant Method of Communication \u2014 The method of\
+        \ communication considers the timing, audience, and nature of the information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.5
+      description: "Communicates Responsibilities \u2014 Entity personnel with responsibility\
+        \ for designing, developing, implementing, operating, maintaining, or monitoring\
+        \ system controls receive communications about their responsibilities, including\
+        \ changes in their responsibilities, and have the information necessary to\
+        \ carry out those responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.6
+      description: "Communicates Information on Reporting Failures, Incidents, Concerns,\
+        \ and Other Matters \u2014 Entity personnel are provided with information\
+        \ on how to report systems failures, incidents, concerns, and other complaints\
+        \ to personnel."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.7
+      description: "Communicates Objectives and Changes to Objectives \u2014 The entity\
+        \ communicates its objectives and changes to those objectives to personnel\
+        \ in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.8
+      description: "Communicates Information to Improve Security Knowledge and Awareness\
+        \ \u2014 The entity communicates information to improve security knowledge\
+        \ and awareness and to model appropriate security behaviors to personnel through\
+        \ a security awareness training program."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.9
+      description: "Communicates Information About System Operation and Boundaries\
+        \ \u2014 The entity prepares and communicates information about the design\
+        \ and operation of the system and its boundaries to authorized personnel to\
+        \ enable them to understand their role in the system and the results of system\
+        \ operation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.10
+      description: "Communicates System Objectives \u2014 The entity communicates\
+        \ its objectives to personnel to enable them to carry out their responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.2
+      ref_id: CC2.2.11
+      description: "Communicates System Changes \u2014 System changes that affect\
+        \ responsibilities or the achievement of the entity's objectives are communicated\
+        \ in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2
+      ref_id: CC2.3
+      name: COSO Principle 15
+      description: The entity communicates with external parties regarding matters
+        affecting the functioning of internal control.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.1
+      description: "Communicates to External Parties \u2014 Processes are in place\
+        \ to communicate relevant and timely information to external parties, including\
+        \ shareholders, partners, owners, regulators, customers, financial analysts,\
+        \ and other external parties."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.2
+      description: "Enables Inbound Communications \u2014 Open communication channels\
+        \ allow input from customers, consumers, suppliers, external auditors, regulators,\
+        \ financial analysts, and others, providing management and the board of directors\
+        \ with relevant information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.3
+      description: "Communicates With the Board of Directors \u2014 Relevant information\
+        \ resulting from assessments conducted by external parties is communicated\
+        \ to the board of directors."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.4
+      description: "Provides Separate Communication Lines \u2014 Separate communication\
+        \ channels, such as whistle-blower hotlines, are in place and serve as fail-safe\
+        \ mechanisms to enable anonymous or confidential communication when normal\
+        \ channels are inoperative or ineffective."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.5
+      description: "Selects Relevant Method of Communication \u2014 The method of\
+        \ communication considers the timing, audience, and nature of the communication\
+        \ and legal, regulatory, and fiduciary requirements and expectations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.6
+      description: "Communicates Objectives Related to Confidentiality and Changes\
+        \ to Objectives \u2014 The entity communicates, to external users, vendors,\
+        \ business partners and others whose products and services are part of the\
+        \ system, objectives and changes to objectives related to confidentiality."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.7
+      description: "Communicates Objectives Related to Privacy and Changes to Objectives\
+        \ \u2014 The entity communicates, to external users, vendors, business partners\
+        \ and others whose products and services are part of the system, objectives\
+        \ related to privacy and changes to those objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.8
+      description: "Communicates Information About System Operation and Boundaries\u2014\
+        The entity prepares and communicates information about the design and operation\
+        \ of the system and its boundaries to authorized external users to permit\
+        \ users to understand their role in the system and the results of system operation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.9
+      description: "Communicates System Objectives \u2014 The entity communicates\
+        \ its system objectives to appropriate external users."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.10
+      description: "Communicates System Responsibilities \u2014 External users with\
+        \ responsibility for designing, developing, implementing, operating, maintaining,\
+        \ and monitoring system controls receive communications about their responsibilities\
+        \ and have the information necessary to carry out those responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc2.3
+      ref_id: CC2.3.11
+      description: "Communicates Information on Reporting System Failures, Incidents,\
+        \ Concerns, and Other Matters \u2014 External users are provided with information\
+        \ on how to report systems failures, incidents, concerns, and other complaints\
+        \ to appropriate personnel."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3
+      assessable: false
+      depth: 1
+      ref_id: CC3
+      name: Risk Assessment
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3
+      ref_id: CC3.1
+      name: COSO Principle 6
+      description: The entity specifies objectives with sufficient clarity to enable
+        the identification and assessment of risks relating to objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.1
+      description: "Operations Objectives \u2014 Reflects Management's Choices \u2014\
+        \ Operations objectives reflect management's choices about structure, industry\
+        \ considerations, and performance of the entity."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.2
+      description: "Considers Tolerances for Risk \u2014 Management considers the\
+        \ acceptable levels of variation relative to the achievement of operations\
+        \ objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.3
+      description: "Includes Operations and Financial Performance Goals \u2014 The\
+        \ organization reflects the desired level of operations and financial performance\
+        \ for the entity within operations objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.4
+      description: "Forms a Basis for Committing of Resources \u2014 Management uses\
+        \ operations objectives as a basis for allocating resources needed to attain\
+        \ desired operations and financial performance."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.5
+      description: "External Financial Reporting Objectives \u2014 Complies With Applicable\
+        \ Accounting Standards \u2014 Financial reporting objectives are consistent\
+        \ with accounting principles suitable and available for that entity. The accounting\
+        \ principles selected are appropriate in the circumstances."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.6
+      description: "Considers Materiality \u2014 Management considers materiality\
+        \ in financial statement presentation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.7
+      description: "Reflects Entity Activities \u2014 External reporting reflects\
+        \ the underlying transactions and events to show qualitative characteristics\
+        \ and assertions."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.8
+      description: "External Nonfinancial Reporting Objectives \u2014 Complies With\
+        \ Externally Established Frameworks \u2014 Management establishes objectives\
+        \ consistent with laws and regulations or standards and frameworks of recognized\
+        \ external organizations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.9
+      description: "Considers the Required Level of Precision \u2014 Management reflects\
+        \ the required level of precision and accuracy suitable for user needs and\
+        \ based on criteria established by third parties in nonfinancial reporting."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.10
+      description: "Reflects Entity Activities \u2014 External reporting reflects\
+        \ the underlying transactions and events within a range of acceptable limits."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.11
+      description: "Internal Reporting Objectives \u2014 Reflects Management's Choices\
+        \ \u2014 Internal reporting provides management with accurate and complete\
+        \ information regarding management's choices and information needed in managing\
+        \ the entity."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.12
+      description: "Considers the Required Level of Precision \u2014 Management reflects\
+        \ the required level of precision and accuracy suitable for user needs in\
+        \ nonfinancial reporting objectives and materiality within financial reporting\
+        \ objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.13
+      description: "Reflects Entity Activities \u2014 Internal reporting reflects\
+        \ the underlying transactions and events within a range of acceptable limits."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.14
+      description: "Compliance Objectives \u2014 Reflects External Laws and Regulations\
+        \ \u2014 Laws and regulations establish minimum standards of conduct, which\
+        \ the entity integrates into compliance objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.15
+      description: "Considers Tolerances for Risk \u2014 Management considers the\
+        \ acceptable levels of variation relative to the achievement of operations\
+        \ objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.1
+      ref_id: CC3.1.16
+      description: "Establishes Sub-objectives to Support Objectives \u2014 Management\
+        \ identifies sub-objectives related to security, availability, processing\
+        \ integrity, confidentiality, and privacy to support the achievement of the\
+        \ entity\u2019s objectives related to reporting, operations, and compliance."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3
+      ref_id: CC3.2
+      name: COSO Principle 7
+      description: The entity identifies risks to the achievement of its objectives
+        across the entity and analyzes risks as a basis for determining how the risks
+        should be managed.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.1
+      description: "Includes Entity, Subsidiary, Division, Operating Unit, and Functional\
+        \ Levels \u2014 The entity identifies and assesses risk at the entity, subsidiary,\
+        \ division, operating unit, and functional levels relevant to the achievement\
+        \ of objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.2
+      description: "Analyzes Internal and External Factors \u2014 Risk identification\
+        \ considers both internal and external factors and their impact on the achievement\
+        \ of objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.3
+      description: "Involves Appropriate Levels of Management \u2014 The entity puts\
+        \ into place effective risk assessment mechanisms that involve appropriate\
+        \ levels of management."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.4
+      description: "Estimates Significance of Risks Identified \u2014 Identified risks\
+        \ are analyzed through a process that includes estimating the potential significance\
+        \ of the risk."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.5
+      description: "Determines How to Respond to Risks \u2014 Risk assessment includes\
+        \ considering how the risk should be managed and whether to accept, avoid,\
+        \ reduce, or share the risk."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.6
+      description: "Identifies and Assesses Criticality of Information Assets and\
+        \ Identifies Threats and Vulnerabilities \u2014 The entity's risk identification\
+        \ and assessment process includes (1) identifying information assets, including\
+        \ physical devices and systems, virtual devices, software, data and data flows,\
+        \ external information systems, and organizational roles; (2) assessing the\
+        \ criticality of those information assets; (3) identifying the threats to\
+        \ the assets from intentional (including malicious) and unintentional acts\
+        \ and environmental events; and (4) identifying the vulnerabilities of the\
+        \ identified assets."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.7
+      description: "Analyzes Threats and Vulnerabilities From Vendors, Business Partners,\
+        \ and Other Parties \u2014 The entity's risk assessment process includes the\
+        \ analysis of potential threats and vulnerabilities arising from vendors providing\
+        \ goods and services, as well as threats and vulnerabilities arising from\
+        \ business partners, customers, and others with access to the entity's information\
+        \ systems."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.2
+      ref_id: CC3.2.8
+      description: "Considers the Significance of the Risk \u2014 The entity\u2019\
+        s consideration of the potential significance of the identified risks includes\
+        \ (1) determining the criticality of identified assets in meeting objectives;\
+        \ (2) assessing the impact of identified threats and vulnerabilities in meeting\
+        \ objectives; (3) assessing the likelihood of identified threats; and (4)\
+        \ determining the risk associated with assets based on asset criticality,\
+        \ threat impact, and likelihood."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3
+      ref_id: CC3.3
+      name: COSO Principle 8
+      description: The entity considers the potential for fraud in assessing risks
+        to the achievement of objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3
+      ref_id: CC3.3.1
+      description: "Considers Various Types of Fraud \u2014 The assessment of fraud\
+        \ considers fraudulent reporting, possible loss of assets, and corruption\
+        \ resulting from the various ways that fraud and misconduct can occur."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3
+      ref_id: CC3.3.2
+      description: "Assesses Incentives and Pressures \u2014 The assessment of fraud\
+        \ risks considers incentives and pressures."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3
+      ref_id: CC3.3.3
+      description: "Assesses Opportunities \u2014 The assessment of fraud risk considers\
+        \ opportunities for unauthorized acquisition, use, or disposal of assets,\
+        \ altering the entity\u2019s reporting records, or committing other inappropriate\
+        \ acts."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3
+      ref_id: CC3.3.4
+      description: "Assesses Attitudes and Rationalizations \u2014 The assessment\
+        \ of fraud risk considers how management and other personnel might engage\
+        \ in or justify inappropriate actions."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.3
+      ref_id: CC3.3.5
+      description: "Considers the Risks Related to the Use of IT and Access to Information\
+        \ \u2014 The assessment of fraud risks includes consideration of threats and\
+        \ vulnerabilities that arise specifically from the use of IT and access to\
+        \ information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3
+      ref_id: CC3.4
+      name: COSO Principle 9
+      description: The entity identifies and assesses changes that could significantly
+        impact the system of internal control.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4
+      ref_id: CC3.4.1
+      description: "Assesses Changes in the External Environment\u2014The risk identification\
+        \ process considers changes to the regulatory, economic, and physical environment\
+        \ in which the entity operates."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4
+      ref_id: CC3.4.2
+      description: "Assesses Changes in the Business Model\u2014The entity considers\
+        \ the potential impacts of new business lines, dramatically altered compositions\
+        \ of existing business lines, acquired or divested business operations on\
+        \ the system of internal control, rapid growth, changing reliance on foreign\
+        \ geographies, and new technologies."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4
+      ref_id: CC3.4.3
+      description: "Assesses Changes in Leadership\u2014The entity considers changes\
+        \ in management and respective attitudes and philosophies on the system of\
+        \ internal control."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4
+      ref_id: CC3.4.4
+      description: "Assess Changes in Systems and Technology\u2014The risk identification\
+        \ process considers changes arising from changes in the entity\u2019s systems\
+        \ and changes in the technology environment."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc3.4
+      ref_id: CC3.4.5
+      description: "Assess Changes in Vendor and Business Partner Relationships\u2014\
+        The risk identification process considers changes in vendor and business partner\
+        \ relationships."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4
+      assessable: false
+      depth: 1
+      ref_id: CC4
+      name: Monitoring Activities
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4
+      ref_id: CC4.1
+      name: COSO Principle 16
+      description: The entity selects, develops, and performs ongoing and/or separate
+        evaluations to ascertain whether the components of internal control are present
+        and functioning.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.1
+      description: "Considers a Mix of Ongoing and Separate Evaluations \u2014 Management\
+        \ includes a balance of ongoing and separate evaluations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.2
+      description: "Considers Rate of Change \u2014 Management considers the rate\
+        \ of change in business and business processes when selecting and developing\
+        \ ongoing and separate evaluations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.3
+      description: "Establishes Baseline Understanding \u2014 The design and current\
+        \ state of an internal control system are used to establish a baseline for\
+        \ ongoing and separate evaluations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.4
+      description: "Uses Knowledgeable Personnel \u2014 Evaluators performing ongoing\
+        \ and separate evaluations have sufficient knowledge to understand what is\
+        \ being evaluated."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.5
+      description: "Integrates With Business Processes \u2014 Ongoing evaluations\
+        \ are built into the business processes and adjust to changing conditions."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.6
+      description: "Adjusts Scope and Frequency \u2014 Management varies the scope\
+        \ and frequency of separate evaluations depending on risk."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.7
+      description: "Objectively Evaluates \u2014 Separate evaluations are performed\
+        \ periodically to provide objective feedback."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.1
+      ref_id: CC4.1.8
+      description: "Considers Different Types of Ongoing and Separate Evaluations\
+        \ \u2014 Management uses a variety of different types of ongoing and separate\
+        \ evaluations, including penetration testing, independent certification made\
+        \ against established specifications (for example, ISO certifications), and\
+        \ internal audit assessments."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4
+      ref_id: CC4.2
+      name: COSO Principle 17
+      description: The entity evaluates and communicates internal control deficiencies
+        in a timely manner to those parties responsible for taking corrective action,
+        including senior management and the board of directors, as appropriate.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2
+      ref_id: CC4.2.1
+      description: "Assesses Results \u2014 Management and the board of directors,\
+        \ as appropriate, assess results of ongoing and separate evaluations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2
+      ref_id: CC4.2.2
+      description: "Communicates Deficiencies \u2014 Deficiencies are communicated\
+        \ to parties responsible for taking corrective action and to senior management\
+        \ and the board of directors, as appropriate."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc4.2
+      ref_id: CC4.2.3
+      description: "Monitors Corrective Action \u2014 Management tracks whether deficiencies\
+        \ are remedied on a timely basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5
+      assessable: false
+      depth: 1
+      ref_id: CC5
+      name: Control Activities
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5
+      ref_id: CC5.1
+      name: COSO Principle 10
+      description: The entity selects and develops control activities that contribute
+        to the mitigation of risks to the achievement of objectives to acceptable
+        levels.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      ref_id: CC5.1.1
+      description: "Integrates With Risk Assessment \u2014 Control activities help\
+        \ ensure that risk responses that address and mitigate risks are carried out."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      ref_id: CC5.1.2
+      description: "Considers Entity-Specific Factors \u2014 Management considers\
+        \ how the environment, complexity, nature, and scope of its operations, as\
+        \ well as the specific characteristics of its organization, affect the selection\
+        \ and development of control activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      ref_id: CC5.1.3
+      description: "Determines Relevant Business Processes \u2014 Management determines\
+        \ which relevant business processes require control activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      ref_id: CC5.1.4
+      description: "Evaluates a Mix of Control Activity Types \u2014 Control activities\
+        \ include a range and variety of controls and may include a balance of approaches\
+        \ to mitigate risks, considering both manual and automated controls, and preventive\
+        \ and detective controls."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      ref_id: CC5.1.5
+      description: "Considers at What Level Activities Are Applied \u2014 Management\
+        \ considers control activities at various levels in the entity."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.1
+      ref_id: CC5.1.6
+      description: "Addresses Segregation of Duties \u2014 Management segregates incompatible\
+        \ duties, and where such segregation is not practical, management selects\
+        \ and develops alternative control activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5
+      ref_id: CC5.2
+      name: COSO Principle 11
+      description: The entity also selects and develops general control activities
+        over technology to support the achievement of objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2
+      ref_id: CC5.2.1
+      description: "Determines Dependency Between the Use of Technology in Business\
+        \ Processes and Technology General Controls \u2014 Management understands\
+        \ and determines the dependency and linkage between business processes, automated\
+        \ control activities, and technology general controls."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2
+      ref_id: CC5.2.2
+      description: "Establishes Relevant Technology Infrastructure Control Activities\
+        \ \u2014 Management selects and develops control activities over the technology\
+        \ infrastructure, which are designed and implemented to help ensure the completeness,\
+        \ accuracy, and availability of technology processing."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2
+      ref_id: CC5.2.3
+      description: "Establishes Relevant Security Management Process Controls Activities\
+        \ \u2014 Management selects and develops control activities that are designed\
+        \ and implemented to restrict technology access rights to authorized users\
+        \ commensurate with their job responsibilities and to protect the entity\u2019\
+        s assets from external threats."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.2
+      ref_id: CC5.2.4
+      description: "Establishes Relevant Technology Acquisition, Development, and\
+        \ Maintenance Process Control Activities \u2014 Management selects and develops\
+        \ control activities over the acquisition, development, and maintenance of\
+        \ technology and its infrastructure to achieve management\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5
+      ref_id: CC5.3
+      name: COSO Principle 12
+      description: The entity deploys control activities through policies that establish
+        what is expected and in procedures that put policies into action.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      ref_id: CC5.3.1
+      description: "Establishes Policies and Procedures to Support Deployment of Management\
+        \ \u2018s Directives\u2014Management establishes control activities that are\
+        \ built into business processes and employees\u2019 day-to-day activities\
+        \ through policies establishing what is expected and relevant procedures specifying\
+        \ actions."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      ref_id: CC5.3.2
+      description: "Establishes Responsibility and Accountability for Executing Policies\
+        \ and Procedures\u2014Management establishes responsibility and accountability\
+        \ for control activities with management (or other designated personnel) of\
+        \ the business unit or function in which the relevant risks reside."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      ref_id: CC5.3.3
+      description: "Performs in a Timely Manner\u2014Responsible personnel perform\
+        \ control activities in a timely manner as defined by the policies and procedures."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      ref_id: CC5.3.4
+      description: "Takes Corrective Action\u2014Responsible personnel investigate\
+        \ and act on matters identified as a result of executing control activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      ref_id: CC5.3.5
+      description: "Performs Using Competent Personnel\u2014Competent personnel with\
+        \ sufficient authority perform control activities with diligence and continuing\
+        \ focus."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc5.3
+      ref_id: CC5.3.6
+      description: "Reassesses Policies and Procedures\u2014Management periodically\
+        \ reviews control activities to determine their continued relevance and refreshes\
+        \ them when necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      assessable: false
+      depth: 1
+      ref_id: CC6
+      name: Logical and Physical Access Controls
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.1
+      description: The entity implements logical access security software, infrastructure,
+        and architectures over protected information assets to protect them from security
+        events to meet the entity's objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.1
+      description: "Identifies and Manages the Inventory of Information Assets \u2014\
+        \ The entity identifies, inventories, classifies, and manages information\
+        \ assets."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.2
+      description: "Restricts Logical Access \u2014 Logical access to information\
+        \ assets, including hardware, data (at-rest, during processing, or in transmission),\
+        \ software, administrative authorities, mobile devices, output, and offline\
+        \ system components is restricted through the use of access control software\
+        \ and rule sets."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.3
+      description: "Identifies and Authenticates Users \u2014 Persons, infrastructure\
+        \ and software are identified and authenticated prior to accessing information\
+        \ assets, whether locally or remotely."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.4
+      description: "Considers Network Segmentation \u2014 Network segmentation permits\
+        \ unrelated portions of the entity's information system to be isolated from\
+        \ each other."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.5
+      description: "Manages Points of Access \u2014 Points of access by outside entities\
+        \ and the types of data that flow through the points of access are identified,\
+        \ inventoried, and managed. The types of individuals and systems using each\
+        \ point of access are identified, documented, and managed."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.6
+      description: "Restricts Access to Information Assets \u2014 Combinations of\
+        \ data classification, separate data structures, port restrictions, access\
+        \ protocol restrictions, user identification, and digital certificates are\
+        \ used to establish access control rules for information assets."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.7
+      description: "Manages Identification and Authentication \u2014 Identification\
+        \ and authentication requirements are established, documented, and managed\
+        \ for individuals and systems accessing entity information, infrastructure\
+        \ and software."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.8
+      description: "Manages Credentials for Infrastructure and Software \u2014 New\
+        \ internal and external infrastructure and software are registered, authorized,\
+        \ and documented prior to being granted access credentials and implemented\
+        \ on the network or access point. Credentials are removed and access is disabled\
+        \ when access is no longer required or the infrastructure and software are\
+        \ no longer in use."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.9
+      description: "Uses Encryption to Protect Data \u2014 The entity uses encryption\
+        \ to supplement other measures used to protect data-at-rest, when such protections\
+        \ are deemed appropriate based on assessed risk."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.1
+      ref_id: CC6.1.10
+      description: "Protects Encryption Keys \u2014 Processes are in place to protect\
+        \ encryption keys during generation, storage, use, and destruction."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.2
+      description: Prior to issuing system credentials and granting system access,
+        the entity registers and authorizes new internal and external users whose
+        access is administered by the entity. For those users whose access is administered
+        by the entity, user system credentials are removed when user access is no
+        longer authorized.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2
+      ref_id: CC6.2.1
+      description: "Controls Access Credentials to Protected Assets \u2014 Information\
+        \ asset access credentials are created based on an authorization from the\
+        \ system's asset owner or authorized custodian."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2
+      ref_id: CC6.2.2
+      description: "Removes Access to Protected Assets When Appropriate \u2014 Processes\
+        \ are in place to remove credential access when an individual no longer requires\
+        \ such access."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.2
+      ref_id: CC6.2.3
+      description: "Reviews Appropriateness of Access Credentials \u2014 The appropriateness\
+        \ of access credentials is reviewed on a periodic basis for unnecessary and\
+        \ inappropriate individuals with credentials."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.3
+      description: "The entity authorizes, modifies, or removes access to data, software,\
+        \ functions, and other protected information assets based on roles, responsibilities,\
+        \ or the system design and changes, giving consideration to the concepts of\
+        \ least privilege and segregation of duties, to meet the entity\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3
+      ref_id: CC6.3.1
+      description: "Creates or Modifies Access to Protected Information Assets \u2014\
+        \ Processes are in place to create or modify access to protected information\
+        \ assets based on authorization from the asset\u2019s owner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3
+      ref_id: CC6.3.2
+      description: "Removes Access to Protected Information Assets \u2014 Processes\
+        \ are in place to remove access to protected information assets when an individual\
+        \ no longer requires access."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.3
+      ref_id: CC6.3.3
+      description: "Uses Role-Based Access Controls \u2014 Role-based access control\
+        \ is utilized to support segregation of incompatible functions."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.4
+      description: "The entity restricts physical access to facilities and protected\
+        \ information assets (for example, data center facilities, back-up media storage,\
+        \ and other sensitive locations) to authorized personnel to meet the entity\u2019\
+        s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4
+      ref_id: CC6.4.1
+      description: "Creates or Modifies Physical Access \u2014 Processes are in place\
+        \ to create or modify physical access to facilities such as data centers,\
+        \ office spaces, and work areas, based on authorization from the system's\
+        \ asset owner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4
+      ref_id: CC6.4.2
+      description: "Removes Physical Access \u2014 Processes are in place to remove\
+        \ access to physical resources when an individual no longer requires access."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.4
+      ref_id: CC6.4.3
+      description: "Reviews Physical Access \u2014 Processes are in place to periodically\
+        \ review physical access to ensure consistency with job responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.5
+      description: "The entity discontinues logical and physical protections over\
+        \ physical assets only after the ability to read or recover data and software\
+        \ from those assets has been diminished and is no longer required to meet\
+        \ the entity\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.5
+      ref_id: CC6.5.1
+      description: "Identifies Data and Software for Disposal \u2014 Procedures are\
+        \ in place to identify data and software stored on equipment to be disposed\
+        \ and to render such data and software unreadable."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.5
+      ref_id: CC6.5.2
+      description: "Removes Data and Software From Entity Control \u2014 Procedures\
+        \ are in place to remove data and software stored on equipment to be removed\
+        \ from the physical control of the entity and to render such data and software\
+        \ unreadable."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.6
+      description: The entity implements logical access security measures to protect
+        against threats from sources outside its system boundaries.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6
+      ref_id: CC6.6.1
+      description: "Restricts Access \u2014 The types of activities that can occur\
+        \ through a communication channel (for example, FTP site, router port) are\
+        \ restricted."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6
+      ref_id: CC6.6.2
+      description: "Protects Identification and Authentication Credentials \u2014\
+        \ Identification and authentication credentials are protected during transmission\
+        \ outside its system boundaries."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6
+      ref_id: CC6.6.3
+      description: "Requires Additional Authentication or Credentials \u2014 Additional\
+        \ authentication information or credentials are required when accessing the\
+        \ system from outside its boundaries."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6
+      ref_id: CC6.6.4
+      description: "Implements Boundary Protection Systems \u2014 Boundary protection\
+        \ systems (for example, firewalls, demilitarized zones, and intrusion detection\
+        \ systems) are implemented to protect external access points from attempts\
+        \ and unauthorized access and are monitored to detect such attempts."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.7
+      description: "The entity restricts the transmission, movement, and removal of\
+        \ information to authorized internal and external users and processes, and\
+        \ protects it during transmission, movement, or removal to meet the entity\u2019\
+        s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7
+      ref_id: CC6.7.1
+      description: "Restricts the Ability to Perform Transmission \u2014 Data loss\
+        \ prevention processes and technologies are used to restrict ability to authorize\
+        \ and execute transmission, movement and removal of information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7
+      ref_id: CC6.7.2
+      description: "Uses Encryption Technologies or Secure Communication Channels\
+        \ to Protect Data \u2014 Encryption technologies or secured communication\
+        \ channels are used to protect transmission of data and other communications\
+        \ beyond connectivity access points."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7
+      ref_id: CC6.7.3
+      description: "Protects Removal Media \u2014 Encryption technologies and physical\
+        \ asset protections are used for removable media (such as USB drives and back-up\
+        \ tapes), as appropriate."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.7
+      ref_id: CC6.7.4
+      description: "Protects Mobile Devices \u2014 Processes are in place to protect\
+        \ mobile devices (such as laptops, smart phones and tablets) that serve as\
+        \ information assets."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
+      ref_id: CC6.8
+      description: "The entity implements controls to prevent or detect and act upon\
+        \ the introduction of unauthorized or malicious software to meet the entity\u2019\
+        s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8
+      ref_id: CC6.8.1
+      description: "Restricts Application and Software Installation \u2014 The ability\
+        \ to install applications and software is restricted to authorized individuals."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8
+      ref_id: CC6.8.2
+      description: "Detects Unauthorized Changes to Software and Configuration Parameters\
+        \ \u2014 Processes are in place to detect changes to software and configuration\
+        \ parameters that may be indicative of unauthorized or malicious software."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8
+      ref_id: CC6.8.3
+      description: "Uses a Defined Change Control Process \u2014 A management-defined\
+        \ change control process is used for the implementation of software."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8
+      ref_id: CC6.8.4
+      description: "Uses Antivirus and Anti-Malware Software \u2014 Antivirus and\
+        \ anti-malware software is implemented and maintained to provide for the interception\
+        \ or detection and remediation of malware."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6.8
+      ref_id: CC6.8.5
+      description: "Scans Information Assets from Outside the Entity for Malware and\
+        \ Other Unauthorized Software \u2014 Procedures are in place to scan information\
+        \ assets that have been transferred or returned to the entity\u2019s custody\
+        \ for malware and other unauthorized software and to remove any items detected\
+        \ prior to its implementation on the network."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7
+      assessable: false
+      depth: 1
+      ref_id: CC7
+      name: System Operations
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7
+      ref_id: CC7.1
+      description: To meet its objectives, the entity uses detection and monitoring
+        procedures to identify (1) changes to configurations that result in the introduction
+        of new vulnerabilities, and (2) susceptibilities to newly discovered vulnerabilities.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1
+      ref_id: CC7.1.1
+      description: "Uses Defined Configuration Standards \u2014 Management has defined\
+        \ configuration standards."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1
+      ref_id: CC7.1.2
+      description: "Monitors Infrastructure and Software \u2014 The entity monitors\
+        \ infrastructure and software for noncompliance with the standards, which\
+        \ could threaten the achievement of the entity's objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1
+      ref_id: CC7.1.3
+      description: "Implements Change-Detection Mechanisms \u2014 The IT system includes\
+        \ a change-detection mechanism (for example, file integrity monitoring tools)\
+        \ to alert personnel to unauthorized modifications of critical system files,\
+        \ configuration files, or content files."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1
+      ref_id: CC7.1.4
+      description: "Detects Unknown or Unauthorized Components \u2014 Procedures are\
+        \ in place to detect the introduction of unknown or unauthorized components."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.1
+      ref_id: CC7.1.5
+      description: "Conducts Vulnerability Scans \u2014 The entity conducts vulnerability\
+        \ scans designed to identify potential vulnerabilities or misconfigurations\
+        \ on a periodic basis and after any significant change in the environment\
+        \ and takes action to remediate identified deficiencies on a timely basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7
+      ref_id: CC7.2
+      description: The entity monitors system components and the operation of those
+        components for anomalies that are indicative of malicious acts, natural disasters,
+        and errors affecting the entity's ability to meet its objectives; anomalies
+        are analyzed to determine whether they represent security events.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2
+      ref_id: CC7.2.1
+      description: "Implements Detection Policies, Procedures, and Tools \u2014 Detection\
+        \ policies and procedures are defined and implemented, and detection tools\
+        \ are implemented on Infrastructure and software to identify anomalies in\
+        \ the operation or unusual activity on systems. Procedures may include (1)\
+        \ a defined governance process for security event detection and management\
+        \ that includes provision of resources; (2) use of intelligence sources to\
+        \ identify newly discovered threats and vulnerabilities; and (3) logging of\
+        \ unusual system activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2
+      ref_id: CC7.2.2
+      description: "Designs Detection Measures \u2014 Detection measures are designed\
+        \ to identify anomalies that could result from actual or attempted (1) compromise\
+        \ of physical barriers; (2) unauthorized actions of authorized personnel;\
+        \ (3) use of compromised identification and authentication credentials; (4)\
+        \ unauthorized access from outside the system boundaries; (5) compromise of\
+        \ authorized external parties; and (6) implementation or connection of unauthorized\
+        \ hardware and software."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2
+      ref_id: CC7.2.3
+      description: "Implements Filters to Analyze Anomalies \u2014 Management has\
+        \ implemented procedures to filter, summarize, and analyze anomalies to identify\
+        \ security events."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.2
+      ref_id: CC7.2.4
+      description: "Monitors Detection Tools for Effective Operation \u2014 Management\
+        \ has implemented processes to monitor the effectiveness of detection tools."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7
+      ref_id: CC7.3
+      description: The entity evaluates security events to determine whether they
+        could or have resulted in a failure of the entity to meet its objectives (security
+        incidents) and, if so, takes actions to prevent or address such failures.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3
+      ref_id: CC7.3.1
+      description: "Responds to Security Incidents \u2014 Procedures are in place\
+        \ for responding to security incidents and evaluating the effectiveness of\
+        \ those policies and procedures on a periodic basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3
+      ref_id: CC7.3.2
+      description: "Communicates and Reviews Detected Security Events \u2014 Detected\
+        \ security events are communicated to and reviewed by the individuals responsible\
+        \ for the management of the security program and actions are taken, if necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3
+      ref_id: CC7.3.3
+      description: "Develops and Implements Procedures to Analyze Security Incidents\
+        \ \u2014 Procedures are in place to analyze security incidents and determine\
+        \ system impact."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3
+      ref_id: CC7.3.4
+      description: "Assesses the Impact on Personal Information \u2014 Detected security\
+        \ events are evaluated to determine whether they could or did result in the\
+        \ unauthorized disclosure or use of personal information and whether there\
+        \ has been a failure to comply with applicable laws or regulations."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.3
+      ref_id: CC7.3.5
+      description: "Determines Personal Information Used or Disclosed \u2014 When\
+        \ an unauthorized use or disclosure of personal information has occurred,\
+        \ the affected information is identified."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7
+      ref_id: CC7.4
+      description: The entity responds to identified security incidents by executing
+        a defined incident response program to understand, contain, remediate, and
+        communicate security incidents, as appropriate.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.1
+      description: "Assigns Roles and Responsibilities \u2014 Roles and responsibilities\
+        \ for the design, implementation, maintenance, and execution of the incident\
+        \ response program are assigned, including the use of external resources when\
+        \ necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.2
+      description: "Contains Security Incidents \u2014 Procedures are in place to\
+        \ contain security incidents that actively threaten entity objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.3
+      description: "Mitigates Ongoing Security Incidents \u2014 Procedures are in\
+        \ place to mitigate the effects of ongoing security incidents."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.4
+      description: "Ends Threats Posed by Security Incidents \u2014 Procedures are\
+        \ in place to end the threats posed by security incidents through closure\
+        \ of the vulnerability, removal of unauthorized access, and other remediation\
+        \ actions."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.5
+      description: "Restores Operations \u2014 Procedures are in place to restore\
+        \ data and business operations to an interim state that permits the achievement\
+        \ of entity objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.6
+      description: "Develops and Implements Communication Protocols for Security Incidents\
+        \ \u2014 Protocols for communicating security incidents and actions taken\
+        \ to affected parties are developed and implemented to meet the entity's objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.7
+      description: "Obtains Understanding of Nature of Incident and Determines Containment\
+        \ Strategy \u2014 An understanding of the nature (for example, the method\
+        \ by which the incident occurred and the affected system resources) and severity\
+        \ of the security incident is obtained to determine the appropriate containment\
+        \ strategy, including (1) a determination of the appropriate response time\
+        \ frame, and (2) the determination and execution of the containment approach."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.8
+      description: "Remediates Identified Vulnerabilities \u2014 Identified vulnerabilities\
+        \ are remediated through the development and execution of remediation activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.9
+      description: "Communicates Remediation Activities \u2014 Remediation activities\
+        \ are documented and communicated in accordance with the incident response\
+        \ program."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.10
+      description: "Evaluates the Effectiveness of Incident Response \u2014 The design\
+        \ of incident response activities is evaluated for effectiveness on a periodic\
+        \ basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.11
+      description: "Periodically Evaluates Incidents \u2014 Periodically, management\
+        \ reviews incidents related to security, availability, processing integrity,\
+        \ confidentiality, and privacy and identifies the need for system changes\
+        \ based on incident patterns and root causes."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.12
+      description: "Communicates Unauthorized Use and Disclosure \u2014 Events that\
+        \ resulted in unauthorized use or disclosure of personal information are communicated\
+        \ to the data subjects, legal and regulatory authorities, and others as required."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.4
+      ref_id: CC7.4.13
+      description: "Application of Sanctions \u2014 The conduct of individuals and\
+        \ organizations operating under the authority of the entity and involved in\
+        \ the unauthorized use or disclosure of personal information is evaluated\
+        \ and, if appropriate, sanctioned in accordance with entity policies and legal\
+        \ and regulatory requirements."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7
+      ref_id: CC7.5
+      description: The entity identifies, develops, and implements activities to recover
+        from identified security incidents.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      ref_id: CC7.5.1
+      description: "Restores the Affected Environment \u2014 The activities restore\
+        \ the affected environment to functional operation by rebuilding systems,\
+        \ updating software, installing patches, and changing configurations, as needed."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      ref_id: CC7.5.2
+      description: "Communicates Information About the Event \u2014 Communications\
+        \ about the nature of the incident, recovery actions taken, and activities\
+        \ required for the prevention of future security events are made to management\
+        \ and others as appropriate (internal and external)."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      ref_id: CC7.5.3
+      description: "Determines Root Cause of the Event \u2014 The root cause of the\
+        \ event is determined."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      ref_id: CC7.5.4
+      description: "Implements Changes to Prevent and Detect Recurrences \u2014 Additional\
+        \ architecture or changes to preventive and detective controls, or both, are\
+        \ implemented to prevent and detect recurrences on a timely basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      ref_id: CC7.5.5
+      description: "Improves Response and Recovery Procedures \u2014 Lessons learned\
+        \ are analyzed, and the incident response plan and recovery procedures are\
+        \ improved."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc7.5
+      ref_id: CC7.5.6
+      description: "Implements Incident Recovery Plan Testing \u2014 Incident recovery\
+        \ plan testing is performed on a periodic basis. The testing includes (1)\
+        \ development of testing scenarios based on threat likelihood and magnitude;\
+        \ (2) consideration of relevant system components from across the entity that\
+        \ can impair availability; (3) scenarios that consider the potential for the\
+        \ lack of availability of key personnel; and (4) revision of continuity plans\
+        \ and systems based on test results."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8
+      assessable: false
+      depth: 1
+      ref_id: CC8
+      name: Change Management
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8
+      ref_id: CC8.1
+      description: The entity authorizes, designs, develops or acquires, configures,
+        documents, tests, approves, and implements changes to infrastructure, data,
+        software, and procedures to meet its objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.1
+      description: "Manages Changes Throughout the System Lifecycle \u2014 A process\
+        \ for managing system changes throughout the lifecycle of the system and its\
+        \ components (infrastructure, data, software and procedures) is used to support\
+        \ system availability and processing integrity."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.2
+      description: "Authorizes Changes \u2014 A process is in place to authorize system\
+        \ changes prior to development."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.3
+      description: "Designs and Develops Changes \u2014 A process is in place to design\
+        \ and develop system changes."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.4
+      description: "Documents Changes \u2014 A process is in place to document system\
+        \ changes to support ongoing maintenance of the system and to support system\
+        \ users in performing their responsibilities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.5
+      description: "Tracks System Changes \u2014 A process is in place to track system\
+        \ changes prior to implementation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.6
+      description: "Configures Software \u2014 A process is in place to select and\
+        \ implement the configuration parameters used to control the functionality\
+        \ of software."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.7
+      description: "Tests System Changes \u2014 A process is in place to test system\
+        \ changes prior to implementation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.8
+      description: "Approves System Changes \u2014 A process is in place to approve\
+        \ system changes prior to implementation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.9
+      description: "Deploys System Changes \u2014 A process is in place to implement\
+        \ system changes."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.10
+      description: "Identifies and Evaluates System Changes \u2014 Objectives affected\
+        \ by system changes are identified, and the ability of the modified system\
+        \ to meet the objectives is evaluated throughout the system development life\
+        \ cycle."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.11
+      description: "Identifies Changes in Infrastructure, Data, Software, and Procedures\
+        \ Required to Remediate Incidents \u2014 Changes in infrastructure, data,\
+        \ software, and procedures required to remediate incidents to continue to\
+        \ meet objectives are identified, and the change process is initiated upon\
+        \ identification."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.12
+      description: "Creates Baseline Configuration of IT Technology \u2014 A baseline\
+        \ configuration of IT and control systems is created and maintained."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.13
+      description: "Provides for Changes Necessary in Emergency Situations \u2014\
+        \ A process is in place for authorizing, designing, testing, approving and\
+        \ implementing changes necessary in emergency situations (that is, changes\
+        \ that need to be implemented in an urgent timeframe)."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.14
+      description: "Protects Confidential Information \u2014 The entity protects confidential\
+        \ information during system design, development, testing, implementation,\
+        \ and change processes to meet the entity\u2019s objectives related to confidentiality."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc8.1
+      ref_id: CC8.1.15
+      description: "Protects Personal Information \u2014 The entity protects personal\
+        \ information during system design, development, testing, implementation,\
+        \ and change processes to meet the entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9
+      assessable: false
+      depth: 1
+      ref_id: CC9
+      name: Risk Mitigation
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9
+      ref_id: CC9.1
+      description: The entity identifies, selects, and develops risk mitigation activities
+        for risks arising from potential business disruptions.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.1
+      ref_id: CC9.1.1
+      description: "Considers Mitigation of Risks of Business Disruption \u2014 Risk\
+        \ mitigation activities include the development of planned policies, procedures,\
+        \ communications, and alternative processing solutions to respond to, mitigate,\
+        \ and recover from security events that disrupt business operations. Those\
+        \ policies and procedures include monitoring processes and information and\
+        \ communications to meet the entity's objectives during response, mitigation,\
+        \ and recovery efforts."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.1
+      ref_id: CC9.1.2
+      description: "Considers the Use of Insurance to Mitigate Financial Impact Risks\
+        \ \u2014 The risk management activities consider the use of insurance to offset\
+        \ the financial impact of loss events that would otherwise impair the ability\
+        \ of the entity to meet its objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9
+      ref_id: CC9.2
+      description: The entity assesses and manages risks associated with vendors and
+        business partners.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.1
+      description: "Establishes Requirements for Vendor and Business Partner Engagements\
+        \ \u2014 The entity establishes specific requirements for a vendor and business\
+        \ partner engagement that includes (1) scope of services and product specifications,\
+        \ (2) roles and responsibilities, (3) compliance requirements, and (4) service\
+        \ levels."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.2
+      description: "Assesses Vendor and Business Partner Risks \u2014 The entity assesses,\
+        \ on a periodic basis, the risks that vendors and business partners (and those\
+        \ entities\u2019 vendors and business partners) represent to the achievement\
+        \ of the entity's objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.3
+      description: "Assigns Responsibility and Accountability for Managing Vendors\
+        \ and Business Partners \u2014 The entity assigns responsibility and accountability\
+        \ for the management of risks associated with vendors and business partners."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.4
+      description: "Establishes Communication Protocols for Vendors and Business Partners\
+        \ \u2014 The entity establishes communication and resolution protocols for\
+        \ service or product issues related to vendors and business partners."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.5
+      description: "Establishes Exception Handling Procedures From Vendors and Business\
+        \ Partners \u2014 The entity establishes exception handling procedures for\
+        \ service or product issues related to vendors and business partners."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.6
+      description: "Assesses Vendor and Business Partner Performance \u2014 The entity\
+        \ periodically assesses the performance of vendors and business partners."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.7
+      description: "Implements Procedures for Addressing Issues Identified During\
+        \ Vendor and Business Partner Assessments \u2014 The entity implements procedures\
+        \ for addressing issues identified with vendor and business partner relationships."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.8
+      description: "Implements Procedures for Terminating Vendor and Business Partner\
+        \ Relationships \u2014 The entity implements procedures for terminating vendor\
+        \ and business partner relationships."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.9
+      description: "Obtains Confidentiality Commitments from Vendors and Business\
+        \ Partners \u2014 The entity obtains confidentiality commitments that are\
+        \ consistent with the entity\u2019s confidentiality commitments and requirements\
+        \ from vendors and business partners who have access to confidential information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.10
+      description: "Assesses Compliance With Confidentiality Commitments of Vendors\
+        \ and Business Partners \u2014 On a periodic and as-needed basis, the entity\
+        \ assesses compliance by vendors and business partners with the entity\u2019\
+        s confidentiality commitments and requirements."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.11
+      description: "Obtains Privacy Commitments from Vendors and Business Partners\
+        \ \u2014 The entity obtains privacy commitments, consistent with the entity\u2019\
+        s privacy commitments and requirements, from vendors and business partners\
+        \ who have access to personal information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc9.2
+      ref_id: CC9.2.12
+      description: "Assesses Compliance with Privacy Commitments of Vendors and Business\
+        \ Partners \u2014 On a periodic and as-needed basis, the entity assesses compliance\
+        \ by vendors and business partners with the entity\u2019s privacy commitments\
+        \ and requirements and takes corrective action as necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a
+      assessable: false
+      depth: 1
+      ref_id: A
+      name: Additional Criteria for Availability
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a
+      ref_id: A1.1
+      description: The entity maintains, monitors, and evaluates current processing
+        capacity and use of system components (infrastructure, data, and software)
+        to manage capacity demand and to enable the implementation of additional capacity
+        to help meet its objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.1
+      ref_id: A1.1.1
+      description: "Measures Current Usage \u2014 The use of the system components\
+        \ is measured to establish a baseline for capacity management and to use when\
+        \ evaluating the risk of impaired availability due to capacity constraints."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.1
+      ref_id: A1.1.2
+      description: "Forecasts Capacity \u2014 The expected average and peak use of\
+        \ system components is forecasted and compared to system capacity and associated\
+        \ tolerances. Forecasting considers capacity in the event of the failure of\
+        \ system components that constrain capacity."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.1
+      ref_id: A1.1.3
+      description: "Makes Changes Based on Forecasts \u2014 The system change management\
+        \ process is initiated when forecasted usage exceeds capacity tolerances."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a
+      ref_id: A1.2
+      description: The entity authorizes, designs, develops or acquires, implements,
+        operates, approves, maintains, and monitors environmental protections, software,
+        data back-up processes, and recovery infrastructure to meet its objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.1
+      description: "Identifies Environmental Threats \u2014 As part of the risk assessment\
+        \ process, management identifies environmental threats that could impair the\
+        \ availability of the system, including threats resulting from adverse weather,\
+        \ failure of environmental control systems, electrical discharge, fire, and\
+        \ water."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.2
+      description: "Designs Detection Measures \u2014 Detection measures are implemented\
+        \ to identify anomalies that could result from environmental threat events."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.3
+      description: "Implements and Maintains Environmental Protection Mechanisms \u2014\
+        \ Management implements and maintains environmental protection mechanisms\
+        \ to prevent and mitigate against environmental events."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.4
+      description: "Implements Alerts to Analyze Anomalies \u2014 Management implements\
+        \ alerts that are communicated to personnel for analysis to identify environmental\
+        \ threat events."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.5
+      description: "Responds to Environmental Threat Events \u2014 Procedures are\
+        \ in place for responding to environmental threat events and for evaluating\
+        \ the effectiveness of those policies and procedures on a periodic basis.\
+        \ This includes automatic mitigation systems (for example, uninterruptable\
+        \ power system and generator back-up subsystem)."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.6
+      description: "Communicates and Reviews Detected Environmental Threat Events\
+        \ \u2014 Detected environmental threat events are communicated to and reviewed\
+        \ by the individuals responsible for the management of the system, and actions\
+        \ are taken, if necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.7
+      description: "Determines Data Requiring Backup \u2014 Data is evaluated to determine\
+        \ whether backup is required."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.8
+      description: "Performs Data Backup \u2014 Procedures are in place for backing\
+        \ up data, monitoring to detect back-up failures, and initiating corrective\
+        \ action when such failures occur."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.9
+      description: "Addresses Offsite Storage \u2014 Back-up data is stored in a location\
+        \ at a distance from its principal storage location sufficient that the likelihood\
+        \ of a security or environmental threat event affecting both sets of data\
+        \ is reduced to an appropriate level."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.2.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.2
+      ref_id: A1.2.10
+      description: "Implements Alternate Processing Infrastructure \u2014 Measures\
+        \ are implemented for migrating processing to alternate infrastructure in\
+        \ the event normal processing infrastructure becomes unavailable."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a
+      ref_id: A1.3
+      description: The entity tests recovery plan procedures supporting system recovery
+        to meet its objectives.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.3
+      ref_id: A1.3.1
+      description: "Implements Business Continuity Plan Testing \u2014 Business continuity\
+        \ plan testing is performed on a periodic basis. The testing includes (1)\
+        \ development of testing scenarios based on threat likelihood and magnitude;\
+        \ (2) consideration of system components from across the entity that can impair\
+        \ the availability; (3) scenarios that consider the potential for the lack\
+        \ of availability of key personnel; and (4) revision of continuity plans and\
+        \ systems based on test results."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:a1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:a1.3
+      ref_id: A1.3.2
+      description: "Tests Integrity and Completeness of Back-Up Data \u2014 The integrity\
+        \ and completeness of back-up information is tested on a periodic basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c
+      assessable: false
+      depth: 1
+      ref_id: C
+      name: Additional Criteria for Confidentiality
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:c
+      ref_id: C1.1
+      description: "The entity identifies and maintains confidential information to\
+        \ meet the entity\u2019s objectives related to confidentiality."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:c1.1
+      ref_id: C1.1.1
+      description: "Identifies Confidential information \u2014 Procedures are in place\
+        \ to identify and designate confidential information when it is received or\
+        \ created and to determine the period over which the confidential information\
+        \ is to be retained."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:c1.1
+      ref_id: C1.1.2
+      description: "Protects Confidential Information from Destruction \u2014 Procedures\
+        \ are in place to protect confidential information from erasure or destruction\
+        \ during the specified retention period of the information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:c
+      ref_id: C1.2
+      description: "The entity disposes of confidential information to meet the entity\u2019\
+        s objectives related to confidentiality."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:c1.2
+      ref_id: C1.2.1
+      description: "Identifies Confidential Information for Destruction \u2014 Procedures\
+        \ are in place to identify confidential information requiring destruction\
+        \ when the end of the retention period is reached."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:c1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:c1.2
+      ref_id: C1.2.2
+      description: "Destroys Confidential Information \u2014 Procedures are in place\
+        \ to erase or otherwise destroy confidential information that has been identified\
+        \ for destruction."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1
+      assessable: false
+      depth: 1
+      ref_id: PI1
+      name: Additional Criteria for Processing Integrity
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1
+      ref_id: PI1.1
+      description: The entity obtains or generates, uses, and communicates relevant,
+        quality information regarding the objectives related to processing, including
+        definitions of data processed and product and service specifications, to support
+        the use of products and services.
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.1
+      ref_id: PI1.1.1
+      description: "Identifies Information Specifications \u2014 The entity identifies\
+        \ information specifications required to support the use of products and services."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.1
+      ref_id: PI1.1.2
+      description: "Defines Data Necessary to Support a Product or Service \u2014\
+        \ When data is provided as part of a service or product or as part of a reporting\
+        \ obligation related to a product or service: \u2014  1. The definition of\
+        \ the data is available to the users of the data \u2014  2. The definition\
+        \ of the data includes the following information: \u2014  a. The population\
+        \ of events or instances included in the data \u2014  b. The nature of each\
+        \ element (for example, field) of the data (that is, the event or instance\
+        \ to which the data element relates, for example, transaction price of a sale\
+        \ of XYZ Corporation stock for the last trade in that stock on a given day)\
+        \ \u2014  c. Source(s) of the data \u2014  d. The unit(s) of measurement of\
+        \ data elements (for example, fields) \u2014  e. The accuracy/correctness/precision\
+        \ of measurement \u2014  f. The uncertainty or confidence interval inherent\
+        \ in each data element and in the population of those elements \u2014  g.\
+        \ The date the data was observed or the period of time during which the events\
+        \ relevant to the data occurred \u2014  h. The factors in addition to the\
+        \ date and period of time used to determine the inclusion and exclusion of\
+        \ items in the data elements and population \u2014  3. The definition is complete\
+        \ and accurate. \u2014  4. The description of the data identifies any information\
+        \ that is necessary to understand each data element and the population in\
+        \ a manner consistent with its definition and intended purpose (meta-data)\
+        \ that has not been included within the data."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1
+      ref_id: PI1.2
+      description: "The entity implements policies and procedures over system inputs,\
+        \ including controls over completeness and accuracy, to result in products,\
+        \ services, and reporting to meet the entity\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2
+      ref_id: PI1.2.1
+      description: "Defines Characteristics of Processing Inputs \u2014 The characteristics\
+        \ of processing inputs that are necessary to meet requirements are defined."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2
+      ref_id: PI1.2.2
+      description: "Evaluates Processing Inputs \u2014 Processing inputs are evaluated\
+        \ for compliance with defined input requirements."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.2
+      ref_id: PI1.2.3
+      description: "Creates and Maintains Records of System Inputs \u2014 Records\
+        \ of system input activities are created and maintained completely and accurately\
+        \ in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1
+      ref_id: PI1.3
+      description: "The entity implements policies and procedures over system processing\
+        \ to result in products, services, and reporting to meet the entity\u2019\
+        s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3
+      ref_id: PI1.3.1
+      description: "Defines Processing Specifications \u2014 The processing specifications\
+        \ that are necessary to meet product or service requirements are defined."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3
+      ref_id: PI1.3.2
+      description: "Defines Processing Activities \u2014 Processing activities are\
+        \ defined to result in products or services that meet specifications."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3
+      ref_id: PI1.3.3
+      description: "Detects and Corrects Production Errors \u2014 Errors in the production\
+        \ process are detected and corrected in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3
+      ref_id: PI1.3.4
+      description: "Records System Processing Activities \u2014 System processing\
+        \ activities are recorded completely and accurately in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.3
+      ref_id: PI1.3.5
+      description: "Processes Inputs \u2014 Inputs are processed completely, accurately,\
+        \ and timely as authorized in accordance with defined processing activities."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1
+      ref_id: PI1.4
+      description: "The entity implements policies and procedures to make available\
+        \ or deliver output completely, accurately, and timely in accordance with\
+        \ specifications to meet the entity\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4
+      ref_id: PI1.4.1
+      description: "Protects Output \u2014 Output is protected when stored or delivered,\
+        \ or both, to prevent theft, destruction, corruption, or deterioration that\
+        \ would prevent output from meeting specifications."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4
+      ref_id: PI1.4.2
+      description: "Distributes Output Only to Intended Parties \u2014 Output is distributed\
+        \ or made available only to intended parties."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4
+      ref_id: PI1.4.3
+      description: "Distributes Output Completely and Accurately \u2014 Procedures\
+        \ are in place to provide for the completeness, accuracy, and timeliness of\
+        \ distributed output."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.4
+      ref_id: PI1.4.4
+      description: "Creates and Maintains Records of System Output Activities \u2014\
+        \ Records of system output activities are created and maintained completely\
+        \ and accurately in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1
+      ref_id: PI1.5
+      description: "The entity implements policies and procedures to store inputs,\
+        \ items in processing, and outputs completely, accurately, and timely in accordance\
+        \ with system specifications to meet the entity\u2019s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5
+      ref_id: PI1.5.1
+      description: "Protects Stored Items \u2014 Stored items are protected to prevent\
+        \ theft, corruption, destruction, or deterioration that would prevent output\
+        \ from meeting specifications."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5
+      ref_id: PI1.5.2
+      description: "Archives and Protects System Records \u2014 System records are\
+        \ archived, and archives are protected against theft, corruption, destruction,\
+        \ or deterioration that would prevent them from being used."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5
+      ref_id: PI1.5.3
+      description: "Stores Data Completely and Accurately \u2014 Procedures are in\
+        \ place to provide for the complete, accurate, and timely storage of data."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:pi1.5
+      ref_id: PI1.5.4
+      description: "Creates and Maintains Records of System Storage Activities \u2014\
+        \ Records of system storage activities are created and maintained completely\
+        \ and accurately in a timely manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p
+      assessable: false
+      depth: 1
+      ref_id: P
+      name: Additional Criteria for Privacy
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P1.1
+      description: "The entity provides notice to data subjects about its privacy\
+        \ practices to meet the entity\u2019s objectives related to privacy. The notice\
+        \ is updated and communicated to data subjects in a timely manner for changes\
+        \ to the entity\u2019s privacy practices, including changes in the use of\
+        \ personal information, to meet the entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p1.1
+      ref_id: P1.1.1
+      description: "Communicates to Data Subjects \u2014 Notice is provided to data\
+        \ subjects regarding the following: \u2014 \u2014 Purpose for collecting personal\
+        \ information \u2014 \u2014 Choice and consent \u2014 \u2014 Types of personal\
+        \ information collected \u2014 \u2014 Methods of collection (for example,\
+        \ use of cookies or other tracking techniques) \u2014 \u2014 Use, retention,\
+        \ and disposal \u2014 \u2014 Access \u2014 \u2014 Disclosure to third parties\
+        \ \u2014 \u2014 Security for privacy \u2014 \u2014 Quality, including data\
+        \ subjects\u2019 responsibilities for quality \u2014 \u2014 Monitoring and\
+        \ enforcement \u2014 If personal information is collected from sources other\
+        \ than the individual, such sources are described in the privacy notice."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p1.1
+      ref_id: P1.1.2
+      description: "Provides Notice to Data Subjects \u2014 Notice is provided to\
+        \ data subjects (1) at or before the time personal information is collected\
+        \ or as soon as practical thereafter, (2) at or before the entity changes\
+        \ its privacy notice or as soon as practical thereafter, or (3) before personal\
+        \ information is used for new purposes not previously identified."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p1.1
+      ref_id: P1.1.3
+      description: "Covers Entities and Activities in Notice \u2014 An objective description\
+        \ of the entities and activities covered is included in the entity\u2019s\
+        \ privacy notice."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p1.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p1.1
+      ref_id: P1.1.4
+      description: "Uses Clear and Conspicuous Language \u2014 The entity\u2019s privacy\
+        \ notice is conspicuous and uses clear language."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P2.1
+      description: "The entity communicates choices available regarding the collection,\
+        \ use, retention, disclosure, and disposal of personal information to the\
+        \ data subjects and the consequences, if any, of each choice. Explicit consent\
+        \ for the collection, use, retention, disclosure, and disposal of personal\
+        \ information is obtained from data subjects or other authorized persons,\
+        \ if required. Such consent is obtained only for the intended purpose of the\
+        \ information to meet the entity\u2019s objectives related to privacy. The\
+        \ entity\u2019s basis for determining implicit consent for the collection,\
+        \ use, retention, disclosure, and disposal of personal information is documented."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      ref_id: P2.1.1
+      description: "Communicates to Data Subjects \u2014 Data subjects are informed\
+        \ (a) about the choices available to them with respect to the collection,\
+        \ use, and disclosure of personal information and (b) that implicit or explicit\
+        \ consent is required to collect, use, and disclose personal information,\
+        \ unless a law or regulation specifically requires or allows otherwise."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      ref_id: P2.1.2
+      description: "Communicates Consequences of Denying or Withdrawing Consent \u2014\
+        \ When personal information is collected, data subjects are informed of the\
+        \ consequences of refusing to provide personal information or denying or withdrawing\
+        \ consent to use personal information for purposes identified in the notice."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      ref_id: P2.1.3
+      description: "Obtains Implicit or Explicit Consent \u2014 Implicit or explicit\
+        \ consent is obtained from data subjects at or before the time personal information\
+        \ is collected or soon thereafter. The individual\u2019s preferences expressed\
+        \ in his or her consent are confirmed and implemented."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      ref_id: P2.1.4
+      description: "Documents and Obtains Consent for New Purposes and Uses \u2014\
+        \ If information that was previously collected is to be used for purposes\
+        \ not previously identified in the privacy notice, the new purpose is documented,\
+        \ the data subject is notified, and implicit or explicit consent is obtained\
+        \ prior to such new use or purpose."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      ref_id: P2.1.5
+      description: "Obtains Explicit Consent for Sensitive Information \u2014 Explicit\
+        \ consent is obtained directly from the data subject when sensitive personal\
+        \ information is collected, used, or disclosed, unless a law or regulation\
+        \ specifically requires otherwise."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p2.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p2.1
+      ref_id: P2.1.6
+      description: "Obtains Consent for Data Transfers \u2014 Consent is obtained\
+        \ before personal information is transferred to or from an individual\u2019\
+        s computer or other similar device."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P3.1
+      description: "Personal information is collected consistent with the entity\u2019\
+        s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p3.1
+      ref_id: P3.1.1
+      description: "Limits the Collection of Personal Information \u2014 The collection\
+        \ of personal information is limited to that necessary to meet the entity\u2019\
+        s objectives."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p3.1
+      ref_id: P3.1.2
+      description: "Collects Information by Fair and Lawful Means \u2014 Methods of\
+        \ collecting personal information are reviewed by management before they are\
+        \ implemented to confirm that personal information is obtained (a) fairly,\
+        \ without intimidation or deception, and (b) lawfully, adhering to all relevant\
+        \ rules of law, whether derived from statute or common law, relating to the\
+        \ collection of personal information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p3.1
+      ref_id: P3.1.3
+      description: "Collects Information From Reliable Sources \u2014 Management confirms\
+        \ that third parties from whom personal information is collected (that is,\
+        \ sources other than the individual) are reliable sources that collect information\
+        \ fairly and lawfully."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p3.1
+      ref_id: P3.1.4
+      description: "Informs Data Subjects When Additional Information Is Acquired\
+        \ \u2014 Data subjects are informed if the entity develops or acquires additional\
+        \ information about them for its use."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P3.2
+      description: "For information requiring explicit consent, the entity communicates\
+        \ the need for such consent, as well as the consequences of a failure to provide\
+        \ consent for the request for personal information, and obtains the consent\
+        \ prior to the collection of the information to meet the entity\u2019s objectives\
+        \ related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p3.2
+      ref_id: P3.2.1
+      description: "Obtains Explicit Consent for Sensitive Information \u2014 Explicit\
+        \ consent is obtained directly from the data subject when sensitive personal\
+        \ information is collected, used, or disclosed, unless a law or regulation\
+        \ specifically requires otherwise."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p3.2
+      ref_id: P3.2.2
+      description: "Documents Explicit Consent to Retain Information \u2014 Documentation\
+        \ of explicit consent for the collection, use, or disclosure of sensitive\
+        \ personal information is retained in accordance with objectives related to\
+        \ privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P4.1
+      description: "The entity limits the use of personal information to the purposes\
+        \ identified in the entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p4.1
+      ref_id: P4.1.1
+      description: "Uses Personal Information for Intended Purposes \u2014 Personal\
+        \ information is used only for the intended purposes for which it was collected\
+        \ and only when implicit or explicit consent has been obtained unless a law\
+        \ or regulation specifically requires otherwise."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P4.2
+      description: "The entity retains personal information consistent with the entity\u2019\
+        s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p4.2
+      ref_id: P4.2.1
+      description: "Retains Personal Information \u2014 Personal information is retained\
+        \ for no longer than necessary to fulfill the stated purposes, unless a law\
+        \ or regulation specifically requires otherwise."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p4.2
+      ref_id: P4.2.2
+      description: "Protects Personal Information \u2014 Policies and procedures have\
+        \ been implemented to protect personal information from erasure or destruction\
+        \ during the specified retention period of the information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P4.3
+      description: "The entity securely disposes of personal information to meet the\
+        \ entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p4.3
+      ref_id: P4.3.1
+      description: "Captures, Identifies, and Flags Requests for Deletion \u2014 Requests\
+        \ for deletion of personal information are captured, and information related\
+        \ to the requests is identified and flagged for destruction to meet the entity\u2019\
+        s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p4.3
+      ref_id: P4.3.2
+      description: "Disposes of, Destroys, and Redacts Personal Information \u2014\
+        \ Personal information no longer retained is anonymized, disposed of, or destroyed\
+        \ in a manner that prevents loss, theft, misuse, or unauthorized access."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p4.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p4.3
+      ref_id: P4.3.3
+      description: "Destroys Personal Information \u2014 Policies and procedures are\
+        \ implemented to erase or otherwise destroy personal information that has\
+        \ been identified for destruction."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P5.1
+      description: "The entity grants identified and authenticated data subjects the\
+        \ ability to access their stored personal information for review and, upon\
+        \ request, provides physical or electronic copies of that information to data\
+        \ subjects to meet the entity\u2019s objectives related to privacy. If access\
+        \ is denied, data subjects are informed of the denial and reason for such\
+        \ denial, as required, to meet the entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.1
+      ref_id: P5.1.1
+      description: "Authenticates Data Subjects\u2019 Identity \u2014 The identity\
+        \ of data subjects who request access to their personal information is authenticated\
+        \ before they are given access to that information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.1
+      ref_id: P5.1.2
+      description: "Permits Data Subjects Access to Their Personal Information \u2014\
+        \ Data subjects are able to determine whether the entity maintains personal\
+        \ information about them and, upon request, may obtain access to their personal\
+        \ information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.1
+      ref_id: P5.1.3
+      description: "Provides Understandable Personal Information Within Reasonable\
+        \ Time \u2014 Personal information is provided to data subjects in an understandable\
+        \ form, in a reasonable time frame, and at a reasonable cost, if any."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.1
+      ref_id: P5.1.4
+      description: "Informs Data Subjects If Access Is Denied \u2014 When data subjects\
+        \ are denied access to their personal information, the entity informs them\
+        \ of the denial and the reason for the denial in a timely manner, unless prohibited\
+        \ by law or regulation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P5.2
+      description: "The entity corrects, amends, or appends personal information based\
+        \ on information provided by data subjects and communicates such information\
+        \ to third parties, as committed or required, to meet the entity\u2019s objectives\
+        \ related to privacy. If a request for correction is denied, data subjects\
+        \ are informed of the denial and reason for such denial to meet the entity\u2019\
+        s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P5.2.1
+      description: "Communicates Denial of Access Requests \u2014 Data subjects are\
+        \ informed, in writing, of the reason a request for access to their personal\
+        \ information was denied, the source of the entity\u2019s legal right to deny\
+        \ such access, if applicable, and the individual\u2019s right, if any, to\
+        \ challenge such denial, as specifically permitted or required by law or regulation."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P5.2.2
+      description: "Permits Data Subjects to Update or Correct Personal Information\
+        \ \u2014 Data subjects are able to update or correct personal information\
+        \ held by the entity. The entity provides such updated or corrected information\
+        \ to third parties that were previously provided with the data subject\u2019\
+        s personal information consistent with the entity\u2019s objective related\
+        \ to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p5.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P5.2.3
+      description: "Communicates Denial of Correction Requests \u2014 Data subjects\
+        \ are informed, in writing, about the reason a request for correction of personal\
+        \ information was denied and how they may appeal."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.1
+      description: "The entity discloses personal information to third parties with\
+        \ the explicit consent of data subjects, and such consent is obtained prior\
+        \ to disclosure to meet the entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.1.1
+      description: "Communicates Privacy Policies to Third Parties \u2014 Privacy\
+        \ policies or other specific instructions or requirements for handling personal\
+        \ information are communicated to third parties to whom personal information\
+        \ is disclosed."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.1.2
+      description: "Discloses Personal Information Only When Appropriate \u2014 Personal\
+        \ information is disclosed to third parties only for the purposes for which\
+        \ it was collected or created and only when implicit or explicit consent has\
+        \ been obtained from the data subject, unless a law or regulation specifically\
+        \ requires otherwise."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.1.3
+      description: "Discloses Personal Information Only to Appropriate Third Parties\
+        \ \u2014 Personal information is disclosed only to third parties who have\
+        \ agreements with the entity to protect personal information in a manner consistent\
+        \ with the relevant aspects of the entity\u2019s privacy notice or other specific\
+        \ instructions or requirements. The entity has procedures in place to evaluate\
+        \ that the third parties have effective controls to meet the terms of the\
+        \ agreement, instructions, or requirements."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.1.4
+      description: "Discloses Information to Third Parties for New Purposes and Uses\
+        \ \u2014 Personal information is disclosed to third parties for new purposes\
+        \ or uses only with the prior implicit or explicit consent of data subjects."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.2
+      description: "The entity creates and retains a complete, accurate, and timely\
+        \ record of authorized disclosures of personal information to meet the entity\u2019\
+        s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p5.2
+      ref_id: P6.2.1
+      description: "Creates and Retains Record of Authorized Disclosures \u2014 The\
+        \ entity creates and maintains a record of authorized disclosures of personal\
+        \ information that is complete, accurate, and timely."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P6.3
+      description: "The entity creates and retains a complete, accurate, and timely\
+        \ record of detected or reported unauthorized disclosures (including breaches)\
+        \ of personal information to meet the entity\u2019s objectives related to\
+        \ privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.3
+      ref_id: P6.3.1
+      description: "Creates and Retains Record of Detected or Reported Unauthorized\
+        \ Disclosures \u2014 The entity creates and maintains a record of detected\
+        \ or reported unauthorized disclosures of personal information that is complete,\
+        \ accurate, and timely."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P6.4
+      description: "The entity obtains privacy commitments from vendors and other\
+        \ third parties who have access to personal information to meet the entity\u2019\
+        s objectives related to privacy. The entity assesses those parties\u2019 compliance\
+        \ on a periodic and as-needed basis and takes corrective action, if necessary."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.4
+      ref_id: P6.4.1
+      description: "Discloses Personal Information Only to Appropriate Third Parties\
+        \ \u2014 Personal information is disclosed only to third parties who have\
+        \ agreements with the entity to protect personal information in a manner consistent\
+        \ with the relevant aspects of the entity\u2019s privacy notice or other specific\
+        \ instructions or requirements. The entity has procedures in place to evaluate\
+        \ that the third parties have effective controls to meet the terms of the\
+        \ agreement, instructions, or requirements."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.4
+      ref_id: P6.4.2
+      description: "Remediates Misuse of Personal Information by a Third Party \u2014\
+        \ The entity takes remedial action in response to misuse of personal information\
+        \ by a third party to whom the entity has transferred such information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P6.5
+      description: "The entity obtains commitments from vendors and other third parties\
+        \ with access to personal information to notify the entity in the event of\
+        \ actual or suspected unauthorized disclosures of personal information. Such\
+        \ notifications are reported to appropriate personnel and acted on in accordance\
+        \ with established incident response procedures to meet the entity\u2019s\
+        \ objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.5
+      ref_id: P6.5.1
+      description: "Remediates Misuse of Personal Information by a Third Party \u2014\
+        \ The entity takes remedial action in response to misuse of personal information\
+        \ by a third party to whom the entity has transferred such information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.5
+      ref_id: P6.5.2
+      description: "Reports Actual or Suspected Unauthorized Disclosures \u2014 A\
+        \ process exists for obtaining commitments from vendors and other third parties\
+        \ to report to the entity actual or suspected unauthorized disclosures of\
+        \ personal information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P6.6
+      description: "The entity provides notification of breaches and incidents to\
+        \ affected data subjects, regulators, and others to meet the entity\u2019\
+        s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.6
+      ref_id: P6.6.1
+      description: "Remediates Misuse of Personal Information by a Third Party \u2014\
+        \ The entity takes remedial action in response to misuse of personal information\
+        \ by a third party to whom the entity has transferred such information."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.6
+      ref_id: P6.6.2
+      description: "Provides Notice of Breaches and Incidents \u2014 The entity has\
+        \ a process for providing notice of breaches and incidents to affected data\
+        \ subjects, regulators, and others to meet the entity\u2019s objectives related\
+        \ to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P6.7
+      description: "The entity provides data subjects with an accounting of the personal\
+        \ information held and disclosure of the data subjects\u2019 personal information,\
+        \ upon the data subjects\u2019 request, to meet the entity\u2019s objectives\
+        \ related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.7
+      ref_id: P6.7.1
+      description: "Identifies Types of Personal Information and Handling Process\
+        \ \u2014 The types of personal information and sensitive personal information\
+        \ and the related processes, systems, and third parties involved in the handling\
+        \ of such information are identified."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p6.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p6.7
+      ref_id: P6.7.2
+      description: "Captures, Identifies, and Communicates Requests for Information\
+        \ \u2014 Requests for an accounting of personal information held and disclosures\
+        \ of the data subjects\u2019 personal information are captured, and information\
+        \ related to the requests is identified and communicated to data subjects\
+        \ to meet the entity\u2019s objectives related to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P7.1
+      description: "The entity collects and maintains accurate, up-to-date, complete,\
+        \ and relevant personal information to meet the entity\u2019s objectives related\
+        \ to privacy."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p7.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p7.1
+      ref_id: P7.1.1
+      description: "Ensures Accuracy and Completeness of Personal Information \u2014\
+        \ Personal information is accurate and complete for the purposes for which\
+        \ it is to be used."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p7.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p7.1
+      ref_id: P7.1.2
+      description: "Ensures Relevance of Personal Information \u2014 Personal information\
+        \ is relevant to the purposes for which it is to be used."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p
+      ref_id: P8.1
+      description: "The entity implements a process for receiving, addressing, resolving,\
+        \ and communicating the resolution of inquiries, complaints, and disputes\
+        \ from data subjects and others and periodically monitors compliance to meet\
+        \ the entity\u2019s objectives related to privacy. Corrections and other necessary\
+        \ actions related to identified deficiencies are made or taken in a timely\
+        \ manner."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      ref_id: P8.1.1
+      description: "Communicates to Data Subjects \u2014 Data subjects are informed\
+        \ about how to contact the entity with inquiries, complaints, and disputes."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      ref_id: P8.1.2
+      description: "Addresses Inquiries, Complaints, and Disputes \u2014 A process\
+        \ is in place to address inquiries, complaints, and disputes."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      ref_id: P8.1.3
+      description: "Documents and Communicates Dispute Resolution and Recourse \u2014\
+        \ Each complaint is addressed, and the resolution is documented and communicated\
+        \ to the individual."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      ref_id: P8.1.4
+      description: "Documents and Reports Compliance Review Results \u2014 Compliance\
+        \ with objectives related to privacy are reviewed and documented, and the\
+        \ results of such reviews are reported to management. If problems are identified,\
+        \ remediation plans are developed and implemented."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      ref_id: P8.1.5
+      description: "Documents and Reports Instances of Noncompliance \u2014 Instances\
+        \ of noncompliance with objectives related to privacy are documented and reported\
+        \ and, if needed, corrective and disciplinary measures are taken on a timely\
+        \ basis."
+    - urn: urn:intuitem:risk:req_node:soc2-2017:p8.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc2-2017:p8.1
+      ref_id: P8.1.6
+      description: "Performs Ongoing Monitoring \u2014 Ongoing procedures are performed\
+        \ for monitoring the effectiveness of controls over personal information and\
+        \ for taking timely corrective actions when necessary."
