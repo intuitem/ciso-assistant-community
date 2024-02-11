@@ -348,7 +348,6 @@ class RiskAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get treatment plan CSV")
     def treatment_plan_csv(self, request, pk):
-        print("coucou")
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
