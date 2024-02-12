@@ -1,12 +1,29 @@
 from uuid import UUID
+from django.core.exceptions import ValidationError
+
 import pytest
 from ciso_assistant.settings import BASE_DIR
-from core.models import *
-from library.utils import *
+from core.models import (
+    Project,
+    RiskAssessment,
+    ComplianceAssessment,
+    RiskScenario,
+    RequirementNode,
+    RequirementAssessment,
+    SecurityMeasure,
+    SecurityFunction,
+    Evidence,
+    RiskAcceptance,
+    Asset,
+    Threat,
+    RiskMatrix,
+    Library,
+    Framework,
+)
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from iam.models import *
-from core.models import *
+from iam.models import Folder
+from library.utils import import_library_view, get_library
 
 User = get_user_model()
 
@@ -21,13 +38,25 @@ def root_folder_fixture():
 
 
 @pytest.fixture
+def domain_project_fixture():
+    Folder.objects.create(
+        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
+    )
+    folder = Folder.objects.create(
+        name="test folder", description="test folder description"
+    )
+    project = Project.objects.create(name="test project", folder=folder)
+    return project
+
+
+@pytest.fixture
 def risk_matrix_fixture():
     Folder.objects.create(
         name="Global", content_type=Folder.ContentType.ROOT, builtin=True
     )
-    import_library_view(
-        get_library("urn:intuitem:risk:library:critical_risk_matrix_5x5")
-    )
+    library = get_library("urn:intuitem:risk:library:critical_risk_matrix_5x5")
+    assert library is not None
+    import_library_view(library)
 
 
 @pytest.mark.django_db
@@ -51,11 +80,11 @@ class TestEvidence:
                 attachment=SimpleUploadedFile(SAMPLE_640x480_JPG.name, f.read()),
                 folder=folder,
             )
-            evidence.security_measures.add(security_measure)
+            evidence.security_measures.add(security_measure)  # pyright: ignore[reportAttributeAccessIssue]
 
         assert evidence.name == "test evidence"
         assert evidence.description == "test evidence description"
-        assert list(evidence.security_measures.all()) == [security_measure]
+        assert list(evidence.security_measures.all()) == [security_measure]  # pyright: ignore[reportAttributeAccessIssue]
         assert evidence.attachment.name.startswith(
             SAMPLE_640x480_JPG.name.split(".")[0]
         )
@@ -77,7 +106,7 @@ class TestEvidence:
             name="test evidence",
             description="test evidence description",
         )
-        evidence.security_measures.add(security_measure)
+        evidence.security_measures.add(security_measure)  # pyright: ignore[reportAttributeAccessIssue]
         assert not evidence.attachment
 
 
@@ -147,10 +176,10 @@ class TestRiskAssessment:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
-        scenario = RiskScenario.objects.create(
+        RiskScenario.objects.create(
             name="test scenario",
             description="test scenario description",
             risk_assessment=risk_assessment,
@@ -173,7 +202,7 @@ class TestRiskAssessment:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -203,13 +232,13 @@ class TestRiskAssessment:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
 
         assert risk_assessment.get_scenario_count() == 0
 
-        scenario = RiskScenario.objects.create(
+        RiskScenario.objects.create(
             name="test scenario",
             description="test scenario description",
             risk_assessment=risk_assessment,
@@ -248,7 +277,7 @@ class TestRiskAssessment:
             folder=folder,
         )
         project = Project.objects.create(name="test project", folder=folder)
-        risk_assessment = RiskAssessment.objects.create(
+        RiskAssessment.objects.create(
             name="test risk assessment",
             description="test risk assessment description",
             project=project,
@@ -273,7 +302,7 @@ class TestRiskAssessment:
             folder=folder,
         )
         project = Project.objects.create(name="test project", folder=folder)
-        risk_assessment = RiskAssessment.objects.create(
+        RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
             project=project,
@@ -301,7 +330,7 @@ class TestRiskAssessment:
             folder=folder,
         )
         project = Project.objects.create(name="test project", folder=folder)
-        risk_assessment = RiskAssessment.objects.create(
+        RiskAssessment.objects.create(
             name="test risk_assessment",
             description="test risk_assessment description",
             project=project,
@@ -349,13 +378,13 @@ class TestRiskAssessment:
         )
 
         project2 = Project.objects.create(name="test project 2", folder=folder)
-        risk_assessment4 = RiskAssessment.objects.create(
+        RiskAssessment.objects.create(
             name="test risk_assessment 4",
             description="test risk_assessment description",
             project=project2,
             risk_matrix=risk_matrix,
         )
-        risk_assessment5 = RiskAssessment.objects.create(
+        RiskAssessment.objects.create(
             name="test risk_assessment 5",
             description="test risk_assessment description",
             project=project2,
@@ -416,7 +445,7 @@ class TestRiskScenario:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -440,7 +469,7 @@ class TestRiskScenario:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -501,7 +530,7 @@ class TestRiskScenario:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -525,7 +554,7 @@ class TestRiskScenario:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -550,12 +579,12 @@ class TestRiskScenario:
             project=project,
             risk_matrix=risk_matrix,
         )
-        scenario4 = RiskScenario.objects.create(
+        RiskScenario.objects.create(
             name="test scenario 4",
             description="test scenario description",
             risk_assessment=risk_assessment2,
         )
-        scenario5 = RiskScenario.objects.create(
+        RiskScenario.objects.create(
             name="test scenario 5",
             description="test scenario description",
             risk_assessment=risk_assessment2,
@@ -576,7 +605,7 @@ class TestRiskScenario:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -611,19 +640,22 @@ class TestRiskMatrix:
 class TestSecurityMeasure:
     pytestmark = pytest.mark.django_db
 
-    def test_measure_creation(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_measure_creation(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         measure = SecurityMeasure.objects.create(name="Measure", folder=root_folder)
         assert measure.name == "Measure"
         assert measure.folder == root_folder
 
-    def test_measure_creation_same_name(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_measure_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         SecurityMeasure.objects.create(name="Measure", folder=root_folder)
         with pytest.raises(ValidationError):
             SecurityMeasure.objects.create(name="Measure", folder=root_folder)
 
-    def test_measure_creation_same_name_different_folder(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_measure_creation_same_name_different_folder(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
         measure1 = SecurityMeasure.objects.create(name="Measure", folder=root_folder)
@@ -633,7 +665,8 @@ class TestSecurityMeasure:
         assert measure1.folder == root_folder
         assert measure2.folder == folder
 
-    def test_measure_category_inherited_from_function(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_measure_category_inherited_from_function(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
         function = SecurityFunction.objects.create(
@@ -649,7 +682,8 @@ class TestSecurityMeasure:
 class TestRiskAcceptance:
     pytestmark = pytest.mark.django_db
 
-    def test_acceptance_creation(self, risk_matrix_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_acceptance_creation(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -661,7 +695,7 @@ class TestRiskAcceptance:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -684,7 +718,8 @@ class TestRiskAcceptance:
         assert acceptance.risk_scenarios.count() == 1
         assert acceptance.risk_scenarios.all()[0] == scenario
 
-    def test_acceptance_creation_same_name_different_folder(self, risk_matrix_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_acceptance_creation_same_name_different_folder(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -699,7 +734,7 @@ class TestRiskAcceptance:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -730,7 +765,8 @@ class TestRiskAcceptance:
         assert acceptance2.risk_scenarios.count() == 1
         assert acceptance2.risk_scenarios.all()[0] == scenario
 
-    def test_acceptance_creation_same_name_same_folder(self, risk_matrix_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_acceptance_creation_same_name_same_folder(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
@@ -742,7 +778,7 @@ class TestRiskAcceptance:
             project=project,
             risk_matrix=risk_matrix,
         )
-        threat = Threat.objects.create(
+        Threat.objects.create(
             name="test threat", description="test threat description", folder=folder
         )
         scenario = RiskScenario.objects.create(
@@ -772,20 +808,23 @@ class TestRiskAcceptance:
 class TestAsset:
     pytestmark = pytest.mark.django_db
 
-    def test_asset_creation(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_asset_creation(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         asset = Asset.objects.create(name="Asset", folder=root_folder)
         assert asset.name == "Asset"
         assert asset.folder == root_folder
         assert asset.type == Asset.Type.SUPPORT
 
-    def test_asset_creation_same_name(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_asset_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         Asset.objects.create(name="Asset", folder=root_folder)
         with pytest.raises(ValidationError):
             Asset.objects.create(name="Asset", folder=root_folder)
 
-    def test_asset_creation_same_name_different_folder(self, root_folder_fixture):
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_asset_creation_same_name_different_folder(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
 
@@ -797,3 +836,282 @@ class TestAsset:
         assert asset2.type == Asset.Type.SUPPORT
         assert asset1.folder == root_folder
         assert asset2.folder == folder
+
+
+@pytest.mark.django_db
+class TestLibrary:
+    pytestmark = pytest.mark.django_db
+
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_library_creation(self):
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        assert library.name == "Library"
+        assert library.description == "Library description"
+        assert library.locale == "en"
+        assert library.version == 1
+        assert library.folder == Folder.get_root_folder()
+
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_library_reference_count_zero_if_unused(self):
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        assert library.reference_count == 0
+
+    @pytest.mark.usefixtures("domain_project_fixture")
+    def test_library_reference_count_incremented_when_framework_is_referenced_by_compliance_assessment_and_decremented_when_compliance_assessment_is_deleted(
+        self,
+    ):
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        framework = Framework.objects.create(
+            name="Framework",
+            description="Framework description",
+            folder=Folder.get_root_folder(),
+            library=library,
+        )
+
+        assert library.reference_count == 0
+
+        compliance_assessment = ComplianceAssessment.objects.create(
+            name="ComplianceAssessment",
+            description="ComplianceAssessment description",
+            project=Project.objects.last(),
+            framework=framework,
+        )
+
+        assert library.reference_count == 1
+
+        compliance_assessment.delete()
+
+        assert library.reference_count == 0
+
+    @pytest.mark.usefixtures("domain_project_fixture")
+    def test_library_reference_count_incremented_when_security_function_is_referenced_by_complance_assessment_and_decremented_when_compliance_assessment_is_deleted(
+        self,
+    ):
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        framework = Framework.objects.create(
+            name="Framework",
+            description="Framework description",
+            folder=Folder.get_root_folder(),
+            library=library,
+        )
+        requirement_node = RequirementNode.objects.create(
+            name="RequirementNode",
+            description="RequirementNode description",
+            folder=Folder.get_root_folder(),
+            framework=framework,
+            assessable=True,
+        )
+        assert library.reference_count == 0
+        compliance_assessment = ComplianceAssessment.objects.create(
+            name="ComplianceAssessment",
+            description="ComplianceAssessment description",
+            project=Project.objects.last(),
+            framework=framework,
+        )
+
+        requirement_assessment = RequirementAssessment.objects.create(
+            requirement=requirement_node,
+            compliance_assessment=compliance_assessment,
+            folder=Folder.get_root_folder(),
+        )
+
+        security_function = SecurityFunction.objects.create(
+            name="SecurityFunction",
+            description="SecurityFunction description",
+            folder=Folder.get_root_folder(),
+            library=library,
+        )
+        security_measure = SecurityMeasure.objects.create(
+            name="SecurityMeasure",
+            description="SecurityMeasure description",
+            folder=Folder.get_root_folder(),
+            security_function=security_function,
+        )
+
+        requirement_assessment.security_measures.add(security_measure)
+
+        assert library.reference_count == 1
+        compliance_assessment.delete()
+        assert library.reference_count == 0
+
+    @pytest.mark.usefixtures("risk_matrix_fixture")
+    def test_library_reference_count_incremented_when_risk_matrix_is_referenced_by_risk_assessment_and_decremented_when_risk_assessment_is_deleted(
+        self,
+    ):
+        domain = Folder.objects.create(name="Domain", description="Domain description")
+        project = Project.objects.create(name="Project", folder=domain)
+
+        library = Library.objects.get()
+        risk_matrix = RiskMatrix.objects.get()
+
+        assert library.reference_count == 0
+
+        risk_assessment = RiskAssessment.objects.create(
+            name="RiskAssessment",
+            description="RiskAssessment description",
+            project=project,
+            risk_matrix=risk_matrix,
+        )
+
+        assert library.reference_count == 1
+
+        risk_assessment.delete()
+
+        assert library.reference_count == 0
+
+    @pytest.mark.usefixtures("risk_matrix_fixture")
+    def test_library_reference_count_incremented_when_threat_is_referenced_by_risk_scenario_and_decremented_when_risk_scenario_is_deleted(
+        self,
+    ):
+        domain = Folder.objects.create(name="Domain", description="Domain description")
+        project = Project.objects.create(name="Project", folder=domain)
+
+        risk_matrix = RiskMatrix.objects.get()
+
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        threat = Threat.objects.create(
+            name="Threat",
+            description="Threat description",
+            folder=Folder.get_root_folder(),
+            library=library,
+        )
+
+        risk_assessment = RiskAssessment.objects.create(
+            name="RiskAssessment",
+            description="RiskAssessment description",
+            project=project,
+            risk_matrix=risk_matrix,
+        )
+
+        assert library.reference_count == 0
+
+        risk_scenario = RiskScenario.objects.create(
+            name="RiskScenario",
+            description="RiskScenario description",
+            risk_assessment=risk_assessment,
+        )
+        risk_scenario.threats.add(threat)
+
+        assert library.reference_count == 1
+
+        risk_scenario.delete()
+
+        assert library.reference_count == 0
+
+    @pytest.mark.usefixtures("risk_matrix_fixture")
+    def test_library_reference_count_incremented_when_security_function_is_referenced_by_risk_scenario_and_decremented_when_risk_scenario_is_deleted(
+        self,
+    ):
+        domain = Folder.objects.create(name="Domain", description="Domain description")
+        project = Project.objects.create(name="Project", folder=domain)
+
+        risk_matrix = RiskMatrix.objects.get()
+
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        security_function = SecurityFunction.objects.create(
+            name="SecurityFunction",
+            description="SecurityFunction description",
+            folder=Folder.get_root_folder(),
+            library=library,
+        )
+        security_measure = SecurityMeasure.objects.create(
+            name="SecurityMeasure",
+            description="SecurityMeasure description",
+            folder=Folder.get_root_folder(),
+            security_function=security_function,
+        )
+
+        risk_assessment = RiskAssessment.objects.create(
+            name="RiskAssessment",
+            description="RiskAssessment description",
+            project=project,
+            risk_matrix=risk_matrix,
+        )
+
+        assert library.reference_count == 0
+
+        risk_scenario = RiskScenario.objects.create(
+            name="RiskScenario",
+            description="RiskScenario description",
+            risk_assessment=risk_assessment,
+        )
+        risk_scenario.security_measures.add(security_measure)
+
+        assert library.reference_count == 1
+
+        risk_scenario.delete()
+
+        assert library.reference_count == 0
+
+    @pytest.mark.usefixtures("domain_project_fixture")
+    def test_library_reference_count_must_be_zero_for_library_deletion(
+        self,
+    ):
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        framework = Framework.objects.create(
+            name="Framework",
+            description="Framework description",
+            folder=Folder.get_root_folder(),
+            library=library,
+        )
+        compliance_assessment = ComplianceAssessment.objects.create(
+            name="ComplianceAssessment",
+            description="ComplianceAssessment description",
+            project=Project.objects.last(),
+            framework=framework,
+        )
+
+        assert library.reference_count == 1
+
+        with pytest.raises(ValueError):
+            library.delete()
+
+        compliance_assessment.delete()
+
+        assert library.reference_count == 0
+
+        library.delete()
+
+        assert Library.objects.count() == 0
