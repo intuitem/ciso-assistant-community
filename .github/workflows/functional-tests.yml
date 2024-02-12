@@ -56,17 +56,6 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: |
           touch .env
-          echo DEFAULT_FROM_EMAIL='core.assistant@intuitem.com' >> .env
-          echo EMAIL_HOST='localhost' >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo EMAIL_HOST_USER='user' >> .env
-          echo EMAIL_HOST_PASSWORD='pass' >> .env
-          echo EMAIL_USE_TLS=True >> .env
-          echo EMAIL_HOST_RESCUE='localhost' >> .env
-          echo EMAIL_PORT_RESCUE=1025 >> .env
-          echo EMAIL_HOST_USER_RESCUE='' >> .env
-          echo EMAIL_HOST_PASSWORD_RESCUE='' >> .env
-          echo EMAIL_USE_TLS_RESCUE=False >> .env
           echo PUBLIC_BACKEND_API_URL=http://127.0.0.1:8000/api >> .env
 
       - name: Create backend environment variables file
@@ -80,11 +69,6 @@ jobs:
           echo POSTGRES_USER=postgres >> .env
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
           echo DB_HOST=localhost >> .env
-          echo EMAIL_HOST=localhost >> .env
-          echo EMAIL_PORT=1025 >> .env
-          echo EMAIL_HOST_USER='' >> .env
-          echo EMAIL_HOST_PASSWORD='' >> .env
-          echo DEFAULT_FROM_EMAIL='ciso-assistant@alsigo.net' >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://127.0.0.1:4173 >> .env
       - name: Run migrations
