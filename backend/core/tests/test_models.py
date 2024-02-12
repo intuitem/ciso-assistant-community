@@ -682,7 +682,7 @@ class TestSecurityMeasure:
 class TestRiskAcceptance:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("root_folder_fixture")
+    @pytest.mark.usefixtures("risk_matrix_fixture")
     def test_acceptance_creation(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
@@ -718,7 +718,7 @@ class TestRiskAcceptance:
         assert acceptance.risk_scenarios.count() == 1
         assert acceptance.risk_scenarios.all()[0] == scenario
 
-    @pytest.mark.usefixtures("root_folder_fixture")
+    @pytest.mark.usefixtures("risk_matrix_fixture")
     def test_acceptance_creation_same_name_different_folder(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
@@ -765,7 +765,7 @@ class TestRiskAcceptance:
         assert acceptance2.risk_scenarios.count() == 1
         assert acceptance2.risk_scenarios.all()[0] == scenario
 
-    @pytest.mark.usefixtures("root_folder_fixture")
+    @pytest.mark.usefixtures("risk_matrix_fixture")
     def test_acceptance_creation_same_name_same_folder(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
