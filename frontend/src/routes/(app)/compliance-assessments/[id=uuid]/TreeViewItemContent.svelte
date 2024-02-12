@@ -155,20 +155,20 @@
 		<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
 			{#each orderedStatusPercentages as sp}
 				{#if complianceColorMap[sp.status] === '#000000'}
-				<div
-					class="flex flex-col justify-center overflow-hidden text-white text-xs text-center bg-yellow-500"
-					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-				>
-					{sp.percentage.display}%
-				</div>
+					<div
+						class="flex flex-col justify-center overflow-hidden text-white text-xs text-center bg-yellow-500"
+						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+					>
+						{sp.percentage.display}%
+					</div>
 				{:else}
-				<div
-					class="flex flex-col justify-center overflow-hidden text-black text-xs text-center bg-yellow-500"
-					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-				>
-					{sp.percentage.display}%
-				<!-- {sp.percentage?.display}% -->
-				</div>
+					<div
+						class="flex flex-col justify-center overflow-hidden text-black text-xs text-center bg-yellow-500"
+						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+					>
+						{sp.percentage.display}%
+						<!-- {sp.percentage?.display}% -->
+					</div>
 				{/if}
 			{/each}
 		</div>

@@ -271,7 +271,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'security_measures', urlModel: 'security-measures' },
 			{ field: 'evidences', urlModel: 'evidences' },
-			{ field: 'compliance_assessment', urlModel: 'compliance-assessments'}
+			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		]
 	},
 	libraries: {

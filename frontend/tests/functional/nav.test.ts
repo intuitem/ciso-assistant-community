@@ -4,7 +4,13 @@ type StringMap = {
 	[key: string]: string;
 };
 
-test('sidebar navigation tests', async ({ logedPage, analyticsPage: analyticsPage, layout, sideBar, page }) => {
+test('sidebar navigation tests', async ({
+	logedPage,
+	analyticsPage: analyticsPage,
+	layout,
+	sideBar,
+	page
+}) => {
 	await test.step('proper redirection to the analytics page after login', async () => {
 		await analyticsPage.hasUrl();
 		await analyticsPage.hasTitle();
