@@ -12,6 +12,7 @@
 	on:click={() => handler.sort(orderBy)}
 	class:active={$sorted.identifier === identifier}
 	class={_class}
+	data-testid="tableheader"
 >
 	<div class="flex items-center h-full">
 		<slot />
