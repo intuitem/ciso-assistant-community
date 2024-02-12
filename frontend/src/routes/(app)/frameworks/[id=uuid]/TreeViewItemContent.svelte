@@ -26,8 +26,11 @@
 	</span>
 	{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
 		<div
+			role="button"
+			tabindex="0"
 			class="underline text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
 			on:click={(_) => (showInfo = !showInfo)}
+			on:keydown={(_) => (showInfo = !showInfo)}
 		>
 			<i class="text-xs fa-solid fa-info-circle" /> Learn more
 		</div>
