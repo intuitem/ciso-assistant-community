@@ -10,7 +10,7 @@
 	export let security_functions: Record<string, any>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
-	export let status: string | undefined = undefined;
+	// export let status: string | undefined = undefined;
 	export let statusCounts: Record<string, number> | undefined;
 
 	$: hasChildren = children && Object.keys(children).length > 0;
@@ -87,7 +87,7 @@
 		{#if threats || security_functions}
 			<div
 				role="button"
-				tabindex="-1"
+				tabindex="0"
 				class="underline text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
 				on:click={(_) => (showInfo = !showInfo)}
 				on:keydown={(_) => (showInfo = !showInfo)}
@@ -155,20 +155,20 @@
 		<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
 			{#each orderedStatusPercentages as sp}
 				{#if complianceColorMap[sp.status] === '#000000'}
-				<div
-					class="flex flex-col justify-center overflow-hidden text-white text-xs text-center bg-yellow-500"
-					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-				>
-					{sp.percentage.display}%
-				</div>
+					<div
+						class="flex flex-col justify-center overflow-hidden text-white text-xs text-center bg-yellow-500"
+						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+					>
+						{sp.percentage.display}%
+					</div>
 				{:else}
-				<div
-					class="flex flex-col justify-center overflow-hidden text-black text-xs text-center bg-yellow-500"
-					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-				>
-					{sp.percentage.display}%
-				<!-- {sp.percentage?.display}% -->
-				</div>
+					<div
+						class="flex flex-col justify-center overflow-hidden text-black text-xs text-center bg-yellow-500"
+						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+					>
+						{sp.percentage.display}%
+						<!-- {sp.percentage?.display}% -->
+					</div>
 				{/if}
 			{/each}
 		</div>

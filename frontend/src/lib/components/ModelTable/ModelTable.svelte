@@ -77,7 +77,7 @@
 		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
-	export let identifierField: string = 'id';
+	export let identifierField = 'id';
 
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 

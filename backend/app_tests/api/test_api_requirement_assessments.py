@@ -113,7 +113,7 @@ class TestRequirementAssessmentsAuthenticated:
             },
             {
                 "folder": str(folder.id),
-                "compliance_assessment": str(compliance_assessment.id),
+                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name},
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
             -1,
@@ -142,6 +142,9 @@ class TestRequirementAssessmentsAuthenticated:
                 "compliance_assessment": str(compliance_assessment.id),
                 "requirement": str(RequirementNode.objects.all()[0].id),
                 "security_measures": [str(security_measure.id)],
+            },
+            {
+                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name}
             },
             base_count=-1,
         )
@@ -186,7 +189,7 @@ class TestRequirementAssessmentsAuthenticated:
             },
             {
                 "folder": str(Folder.get_root_folder().id),
-                "compliance_assessment": str(compliance_assessment.id),
+                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name},
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
         )

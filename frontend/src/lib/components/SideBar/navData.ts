@@ -56,13 +56,12 @@ export const navData = {
 					name: 'Assets',
 					fa_icon: 'fa-solid fa-gem',
 					href: '/assets'
-				},
+				}
 			]
 		},
 		{
 			name: 'Governance',
 			items: [
-
 				{
 					name: 'Policies',
 					fa_icon: 'fa-solid fa-user',
@@ -72,7 +71,7 @@ export const navData = {
 					name: 'Risk matrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
-				},
+				}
 			]
 		},
 		{
@@ -116,10 +115,9 @@ export const navData = {
 				}
 			]
 		},
-    {
-      name: 'Organisation',
-      items : [
-        
+		{
+			name: 'Organisation',
+			items: [
 				{
 					name: 'Domains',
 					fa_icon: 'fa-solid fa-diagram-project',
@@ -145,9 +143,8 @@ export const navData = {
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
 				}
-      ]
-
-    },
+			]
+		},
 
 		{
 			name: 'Extra',
