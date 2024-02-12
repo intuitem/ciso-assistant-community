@@ -53,10 +53,11 @@ def get_available_libraries():
     for f in files:
         with open(path / f, "r", encoding="utf-8") as file:
             libs = yaml.safe_load_all(file)
-            for l in list(libs):
-                if (lib := Library.objects.filter(urn=l["urn"]).first()) is not None:
-                    l["id"] = lib.id
-                libraries.append(l)
+            for _lib in list(libs):
+                if (lib := Library.objects.filter(urn=_lib["urn"]).first()) is not None:
+                    _lib["id"] = lib.id
+                    _lib["reference_count"] = lib.reference_count
+                libraries.append(_lib)
     return libraries
 
 
@@ -133,7 +134,7 @@ class RequirementNodeImporter:
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
         )
-    
+
         for threat in self.requirement_data.get("threats", []):
             requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
 
@@ -159,7 +160,9 @@ class FrameworkImporter:
         for index, requirement_node_data in enumerate(requirement_nodes):
             requirement_node_importer = RequirementNodeImporter(requirement_node_data)
             requirement_node_importers.append(requirement_node_importer)
-            if (requirement_node_error := requirement_node_importer.is_valid()) is not None:
+            if (
+                requirement_node_error := requirement_node_importer.is_valid()
+            ) is not None:
                 import_errors.append((index, requirement_node_error))
 
         self._requirement_nodes = requirement_node_importers
@@ -465,7 +468,7 @@ class LibraryImporter:
     def import_library(self) -> Union[str, None]:
         if (error_message := self.init()) is not None:
             return error_message
-        
+
         if self._library_data.get("dependencies"):
             for dependency in self._library_data["dependencies"]:
                 if not Library.objects.filter(urn=dependency).exists():
