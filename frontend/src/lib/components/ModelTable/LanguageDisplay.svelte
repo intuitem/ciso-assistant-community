@@ -5,4 +5,4 @@
 	$: display = LOCALE_DISPLAY_MAP[cell];
 </script>
 
-<span {...$$restProps}>{display}</span>
+<span {...$$restProps}>{@html display}</span>
