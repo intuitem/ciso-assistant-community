@@ -5,7 +5,12 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import type { ModalSettings, ModalComponent, ModalStore, ToastStore } from '@skeletonlabs/skeleton';
+	import type {
+		ModalSettings,
+		ModalComponent,
+		ModalStore,
+		ToastStore
+	} from '@skeletonlabs/skeleton';
 	import { getModalStore, TabGroup, Tab, getToastStore } from '@skeletonlabs/skeleton';
 	import { isURL } from '$lib/utils/helpers';
 	import { getModelInfo } from '$lib/utils/crud.js';
@@ -34,7 +39,7 @@
 				URLModel: getModelInfo('evidences').urlModel,
 				formAction: action
 			}
-		}; 
+		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
@@ -129,29 +134,23 @@
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
 		<TabGroup>
-			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>
-				Security measures
-			</Tab>
-			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>
-				Requirement assessments
-			</Tab>
+			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>Security measures</Tab>
+			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>Requirement assessments</Tab>
 			<svelte:fragment slot="panel">
 				{#if tabSet === 0}
 					<div
 						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 					>
-						<ModelTable
-							source={data.tables['security-measures']}
-							URLModel="security-measures"
-						/>
+						<ModelTable source={data.tables['security-measures']} URLModel="security-measures" />
 					</div>
 				{/if}
 				{#if tabSet === 1}
 					<div
 						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 					>
-						<ModelTable source={data.tables['requirement-assessments']}
-						URLModel="requirement-assessments" 
+						<ModelTable
+							source={data.tables['requirement-assessments']}
+							URLModel="requirement-assessments"
 						/>
 					</div>
 				{/if}
@@ -170,9 +169,9 @@
 						on:click={(_) => {
 							modalConfirm(data.evidence.id, data.evidence.attachment, '?/deleteAttachment');
 						}}
-						on:keydown={(_) => modalConfirm(data.evidence.id, data.evidence.attachment, '?/deleteAttachment')}
-						class="btn variant-filled-tertiary h-full"
-						><i class="fa-solid fa-trash" /></button
+						on:keydown={(_) =>
+							modalConfirm(data.evidence.id, data.evidence.attachment, '?/deleteAttachment')}
+						class="btn variant-filled-tertiary h-full"><i class="fa-solid fa-trash" /></button
 					>
 				</div>
 			</div>

@@ -75,10 +75,13 @@
 				<p class="text-md leading-5 text-gray-700">Provider: {library.provider}</p>
 				<p class="text-md leading-5 text-gray-700">Packager: {library.packager}</p>
 				{#if library.dependencies}
-					<p class="text-md leading-5 text-gray-700">Dependendies:
-					{#each library.dependencies as dependency}
-						<li><a href="/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a></li>
-					{/each}
+					<p class="text-md leading-5 text-gray-700">
+						Dependendies:
+						{#each library.dependencies as dependency}
+							<li>
+								<a href="/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a>
+							</li>
+						{/each}
 					</p>
 				{/if}
 				{#if library.copyright}

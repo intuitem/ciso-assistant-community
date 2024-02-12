@@ -45,7 +45,13 @@ export const actions: Actions = {
 			return fail(400, { form });
 		}
 
-		setFlash({ type: 'success', message: `Your password was successfully set. Welcome to CISO Assistant.` }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: `Your password was successfully set. Welcome to CISO Assistant.`
+			},
+			event
+		);
 		redirect(302, '/login');
 	}
 };
