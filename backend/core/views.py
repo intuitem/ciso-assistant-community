@@ -502,6 +502,7 @@ class SecurityMeasureViewSet(BaseModelViewSet):
         "effort",
         "risk_scenarios",
         "requirement_assessments",
+        "evidences"
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -1161,7 +1162,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     """
 
     model = RequirementAssessment
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "evidences"]
     search_fields = ["name", "description"]
 
     @action(detail=False, name="Get updatable measures")

@@ -18,7 +18,7 @@ export const load = (async ({ fetch }) => {
 	const libraries = await res.json().then((res) => res.results);
 
 	function countObjects(library: Library) {
-		let result: { [key: string]: any } = new Object();
+		const result: { [key: string]: any } = new Object();
 		for (const [key, value] of Object.entries(library.objects)) {
 			if (Array.isArray(value)) {
 				const str = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
