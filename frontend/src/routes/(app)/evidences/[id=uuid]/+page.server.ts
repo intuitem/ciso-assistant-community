@@ -4,6 +4,9 @@ import { z } from 'zod';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { PageServerLoad } from './$types';
+import type { urlModel } from '$lib/utils/types';
+import { listViewFields } from '$lib/utils/table';
+import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
 export const load: PageServerLoad = (async ({ fetch, params }) => {
 	const URLModel = 'evidences';
@@ -14,7 +17,27 @@ export const load: PageServerLoad = (async ({ fetch, params }) => {
 
 	const object = await fetch(`${endpoint}object/`).then((res) => res.json());
 
-	return { URLModel, evidence, object };
+	const tables: Record<string, any> = {};
+
+	for (const key of ['security-measures', 'requirement-assessments'] as urlModel[]) {
+		const keyEndpoint = `${BASE_API_URL}/${key}/?evidences=${params.id}`;
+		const response = await fetch(keyEndpoint);
+		if (response.ok) {
+			const data = await response.json().then((data) => data.results);
+			const bodyData = tableSourceMapper(data, listViewFields[key].body);
+
+			const table: TableSource = {
+				head: listViewFields[key].head,
+				body: bodyData,
+				meta: data
+			};
+			tables[key] = table;
+		} else {
+			console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
+		}
+	}
+
+	return { URLModel, evidence, object, tables };
 })
 
 export const actions: Actions = {
