@@ -5,8 +5,8 @@ DATABASE_BACKUP_NAME=ciso-assistant-backup.sqlite3
 
 cleanup() {
     echo -e "\nCleaning up..."
-    if [ -n "$BACKEND_PID" ] ; then
-        kill $BACKEND_PID
+    if [ -n $BACKEND_PID ] ; then
+        kill $BACKEND_PID > /dev/null 2>&1
         echo "| backend server stopped"
     fi
     if [ -f $DB_DIR/$DATABASE_BACKUP_NAME ] ; then
