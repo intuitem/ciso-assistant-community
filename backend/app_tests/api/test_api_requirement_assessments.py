@@ -113,7 +113,7 @@ class TestRequirementAssessmentsAuthenticated:
             },
             {
                 "folder": str(folder.id),
-                "compliance_assessment": str(compliance_assessment.id),
+                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name},
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
             -1,
