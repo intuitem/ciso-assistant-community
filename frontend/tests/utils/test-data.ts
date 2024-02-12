@@ -15,7 +15,7 @@ export default {
     file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
     framework: {
         name: "NIST CSF",
-        urn: "urn:intuitem:risk:library:nist-csf-1_1"
+        urn: "urn:intuitem:risk:library:nist-csf-1.1"
     },
     matrix: {
         name: "Critical risk matrix 5x5",
@@ -60,14 +60,14 @@ export default {
         name: "RC.RP. Recovery Planning/RC.RP-1",
         library: {
             name: "NIST CSF",
-            urn: "urn:intuitem:risk:library:nist-csf-1_1"
+            urn: "urn:intuitem:risk:library:nist-csf-1.1"
         },
     },
     requirement_assessment2: {
         name: "ID.GV. Governance/ID.GV-4",
         library: {
             name: "NIST CSF",
-            urn: "urn:intuitem:risk:library:nist-csf-1_1"
+            urn: "urn:intuitem:risk:library:nist-csf-1.1"
         },
     }
 } as {[key: string]: any};
