@@ -154,7 +154,7 @@
 	<div>
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="absolute right-2 top-2 py-2 px-4">
-				<a href="/risk-assessments/{risk_assessment.id}/plan" class="btn variant-filled-primary"
+				<a href="/risk-assessments/{risk_assessment.id}/plan" class="btn variant-filled-primary" data-testid="edit-button"
 					><i class="fa-solid fa-heart-pulse mr-2" />Remediation plan</a
 				>
 				<button class="btn variant-filled-primary" use:popup={popupDownload}
@@ -187,6 +187,7 @@
 					<a
 						href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
 						class="btn variant-filled-primary"
+						data-testid="edit-button"
 					>
 						<i class="fa-solid fa-edit mr-2" />
 						Edit</a
@@ -194,7 +195,7 @@
 				{/if}
 			</div>
 			<div class="container w-1/3">
-				<div id="name" class="text-lg font-semibold">
+				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{#if risk_assessment.is_draft}
 						<span class="badge bg-blue-200">Draft</span>
 					{/if}
@@ -221,13 +222,13 @@
 			<div class="container w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold">Risk matrix:</span>
-					<a href="/risk-matrices/{risk_assessment.risk_matrix.id}" class="anchor"
+					<a href="/risk-matrices/{risk_assessment.risk_matrix.id}" class="anchor" data-testid="risk-matrix-field-value"
 						>{risk_assessment.risk_matrix.name}</a
 					>
 				</div>
 				<br />
-				<div class="text-sm"><span class="font-semibold">Description:</span></div>
-				<div class="text-sm">{risk_assessment.description ?? '-'}</div>
+				<div class="text-sm"><span class="font-semibold" data-testid="description-field-title">Description:</span></div>
+				<div class="text-sm" data-testid="description-field-value">{risk_assessment.description ?? '-'}</div>
 			</div>
 		</div>
 	</div>

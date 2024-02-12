@@ -1,6 +1,6 @@
-import { expect, type Locator, type Page } from './test-utils';
-import { navData } from '../../src/lib/components/SideBar/navData';
-import type { PageContent } from './page-content';
+import { expect, type Locator, type Page } from './test-utils.js';
+import { navData } from '../../src/lib/components/SideBar/navData.js';
+import type { PageContent } from './page-content.js';
 
 type TabContent = {
 	name: string;

@@ -18,5 +18,6 @@ vite.config.js.timestamp-*
 .turbo
 .vercel
 .test-tmp
+.testhistory
 symlink-from
 coverage/**
