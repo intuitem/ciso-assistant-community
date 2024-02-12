@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils.html import mark_safe
+from django.db.models import Q
 
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
@@ -39,6 +40,36 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+
+    @property
+    def reference_count(self) -> int:
+        """
+        Returns the number of distinct risk and compliance assessments that reference objects from this library
+        """
+        return (
+            RiskAssessment.objects.filter(
+                Q(risk_scenarios__threats__library=self)
+                | Q(risk_matrix__library=self)
+                | Q(risk_scenarios__security_measures__security_function__library=self)
+            )
+            .distinct()
+            .count()
+            + ComplianceAssessment.objects.filter(
+                Q(framework__library=self)
+                | Q(
+                    requirement_assessments__security_measures__security_function__library=self
+                )
+            )
+            .distinct()
+            .count()
+        )
+
+    def delete(self, *args, **kwargs):
+        if self.reference_count > 0:
+            raise ValueError(
+                "This library is still referenced by some risk or compliance assessments"
+            )
+        super(Library, self).delete(*args, **kwargs)
 
 
 class Assessment(AbstractBaseModel, NameDescriptionMixin):
@@ -804,7 +835,6 @@ class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
         ("2", _("High")),
     ]
 
-
     risk_assessment = models.ForeignKey(
         RiskAssessment,
         on_delete=models.CASCADE,
@@ -877,7 +907,7 @@ class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
     )
 
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-    strength_of_knowledge =  models.CharField(
+    strength_of_knowledge = models.CharField(
         max_length=20,
         choices=SOK_OPTIONS,
         default="--",
@@ -1190,7 +1220,7 @@ class ComplianceAssessment(Assessment):
     def get_measures_status_count(self):
         measures_status_count = []
         measures_list = []
-        for requirement_assessment in self.requirementassessment_set.all():
+        for requirement_assessment in self.requirement_assessments.all():
             measures_list += requirement_assessment.security_measures.all().values_list(
                 "id", flat=True
             )
@@ -1362,6 +1392,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         ComplianceAssessment,
         on_delete=models.CASCADE,
         verbose_name=_("Compliance assessment"),
+        related_name="requirement_assessments",
     )
     requirement = models.ForeignKey(
         RequirementNode, on_delete=models.CASCADE, verbose_name=_("Requirement")
