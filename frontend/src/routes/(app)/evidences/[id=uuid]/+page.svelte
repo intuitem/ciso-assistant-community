@@ -5,10 +5,11 @@
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore, ToastStore } from '@skeletonlabs/skeleton';
+	import { getModalStore, TabGroup, Tab, getToastStore } from '@skeletonlabs/skeleton';
 	import { isURL } from '$lib/utils/helpers';
 	import { getModelInfo } from '$lib/utils/crud.js';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.evidence);
@@ -21,6 +22,7 @@
 	let attachment: Attachment | undefined = undefined;
 
 	const modalStore: ModalStore = getModalStore();
+	const toastStore: ToastStore = getToastStore();
 
 	function modalConfirm(id: string, name: string, action: string): void {
 		const modalComponent: ModalComponent = {
@@ -55,12 +57,14 @@
 	const user = $page.data.user;
 	const model = URL_MODEL_MAP['evidences'];
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model.name}`);
+
+	let tabSet = 0;
 </script>
 
 <div class="flex flex-col space-y-4">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
 		<div class="flex flex-col space-y-2">
-			{#each Object.entries(data.evidence).filter( ([key, _]) => ['name', 'description', 'folder', 'security_measures', 'requirement_assessments', 'attachment', 'link', 'comment'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.evidence).filter( ([key, _]) => ['name', 'description', 'folder', 'attachment', 'link', 'comment'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div class="text-sm font-medium text-gray-800 capitalize-first">
 						{#if key === 'urn'}
@@ -122,6 +126,37 @@
 				>
 			{/if}
 		</span>
+	</div>
+	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
+		<TabGroup>
+			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>
+				Security measures
+			</Tab>
+			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>
+				Requirement assessments
+			</Tab>
+			<svelte:fragment slot="panel">
+				{#if tabSet === 0}
+					<div
+						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+					>
+						<ModelTable
+							source={data.tables['security-measures']}
+							URLModel="security-measures"
+						/>
+					</div>
+				{/if}
+				{#if tabSet === 1}
+					<div
+						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
+					>
+						<ModelTable source={data.tables['requirement-assessments']}
+						URLModel="requirement-assessments" 
+						/>
+					</div>
+				{/if}
+			</svelte:fragment>
+		</TabGroup>
 	</div>
 	{#if data.evidence.attachment}
 		<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
