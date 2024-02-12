@@ -40,13 +40,15 @@ class LibraryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return Response({"results": self.get_queryset()})
 
-    def retrieve(self, request, *args, pk=None, **kwargs):
+    def retrieve(self, request, *args, pk, **kwargs):
         library = get_library(pk)
         return Response(library)
 
-    def destroy(self, request, *args, pk=None, **kwargs):
+    def destroy(self, request, *args, pk, **kwargs):
         _library = get_library(pk)
-        if _library and (_id := _library.get("id")):
+        if _library and (
+            _id := _library.get("id") and _library.get("reference_count") == 0
+        ):
             library = Library.objects.get(id=_id)
             try:
                 library.delete()
@@ -74,9 +76,7 @@ class LibraryViewSet(viewsets.ModelViewSet):
             )
         preview = preview_library(library)
         return Response(
-            get_sorted_requirement_nodes(
-                preview.get("requirement_nodes"), None
-            )
+            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
         )
 
     @action(detail=True, methods=["get"], url_path="import")
@@ -88,7 +88,9 @@ class LibraryViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
             return Response(
-                {"error": "Failed to load library, please check if it has dependencies"},
+                {
+                    "error": "Failed to load library, please check if it has dependencies"
+                },
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 

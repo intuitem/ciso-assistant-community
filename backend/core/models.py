@@ -64,6 +64,13 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
             .count()
         )
 
+    def delete(self, *args, **kwargs):
+        if self.reference_count > 0:
+            raise ValueError(
+                "This library is still referenced by some risk or compliance assessments"
+            )
+        super(Library, self).delete(*args, **kwargs)
+
 
 class Assessment(AbstractBaseModel, NameDescriptionMixin):
     class Status(models.TextChoices):
