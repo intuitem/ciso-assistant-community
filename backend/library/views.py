@@ -60,7 +60,7 @@ class LibraryViewSet(viewsets.ModelViewSet):
             )
 
         try:
-            library.delete()
+            Library.objects.get(id=library.get("id")).delete()
         except IntegrityError as e:
             # TODO: Log the exception if logging is set up
             # logging.exception("Integrity error while deleting library: %s", e)
