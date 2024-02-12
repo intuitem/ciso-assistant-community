@@ -40,8 +40,7 @@ for (const key of testPages) {
                 await pages[key].createItem(items[key].build, "dependency" in items[key] ? items[key].dependency : null);
                 
                 if (await pages[key].getRow(items[key].build.name).isHidden()) {
-                    //filter the item to the top of the list
-                    await pages[key].collumnHeader('Name').click();
+                    await pages[key].searchInput.fill(items[key].build.name);
                 }
 
                 await pages[key].viewItemDetail(items[key].build.name);

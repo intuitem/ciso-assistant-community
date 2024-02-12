@@ -8,6 +8,7 @@ export class PageContent extends BasePage {
     readonly itemDetail: PageDetail;
     readonly addButton: Locator;
     readonly editButton: Locator;
+    readonly searchInput: Locator;
     readonly deleteModalTitle: Locator;
     readonly deleteModalConfirmButton: Locator;
     readonly deleteModalCancelButton: Locator;
@@ -18,6 +19,7 @@ export class PageContent extends BasePage {
         this.itemDetail = new PageDetail(page, url, this.form, "");
         this.addButton = this.page.getByTestId("add-button");
         this.editButton = this.page.getByTestId("edit-button");
+        this.searchInput = this.page.getByTestId("search-input");
         this.deleteModalTitle = this.page.getByTestId("modal-title");
         this.deleteModalConfirmButton = this.page.getByTestId("delete-confirm-button");
         this.deleteModalCancelButton = this.page.getByTestId("delete-cancel-button");
@@ -60,6 +62,9 @@ export class PageContent extends BasePage {
         }
         await this.importItemButton(name, language).click();
         await this.isToastVisible('Successfully imported library ' + urn + '.+', undefined, { timeout: 15000});
+        await this.tab('Imported libraries').click();
+        expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
+        expect(this.getRow(name)).toBeVisible();
     }
 
     async viewItemDetail(value?: string) {
