@@ -17,7 +17,8 @@
 	export let editURL: string | undefined;
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined;
 	export let URLModel: urlModel | string | undefined;
-	export let identifierField = 'id';
+	export let identifierField: string = 'id';
+	export let preventDelete = false;
 
 	export let hasBody = false;
 
@@ -46,7 +47,8 @@
 	}
 
 	const user = $page.data.user;
-	const canDeleteObject: boolean = Object.hasOwn(user.permissions, `delete_${model?.name}`);
+	const canDeleteObject: boolean =
+		Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
 	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model?.name}`);
 
 	$: displayDetail = detailURL;
