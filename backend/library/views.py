@@ -62,10 +62,13 @@ class LibraryViewSet(viewsets.ModelViewSet):
         try:
             library.delete()
         except IntegrityError as e:
-            return Response(data=str(e), status=status.HTTP_400_BAD_REQUEST)
+            # TODO: Log the exception if logging is set up
+            # logging.exception("Integrity error while deleting library: %s", e)
+            print(e)
         except Exception as e:
             # TODO: Log the exception if logging is set up
             # logging.exception("Unexpected error while deleting library: %s", e)
+            print(e)
             return Response(
                 data="Unexpected error occurred while deleting the library.",
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
