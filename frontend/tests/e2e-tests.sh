@@ -42,11 +42,11 @@ fi
 
 echo "starting backend server..."
 unset POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
-CISO_ASSISTANT_URL=http://localhost:4173
-ALLOWED_HOSTS=localhost
-DJANGO_DEBUG=True
-DJANGO_SUPERUSER_EMAIL=admin@tests.com
-DJANGO_SUPERUSER_PASSWORD=1234
+export CISO_ASSISTANT_URL=http://localhost:4173
+export ALLOWED_HOSTS=localhost
+export DJANGO_DEBUG=True
+export DJANGO_SUPERUSER_EMAIL=admin@tests.com
+export DJANGO_SUPERUSER_PASSWORD=1234
 
 cd $APP_DIR/backend/
 python manage.py makemigrations
