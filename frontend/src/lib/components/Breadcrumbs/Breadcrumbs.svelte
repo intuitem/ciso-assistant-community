@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { breadcrumbObject, pageTitle } from '$lib/utils/stores';
 	import { listViewFields } from '$lib/utils/table';
+	import * as m from '$paraglide/messages';
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
 
@@ -27,7 +28,7 @@
 			};
 		});
 
-		crumbs.unshift({ label: 'Home', href: '/', icon: 'fa-regular fa-compass' });
+		crumbs.unshift({ label: m.Home(), href: '/', icon: 'fa-regular fa-compass' });
 		if (crumbs[crumbs.length - 1].label != 'Edit') pageTitle.set(crumbs[crumbs.length - 1].label);
 		else pageTitle.set('Edit ' + crumbs[crumbs.length - 2].label);
 	}

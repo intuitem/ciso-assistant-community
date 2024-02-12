@@ -2,6 +2,8 @@
 	// Most of your app wide CSS should be put in this file
 	import '../app.postcss';
 
+	import ParaglideSvelte from './ParaglideJsProvider.svelte'
+
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 
 	import { getToastStore, storePopup } from '@skeletonlabs/skeleton';
@@ -52,6 +54,7 @@
 	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import ParaglideJsProvider from './ParaglideJsProvider.svelte';
 
 	const modalRegistry: Record<string, ModalComponent> = {
 		// Set a unique modal ID, then pass the component reference
@@ -60,7 +63,7 @@
 		deleteConfirmModal: { ref: DeleteConfirmModal }
 	};
 </script>
-
+<ParaglideJsProvider>
 <Modal components={modalRegistry} />
 <Toast />
 <slot />
@@ -69,3 +72,4 @@
 	{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
 	<div style:background-color={bg} class="flash">{$flash.message}</div>
 {/if}
+</ParaglideJsProvider>

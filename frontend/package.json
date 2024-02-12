@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "paraglide-js compile --project ./project.inlang && vite build",
 		"preview": "vite preview",
 		"test:e2e": "playwright test",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -14,9 +14,11 @@
 		"test:ui": "vitest --ui",
 		"coverage": "vitest run --coverage",
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
-		"format": "prettier --plugin-search-dir . --write ."
+		"format": "prettier --plugin-search-dir . --write .",
+		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
+		"@inlang/paraglide-js": "1.2.5",
 		"@playwright/test": "^1.28.1",
 		"@skeletonlabs/skeleton": "^2.3.0",
 		"@skeletonlabs/tw-plugin": "^0.2.2",
@@ -59,6 +61,7 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.5.1",
+		"@inlang/paraglide-js-adapter-vite": "^1.2.14",
 		"dotenv": "^16.4.1",
 		"echarts": "^5.4.3",
 		"svelte-multiselect": "^10.2.0"
