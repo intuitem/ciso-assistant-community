@@ -4,7 +4,7 @@ type StringMap = {
     [key: string]: string;
 };
 
-test('sidebar navigation tests', async ({ logedPage, overviewPage, sideBar, page }) => {
+test('sidebar navigation tests', async ({ logedPage, analyticsPage: overviewPage, sideBar, page }) => {
     test.slow();
     
     await test.step('proper redirection to the overview page after login', async () => {

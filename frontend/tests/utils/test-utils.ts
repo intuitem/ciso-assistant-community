@@ -1,7 +1,7 @@
 import { test as base, expect as baseExpect, type Page} from '@playwright/test';
 import { SideBar } from './sidebar.js';
 import { LoginPage } from './login-page.js';
-import { OverviewPage } from './overview-page.js';
+import { AnalyticsPage } from './analytics-page.js';
 import { PageContent } from './page-content.js';
 import { FormFieldType as type } from './form-content.js';
 import { randomBytes } from 'crypto';
@@ -24,7 +24,7 @@ type Fixtures = {
     securityFunctionsPage: PageContent;
     securityMeasuresPage: PageContent;
     threatsPage: PageContent;
-    overviewPage: OverviewPage;
+    analyticsPage: AnalyticsPage;
     logedPage: LoginPage;
     loginPage: LoginPage;
 };
@@ -199,8 +199,8 @@ export const test = base.extend<Fixtures>({
         await use(new LoginPage(page));
     },
 
-    overviewPage: async ({ page }, use) => {
-        await use(new OverviewPage(page));
+    analyticsPage: async ({ page }, use) => {
+        await use(new AnalyticsPage(page));
     },
 });
 

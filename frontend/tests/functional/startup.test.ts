@@ -1,6 +1,6 @@
 import { test } from '../utils/test-utils.js';
 
-test('startup tests', async ({ loginPage, overviewPage, page }) => {
+test('startup tests', async ({ loginPage, analyticsPage: overviewPage, page }) => {
     await test.step('proper redirection to the login page', async () => {
         await page.goto('/');
         await loginPage.hasUrl(1);
