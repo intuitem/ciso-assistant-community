@@ -151,13 +151,13 @@
 			}}
 		>
 			{#if typeof node.content === 'string'}
-				{@html node.content}
+				{node.content}
 			{:else}
 				<svelte:component this={node.content} {...node.contentProps} />
 			{/if}
 			<svelte:fragment slot="lead">
 				{#if typeof node.lead === 'string'}
-					{@html node.lead}
+					{node.lead}
 				{:else}
 					<svelte:component this={node.lead} {...node.leadProps} />
 				{/if}

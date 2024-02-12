@@ -49,7 +49,7 @@
 
 		if (node.children && Object.keys(node.children).length > 0) {
 			for (const childId in node.children) {
-				if (node.children.hasOwnProperty(childId)) {
+				if (Object.prototype.hasOwnProperty.call(node.children, childId)) {
 					const childNode = node.children[childId];
 					countStatus(childNode, statusCounts);
 				}

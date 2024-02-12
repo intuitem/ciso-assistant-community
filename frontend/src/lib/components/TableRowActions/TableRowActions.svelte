@@ -17,7 +17,7 @@
 	export let editURL: string | undefined;
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined;
 	export let URLModel: urlModel | string | undefined;
-	export let identifierField: string = 'id';
+	export let identifierField = 'id';
 
 	export let hasBody = false;
 

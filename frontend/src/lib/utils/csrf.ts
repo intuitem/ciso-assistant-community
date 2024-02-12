@@ -6,7 +6,9 @@ async function getCsrfToken() {
 			credentials: 'include'
 		}).then((res) => res.json());
 		return response.csrfToken;
-	} catch (error) {}
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 export const csrfToken = await getCsrfToken();
