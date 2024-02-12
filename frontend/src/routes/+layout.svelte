@@ -2,7 +2,7 @@
 	// Most of your app wide CSS should be put in this file
 	import '../app.postcss';
 
-	import ParaglideSvelte from './ParaglideJsProvider.svelte'
+	import ParaglideSvelte from './ParaglideJsProvider.svelte';
 
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 
@@ -63,13 +63,14 @@
 		deleteConfirmModal: { ref: DeleteConfirmModal }
 	};
 </script>
-<ParaglideJsProvider>
-<Modal components={modalRegistry} />
-<Toast />
-<slot />
 
-{#if $flash}
-	{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
-	<div style:background-color={bg} class="flash">{$flash.message}</div>
-{/if}
+<ParaglideJsProvider>
+	<Modal components={modalRegistry} />
+	<Toast />
+	<slot />
+
+	{#if $flash}
+		{@const bg = $flash.type == 'success' ? '#3D9970' : '#FF4136'}
+		<div style:background-color={bg} class="flash">{$flash.message}</div>
+	{/if}
 </ParaglideJsProvider>

@@ -65,9 +65,15 @@
 				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2" />My profile</a
 			>
-			<select {value} on:change={handleLocaleChange} class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0">
+			<select
+				{value}
+				on:change={handleLocaleChange}
+				class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
+			>
 				{#each availableLanguageTags as lang}
-					<option value={lang} selected={lang === languageTag()}>{LOCALE_MAP[lang].flag} {LOCALE_MAP[lang].name}</option>
+					<option value={lang} selected={lang === languageTag()}
+						>{LOCALE_MAP[lang].flag} {LOCALE_MAP[lang].name}</option
+					>
 				{/each}
 			</select>
 			<button
