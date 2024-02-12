@@ -3,7 +3,7 @@ import { test, expect, setHttpResponsesListener, TestContent } from '../utils/te
 
 let vars = TestContent.generateTestVars(); 
 
-test('user usual routine actions are working correctly', async ({ logedPage, pages, overviewPage, sideBar, page }) => {
+test('user usual routine actions are working correctly', async ({ logedPage, pages, analyticsPage: overviewPage, sideBar, page }) => {
     test.slow();
 
     await test.step('proper redirection to the overview page after login', async () => {
@@ -13,7 +13,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
     
     await test.step('user can create a domain', async () => {
-        await sideBar.click("General", pages.foldersPage.url);
+        await sideBar.click("Organisation", pages.foldersPage.url);
         await expect(page).toHaveURL(pages.foldersPage.url);
         await pages.foldersPage.hasTitle();
 
@@ -26,7 +26,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create a project', async () => {
-        await sideBar.click("General", pages.projectsPage.url);
+        await sideBar.click("Organisation", pages.projectsPage.url);
         await expect(page).toHaveURL(pages.projectsPage.url);
         await pages.projectsPage.hasTitle();
 
@@ -42,7 +42,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create an asset', async () => {
-        await sideBar.click("General", pages.assetsPage.url);
+        await sideBar.click("Context", pages.assetsPage.url);
         await expect(page).toHaveURL(pages.assetsPage.url);
         await pages.assetsPage.hasTitle();
 
@@ -58,7 +58,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can import a framework', async () => {
-        await sideBar.click("Compliance management", pages.frameworksPage.url);
+        await sideBar.click("Compliance", pages.frameworksPage.url);
         await expect(page).toHaveURL(pages.frameworksPage.url);
         await pages.frameworksPage.hasTitle();
 
@@ -68,13 +68,13 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
         
         await pages.librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
 
-        await sideBar.click("Compliance management", pages.frameworksPage.url);
+        await sideBar.click("Compliance", pages.frameworksPage.url);
         await expect(page).toHaveURL(pages.frameworksPage.url);
         await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
     });
 
     await test.step('user can create a security function', async () => {
-        await sideBar.click("General", pages.securityFunctionsPage.url);
+        await sideBar.click("Context", pages.securityFunctionsPage.url);
         await expect(page).toHaveURL(pages.securityFunctionsPage.url);
         await pages.securityFunctionsPage.hasTitle();
 
@@ -90,7 +90,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create a security measure', async () => {
-        await sideBar.click("General", pages.securityMeasuresPage.url);
+        await sideBar.click("Context", pages.securityMeasuresPage.url);
         await expect(page).toHaveURL(pages.securityMeasuresPage.url);
         await pages.securityMeasuresPage.hasTitle();
 
@@ -110,7 +110,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create a compliance assessment', async () => {
-        await sideBar.click("Compliance management", pages.complianceAssessmentsPage.url);
+        await sideBar.click("Compliance", pages.complianceAssessmentsPage.url);
         await expect(page).toHaveURL(pages.complianceAssessmentsPage.url);
         await pages.complianceAssessmentsPage.hasTitle();
 
@@ -128,7 +128,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create an evidence', async () => {
-        await sideBar.click("Compliance management", pages.evidencesPage.url);
+        await sideBar.click("Compliance", pages.evidencesPage.url);
         await expect(page).toHaveURL(pages.evidencesPage.url);
         await pages.evidencesPage.hasTitle();
 
@@ -149,7 +149,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can import a risk matrix', async () => {
-        await sideBar.click("Risk management", pages.riskMatricesPage.url);
+        await sideBar.click("Governance", pages.riskMatricesPage.url);
         await expect(page).toHaveURL(pages.riskMatricesPage.url);
         await pages.riskMatricesPage.hasTitle();
 
@@ -159,14 +159,13 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
         
         await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
 
-        await sideBar.click("Risk management", pages.riskMatricesPage.url);
+        await sideBar.click("Governance", pages.riskMatricesPage.url);
         await expect(page).toHaveURL(pages.riskMatricesPage.url);
         await expect(page.getByRole('row', { name: vars.matrix.displayName })).toBeVisible();
-        // await expect(page.getByRole('row', { name: testVars.matrix.name })).toBeVisible();
     });
 
     await test.step('user can create a risk assessment', async () => {
-        await sideBar.click("Risk management", pages.riskAssessmentsPage.url);
+        await sideBar.click("Risk", pages.riskAssessmentsPage.url);
         await expect(page).toHaveURL(pages.riskAssessmentsPage.url);
         await pages.riskAssessmentsPage.hasTitle();
 
@@ -184,7 +183,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create a threat', async () => {
-        await sideBar.click("General", pages.threatsPage.url);
+        await sideBar.click("Context", pages.threatsPage.url);
         await expect(page).toHaveURL(pages.threatsPage.url);
         await pages.threatsPage.hasTitle();
 
@@ -199,7 +198,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create a risk scenario', async () => {
-        await sideBar.click("Risk management", pages.riskScenariosPage.url);
+        await sideBar.click("Risk", pages.riskScenariosPage.url);
         await expect(page).toHaveURL(pages.riskScenariosPage.url);
         await pages.riskScenariosPage.hasTitle();
 
@@ -214,7 +213,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
     });
 
     await test.step('user can create a risk acceptance', async () => {
-        await sideBar.click("Risk management", pages.riskAcceptancesPage.url);
+        await sideBar.click("Risk", pages.riskAcceptancesPage.url);
         await expect(page).toHaveURL(pages.riskAcceptancesPage.url);
         await pages.riskAcceptancesPage.hasTitle();
 
@@ -229,29 +228,6 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
 
         //TODO assert that the risk acceptance data are displayed in the table
     });
-
-    // await test.step('cleanup', async () => {
-    //     //clean up test folder and associated objects
-    //     await sideBar.click("General", pages.foldersPage.url);
-    //     await expect(pages.foldersPage.deleteItemButton(testVars.folderName)).toBeVisible();
-    //     await pages.foldersPage.deleteItemButton(testVars.folderName).click();
-    //     await pages.foldersPage.deleteModalConfirmButton.click();
-    //     await expect(pages.foldersPage.deleteModalTitle).not.toBeVisible();
-
-    //     // //clean up test framework
-    //     // await sideBar.click("Compliance management", pages.frameworksPage.url);
-    //     // await expect(pages.frameworksPage.deleteItemButton(testVars.framework.name)).toBeVisible();
-    //     // await pages.frameworksPage.deleteItemButton(testVars.framework.name).click();
-    //     // await pages.frameworksPage.deleteModalConfirmButton.click();
-    //     // await expect(pages.frameworksPage.deleteModalTitle).not.toBeVisible();
-
-    //     // //clean up test matrix
-    //     // await sideBar.click("Risk management", pages.riskMatricesPage.url);
-    //     // await expect(pages.riskMatricesPage.deleteItemButton(testVars.matrix.displayName)).toBeVisible();
-    //     // await pages.riskMatricesPage.deleteItemButton(testVars.matrix.displayName).click();
-    //     // await pages.riskMatricesPage.deleteModalConfirmButton.click();
-    //     // await expect(pages.riskMatricesPage.deleteModalTitle).not.toBeVisible();
-    // });
 });
 
 test.afterEach('cleanup', async ({ foldersPage, page }) => {
