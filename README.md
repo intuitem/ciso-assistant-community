@@ -1,243 +1,291 @@
-# MIRA
+# CISO Assistant
 
-MIRA offers a straightforward security_function to centralize, assess and monitor your IT risks. What makes it special is the fact that it is based on field knowledge and inputs from security experts.
+CISO Assistant brings a different take on Cyber Security Posture Management:
 
-## General
+- by explicitly decoupling compliance from cybersecurity practices implementation
+- providing simplified tools for decision making
+- while providing capabilities for a program, product or an organization assessment against standard frameworks.
+- you can bring your own framework as well using a simplified DSL
 
-TBD
+![](posture.png)
 
-## Requirements
+This decoupling allows you to save considerable amount of time:
+- reuse previous assessments,
+- assess a scope against multiple frameworks at the same time, 
+- leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
 
-- Python 3.8+
+Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) about the community editions on our blog.
+
+## Supported frameworks
+
+- ISO 27001:2022
+- NIST Cyber Security Framework (CSF) v1.1
+- NIS2
+- SOC2
+- PCI DSS 4.0
+- CMMC v2
+- PSPF
+
+Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
+### Coming soon
+
+- GDPR checklist
+- ANSSI CyberScore
+- DFS 500
+- DORA
+- and much more!
+
+## Community
+
+Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.
+
+## Testing in the cloud
+
+> The fastest and easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
+
+## Testing locally - Quick start 🚀
+
+To run CISO Assistant locally in a straightforward way, you can use Docker compose.
+
+1. Clone the repository
+
+```sh
+git clone git@github.com:intuitem/ciso-assistant-community.git
+cd ciso-assistant-community
+```
+
+2. Launch docker-compose script
+
+```sh
+./docker-compose.sh
+```
+
+When asked for, enter your email and password for your superuser.
+
+You can then reach CISO Assistant using your web brower at [http://localhost:3000/](http://localhost:3000/)
+
+For the following executions, use "docker-compose up" directly.
+
+## Setting up CISO Assistant for development
+
+### Requirements
+
+- Python 3.11+
 - pip 20.3+
+- npm 10.2+
 
-## Quick start
+### Running the backend
 
-1. Clone the repository
+1. Clone the repository.
 
 ```sh
-$ git clone https://github.com/intuitem/asf-rm.git
-$ cd asf-rm
+git clone git@github.com:intuitem/ciso-assistant-community.git
+cd ciso-assistant-community
 ```
 
-2. Install docker and docker-compose if you don't have those.  [Read the official docs for your own OS/distro](https://docs.docker.com/get-docker/)
+2. Create a file in the parent folder (e.g. ../myvars) and store your environment variables within it by copying and modifying the following code and replace `"<XXX>"` by your private values. Take care not to commit this file in your git repo.
 
-3. Once that is done, you can simply start-up MIRA by running
+**Mandatory variables**
 
-```sh
-$ docker-compose up
-```
+All variables in the backend have handy default values.
 
-## Features
-
-## How to set up MIRA for development?
-
-1. Clone the repository
-```sh
-$ git clone https://github.com/intuitem/asf-rm.git
-$ cd asf-rm
-```
-
-2. Create local secret variables in a script located in parent folder (e.g. ../myvars), to be adapted
+**Recommended variables**
 
 ```sh
-export DJANGO_SECRET_KEY=<XXX>
 export DJANGO_DEBUG=True
-export DJANGO_SUPERUSER_PASSWORD=<XXX>
-export MIRA_URL=http://127.0.0.1:8000
-# For postgres (if the variables are not defined then we use sqlite)
-export POSTGRES_NAME=asf
-export POSTGRES_USER=asfuser
-export POSTGRES_PASSWORD=<XXX>
-export DB_HOST=localhost
-export DB_PORT=5432
-# Mailing in production with gmail for example
-export EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-export EMAIL_HOST=smtp.gmail.com
-export EMAIL_USE_TLS=True
-export EMAIL_PORT=587
-export EMAIL_HOST_USER=your_account@gmail.com
-export EMAIL_HOST_PASSWORD=yourpassword
-export DEFAULT_FROM_EMAIL=mira@alsigo.net
-# Mailing in development with Mailhog for example
+
+# Default url is set to http://localhost:5173 but you can change it, e.g. to use https with a caddy proxy
+export CISO_ASSISTANT_URL=https://localhost:8443
+
+# Setup a development mailer with Mailhog for example
+export EMAIL_HOST_USER=''
+export EMAIL_HOST_PASSWORD=''
+export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-# Captcha, if you want to disable it, just put empty strings
-export RECAPTCHA_PUBLIC_KEY=MyRecaptchaKey123
-export RECAPTCHA_PRIVATE_KEY=MyRecaptchaPrivateKey456
-# Add a second mailing with sendgrid for example (optional)
-export EMAIL_HOST_RESCUE='smtp.sendgrid.net'
+```
+
+**Other variables**
+
+```sh
+# CISO Assistant will use SQLite by default, but you can setup PostgreSQL by declaring these variables
+export POSTGRES_NAME=ciso-assistant
+export POSTGRES_USER=ciso-assistantuser
+export POSTGRES_PASSWORD=<XXX>
+export POSTGRES_PASSWORD_FILE=<XXX>  # alternative way to specify password
+export DB_HOST=localhost
+export DB_PORT=5432  # optional, default value is 5432
+
+# Add a second backup mailer
+export EMAIL_HOST_RESCUE=<XXX>
 export EMAIL_PORT_RESCUE=587
-export EMAIL_HOST_USER_RESCUE='apikey'
-export EMAIL_HOST_PASSWORD_RESCUE=SENDGRID_APIKEY
+export EMAIL_HOST_USER_RESCUE=<XXX>
+export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
-# Idle session timeout management (optional)
-export SESSION_COOKIE_AGE=900 # 15 minutes, in seconds (default)
-export SESSION_EXPIRE_AT_BROWSER_CLOSE=True # (default)
-export SESSION_SAVE_EVERY_REQUEST=True # (default)
+
+# You can define the email of the first superuser, useful for automation
+export CISO_SUPERUSER_EMAIL=<XXX>
+
+# By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test, 
+# but not recommended for production, as it can break the sessions (see 
+# this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information). 
+# To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
+export DJANGO_SECRET_KEY=...
 ```
 
-NOTE: DB_PORT is optional, and defaults to 5432.
+3. Choose the tool of your choice, either python-venv or virtualenv. For example:
 
-NOTE: To use the `reset.sh` script, you need to set the `POSTGRES_DBLOGIN` variable to the login of the postgres daemon.
-
-3. Create a virtual environment with the tool of your choice and activate it. For scenario:
 ```sh
-$ pip install virtualenv
-$ virtualenv venv
-$ source venv/bin/activate
-$ source ../myvars
+# Install python-venv
+sudo apt install python-venv # or python3-venv
+# Create the virtual environment venv
+python -m venv venv # or python3 -m venv venv
+# To enter inside the virtual environment
+source venv/bin/activate
+# If you want to exit the virtual environment once finished
+deactivate
 ```
 
-4. Install required dependencies
+4. Install required dependencies.
+
 ```sh
-(venv)$ pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-5. Setup Postgres database for development and provide the following env variables. Make sure to use a dedicated database as per Django recommendations:
+5. If you want to setup Postgres:
+
+- Launch one of these commands to enter in Postgres:
+  - ```psql as superadmin```
+  - ```sudo su postgres```
+  - ```psql```
+- Create the database "ciso-assistant"
+  - ```create database ciso-assistant;```
+- Create user "ciso-assistantuser" and grant it access
+  - ```create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';```
+  -  ```grant all privileges on database ciso-assistant to ciso-assistantuser;```
+
+6. Apply migrations.
+
+```sh
+python manage.py migrate
+```
+
+7. Create a Django superuser, that will be CISO Assistant administrator.
+
+> If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with createsuperuser, as it will be created automatically on first start. You should receive an email with a link to setup your password.
+
+```sh
+python manage.py createsuperuser
+```
 
 
-- Launch psql as superadmin
-    - sudo su postgres
-    - psql
-- Create the database "asf"
-    - create database asf;
-- Create user "asfuser" and grant it access
-    - create user asfuser with password '<POSTGRES_PASSWORD>';
-    - grant all privileges on database asf to asfuser;
+8.  Run development server.
 
-- Note: to clean existing migrations, type:
+```sh
+python manage.py runserver
+```
+
+9.   Configure the git hooks for generating the build name.
+
+```sh
+cd .git/hooks 
+ln -fs ../../git_hooks/post-commit .
+ln -fs ../../git_hooks/post-merge .
+```
+
+### Running the frontend
+
+1. cd into the frontend directory
+
+```shell
+cd frontend
+```
+
+2. Declare the PUBLIC_BACKEND_API_URL environment variable.
+
+EITHER
+
+```bash
+echo "PUBLIC_BACKEND_API_URL=http://localhost:8000/api" > .env
+```
+
+OR
+
+```bash
+export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
+```
+Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
+
+
+3. Install dependencies
+
+```bash
+npm install
+```
+
+4. Start a development server (make sure that the django app is running)
+
+```bash
+npm run dev
+```
+
+5. If you want to setup Postgres:
+
+- Launch one of these commands to enter in Postgres:
+  - ```psql as superadmin```
+  - ```sudo su postgres```
+  - ```psql```
+- Create the database "mira"
+  - ```create database mira;```
+- Create user "mirauser" and grant it access
+  - ```create user mirauser with password '<POSTGRES_PASSWORD>';```
+  -  ```grant all privileges on database mira to mirauser;```
+
+6. Prepare and apply migrations.
+
+```sh
+(venv)$ cd backend
+(venv)$ pytest
+```
+
+Coming soon.
+
+## Managing migrations
+
+The migrations are tracked by version control, https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control
+
+For the first version of the product, it is recommended to start from a clean migration.
+
+Note: to clean existing migrations, type:
+
 ```sh
 find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
 find . -path "*/migrations/*.pyc"  -delete
 ```
 
-6. prepare migrations 
+After a change (or a clean), it is necessary to re-generate migration files:
 
 ```sh
-(venv)$ python manage.py makemigrations
+python manage.py makemigrations
+python manage.py migrate
 ```
 
-7. Apply migrations. The first ones will init your database with the proper tables:
-```sh
-(venv)$ python manage.py migrate
-```
-
-8. Create a development Django user, that will be MIRA superuser
-```sh
-(venv)$ python manage.py createsuperuser
-```
-
-9. install Tailwind CSS
-
-- npm install tailwindcss postcss postcss-import
-- python manage.py tailwind install
-
-10. Compile strings
-
-- python3 manage.py makemessages -i venv -l fr
-- python3 manage.py compilemessages -i venv -l fr
-
-
-11. Run development server
-
-You may chose to run it dockerized or not.
-```sh
-$ docker-compose up
-```
-**OR**
-```sh
-(venv)$ python manage.py runserver
-```
-
-12. Configure the git hooks for generating the build name
-
-```sh
-(venv)$ cd .git/hooks 
-(venv)$ ln -fs ../../git_hooks/post-commit .
-(venv)$ ln -fs ../../git_hooks/post-merge .
-```
-
-## Running the tests
-
-### Unit tests
-
-After setting up your development environment, you may run tests:
-
-```sh
-(venv)$ bash test.sh
-```
-### Functional Tests
-
-You can find details about functional tests into our [Functional Test Book](/asfTest/README.md).
-
-## Structure
-
-TBD
-
-## Deployment with docker
-
-```sh
-$ docker-compose -f docker-compose.prod.yml up
-```
-
-Do not forget to check the [Django Deployment checklist](https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/)
-
-## Deployement with K8s
-
-### Single-tenant deployment
-
-The docker image must be compiled with:
-```sh
-$ docker build -t mira:x.y.z .
-```
-The image must be then tagged "mira:latest" for the appropriate repository and pushed to it.
-
-The deployment with sqlite is very simple:
-- Environment variables are defined in cm.mira-config-dev.yaml (except secrets)
-- Secrets shall be created using the create_secret.py script on a list of exports (eg. myvars) and then "kubectl create secrets" as recommended by the script
-- A service called "mira" is defined in svc.mira.yaml
-- An ingress is defined in ing.mira.yaml. It shall be adapted to the served domain.
-- The pods can be created with sts.mira.yaml, using a StatefulSet.
-
-When using Postgres, the pods can be created with deploy.mira.yaml, using a Deployement.
-
-Configurations and readme can be found in the k8s directory, in particular for Scaleway.
-
-### Multi-tenant deployment
-
-For multi-tenant, use the mira-cluster-controller application. It automatically creates clients statefulsets, service and ingress when a new client is added.
-
-Client suppression can be done from the GUI, but effective suppression requires kubectl intervention:
-    - k delete sts mira-<client>
-    - k delete ing mira-<client>
-    - k delete svc mira-<client>
-    - k delete pvc mira-<client>  ## beware, this action will suppress all client data (when using sqlite)
-
-To initiate multi-tenant admin, perform the following action
-```shell
-k exec -it mira-cluster-controller -- bash
-./superuser.sh <admin_email>
-```
-Use the static OTP provided as a last line for the initial connection to the GUI. From there, add an OTP device and attach it to the administrator.
-
-From there, management of users and clients can be done from the GUI.
+These migration files should be tracked by version control.
 
 ## Built With
 
-- Django - Python Web Development Framework
-- Gunicorn - Python WSGI HTTP Server for UNIX
-- caddy - HTTP Server and Reverse Proxy
-- PostgreSQL - Open Source RDBMS
-- sqlite - Open Source RDBMS
-- Tailwind CSS - CSS Framework
-- AlpineJS - Minimalist JS framework
-- Docker - Container Engine
+- [Django](https://www.djangoproject.com/) - Python Web Development Framework
+- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
+
+- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
+- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [SvelteKit](https://kit.svelte.dev/) - Frontend framework
+- [Docker](https://www.docker.com/) - Container Engine
 
 ## Security
 
-TBD
+Great care has been taken to follow security best practices. Please report any issue to security@intuitem.com.
 
 ## License
 
-GPLv3
+[AGPLv3](https://choosealicense.com/licenses/agpl-3.0/)

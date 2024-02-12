@@ -1,62 +1,27 @@
 version: "3.9"
 
 services:
-  web:
-    image: app
-    restart: on-failure
+  backend:
+    container_name: backend
+    build: ./backend
+    restart: always
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - POSTGRES_NAME=${POSTGRES_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_HOST=${DB_HOST}
+      - ALLOWED_HOSTS=backend
+      - CISO_ASSISTANT_URL=http://localhost:3000
+      - DJANGO_DEBUG=True
     volumes:
-      - .:/code
-      - static_volume:/code/static
-    ports: 
-      - 8000:8000
-    depends_on:
-      - db
-    networks:
-      - db_network
-    entrypoint: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+      - ./db:/code/db
 
-  migration:
-    build: .
-    image: app
-    restart: on-failure
+  frontend:
+    container_name: frontend
     environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - POSTGRES_NAME=${POSTGRES_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_HOST=${DB_HOST}
+        - ORIGIN=http://localhost:3000
+    build: 
+      context: ./frontend
+      args:
+        - PUBLIC_BACKEND_API_URL=http://backend:8000/api
     depends_on:
-      - db
-    networks:
-      - db_network
-    command: bash -c "
-             python manage.py makemigrations core general cal &&
-             python manage.py migrate"
-
-  db:
-    image: postgres:14.1
-    restart: on-failure
+      - backend
     ports:
-      - 5432:5432
-    volumes:
-      - db_volume:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=${POSTGRES_NAME}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    networks:
-      - db_network
+      - 3000:3000
 
-networks:
-  db_network:
-    driver: bridge
-
-volumes:
-  db_volume:
-  static_volume:

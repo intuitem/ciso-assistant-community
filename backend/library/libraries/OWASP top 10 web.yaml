@@ -1,0 +1,121 @@
+urn: urn:intuitem:risk:library:owasp-top-10-web
+locale: en
+ref_id: OWASP top 10 Web
+name: OWASP top 10 Web
+description: Top 10 appsec risks determined by OWASP - 2021
+version: 1
+provider: OWASP
+packager: intuitem
+copyright: |-
+  COPYRIGHT NOTICE
+  Open Web Application Security Project, OWASP, Global AppSec, AppSec Days, AppSec California, SnowFROC, LASCON, and the OWASP logo are trademarks of the OWASP Foundation. Unless otherwise specified, all content on the site is Creative Commons Attribution-ShareAlike v4.0 and provided without warranty of service or accuracy. For more information, please refer to our General Disclaimer (https://owasp.org/www-policy/operational/general-disclaimer.html). OWASP does not endorse or recommend commercial products or services, allowing our community to remain vendor neutral with the collective wisdom of the best minds in software security worldwide. Copyright 2022, OWASP Foundation, Inc.
+objects:
+  threats:
+    - urn: urn:intuitem:risk:threat:A01
+      ref_id: A01
+      name: Broken Access Control
+      description:
+        Access control enforces policy such that users cannot act outside
+        of their intended permissions. Failures typically lead to unauthorized information
+        disclosure, modification, or destruction of all data or performing a business
+        function outside the user's limits.
+    - urn: urn:intuitem:risk:threat:A02
+      ref_id: A02
+      name: Cryptographic Failures
+      description:
+        The first thing is to determine the protection needs of data in transit
+        and at rest. For example, passwords, credit card numbers, health records, personal
+        information, and business secrets require extra protection, mainly if that data
+        falls under privacy laws, e.g., EU's General Data Protection Regulation (GDPR),
+        or regulations, e.g., financial data protection such as PCI Data Security Standard
+        (PCI DSS).
+    - urn: urn:intuitem:risk:threat:A03
+      ref_id: A03
+      name: Injection
+      description:
+        "An application is vulnerable to attack when: User-supplied data
+        is not validated, filtered, or sanitized by the application / Dynamic queries
+        or non-parameterized calls without context-aware escaping are used directly
+        in the interpreter / Hostile data is used within object-relational mapping (ORM)
+        search parameters to extract additional, sensitive records / Hostile data is
+        directly used or concatenated. The SQL or command contains the structure and
+        malicious data in dynamic queries, commands, or stored procedures."
+    - urn: urn:intuitem:risk:threat:A04
+      ref_id: A04
+      name: Insecure Design
+      description:
+        Insecure design is a broad category representing different weaknesses,
+        expressed as missing or ineffective control design.
+    - urn: urn:intuitem:risk:threat:A05
+      ref_id: A05 
+      name: Security Misconfiguration
+      description:
+        "The application might be vulnerable if the application is: Missing
+        appropriate security hardening across any part of the application stack or improperly
+        configured permissions on cloud services. / Unnecessary features are enabled
+        or installed (e.g., unnecessary ports, services, pages, accounts, or privileges).
+        / Default accounts and their passwords are still enabled and unchanged. / Error
+        handling reveals stack traces or other overly informative error messages to
+        users. / For upgraded systems, the latest security features are disabled or
+        not configured securely. / The security settings in the application servers,
+        application frameworks (e.g., Struts, Spring, ASP.NET), libraries, databases,
+        etc., are not set to secure values. / The server does not send security headers
+        or directives, or they are not set to secure values. / The software is out of
+        date or vulnerable"
+    - urn: urn:intuitem:risk:threat:A06
+      ref_id: A06
+      name: Vulnerable and Outdated Components
+      description:
+        "You are likely vulnerable: If you do not know the versions of all
+        components you use (both client-side and server-side). This includes components
+        you directly use as well as nested dependencies. / If the software is vulnerable,
+        unsupported, or out of date. This includes the OS, web/application server, database
+        management system (DBMS), applications, APIs and all components, runtime environments,
+        and libraries. / If you do not scan for vulnerabilities regularly and subscribe
+        to security bulletins related to the components you use. / If you do not fix
+        or upgrade the underlying platform, frameworks, and dependencies in a risk-based,
+        timely fashion. This commonly happens in environments when patching is a monthly
+        or quarterly task under change control, leaving organizations open to days or
+        months of unnecessary exposure to fixed vulnerabilities. / If software developers
+        do not test the compatibility of updated, upgraded, or patched libraries. /
+        If you do not secure the components’ configurations"
+    - urn: urn:intuitem:risk:threat:A07
+      ref_id: A07
+      name: Identification and Authentication Failures
+      description:
+        Confirmation of the user's identity, authentication, and session
+        management is critical to protect against authentication-related attacks.
+    - urn: urn:intuitem:risk:threat:A08
+      ref_id: A08
+      name: Software and Data Integrity Failures
+      description:
+        Software and data integrity failures relate to code and infrastructure
+        that does not protect against integrity violations. An example of this is where
+        an application relies upon plugins, libraries, or modules from untrusted sources,
+        repositories, and content delivery networks (CDNs). An insecure CI/CD pipeline
+        can introduce the potential for unauthorized access, malicious code, or system
+        compromise. Lastly, many applications now include auto-update functionality,
+        where updates are downloaded without sufficient integrity verification and applied
+        to the previously trusted application. Attackers could potentially upload their
+        own updates to be distributed and run on all installations. Another example
+        is where objects or data are encoded or serialized into a structure that an
+        attacker can see and modify is vulnerable to insecure deserialization.
+    - urn: urn:intuitem:risk:threat:A09
+      ref_id: A09
+      name: "Security Logging and Monitoring Failures "
+      description:
+        Returning to the OWASP Top 10 2021, this category is to help detect,
+        escalate, and respond to active breaches. Without logging and monitoring, breaches
+        cannot be detected.
+    - urn: urn:intuitem:risk:threat:A10
+      ref_id: A10
+      name: "Server Side Request Forgery (SSRF) "
+      description:
+        SSRF flaws occur whenever a web application is fetching a remote
+        resource without validating the user-supplied URL. It allows an attacker to
+        coerce the application to send a crafted request to an unexpected destination,
+        even when protected by a firewall, VPN, or another type of network access control
+        list (ACL). As modern web applications provide end-users with convenient features,
+        fetching a URL becomes a common scenario. As a result, the incidence of SSRF
+        is increasing. Also, the severity of SSRF is becoming higher due to cloud services
+        and the complexity of architectures.

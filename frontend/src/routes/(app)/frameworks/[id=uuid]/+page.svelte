@@ -1,0 +1,85 @@
+<script lang="ts">
+	import type { PageData } from './$types';
+	import { page } from '$app/stores';
+	import type { TreeViewNode } from '@skeletonlabs/skeleton';
+	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import TreeViewItemLead from './TreeViewItemLead.svelte';
+	import TreeViewItemContent from './TreeViewItemContent.svelte';
+	import { breadcrumbObject } from '$lib/utils/stores';
+	import { URL_MODEL_MAP } from '$lib/utils/crud';
+
+	export let data: PageData;
+	breadcrumbObject.set(data.framework);
+	const tree = data.tree;
+
+	function transformToTreeView(nodes) {
+		return nodes.map(([id, node]) => {
+			return {
+				id: id,
+				content: TreeViewItemContent,
+				contentProps: node,
+				// lead: TreeViewItemLead,
+				children: node.children ? transformToTreeView(Object.entries(node.children)) : []
+			};
+		});
+	}
+	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
+</script>
+
+<div class="flex flex-col space-y-4">
+	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
+		<div class="flex flex-col space-y-2">
+			{#each Object.entries(data.framework).filter(([key, _]) => key !== 'id' && key !== 'created_at') as [key, value]}
+				<div class="flex flex-col">
+					<div class="text-sm font-medium text-gray-800 capitalize-first">
+						{#if key === 'urn'}
+							URN
+						{:else}
+							{key.replace('_', ' ')}
+						{/if}
+					</div>
+					<ul class="text-sm">
+						<li class="text-gray-600 list-none">
+							{#if value}
+								{#if Array.isArray(value)}
+									<ul>
+										{#each value as val}
+											<li>
+												{#if val.str && val.id}
+													{@const itemHref = `/${
+														URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+															(item) => item.field === key
+														)?.urlModel
+													}/${val.id}`}
+													<a href={itemHref} class="anchor">{val.str}</a>
+												{:else}
+													{value}
+												{/if}
+											</li>
+										{/each}
+									</ul>
+								{:else if value.str && value.id}
+									{@const itemHref = `/${
+										URL_MODEL_MAP['frameworks']['foreignKeyFields']?.find(
+											(item) => item.field === key
+										)?.urlModel
+									}/${value.id}`}
+									<a href={itemHref} class="anchor">{value.str}</a>
+								{:else}
+									{value.str ?? value}
+								{/if}
+							{:else}
+								--
+							{/if}
+						</li>
+					</ul>
+				</div>
+			{/each}
+		</div>
+	</div>
+
+	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+		<h4 class="h4 font-semibold">Associated requirements</h4>
+		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
+	</div>
+</div>
