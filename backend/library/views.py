@@ -1,6 +1,9 @@
 import json
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import QuerySet
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
@@ -45,22 +48,30 @@ class LibraryViewSet(viewsets.ModelViewSet):
         return Response(library)
 
     def destroy(self, request, *args, pk, **kwargs):
-        _library = get_library(pk)
-        if _library and (
-            _id := _library.get("id") and _library.get("reference_count") == 0
-        ):
-            library = Library.objects.get(id=_id)
-            try:
-                library.delete()
-            except Exception:
-                return Response(
-                    data="This library could not be deleted.",
-                    status=HTTP_400_BAD_REQUEST,
-                )
-            return Response(status=HTTP_200_OK)
-        return Response(
-            data="This library does not exist.", status=HTTP_400_BAD_REQUEST
-        )
+        library = get_library(pk)
+
+        if library is None:
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+
+        if library["reference_count"] != 0:
+            return Response(
+                data="Library cannot be deleted because it has references.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            library.delete()
+        except IntegrityError as e:
+            return Response(data=str(e), status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # TODO: Log the exception if logging is set up
+            # logging.exception("Unexpected error while deleting library: %s", e)
+            return Response(
+                data="Unexpected error occurred while deleting the library.",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):

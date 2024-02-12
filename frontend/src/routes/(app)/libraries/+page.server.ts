@@ -123,7 +123,8 @@ export const actions: Actions = {
 			const res = await event.fetch(endpoint, requestInitOptions);
 			if (!res.ok) {
 				const response = await res.json();
-				console.log(response);
+				console.error(response);
+				setFlash({ type: 'error', message: `${response}` }, event);
 				if (response.non_field_errors) {
 					setError(deleteForm, 'non_field_errors', response.non_field_errors);
 				}
