@@ -146,7 +146,7 @@ export const test = base.extend<Fixtures>({
             { name: 'security_measures', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
             { name: 'residual_proba', type: type.SELECT },
             { name: 'residual_impact', type: type.SELECT },
-            { name: 'comments', type: type.TEXT },
+            { name: 'justification', type: type.TEXT },
         ]);
         await use(rPage);
     },
@@ -364,7 +364,7 @@ export class TestContent {
                     expiry_date: "2026-02-25",
                     link: "https://intuitem.com/community/",
                     effort: "Medium",
-                    category: "Process"
+                    category: vars.securityFunction2.category
                 }
             },
             complianceAssessmentsPage: { 
@@ -398,8 +398,8 @@ export class TestContent {
                     folder: vars.folderName,
                     security_measures: [vars.securityMeasureName],
                     requirement_assessments: [
-                        vars.assessmentName + ' - ' + vars.requirement_assessment.name,
-                        vars.assessmentName + ' - ' + vars.requirement_assessment2.name
+                        vars.requirement_assessment.name,
+                        vars.requirement_assessment2.name
                     ],
                     link: "https://intuitem.com/",
                 },
@@ -443,7 +443,7 @@ export class TestContent {
                 editParams: {
                     name: "", 
                     description: "",
-                    treatment: "Accepted",
+                    treatment: "Accept",
                     //TODO add risk_assessment & threats
                     assets: [vars.assetName],
                     existing_measures: "Test existing measures",
@@ -452,7 +452,7 @@ export class TestContent {
                     security_measures: [vars.securityMeasureName],
                     residual_proba: "Medium",
                     residual_impact: "Low",
-                    comments: "Test comments"
+                    justification: "Test comments"
                 }
             },
             riskAcceptancesPage: { 

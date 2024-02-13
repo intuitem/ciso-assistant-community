@@ -78,10 +78,10 @@ export class PageDetail extends BasePage {
                     else {
                         const value = this.page.getByTestId(key.replaceAll('_', '-') + "-field-value");
                         if ((await value.allInnerTexts()).length > 1) {
-                            await expect.soft(await value.allInnerTexts()).toHaveTextUnordered(typeof values[key] === 'object' ? values[key].value : values[key]);
+                            await expect.soft(await value.allInnerTexts()).toHaveTextUnordered(typeof values[key] === 'object' && !Array.isArray(values[key]) ? values[key].value : values[key]);
                         }
                         else {
-                            await expect.soft(value).toContainText(typeof values[key] === 'object' ? values[key].value : values[key], { ignoreCase: true });
+                            await expect.soft(value).toContainText(typeof values[key] === 'object' && !Array.isArray(values[key]) ? values[key].value : values[key], { ignoreCase: true });
                         }
                     }
                 }

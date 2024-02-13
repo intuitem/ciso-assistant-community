@@ -71,13 +71,13 @@
 						{/if}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none" data-testid={key.replace('_', '-') + "-field-value"}>
+						<li class="text-gray-600 list-none" data-testid={!Array.isArray(value) || value.length <=0 ? key.replace('_', '-') + "-field-value" : null}>
 							{#if value}
 								{#if Array.isArray(value)}
 									<ul>
 										{#if value.length > 0}
 											{#each value as val}
-												<li>
+												<li data-testid={key.replace('_', '-') + "-field-value"}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(

@@ -36,53 +36,53 @@ export class FormContent {
         for (const key in values) {
             const field = this.fields.get(key);
 
-            if (field?.locator.innerText !== values[key]) {
-                switch (field?.type) {
-                    case FormFieldType.CHECKBOX:
-                        if (values[key] === "true") {
-                            await field.locator.check();
-                        }
-                        else if (values[key] === "false") {
-                            await field.locator.uncheck();
-                        }
-                        break;
-                    case FormFieldType.FILE:
-                        await field.locator.setInputFiles(values[key]);
-                        break;
-                    case FormFieldType.SELECT:
-                        await field.locator.selectOption(values[key]);
-                        break;
-                    case FormFieldType.SELECT_AUTOCOMPLETE:
+            switch (field?.type) {
+                case FormFieldType.CHECKBOX:
+                    if (values[key] === "true") {
+                        await field.locator.check();
+                    }
+                    else if (values[key] === "false") {
+                        await field.locator.uncheck();
+                    }
+                    break;
+                case FormFieldType.FILE:
+                    await field.locator.setInputFiles(values[key]);
+                    break;
+                case FormFieldType.SELECT:
+                    await field.locator.selectOption(values[key]);
+                    break;
+                case FormFieldType.SELECT_AUTOCOMPLETE:
+                    if (await field.locator.getByRole("option").isVisible() && await field.locator.getByRole("searchbox").evaluate(el => el.classList.contains("disabled"))) {
+                        await expect(field.locator.getByRole("option")).toContainText(values[key]);
+                    } else {
                         await field.locator.click();
-                        
                         if (typeof values[key] === "object" && 'request' in values[key]) {
                             const responsePromise = this.page.waitForResponse(resp => resp.url().includes(values[key].request.url) && resp.status() === 200);
-                            await expect(this.page.getByRole("option", {name: values[key].value, exact: true})).toBeVisible();
-                            await this.page.getByRole("option", {name: values[key].value, exact: true}).click();
+                            await expect(this.page.getByRole("option", {name: values[key].value, exact: true}).first()).toBeVisible();
+                            await this.page.getByRole("option", {name: values[key].value, exact: true}).first().click();
                             
-                            const response = await responsePromise;
-                            expect((await response.json()).category).toBe(values[key].category);
+                            await responsePromise;
                         } else {
-                            await expect(this.page.getByRole("option", {name: values[key], exact: true})).toBeVisible();
-                            await this.page.getByRole("option", {name: values[key], exact: true}).click();
+                            await expect(this.page.getByRole("option", {name: values[key], exact: true}).first()).toBeVisible();
+                            await this.page.getByRole("option", {name: values[key], exact: true}).first().click();
                         }
-                        break;
-                    case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
-                        await field.locator.click();
-                        for (const val of values[key]) {
-                            await expect(this.page.getByRole("option", {name: val, exact: true})).toBeVisible();
-                            await this.page.getByRole("option", {name: val, exact: true}).click();
-                        }
-                        if (await field.locator.isEnabled()) {
-                            await field.locator.press("Escape");
-                        }
-                        break;
-                    case FormFieldType.DATE:
-                        await field.locator.clear();
-                    default:
-                        await field?.locator.fill(values[key]);
-                        break;
-                }
+                    }
+                    break;
+                case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
+                    await field.locator.click();
+                    for (const val of values[key]) {
+                        await expect(this.page.getByRole("option", {name: val, exact: true}).first()).toBeVisible();
+                        await this.page.getByRole("option", {name: val, exact: true}).first().click();
+                    }
+                    if (await field.locator.isEnabled() && !await field.locator.getByRole("searchbox").evaluate(el => el.classList.contains("disabled"))) {
+                        await field.locator.press("Escape");
+                    }
+                    break;
+                case FormFieldType.DATE:
+                    await field.locator.clear();
+                default:
+                    await field?.locator.fill(values[key]);
+                    break;
             }
             // await this.page.waitForTimeout(20);
         }

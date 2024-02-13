@@ -139,8 +139,8 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
             folder: vars.folderName,
             security_measures: [vars.securityMeasureName],
             requirement_assessments: [
-                vars.assessmentName + ' - ' + vars.requirement_assessment.name,
-                vars.assessmentName + ' - ' + vars.requirement_assessment2.name
+                vars.requirement_assessment.name,
+                vars.requirement_assessment2.name
             ],
             link: "https://intuitem.com/"
         });
@@ -206,7 +206,7 @@ test('user usual routine actions are working correctly', async ({ logedPage, pag
             name: vars.riskScenarioName, 
             description: vars.description, 
             risk_assessment: vars.riskAssessmentName, 
-            threats: [vars.threat.name]
+            threats: [vars.threatName]
         });
 
         //TODO assert that the risk scenario data are displayed in the table
