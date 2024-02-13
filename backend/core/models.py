@@ -40,6 +40,11 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    dependencies = models.ManyToManyField(
+        "self",
+        blank=True,
+        verbose_name=_("Dependencies"),
+    )
 
     @property
     def reference_count(self) -> int:
