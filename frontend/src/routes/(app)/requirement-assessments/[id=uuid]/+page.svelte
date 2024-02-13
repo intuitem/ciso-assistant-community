@@ -36,12 +36,13 @@
 	}
 
 	const title =
-		data.compliance_assessment.name +
-		' - ' +
-		data.parent.display_short +
-		': ' +
+		(data.parent.display_short ? data.parent.display_short + ': ' : '') +
 		data.requirement.display_short;
-	breadcrumbObject.set({ id: data.requirementAssessment.id, name: title, email: '' });
+	breadcrumbObject.set({
+		id: data.requirementAssessment.id,
+		name: title ?? 'Requirement assessment',
+		email: ''
+	});
 
 	const schema = RequirementAssessmentSchema;
 

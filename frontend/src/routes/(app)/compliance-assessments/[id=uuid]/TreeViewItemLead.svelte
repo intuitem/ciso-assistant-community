@@ -1,5 +1,4 @@
 <script lang="ts">
-	// export let status: string;
 	export let statusDisplay: string;
 	export let statusColor: string;
 	export let assessable: boolean;
