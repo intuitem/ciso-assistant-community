@@ -150,7 +150,7 @@ export const navData = {
 			name: 'extra',
 			items: [
 				{
-					name: 'xrays',
+					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']

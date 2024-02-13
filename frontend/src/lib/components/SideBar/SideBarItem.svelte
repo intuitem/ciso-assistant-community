@@ -15,7 +15,7 @@
 		securityFunctions: m.securityFunctions(),
 		securityMeasures: m.securityMeasures(),
 		assets: m.assets(),
-		policies: m.policies(), // Note: Correcting typo in "policies"
+		policies: m.policies(),
 		riskMatrices: m.riskMatrices(),
 		riskAssessments: m.riskAssessments(),
 		riskScenarios: m.riskScenarios(),
@@ -28,7 +28,7 @@
 		users: m.users(),
 		userGroups: m.userGroups(),
 		roleAssignments: m.roleAssignments(),
-		xrays: m.xrays(),
+		xRays: m.xRays(),
 		scoringAssistant: m.scoringAssistant(),
 		libraries: m.libraries(),
 		backupRestore: m.backupRestore()
