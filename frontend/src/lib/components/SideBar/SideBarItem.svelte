@@ -45,7 +45,7 @@
 	>
 		<span class="px-4 flex items-center w-full space-x-2 text-xs">
 			<i class="{item.fa_icon} w-1/12" />
-			<span class="text-sm tracking-wide truncate">{item.name}</span>
+			<span class="text-sm tracking-wide truncate">{items[item.name]}</span>
 		</span></a
 	>
 {/each}
