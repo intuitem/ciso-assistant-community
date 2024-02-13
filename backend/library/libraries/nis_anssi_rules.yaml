@@ -1,0 +1,1695 @@
+urn: urn:intuitem:risk:library:anssi-nis-rules
+locale: en
+ref_id: ANSSI-NIS
+name: ANSSI NIS rules
+description: 'Order of 14 September 2018 setting the security rules and deadlines
+  mentioned in Article 10 of Decree No. 2018-384 of 23 May 2018 on the security of
+  networks and information systems of operators of essential services and digital
+  service providers
+
+  https://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/'
+copyright: French law
+version: 1
+provider: French government
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:anssi-nis-rules
+    ref_id: ANSSI-NIS
+    name: ANSSI NIS rules
+    description: 'Order of 14 September 2018 setting the security rules and deadlines
+      mentioned in Article 10 of Decree No. 2018-384 of 23 May 2018 on the security
+      of networks and information systems of operators of essential services and digital
+      service providers
+
+      https://www.legifrance.gouv.fr/loda/id/JORFTEXT000037444012/'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      assessable: false
+      depth: 1
+      ref_id: CHAPTER I
+      name: Rules relating to the governance of the security of networks and information
+        systems
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      ref_id: Rule 1
+      name: Risk Analysis
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-1
+      description: The operator of essential services shall carry out and maintain,
+        as part of the security approval provided for in Rule 3, a risk analysis of
+        its critical information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-1
+      description: This risk analysis takes into account the analysis that the operator
+        has carried out to identify its information systems as EIS.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      ref_id: Rule 2
+      name: Security Policy
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.1'
+      description: The operator of essential services shall develop, maintain and
+        implement a network and information systems security policy (ISSP).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.2'
+      description: The ISSP describes all the procedures and organisational and technical
+        means implemented by the operator in order to ensure the security of its essential
+        information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.3'
+      description: 'In the area of security governance, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.3
+      description: '- EIS security objectives and strategic directions;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node11
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.3
+      description: '- the organization of security governance and in particular the
+        roles and responsibilities of internal staff and external personnel (contractors,
+        suppliers, etc.) with regard to the security of EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node12
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.3
+      description: '- EIS security awareness plans for all staff as well as EIS security
+        training plans for persons with specific responsibilities, including those
+        in charge of the administration and security of EIS and users with privileged
+        access rights to EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.3
+      description: '- the security approval procedure for EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.3
+      description: '- procedures for monitoring and auditing the security of EIS,
+        including those implemented in the context of security accreditation.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.4'
+      description: 'In the area of protection, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node16
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
+      description: '- general security measures, including the management and security
+        of EIS hardware and software resources, access control to EIS, operation and
+        administration of EIS, and network, workstation and data security;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
+      description: '- general security measures, including the management and security
+        of EIS hardware and software resources, access control to EIS, operation and
+        administration of EIS, and network, workstation and data security;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
+      description: '- physical and environmental security procedures and measures
+        applicable to EFAs;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
+      description: '- the procedure for maintaining the security of EIS resources.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.5'
+      description: 'In the field of defence, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node21
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.5
+      description: '- the procedure for detecting security incidents;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node22
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.5
+      description: '- the procedure for handling security incidents.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.6'
+      description: 'In the area of business resilience, the ISSP defines:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node24
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.6
+      description: '- the crisis management procedure in the event of security incidents
+        having a major impact on the operator''s essential services;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node25
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.6
+      description: '- Business continuity and disaster recovery procedures.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.7'
+      description: The ISSP and its application documents are formally approved by
+        the operator's management.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node27
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.7
+      description: The operator shall prepare a report for the benefit of its management,
+        at least annually, on the implementation of the ISSP and its application documents.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node28
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.7
+      description: This report specifies in particular the state of the risks, the
+        level of security of the EFAs and the security actions carried out and planned.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-2
+      ref_id: '2.8'
+      description: The operator shall make available to the National Agency for the
+        Security of Information Systems the PSSI, its application documents and the
+        reports on their implementation.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      ref_id: Rule 3
+      name: Security Approval
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.1'
+      description: The operator of essential services carries out the security approval
+        of each essential information system (EIS), by implementing the approval procedure
+        provided for in its network and information systems security policy.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.2'
+      description: The approval of a system is a formal decision taken by the operator
+        that the risks to the safety of the system have been identified and that the
+        necessary measures to protect it are implemented. It also certifies that any
+        residual risks have been identified and accepted by the operator.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.3'
+      description: As part of the approval, a safety audit of the EIS shall be carried
+        out in accordance with Regulation 5.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.4'
+      description: As part of the approval, a safety audit of the EIS shall be carried
+        out in accordance with Regulation 5.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.5'
+      description: 'The operator makes the decision to approve an EIS on the basis
+        of the approval file, which includes, in particular:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node36
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
+      description: '- the risk analysis and security objectives of the EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node37
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
+      description: '- the risk analysis and security objectives of the EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node38
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
+      description: '- the procedures and security measures applied to the EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node39
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
+      description: '- EIS security audit reports;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node40
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
+      description: '- the residual risks and the reasons for their acceptance.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.6'
+      description: The validity of the approval shall be reviewed by the operator
+        at least every three years and at the time of each event or development likely
+        to change the context described in the approval dossier.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node42
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.6
+      description: Each re-examination of the registration is recorded in the registration
+        file.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node43
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.6
+      description: The operator shall renew the approval as soon as it is no longer
+        valid.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-3
+      ref_id: '3.7'
+      description: The operator shall make decisions and approval files available
+        to the National Agency for the Security of Information Systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      ref_id: Rule 4
+      name: Indicators
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-4
+      ref_id: '4.1'
+      description: 'The operator of essential services shall assess and maintain the
+        following indicators for each critical information system (EIS):'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node47
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' Indicators relating to the maintenance of resources in a safe
+        condition:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node48
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' The percentage of user workstations whose system resources are
+        not installed in a version supported by the vendor or manufacturer.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node49
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' The percentage of servers whose system resources are not installed
+        in a version supported by the vendor or manufacturer.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node50
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' Indicators relating to user access rights and authentication
+        of access to resources:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node51
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' the percentage of users accessing the EIS through privileged
+        accounts;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node52
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' The percentage of resources whose authentication secrets cannot
+        be changed by the operator.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node53
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' Indicators related to the administration of resources:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node54
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' The percentage of administered resources that are administered
+        from a non-specific administrative account.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node55
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.1
+      description: ' The percentage of managed resources that cannot be administered
+        through a physical network link or physical administration interface.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-4
+      ref_id: '4.2'
+      description: The operator shall specify for each indicator the method of assessment
+        used and, where appropriate, the margin of uncertainty in its assessment.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node57
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.2
+      description: When an indicator changes significantly compared to the previous
+        assessment, the operator specifies the reasons for this.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-4
+      ref_id: '4.3'
+      description: The operator shall provide the National Agency for the Security
+        of Information Systems, at its request, with the updated indicators on an
+        electronic medium.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      ref_id: Rule 5
+      description: Security Audits
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-5
+      ref_id: '5.1'
+      description: The operator of essential services shall, as part of the security
+        approval provided for in Regulation 3, carry out a security audit of each
+        critical information system (EIS)
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node61
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.1
+      description: The audit must also be carried out at the time of each renewal
+        of the accreditation, taking into account in particular the results of the
+        update of the EIS risk analysis.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-5
+      ref_id: '5.2'
+      description: The purpose of this audit is to verify the application and effectiveness
+        of the EIS security measures and in particular compliance with these safety
+        rules.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node63
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.2
+      description: It must make it possible to assess the security level of the EIS
+        with regard to known threats and vulnerabilities and includes in particular
+        the performance of an architecture audit, a configuration audit and an organizational
+        and physical audit.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-5
+      ref_id: '5.3'
+      description: The operator or service provider mandated for this purpose carries
+        out this audit based on the requirements of the reference framework for information
+        systems security audits adopted pursuant to Article 10 of Decree No. 2015-350
+        of 27 March 2015,  as amended, relating to the qualification of security products
+        and trust service providers for the purposes of information system security.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-5
+      ref_id: '5.4'
+      description: At the end of the audit, the operator or, where applicable, the
+        service provider shall draw up an audit report setting out the findings on
+        the measures applied and on compliance with these safety rules.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node66
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.4
+      description: The report specifies whether the level of security achieved is
+        consistent with the security objectives, taking into account known threats
+        and vulnerabilities.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node67
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:5.4
+      description: It makes recommendations to address any non-conformities and vulnerabilities
+        discovered.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-i
+      ref_id: Rule 6
+      name: Cartography
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-6
+      ref_id: '6.1'
+      description: 'The operator of essential services shall develop and maintain
+        the following mapping elements for each essential information system (EIS):'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node70
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' the names and functions of the applications, supporting the operator''s
+        activities, installed on the EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node71
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' if applicable, IP address ranges from the SIE to or accessible
+        from the Internet or a third-party network;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node72
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' if applicable, the IP address ranges associated with the different
+        subnets that make up the EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node73
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' the functional description and installation locations of the
+        EIS and its various sub-networks;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node74
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' the functional description of the points of interconnection of
+        the EIS and its various subnetworks with third-party networks, including a
+        description of the equipment and the filtering and protection functions implemented
+        at the level of those interconnections;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node75
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' the inventory and architecture of the EIS management devices
+        to carry out remote installation, update, supervision, configuration management,
+        authentication as well as account and access rights management;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node76
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' the list of accounts with privileged access rights to the EIS
+        (referred to as "privileged accounts"). This list specifies for each account
+        the level and scope of the associated access rights, including the accounts
+        to which these rights relate (user accounts, email accounts, process accounts,
+        etc.);'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node77
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.1
+      description: ' the inventory, architecture, and positioning of hostname resolution,
+        messaging, Internet relay, and remote access services implemented by the EIS.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-6
+      ref_id: '6.2'
+      description: The operator shall provide the National Agency for the Security
+        of Information Systems, at its request, with the updated mapping elements
+        on an electronic medium.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-ii
+      assessable: false
+      depth: 1
+      ref_id: Chapter II
+      name: Rules relating to the protection of networks and information systems
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-ii
+      ref_id: Section II.1
+      name: Architecture Security
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.1
+      ref_id: Rule 7
+      name: Configuration
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:7.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-7
+      ref_id: '7.1'
+      description: 'The operator of essential services shall comply with the following
+        rules when installing services and equipment on its essential information
+        systems (EIS):'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node83
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:7.1
+      description: '- the operator installs on its EFS only those services and functionalities
+        that are essential for their operation or security. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node84
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node83
+      description: 'It disables services and features that are not essential, including
+        those installed by default, and uninstalls them if possible. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node85
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node83
+      description: When de-installation is not possible, the operator shall mention
+        this in the approval file of the SIE concerned, specifying the services and
+        functionalities concerned and the risk reduction measures implemented;
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node86
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:7.1
+      description: '- the operator only connects to its EIS equipment, peripheral
+        hardware and removable media which it manages and which are essential for
+        the operation or security of its EFS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node87
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:7.1
+      description: '- removable writable media connected to the EFS are used exclusively
+        for the operation, including maintenance and administration, or security of
+        the EFS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node88
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:7.1
+      description: '- The operator scan the contents of removable media, including
+        for malicious code, before each use of removable media. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node89
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node88
+      description: The operator shall set up mechanisms on the equipment to which
+        these removable media are connected to protect against the risk of malicious
+        code execution from these media.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.1
+      ref_id: Rule 8
+      name: Partitioning
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-8
+      ref_id: '8.1'
+      description: 'The operator of essential services compartmentalizes its essential
+        information systems (EIS) in order to limit the spread of computer attacks
+        within its systems or subsystems. It complies with the following rules:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node92
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.1
+      description: '- each EIS is physically or logically partitioned from the operator''s
+        other information systems and the information systems of third parties;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node93
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.1
+      description: '- where an EIS is itself made up of subsystems, these are physically
+        or logically segregated from each other. A subsystem can be set up to ensure
+        a homogeneous functionality or set of functionalities of an EIS or to isolate
+        resources from an EIS requiring the same security need;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node94
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.1
+      description: '- only those interconnections that are strictly necessary for
+        the proper functioning and security of an EIS shall be put in place between
+        the EIS and other systems or between the subsystems of the EIS.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-8
+      ref_id: '8.2'
+      description: In the particular case of an interconnection between the internet
+        and an EIS necessary for the provision of domain name hosting, top-level zone
+        hosting, domain name resolution or peering interconnection for the exchange
+        of internet traffic, the operator is not required to ensure physical or logical
+        partitioning at the level of such interconnection but shall implement appropriate
+        protection measures such as those recommended by the Agency National Information
+        Systems Security Authority.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-8
+      ref_id: '8.3'
+      description: 'In addition, where an essential service requires the EIS necessary
+        for its provision to be accessible via a public network, the operator shall
+        organise that EIS, in accordance with the principle of defence in depth, into
+        at least two subsystems as follows:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node97
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.3
+      description: '- a first subsystem corresponding to the part of the EIS directly
+        accessible via this public network, to which the operator applies appropriate
+        partitioning measures such as those recommended by the National Agency for
+        the Security of Information Systems;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node98
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.3
+      description: '- a second subsystem corresponding to the internal part of the
+        EIS to which the operator applies this partitioning rule.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:8.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-8
+      ref_id: '8.4'
+      description: The operator shall describe in the approval file for each EIS the
+        compartmentalization mechanisms that he or she puts in place.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.1
+      ref_id: Rule 9
+      name: Remote Access
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-9
+      ref_id: '9.1'
+      description: The operator of essential services protects access to its essential
+        information systems (EIS) through third-party information systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-9
+      ref_id: '9.2'
+      description: In particular, where an essential service requires the EIS necessary
+        for its provision to be accessible via a public network, the operator shall
+        protect that access by means of cryptographic mechanisms in accordance with
+        the rules recommended by the National Agency for the Security of Information
+        Systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-9
+      ref_id: '9.3'
+      description: 'In addition, when the operator or a service provider authorised
+        by it for this purpose accesses an EIS via an information system which is
+        not under the control of the operator or service provider, the operator shall
+        apply or cause to be applied to its service provider the following rules:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node104
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.3
+      description: '- Access to the EIS is protected by encryption and authentication
+        mechanisms in accordance with the rules recommended by the National Agency
+        for the Security of Information Systems;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node105
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.3
+      description: '- when access to the EIS is made from a site outside that of the
+        operator, the authentication mechanism is reinforced by implementing two-factor
+        authentication (authentication involving both a secret element and another
+        element specific to the user), unless technical or operational reasons, specified
+        in the EIS approval file,  do not allow it;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node106
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.3
+      description: '- the equipment used to access the EIS is managed and configured
+        by the operator or, where applicable, by the service provider.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node107
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node106
+      description: When access to the EIS is made from a site outside that of the
+        operator, the mass storage of this equipment is permanently protected by encryption
+        and authentication mechanisms in accordance with the rules recommended by
+        the National Agency for the Security of Information Systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:9.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-9
+      ref_id: '9.4'
+      description: The operator shall describe in the approval file for each EIS the
+        mechanisms it has in place to protect access to the EIS.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.1
+      ref_id: Rule 10
+      name: Filtering
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-10
+      ref_id: '10.1'
+      description: 'The operator of essential services implements mechanisms to filter
+        the data flows circulating in its essential information systems (EIS) in order
+        to block the circulation of flows that are useless to the operation of its
+        systems and likely to facilitate computer attacks. It complies with the following
+        rules:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node111
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.1
+      description: '- the operator defines the rules for filtering data flows (filtering
+        on network addresses, protocols, port numbers, etc.) to limit the flow of
+        flows to only those data flows necessary for the operation and security of
+        its EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node112
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.1
+      description: '- the incoming and outgoing flows of the EFAs as well as the flows
+        between subsystems of the EFAs shall be filtered at the level of their interconnections
+        in such a way as to allow the circulation of only those flows which are strictly
+        necessary for the operation and security of the EFAs. Feeds that don''t comply
+        with the filtering rules are blocked by default;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node113
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.1
+      description: '- The operator shall establish and maintain a list of filtering
+        rules mentioning all the rules in force or abolished for less than one year.
+        This list specifies for each rule:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node114
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.1
+      description: '- the reason for and when the rule was implemented, modified,
+        or removed;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node115
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.1
+      description: '- the technical modalities for the implementation of the rule.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-10
+      ref_id: '10.2'
+      description: In the specific case of an EIS necessary for the provision of peering
+        interconnection service for the exchange of internet traffic, the operator
+        shall only put in place filtering mechanisms for data flows other than those
+        corresponding to the internet traffic itself.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:10.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-10
+      ref_id: '10.3'
+      description: The operator shall describe in the approval file for each EIS the
+        filtering mechanisms he or she puts in place.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-ii
+      ref_id: Section II.2
+      name: Administration Security
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.2
+      ref_id: Rule 11
+      name: Administrative Accounts
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-11
+      ref_id: '11.1'
+      description: The operator of essential services creates accounts (called "administrative
+        accounts") for the sole purpose of persons (called "administrators") responsible
+        for carrying out the administrative operations (installation, configuration,
+        management, maintenance, supervision, etc.) of the resources of its essential
+        information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-11
+      ref_id: '11.2'
+      description: 'The operator shall define, in accordance with its network and
+        information systems security policy, the rules for the management and assignment
+        of the administrative accounts of its EIS, and shall comply with the following
+        rules:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node122
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.2
+      description: '- The granting of rights to administrators respects the principle
+        of least privilege (only strictly necessary rights are granted). In particular,
+        in order to limit the scope of individual rights, they are assigned to each
+        administrator by restricting them as much as possible to the functional and
+        technical scope for which this administrator is responsible;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node123
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.2
+      description: '- An administrative account is used exclusively to connect to
+        an administrative information system (information system used for resource
+        administration operations) or to an administered resource;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node124
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.2
+      description: '- Administration operations are performed exclusively from administrative
+        accounts, and conversely, administrative accounts are used exclusively for
+        administrative operations.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node125
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.2
+      description: '- When the administration of a resource cannot technically be
+        carried out from a specific administration account, the operator shall put
+        in place measures to ensure the traceability and control of the administration
+        operations carried out on that resource and measures to reduce the risk associated
+        with the use of a non-administration-specific account. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node126
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node125
+      description: It describes these measures in the approval dossier of the SIE
+        concerned as well as the technical reasons that prevented the use of an administration
+        account;
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node127
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:11.2
+      description: '- the operator shall establish and maintain the list of administrative
+        accounts of its EFAs and manage them as privileged accounts.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.2
+      ref_id: Rule 12
+      name: Administrative Information Systems
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-12
+      ref_id: '12.1'
+      description: 'The operator of essential services shall apply the following rules
+        to the information systems (referred to as "administrative information systems")
+        used to carry out the administration of its essential information systems
+        (EIS):'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node130
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- the hardware and software resources of the administration information
+        systems are managed and configured by the operator or, where applicable, by
+        the service provider it has mandated to carry out the administration operations;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node131
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- The hardware and software resources of the administrative information
+        systems are used exclusively to carry out administrative operations.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node132
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node131
+      description: However, where technical or organizational reasons warrant, the
+        administrator's physical workstation may be used to perform operations other
+        than administrative operations. In this case, mechanisms for hardening the
+        workstation operating system and partitioning must be put in place to isolate
+        the software environment used for these other operations from the software
+        environment used for administrative operations;
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node133
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- A software environment used to perform administrative operations
+        must not be used for any other purpose, such as accessing websites or mail
+        servers on the Internet;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node134
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- A user must not connect to an administrative information system
+        by means of a software environment used for functions other than administrative
+        operations;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node135
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- Data flows associated with operations other than administrative
+        operations must, when they transit through administrative information systems,
+        be partitioned by means of encryption and authentication mechanisms in accordance
+        with the rules recommended by the National Agency for the Security of Information
+        Systems;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node136
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- the administrative information systems are connected to the
+        resources of the EIS to be administered through a physical network link used
+        exclusively for administrative operations. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node137
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node136
+      description: These resources are administered through their physical administration
+        interface.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node138
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node136
+      description: When technical reasons prevent the administration of a resource
+        through a physical network link or its physical administration interface,
+        the operator shall implement risk mitigation measures such as logical security
+        measures.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node139
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node136
+      description: In this case, it shall describe these measures and their justifications
+        in the approval dossier of the SIE concerned;
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node140
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- When they do not circulate in the administration information
+        system, administration flows are protected by encryption and authentication
+        mechanisms that comply with the rules recommended by the National Agency for
+        Information Systems Security. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node141
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node140
+      description: 'If encryption and authentication of these flows are not possible
+        for technical reasons, the operator shall implement measures to protect the
+        confidentiality and integrity of these flows and to strengthen the control
+        and traceability of administrative operations. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node142
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node140
+      description: In this case, it shall describe these measures and their justifications
+        in the approval dossier of the SIE concerned;
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node143
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:12.1
+      description: '- Logs recording events generated by administrative information
+        system resources do not contain passwords or other secret authentication elements
+        in plain text or in the form of a cryptographic fingerprint.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-ii
+      ref_id: Section II.3
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-13
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.3
+      ref_id: Rule 13
+      name: Identification
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-13
+      ref_id: '13.1'
+      description: The operator of critical services creates individual accounts for
+        all users (including users with privileged accounts or administrative accounts)
+        and for automatic processes accessing the resources of its critical information
+        systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:13.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-13
+      ref_id: '13.2'
+      description: 'Where technical or operational reasons do not allow the creation
+        of individual accounts for users or for automatic processes, the operator
+        shall put in place measures to reduce the risk associated with the use of
+        shared accounts and to ensure traceability of the use of those accounts. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node148
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:13.2
+      description: In this case, the operator shall describe these measures in the
+        approval dossier of the relevant EIS and the reasons for the use of shared
+        accounts.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:13.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-13
+      ref_id: '13.3'
+      description: In addition, where an essential service requires the dissemination
+        of information to the public, the operator is not required to create accounts
+        for public access to that information.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:13.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-13
+      ref_id: '13.4'
+      description: The operator shall immediately deactivate accounts that are no
+        longer needed.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-14
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.3
+      ref_id: Rule 14
+      name: Authentification
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-14
+      ref_id: '14.1'
+      description: The operator of essential services shall protect access to the
+        resources of its critical information systems (EIS), whether by a user or
+        by an automated process, by means of an authentication mechanism involving
+        a secret element.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-14
+      ref_id: '14.2'
+      description: The operator shall define, in accordance with its network and information
+        systems security policy, the rules for managing the secret authentication
+        elements implemented in its EIS.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-14
+      ref_id: '14.3'
+      description: 'Where technically possible, the authentication secrets must be
+        able to be modified by the operator whenever necessary. In this case, the
+        operator complies with the following rules:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node155
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.3
+      description: '- The operator must modify the authentication secrets when they
+        have been installed by the manufacturer or supplier of the resource, before
+        it is put into service. To this end, the operator shall check with the manufacturer
+        or supplier that it has the means and rights to carry out these operations;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node156
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.3
+      description: '- The secret authentication element of a shared account must be
+        renewed regularly and each time a user withdraws from that account.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node157
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.3
+      description: '- Users who are not responsible for this cannot change the authentication
+        secrets. They also can''t access these elements in plain text;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node158
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.3
+      description: '- When the authentication secrets are passwords, users should
+        not reuse them between privileged accounts or between a privileged and a non-privileged
+        account.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node159
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.3
+      description: '- when the secret authentication elements are passwords, they
+        comply with the rules of the art such as those recommended by the National
+        Agency for the Security of Information Systems, in terms of complexity (length
+        of the password and types of characters), taking into account the maximum
+        level of complexity allowed by the resource concerned,  and renewal.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-14
+      ref_id: '14.4'
+      description: When the resource does not technically allow the authentication
+        secret element to be modified, the operator shall put in place appropriate
+        access control to the relevant resource as well as measures to trace access
+        and reduce the risk associated with the use of a fixed authentication secret
+        element.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.5
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.4
+      ref_id: '14.5'
+      description: The operator shall describe in the approval file of the SIE concerned
+        these measures and the technical reasons which prevented the modification
+        of the authentication secret element.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:14.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-14
+      ref_id: '14.6'
+      description: In addition, where an essential service requires the dissemination
+        of information to the public, the operator is not required to put in place
+        authentication mechanisms for public access to that information.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-15
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.3
+      ref_id: Rule 15
+      name: Access rights
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:15.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-15
+      ref_id: '15.1'
+      description: 'The operator of essential services shall define, in accordance
+        with its network and information systems security policy, the rules for managing
+        and assigning access rights to the resources of its essential information
+        systems (EIS), and shall comply with the following rules:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node165
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:15.1
+      description: '- the operator assigns to a user or an automatic process access
+        rights to a resource only if such access is strictly necessary for the performance
+        of the user''s tasks or the operation of the automatic process;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node166
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:15.1
+      description: '- The operator defines access to the various functionalities of
+        each resource and assigns the rights only to the users and automatic processes
+        that strictly need them;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node167
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:15.1
+      description: '- Access rights are reviewed periodically, at least annually,
+        by the operator. This review addresses the relationship between accounts,
+        the associated access rights, and the resources or features that are the subject
+        of them;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node168
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:15.1
+      description: '- The operator shall establish and maintain the list of privileged
+        accounts. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node169
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node168
+      description: Any modification of a privileged account (addition, deletion, suspension
+        or modification of associated rights) is subject to a formal control by the
+        operator to verify that access rights to resources and features are allocated
+        according to the principle of least privilege (only strictly necessary rights
+        are granted) and in line with the needs of use of the account.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-ii
+      ref_id: Section II.4
+      name: Safe maintenance
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.4
+      ref_id: Rule 16
+      name: Safe Maintenance Procedure
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-16
+      ref_id: '16.1'
+      description: The operator of essential services shall develop, maintain and
+        implement a procedure for maintaining the security of the hardware and software
+        resources of its essential information systems (EIS), in accordance with its
+        network and information systems security policy.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-16
+      ref_id: '16.2'
+      description: 'This procedure defines the conditions for maintaining the security
+        level of EIS resources in response to evolving vulnerabilities and threats,
+        including the policy for installing any new version and security remediation
+        of a resource and the checks to be performed prior to installation. It provides
+        that:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node174
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.2
+      description: '- the operator keeps itself informed of vulnerabilities and security
+        corrective measures likely to affect the hardware and software resources of
+        its EIS, which are disseminated in particular by the suppliers or manufacturers
+        of these resources or by cybersecurity prevention and alert centres such as
+        the CERT-FR (government monitoring centre,  Alert and Response to Cyber Attacks);'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node175
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.2
+      description: '- Except in the event of justified technical or operational difficulties,
+        the operator installs and maintains all the hardware and software resources
+        of its EIS in versions supported by their suppliers or manufacturers and including
+        security updates;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node176
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.2
+      description: '- prior to the installation of any new version, the operator shall
+        ensure the origin of this version and its integrity, and analyse its impact
+        on the SIE concerned from a technical and operational point of view;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node177
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.2
+      description: '- as soon as he becomes aware of a corrective safety measure concerning
+        one of his resources, and except in the case of justified technical or operational
+        difficulties, the operator shall plan the installation after having carried
+        out the checks referred to in the preceding paragraph, and carry out this
+        installation within the time limits laid down by the procedure for maintaining
+        conditions in safe conditions;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node178
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:16.2
+      description: '- where justified by technical or operational reasons, the operator
+        may decide, for certain resources of its EIS, not to install a version supported
+        by the supplier or manufacturer of the resource concerned or not to install
+        a security corrective measure. In this case, the operator shall implement
+        technical or organisational measures provided for in the security maintenance
+        procedure to reduce the risks associated with the use of an outdated version
+        or a version with known vulnerabilities. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node179
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node178
+      description: The operator shall describe in the approval dossier of the relevant
+        EIS these risk reduction measures and the technical or operational reasons
+        that prevented the installation of a supported version or a safety corrective
+        measure.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-ii
+      ref_id: Section II.5
+      name: Physical and Environmental Security
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-17
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-ii.5
+      ref_id: Rule 17
+      name: Physical and Environmental Security
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:17.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-17
+      ref_id: '17.1'
+      description: 'The operator of essential services shall define and implement,
+        in accordance with its network and information systems security policy, the
+        physical and environmental security procedures and measures applicable to
+        its essential information systems (EIS). '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node183
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:17.1
+      description: Those procedures and measures shall include the control of internal
+        and external staff, the control of physical access to EIAs and, where appropriate,
+        the protection of EFAs against environmental risks such as natural disasters.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-iii
+      assessable: false
+      depth: 1
+      ref_id: Chapter III
+      name: Rules relating to the defence of information networks and systems
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-iii
+      ref_id: Section III.1
+      name: Security Incident Detection
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.1
+      ref_id: Rule 18
+      name: Detection
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      ref_id: '18.1'
+      description: The operator of essential services shall develop, maintain and
+        implement, in accordance with its network and information systems security
+        policy, a procedure for detecting security incidents affecting its essential
+        information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      ref_id: '18.2'
+      description: This procedure shall provide for organisational and technical measures
+        to detect security incidents affecting EIS.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node189
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.2
+      description: The organizational measures include the modalities of operation
+        of the detection devices and describe the chain of processing of the security
+        events identified by these devices.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node190
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.2
+      description: The technical measurements specify the nature and positioning of
+        the detection devices.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      ref_id: '18.3'
+      description: 'The operator implements detection devices capable of identifying
+        events characteristic of a security incident, in particular an ongoing or
+        future attack, and of allowing the search for traces of previous incidents.
+        To this end, these devices:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node192
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.3
+      description: '- collect relevant data on the operation of each EIS (in particular
+        "network" or "system" data) from sensors positioned in such a way as to identify
+        security events related to all data flows exchanged between EIS and information
+        systems other than those of the operator;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node193
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.3
+      description: '- Analyze sensor data, in particular by looking for technical
+        markers of known attacks, in order to identify security events and characterize
+        them;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node194
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.3
+      description: '- Archive the metadata of the identified events in order to allow
+        a posteriori search for technical markers of attacks or compromises over a
+        period of at least six months.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      ref_id: '18.4'
+      description: In the specific case of an EIS necessary for the provision of peering
+        interconnection service for the exchange of internet traffic, the operator
+        shall implement detection devices only for data flows other than those corresponding
+        to the internet traffic itself.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      ref_id: '18.5'
+      description: The operator or service provider mandated for this purpose operates
+        the detection devices in accordance with the requirements of the standard
+        for the detection of security incidents adopted pursuant to Article 10 of
+        Decree No. 2015-350 of 27 March 2015,  as amended, relating to the qualification
+        of security products and trust service providers for the purposes of information
+        system security.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:18.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-18
+      ref_id: '18.6'
+      description: In particular, the operator shall ensure that the installation
+        and operation of the detection devices does not affect the safety and operation
+        of its EIS.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-19
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.1
+      ref_id: Rule 19
+      name: Journaling
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-19
+      ref_id: '19.1'
+      description: The operator of essential services shall implement a logging system
+        on each critical information system (EIS) that records events relating to
+        user authentication, account and access rights management, access to resources,
+        changes to EIS security rules and the operation of the EIS. The logging system
+        helps in the detection of security incidents by collecting the log data.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-19
+      ref_id: '19.2'
+      description: 'The logging system shall cover the following equipment when it
+        generates the events referred to in the first subparagraph:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node201
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' application servers supporting essential services;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node202
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' system infrastructure servers;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node203
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' network infrastructure servers;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node204
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' safety equipment;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node205
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' engineering and maintenance positions for industrial systems;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node206
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' network equipment;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node207
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.2
+      description: ' administrative positions.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-19
+      ref_id: '19.3'
+      description: Events recorded by the logging system are timestamped using synchronized
+        time sources.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node209
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.3
+      description: For each EIS, they shall be centralised and archived for a period
+        of at least six months.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node210
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:19.3
+      description: The event archiving format allows for automated searches of event
+        events.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-20
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.1
+      ref_id: Rule 20
+      name: Log correlation and analysis
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:20.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-20
+      ref_id: '20.1'
+      description: The operator of essential services shall implement a log correlation
+        and analysis system that exploits the events recorded by the logging system
+        installed on each of the critical information systems (EIS), in order to detect
+        events that may affect the security of the EFS. The log correlation and analysis
+        system helps detect security incidents by analyzing log data.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:20.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-20
+      ref_id: '20.2'
+      description: The log correlation and analysis system is installed and operated
+        on an information system set up exclusively for the purpose of detecting events
+        likely to affect the security of information systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node214
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-20
+      description: The operator or service provider mandated for this purpose installs
+        and operates this log correlation and analysis system based on the requirements
+        of the standard for the detection of security incidents adopted pursuant to
+        Article 10 of Decree No. 2015-350 of 27 March 2015,  as amended, relating
+        to the qualification of security products and trust service providers for
+        the purposes of information system security.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-iii
+      ref_id: Section III.2
+      name: Security Incident Management
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-21
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.2
+      ref_id: Rule 21
+      name: Incident Response
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:21.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-21
+      ref_id: '21.1'
+      description: The operator of essential services shall develop, maintain and
+        implement, in accordance with its network and information systems security
+        policy, a procedure for dealing with security incidents affecting its essential
+        information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:21.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-21
+      ref_id: '21.2'
+      description: The operator or service provider mandated for this purpose processes
+        incidents based on the requirements of the security incident response framework
+        adopted pursuant to Article 10 of Decree No. 2015-350 of 27 March 2015,  as
+        amended, relating to the qualification of security products and trust service
+        providers for the security needs of information systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:21.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-21
+      ref_id: '21.3'
+      description: A specific information system must be set up to deal with incidents,
+        in particular to store technical records relating to incident analyses. This
+        system is compartmentalized with respect to the EIS concerned by the incident.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:21.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-21
+      ref_id: '21.4'
+      description: The operator shall keep the technical records relating to the analysis
+        of incidents for a period of at least six months. It shall make these technical
+        records available to the National Agency for the Security of Information Systems.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-22
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:section-iii.2
+      ref_id: Rule 22
+      name: Alert Processing
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:22.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-22
+      ref_id: '22.1'
+      description: 'The operator of essential services shall set up a service enabling
+        it to become aware, as soon as possible, of information transmitted by the
+        National Agency for the Security of Information Systems relating to incidents,
+        vulnerabilities and threats. '
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node223
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:22.1
+      description: It implements a procedure to process the information thus received
+        and, if necessary, to take the necessary security measures to protect its
+        essential information systems (EIS).
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node224
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-22
+      description: The operator shall provide the National Agency for the Security
+        of Information Systems with the up-to-date contact details (name of the service,
+        telephone number and e-mail address) of the service provided for in the preceding
+        paragraph.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-iv
+      assessable: false
+      depth: 1
+      ref_id: Chapter IV
+      name: Business Resilience Rules
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:chapter-iv
+      ref_id: Rule 23
+      name: Crisis Management
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-23
+      ref_id: '23.1'
+      description: The operator of essential services shall develop, maintain and
+        implement, in accordance with its network and information systems security
+        policy, a crisis management procedure in the event of security incidents having
+        a major impact on the operator's essential services.
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-23
+      ref_id: '23.2'
+      description: 'This procedure describes the organisation of crisis management
+        put in place by the operator and provides in particular for the application
+        of the following technical measures to essential information systems (EIS):'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node229
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:23.2
+      description: '- Configure EIS to prevent or limit the effects of attacks. This
+        configuration can be used to:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node230
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node229
+      description: '- prohibit the use of removable storage media or the connection
+        of mobile equipment to EFAs;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node231
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node229
+      description: '- install a security corrective measure on a particular EIS;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node232
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node229
+      description: '- Restrict routing.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node233
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:23.2
+      description: '- Set up filtering rules on networks or specific configurations
+        on terminal equipment. This measure may include:'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node234
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node233
+      description: '- Carry out access restrictions in the form of whitelists and
+        blacklists of users.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node235
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node233
+      description: '- Block file exchanges of a particular type.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node236
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:node233
+      description: '- isolate the operator''s websites, applications, or computer
+        equipment from any network;'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node237
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:23.2
+      description: '- isolate the operator''s EIS from the internet network. This
+        requires the network interfaces of the SIEs concerned to be physically or
+        logically disconnected.'
+    - urn: urn:intuitem:risk:req_node:anssi-nis-rules:23.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-23
+      ref_id: '23.3'
+      description: The procedure shall specify the conditions under which these measures
+        may be applied, taking into account the technical and organisational constraints
+        of implementation.
