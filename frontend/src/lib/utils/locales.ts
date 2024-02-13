@@ -1,10 +1,10 @@
 export const LOCALE_MAP = {
 	en: {
-		name: 'English',
+		name: 'english',
 		flag: '🇬🇧'
 	},
 	fr: {
-		name: 'French',
+		name: 'french',
 		flag: '🇫🇷'
 	}
 };
