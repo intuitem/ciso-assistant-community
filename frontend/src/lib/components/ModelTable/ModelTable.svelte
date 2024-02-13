@@ -198,7 +198,7 @@
 							{#if component}
 								<svelte:component this={component} meta={row.meta ?? {}} cell={value}/>
 							{:else}
-                <pre class="font-token whitespace-pre-line break-words">
+                <span class="font-token whitespace-pre-line break-words">
                 {#if Array.isArray(value)}
                   <ul class="list-disc pl-4 whitespace-normal">
                     {#each value as val}
@@ -230,7 +230,7 @@
                 {:else}
                   {value ?? '-'}
                 {/if}
-                </pre>
+                </span>
 							{/if}
 						</td>
             {/if}
