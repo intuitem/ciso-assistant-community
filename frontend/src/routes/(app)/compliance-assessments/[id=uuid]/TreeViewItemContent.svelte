@@ -84,7 +84,7 @@
 				{content}
 			{/if}
 		</span>
-		{#if threats || security_functions}
+		{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
 			<div
 				role="button"
 				tabindex="0"
