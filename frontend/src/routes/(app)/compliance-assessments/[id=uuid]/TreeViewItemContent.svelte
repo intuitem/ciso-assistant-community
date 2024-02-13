@@ -57,8 +57,6 @@
 
 	const assessableNodes = getAssessableNodes(node);
 
-	console.log(assessableNodes);
-
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
 		'partially_compliant',
@@ -94,11 +92,11 @@
 	$: classesPercentText = (statusColor: string) => (statusColor === '#000000' ? 'text-white' : '');
 </script>
 
-<div class="flex flex-row justify-between">
-	<div class="flex flex-col w-1/2">
+<div class="flex flex-row justify-between space-x-8">
+	<div class="flex flex-1 max-w-[65ch] flex-col">
 		<span style="font-weight: {hasChildren ? 600 : 300};">
-			{#if !hasChildren && canEditRequirementAssessment}
-				<span class="w-full h-full flex p-4 rounded-token hover:text-primary-500">
+			{#if assessable && canEditRequirementAssessment}
+				<span class="w-full h-full flex rounded-token hover:text-primary-500">
 					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
 						{content}
 					</a>
@@ -111,9 +109,17 @@
 			<div
 				role="button"
 				tabindex="0"
-				class="underline text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-				on:click={(_) => (showInfo = !showInfo)}
-				on:keydown={(_) => (showInfo = !showInfo)}
+				class="select-none text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
+				on:click={(e) => {
+					e.preventDefault();
+					showInfo = !showInfo;
+				}}
+				on:keydown={(e) => {
+					if (e.key === 'Enter') {
+						e.preventDefault();
+						showInfo = !showInfo;
+					}
+				}}
 			>
 				<i class="text-xs fa-solid fa-info-circle" /> Learn more
 			</div>
@@ -175,7 +181,7 @@
 		{/if}
 	</div>
 	{#if hasChildren}
-		<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
+		<div class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center">
 			{#each orderedStatusPercentages as sp}
 				<div
 					class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
