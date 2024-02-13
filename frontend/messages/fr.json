@@ -1,5 +1,11 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"Home": "Accueil",
-	"Overview": "Vue d'ensemble"
+	"home": "Accueil",
+	"overview": "Vue d'ensemble",
+	"context": "Contexte",
+	"governance": "Gouvernance",
+	"risk": "Risque",
+	"compliance": "Conformité",
+	"organisation": "Organisation",
+	"extra": "Extra"
 }
