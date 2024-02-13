@@ -4,12 +4,12 @@ type StringMap = {
     [key: string]: string;
 };
 
-test('sidebar navigation tests', async ({ logedPage, analyticsPage: overviewPage, sideBar, page }) => {
+test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
     test.slow();
     
     await test.step('proper redirection to the overview page after login', async () => {
-        await overviewPage.hasUrl();
-        await overviewPage.hasTitle();
+        await analyticsPage.hasUrl();
+        await analyticsPage.hasTitle();
         setHttpResponsesListener(page);
     });
     
