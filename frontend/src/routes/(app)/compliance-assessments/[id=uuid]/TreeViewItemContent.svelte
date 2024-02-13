@@ -1,17 +1,36 @@
 <script lang="ts">
 	import { complianceColorMap } from './utils';
 	import { page } from '$app/stores';
+	import type { z } from 'zod';
+	import type { SecurityFunctionSchema, ThreatSchema } from '$lib/utils/schemas';
 
 	export let name: string;
 	export let description: string;
 	export let ra_id: string | undefined = undefined;
 	export let leaf_content: string;
-	export let threats: Record<string, any>[] | undefined = undefined;
-	export let security_functions: Record<string, any>[] | undefined = undefined;
+	export let threats: z.infer<typeof ThreatSchema>[] | undefined = undefined;
+	export let security_functions: z.infer<typeof SecurityFunctionSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
-	// export let status: string | undefined = undefined;
+	export let status: string | undefined = undefined;
 	export let statusCounts: Record<string, number> | undefined;
+	export let assessable: boolean;
+
+	const node = {
+		name,
+		description,
+		ra_id,
+		leaf_content,
+		threats,
+		security_functions,
+		children,
+		canEditRequirementAssessment,
+		status,
+		statusCounts,
+		assessable
+	} as const;
+
+	type TreeViewItemNode = typeof node;
 
 	$: hasChildren = children && Object.keys(children).length > 0;
 
@@ -23,19 +42,22 @@
 
 	let showInfo = false;
 
-	const getLeaves = (children: Record<string, any>[] | undefined, leaves: any = []) => {
-		if (children?.length === 0) return leaves;
-		for (const value of Object.values(children)) {
-			if (value.children && Object.keys(value.children).length > 0) {
-				getLeaves(value.children, leaves);
-			} else {
-				leaves.push(value);
+	const getAssessableNodes = (
+		startNode: TreeViewItemNode,
+		assessableNodes: TreeViewItemNode[] = []
+	) => {
+		if (startNode.assessable) assessableNodes.push(startNode);
+		if (startNode.children) {
+			for (const value of Object.values(startNode.children) as TreeViewItemNode[]) {
+				getAssessableNodes(value, assessableNodes);
 			}
 		}
-		return leaves;
+		return assessableNodes;
 	};
 
-	const leaves = getLeaves(children) ?? [];
+	const assessableNodes = getAssessableNodes(node);
+
+	console.log(assessableNodes);
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -58,7 +80,7 @@
 		(status) => {
 			if (!statusCounts) return { status, percentage: { value: 0, display: '0' } };
 			const value = statusCounts[status] || 0;
-			const percentValue: number = (value / leaves.length) * 100;
+			const percentValue: number = (value / assessableNodes.length) * 100;
 			const percentage = {
 				value: percentValue,
 				display: percentValue.toFixed(0)
@@ -69,6 +91,7 @@
 
 	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
+	$: classesPercentText = (statusColor: string) => (statusColor === '#000000' ? 'text-white' : '');
 </script>
 
 <div class="flex flex-row justify-between">
@@ -154,22 +177,14 @@
 	{#if hasChildren}
 		<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
 			{#each orderedStatusPercentages as sp}
-				{#if complianceColorMap[sp.status] === '#000000'}
-					<div
-						class="flex flex-col justify-center overflow-hidden text-white text-xs text-center bg-yellow-500"
-						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-					>
-						{sp.percentage.display}%
-					</div>
-				{:else}
-					<div
-						class="flex flex-col justify-center overflow-hidden text-black text-xs text-center bg-yellow-500"
-						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-					>
-						{sp.percentage.display}%
-						<!-- {sp.percentage?.display}% -->
-					</div>
-				{/if}
+				<div
+					class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
+						complianceColorMap[sp.status]
+					)}"
+					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+				>
+					{sp.percentage.display}%
+				</div>
 			{/each}
 		</div>
 	{/if}
