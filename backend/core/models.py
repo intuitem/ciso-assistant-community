@@ -40,11 +40,14 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    dependencies = models.ManyToManyField(
+        "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
+    )
 
     @property
     def reference_count(self) -> int:
         """
-        Returns the number of distinct risk and compliance assessments that reference objects from this library
+        Returns the number of distinct dependent libraries and risk and compliance assessments that reference objects from this library
         """
         return (
             RiskAssessment.objects.filter(
@@ -62,12 +65,18 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
             )
             .distinct()
             .count()
+            + Library.objects.filter(dependencies=self).distinct().count()
         )
 
     def delete(self, *args, **kwargs):
         if self.reference_count > 0:
             raise ValueError(
                 "This library is still referenced by some risk or compliance assessments"
+            )
+        dependent_libraries = Library.objects.filter(dependencies=self)
+        if dependent_libraries:
+            raise ValueError(
+                f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
         super(Library, self).delete(*args, **kwargs)
 
