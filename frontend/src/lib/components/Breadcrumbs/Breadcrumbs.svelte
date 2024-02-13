@@ -28,7 +28,7 @@
 			};
 		});
 
-		crumbs.unshift({ label: m.Home(), href: '/', icon: 'fa-regular fa-compass' });
+		crumbs.unshift({ label: m.home(), href: '/', icon: 'fa-regular fa-compass' });
 		if (crumbs[crumbs.length - 1].label != 'Edit') pageTitle.set(crumbs[crumbs.length - 1].label);
 		else pageTitle.set('Edit ' + crumbs[crumbs.length - 2].label);
 	}
