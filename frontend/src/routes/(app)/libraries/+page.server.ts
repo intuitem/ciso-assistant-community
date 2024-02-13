@@ -9,16 +9,16 @@ import { urlParamModelVerboseName } from '$lib/utils/crud';
 import { z } from 'zod';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import type { Library, urlModel } from '$lib/utils/types';
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/libraries/`;
 
 	const res = await fetch(endpoint);
-	const libraries = await res.json().then((res) => res.results);
+	const libraries: Library[] = await res.json().then((res) => res.results);
 
 	function countObjects(library: Library) {
-		let result: { [key: string]: any } = new Object();
+		const result: { [key: string]: any } = new Object();
 		for (const [key, value] of Object.entries(library.objects)) {
 			if (Array.isArray(value)) {
 				const str = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
@@ -41,6 +41,7 @@ export const load = (async ({ fetch }) => {
 			`Packager: ${row.packager}`,
 			...Object.entries(countObjects(row)).map(([key, value]) => `${key}: ${value}`)
 		];
+		row.preventDelete = (row.reference_count && row.reference_count > 0) ?? false;
 	});
 
 	const headData: Record<string, string> = listViewFields['libraries' as urlModel].body.reduce(
@@ -123,7 +124,8 @@ export const actions: Actions = {
 			const res = await event.fetch(endpoint, requestInitOptions);
 			if (!res.ok) {
 				const response = await res.json();
-				console.log(response);
+				console.error(response);
+				setFlash({ type: 'error', message: `${response}` }, event);
 				if (response.non_field_errors) {
 					setError(deleteForm, 'non_field_errors', response.non_field_errors);
 				}

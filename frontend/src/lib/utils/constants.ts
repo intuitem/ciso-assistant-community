@@ -34,8 +34,8 @@ export const URN_REGEX =
 	/^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$/;
 
 export const LOCALE_DISPLAY_MAP = {
-	en: '&#127468&#127463; English',
-	fr: '&#127467&#127479; Français'
+	en: '🇬🇧 English',
+	fr: '🇫🇷 Français'
 };
 
 export const ISO_8601_REGEX =

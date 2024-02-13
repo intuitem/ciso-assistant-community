@@ -77,7 +77,7 @@
 		if (['Enter', 'Space'].includes(event.code)) onRowClick(event, rowIndex);
 	}
 
-	export let identifierField: string = 'id';
+	export let identifierField = 'id';
 
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 
@@ -250,6 +250,7 @@
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
+                preventDelete={row.meta.preventDelete ?? false}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}

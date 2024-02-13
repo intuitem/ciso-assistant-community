@@ -33,6 +33,8 @@
 				{$modalStore[0].title ?? '(title missing)'}
 			</header>
 			<div
+				role="button"
+				tabindex="0"
 				class="flex items-center hover:text-primary-500 cursor-pointer"
 				on:click={parent.onClose}
 				on:keydown={parent.onClose}

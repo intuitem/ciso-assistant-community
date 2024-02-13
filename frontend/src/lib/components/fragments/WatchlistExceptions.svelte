@@ -43,21 +43,21 @@
 							request_path
 						)}'"
 					>
-						<td scope="row" class="px-3 py-4 font-medium">
+						<th scope="row" class="px-3 py-4 font-medium">
 							{#if acceptance.approver == user.id && acceptance.state == 'submitted'}
 								<span class="mr-1 p-1 rounded-md text-xs bg-indigo-500 text-white">
 									action requested
 								</span>
 							{/if}
 							{acceptance.name}
-						</td>
-						<td class="px-3 py-4">
+						</th>
+						<th class="px-3 py-4">
 							{acceptance.folder.str}
-						</td>
-						<td class="px-3 py-4">
+						</th>
+						<th class="px-3 py-4">
 							{acceptance.approver.str}
-						</td>
-						<td class="px-3 py-4">
+						</th>
+						<th class="px-3 py-4">
 							{#if acceptanceState(acceptance.expiry_date) === 'expired'}
 								<span class="rounded bg-red-500 text-white p-1 text-xs mr-1">expired</span>
 							{:else if acceptanceState(acceptance.expiry_date) === 'upcoming'}
@@ -66,7 +66,7 @@
 								<span class="rounded bg-yellow-500 text-white p-1 text-xs mr-1">today</span>
 							{/if}
 							{formatStringToDate(acceptance.expiry_date)}
-						</td>
+						</th>
 					</tr>
 				{/each}
 			{:else}

@@ -1,11 +1,14 @@
 # CISO Assistant
 
+![](gh_banner.png)
+
 CISO Assistant brings a different take on Cyber Security Posture Management:
 
 - by explicitly decoupling compliance from cybersecurity practices implementation
 - providing simplified tools for decision making
 - while providing capabilities for a program, product or an organization assessment against standard frameworks.
 - you can bring your own framework as well using a simplified DSL
+- aim to be a one stop shop for cyber security management and cover the layers of GRC (Governance, Risk and Compliance)
 
 ![](posture.png)
 
