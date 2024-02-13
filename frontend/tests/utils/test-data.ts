@@ -19,8 +19,8 @@ export default {
     },
     matrix: {
         name: "Critical risk matrix 5x5",
-        displayName: "default_5x5",
-        urn: "urn:intuitem:risk:library:5x5_critical_risk_matrix"
+        displayName: "critical 5x5",
+        urn: "urn:intuitem:risk:library:critical_risk_matrix_5x5"
     },
     securityFunction: {
         name: "Physical security policy",
@@ -32,16 +32,16 @@ export default {
         urn: "urn:intuitem:risk:function:POL.PHYSICAL"
     },
     securityFunction2: {
-        name: "Cryptographic policy",
-        category: "policy",
+        name: "Controls accountability matrix",
+        category: "process",
         library: { 
             name: "Documents and policies",
             urn: "urn:intuitem:risk:library:doc-pol"
         },
-        urn: "urn:intuitem:risk:function:POL.CRYPTO"
+        urn: "urn:intuitem:risk:function:DOC.CONTROLS"
     },
     threat: {
-        name: "T1011 - Exfiltration Over Other Network Medium",
+        name: "Exfiltration Over Other Network Medium",
         library: {
             name: "Mitre ATT&CK v14 - Threats and mitigations",
             urn: "urn:intuitem:risk:library:mitre-attack-v14"
@@ -49,7 +49,7 @@ export default {
         urn: "urn:intuitem:risk:threat:mitre-attack:T1011"
     },
     threat2: {
-        name: "T1052 - Exfiltration Over Physical Medium",
+        name: "Exfiltration Over Physical Medium",
         library: {
             name: "Mitre ATT&CK v14 - Threats and mitigations",
             urn: "urn:intuitem:risk:library:mitre-attack-v14"
@@ -57,14 +57,14 @@ export default {
         urn: "urn:intuitem:risk:threat:mitre-attack:T1052"
     },
     requirement_assessment: {
-        name: "RC.RP. Recovery Planning/RC.RP-1",
+        name: "RC.RP - Recovery Planning",
         library: {
             name: "NIST CSF",
             urn: "urn:intuitem:risk:library:nist-csf-1.1"
         },
     },
     requirement_assessment2: {
-        name: "ID.GV. Governance/ID.GV-4",
+        name: "ID.GV - Governance",
         library: {
             name: "NIST CSF",
             urn: "urn:intuitem:risk:library:nist-csf-1.1"

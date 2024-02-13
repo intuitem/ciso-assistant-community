@@ -17,7 +17,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage: overviewPage
         //TODO delete this when page titles are fixed
         const temporaryPageTitle: StringMap = {
 			'X-Rays': "X rays",
-			'Backup & restore': "Backup restore"
+			'Backup & restore': "Backup restore",
+            'Policies': "Security measures"
 		};
         
         for await (const [key, value] of sideBar.items) {            
