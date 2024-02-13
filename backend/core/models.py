@@ -1290,7 +1290,7 @@ class ComplianceAssessment(Assessment):
         # ---
 
         # --- check on requirement assessments:
-        _requirement_assessments = self.requirementassessment_set.all().order_by(
+        _requirement_assessments = self.requirement_assessments.all().order_by(
             "created_at"
         )
         requirement_assessments = []
