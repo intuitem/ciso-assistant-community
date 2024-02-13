@@ -11,6 +11,7 @@
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import type { Node } from './types';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.compliance_assessment);
@@ -26,18 +27,6 @@
 		user.permissions,
 		`change_${requirementAssessmentModel.name}`
 	);
-
-	interface Node {
-		urn: string;
-		parent_urn: string | null;
-		name: string;
-		node_content: string;
-		assessable: boolean;
-		style: string;
-		description: string | null;
-		children?: Record<string, Node>;
-		status?: string; // Assuming that the status field exists in nodes similar to leaves
-	}
 
 	const countStatus = (
 		node: Node,
