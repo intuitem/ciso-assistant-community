@@ -1,6 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"home": "Home",
+	"edit": "Edit",
 	"overview": "Overview",
 	"context": "Context",
 	"governance": "Governance",
@@ -27,7 +28,7 @@
 	"users": "Users",
 	"userGroups": "User groups",
 	"roleAssignments": "Role assignments",
-	"xrays": "X-rays",
+	"xRays": "X-rays",
 	"scoringAssistant": "Scoring assistant",
 	"libraries": "Libraries",
 	"backupRestore": "Backup & restore"
