@@ -1115,3 +1115,30 @@ class TestLibrary:
         library.delete()
 
         assert Library.objects.count() == 0
+
+    @pytest.mark.usefixtures("domain_project_fixture")
+    def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
+        dependency_library = Library.objects.create(
+            name="Dependency Library",
+            description="Dependency Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        library = Library.objects.create(
+            name="Library",
+            description="Library description",
+            folder=Folder.get_root_folder(),
+            locale="en",
+            version=1,
+        )
+        library.dependencies.add(dependency_library)
+
+        with pytest.raises(ValueError):
+            dependency_library.delete()
+
+        library.delete()
+        assert Library.objects.count() == 1
+
+        dependency_library.delete()
+        assert Library.objects.count() == 0
