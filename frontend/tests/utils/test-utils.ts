@@ -69,8 +69,6 @@ export const test = base.extend<Fixtures>({
             { name: 'description', type: type.TEXT },
             { name: 'attachment', type: type.FILE },
             { name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-            { name: 'security_measures', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
-            { name: 'requirement_assessments', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
             { name: 'link', type: type.TEXT },
         ]);
         await use(ePage);
@@ -396,7 +394,6 @@ export class TestContent {
                     description: vars.description, 
                     attachment: vars.file,
                     folder: vars.folderName,
-                    security_measures: [vars.securityMeasureName],
                     requirement_assessments: [
                         vars.requirement_assessment.name,
                         vars.requirement_assessment2.name
