@@ -92,4 +92,4 @@ jobs:
           name: functional-tests-report
           path: |
             ${{ env.working-directory }}/tests/reports/
-          retention-days: 30
+          retention-days: 5
