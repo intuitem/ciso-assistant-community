@@ -1,6 +1,9 @@
 import json
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import QuerySet
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
@@ -40,25 +43,38 @@ class LibraryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return Response({"results": self.get_queryset()})
 
-    def retrieve(self, request, *args, pk=None, **kwargs):
+    def retrieve(self, request, *args, pk, **kwargs):
         library = get_library(pk)
         return Response(library)
 
-    def destroy(self, request, *args, pk=None, **kwargs):
-        _library = get_library(pk)
-        if _library and (_id := _library.get("id")):
-            library = Library.objects.get(id=_id)
-            try:
-                library.delete()
-            except Exception:
-                return Response(
-                    data="This library could not be deleted.",
-                    status=HTTP_400_BAD_REQUEST,
-                )
-            return Response(status=HTTP_200_OK)
-        return Response(
-            data="This library does not exist.", status=HTTP_400_BAD_REQUEST
-        )
+    def destroy(self, request, *args, pk, **kwargs):
+        library = get_library(pk)
+
+        if library is None:
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+
+        if library["reference_count"] != 0:
+            return Response(
+                data="Library cannot be deleted because it has references.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            Library.objects.get(id=library.get("id")).delete()
+        except IntegrityError as e:
+            # TODO: Log the exception if logging is set up
+            # logging.exception("Integrity error while deleting library: %s", e)
+            print(e)
+        except Exception as e:
+            # TODO: Log the exception if logging is set up
+            # logging.exception("Unexpected error while deleting library: %s", e)
+            print(e)
+            return Response(
+                data="Unexpected error occurred while deleting the library.",
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
@@ -74,9 +90,7 @@ class LibraryViewSet(viewsets.ModelViewSet):
             )
         preview = preview_library(library)
         return Response(
-            get_sorted_requirement_nodes(
-                preview.get("requirement_nodes"), None
-            )
+            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
         )
 
     @action(detail=True, methods=["get"], url_path="import")
@@ -88,7 +102,9 @@ class LibraryViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(e)
             return Response(
-                {"error": "Failed to load library, please check if it has dependencies"},
+                {
+                    "error": "Failed to load library, please check if it has dependencies"
+                },
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 

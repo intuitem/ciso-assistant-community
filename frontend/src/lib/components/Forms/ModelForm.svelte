@@ -248,20 +248,6 @@
 			label="Domain"
 			hide={initialData.security_measures || initialData.requirement_assessments}
 		/>
-		<AutocompleteSelect
-			{form}
-			multiple
-			options={getOptions({ objects: model.foreignKeys['security_measures'] })}
-			field="security_measures"
-			label="Security measures"
-		/>
-		<AutocompleteSelect
-			{form}
-			multiple
-			options={getOptions({ objects: model.foreignKeys['requirement_assessments'] })}
-			field="requirement_assessments"
-			label="Requirement assessments"
-		/>
 		<TextField
 			{form}
 			field="link"
