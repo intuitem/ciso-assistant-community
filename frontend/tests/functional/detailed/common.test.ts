@@ -40,7 +40,6 @@ for (const key of testPages) {
                 await pages[key].waitUntilLoaded();
                 await pages[key].createItem(items[key].build, "dependency" in items[key] ? items[key].dependency : null);
                 
-                
                 if (await pages[key].getRow(items[key].build.name).isHidden()) {
                     await pages[key].searchInput.fill(items[key].build.name);
                 }
@@ -54,7 +53,7 @@ for (const key of testPages) {
             
             test(`${items[key].displayName} item details are showing properly`, async ({ pages, page }) => {
                 await pages[key].itemDetail.verifyItem(items[key].build);
-                page.url().includes('evidences') ? await pages[key].page.waitForTimeout(1000) : null;
+                page.url().includes('evidences') ? await pages[key].page.waitForTimeout(1000) : null; // prevent crashing
             });
         
             test(`user can edit ${items[key].displayName.toLowerCase()} item`, async ({ pages, page }, testInfo) => {
@@ -70,13 +69,5 @@ for (const key of testPages) {
         test.afterAll(async () => {
             writeFileSync(file_path, JSON.stringify(history));
         });
-        
-        // test.afterEach('cleanup', async ({ pages, page }) => {
-        //     await pages[key].goto()
-        //     await page.waitForURL(pages[key].url);
-        //     await pages[key].deleteItemButton(vars.folderName).click();
-        //     await pages[key].deleteModalConfirmButton.click();
-        //     await expect(pages[key].getRow(vars.folderName)).not.toBeVisible();
-        // });
     });
 }
