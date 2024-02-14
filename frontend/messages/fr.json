@@ -59,5 +59,10 @@
 	"riskMatrix": "Matrice des risques",
 	"project": "Projet",
 	"folder": "Dossier",
+	"riskAssessment": "Évaluation de risque",
+	"threat": "Menace",
+	"framework": "Cadre",
+	"file": "Fichier",
+	"language": "Langue",
 	"builtin": "Intégré"
 }

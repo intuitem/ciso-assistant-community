@@ -146,8 +146,14 @@
 		project: m.project(),
 		complianceAssessments: m.complianceAssessments(),
 		folder: m.folder(),
-		meta: m.meta(),
 		builtin: m.builtin(),
+		assets: m.assets(),
+		threat: m.threat(),
+		riskAssessment: m.riskAssessment(),
+		framework: m.framework(),
+		file: m.file(),
+		overview: m.overview(),
+		language: m.language()
 	}
 </script>
 

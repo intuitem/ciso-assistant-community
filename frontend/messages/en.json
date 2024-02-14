@@ -59,5 +59,10 @@
 	"riskMatrix": "Risk matrix",
 	"project": "Project",
 	"folder": "Folder",
+	"riskAssessment": "Risk assessment",
+	"threat": "Threat",
+	"framework": "Framework",
+	"file": "File",
+	"language": "Language",
 	"builtin": "Builtin"
 }
