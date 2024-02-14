@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 import pytest
 from ciso_assistant.settings import BASE_DIR
 from core.models import (
+    Policy,
     Project,
     RiskAssessment,
     ComplianceAssessment,
@@ -676,6 +677,51 @@ class TestSecurityMeasure:
             name="Measure", folder=folder, security_function=function
         )
         assert measure.category == "technical"
+
+
+@pytest.mark.django_db
+class TestPolicy:
+    pytestmark = pytest.mark.django_db
+
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_policy_creation(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        policy = Policy.objects.create(name="Policy", folder=root_folder)
+        assert Policy.objects.count() == 1
+        assert SecurityMeasure.objects.count() == 1
+        assert policy.name == "Policy"
+        assert policy.folder == root_folder
+        assert policy.category == "policy"
+
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_policy_does_not_inherit_category_from_security_function(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        folder = Folder.objects.create(name="Parent", folder=root_folder)
+        function = SecurityFunction.objects.create(
+            name="Function", folder=root_folder, category="technical"
+        )
+        policy = Policy.objects.create(
+            name="Policy", folder=folder, security_function=function
+        )
+        assert policy.category == "policy"
+
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_policy_creation_same_name(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        Policy.objects.create(name="Policy", folder=root_folder)
+        with pytest.raises(ValidationError):
+            Policy.objects.create(name="Policy", folder=root_folder)
+
+    @pytest.mark.usefixtures("root_folder_fixture")
+    def test_policy_creation_same_name_different_folder(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        folder = Folder.objects.create(name="Parent", folder=root_folder)
+        policy1 = Policy.objects.create(name="Policy", folder=root_folder)
+        policy2 = Policy.objects.create(name="Policy", folder=folder)
+        assert policy1.name == "Policy"
+        assert policy2.name == "Policy"
+        assert policy1.folder == root_folder
+        assert policy2.folder == folder
 
 
 @pytest.mark.django_db
