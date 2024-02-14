@@ -195,6 +195,18 @@ class SecurityMeasureReadSerializer(SecurityMeasureWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
 
 
+class PolicyWriteSerializer(SecurityMeasureWriteSerializer):
+    class Meta:
+        model = Policy
+        fields = "__all__"
+
+
+class PolicyReadSerializer(SecurityMeasureReadSerializer):
+    class Meta:
+        model = Policy
+        fields = "__all__"
+
+
 class UserReadSerializer(BaseModelSerializer):
     user_groups = FieldsRelatedField(many=True)
 
@@ -234,7 +246,10 @@ class UserWriteSerializer(BaseModelSerializer):
             user = User.objects.create_user(**validated_data)
         except Exception as e:
             print(e)
-            if User.objects.filter(email=validated_data["email"]).exists() and send_mail:
+            if (
+                User.objects.filter(email=validated_data["email"]).exists()
+                and send_mail
+            ):
                 raise serializers.ValidationError(
                     {
                         "warning": [
@@ -244,11 +259,7 @@ class UserWriteSerializer(BaseModelSerializer):
                 )
             else:
                 raise serializers.ValidationError(
-                    {
-                        "error": [
-                            "An error occurred while creating the user"
-                        ]
-                    }
+                    {"error": ["An error occurred while creating the user"]}
                 )
         return user
 
@@ -364,8 +375,13 @@ class EvidenceReadSerializer(BaseModelSerializer):
 
 
 class EvidenceWriteSerializer(BaseModelSerializer):
-    security_measures = serializers.PrimaryKeyRelatedField(many=True, queryset=SecurityMeasure.objects.all())
-    requirement_assessments = serializers.PrimaryKeyRelatedField(many=True, queryset=RequirementAssessment.objects.all())
+    security_measures = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=SecurityMeasure.objects.all()
+    )
+    requirement_assessments = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=RequirementAssessment.objects.all()
+    )
+
     class Meta:
         model = Evidence
         fields = "__all__"
@@ -396,7 +412,6 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     compliance_assessment = FieldsRelatedField()
-
 
     class Meta:
         model = RequirementAssessment
