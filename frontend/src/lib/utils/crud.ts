@@ -175,7 +175,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
-			{ field: 'security_function', urlModel: 'security-functions' },
+			{ field: 'security_function', urlModel: 'security-functions', urlParams: 'category=policy' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],

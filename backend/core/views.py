@@ -278,7 +278,7 @@ class SecurityFunctionViewSet(BaseModelViewSet):
     """
 
     model = SecurityFunction
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "category"]
     search_fields = ["name", "description", "provider"]
 
     @action(detail=False, name="Get category choices")
