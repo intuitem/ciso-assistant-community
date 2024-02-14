@@ -144,8 +144,10 @@
 			field="threats"
 			label="Threats"
 		/>
-	{:else if URLModel === 'security-measures'}
-		<Select {form} options={model.selectOptions['category']} field="category" label="Category" />
+	{:else if URLModel === 'security-measures' || URLModel === 'policies'}
+		{#if schema.shape.category}
+			<Select {form} options={model.selectOptions['category']} field="category" label="Category" />
+		{/if}
 		<Select {form} options={model.selectOptions['status']} field="status" label="Status" />
 		<AutocompleteSelect
 			{form}
