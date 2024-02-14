@@ -141,12 +141,12 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<h3 class="h3 font-semibold">
+	<h3 class="h3 font-semibold whitespace-pre-line">
 		{title}
 	</h3>
 	<code class="code">{data.requirement.urn}</code>
 	{#if data.requirement.description}
-		<p>{data.requirement.description}</p>
+		<p class="whitespace-pre-line">{data.requirement.description}</p>
 	{/if}
 	{#if threats || security_functions}
 		<div class="card p-4 variant-glass-primary text-sm flex flex-row cursor-auto">
