@@ -1,4 +1,4 @@
-name: Startup Functional Tests
+name: Startup Tests
 
 on:
   pull_request:
@@ -6,13 +6,12 @@ on:
 
 env:
   GITHUB_WORKFLOW: github_actions
+  backend-directory: ./backend
+  working-directory: ./frontend
 
 jobs:
-  startup-tests:
+  startup-functional-test:
     runs-on: ubuntu-latest
-    env:
-      backend-directory: ./backend
-      working-directory: ./frontend
 
     services:
       postgres:
@@ -88,8 +87,45 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: startup-tests-report
+          name: startup-functional-test-report
           path: |
             ${{ env.working-directory }}/tests/reports/
             ${{ env.working-directory }}/tests/results/
           retention-days: 30
+  startup-docker-compose-test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SUPERUSER_EMAIL: admin@tests.com
+      DJANGO_SUPERUSER_PASSWORD: 1234
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      COMPOSE_TEST: True
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Install dependencies
+        working-directory: ${{ env.working-directory }}
+        run: |
+          npm install
+          npm ci
+      - name: Install Playwright Browsers
+        working-directory: ${{ env.working-directory }}
+        run: npx playwright install --with-deps
+      - name: Build the Docker app
+        run: docker compose up -d --build
+      - name: Config the Docker app
+        run: |
+          docker compose exec backend python manage.py migrate
+          docker compose exec backend python manage.py createsuperuser --noinput
+      - name: Run tests
+        working-directory: ${{ env.working-directory }}
+        run: npx playwright test tests/functional/startup.test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: startup-docker-test-report
+          path: |
+            ${{ env.working-directory }}/tests/reports/
+            ${{ env.working-directory }}/tests/results/
+          retention-days: 5
