@@ -1,19 +1,21 @@
 from django.apps import AppConfig
 
+
 def startup():
     """Implement CISO Assistant 1.0 default Roles and User Groups"""
 
-    from iam.models import Folder
-    from iam.models import UserGroup, Role, RoleAssignment
+    from ciso_assistant.settings import (
+        CISO_ASSISTANT_SUPERUSER_EMAIL,
+    )
     from django.contrib.auth.models import Permission
-    from iam.models import User
-    from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, EMAIL_HOST, EMAIL_HOST_RESCUE
+    from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
     auditor_permissions = Permission.objects.filter(
         codename__in=[
             "view_project",
             "view_riskassessment",
             "view_securitymeasure",
+            "view_policy",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
@@ -34,6 +36,7 @@ def startup():
             "view_project",
             "view_riskassessment",
             "view_securitymeasure",
+            "view_policy",
             "view_riskscenario",
             "view_riskacceptance",
             "approve_riskacceptance",
@@ -60,10 +63,15 @@ def startup():
             "add_riskassessment",
             "view_riskassessment",
             "change_riskassessment",
-            "delete_riskassessment" "add_securitymeasure",
+            "delete_riskassessment",
+            "add_securitymeasure",
             "view_securitymeasure",
             "change_securitymeasure",
             "delete_securitymeasure",
+            "add_policy",
+            "view_policy",
+            "change_policy",
+            "delete_policy",
             "add_riskscenario",
             "view_riskscenario",
             "change_riskscenario",
@@ -109,6 +117,10 @@ def startup():
             "view_securitymeasure",
             "change_securitymeasure",
             "delete_securitymeasure",
+            "add_policy",
+            "view_policy",
+            "change_policy",
+            "delete_policy",
             "add_riskscenario",
             "view_riskscenario",
             "change_riskscenario",
@@ -183,6 +195,10 @@ def startup():
             "view_securitymeasure",
             "change_securitymeasure",
             "delete_securitymeasure",
+            "add_policy",
+            "view_policy",
+            "change_policy",
+            "delete_policy",
             "add_riskscenario",
             "view_riskscenario",
             "change_riskscenario",
