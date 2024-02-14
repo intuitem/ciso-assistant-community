@@ -36,5 +36,6 @@
 	"backupRestore": "Sauvegarde et restauration",
 	"myProfile": "Mon profil",
 	"aboutCiso": "À propos de CISO Assistant",
-	"Logout": "Se déconnecter"
+	"Logout": "Se déconnecter",
+	"name": "nom"
 }
