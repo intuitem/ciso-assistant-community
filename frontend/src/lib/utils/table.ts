@@ -49,6 +49,10 @@ export const listViewFields = {
 		head: ['Name', 'Description', 'Category', 'ETA', 'Domain', 'Security function'],
 		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
 	},
+	policies: {
+		head: ['Name', 'Description', 'ETA', 'Domain', 'Security function'],
+		body: ['name', 'description', 'eta', 'folder', 'security_function']
+	},
 	'security-functions': {
 		head: ['Ref', 'Name', 'Description', 'Category', 'Provider', 'Domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],

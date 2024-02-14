@@ -24,6 +24,7 @@ export const URL_MODEL = [
 	'threats',
 	'risk-scenarios',
 	'security-measures',
+	'policies',
 	'risk-acceptances',
 	'security-functions',
 	'assets',
