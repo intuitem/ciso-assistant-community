@@ -98,6 +98,17 @@ export const SecurityMeasureSchema = baseNamedObject({
 	security_function: z.string().optional()
 });
 
+export const PolicySchema = baseNamedObject({
+	status: z.string().optional(),
+	evidences: z.string().optional().array().optional(),
+	eta: z.string().optional().nullable(),
+	expiry_date: z.string().optional().nullable(),
+	link: z.string().url().optional().nullable(),
+	effort: z.string().optional(),
+	folder: z.string(),
+	security_function: z.string().optional()
+});
+
 export const RiskAcceptanceSchema = baseNamedObject({
 	folder: z.string(),
 	expiry_date: z.string().optional().nullable(),
@@ -181,6 +192,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'security-measures': SecurityMeasureSchema,
+	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'security-functions': SecurityFunctionSchema,
 	assets: AssetSchema,
