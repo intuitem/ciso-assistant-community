@@ -172,16 +172,17 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first">
+					<div class="text-sm font-medium text-gray-800 capitalize-first"
+					data-testid="{key.replace('_', '-')}-field-title">
 						{key.replace('_', ' ')}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none">
+						<li class="text-gray-600 list-none" data-testid={!(value instanceof Array) ? key.replace('_', '-') + "-field-value" : null}>
 							{#if value}
 								{#if Array.isArray(value)}
 									<ul>
 										{#each value as val}
-											<li>
+											<li data-testid={key.replace('_', '-') + "-field-value"}>
 												{#if val.str && val.id}
 													{@const itemHref = `/${
 														URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
@@ -219,6 +220,7 @@
 			<a
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit"
+				data-testid="edit-button"
 				><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
 			>
 		{/if}
