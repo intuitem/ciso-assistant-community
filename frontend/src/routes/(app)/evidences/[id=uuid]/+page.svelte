@@ -71,7 +71,8 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.evidence).filter( ([key, _]) => ['name', 'description', 'folder', 'attachment', 'link', 'comment'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first">
+					<div class="text-sm font-medium text-gray-800 capitalize-first"
+					data-testid={key.replace('_', '-') + "-field-title"}>
 						{#if key === 'urn'}
 							URN
 						{:else}
@@ -79,13 +80,13 @@
 						{/if}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none">
+						<li class="text-gray-600 list-none" data-testid={!Array.isArray(value) || value.length <=0 ? key.replace('_', '-') + "-field-value" : null}>
 							{#if value}
 								{#if Array.isArray(value)}
 									<ul>
 										{#if value.length > 0}
 											{#each value as val}
-												<li>
+												<li data-testid={key.replace('_', '-') + "-field-value"}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
@@ -127,6 +128,7 @@
 				<a
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
+					data-testid="edit-button"
 					><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
 				>
 			{/if}
@@ -160,10 +162,11 @@
 	{#if data.evidence.attachment}
 		<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
 			<div class="flex flex-row justify-between">
-				<h4 class="h4 font-semibold">{data.evidence.attachment}</h4>
+				<h4 class="h4 font-semibold" data-testid="attachment-name-title">{data.evidence.attachment}</h4>
 				<div class="space-x-2">
 					<a href={`./${data.evidence.id}/attachment`} class="btn variant-filled-primary h-fit"
-						><i class="fa-solid fa-download mr-2" /> Download</a
+						data-testid="attachment-download-button"	
+					><i class="fa-solid fa-download mr-2" /> Download</a
 					>
 					<button
 						on:click={(_) => {
