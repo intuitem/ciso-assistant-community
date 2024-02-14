@@ -828,6 +828,15 @@ class SecurityMeasure(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
         ).count()
 
 
+class Policy(SecurityMeasure):
+    class Meta:
+        proxy = True
+        verbose_name = _("Policy")
+        verbose_name_plural = _("Policies")
+
+    objects = SecurityMeasure.objects.filter(category="policy")
+
+
 class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
