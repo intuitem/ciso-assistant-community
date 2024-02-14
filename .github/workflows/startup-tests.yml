@@ -116,12 +116,12 @@ jobs:
         run: |
           touch .env
           echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
-          echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
-          echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
           docker compose exec backend python manage.py migrate
+          docker compose exec backend export DJANGO_SUPERUSER_EMAIL=admin@tests.com
+          docker compose exec backend export DJANGO_SUPERUSER_PASSWORD=1234
           docker compose exec backend python manage.py createsuperuser --noinput
       - name: Run tests
         working-directory: ${{ env.working-directory }}
