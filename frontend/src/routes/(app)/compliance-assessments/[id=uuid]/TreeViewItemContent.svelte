@@ -102,7 +102,9 @@
 					</a>
 				</span>
 			{:else}
-				{content}
+				<p class="max-w-[65ch] whitespace-pre-line">
+					{content}
+				</p>
 			{/if}
 		</span>
 		{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}

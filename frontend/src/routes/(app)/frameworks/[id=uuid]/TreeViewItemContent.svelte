@@ -21,16 +21,26 @@
 </script>
 
 <div>
-	<span style="font-weight: {hasChildren ? 600 : 300};">
-		{content}
+	<span class="whitespace-pre-line" style="font-weight: {hasChildren ? 600 : 300};">
+		<p class="max-w-[65ch]">
+			{content}
+		</p>
 	</span>
 	{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
 		<div
 			role="button"
 			tabindex="0"
 			class="underline text-sm hover:text-primary-400 {classesShowInfoText(showInfo)}"
-			on:click={(_) => (showInfo = !showInfo)}
-			on:keydown={(_) => (showInfo = !showInfo)}
+			on:click={(e) => {
+				e.preventDefault();
+				showInfo = !showInfo;
+			}}
+			on:keydown={(e) => {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					showInfo = !showInfo;
+				}
+			}}
 		>
 			<i class="text-xs fa-solid fa-info-circle" /> Learn more
 		</div>
