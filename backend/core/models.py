@@ -828,13 +828,19 @@ class SecurityMeasure(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
         ).count()
 
 
+class PolicyManager(models.Manager):
+    def create(self, *args, **kwargs):
+        kwargs["category"] = "policy"  # Ensure category is always "policy"
+        return super().create(*args, **kwargs)
+
+
 class Policy(SecurityMeasure):
     class Meta:
         proxy = True
         verbose_name = _("Policy")
         verbose_name_plural = _("Policies")
 
-    objects = SecurityMeasure.objects.filter(category="policy")
+    objects = PolicyManager()  # Use the custom manager
 
     def save(self, *args, **kwargs):
         self.category = "policy"
