@@ -69,7 +69,7 @@ jobs:
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
           echo DB_HOST=localhost >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://127.0.0.1:4173 >> .env
+          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -90,6 +90,6 @@ jobs:
         with:
           name: startup-tests-report
           path: |
-            ${{ env.working-directory }}/tests/reports/
             ${{ env.working-directory }}/tests/results/
-          retention-days: 30
+            ${{ env.working-directory }}/tests/reports/
+          retention-days: 5
