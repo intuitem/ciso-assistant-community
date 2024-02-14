@@ -3,9 +3,9 @@ import { devices } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
 	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173,
-		reuseExistingServer: !process.env.CI,
+		command: process.env.COMPOSE_TEST ? 'echo "The docker compose frontend server didn\'t start correctly"' : 'npm run build && npm run preview',
+		port: process.env.COMPOSE_TEST ? 3000 : 4173,
+		reuseExistingServer: process.env.COMPOSE_TEST
 	},
 	testDir: 'tests',
 	outputDir: 'tests/results',
