@@ -295,10 +295,11 @@
 		<div class="flex flex-row justify-between space-x-4">
 			<button
 				class="btn bg-gray-400 text-white font-semibold w-full"
+				data-testid="cancel-button"
 				type="button"
 				on:click={cancel}>Cancel</button
 			>
-			<button class="btn variant-filled-primary font-semibold w-full">Save</button>
+			<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button">Save</button>
 		</div>
 	</SuperForm>
 </div>
