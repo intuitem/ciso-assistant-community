@@ -11,6 +11,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
+	import * as m from '$paraglide/messages';
 	// Event Dispatcher
 	type TableEvent = {
 		selected: string[];
@@ -119,6 +120,35 @@
 
 	// tagged_keys tag_map[key][value]
 	$: source, handler.setRows(data);
+
+	const headTranslate: any = {
+		name: m.name(),
+		description: m.description(),
+		parentDomain: m.parentDomain(),
+		ref: m.ref(),
+		refId: m.refId(),
+		businessValue: m.businessValue(),
+		email: m.email(),
+		firstName: m.firstName(),
+		lastName: m.lastName(),
+		category: m.category(),
+		eta: m.eta(),
+		securityFunction: m.securityFunction(),
+		provider: m.provider(),
+		domain: m.domain(),
+		urn: m.urn(),
+		id: m.id(),
+		treatmentStatus: m.treatmentStatus(),
+		currentLevel: m.currentLevel(),
+		residualLevel: m.residualLevel(),
+		riskMatrix: m.riskMatrix(),
+		riskScenarios: m.riskScenarios(),
+		project: m.project(),
+		complianceAssessments: m.complianceAssessments(),
+		folder: m.folder(),
+		meta: m.meta(),
+		builtin: m.builtin(),
+	}
 </script>
 
 <div class="table-container {classesBase}">
@@ -145,7 +175,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{heading}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{headTranslate[heading]}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
