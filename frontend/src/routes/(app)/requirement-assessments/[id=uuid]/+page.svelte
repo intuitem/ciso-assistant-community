@@ -141,7 +141,7 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<h3 class="h3 font-semibold">
+	<h3 class="h3 font-semibold whitespace-pre-line">
 		{title}
 	</h3>
 	<code class="code">{data.requirement.urn}</code>
