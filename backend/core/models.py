@@ -836,6 +836,10 @@ class Policy(SecurityMeasure):
 
     objects = SecurityMeasure.objects.filter(category="policy")
 
+    def save(self, *args, **kwargs):
+        self.category = "policy"
+        super(Policy, self).save(*args, **kwargs)
+
 
 class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
     TREATMENT_OPTIONS = [
