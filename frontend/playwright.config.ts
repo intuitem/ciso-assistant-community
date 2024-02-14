@@ -28,8 +28,8 @@ const config: PlaywrightTestConfig = {
 	],
 	use: {
 		screenshot: 'only-on-failure',
-		video: process.env.CI || true ? 'retain-on-failure' : 'on',
-		trace: process.env.CI || true ? 'retain-on-failure' : 'on',
+		video: process.env.CI && false ? 'retain-on-failure' : 'on',
+		trace: process.env.CI && false ? 'retain-on-failure' : 'on',
 		contextOptions: {
 			recordVideo: { dir: "tests/results/videos"}
 		}
