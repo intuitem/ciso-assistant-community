@@ -37,16 +37,15 @@ for (const key of testPages) {
                 
                 setHttpResponsesListener(page);
 
-                if (await pages[key].getRow("loading").first().isVisible()) {
-                    await pages[key].getRow("loading").first().waitFor({state: 'hidden'});
-                }
-
+                await pages[key].waitUntilLoaded();
                 await pages[key].createItem(items[key].build, "dependency" in items[key] ? items[key].dependency : null);
+                
                 
                 if (await pages[key].getRow(items[key].build.name).isHidden()) {
                     await pages[key].searchInput.fill(items[key].build.name);
                 }
-
+                
+                await pages[key].waitUntilLoaded();
                 await pages[key].viewItemDetail(items[key].build.name);
                 await pages[key].itemDetail.hasTitle();
             });
