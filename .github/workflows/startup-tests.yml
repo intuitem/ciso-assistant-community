@@ -119,7 +119,7 @@ jobs:
       - name: Config the Docker app
         run: |
           docker compose exec backend python manage.py migrate
-          docker compose exec backend python bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 manage.py createsuperuser --noinput"
+          docker compose exec backend python /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 manage.py createsuperuser --noinput"
       - name: Run tests
         working-directory: ${{ env.working-directory }}
         run: npx playwright test tests/functional/startup.test.ts
