@@ -3,7 +3,9 @@ name: Functional Tests
 on:
   pull_request:
     branches: [main, develop]
-    types: [opened, edited]
+    types: [opened, synchronize]
+    paths:
+      - 'frontend/tests/**'
   workflow_dispatch:
 
 env:
