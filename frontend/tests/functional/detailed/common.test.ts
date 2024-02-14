@@ -51,9 +51,10 @@ for (const key of testPages) {
                 //wait fore the file to load to prevent crashing
                 page.url().includes('evidences') ? await pages[key].page.getByTestId("attachment-name-title").waitFor({state: 'visible'}) : null;
             });
-        
+            
             test(`${items[key].displayName} item details are showing properly`, async ({ pages, page }) => {
                 await pages[key].itemDetail.verifyItem(items[key].build);
+                page.url().includes('evidences') ? await pages[key].page.waitForTimeout(1000) : null;
             });
         
             test(`user can edit ${items[key].displayName.toLowerCase()} item`, async ({ pages, page }, testInfo) => {
