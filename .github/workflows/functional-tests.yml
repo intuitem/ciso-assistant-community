@@ -3,7 +3,7 @@ name: Functional Tests
 on:
   pull_request:
     branches: [main, develop]
-    types: [opened]
+    types: [opened, edited]
   workflow_dispatch:
 
 env:
@@ -91,5 +91,6 @@ jobs:
         with:
           name: functional-tests-report
           path: |
+            ${{ env.working-directory }}/tests/results/
             ${{ env.working-directory }}/tests/reports/
           retention-days: 5

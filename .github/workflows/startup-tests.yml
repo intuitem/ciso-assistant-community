@@ -90,5 +90,6 @@ jobs:
         with:
           name: startup-tests-report
           path: |
+            ${{ env.working-directory }}/tests/results/
             ${{ env.working-directory }}/tests/reports/
           retention-days: 5
