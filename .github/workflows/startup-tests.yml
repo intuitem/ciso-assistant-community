@@ -117,7 +117,6 @@ jobs:
       - name: Config the Docker app
         run: |
           docker compose exec backend python manage.py migrate
-          docker compose exec backend python manage.py createsuperuser --noinput
       - name: Run tests
         working-directory: ${{ env.working-directory }}
         run: npx playwright test tests/functional/startup.test.ts
