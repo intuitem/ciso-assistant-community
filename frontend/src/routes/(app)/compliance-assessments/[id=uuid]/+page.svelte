@@ -85,7 +85,7 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first">
+					<div class="text-sm font-medium text-gray-800 capitalize-first" data-testid={key.replaceAll('_', '-') + "-field-title"}>
 						{#if key === 'urn'}
 							URN
 						{:else}
@@ -93,7 +93,7 @@
 						{/if}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none">
+						<li class="text-gray-600 list-none" data-testid={key.replaceAll('_', '-') + "-field-value"}>
 							{#if value}
 								{#if Array.isArray(value)}
 									<ul>
@@ -144,6 +144,7 @@
 				<a
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
+					data-testid="edit-button"
 					><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
 				>
 			{/if}

@@ -1,6 +1,5 @@
-import { expect, type Page } from './test-utils';
-import { PageContent } from './page-content';
-import { BasePage } from './base-page';
+import { expect, type Page } from './test-utils.js';
+import { BasePage } from './base-page.js';
 
 export class AnalyticsPage extends BasePage {
 	constructor(public readonly page: Page) {
@@ -9,6 +8,6 @@ export class AnalyticsPage extends BasePage {
 	}
 
 	async hasTitle() {
-		await expect.soft(this.page.locator('#page-title')).toHaveText('Analytics');
+		await expect.soft(this.pageTitle).toHaveText('Analytics');
 	}
 }
