@@ -64,7 +64,7 @@
 	<slot name="body" />
 	{#if !hasBody}
 		{#if displayDetail}
-			<a href={detailURL} class="unstyled cursor-pointer hover:text-primary-500"
+			<a href={detailURL} class="unstyled cursor-pointer hover:text-primary-500" data-testid="tablerow-detail-button"
 				><i class="fa-solid fa-eye" /></a
 			>
 		{/if}
@@ -72,7 +72,7 @@
 			<a
 				href={editURL}
 				on:click={stopPropagation}
-				class="unstyled cursor-pointer hover:text-primary-500"
+				class="unstyled cursor-pointer hover:text-primary-500" data-testid="tablerow-edit-button"
 				><i class="fa-solid fa-pen-to-square" /></a
 			>
 		{/if}
@@ -83,7 +83,7 @@
 					stopPropagation(_);
 				}}
 				on:keydown={(_) => modalConfirmDelete(row.meta.id, row.name ?? Object.values(row)[0])}
-				class="cursor-pointer hover:text-primary-500"><i class="fa-solid fa-trash" /></button
+				class="cursor-pointer hover:text-primary-500" data-testid="tablerow-delete-button"><i class="fa-solid fa-trash" /></button
 			>
 		{/if}
 	{/if}
