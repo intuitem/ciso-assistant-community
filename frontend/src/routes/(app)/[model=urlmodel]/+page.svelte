@@ -11,7 +11,8 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
-	import { localItems } from '$lib/utils/locales';
+	import * as m from '$paraglide/messages';
+	import { localItems, getDeterminant } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
@@ -93,7 +94,9 @@
 						class="btn variant-filled-primary self-end"
 						data-testid="add-button"
 						on:click={modalCreateForm}
-						><i class="fa-solid fa-plus mr-2" />New {data.model.verboseName.toLowerCase()}</button
+						><i class="fa-solid fa-plus mr-2" />
+						{m.addButton({determinant:getDeterminant(languageTag(), "undefined", data.model), model: localItems(languageTag())[data.model.localName].toLowerCase()})}
+					</button
 					>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"

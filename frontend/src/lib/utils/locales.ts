@@ -1,4 +1,5 @@
 import * as m from '$paraglide/messages';
+import type { ModelInfo } from '$lib/utils/types';
 
 export const LOCALE_MAP = {
 	en: {
@@ -10,6 +11,30 @@ export const LOCALE_MAP = {
 		flag: '🇫🇷'
 	}
 };
+
+export function getDeterminant(lang: string, defined: string, model: ModelInfo, plural=false): string {
+	const determinantTable = {
+		"fr": {
+			"defined": {
+				"plural": "les",
+				"m": "le",
+				"f": "la"
+			},
+			"undefined": {
+				"plural": "des",
+				"m": "un",
+				"f": "une"
+			}
+		}
+	};
+
+	if (lang === "en")
+		return '';
+	else if (lang === "fr" && plural)
+		return determinantTable[lang][defined]["plural"];
+	else
+		return determinantTable[lang][defined][model.localFrGender];
+}
 
 interface LocalItems {
 	[key: string]: string;
@@ -35,17 +60,23 @@ export function localItems(languageTag: string): LocalItems {
 		securityFunctions: m.securityFunctions({ languageTag: languageTag }),
 		securityMeasures: m.securityMeasures({ languageTag: languageTag }),
 		assets: m.assets({ languageTag: languageTag }),
+		asset: m.asset({ languageTag: languageTag }),
 		policies: m.policies({ languageTag: languageTag }),
 		riskMatrices: m.riskMatrices({ languageTag: languageTag }),
 		riskAssessments: m.riskAssessments({ languageTag: languageTag }),
 		riskScenarios: m.riskScenarios({ languageTag: languageTag }),
+		riskScenario: m.riskScenario({ languageTag: languageTag }),
 		riskAcceptances: m.riskAcceptances({ languageTag: languageTag }),
+		riskAcceptance: m.riskAcceptance({ languageTag: languageTag }),
 		complianceAssessments: m.complianceAssessments({ languageTag: languageTag }),
+		complianceAssessment: m.complianceAssessment({ languageTag: languageTag }),
 		evidences: m.evidences({ languageTag: languageTag }),
+		evidence: m.evidence({ languageTag: languageTag }),
 		frameworks: m.frameworks({ languageTag: languageTag }),
 		domains: m.domains({ languageTag: languageTag }),
 		projects: m.projects({ languageTag: languageTag }),
 		users: m.users({ languageTag: languageTag }),
+		user: m.user({ languageTag: languageTag }),
 		userGroups: m.userGroups({ languageTag: languageTag }),
 		roleAssignments: m.roleAssignments({ languageTag: languageTag }),
 		xRays: m.xRays({ languageTag: languageTag }),
@@ -67,6 +98,7 @@ export function localItems(languageTag: string): LocalItems {
 		category: m.category({ languageTag: languageTag }),
 		eta: m.eta({ languageTag: languageTag }),
 		securityFunction: m.securityFunction({ languageTag: languageTag }),
+		securityMeasure: m.securityMeasure({ languageTag: languageTag }),
 		provider: m.provider({ languageTag: languageTag }),
 		domain: m.domain({ languageTag: languageTag }),
 		urn: m.urn({ languageTag: languageTag }),
