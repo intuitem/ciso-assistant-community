@@ -24,19 +24,17 @@ export const listViewFields = {
 	'risk-scenarios': {
 		head: [
 			'Name',
-			'Treatment status',
-			'Threat',
+			'Threats',
 			'Risk assessment',
-			'Assets',
+			'Security measures',
 			'Current level',
 			'Residual level'
 		],
 		body: [
 			'name',
-			'treatment',
-			'threat',
+			'threats',
 			'risk_assessment',
-			'assets',
+			'security_measures',
 			'current_level',
 			'residual_level'
 		]
