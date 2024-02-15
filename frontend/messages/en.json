@@ -72,5 +72,12 @@
 	"framework": "Framework",
 	"file": "File",
 	"language": "Language",
-	"builtin": "Builtin"
+	"builtin": "Builtin",
+	"next": "Next",
+	"previous": "Previous",
+	"show": "Show",
+	"entries": "entries",
+	"searchPlaceholder": "Search...",
+	"noEntriesFound": "No entries found",
+	"rowCount": "Showing {start} to {end} of {total}"
 }
