@@ -65,10 +65,6 @@
 	$: labels = update_scores(risk_score, risk_matrix);
 </script>
 
-<svelte:head>
-	<title>Scoring assistant</title>
-</svelte:head>
-
 <main class="text-sm h-full flex flex-col">
 	<div class="mx-auto">
 		<div class="flex flex-col">

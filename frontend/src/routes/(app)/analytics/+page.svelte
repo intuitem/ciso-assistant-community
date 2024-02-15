@@ -179,10 +179,6 @@
 	let dropdown = new Dropdown();
 </script>
 
-<svelte:head>
-	<title>Analytics</title>
-</svelte:head>
-
 <svelte:document
 	on:click={() => {
 		if (openTab === 3 && dropdown.show) {
