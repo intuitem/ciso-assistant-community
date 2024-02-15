@@ -65,7 +65,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const deleteForm = await superValidate(z.object({ id: z.string().uuid() }));
 				const createSchema = modelSchema(e.urlModel);
 				initialData[e.field] = data.id;
-				initialData['hey'] = 'hey';
 				const createForm = await superValidate(initialData, createSchema, { errors: false });
 
 				const foreignKeys: Record<string, any> = {};
