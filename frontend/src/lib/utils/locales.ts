@@ -12,6 +12,12 @@ export const LOCALE_MAP = {
 	}
 };
 
+export function toCamelCase(str: string) {
+	return str.replace(/[-_]+(.)?/g, function(match, char) {
+	  return char ? char.toUpperCase() : '';
+	});
+}
+
 export function getDeterminant(lang: string, defined: string, model: ModelInfo, plural=false): string {
 	const determinantTable = {
 		"fr": {
@@ -115,6 +121,39 @@ export function localItems(languageTag: string): LocalItems {
 		file: m.file({ languageTag: languageTag }),
 		language: m.language({ languageTag: languageTag }),
 		builtin: m.builtin({ languageTag: languageTag }),
+		status: m.status({ languageTag: languageTag }),
+		effort: m.effort({ languageTag: languageTag }),
+		impact: m.impact({ languageTag: languageTag }),
+		expiryDate: m.expiryDate({ languageTag: languageTag }),
+		link: m.link({ languageTag: languageTag }),
+		createdAt: m.createdAt({ languageTag: languageTag }),
+		updatedAt: m.updatedAt({ languageTag: languageTag }),
+		acceptedAt: m.acceptedAt({ languageTag: languageTag }),
+		rejectedAt: m.rejectedAt({ languageTag: languageTag }),
+		revokedAt: m.revokedAt({ languageTag: languageTag }),
+		locale: m.locale({ languageTag: languageTag }),
+		defaultLocale: m.defaultLocale({ languageTag: languageTag }),
+		annotation: m.annotation({ languageTag: languageTag }),
+		library: m.library({ languageTag: languageTag }),
+		typicalEvidence: m.typicalEvidence({ languageTag: languageTag }),
+		parentAsset: m.parentAsset({ languageTag: languageTag }),
+		approver: m.approver({ languageTag: languageTag }),
+		state: m.state({ languageTag: languageTag }),
+		justification: m.justification({ languageTag: languageTag }),
+		parentFolder: m.parentFolder({ languageTag: languageTag }),
+		contentType: m.contentType({ languageTag: languageTag }),
+		lcStatus: m.lcStatus({ languageTag: languageTag }),
+		internalReference: m.internalReference({ languageTag: languageTag }),
+		isActive: m.isActive({ languageTag: languageTag }),
+		dateJoined: m.dateJoined({ languageTag: languageTag }),
+		version: m.version({ languageTag: languageTag }),
+		treatment: m.treatment({ languageTag: languageTag }),
+		currentProba: m.currentProba({ languageTag: languageTag }),
+		currentImpact: m.currentImpact({ languageTag: languageTag }),
+		residualProba: m.residualProba({ languageTag: languageTag }),
+		residualImpact: m.residualImpact({ languageTag: languageTag }),
+		existingMeasures: m.existingMeasures({ languageTag: languageTag }),
+		strengthOfKnowledge: m.strengthOfKnowledge({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
