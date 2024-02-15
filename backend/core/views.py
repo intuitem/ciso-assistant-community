@@ -346,6 +346,39 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         else:
             return Response(status=HTTP_403_FORBIDDEN)
 
+    @action(detail=True, methods=["get"], name="Get treatment plan data")
+    def plan(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RiskAssessment,
+        )
+        if UUID(pk) in viewable_objects:
+            risk_assessment_object = self.get_object()
+            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
+            risk_assessment = RiskAssessmentReadSerializer(risk_assessment_object).data
+            risk_scenarios = RiskScenarioReadSerializer(
+                risk_scenarios_objects, many=True
+            ).data
+            [
+                risk_scenario.update(
+                    {
+                        "security_measures": SecurityMeasureReadSerializer(
+                            SecurityMeasure.objects.filter(
+                                risk_scenarios__id=risk_scenario["id"]
+                            ),
+                            many=True,
+                        ).data
+                    }
+                )
+                for risk_scenario in risk_scenarios
+            ]
+            risk_assessment.update({"risk_scenarios": risk_scenarios})
+            return Response(risk_assessment)
+
+        else:
+            return Response(status=HTTP_403_FORBIDDEN)
+
     @action(detail=True, name="Get treatment plan CSV")
     def treatment_plan_csv(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
