@@ -148,7 +148,7 @@
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line">{data.requirement.description}</p>
 	{/if}
-	{#if threats || security_functions}
+	{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
 		<div class="card p-4 variant-glass-primary text-sm flex flex-row cursor-auto">
 			<div class="flex-1">
 				<p class="font-medium">
@@ -208,7 +208,7 @@
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
 		>
-			<div class="card shadow-lg mt-8 bg-white">
+			<div class="card shadow-lg bg-white">
 				<TabGroup>
 					<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
 						>Security measures
