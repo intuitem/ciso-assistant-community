@@ -2,22 +2,8 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type HandleFetch } from '@sveltejs/kit';
 
-const LOGIN_REQUIRED_ROUTING_GROUP = new Set(['app']); // List of route group that require login to be accessed
-const ROUTE_GROUP_REGEX = /^\([a-zA-Z0-9_]+\)/;
-
 export const handle: Handle = async ({ event, resolve }) => {
-	const route: string | null = event.route.id;
-	let group = null;
-
 	const session = event.cookies.get('sessionid');
-
-	if (route) {
-		group = route.substring(1).match(ROUTE_GROUP_REGEX)?.[0];
-		group = group?.substring(1, group.length - 1);
-	}
-	if (!session && group && LOGIN_REQUIRED_ROUTING_GROUP.has(group)) {
-		redirect(302, `/login?next=${event.url.pathname}`);
-	}
 
 	let csrfToken = event.cookies.get('csrftoken');
 	if (!csrfToken) {
@@ -57,9 +43,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	});
 
 	if (!res.ok) {
-		console.log('bad response:', await res.text());
-		// The session is invalid. Load page as normal.
-		return await resolve(event);
+		// The session is invalid. Delete the session cookie and redirect to the login page.
+		event.cookies.delete('sessionid', {
+			path: '/',
+			secure: true,
+			sameSite: 'lax'
+		});
+		redirect(302, `/login?next=${event.url.pathname}`);
 	}
 
 	// User exists, set `events.locals.user` and load page.
