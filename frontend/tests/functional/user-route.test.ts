@@ -1,238 +1,245 @@
 import { LoginPage } from '../utils/login-page.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
 
-let vars = TestContent.generateTestVars(); 
+const vars = TestContent.generateTestVars();
 
-test('user usual routine actions are working correctly', async ({ logedPage, pages, analyticsPage: overviewPage, sideBar, page }) => {
-    test.slow();
+test('user usual routine actions are working correctly', async ({
+	logedPage,
+	pages,
+	analyticsPage: overviewPage,
+	sideBar,
+	page
+}) => {
+	test.slow();
 
-    await test.step('proper redirection to the overview page after login', async () => {
-        await overviewPage.hasUrl();
-        await overviewPage.hasTitle();
-        setHttpResponsesListener(page);
-    });
-    
-    await test.step('user can create a domain', async () => {
-        await sideBar.click("Organisation", pages.foldersPage.url);
-        await expect(page).toHaveURL(pages.foldersPage.url);
-        await pages.foldersPage.hasTitle();
+	await test.step('proper redirection to the overview page after login', async () => {
+		await overviewPage.hasUrl();
+		await overviewPage.hasTitle();
+		setHttpResponsesListener(page);
+	});
 
-        await pages.foldersPage.createItem({
-            name: vars.folderName, 
-            description: vars.description
-        });
+	await test.step('user can create a domain', async () => {
+		await sideBar.click('Organization', pages.foldersPage.url);
+		await expect(page).toHaveURL(pages.foldersPage.url);
+		await pages.foldersPage.hasTitle();
 
-        //TODO assert that the domain data are displayed in the table
-    });
+		await pages.foldersPage.createItem({
+			name: vars.folderName,
+			description: vars.description
+		});
 
-    await test.step('user can create a project', async () => {
-        await sideBar.click("Organisation", pages.projectsPage.url);
-        await expect(page).toHaveURL(pages.projectsPage.url);
-        await pages.projectsPage.hasTitle();
+		//TODO assert that the domain data are displayed in the table
+	});
 
-        await pages.projectsPage.createItem({
-            name: vars.projectName, 
-            description: vars.description, 
-            folder: vars.folderName, 
-            internal_reference: "Test internal reference", 
-            lc_status: "Production"
-        });
+	await test.step('user can create a project', async () => {
+		await sideBar.click('Organization', pages.projectsPage.url);
+		await expect(page).toHaveURL(pages.projectsPage.url);
+		await pages.projectsPage.hasTitle();
 
-        //TODO assert that the project data are displayed in the table
-    });
+		await pages.projectsPage.createItem({
+			name: vars.projectName,
+			description: vars.description,
+			folder: vars.folderName,
+			internal_reference: 'Test internal reference',
+			lc_status: 'Production'
+		});
 
-    await test.step('user can create an asset', async () => {
-        await sideBar.click("Context", pages.assetsPage.url);
-        await expect(page).toHaveURL(pages.assetsPage.url);
-        await pages.assetsPage.hasTitle();
+		//TODO assert that the project data are displayed in the table
+	});
 
-        await pages.assetsPage.createItem({
-            name: vars.assetName, 
-            description: vars.description, 
-            business_value: "Test value", 
-            folder: vars.folderName, 
-            type: "Primary"
-        });
+	await test.step('user can create an asset', async () => {
+		await sideBar.click('Context', pages.assetsPage.url);
+		await expect(page).toHaveURL(pages.assetsPage.url);
+		await pages.assetsPage.hasTitle();
 
-        //TODO assert that the asset data are displayed in the table
-    });
+		await pages.assetsPage.createItem({
+			name: vars.assetName,
+			description: vars.description,
+			business_value: 'Test value',
+			folder: vars.folderName,
+			type: 'Primary'
+		});
 
-    await test.step('user can import a framework', async () => {
-        await sideBar.click("Compliance", pages.frameworksPage.url);
-        await expect(page).toHaveURL(pages.frameworksPage.url);
-        await pages.frameworksPage.hasTitle();
+		//TODO assert that the asset data are displayed in the table
+	});
 
-        await pages.frameworksPage.addButton.click();
-        await expect(page).toHaveURL(pages.librariesPage.url);
-        await pages.librariesPage.hasTitle();
-        
-        await pages.librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
+	await test.step('user can import a framework', async () => {
+		await sideBar.click('Compliance', pages.frameworksPage.url);
+		await expect(page).toHaveURL(pages.frameworksPage.url);
+		await pages.frameworksPage.hasTitle();
 
-        await sideBar.click("Compliance", pages.frameworksPage.url);
-        await expect(page).toHaveURL(pages.frameworksPage.url);
-        await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
-    });
+		await pages.frameworksPage.addButton.click();
+		await expect(page).toHaveURL(pages.librariesPage.url);
+		await pages.librariesPage.hasTitle();
 
-    await test.step('user can create a security function', async () => {
-        await sideBar.click("Context", pages.securityFunctionsPage.url);
-        await expect(page).toHaveURL(pages.securityFunctionsPage.url);
-        await pages.securityFunctionsPage.hasTitle();
+		await pages.librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
 
-        await pages.securityFunctionsPage.createItem({
-            name: vars.securityFunctionName, 
-            description: vars.description,
-            category: "Physical",
-            provider: "Test provider", 
-            folder: vars.folderName
-        });
+		await sideBar.click('Compliance', pages.frameworksPage.url);
+		await expect(page).toHaveURL(pages.frameworksPage.url);
+		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
+	});
 
-        //TODO assert that the security function data are displayed in the table
-    });
+	await test.step('user can create a security function', async () => {
+		await sideBar.click('Context', pages.securityFunctionsPage.url);
+		await expect(page).toHaveURL(pages.securityFunctionsPage.url);
+		await pages.securityFunctionsPage.hasTitle();
 
-    await test.step('user can create a security measure', async () => {
-        await sideBar.click("Context", pages.securityMeasuresPage.url);
-        await expect(page).toHaveURL(pages.securityMeasuresPage.url);
-        await pages.securityMeasuresPage.hasTitle();
+		await pages.securityFunctionsPage.createItem({
+			name: vars.securityFunctionName,
+			description: vars.description,
+			category: 'Physical',
+			provider: 'Test provider',
+			folder: vars.folderName
+		});
 
-        await pages.securityMeasuresPage.createItem({
-            name: vars.securityMeasureName, 
-            description: vars.description, 
-            category: "Technical", 
-            status: "Planned", 
-            eta: "2025-01-01", 
-            link: "https://intuitem.com/", 
-            effort: "Large", 
-            folder: vars.folderName, 
-            security_function: vars.securityFunctionName
-        });
+		//TODO assert that the security function data are displayed in the table
+	});
 
-        //TODO assert that the security measure data are displayed in the table
-    });
+	await test.step('user can create a security measure', async () => {
+		await sideBar.click('Context', pages.securityMeasuresPage.url);
+		await expect(page).toHaveURL(pages.securityMeasuresPage.url);
+		await pages.securityMeasuresPage.hasTitle();
 
-    await test.step('user can create a compliance assessment', async () => {
-        await sideBar.click("Compliance", pages.complianceAssessmentsPage.url);
-        await expect(page).toHaveURL(pages.complianceAssessmentsPage.url);
-        await pages.complianceAssessmentsPage.hasTitle();
+		await pages.securityMeasuresPage.createItem({
+			name: vars.securityMeasureName,
+			description: vars.description,
+			category: 'Technical',
+			status: 'Planned',
+			eta: '2025-01-01',
+			link: 'https://intuitem.com/',
+			effort: 'Large',
+			folder: vars.folderName,
+			security_function: vars.securityFunctionName
+		});
 
-        await pages.complianceAssessmentsPage.createItem({
-            name: vars.assessmentName, 
-            description: vars.description,
-            project: vars.projectName,
-            version: "1.4.2",
-            framework: vars.framework.name,
-            eta: "2025-01-01",
-            due_date: "2025-05-01"
-        });
+		//TODO assert that the security measure data are displayed in the table
+	});
 
-        //TODO assert that the compliance assessment data are displayed in the table
-    });
+	await test.step('user can create a compliance assessment', async () => {
+		await sideBar.click('Compliance', pages.complianceAssessmentsPage.url);
+		await expect(page).toHaveURL(pages.complianceAssessmentsPage.url);
+		await pages.complianceAssessmentsPage.hasTitle();
 
-    await test.step('user can create an evidence', async () => {
-        await sideBar.click("Compliance", pages.evidencesPage.url);
-        await expect(page).toHaveURL(pages.evidencesPage.url);
-        await pages.evidencesPage.hasTitle();
+		await pages.complianceAssessmentsPage.createItem({
+			name: vars.assessmentName,
+			description: vars.description,
+			project: vars.projectName,
+			version: '1.4.2',
+			framework: vars.framework.name,
+			eta: '2025-01-01',
+			due_date: '2025-05-01'
+		});
 
-        await pages.evidencesPage.createItem({
-            name: vars.evidenceName, 
-            description: vars.description, 
-            attachment: vars.file,
-            folder: vars.folderName,
-            requirement_assessments: [
-                vars.requirement_assessment.name,
-                vars.requirement_assessment2.name
-            ],
-            link: "https://intuitem.com/"
-        });
+		//TODO assert that the compliance assessment data are displayed in the table
+	});
 
-        //TODO assert that the evidence data are displayed in the table
-    });
+	await test.step('user can create an evidence', async () => {
+		await sideBar.click('Compliance', pages.evidencesPage.url);
+		await expect(page).toHaveURL(pages.evidencesPage.url);
+		await pages.evidencesPage.hasTitle();
 
-    await test.step('user can import a risk matrix', async () => {
-        await sideBar.click("Governance", pages.riskMatricesPage.url);
-        await expect(page).toHaveURL(pages.riskMatricesPage.url);
-        await pages.riskMatricesPage.hasTitle();
+		await pages.evidencesPage.createItem({
+			name: vars.evidenceName,
+			description: vars.description,
+			attachment: vars.file,
+			folder: vars.folderName,
+			requirement_assessments: [
+				vars.requirement_assessment.name,
+				vars.requirement_assessment2.name
+			],
+			link: 'https://intuitem.com/'
+		});
 
-        await pages.riskMatricesPage.addButton.click();
-        await expect(page).toHaveURL(pages.librariesPage.url);
-        await pages.librariesPage.hasTitle();
-        
-        await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
+		//TODO assert that the evidence data are displayed in the table
+	});
 
-        await sideBar.click("Governance", pages.riskMatricesPage.url);
-        await expect(page).toHaveURL(pages.riskMatricesPage.url);
-        await expect(page.getByRole('row', { name: vars.matrix.displayName })).toBeVisible();
-    });
+	await test.step('user can import a risk matrix', async () => {
+		await sideBar.click('Governance', pages.riskMatricesPage.url);
+		await expect(page).toHaveURL(pages.riskMatricesPage.url);
+		await pages.riskMatricesPage.hasTitle();
 
-    await test.step('user can create a risk assessment', async () => {
-        await sideBar.click("Risk", pages.riskAssessmentsPage.url);
-        await expect(page).toHaveURL(pages.riskAssessmentsPage.url);
-        await pages.riskAssessmentsPage.hasTitle();
+		await pages.riskMatricesPage.addButton.click();
+		await expect(page).toHaveURL(pages.librariesPage.url);
+		await pages.librariesPage.hasTitle();
 
-        await pages.riskAssessmentsPage.createItem({
-            name: vars.riskAssessmentName, 
-            description: vars.description, 
-            project: vars.projectName, 
-            version: "1.4.2",
-            risk_matrix: vars.matrix.displayName,
-            eta: "2025-01-01",
-            due_date: "2025-05-01"
-        });
+		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
 
-        //TODO assert that the risk assessment data are displayed in the table
-    });
+		await sideBar.click('Governance', pages.riskMatricesPage.url);
+		await expect(page).toHaveURL(pages.riskMatricesPage.url);
+		await expect(page.getByRole('row', { name: vars.matrix.displayName })).toBeVisible();
+	});
 
-    await test.step('user can create a threat', async () => {
-        await sideBar.click("Context", pages.threatsPage.url);
-        await expect(page).toHaveURL(pages.threatsPage.url);
-        await pages.threatsPage.hasTitle();
+	await test.step('user can create a risk assessment', async () => {
+		await sideBar.click('Risk', pages.riskAssessmentsPage.url);
+		await expect(page).toHaveURL(pages.riskAssessmentsPage.url);
+		await pages.riskAssessmentsPage.hasTitle();
 
-        await pages.threatsPage.createItem({
-            name: vars.threatName, 
-            description: vars.description, 
-            folder: vars.folderName, 
-            provider: "Test provider"
-        });
+		await pages.riskAssessmentsPage.createItem({
+			name: vars.riskAssessmentName,
+			description: vars.description,
+			project: vars.projectName,
+			version: '1.4.2',
+			risk_matrix: vars.matrix.displayName,
+			eta: '2025-01-01',
+			due_date: '2025-05-01'
+		});
 
-        //TODO assert that the threat data are displayed in the table
-    });
+		//TODO assert that the risk assessment data are displayed in the table
+	});
 
-    await test.step('user can create a risk scenario', async () => {
-        await sideBar.click("Risk", pages.riskScenariosPage.url);
-        await expect(page).toHaveURL(pages.riskScenariosPage.url);
-        await pages.riskScenariosPage.hasTitle();
+	await test.step('user can create a threat', async () => {
+		await sideBar.click('Context', pages.threatsPage.url);
+		await expect(page).toHaveURL(pages.threatsPage.url);
+		await pages.threatsPage.hasTitle();
 
-        await pages.riskScenariosPage.createItem({
-            name: vars.riskScenarioName, 
-            description: vars.description, 
-            risk_assessment: vars.riskAssessmentName, 
-            threats: [vars.threatName]
-        });
+		await pages.threatsPage.createItem({
+			name: vars.threatName,
+			description: vars.description,
+			folder: vars.folderName,
+			provider: 'Test provider'
+		});
 
-        //TODO assert that the risk scenario data are displayed in the table
-    });
+		//TODO assert that the threat data are displayed in the table
+	});
 
-    await test.step('user can create a risk acceptance', async () => {
-        await sideBar.click("Risk", pages.riskAcceptancesPage.url);
-        await expect(page).toHaveURL(pages.riskAcceptancesPage.url);
-        await pages.riskAcceptancesPage.hasTitle();
+	await test.step('user can create a risk scenario', async () => {
+		await sideBar.click('Risk', pages.riskScenariosPage.url);
+		await expect(page).toHaveURL(pages.riskScenariosPage.url);
+		await pages.riskScenariosPage.hasTitle();
 
-        await pages.riskAcceptancesPage.createItem({
-            name: vars.riskAcceptanceName,
-            description: vars.description,
-            expiry_date: "2025-01-01",
-            folder: vars.folderName,
-            approver: LoginPage.defaultEmail,
-            risk_scenarios: [vars.riskScenarioName]
-        });
+		await pages.riskScenariosPage.createItem({
+			name: vars.riskScenarioName,
+			description: vars.description,
+			risk_assessment: vars.riskAssessmentName,
+			threats: [vars.threatName]
+		});
 
-        //TODO assert that the risk acceptance data are displayed in the table
-    });
+		//TODO assert that the risk scenario data are displayed in the table
+	});
+
+	await test.step('user can create a risk acceptance', async () => {
+		await sideBar.click('Risk', pages.riskAcceptancesPage.url);
+		await expect(page).toHaveURL(pages.riskAcceptancesPage.url);
+		await pages.riskAcceptancesPage.hasTitle();
+
+		await pages.riskAcceptancesPage.createItem({
+			name: vars.riskAcceptanceName,
+			description: vars.description,
+			expiry_date: '2025-01-01',
+			folder: vars.folderName,
+			approver: LoginPage.defaultEmail,
+			risk_scenarios: [vars.riskScenarioName]
+		});
+
+		//TODO assert that the risk acceptance data are displayed in the table
+	});
 });
 
 test.afterEach('cleanup', async ({ foldersPage, page }) => {
-    await foldersPage.goto()
-    await page.waitForURL(foldersPage.url);
-    await foldersPage.deleteItemButton(vars.folderName).click();
-    await foldersPage.deleteModalConfirmButton.click();
-    await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
+	await foldersPage.goto();
+	await page.waitForURL(foldersPage.url);
+	await foldersPage.deleteItemButton(vars.folderName).click();
+	await foldersPage.deleteModalConfirmButton.click();
+	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 });
+
