@@ -1,35 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { localItems } from '$lib/utils/locales';
 	import { breadcrumbObject, pageTitle } from '$lib/utils/stores';
 	import { listViewFields } from '$lib/utils/table';
 	import * as m from '$paraglide/messages';
-
-	const breadcrumbsItems: any = {
-		edit: m.edit(),
-		analytics: m.analytics(),
-		calendar: m.calendar(),
-		threats: m.threats(),
-		securityFunctions: m.securityFunctions(),
-		securityMeasures: m.securityMeasures(),
-		assets: m.assets(),
-		policies: m.policies(),
-		riskMatrices: m.riskMatrices(),
-		riskAssessments: m.riskAssessments(),
-		riskScenarios: m.riskScenarios(),
-		riskAcceptances: m.riskAcceptances(),
-		complianceAssessments: m.complianceAssessments(),
-		evidences: m.evidences(),
-		frameworks: m.frameworks(),
-		domains: m.domains(),
-		projects: m.projects(),
-		users: m.users(),
-		userGroups: m.userGroups(),
-		roleAssignments: m.roleAssignments(),
-		xRays: m.xRays(),
-		scoringAssistant: m.scoringAssistant(),
-		libraries: m.libraries(),
-		backupRestore: m.backupRestore()
-	}
+	import { languageTag } from '$paraglide/runtime';
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
 
@@ -79,8 +54,8 @@
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
-				{#if breadcrumbsItems[c.label]}
-					{breadcrumbsItems[c.label]}
+				{#if localItems(languageTag())[c.label]}
+					{localItems(languageTag())[c.label]}
 				{:else}
 					{c.label}
 				{/if}
@@ -95,8 +70,8 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if breadcrumbsItems[c.label]}
-							{breadcrumbsItems[c.label]}
+						{#if localItems(languageTag())[c.label]}
+							{localItems(languageTag())[c.label]}
 						{:else}
 							{c.label}
 						{/if}
@@ -106,8 +81,8 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{#if breadcrumbsItems[c.label]}
-							{breadcrumbsItems[c.label]}
+						{#if localItems(languageTag())[c.label]}
+							{localItems(languageTag())[c.label]}
 						{:else}
 							{c.label}
 						{/if}
