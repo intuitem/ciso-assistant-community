@@ -38,7 +38,7 @@
 	"userGroups": "Groupes d'utilisateurs",
 	"roleAssignments": "Affectations de rôle",
 	"xRays": "X-rays",
-	"scoringAssistant": "Assistat d'évaluation",
+	"scorAffichageAssistant": "Assistat d'évaluation",
 	"libraries": "Bibliothèques",
 	"backupRestore": "Sauvegarde et restauration",
 	"myProfile": "Mon profil",
@@ -72,5 +72,12 @@
 	"framework": "Cadre",
 	"file": "Fichier",
 	"language": "Langue",
-	"builtin": "Intégré"
+	"builtin": "Intégré",
+	"next": "Suivant",
+	"previous": "Précédent",
+	"show": "Afficher",
+	"entries": "entrées",
+	"searchPlaceholder": "Rechercher...",
+	"noEntriesFound": "Aucune entrée trouvée",
+	"rowCount": "Affichage de {start} à {end} sur {total}"
 }
