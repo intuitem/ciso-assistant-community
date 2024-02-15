@@ -205,8 +205,12 @@
 				<div class="text-sm">
 					<ul>
 						<li class="pb-1">
-							<span class="font-semibold">Audited by:</span>
-							{risk_assessment.auditor ? risk_assessment.auditor.str : '-'}
+							<span class="font-semibold">Authors:</span>
+							<ul>
+								{#each risk_assessment.authors as author}
+									<li>{author.str}</li>
+								{/each}
+							</ul>
 						</li>
 						<li class="pb-1">
 							<span class="font-semibold">Created at:</span>
@@ -222,13 +226,19 @@
 			<div class="container w-2/3">
 				<div class="text-sm">
 					<span class="font-semibold" data-testid="risk-matrix-field-title">Risk matrix:</span>
-					<a href="/risk-matrices/{risk_assessment.risk_matrix.id}" class="anchor" data-testid="risk-matrix-field-value"
-						>{risk_assessment.risk_matrix.name}</a
+					<a
+						href="/risk-matrices/{risk_assessment.risk_matrix.id}"
+						class="anchor"
+						data-testid="risk-matrix-field-value">{risk_assessment.risk_matrix.name}</a
 					>
 				</div>
 				<br />
-				<div class="text-sm"><span class="font-semibold" data-testid="description-field-title">Description:</span></div>
-				<div class="text-sm" data-testid="description-field-value">{risk_assessment.description ?? '-'}</div>
+				<div class="text-sm">
+					<span class="font-semibold" data-testid="description-field-title">Description:</span>
+				</div>
+				<div class="text-sm" data-testid="description-field-value">
+					{risk_assessment.description ?? '-'}
+				</div>
 			</div>
 		</div>
 	</div>

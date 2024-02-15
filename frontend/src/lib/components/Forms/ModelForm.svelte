@@ -111,6 +111,20 @@
 			label="Risk matrix"
 			helpText="WARNING: You will not be able to change the risk matrix after the risk assessment is created"
 		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+			field="authors"
+			label="Authors"
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+			field="reviewers"
+			label="Reviewers"
+		/>
 		<TextField type="date" {form} field="eta" label="ETA" helpText="Estimated time of arrival" />
 		<TextField
 			type="date"
@@ -270,6 +284,20 @@
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
 			field="framework"
 			label="Framework"
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
+			field="authors"
+			label="Authors"
+		/>
+		<AutocompleteSelect
+			{form}
+			multiple
+			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
+			field="reviewers"
+			label="Reviewers"
 		/>
 		<TextField type="date" {form} field="eta" label="ETA" helpText="Estimated time of arrival" />
 		<TextField
