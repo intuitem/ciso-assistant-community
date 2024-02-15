@@ -191,7 +191,9 @@
 					)}"
 					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
 				>
-					{sp.percentage.display}%
+					{#if sp.status !== 'to_do'}
+						{sp.percentage.display}%
+					{/if}
 				</div>
 			{/each}
 		</div>

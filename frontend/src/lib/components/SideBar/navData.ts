@@ -116,7 +116,7 @@ export const navData = {
 			]
 		},
 		{
-			name: 'Organisation',
+			name: 'Organization',
 			items: [
 				{
 					name: 'Domains',

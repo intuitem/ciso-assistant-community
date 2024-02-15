@@ -122,7 +122,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Risk assessments',
 		foreignKeyFields: [
 			{ field: 'project', urlModel: 'projects' },
-			{ field: 'auditor', urlModel: 'users' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
 		],
@@ -271,6 +272,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Compliance assessments',
 		foreignKeyFields: [
 			{ field: 'project', urlModel: 'projects' },
+			{ field: 'authors', urlModel: 'users' },
+			{ field: 'reviewers', urlModel: 'users' },
 			{ field: 'framework', urlModel: 'frameworks' }
 		]
 	},
