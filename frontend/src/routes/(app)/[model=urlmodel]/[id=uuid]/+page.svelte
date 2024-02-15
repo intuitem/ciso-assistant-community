@@ -15,6 +15,8 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
+	import { localItems, toCamelCase } from '$lib/utils/locales.js';
+	import { languageTag } from '$paraglide/runtime.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -172,29 +174,33 @@
 		<div class="flex flex-col space-y-2">
 			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first">
-						{key.replace('_', ' ')}
+					<div class="text-sm font-medium text-gray-800">
+						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
 					</div>
 					<ul class="text-sm">
 						<li class="text-gray-600 list-none">
 							{#if value}
 								{#if Array.isArray(value)}
-									<ul>
-										{#each value as val}
-											<li>
-												{#if val.str && val.id}
-													{@const itemHref = `/${
-														URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-															(item) => item.field === key
-														)?.urlModel
-													}/${val.id}`}
-													<a href={itemHref} class="anchor">{val.str}</a>
-												{:else}
-													{value}
-												{/if}
-											</li>
-										{/each}
-									</ul>
+									{#if Object.keys(value).length > 0}
+										<ul>
+											{#each value as val}
+												<li>
+													{#if val.str && val.id}
+														{@const itemHref = `/${
+															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																(item) => item.field === key
+															)?.urlModel
+														}/${val.id}`}
+														<a href={itemHref} class="anchor">{val.str}</a>
+													{:else}
+														{value}
+													{/if}
+												</li>
+											{/each}
+										</ul>
+									{:else}
+										--
+									{/if}
 								{:else if value.id}
 									{@const itemHref = `/${
 										URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
