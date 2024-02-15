@@ -2,8 +2,7 @@
 FROM mcr.microsoft.com/playwright:v1.40.1
 WORKDIR /app
 
-ARG PUBLIC_BACKEND_API_URL
-ENV PUBLIC_BACKEND_API_URL=$PUBLIC_BACKEND_API_URL
+ENV PUBLIC_BACKEND_API_URL=foo
 
 COPY ../package*.json .
 RUN npm ci
