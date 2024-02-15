@@ -29,19 +29,19 @@
 	<p class="font-semibold text-lg">
 		Domain: <a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.name}</a
+			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.str}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
 		Project: <a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.name}</a
+			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		RiskAssessment: <a
+		Risk assessment: <a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/risk-assessments/{data.risk_assessment.id}/"
 			>{data.risk_assessment.name} - {data.risk_assessment.version}</a
@@ -100,7 +100,7 @@
 							<td class="px-2 py-3">{measure.name ?? '--'}</td>
 							<td class="px-2 py-3 max-w-md">{measure.description ?? '--'}</td>
 							<td class="px-2 py-3">{measure.type ?? '--'}</td>
-							<td class="px-2 py-3">{measure.security_function ?? '--'}</td>
+							<td class="px-2 py-3">{measure.security_function.str ?? '--'}</td>
 							<td class="px-2 py-3">{measure.eta ?? '--'}</td>
 							<td class="px-2 py-3">{measure.effort ?? '--'}</td>
 							<td class="px-2 py-3 text-center">{measure.link ?? '--'} </td>
