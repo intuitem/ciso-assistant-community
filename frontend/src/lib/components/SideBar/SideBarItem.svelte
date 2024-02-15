@@ -1,38 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages';
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 	export let item: any; // TODO: type this
 
 	$: classesActive = (href: string) =>
 		href === $page.url.pathname
 			? 'bg-primary-100 text-primary-800'
 			: 'hover:bg-primary-50 text-gray-800 ';
-
-	const items: any = {
-		analytics: m.analytics(),
-		calendar: m.calendar(),
-		threats: m.threats(),
-		securityFunctions: m.securityFunctions(),
-		securityMeasures: m.securityMeasures(),
-		assets: m.assets(),
-		policies: m.policies(),
-		riskMatrices: m.riskMatrices(),
-		riskAssessments: m.riskAssessments(),
-		riskScenarios: m.riskScenarios(),
-		riskAcceptances: m.riskAcceptances(),
-		complianceAssessments: m.complianceAssessments(),
-		evidences: m.evidences(),
-		frameworks: m.frameworks(),
-		domains: m.domains(),
-		projects: m.projects(),
-		users: m.users(),
-		userGroups: m.userGroups(),
-		roleAssignments: m.roleAssignments(),
-		xRays: m.xRays(),
-		scoringAssistant: m.scoringAssistant(),
-		libraries: m.libraries(),
-		backupRestore: m.backupRestore()
-	}
 </script>
 
 {#each item as item}
@@ -45,7 +20,7 @@
 	>
 		<span class="px-4 flex items-center w-full space-x-2 text-xs">
 			<i class="{item.fa_icon} w-1/12" />
-			<span class="text-sm tracking-wide truncate">{items[item.name]}</span>
+			<span class="text-sm tracking-wide truncate">{localItems(languageTag())[item.name]}</span>
 		</span></a
 	>
 {/each}

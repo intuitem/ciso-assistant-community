@@ -11,6 +11,8 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
 
