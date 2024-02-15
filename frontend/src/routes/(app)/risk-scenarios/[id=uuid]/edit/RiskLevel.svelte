@@ -42,7 +42,7 @@
 			: undefined;
 </script>
 
-<div>
+<div class="flex flex-col">
 	{#if label !== undefined}
 		<label class="text-sm font-semibold" for={field}>{label}</label>
 	{/if}
@@ -57,6 +57,6 @@
 		<div class="flex font-medium w-32 justify-center p-2 rounded-token bg-gray-300">--</div>
 	{/if}
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-gray-500 w-64">{helpText}</p>
 	{/if}
 </div>
