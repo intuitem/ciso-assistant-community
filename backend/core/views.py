@@ -1379,9 +1379,7 @@ def generate_html(
     <body class="container container-tablet">
     """
     content += '<hr class="dotted">'
-    content += (
-        '<div class="flex flex-row space-x-4 flex justify-center items-center mb-4">'
-    )
+    content += '<div class="flex flex-row space-x-4 justify-center items-center mb-4">'
     content += f"<h1 class='text-3xl'>{compliance_assessment.name}: {compliance_assessment.framework}</h1>"
     content += bar_graph(None)
     content += "</div>"
@@ -1390,6 +1388,25 @@ def generate_html(
     </thead>
     <tbody>
     """
+    content += '<div class="flex flex-row space-x-4 mb-4">'
+
+    content += "<div>"
+    content += "<p class='font-semibold'>Authors</p>"
+    content += "<ul>"
+    for author in compliance_assessment.authors.all():
+        content += f"<li>{author}</li>"
+    content += "</ul>"
+    content += "</div>"
+
+    content += "<div>"
+    content += "<p class='font-semibold'>Reviewers</p>"
+    content += "<ul>"
+    for reviewer in compliance_assessment.reviewers.all():
+        content += f"<li>{reviewer}</li>"
+    content += "</ul>"
+    content += "</div>"
+
+    content += "</div>"
 
     def generate_html_rec(requirement_node: RequirementNode):
         selected_evidences = []
