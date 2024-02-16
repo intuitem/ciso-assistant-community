@@ -1,6 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"addButton": "Ajouter {determinant} {model}",
+	"associatedObject": "{model} associé{e}s",
 	"french": "Français",
 	"english": "Anglais",
 	"home": "Accueil",
@@ -95,7 +96,8 @@
 	"annotation": "Annotation",
 	"library": "Bibliothèque",
 	"typicalEvidence": "Preuve typique",
-	"parentAsset": "Actif parent",
+	"parentAsset": "Bien sensible parent",
+	"parentAssets": "Biens sensibles parents",
 	"approver": "Approbateur",
 	"state": "État",
 	"justification": "Justification",
@@ -112,5 +114,10 @@
 	"residualProba": "Probabilité résiduelle",
 	"residualImpact": "Impact résiduel",
 	"existingMeasures": "Mesures existantes",
-	"strengthOfKnowledge": "Expertise"
+	"strengthOfKnowledge": "Expertise",
+	"dueDate": "Date d'échéance",
+	"attachment": "Pièce jointe",
+	"observation": "Observation",
+	"importMatrices": "Importer des matrices",
+	"importFrameworks": "Importer des cadres"
 }
