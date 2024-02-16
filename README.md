@@ -13,8 +13,9 @@ CISO Assistant brings a different take on Cyber Security Posture Management:
 ![](posture.png)
 
 This decoupling allows you to save considerable amount of time:
+
 - reuse previous assessments,
-- assess a scope against multiple frameworks at the same time, 
+- assess a scope against multiple frameworks at the same time,
 - leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
 
 Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) about the community editions on our blog.
@@ -30,6 +31,7 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - PSPF
 
 Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
+
 ### Coming soon
 
 - GDPR checklist
@@ -133,11 +135,17 @@ export EMAIL_USE_TLS_RESCUE=True
 # You can define the email of the first superuser, useful for automation
 export CISO_SUPERUSER_EMAIL=<XXX>
 
-# By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test, 
-# but not recommended for production, as it can break the sessions (see 
-# this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information). 
+# By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test,
+# but not recommended for production, as it can break the sessions (see
+# this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information).
 # To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
 export DJANGO_SECRET_KEY=...
+
+# Logging configuration
+export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+export LOG_OUTPUTS=console,json # optional, default value is console,json. Available options: console, json, flat
+export JSON_LOG_FILE=logs/json.log # optional, default value is logs/json.log. Path to the JSON log file
+export FLAT_LOG_FILE=logs/flat.log # optional, default value is logs/flat.log Path to the flat log file
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
@@ -162,14 +170,14 @@ pip install -r requirements.txt
 5. If you want to setup Postgres:
 
 - Launch one of these commands to enter in Postgres:
-  - ```psql as superadmin```
-  - ```sudo su postgres```
-  - ```psql```
+  - `psql as superadmin`
+  - `sudo su postgres`
+  - `psql`
 - Create the database "ciso-assistant"
-  - ```create database ciso-assistant;```
+  - `create database ciso-assistant;`
 - Create user "ciso-assistantuser" and grant it access
-  - ```create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';```
-  -  ```grant all privileges on database ciso-assistant to ciso-assistantuser;```
+  - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
+  - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
 6. Apply migrations.
 
@@ -185,17 +193,16 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-
 8.  Run development server.
 
 ```sh
 python manage.py runserver
 ```
 
-9.   Configure the git hooks for generating the build name.
+9.  Configure the git hooks for generating the build name.
 
 ```sh
-cd .git/hooks 
+cd .git/hooks
 ln -fs ../../git_hooks/post-commit .
 ln -fs ../../git_hooks/post-merge .
 ```
@@ -221,8 +228,8 @@ OR
 ```bash
 export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
 ```
-Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
 
+Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
 
 3. Install dependencies
 
@@ -239,14 +246,14 @@ npm run dev
 5. If you want to setup Postgres:
 
 - Launch one of these commands to enter in Postgres:
-  - ```psql as superadmin```
-  - ```sudo su postgres```
-  - ```psql```
+  - `psql as superadmin`
+  - `sudo su postgres`
+  - `psql`
 - Create the database "mira"
-  - ```create database mira;```
+  - `create database mira;`
 - Create user "mirauser" and grant it access
-  - ```create user mirauser with password '<POSTGRES_PASSWORD>';```
-  -  ```grant all privileges on database mira to mirauser;```
+  - `create user mirauser with password '<POSTGRES_PASSWORD>';`
+  - `grant all privileges on database mira to mirauser;`
 
 6. Prepare and apply migrations.
 
