@@ -38,6 +38,10 @@ Checkout the [library](/library/libraries/) for the Domain Specific Language use
 - DORA
 - and much more!
 
+### Add your own framework
+
+Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file.
+
 ## Community
 
 Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.

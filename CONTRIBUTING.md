@@ -19,3 +19,7 @@
 ## Do you want to contribute to the code?
 
 - Please check our Contributor Licence Agreement first. Our bot will ask you to sign it on first contribution.
+
+## Do you want to create and share a library?
+
+- Have a look to the tools directory and its readme. A python script will help you create your library very simply from an Excel file. To share it with the community, make a PR, or contact us if you are not familiar with Github.
