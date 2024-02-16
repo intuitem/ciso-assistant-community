@@ -137,6 +137,7 @@ export function localItems(languageTag: string): LocalItems {
 		library: m.library({ languageTag: languageTag }),
 		typicalEvidence: m.typicalEvidence({ languageTag: languageTag }),
 		parentAsset: m.parentAsset({ languageTag: languageTag }),
+		parentAssets: m.parentAssets({ languageTag: languageTag }),
 		approver: m.approver({ languageTag: languageTag }),
 		state: m.state({ languageTag: languageTag }),
 		justification: m.justification({ languageTag: languageTag }),
@@ -153,7 +154,10 @@ export function localItems(languageTag: string): LocalItems {
 		residualProba: m.residualProba({ languageTag: languageTag }),
 		residualImpact: m.residualImpact({ languageTag: languageTag }),
 		existingMeasures: m.existingMeasures({ languageTag: languageTag }),
-		strengthOfKnowledge: m.strengthOfKnowledge({ languageTag: languageTag })
+		strengthOfKnowledge: m.strengthOfKnowledge({ languageTag: languageTag }),
+		dueDate: m.dueDate({ languageTag: languageTag }),
+		attachment: m.attachment({ languageTag: languageTag }),
+		observation: m.observation({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }

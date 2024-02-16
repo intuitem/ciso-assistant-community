@@ -100,11 +100,11 @@
 					>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-						><i class="fa-solid fa-file-import mr-2" />Import matrices</a
+						><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
 					>
 				{:else if data.URLModel === 'frameworks'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-						><i class="fa-solid fa-file-import mr-2" />Import framework</a
+						><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
 					>
 				{/if}
 			</div>

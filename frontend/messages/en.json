@@ -1,6 +1,7 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"addButton": "Add {model}",
+	"associatedObject": "Associated {model}",
 	"french": "French",
 	"english": "English",
 	"home": "Home",
@@ -96,12 +97,13 @@
 	"library": "Library",
 	"typicalEvidence": "Typical evidence",
 	"parentAsset": "Parent asset",
+	"parentAssets": "Parent assets",
 	"approver": "Approver",
 	"state": "State",
 	"justification": "Justification",
 	"parentFolder": "Parent folder",
 	"contentType": "Content type",
-	"lcStatus": "status",
+	"lcStatus": "Status",
 	"internalReference": "Internal reference",
 	"isActive": "Is active",
 	"dateJoined": "Date joined",
@@ -112,5 +114,10 @@
 	"residualProba": "Residual probability",
 	"residualImpact": "Residual impact",
 	"existingMeasures": "Existing measures",
-	"strengthOfKnowledge": "Strength of knowledge"
+	"strengthOfKnowledge": "Strength of knowledge",
+	"dueDate": "Due date",
+	"attachment": "Attachment",
+	"observation": "Observation",
+	"importMatrices": "Import matrices",
+	"importFrameworks": "Import frameworks"
 }
