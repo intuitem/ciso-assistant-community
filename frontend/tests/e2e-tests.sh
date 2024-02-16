@@ -27,15 +27,16 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     echo "Run the end-to-end tests for the CISO Assistant application."
     echo "Options:"
     echo "  --browser=NAME          Run the tests in the specified browser (chromium, firefox, webkit)"
+    echo "  --global-timeout=MS     Maximum time this test suite can run in milliseconds (default: unlimited)"
     echo "  --headed                Run the tests in headful mode"
     echo "  -h                      Show this help message and exit"
     echo "  --list                  List all the tests"
     echo "  --port=PORT             Run the backend server on the specified port (default: 8080)"
     echo "  --project=NAME          Run the tests in the specified project"
+    echo "  -q                      Quick mode: execute only the tests 1 time with no retries and only 1 project"
     echo "  --repeat-each=COUNT     Run the tests the specified number of times (default: 1)"
     echo "  --retries=COUNT         Set the number of retries for the tests"
     echo "  --timeout=MS            Set the timeout for the tests in milliseconds"
-    echo "  --global-timeout=MS     Maximum time this test suite can run in milliseconds (default: unlimited)"
     echo "  -v                      Show the output of the backend server"
     echo "  --workers=COUNT         Number of concurrent workers or percentage of logical CPU cores, use 1 to run in a single worker (default: 1)"
     exit 0
@@ -143,4 +144,8 @@ else
     echo "with args: ${SCRIPT_LONG_ARGS[@]}"
 fi
 
-npx playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}"
+if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -q " ]] ; then
+    npx playwright test ./tests/functional/"${TEST_PATHS[@]}" -x --project=chromium "${SCRIPT_LONG_ARGS[@]}"
+else
+    npx playwright test ./tests/functional/"${TEST_PATHS[@]}" "${SCRIPT_LONG_ARGS[@]}"
+fi
