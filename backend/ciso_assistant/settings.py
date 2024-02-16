@@ -19,6 +19,11 @@ from django.core.management.utils import get_random_secret_key
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+LOG_OUTPUTS = os.environ.get("LOG_OUTPUTS", "console,json").split(",")
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+JSON_LOG_FILE = os.environ.get("JSON_LOG_FILE", "logs/json.log")
+FLAT_LOG_FILE = os.environ.get("FLAT_LOG_FILE", "logs/flat.log")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -43,29 +48,29 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "plain_console",
         },
-        "json_file": {
+        "json": {
             "class": "logging.handlers.WatchedFileHandler",
-            "filename": "logs/json.log",
+            "filename": JSON_LOG_FILE,
             "formatter": "json",
         },
-        "flat_line_file": {
+        "flat": {
             "class": "logging.handlers.WatchedFileHandler",
-            "filename": "logs/flat_line.log",
+            "filename": FLAT_LOG_FILE,
             "formatter": "key_value",
         },
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "flat_line_file", "json_file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "handlers": LOG_OUTPUTS,
+            "level": LOG_LEVEL,
         },
         "django_structlog": {
-            "handlers": ["console", "flat_line_file", "json_file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "handlers": LOG_OUTPUTS,
+            "level": LOG_LEVEL,
         },
         "ciso_assistant": {
-            "handlers": ["console", "flat_line_file", "json_file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "handlers": LOG_OUTPUTS,
+            "level": LOG_LEVEL,
         },
     },
 }
