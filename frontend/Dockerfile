@@ -3,7 +3,7 @@ WORKDIR /app
 
 ENV PUBLIC_BACKEND_API_URL=foo
 
-COPY package*.json .
+COPY package*.json ./
 COPY . .
 RUN npm ci
 RUN npm run build
