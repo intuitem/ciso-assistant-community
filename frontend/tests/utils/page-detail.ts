@@ -33,7 +33,7 @@ export class PageDetail extends BasePage {
         await this.form.fill(editedValues);
         await this.form.saveButton.click();
 
-        await this.isToastVisible('.+ successfully saved: ' + {...buildParams, ...editedValues}.name);
+        await this.isToastVisible('.+ successfully saved: ' + ({...buildParams, ...editedValues}.name || {...buildParams, ...editedValues}.email));
         return editedValues;
     }
 
@@ -57,8 +57,11 @@ export class PageDetail extends BasePage {
             for (const key in values) {
                 if (await this.page.getByTestId(key.replaceAll('_', '-') + "-field-title").isVisible()) {
                     await expect.soft(this.page.getByTestId(key.replaceAll('_', '-') + "-field-title")).toHaveText(new RegExp(key.replaceAll('_', ' '), 'i'));
-        
-                    if (this.form.fields.get(key)?.type === FormFieldType.DATE) {
+                    
+                    if (this.form.fields.get(key)?.type === FormFieldType.CHECKBOX) {
+                        await expect.soft(this.page.getByTestId(key.replaceAll('_', '-') + "-field-value")).toHaveText(values[key] ? "true" : "--");
+                    }
+                    else if (this.form.fields.get(key)?.type === FormFieldType.DATE) {
                         const displayedValue = await this.page.getByTestId(key.replaceAll('_', '-') + "-field-value").innerText();
                         
                         const displayedDate = new Date(displayedValue);

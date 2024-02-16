@@ -31,17 +31,15 @@ export class FormContent {
     }
 
     async fill(values: { [k: string]: any }) {
-        let temp = {};
-
         for (const key in values) {
             const field = this.fields.get(key);
 
             switch (field?.type) {
                 case FormFieldType.CHECKBOX:
-                    if (values[key] === "true") {
+                    if (values[key]) {
                         await field.locator.check();
                     }
-                    else if (values[key] === "false") {
+                    else {
                         await field.locator.uncheck();
                     }
                     break;
@@ -84,7 +82,6 @@ export class FormContent {
                     await field?.locator.fill(values[key]);
                     break;
             }
-            // await this.page.waitForTimeout(20);
         }
     }
 

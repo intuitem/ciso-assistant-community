@@ -13,6 +13,18 @@ export default {
     description: "Test description",
     file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
     file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
+    user: {
+        email: "User@tests.com",
+        password: "password",
+        firstName: "Test",
+        lastName: "User",
+    },
+    usergroups: {
+        analyst: "Analyst",
+        auditor: "Auditor",
+        domainManager: "Domain manager",
+        validator: "Validator",
+    },
     framework: {
         name: "NIST CSF",
         urn: "urn:intuitem:risk:library:nist-csf-1.1"
