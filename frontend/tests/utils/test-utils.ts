@@ -10,8 +10,9 @@ import testData from './test-data.js'
 type Fixtures = {
     sideBar: SideBar;
     pages: {[page: string]: PageContent}
-    complianceAssessmentsPage: PageContent;
+    analyticsPage: AnalyticsPage;
     assetsPage: PageContent;
+    complianceAssessmentsPage: PageContent;
     evidencesPage: PageContent;
     foldersPage: PageContent;
     frameworksPage: PageContent;
@@ -24,7 +25,7 @@ type Fixtures = {
     securityFunctionsPage: PageContent;
     securityMeasuresPage: PageContent;
     threatsPage: PageContent;
-    analyticsPage: AnalyticsPage;
+    usersPage: PageContent;
     logedPage: LoginPage;
     loginPage: LoginPage;
 };
@@ -34,8 +35,8 @@ export const test = base.extend<Fixtures>({
         await use(new SideBar(page));
     },
 
-    pages: async ({ page, complianceAssessmentsPage, assetsPage, evidencesPage, foldersPage, frameworksPage, librariesPage, projectsPage, riskAcceptancesPage, riskAssessmentsPage, riskMatricesPage, riskScenariosPage, securityFunctionsPage, securityMeasuresPage, threatsPage }, use) => {
-        await use({complianceAssessmentsPage, assetsPage, evidencesPage, foldersPage, frameworksPage, librariesPage, projectsPage, riskAcceptancesPage, riskAssessmentsPage, riskMatricesPage, riskScenariosPage, securityFunctionsPage, securityMeasuresPage, threatsPage});
+    pages: async ({ page, complianceAssessmentsPage, assetsPage, evidencesPage, foldersPage, frameworksPage, librariesPage, projectsPage, riskAcceptancesPage, riskAssessmentsPage, riskMatricesPage, riskScenariosPage, securityFunctionsPage, securityMeasuresPage, threatsPage, usersPage }, use) => {
+        await use({complianceAssessmentsPage, assetsPage, evidencesPage, foldersPage, frameworksPage, librariesPage, projectsPage, riskAcceptancesPage, riskAssessmentsPage, riskMatricesPage, riskScenariosPage, securityFunctionsPage, securityMeasuresPage, threatsPage, usersPage});
     },
 
     complianceAssessmentsPage: async ({ page }, use) => {
@@ -186,6 +187,17 @@ export const test = base.extend<Fixtures>({
         await use(tPage);
     },
 
+    usersPage: async ({ page }, use) => {
+        const uPage = new PageContent(page, '/users', 'Users', [
+            { name: 'email', type: type.TEXT },
+            { name: 'first_name', type: type.TEXT },
+            { name: 'last_name', type: type.TEXT },
+            { name: 'user_groups', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+            { name: 'is_active', type: type.CHECKBOX },
+        ]);
+        await use(uPage);
+    },
+
     logedPage: async ({ page }, use) => {        
         const loginPage = new LoginPage(page);
         await loginPage.goto();
@@ -261,6 +273,24 @@ export class TestContent {
                 editParams: {
                     name: "",
                     description: ""
+                }
+            },
+            usersPage: { 
+                displayName: "Users",
+                build : {
+                    email: vars.user.email
+                },
+                editParams: {
+                    email: '_' + vars.user.email, 
+                    first_name: vars.user.firstName,
+                    last_name: vars.user.lastName, 
+                    user_groups: [
+                        `${vars.folderName} - ${vars.usergroups.analyst}`,
+                        `${vars.folderName} - ${vars.usergroups.auditor}`,
+                        `${vars.folderName} - ${vars.usergroups.domainManager}`,
+                        `${vars.folderName} - ${vars.usergroups.validator}`,
+                    ],
+                    is_active: false
                 }
             },
             projectsPage: { 
@@ -468,14 +498,21 @@ export class TestContent {
                     expiry_date: "2025-12-31", 
                     //TODO add approver & risk_scenarios
                 }
-            }
+            },
+            
         }
     }
 
     static generateTestVars() {
-        const vars = {...testData};
+        const vars = structuredClone(testData);
         for (const key in testData) {
-            vars[key] = key.match(/.*Name/) ? getUniqueValue(testData[key]) : testData[key];
+            if (key === 'user') {
+                const email = testData[key].email.split('@');
+                vars[key].email = getUniqueValue(email[0]) + '@' + email[1];
+            }
+            else if (key.match(/.*Name/)) {
+                vars[key] = getUniqueValue(testData[key]);
+            }
         }
         return vars
     }

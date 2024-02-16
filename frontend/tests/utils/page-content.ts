@@ -44,7 +44,12 @@ export class PageContent extends BasePage {
         await this.form.saveButton.click();
         await expect(this.form.formTitle).not.toBeVisible();
         if (typeof this.name == 'string') {
-            await this.isToastVisible('Successfully created ' + this.name.substring(0, this.name.length - 1).toLowerCase() + /\..+/.source);
+            if (this.name === "Users") {
+                await this.isToastVisible('User successfully created' + /\..+/.source);
+            }
+            else {
+                await this.isToastVisible('Successfully created ' + this.name.substring(0, this.name.length - 1).toLowerCase() + /\..+/.source);
+            }
         }
         else {
             await this.isToastVisible('Successfully created ' + this.name.source + /\..+/.source, 'i');
