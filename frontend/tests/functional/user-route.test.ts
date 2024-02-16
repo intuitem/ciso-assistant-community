@@ -233,13 +233,31 @@ test('user usual routine actions are working correctly', async ({
 
 		//TODO assert that the risk acceptance data are displayed in the table
 	});
+
+	await test.step('user can add another user', async () => {
+		await sideBar.click('Organization', pages.usersPage.url);
+		await expect(page).toHaveURL(pages.usersPage.url);
+		await pages.usersPage.hasTitle();
+
+		await pages.usersPage.createItem({
+			email: vars.user.email
+		});
+
+		//TODO assert that the user data are displayed in the table
+	});
 });
 
-test.afterEach('cleanup', async ({ foldersPage, page }) => {
+test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await foldersPage.goto();
 	await page.waitForURL(foldersPage.url);
 	await foldersPage.deleteItemButton(vars.folderName).click();
 	await foldersPage.deleteModalConfirmButton.click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
+
+	await usersPage.goto();
+	await page.waitForURL(usersPage.url);
+	await usersPage.deleteItemButton(vars.user.email).click();
+	await usersPage.deleteModalConfirmButton.click();
+	await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
 });
 
