@@ -194,6 +194,8 @@ export const test = base.extend<Fixtures>({
             { name: 'last_name', type: type.TEXT },
             { name: 'user_groups', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
             { name: 'is_active', type: type.CHECKBOX },
+            { name: 'new_password', type: type.TEXT },
+            { name: 'confirm_new_password', type: type.TEXT },
         ]);
         await use(uPage);
     },
