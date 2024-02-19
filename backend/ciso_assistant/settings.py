@@ -24,6 +24,14 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 JSON_LOG_FILE = os.environ.get("JSON_LOG_FILE", "logs/json.log")
 FLAT_LOG_FILE = os.environ.get("FLAT_LOG_FILE", "logs/flat.log")
 
+CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
+
+
+def set_ciso_assistant_url(_, __, event_dict):
+    event_dict["ciso_assistant_url"] = CISO_ASSISTANT_URL
+    return event_dict
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -79,6 +87,7 @@ LOGGING = {
 structlog.configure(
     processors=[
         structlog.contextvars.merge_contextvars,
+        set_ciso_assistant_url,
         structlog.stdlib.filter_by_level,
         structlog.processors.TimeStamper(fmt="iso"),  # ISO 8601 timestamps
         structlog.stdlib.add_logger_name,
@@ -122,7 +131,6 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
 
 logger.info("DEBUG mode: %s", DEBUG)
-CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
