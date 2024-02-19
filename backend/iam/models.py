@@ -29,10 +29,13 @@ from django.dispatch import receiver
 from ciso_assistant.settings import (
     CISO_ASSISTANT_URL,
     EMAIL_HOST,
+    EMAIL_HOST_USER,
     EMAIL_HOST_USER_RESCUE,
     EMAIL_HOST_PASSWORD_RESCUE,
     EMAIL_HOST_RESCUE,
+    EMAIL_PORT,
     EMAIL_PORT_RESCUE,
+    EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
 from django.core.exceptions import ObjectDoesNotExist
@@ -362,9 +365,18 @@ class User(AbstractBaseUser):
                 fail_silently=False,
                 html_message=email,
             )
-            print("mail sent to", self.email)
-        except Exception as e:
-            print("primary mailer failure, try rescue mailer...")
+            logger.info("email sent", recipient=self.email, subject=subject)
+        except Exception as primary_exception:
+            logger.error(
+                "primary mailer failure, trying rescue",
+                recipient=self.email,
+                subject=subject,
+                error=primary_exception,
+                email_host=EMAIL_HOST,
+                email_port=EMAIL_PORT,
+                email_host_user=EMAIL_HOST_USER,
+                email_use_tls=EMAIL_USE_TLS,
+            )
             if EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
@@ -381,12 +393,21 @@ class User(AbstractBaseUser):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    print("mail sent to", self.email)
-                except Exception as ex2:
-                    print("secondary mailer failure")
-                    raise ex2
+                    logger.info("email sent", recipient=self.email, subject=subject)
+                except Exception as rescue_exception:
+                    logger.error(
+                        "rescue mailer failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=rescue_exception,
+                        email_host=EMAIL_HOST_RESCUE,
+                        email_port=EMAIL_PORT_RESCUE,
+                        email_username=EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                    )
+                    raise rescue_exception
             else:
-                raise e
+                raise primary_exception
 
     def get_user_groups(self):
         # pragma pylint: disable=no-member
