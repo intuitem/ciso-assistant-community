@@ -9,6 +9,10 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
+import structlog
+
+logger = structlog.get_logger()
+
 User = get_user_model()
 
 
@@ -245,11 +249,12 @@ class UserWriteSerializer(BaseModelSerializer):
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
-            print(e)
+            logger.error(e)
             if (
                 User.objects.filter(email=validated_data["email"]).exists()
                 and send_mail
             ):
+                logger.warning("mailing failed")
                 raise serializers.ValidationError(
                     {
                         "warning": [

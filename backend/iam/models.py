@@ -37,6 +37,10 @@ from ciso_assistant.settings import (
 )
 from django.core.exceptions import ObjectDoesNotExist
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 class UserGroup(models.Model):
     """UserGroup objects contain users and can be used as principals in role assignments"""
@@ -225,6 +229,9 @@ class UserManager(BaseUserManager):
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
         user.save(using=self._db)
+
+        logger.info("user created sucessfully", user=user)
+
         if mailing:
             try:
                 user.mailing(
@@ -236,14 +243,14 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
-        print("Creating user for", email)
+        logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
         if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
             extra_fields.setdefault("mailing", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
-        print("Creating superuser for", email)
+        logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
@@ -294,7 +301,7 @@ class User(AbstractBaseUser):
         )
         objects = UserManager()
     except:
-        print("Exception kludge")
+        logger.debug("Exception kludge")
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
