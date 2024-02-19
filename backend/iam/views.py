@@ -12,6 +12,7 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+from rest_framework.settings import api_settings
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from .serializers import (
@@ -47,9 +48,16 @@ class LoginView(views.APIView):
         except serializers.ValidationError as e:
             logger.warning(
                 "login attempt failed",
-                code=e.get_codes(),
+                error=e,
                 username=request.data.get("username"),
             )
+            if isinstance(e.detail, dict):
+                return Response(data={**e.detail}, status=HTTP_401_UNAUTHORIZED)
+            else:
+                return Response(
+                    data={api_settings.NON_FIELD_ERRORS_KEY: [e.detail]},
+                    status=HTTP_401_UNAUTHORIZED,
+                )
 
         return Response(None, status=HTTP_202_ACCEPTED)
 
@@ -57,7 +65,12 @@ class LoginView(views.APIView):
 class LogoutView(views.APIView):
     @method_decorator(ensure_csrf_cookie)
     def post(self, request) -> Response:
-        logout(request)
+        try:
+            logger.info("logout request", user=request.user)
+            logout(request)
+            logger.info("logout succesful", user=request.user)
+        except Exception as e:
+            logger.error("logout failed", user=request.user, error=e)
         return Response({"message": "Logged out successfully."}, status=HTTP_200_OK)
 
 
