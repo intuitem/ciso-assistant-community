@@ -38,7 +38,7 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     echo "  --retries=COUNT         Set the number of retries for the tests"
     echo "  --timeout=MS            Set the timeout for the tests in milliseconds"
     echo "  -v                      Show the output of the backend server"
-    echo "  --workers=COUNT         Number of concurrent workers or percentage of logical CPU cores, use 1 to run in a single worker (default: 1)"
+    echo -e "  --workers=COUNT         Number of concurrent workers or percentage of logical CPU cores, use 1 to run in a single worker (default: 1)\nBe aware that increasing the number of workers may reduce tests accuracy and stability."
     exit 0
 fi
 

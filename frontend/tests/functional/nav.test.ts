@@ -7,7 +7,7 @@ type StringMap = {
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
     test.slow();
     
-    await test.step('proper redirection to the overview page after login', async () => {
+    await test.step('proper redirection to the analytics page after login', async () => {
         await analyticsPage.hasUrl();
         await analyticsPage.hasTitle();
         setHttpResponsesListener(page);
