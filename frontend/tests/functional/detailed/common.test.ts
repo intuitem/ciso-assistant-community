@@ -40,12 +40,12 @@ for (const key of testPages) {
                 await pages[key].waitUntilLoaded();
                 await pages[key].createItem(items[key].build, "dependency" in items[key] ? items[key].dependency : null);
                 
-                if (await pages[key].getRow(items[key].build.name).isHidden()) {
-                    await pages[key].searchInput.fill(items[key].build.name);
+                if (await pages[key].getRow(items[key].build.name || items[key].build.email).isHidden()) {
+                    await pages[key].searchInput.fill(items[key].build.name || items[key].build.email);
                 }
                 
                 await pages[key].waitUntilLoaded();
-                await pages[key].viewItemDetail(items[key].build.name);
+                await pages[key].viewItemDetail(items[key].build.name || items[key].build.email);
                 await pages[key].itemDetail.hasTitle();
                 //wait fore the file to load to prevent crashing
                 page.url().includes('evidences') ? await pages[key].page.getByTestId("attachment-name-title").waitFor({state: 'visible'}) : null;
@@ -58,7 +58,7 @@ for (const key of testPages) {
         
             test(`user can edit ${items[key].displayName.toLowerCase()} item`, async ({ pages, page }, testInfo) => {
                 const editedValues = await pages[key].itemDetail.editItem(items[key].build, items[key].editParams);
-                replaceValues(history[testInfo.line], items[key].build.name, items[key].build.name + ' edited');
+                replaceValues(history[testInfo.line], items[key].build.name || items[key].build.email, items[key].build.name + ' edited'  || '_' + items[key].build.email);
                 //wait fore the file to load to prevent crashing
                 page.url().includes('evidences') ? await pages[key].page.getByTestId("attachment-name-title").waitFor({state: 'visible'}) : null;
 
