@@ -60,6 +60,7 @@ LOGGING = {
         },
     },
     "loggers": {
+        "": {"handlers": LOG_OUTPUTS, "level": LOG_LEVEL},
         "django": {
             "handlers": LOG_OUTPUTS,
             "level": LOG_LEVEL,
