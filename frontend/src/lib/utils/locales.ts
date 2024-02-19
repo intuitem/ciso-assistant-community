@@ -13,9 +13,9 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
-	return str.replace(/[-_]+(.)?/g, function(match, char) {
-	  return char ? char.toUpperCase() : '';
-	});
+	return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        return index == 0 ? word.toLowerCase() : word.toUpperCase();
+    }).replace(/\s+/g, '');
 }
 
 export function getDeterminant(lang: string, defined: string, model: ModelInfo, plural=false): string {
@@ -158,6 +158,14 @@ export function localItems(languageTag: string): LocalItems {
 		dueDate: m.dueDate({ languageTag: languageTag }),
 		attachment: m.attachment({ languageTag: languageTag }),
 		observation: m.observation({ languageTag: languageTag }),
+		veryLow: m.veryLow({ languageTag: languageTag }),
+		low: m.low({ languageTag: languageTag }),
+		medium: m.medium({ languageTag: languageTag }),
+		high: m.high({ languageTag: languageTag }),
+		veryHigh: m.veryHigh({ languageTag: languageTag }),
+		planned: m.planned({ languageTag: languageTag }),
+		active: m.active({ languageTag: languageTag }),
+		inactive: m.inactive({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
