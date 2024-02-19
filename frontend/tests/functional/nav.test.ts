@@ -42,25 +42,25 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
     
     await test.step('more panel links are working properly', async () => {
         await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert')
+        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
         await expect(sideBar.profileButton).toBeVisible();
         await sideBar.profileButton.click();
-        await expect(sideBar.morePanel).toHaveAttribute('inert')
+        await expect(sideBar.morePanel).toHaveAttribute('inert');
         await expect(page).toHaveURL('/profile');
         await expect.soft(logedPage.pageTitle).toHaveText('Profile');
         
         await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert')
+        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
         await expect(sideBar.aboutButton).toBeVisible();
         await sideBar.aboutButton.click();
-        await expect(sideBar.morePanel).toHaveAttribute('inert')
+        await expect(sideBar.morePanel).toHaveAttribute('inert');
         await expect(logedPage.modalTitle).toBeVisible();
         await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
         await page.mouse.click(20, 20); // click outside the modal to close it
         await expect(logedPage.modalTitle).not.toBeVisible();
         
         await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert')
+        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
         await expect(sideBar.logoutButton).toBeVisible();
         await sideBar.logoutButton.click();
         await logedPage.hasUrl(0);
