@@ -11,6 +11,10 @@
 
 	import { RISK_COLOR_PALETTE } from '$lib/utils/constants';
 
+	import * as m from '$paraglide/messages';
+	import { localItems } from '$lib/utils/locales.js';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data;
 
 	let user: User = data.user;
@@ -29,10 +33,17 @@
 
 	let openTab = 1;
 
-	const cur_rsk_label = 'Current risk';
-	const rsd_rsk_label = 'Residual risk';
+	const cur_rsk_label = m.currentRisk();
+	const rsd_rsk_label = m.residualRisk();
 
 	let dropdown_selected_values: any;
+
+	console.log(security_measure_status.localLables);
+
+	for (const item in security_measure_status.labels) {
+		console.log(security_measure_status.labels[item])
+		security_measure_status.labels[item] = localItems(languageTag())[security_measure_status.localLables[item]];
+	}
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -180,7 +191,7 @@
 </script>
 
 <svelte:head>
-	<title>Analytics</title>
+	<title>{m.analytics()}</title>
 </svelte:head>
 
 <svelte:document
@@ -203,7 +214,7 @@
 			<span class="">
 				<i class="fas fa-chart-pie" />
 			</span>
-			<div class="w-full">Summary</div>
+			<div class="w-full">{m.summary()}</div>
 		</button>
 		<button
 			class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center {openTab !==
@@ -215,7 +226,7 @@
 			<span class="">
 				<i class="fas fa-star" />
 			</span>
-			<div class="w-full">Compliance</div>
+			<div class="w-full">{m.compliance()}</div>
 		</button>
 		<button
 			class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center {openTab !==
@@ -227,7 +238,7 @@
 			<span class="">
 				<i class="fas fa-heartbeat" />
 			</span>
-			<div class="w-full">Treatment</div>
+			<div class="w-full">{m.treatment()}</div>
 		</button>
 		<button
 			class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center {openTab !==
@@ -239,42 +250,42 @@
 			<span class="">
 				<i class="fas fa-drafting-compass" />
 			</span>
-			<div class="w-full">Composer</div>
+			<div class="w-full">{m.composer()}</div>
 		</button>
 	</div>
 
 	<div class:hide={openTab !== 1}>
 		<section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="stats">
 			<div class="p-2 m-2">
-				<span class="text-2xl font-extrabold text-slate-700">Statistics</span>
+				<span class="text-2xl font-extrabold text-slate-700">{m.statistics()}</span>
 			</div>
 			<div class="flex items-center content-center">
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-blue-500 mr-2"><i class="fas fa-glasses" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.RiskAssessment}</div>
-						<div class="font-semibold text-slate-500 text-sm">Risk assessments</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.riskAssessments()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-yellow-500 mr-2"><i class="fas fa-clone" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.RiskScenario}</div>
-						<div class="font-semibold text-slate-500 text-sm">Scenarios</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.scenarios()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.SecurityMeasure}</div>
-						<div class="font-semibold text-slate-500 text-sm">Security measures</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.securityMeasures()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-green-500 mr-2"><i class="fas fa-user-tie" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.RiskAcceptance}</div>
-						<div class="font-semibold text-slate-500 text-sm">Risk acceptances</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.riskAcceptances()}</div>
 					</div>
 				</div>
 			</div>
@@ -282,14 +293,18 @@
 
 		<section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
 			<div class="p-2 m-2">
-				<div class="text-2xl font-extrabold text-slate-700">My projects</div>
+				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
-					Assigned to <span class="font-bold text-slate-700">{counters.Project}</span> projects
+					{#if counters.Project > 1}
+						{m.assignedObjects({number: counters.Project, object: 'projects'})}
+					{:else}
+						{m.assignedObjects({number: counters.Project, object: 'project'})}
+					{/if}
 				</div>
 			</div>
 			<div class="flex items-center content-center">
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">Current risk level per risk scenario</span>
+					<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 					<DonutChart
 						s_label={cur_rsk_label}
@@ -298,7 +313,7 @@
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">Residual risk level per risk scenario</span>
+					<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 					<DonutChart
 						s_label={rsd_rsk_label}
@@ -307,7 +322,7 @@
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">Security measures status</span>
+					<span class="text-sm font-semibold">{m.securityMeasuresStatus()}</span>
 
 					<!-- -----------MEASURE STATUS------------ -->
 
@@ -320,19 +335,19 @@
 
 		<section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
 			<div class="p-2 m-2">
-				<div class="text-2xl font-extrabold text-slate-700">Watch list</div>
+				<div class="text-2xl font-extrabold text-slate-700">{m.watchlist()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
-					Items that have expired or with close ETA
+					{m.watchlistDescription()}
 				</div>
 			</div>
 			<div class="p-2 m-2 flex flex-col space-y-5 items-center content-center">
 				<div class="w-full">
-					<span class="text-md font-semibold">Measures to review</span>
+					<span class="text-md font-semibold">{m.measuresToReview()}</span>
 
 					<WatchlistMeasures {measures_to_review} />
 				</div>
 				<div class="w-full">
-					<span class="text-md font-semibold">Exceptions to review</span>
+					<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
 
 					<WatchlistExceptions {acceptances_to_review} {user} />
 				</div>

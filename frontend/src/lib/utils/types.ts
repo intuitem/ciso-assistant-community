@@ -109,6 +109,7 @@ export interface Counter {
 }
 
 export interface SecurityMeasureStatus {
+	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on
 }
