@@ -19,7 +19,7 @@ from django.core.management.utils import get_random_secret_key
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOG_OUTPUTS = os.environ.get("LOG_OUTPUTS", "console,json").split(",")
+LOG_OUTPUTS = os.environ.get("LOG_OUTPUTS", "console").split(",")
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 JSON_LOG_FILE = os.environ.get("JSON_LOG_FILE", "logs/json.log")
 FLAT_LOG_FILE = os.environ.get("FLAT_LOG_FILE", "logs/flat.log")
