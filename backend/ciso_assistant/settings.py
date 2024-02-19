@@ -288,7 +288,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 if "POSTGRES_NAME" in os.environ:
-    logger.info("Postgresql database engine")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -299,15 +298,14 @@ if "POSTGRES_NAME" in os.environ:
             "PORT": os.environ.get("DB_PORT", "5432"),
         }
     }
-    logger.info("Postgresql database engine")
 else:
-    logger.info("sqlite database engine")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db/ciso-assistant.sqlite3",
         }
     }
+logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
