@@ -320,6 +320,10 @@ class User(AbstractBaseUser):
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
 
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        logger.info("user deleted", user=self)
+
     def __str__(self):
         return (
             f"{self.first_name} {self.last_name}"
