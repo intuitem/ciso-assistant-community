@@ -324,6 +324,10 @@ class User(AbstractBaseUser):
         super().delete(*args, **kwargs)
         logger.info("user deleted", user=self)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        logger.info("user saved", user=self)
+
     def __str__(self):
         return (
             f"{self.first_name} {self.last_name}"
