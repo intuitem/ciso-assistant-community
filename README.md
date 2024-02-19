@@ -69,7 +69,7 @@ cd ciso-assistant-community
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO Assistant using your web brower at [http://localhost:3000/](http://localhost:3000/)
+You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
 
 For the following executions, use "docker-compose up" directly.
 
@@ -185,7 +185,6 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-
 8.  Run development server.
 
 ```sh
@@ -236,26 +235,9 @@ npm install
 npm run dev
 ```
 
-5. If you want to setup Postgres:
+5. Reach the frontend on http://localhost:5173
 
-- Launch one of these commands to enter in Postgres:
-  - ```psql as superadmin```
-  - ```sudo su postgres```
-  - ```psql```
-- Create the database "mira"
-  - ```create database mira;```
-- Create user "mirauser" and grant it access
-  - ```create user mirauser with password '<POSTGRES_PASSWORD>';```
-  -  ```grant all privileges on database mira to mirauser;```
-
-6. Prepare and apply migrations.
-
-```sh
-(venv)$ cd backend
-(venv)$ pytest
-```
-
-Coming soon.
+Note: Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
 
 ## Managing migrations
 
