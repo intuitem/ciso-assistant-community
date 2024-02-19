@@ -1,7 +1,6 @@
 from base64 import urlsafe_b64decode
 from django.contrib.auth import get_user_model, login, logout
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -24,6 +23,10 @@ from .serializers import (
 
 from .models import Role, RoleAssignment
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 User = get_user_model()
 
 
@@ -31,14 +34,23 @@ class LoginView(views.APIView):
     permission_classes = [permissions.AllowAny]
 
     @method_decorator(ensure_csrf_cookie)
-    def post(self, request, format=None) -> Response:
+    def post(self, request) -> Response:
         serializer = LoginSerializer(
-            data=self.request.data,  # type: ignore
+            data=self.request.data,
             context={"request": self.request},
         )
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]  # type: ignore
-        login(request, user)
+        try:
+            serializer.is_valid(raise_exception=True)
+            user = serializer.validated_data["user"]
+            login(request, user)
+            logger.info("login succesful", user=user)
+        except serializers.ValidationError as e:
+            logger.warning(
+                "login attempt failed",
+                code=e.get_codes(),
+                username=request.data.get("username"),
+            )
+
         return Response(None, status=HTTP_202_ACCEPTED)
 
 
@@ -96,11 +108,13 @@ class PasswordResetView(views.APIView):
             },
             status=HTTP_500_INTERNAL_SERVER_ERROR,
         )
-    
+
+
 class ResetPasswordConfirmView(views.APIView):
     """
     API Endpoit for reset password confirm
     """
+
     default_token_generator = PasswordResetTokenGenerator()
     permission_classes = [permissions.AllowAny]
     serialier_class = ResetPasswordConfirmSerializer
@@ -134,9 +148,10 @@ class ResetPasswordConfirmView(views.APIView):
                 user.save()
                 return Response(status=status.HTTP_200_OK)
         return Response(
-                    data={"error": "The link is invalid or has expired."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            data={"error": "The link is invalid or has expired."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
 
 class ChangePasswordView(views.APIView):
     """
