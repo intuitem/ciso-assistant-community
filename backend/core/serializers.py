@@ -268,6 +268,22 @@ class UserWriteSerializer(BaseModelSerializer):
                 )
         return user
 
+    def update(self, instance: User, validated_data: Any) -> User:
+        user_groups_data = validated_data.get("user_groups")
+        if user_groups_data is not None:
+            initial_groups = set(instance.user_groups.all())
+            new_groups = set(group for group in user_groups_data)
+
+            if initial_groups != new_groups:
+                logger.info(
+                    "user groups updated",
+                    user=instance,
+                    initial_user_groups=initial_groups,
+                    new_user_groups=new_groups,
+                )
+                # instance.user_groups.set(user_groups_data)
+        return super().update(instance, validated_data)
+
 
 class UserGroupReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
