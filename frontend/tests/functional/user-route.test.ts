@@ -6,15 +6,15 @@ const vars = TestContent.generateTestVars();
 test('user usual routine actions are working correctly', async ({
 	logedPage,
 	pages,
-	analyticsPage: overviewPage,
+	analyticsPage,
 	sideBar,
 	page
 }) => {
 	test.slow();
 
-	await test.step('proper redirection to the overview page after login', async () => {
-		await overviewPage.hasUrl();
-		await overviewPage.hasTitle();
+	await test.step('proper redirection to the analytics page after login', async () => {
+		await analyticsPage.hasUrl();
+		await analyticsPage.hasTitle();
 		setHttpResponsesListener(page);
 	});
 
