@@ -516,16 +516,16 @@ def aggregate_risks_per_field(
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(residual_level=i)
-                    .filter(risk_assessment__risk_matrix__name=["name"])
+                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )
+                ) # What the second filter does ? Is this usefull ?
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
-                    .filter(risk_assessment__risk_matrix__name=["name"])
+                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )
+                ) # What the second filter does ? Is this usefull ?
 
             if "count" not in values[m["risk"][i][field]]:
                 values[m["risk"][i][field]]["count"] = count
@@ -535,17 +535,17 @@ def aggregate_risks_per_field(
     return values
 
 def risks_count_per_level(user: User, risk_assessments: list | None = None):
-    current_level = list()
-    residual_level = list()
+    current_level  = []
+    residual_level = []
 
-    for r in aggregate_risks_per_field(
+    for level_name, level_data in aggregate_risks_per_field(
         user, "name", risk_assessments=risk_assessments
     ).items():
         current_level.append(
             {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
 
-    for r in aggregate_risks_per_field(
+    for level_name, level_data in aggregate_risks_per_field(
         user, "name", residual=True, risk_assessments=risk_assessments
     ).items():
         residual_level.append(

@@ -29,6 +29,7 @@
 
 					<div class="items-center h-96">
 						<DonutChart
+							name="current_risk_level"
 							s_label="Current risk level per risk scenario"
 							values={data.current_level}
 							colors={RISK_COLOR_PALETTE}
@@ -52,6 +53,7 @@
 				<div class="p-2 text-sm font-semibold">Residual risk level per risk scenario</div>
 				<div class="items-center h-96">
 					<DonutChart
+						name="residual_risk_level"
 						s_label="Residual risk level per risk scenario"
 						values={data.residual_level}
 						colors={RISK_COLOR_PALETTE}
