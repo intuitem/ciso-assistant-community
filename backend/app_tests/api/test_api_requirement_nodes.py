@@ -6,7 +6,7 @@ from iam.models import Folder
 from test_api import EndpointTestsQueries, EndpointTestsUtils
 
 # Generic requirement data for tests
-REQUIREMENT_NODE_NAME = "Test Requiremen Node"
+REQUIREMENT_NODE_NAME = "Test Requirement Node"
 REQUIREMENT_NODE_DESCRIPTION = "Test Description"
 REQUIREMENT_NODE_URN = "urn:test:req_node.t:1"
 REQUIREMENT_NODE_PARENT_URN = "urn:test:req_node.t"
