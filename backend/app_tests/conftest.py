@@ -33,4 +33,4 @@ def authenticated_client_with_role(app_config, request):
     UserGroup.objects.get(name=request.param['role'], folder=Folder.objects.get(name=request.param['folder']).id).user_set.add(user)
     client = APIClient()
     client.force_login(user)
-    return client
+    return client, request.param
