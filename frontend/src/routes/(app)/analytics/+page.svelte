@@ -306,6 +306,7 @@
 					<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 					<DonutChart
+						name="current_risk"
 						s_label={cur_rsk_label}
 						values={risk_level.current}
 						colors={RISK_COLOR_PALETTE}
@@ -315,6 +316,7 @@
 					<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 					<DonutChart
+					name="residual_risk"
 						s_label={rsd_rsk_label}
 						values={risk_level.residual}
 						colors={RISK_COLOR_PALETTE}

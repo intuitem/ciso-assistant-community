@@ -138,6 +138,7 @@
 		</div>
 		<div class="w-full">
 			<DonutChart
+				name="compliance_assessments"
 				s_label="compliance_assessments"
 				values={compliance_assessment_donut_values.values}
 			/>

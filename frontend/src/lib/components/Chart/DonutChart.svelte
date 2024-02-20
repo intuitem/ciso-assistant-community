@@ -3,6 +3,7 @@
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
+	export let name: string;
 	export let s_label: string;
 
 	export let values: any[]; // Set the types for these variables later on
@@ -15,6 +16,7 @@
 	let chart_element: HTMLElement | null = null;
 	onMount(async () => {
 		const echarts = await import('echarts');
+		const chart_element = document.getElementById(chart_id);
 		let chart = echarts.init(chart_element, null, { renderer: 'svg' });
 
 		// specify chart configuration item and data
@@ -75,4 +77,4 @@
 	});
 </script>
 
-<div class="bg-white w-auto h-full" bind:this={chart_element} />
+<div id="{chart_id}" class="bg-white w-auto h-full"/> <!-- bind:this={chart_element} -->
