@@ -27,12 +27,14 @@ const config: PlaywrightTestConfig = {
 		}]
 	],
 	use: {
+		ignoreHTTPSErrors: true,
+		baseURL: process.env.COMPOSE_TEST ? "https://localhost:8443" : "http://localhost:4173",
 		screenshot: 'only-on-failure',
 		video: process.env.CI ? 'retain-on-failure' : 'on',
 		trace: process.env.CI ? 'retain-on-failure' : 'on',
 		contextOptions: {
-			recordVideo: { dir: "tests/results/videos"}
-		}
+			recordVideo: { dir: "tests/results/videos"},
+		  },
 	},
 	projects: [
 		{
