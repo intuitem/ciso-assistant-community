@@ -7,7 +7,6 @@ from core.models import (
     RiskScenario,
     RiskMatrix,
     RiskAssessment,
-    Threat,
 )
 from iam.models import Folder, UserGroup
 
@@ -124,10 +123,6 @@ class TestRiskAcceptanceAuthenticated:
             },
         )
 
-    @pytest.mark.skip(
-        reason="Everything is working fine on the API but the approver field is problematic in tests"
-    )
-    # NOTE: It is related to roles and approver permissions somewhere in the test context
     def test_create_risk_acceptances(self, authenticated_client):
         """test to create risk acceptances with the API with authentication"""
 
@@ -143,7 +138,6 @@ class TestRiskAcceptanceAuthenticated:
                 project=Project.objects.create(name="test", folder=folder),
                 risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
             ),
-            threat=Threat.objects.create(name="test", folder=folder),
         )
 
         EndpointTestsQueries.Auth.create_object(
@@ -172,10 +166,6 @@ class TestRiskAcceptanceAuthenticated:
             },
         )
 
-    @pytest.mark.skip(
-        reason="Everything is working fine on the API but the approver field is problematic in tests"
-    )
-    # NOTE: It is related to roles and approver permissions somewhere in the test context
     def test_update_risk_acceptances(self, authenticated_client):
         """test to update risk acceptances with the API with authentication"""
 
@@ -194,7 +184,6 @@ class TestRiskAcceptanceAuthenticated:
                 project=Project.objects.create(name="test", folder=folder2),
                 risk_matrix=RiskMatrix.objects.create(name="test", folder=folder2),
             ),
-            threat=Threat.objects.create(name="test", folder=folder2),
         )
 
         EndpointTestsQueries.Auth.update_object(
