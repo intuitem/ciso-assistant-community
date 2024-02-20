@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from core.models import SecurityFunction, Policy
+from core.models import Policy
 from iam.models import Folder
 
 from test_api import EndpointTestsQueries
@@ -22,7 +22,7 @@ class TestPolicysUnauthenticated:
 
     client = APIClient()
 
-    def test_get_security_measures(self):
+    def test_get_policies(self):
         """test to get policies from the API without authentication"""
 
         EndpointTestsQueries.get_object(
@@ -36,7 +36,7 @@ class TestPolicysUnauthenticated:
             },
         )
 
-    def test_create_security_measures(self):
+    def test_create_policies(self):
         """test to create policies with the API without authentication"""
 
         EndpointTestsQueries.create_object(
@@ -50,7 +50,7 @@ class TestPolicysUnauthenticated:
             },
         )
 
-    def test_update_security_measures(self):
+    def test_update_policies(self):
         """test to update policies with the API without authentication"""
 
         EndpointTestsQueries.update_object(
@@ -69,7 +69,7 @@ class TestPolicysUnauthenticated:
             },
         )
 
-    def test_delete_security_measures(self):
+    def test_delete_policies(self):
         """test to delete policies with the API without authentication"""
 
         EndpointTestsQueries.delete_object(
@@ -87,7 +87,7 @@ class TestPolicysUnauthenticated:
 class TestPolicysAuthenticated:
     """Perform tests on policies API endpoint with authentication"""
 
-    def test_get_security_measures(self, authenticated_client):
+    def test_get_policies(self, authenticated_client):
         """test to get policies from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
@@ -111,12 +111,8 @@ class TestPolicysAuthenticated:
             },
         )
 
-    def test_create_security_measures(self, authenticated_client):
+    def test_create_policies(self, authenticated_client):
         """test to create policies with the API with authentication"""
-
-        security_function = SecurityFunction.objects.create(
-            name="test", typical_evidence={}, folder=Folder.objects.create(name="test")
-        )
 
         EndpointTestsQueries.Auth.create_object(
             authenticated_client,
@@ -138,13 +134,10 @@ class TestPolicysAuthenticated:
             },
         )
 
-    def test_update_security_measures(self, authenticated_client):
+    def test_update_policies(self, authenticated_client):
         """test to update policies with the API with authentication"""
 
         folder = Folder.objects.create(name="test")
-        security_function = SecurityFunction.objects.create(
-            name="test", typical_evidence={}, folder=folder
-        )
 
         EndpointTestsQueries.Auth.update_object(
             authenticated_client,
@@ -175,7 +168,7 @@ class TestPolicysAuthenticated:
             },
         )
 
-    def test_delete_security_measures(self, authenticated_client):
+    def test_delete_policies(self, authenticated_client):
         """test to delete policies with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
@@ -186,6 +179,13 @@ class TestPolicysAuthenticated:
                 "name": POLICY_NAME,
                 "folder": Folder.objects.create(name="test"),
             },
+        )
+    
+    def test_get_category_choices(self, authenticated_client):
+        """test to get policies category choices from the API with authentication"""
+
+        EndpointTestsQueries.Auth.get_object_options(
+            authenticated_client, "policies", "category", Policy.CATEGORY
         )
 
     def test_get_effort_choices(self, authenticated_client):
