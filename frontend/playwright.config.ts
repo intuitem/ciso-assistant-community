@@ -31,8 +31,8 @@ const config: PlaywrightTestConfig = {
 		video: process.env.CI ? 'retain-on-failure' : 'on',
 		trace: process.env.CI ? 'retain-on-failure' : 'on',
 		contextOptions: {
-			recordVideo: { dir: "tests/results/videos"}
-		}
+			recordVideo: { dir: "tests/results/videos"},
+		  },
 	},
 	projects: [
 		{
