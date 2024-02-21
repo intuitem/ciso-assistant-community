@@ -1,8 +1,13 @@
 import pytest
 from rest_framework.test import APIClient
-from iam.models import Folder, User, UserGroup
+from api.test_api import EndpointTestsUtils
+from iam.models import User, UserGroup
 from core.apps import startup
 
+class Test(dict):
+    def __init__(self, *args, **kwargs):
+        super(Test, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 @pytest.fixture
 def app_config():
@@ -27,10 +32,7 @@ def authenticated_client(app_config):
 
 
 @pytest.fixture
-def authenticated_client_with_role(app_config, request):
-    """Get an authenticated client with a specific role"""
-    user = User.objects.create_user("user@tests.com")
-    UserGroup.objects.get(name=request.param['role'], folder=Folder.objects.get(name=request.param['folder']).id).user_set.add(user)
-    client = APIClient()
-    client.force_login(user)
-    return client, request.param
+def test(authenticated_client, request):
+    """Get the elements used by the tests such as client and associated folder"""
+    client, folder = EndpointTestsUtils.get_test_client_and_folder(authenticated_client, request.param)
+    return Test({"client": client, "authenticated_client": authenticated_client, "folder": folder, "user_group": request.param})

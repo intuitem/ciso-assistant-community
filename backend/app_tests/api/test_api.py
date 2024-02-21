@@ -1,8 +1,10 @@
+import pytest
 import json
 import re
 from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APIClient
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from test_vars import *
@@ -10,7 +12,7 @@ from test_vars import *
 
 class EndpointTestsUtils:
     """Provides utils functions for API endpoints testing"""
-
+    
     def get_endpoint_url(verbose_name: str, resolved: bool = True):
         """Get the endpoint URL for the given object"""
 
@@ -25,6 +27,19 @@ class EndpointTestsUtils:
         urn = get_var(urn_varname)
         return f"{reverse(LIBRARIES_ENDPOINT)}{urn}/" if resolved else eval(urn)
 
+    @pytest.mark.django_db
+    def get_test_client_and_folder(authenticated_client, role: str):
+        """Get an authenticated client with a specific role and the folder associated to the role"""
+        from iam.models import Folder, User, UserGroup
+
+        EndpointTestsQueries.Auth.create_object(authenticated_client, "Folders", Folder, {"name": "test"})
+        folder = Folder.objects.get(name="test")
+
+        user = User.objects.create_user("user@tests.com")
+        UserGroup.objects.get(name=role, folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"])).user_set.add(user)
+        client = APIClient()
+        client.force_login(user)
+        return client, folder
 
 class EndpointTestsQueries:
     """Provides tests functions for API endpoints testing"""
