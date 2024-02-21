@@ -15,8 +15,9 @@ services:
   frontend:
     container_name: frontend
     environment:
-        - ORIGIN=https://localhost:8443
         - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+        - PROTOCOL_HEADER=x-forwarded-proto 
+        - HOST_HEADER=x-forwarded-host
     build: ./frontend
     depends_on:
       - backend
