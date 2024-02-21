@@ -27,6 +27,7 @@ const config: PlaywrightTestConfig = {
 		}]
 	],
 	use: {
+		ignoreHTTPSErrors: true,
 		screenshot: 'only-on-failure',
 		video: process.env.CI ? 'retain-on-failure' : 'on',
 		trace: process.env.CI ? 'retain-on-failure' : 'on',
