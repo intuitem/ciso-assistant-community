@@ -1,9 +1,10 @@
 import pytest
 from rest_framework.test import APIClient
 from core.models import Project
-from iam.models import Folder
+from iam.models import Folder, User, UserGroup
 
-from test_api import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
+from test_api import EndpointTestsQueries, EndpointTestsUtils
 
 # Generic project data for tests
 PROJECT_NAME = "Test Project"
@@ -76,30 +77,32 @@ class TestProjectsUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestProjectsAuthenticated:
     """Perform tests on Projects API endpoint with authentication"""
 
-    def test_get_projects(self, authenticated_client):
+    def test_get_projects(self, test):
         """test to get projects from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Projects",
             Project,
             {
                 "name": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
-                "folder": Folder.get_root_folder(),
+                "folder": test.folder,
                 "internal_reference": PROJECT_REFERENCE,
                 "lc_status": PROJECT_STATUS[0],
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "lc_status": PROJECT_STATUS[1],
             },
         )
+        
 
-    def test_create_projects(self, authenticated_client):
+    def test_create_projects(self, authenticated_client, test):
         """test to create projects with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
@@ -119,7 +122,7 @@ class TestProjectsAuthenticated:
             },
         )
 
-    def test_update_projects(self, authenticated_client):
+    def test_update_projects(self, authenticated_client, test):
         """test to update projects with the API with authentication"""
 
         status = ("in_dev", "Development")
@@ -149,7 +152,7 @@ class TestProjectsAuthenticated:
             },
         )
 
-    def test_delete_projects(self, authenticated_client):
+    def test_delete_projects(self, authenticated_client, test):
         """test to delete projects with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
@@ -159,7 +162,7 @@ class TestProjectsAuthenticated:
             {"name": PROJECT_NAME, "folder": Folder.get_root_folder()},
         )
 
-    def test_get_status_choices(self, authenticated_client):
+    def test_get_status_choices(self, authenticated_client, test):
         """test to get projects status choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
