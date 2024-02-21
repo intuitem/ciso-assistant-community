@@ -291,6 +291,12 @@
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
+			<Select
+				{form}
+				options={data.strengthOfKnowledgeChoices}
+				field="strength_of_knowledge"
+				label="Strength of knowledge"
+			/>
 			<TextArea {form} field="justification" label="Justification" />
 		</div>
 		<div class="flex flex-row justify-between space-x-4">

@@ -113,6 +113,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			}))
 		);
 
+	const strengthOfKnowledgeChoicesEndpoint = `${BASE_API_URL}/${URLModel}/strength_of_knowledge/`;
+	const strengthOfKnowledgeChoices = await fetch(strengthOfKnowledgeChoicesEndpoint)
+		.then((res) => res.json())
+		.then((data) =>
+			Object.entries(data).map(([key, value]) => ({
+				label: value,
+				value: key
+			}))
+		);
+
 	const measureCreateSchema = modelSchema('security-measures');
 	const initialData = {
 		folder: scenario.project.folder.id
@@ -170,6 +180,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		probabilityChoices,
 		impactChoices,
 		treatmentChoices,
+		strengthOfKnowledgeChoices,
 		tables,
 		measureModel,
 		measureCreateForm
