@@ -24,19 +24,17 @@ export const listViewFields = {
 	'risk-scenarios': {
 		head: [
 			'name',
-			'treatmentStatus',
-			'threat',
+			'threats',
 			'riskAssessment',
-			'assets',
+			'securityMeasures',
 			'currentLevel',
 			'residualLevel'
 		],
 		body: [
 			'name',
-			'treatment',
-			'threat',
+			'threats',
 			'risk_assessment',
-			'assets',
+			'security_measures',
 			'current_level',
 			'residual_level'
 		]
@@ -48,6 +46,10 @@ export const listViewFields = {
 	'security-measures': {
 		head: ['name', 'description', 'category', 'eta', 'domain', 'securityFunction'],
 		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
+	},
+	policies: {
+		head: ['Name', 'Description', 'ETA', 'Domain', 'Security function'],
+		body: ['name', 'description', 'eta', 'folder', 'security_function']
 	},
 	'security-functions': {
 		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],

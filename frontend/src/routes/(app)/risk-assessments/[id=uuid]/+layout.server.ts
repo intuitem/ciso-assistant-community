@@ -80,10 +80,13 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 
 				const metaData = tableSourceMapper(data, ['id']);
 
-				const bodyData = tableSourceMapper(data, listViewFields[e.urlModel].body);
+				const bodyData = tableSourceMapper(
+					data,
+					listViewFields[e.urlModel].body.filter((field) => field !== 'risk_assessment')
+				);
 
 				const table: TableSource = {
-					head: listViewFields[e.urlModel].head,
+					head: listViewFields[e.urlModel].head.filter((field) => field !== 'Risk assessment'),
 					body: bodyData,
 					meta: metaData
 				};

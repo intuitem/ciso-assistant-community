@@ -3,7 +3,9 @@ name: Functional Tests
 on:
   pull_request:
     branches: [main, develop]
-    types: [opened]
+    types: [opened, synchronize]
+    paths:
+      - 'frontend/tests/**'
   workflow_dispatch:
 
 env:
@@ -56,7 +58,7 @@ jobs:
         working-directory: ${{ env.working-directory }}
         run: |
           touch .env
-          echo PUBLIC_BACKEND_API_URL=http://127.0.0.1:8000/api >> .env
+          echo PUBLIC_BACKEND_API_URL=http://localhost:8000/api >> .env
 
       - name: Create backend environment variables file
         working-directory: ${{ env.backend-directory }}
@@ -70,7 +72,7 @@ jobs:
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
           echo DB_HOST=localhost >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
-          echo CISO_ASSISTANT_URL=http://127.0.0.1:4173 >> .env
+          echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
@@ -91,6 +93,6 @@ jobs:
         with:
           name: functional-tests-report
           path: |
-            ${{ env.working-directory }}/tests/reports/
             ${{ env.working-directory }}/tests/results/
-          retention-days: 30
+            ${{ env.working-directory }}/tests/reports/
+          retention-days: 5

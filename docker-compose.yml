@@ -16,10 +16,8 @@ services:
     container_name: frontend
     environment:
         - ORIGIN=http://localhost:3000
-    build: 
-      context: ./frontend
-      args:
         - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+    build: ./frontend
     depends_on:
       - backend
     ports:

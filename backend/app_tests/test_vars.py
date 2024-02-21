@@ -16,6 +16,7 @@ RISK_ASSESSMENT_ENDPOINT = "risk-assessments-list"
 RISK_SCENARIOS_ENDPOINT = "risk-scenarios-list"
 SECURITY_FUNCTIONS_ENDPOINT = "security-functions-list"
 SECURITY_MEASURES_ENDPOINT = "security-measures-list"
+POLICIES_ENDPOINT = "policies-list"
 THREATS_ENDPOINT = "threats-list"
 USERS_ENDPOINT = "users-list"
 

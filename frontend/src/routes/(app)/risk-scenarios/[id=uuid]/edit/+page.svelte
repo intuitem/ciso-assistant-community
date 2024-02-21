@@ -196,12 +196,13 @@
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-semibold">Current risk</h4>
-			<div class="flex flex-row space-x-4">
+			<div class="flex flex-row space-x-4 justify-between">
 				<TextArea
 					{form}
 					field="existing_measures"
 					label="Existing measures"
 					helpText="The existing security measures to manage this risk"
+					regionContainer="w-1/2"
 				/>
 				<div class="flex flex-col">
 					<h5 class="h5 font-medium">Current assessment</h5>
@@ -238,8 +239,8 @@
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-semibold">Residual risk</h4>
-			<div class="flex flex-row space-x-4">
-				<div class="flex flex-col">
+			<div class="flex flex-row space-x-4 justify-between">
+				<div class="flex flex-col w-1/2">
 					<span class="flex flex-row justify-between items-center">
 						<h5 class="h5 font-medium">Associated security measures</h5>
 						<button
@@ -295,10 +296,13 @@
 		<div class="flex flex-row justify-between space-x-4">
 			<button
 				class="btn bg-gray-400 text-white font-semibold w-full"
+				data-testid="cancel-button"
 				type="button"
 				on:click={cancel}>Cancel</button
 			>
-			<button class="btn variant-filled-primary font-semibold w-full">Save</button>
+			<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button"
+				>Save</button
+			>
 		</div>
 	</SuperForm>
 </div>

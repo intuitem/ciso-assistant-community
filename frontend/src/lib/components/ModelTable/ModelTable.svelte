@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { page } from '$app/stores';
+	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { FIELD_COLORED_TAG_MAP, FIELD_COMPONENT_MAP } from '$lib/utils/crud';
 	import { createEventDispatcher } from 'svelte';
 
@@ -234,8 +234,9 @@
 							{#if component}
 								<svelte:component this={component} meta={row.meta ?? {}} cell={value}/>
 							{:else}
+                <span class="font-token whitespace-pre-line break-words">
                 {#if Array.isArray(value)}
-                  <ul class="list-disc pl-4">
+                  <ul class="list-disc pl-4 whitespace-normal">
                     {#each value as val}
                       <li>
                         {#if val.str && val.id}
@@ -260,11 +261,12 @@
                   {:else}
                     {value.str ?? '-'}
                   {/if}
-				{:else if value && value.hexcolor}
-				  <p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                {:else if value && value.hexcolor}
+                  <p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
                 {:else}
                   {value ?? '-'}
                 {/if}
+                </span>
 							{/if}
 						</td>
             {/if}
