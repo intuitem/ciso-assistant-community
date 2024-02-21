@@ -119,8 +119,8 @@ jobs:
       - name: Config the Docker app
         run: |
           docker compose exec backend python manage.py migrate
-          docker compose exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput"
-      - name: Run test
+          docker compose exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput && exit 0"
+      - name: Run tests
         working-directory: ${{ env.working-directory }}
         run: |
           response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
