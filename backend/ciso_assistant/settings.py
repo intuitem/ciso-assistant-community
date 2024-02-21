@@ -69,18 +69,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": LOG_OUTPUTS, "level": LOG_LEVEL},
-        "django": {
-            "handlers": LOG_OUTPUTS,
-            "level": LOG_LEVEL,
-        },
-        "django_structlog": {
-            "handlers": LOG_OUTPUTS,
-            "level": LOG_LEVEL,
-        },
-        "ciso_assistant": {
-            "handlers": LOG_OUTPUTS,
-            "level": LOG_LEVEL,
-        },
     },
 }
 
