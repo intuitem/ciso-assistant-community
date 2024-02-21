@@ -123,7 +123,7 @@ jobs:
       - name: Run test
         working-directory: ${{ env.working-directory }}
         run: |
-          response=$(curl -d "username=root@gmail.com&password=root" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
+          response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
           server_reponse='{"type":"redirect","status":302,"location":"/analytics"}'
           if [[ "$response" == "$server_reponse" ]]; then
             echo "Success"
