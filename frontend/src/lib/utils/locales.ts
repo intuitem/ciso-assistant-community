@@ -58,7 +58,7 @@ export function localItems(languageTag: string): LocalItems {
 		governance: m.governance({ languageTag: languageTag }),
 		risk: m.risk({ languageTag: languageTag }),
 		compliance: m.compliance({ languageTag: languageTag }),
-		organisation: m.organisation({ languageTag: languageTag }),
+		organization: m.organization({ languageTag: languageTag }),
 		extra: m.extra({ languageTag: languageTag }),
 		analytics: m.analytics({ languageTag: languageTag }),
 		calendar: m.calendar({ languageTag: languageTag }),

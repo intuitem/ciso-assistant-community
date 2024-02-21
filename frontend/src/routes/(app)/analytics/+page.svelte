@@ -38,10 +38,7 @@
 
 	let dropdown_selected_values: any;
 
-	console.log(security_measure_status.localLables);
-
 	for (const item in security_measure_status.labels) {
-		console.log(security_measure_status.labels[item])
 		security_measure_status.labels[item] = localItems(languageTag())[security_measure_status.localLables[item]];
 	}
 
