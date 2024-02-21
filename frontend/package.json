@@ -18,8 +18,8 @@
 		"postinstall": "paraglide-js compile --project ./project.inlang"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.40.1",
 		"@inlang/paraglide-js": "1.2.5",
+		"@playwright/test": "^1.40.1",
 		"@skeletonlabs/skeleton": "^2.3.0",
 		"@skeletonlabs/tw-plugin": "^0.2.2",
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -30,7 +30,7 @@
 		"@tailwindcss/typography": "^0.5.9",
 		"@testing-library/jest-dom": "^6.1.4",
 		"@testing-library/svelte": "^4.0.4",
-		"@types/node": "^20.8.7",
+		"@types/node": "^20.11.19",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"@vincjo/datatables": "^1.14.0",
