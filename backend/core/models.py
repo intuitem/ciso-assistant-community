@@ -857,7 +857,6 @@ class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
     ]
 
     SOK_OPTIONS = [
-        ("--", _("--")),
         ("0", _("Low")),
         ("1", _("Medium")),
         ("2", _("High")),
@@ -938,7 +937,8 @@ class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
     strength_of_knowledge = models.CharField(
         max_length=20,
         choices=SOK_OPTIONS,
-        default="--",
+        null=True,
+        blank=True,
         verbose_name=_("Strength of Knowledge"),
     )
     justification = models.CharField(
