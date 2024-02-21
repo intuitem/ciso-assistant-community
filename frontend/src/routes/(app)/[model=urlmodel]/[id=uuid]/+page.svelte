@@ -172,20 +172,20 @@
 		</div>
 	{/if}
 	<div class="card px-6 py-4 bg-white flex flex-row space-y-2 justify-between shadow-lg">
-		<div class="flex flex-col space-y-2">
+		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800">
+					<div class="text-sm font-medium text-gray-800" data-testid="{key.replace('_', '-')}-field-title">
 						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none">
+						<li class="text-gray-600 list-none" data-testid={!(value instanceof Array) ? key.replace('_', '-') + "-field-value" : null}>
 							{#if value}
 								{#if Array.isArray(value)}
 									{#if Object.keys(value).length > 0}
 										<ul>
 											{#each value as val}
-												<li>
+												<li data-testid={key.replace('_', '-') + "-field-value"}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
@@ -226,7 +226,7 @@
 			<a
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
+				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"/>{m.edit()}</a
 			>
 		{/if}
 	</div>

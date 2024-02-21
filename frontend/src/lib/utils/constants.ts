@@ -1,6 +1,6 @@
-import { PUBLIC_BACKEND_API_URL } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
-export const BASE_API_URL = `${PUBLIC_BACKEND_API_URL}`;
+export const BASE_API_URL = `${env.PUBLIC_BACKEND_API_URL}`;
 
 export const RISK_COLOR_PALETTE: string[] = ['#BBF7D0', '#BEF264', '#FEF08A', '#FBBF24', '#F87171'];
 export const COMPLIANCE_COLOR_MAP = {

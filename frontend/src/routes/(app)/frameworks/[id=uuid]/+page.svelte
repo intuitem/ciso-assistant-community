@@ -26,7 +26,7 @@
 	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 </script>
 
-<div class="flex flex-col space-y-4">
+<div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
 		<div class="flex flex-col space-y-2">
 			{#each Object.entries(data.framework).filter(([key, _]) => key !== 'id' && key !== 'created_at') as [key, value]}

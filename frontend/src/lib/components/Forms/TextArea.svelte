@@ -1,9 +1,11 @@
 <script lang="ts">
+	import type { CssClasses } from '@skeletonlabs/skeleton';
 	import { formFieldProxy } from 'sveltekit-superforms/client';
 
 	let _class = '';
 
 	export { _class as class };
+	export let regionContainer: CssClasses = '';
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -14,7 +16,7 @@
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
 </script>
 
-<div>
+<div class={regionContainer}>
 	{#if label !== undefined}
 		{#if $constraints?.required}
 			<label class="text-sm font-semibold" for={field}

@@ -63,8 +63,8 @@ export const RiskRiskAssessmentSchema = baseNamedObject({
 	risk_matrix: z.string(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
-	authors: z.array(z.string()).optional(),
-	reviewers: z.array(z.string()).optional()
+	authors: z.array(z.string().optional()),
+	reviewers: z.array(z.string().optional())
 });
 
 export const ThreatSchema = baseNamedObject({
@@ -88,6 +88,17 @@ export const RiskScenarioSchema = baseNamedObject({
 
 export const SecurityMeasureSchema = baseNamedObject({
 	category: z.string().optional(),
+	status: z.string().optional(),
+	evidences: z.string().optional().array().optional(),
+	eta: z.string().optional().nullable(),
+	expiry_date: z.string().optional().nullable(),
+	link: z.string().url().optional().nullable(),
+	effort: z.string().optional(),
+	folder: z.string(),
+	security_function: z.string().optional()
+});
+
+export const PolicySchema = baseNamedObject({
 	status: z.string().optional(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
@@ -161,8 +172,8 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	framework: z.string(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
-	authors: z.array(z.string()).optional(),
-	reviewers: z.array(z.string()).optional()
+	authors: z.array(z.string().optional()),
+	reviewers: z.array(z.string().optional())
 });
 
 export const EvidenceSchema = baseNamedObject({
@@ -181,6 +192,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'security-measures': SecurityMeasureSchema,
+	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'security-functions': SecurityFunctionSchema,
 	assets: AssetSchema,

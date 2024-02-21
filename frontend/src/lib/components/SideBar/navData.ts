@@ -65,7 +65,7 @@ export const navData = {
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-user',
-					href: '/security-measures'
+					href: '/policies'
 				},
 				{
 					name: 'riskMatrices',
@@ -116,7 +116,7 @@ export const navData = {
 			]
 		},
 		{
-			name: 'organisation',
+			name: 'organization',
 			items: [
 				{
 					name: 'domains',

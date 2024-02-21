@@ -36,12 +36,13 @@
 	}
 
 	const title =
-		data.compliance_assessment.name +
-		' - ' +
-		data.parent.display_short +
-		': ' +
+		(data.parent.display_short ? data.parent.display_short + ': ' : '') +
 		data.requirement.display_short;
-	breadcrumbObject.set({ id: data.requirementAssessment.id, name: title, email: '' });
+	breadcrumbObject.set({
+		id: data.requirementAssessment.id,
+		name: title ?? 'Requirement assessment',
+		email: ''
+	});
 
 	const schema = RequirementAssessmentSchema;
 
@@ -140,14 +141,14 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<h3 class="h3 font-semibold">
+	<h3 class="h3 font-semibold whitespace-pre-line">
 		{title}
 	</h3>
 	<code class="code">{data.requirement.urn}</code>
 	{#if data.requirement.description}
-		<p>{data.requirement.description}</p>
+		<p class="whitespace-pre-line">{data.requirement.description}</p>
 	{/if}
-	{#if threats || security_functions}
+	{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
 		<div class="card p-4 variant-glass-primary text-sm flex flex-row cursor-auto">
 			<div class="flex-1">
 				<p class="font-medium">
@@ -207,7 +208,7 @@
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
 		>
-			<div class="card shadow-lg mt-8 bg-white">
+			<div class="card shadow-lg bg-white">
 				<TabGroup>
 					<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
 						>Security measures

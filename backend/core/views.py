@@ -278,7 +278,7 @@ class SecurityFunctionViewSet(BaseModelViewSet):
     """
 
     model = SecurityFunction
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "category"]
     search_fields = ["name", "description", "provider"]
 
     @action(detail=False, name="Get category choices")
@@ -343,6 +343,39 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         if UUID(pk) in viewable_objects:
             risk_assessment = self.get_object()
             return Response(risk_assessment.quality_check())
+        else:
+            return Response(status=HTTP_403_FORBIDDEN)
+
+    @action(detail=True, methods=["get"], name="Get treatment plan data")
+    def plan(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RiskAssessment,
+        )
+        if UUID(pk) in viewable_objects:
+            risk_assessment_object = self.get_object()
+            risk_scenarios_objects = risk_assessment_object.risk_scenarios.all()
+            risk_assessment = RiskAssessmentReadSerializer(risk_assessment_object).data
+            risk_scenarios = RiskScenarioReadSerializer(
+                risk_scenarios_objects, many=True
+            ).data
+            [
+                risk_scenario.update(
+                    {
+                        "security_measures": SecurityMeasureReadSerializer(
+                            SecurityMeasure.objects.filter(
+                                risk_scenarios__id=risk_scenario["id"]
+                            ),
+                            many=True,
+                        ).data
+                    }
+                )
+                for risk_scenario in risk_scenarios
+            ]
+            risk_assessment.update({"risk_scenarios": risk_scenarios})
+            return Response(risk_assessment)
+
         else:
             return Response(status=HTTP_403_FORBIDDEN)
 
@@ -502,7 +535,7 @@ class SecurityMeasureViewSet(BaseModelViewSet):
         "effort",
         "risk_scenarios",
         "requirement_assessments",
-        "evidences"
+        "evidences",
     ]
     search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
@@ -588,6 +621,20 @@ class SecurityMeasureViewSet(BaseModelViewSet):
         """
 
         return Response({"results": measures})
+
+
+class PolicyViewSet(SecurityMeasureViewSet):
+    model = Policy
+    filterset_fields = [
+        "folder",
+        "status",
+        "security_function",
+        "effort",
+        "risk_scenarios",
+        "requirement_assessments",
+        "evidences",
+    ]
+    search_fields = ["name", "description", "risk_scenarios", "requirement_assessments"]
 
 
 class RiskScenarioViewSet(BaseModelViewSet):
@@ -1010,7 +1057,7 @@ class EvidenceViewSet(BaseModelViewSet):
                     status=status.HTTP_200_OK,
                 )
         return response
-    
+
     @action(methods=["post"], detail=True)
     def delete_attachment(self, request, pk):
         (
@@ -1266,35 +1313,43 @@ class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
     form_class = FirstConnexionConfirmForm
 
 
-def generate_html(compliance_assessment: ComplianceAssessment) -> Tuple[str, list[Evidence]]:
+def generate_html(
+    compliance_assessment: ComplianceAssessment,
+) -> Tuple[str, list[Evidence]]:
     selected_evidences = []
 
     requirement_nodes = RequirementNode.objects.filter(
         framework=compliance_assessment.framework
     )
 
-    assessments = RequirementAssessment.objects.filter(compliance_assessment=compliance_assessment).all()
+    assessments = RequirementAssessment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).all()
 
-    node_per_urn = {r.urn:r for r in requirement_nodes}
-    ancestors ={}
+    node_per_urn = {r.urn: r for r in requirement_nodes}
+    ancestors = {}
     for a in assessments:
         ancestors[a] = set()
-        req=a.requirement
-        while(req):
+        req = a.requirement
+        while req:
             ancestors[a].add(req)
-            p=req.parent_urn
-            req = None if not(p) else node_per_urn[p]
- 
+            p = req.parent_urn
+            req = None if not (p) else node_per_urn[p]
+
     def bar_graph(node: RequirementNode):
-        """ return bar graph filtered by top node (Null for all)"""
+        """return bar graph filtered by top node (Null for all)"""
         content = ""
         compliance_assessments_status = []
-        candidates = [c for c in assessments if not(node) or c==node or node in ancestors[c]]
+        candidates = [
+            c for c in assessments if not (node) or c == node or node in ancestors[c]
+        ]
         total = len(candidates)
         for st in RequirementAssessment.Status:
             count = len([c for c in candidates if c.status == st])
             compliance_assessments_status.append((st, round(count * 100 / total)))
-        content += '<div class="flex bg-gray-300 rounded-full overflow-hidden h-4 w-2/3">'
+        content += (
+            '<div class="flex bg-gray-300 rounded-full overflow-hidden h-4 w-2/3">'
+        )
         for stat in reversed(compliance_assessments_status):
             if stat[1] > 0:
                 content += '<div class="flex flex-col justify-center overflow-hidden text-xs font-semibold text-center '
@@ -1324,9 +1379,7 @@ def generate_html(compliance_assessment: ComplianceAssessment) -> Tuple[str, lis
     <body class="container container-tablet">
     """
     content += '<hr class="dotted">'
-    content += (
-        '<div class="flex flex-row space-x-4 flex justify-center items-center mb-4">'
-    )
+    content += '<div class="flex flex-row space-x-4 justify-center items-center mb-4">'
     content += f"<h1 class='text-3xl'>{compliance_assessment.name}: {compliance_assessment.framework}</h1>"
     content += bar_graph(None)
     content += "</div>"
@@ -1335,18 +1388,41 @@ def generate_html(compliance_assessment: ComplianceAssessment) -> Tuple[str, lis
     </thead>
     <tbody>
     """
+    content += '<div class="flex flex-row space-x-4 mb-4">'
+
+    content += "<div>"
+    content += "<p class='font-semibold'>Authors</p>"
+    content += "<ul>"
+    for author in compliance_assessment.authors.all():
+        content += f"<li>{author}</li>"
+    content += "</ul>"
+    content += "</div>"
+
+    content += "<div>"
+    content += "<p class='font-semibold'>Reviewers</p>"
+    content += "<ul>"
+    for reviewer in compliance_assessment.reviewers.all():
+        content += f"<li>{reviewer}</li>"
+    content += "</ul>"
+    content += "</div>"
+
+    content += "</div>"
 
     def generate_html_rec(requirement_node: RequirementNode):
         selected_evidences = []
         table = ""
-        children_nodes = [req for req in requirement_nodes if req.parent_urn == requirement_node.urn]
+        children_nodes = [
+            req for req in requirement_nodes if req.parent_urn == requirement_node.urn
+        ]
         if not requirement_node.assessable:
             _display = requirement_node.display_long()
             table += f'<p class="font-semibold">{_display}  </p>'
             if children_nodes:
                 table += bar_graph(requirement_node)
         else:
-            assessment = RequirementAssessment.objects.filter(requirement__urn=requirement_node.urn).first()
+            assessment = RequirementAssessment.objects.filter(
+                requirement__urn=requirement_node.urn
+            ).first()
 
             table += "<div>"
             table += "<div class='flex flex-col shadow-md border rounded-lg px-4 py-2 m-2 ml-0 items-center "
@@ -1388,12 +1464,14 @@ def generate_html(compliance_assessment: ComplianceAssessment) -> Tuple[str, lis
             table += "</div>"
             if children_nodes:
                 table += bar_graph(requirement_node)
- 
+
             direct_evidences = assessment.evidences.all()
             if direct_evidences:
                 selected_evidences += direct_evidences
                 table += '<div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200">'
-                table += '<div class="grid grid-cols-2 justify-items-left font-semibold">'
+                table += (
+                    '<div class="grid grid-cols-2 justify-items-left font-semibold">'
+                )
                 table += f'<p>{("Associated evidence")}:</p>'
                 table += "</div>"
                 for direct_evidence in direct_evidences:

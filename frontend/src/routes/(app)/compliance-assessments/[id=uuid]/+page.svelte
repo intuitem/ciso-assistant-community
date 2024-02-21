@@ -11,6 +11,7 @@
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import type { Node } from './types';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.compliance_assessment);
@@ -26,18 +27,6 @@
 		user.permissions,
 		`change_${requirementAssessmentModel.name}`
 	);
-
-	interface Node {
-		urn: string;
-		parent_urn: string | null;
-		name: string;
-		node_content: string;
-		assessable: boolean;
-		style: string;
-		description: string | null;
-		children?: Record<string, Node>;
-		status?: string; // Assuming that the status field exists in nodes similar to leaves
-	}
 
 	const countStatus = (
 		node: Node,
@@ -91,12 +80,15 @@
 	$: expandedNodesState.set(expandedNodes);
 </script>
 
-<div class="flex flex-col space-y-4">
+<div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
-		<div class="flex flex-col space-y-2">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework'].includes(key) ) as [key, value]}
+		<div class="flex flex-col space-y-2 whitespace-pre-line">
+			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first">
+					<div
+						class="text-sm font-medium text-gray-800 capitalize-first"
+						data-testid={key.replaceAll('_', '-') + '-field-title'}
+					>
 						{#if key === 'urn'}
 							URN
 						{:else}
@@ -104,7 +96,10 @@
 						{/if}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none">
+						<li
+							class="text-gray-600 list-none"
+							data-testid={key.replaceAll('_', '-') + '-field-value'}
+						>
 							{#if value}
 								{#if Array.isArray(value)}
 									<ul>
@@ -112,7 +107,7 @@
 											<li>
 												{#if val.str && val.id}
 													{@const itemHref = `/${
-														URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+														URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
 															(item) => item.field === key
 														)?.urlModel
 													}/${val.id}`}
@@ -155,7 +150,7 @@
 				<a
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
-					><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
+					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
 				>
 			{/if}
 		</div>

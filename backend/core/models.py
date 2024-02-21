@@ -40,11 +40,14 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    dependencies = models.ManyToManyField(
+        "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
+    )
 
     @property
     def reference_count(self) -> int:
         """
-        Returns the number of distinct risk and compliance assessments that reference objects from this library
+        Returns the number of distinct dependent libraries and risk and compliance assessments that reference objects from this library
         """
         return (
             RiskAssessment.objects.filter(
@@ -62,12 +65,18 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
             )
             .distinct()
             .count()
+            + Library.objects.filter(dependencies=self).distinct().count()
         )
 
     def delete(self, *args, **kwargs):
         if self.reference_count > 0:
             raise ValueError(
                 "This library is still referenced by some risk or compliance assessments"
+            )
+        dependent_libraries = Library.objects.filter(dependencies=self)
+        if dependent_libraries:
+            raise ValueError(
+                f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
         super(Library, self).delete(*args, **kwargs)
 
@@ -817,6 +826,25 @@ class SecurityMeasure(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
         return RequirementNode.objects.filter(
             requirementassessment__security_measures=self
         ).count()
+
+
+class PolicyManager(models.Manager):
+    def create(self, *args, **kwargs):
+        kwargs["category"] = "policy"  # Ensure category is always "policy"
+        return super().create(*args, **kwargs)
+
+
+class Policy(SecurityMeasure):
+    class Meta:
+        proxy = True
+        verbose_name = _("Policy")
+        verbose_name_plural = _("Policies")
+
+    objects = PolicyManager()  # Use the custom manager
+
+    def save(self, *args, **kwargs):
+        self.category = "policy"
+        super(Policy, self).save(*args, **kwargs)
 
 
 class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
