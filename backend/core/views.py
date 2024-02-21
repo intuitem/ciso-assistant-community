@@ -657,6 +657,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
+    @action(detail=False, name="Get strength of knowledge choices")
+    def strength_of_knowledge(self, request):
+        return Response(dict(RiskScenario.SOK_OPTIONS))
+
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
         undefined = dict([(-1, "--")])
