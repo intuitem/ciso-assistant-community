@@ -293,9 +293,9 @@
 				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
 					{#if counters.Project > 1}
-						{m.assignedObjects({number: counters.Project, object: 'projects'})}
+						{m.assignedObjects({number: counters.Project, object: m.projects()})}
 					{:else}
-						{m.assignedObjects({number: counters.Project, object: 'project'})}
+						{m.assignedObjects({number: counters.Project, object: m.project()})}
 					{/if}
 				</div>
 			</div>
@@ -354,23 +354,20 @@
 	<div class:hide={openTab !== 4}>
 		<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
 			<div class="p-2 m-2">
-				<div id="title" class="text-lg font-black m-1 p-1">Composer</div>
+				<div id="title" class="text-lg font-black m-1 p-1">{m.composer()}</div>
 				<select id="composer_select" hidden>
 					{#each risk_assessments as risk_assessment}
 						<option value={risk_assessment.id}>{risk_assessment.name}</option>
 					{/each}
 				</select>
 				<div>
-					This will help you aggregate multiple components (projects) to get the compiled view on
-					your risk. This is particularly useful for two use cases:
+					{m.composerDescription()}:
 					<ul class="list-disc px-4 py-2 mx-4 my-2">
 						<li>
-							business intelligence approach to focus on a specific subset across different project
-							domains (eg. across divisions)
+							{m.composerDescription1()}
 						</li>
 						<li>
-							you are interested in the risk assessment of a specific system, for which you need the
-							risk assessment of the underlying components
+							{m.composerDescription2()}
 						</li>
 					</ul>
 				</div>
@@ -388,7 +385,7 @@
 							<button
 								id="process"
 								class="text-md text-white p-2 rounded w-full"
-								on:click|stopPropagation={handle_composer_submit_click}>Process</button
+								on:click|stopPropagation={handle_composer_submit_click}>{m.process()}</button
 							>
 							<div class="flex flex-col items-center relative">
 								<button
@@ -420,7 +417,7 @@
 											{/each}
 											<div class:hide={dropdown.selected.length !== 0} class="flex">
 												<input
-													placeholder="Select your targets"
+													placeholder={m.selectTargets()}
 													class="input bg-transparent text-gray-800 cursor-pointer select-none ring-0 border-0 outline-0"
 												/>
 											</div>
@@ -507,24 +504,24 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 					{#if agg_data.names.length}
 						<div class="m-2 p-2">
 							<div>
-								<div>Treatment progress overview</div>
+								<div>{m.treatmentProgressOverview()}</div>
 								<div class="rounded items-center justify-center">
 									<TreatmentProgressDualBar {agg_data} />
 								</div>
 							</div>
 						</div>
 						<div class="p-4 m-2">
-							<div class="text-lg font-semibold">Your pending measures:</div>
-							<div class="text-sm pb-4">ordered by ranking score</div>
+							<div class="text-lg font-semibold">{m.pendingMeasures()}</div>
+							<div class="text-sm pb-4">{m.orderdByRankingScore()}</div>
 							<div class="flex items-center justify-center">
 								<table class="p-2 m-2 w-full">
 									<tr class="bg-gray-100">
-										<th class="text-left py-2 px-4">Domain</th>
-										<th class="text-left py-2 px-4">Measure</th>
-										<th>Ranking score</th>
-										<th>Status</th>
-										<th>ETA</th>
-										<th class="py-2 px-4">Actions</th>
+										<th class="text-left py-2 px-4">{m.domain()}</th>
+										<th class="text-left py-2 px-4">{m.securityMeasure()}</th>
+										<th>{m.rankingScore()}</th>
+										<th>{m.status()}</th>
+										<th>{m.eta()}</th>
+										<th class="py-2 px-4">{m.actions()}</th>
 									</tr>
 
 									{#if measures}
@@ -558,21 +555,19 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<tr class="text-black p-4 text-center">
 											<td colspan="8" class="py-2">
 												<i class="inline fas fa-exclamation-triangle" />
-												<p class="inline test-gray-900">No pending measure.</p>
+												<p class="inline test-gray-900">{m.noPendingObject({object:m.securityMeasure().toLowerCase(), e:'e'})}.</p>
 											</td>
 										</tr>
 									{/if}
 								</table>
 							</div>
 							<div class="text-sm p-2 m-2">
-								<i class="fas fa-info-circle" /> Ranking score is an adaptive metric that combines the
-								information of effort and current risk level, and crosses it with the other data to assist
-								you for the prioritization.
+								<i class="fas fa-info-circle" /> {m.rankingScoreDefintion()}.
 							</div>
 						</div>
 					{:else}
 						<div class="bg-white shadow-md rounded-lg px-4 py-2 m-8">
-							<div>Projects summary is empty.</div>
+							<div>{m.projectsSummaryEmpty()}.</div>
 						</div>
 					{/if}
 				</div>
@@ -583,7 +578,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 	{#if openTab === 2}
 		<div class="h-full">
 			<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
-				<span class="text-2xl font-extrabold">Overall compliance</span>
+				<span class="text-2xl font-extrabold">{m.overallCompliance()}</span>
 				<div class="flex flex-col space-y-2">
 					{#each data.projects as project}
 						<div class="flex flex-col items-center">
@@ -607,18 +602,18 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 								<div class="card w-full bg-white flex flex-row shadow mx-8 p-4 relative">
 									<div class="w-1/5 flex flex-col space-y-2">
 										<div>
-											<p class="font-medium">Name</p>
+											<p class="font-medium">{m.name()}</p>
 											<p>{compliance_assessment.name}</p>
 										</div>
 										<div>
-											<p class="font-medium">Framework</p>
+											<p class="font-medium">{m.framework()}</p>
 											<p>{compliance_assessment.framework.str}</p>
 										</div>
 									</div>
 									<div class="w-3/5 h-32">
 										<DonutChart
 											name="compliance_assessments"
-											s_label="compliance_assessments"
+											s_label={m.complianceAssessments()}
 											values={compliance_assessment.donut.values}
 										/>
 									</div>
@@ -626,12 +621,12 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<a
 											href="/compliance-assessments/{compliance_assessment.id}/export"
 											class="btn variant-filled-primary"
-											><i class="fa-solid fa-download mr-2" /> Export
+											><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
 										</a>
 										<a
 											href="/compliance-assessments/{compliance_assessment.id}/edit"
 											class="btn variant-filled-primary"
-											><i class="fa-solid fa-edit mr-2" /> Edit
+											><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 										</a>
 									</div>
 								</div>

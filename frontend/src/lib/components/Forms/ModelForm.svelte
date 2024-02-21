@@ -117,14 +117,14 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
 			field="authors"
-			label="Authors"
+			label={m.authors()}
 		/>
 		<AutocompleteSelect
 			{form}
 			multiple
 			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
 			field="reviewers"
-			label="Reviewers"
+			label={m.reviewers()}
 		/>
 		<TextField type="date" {form} field="eta" label={m.eta()} helpText="Estimated time of arrival" />
 		<TextField
@@ -291,14 +291,14 @@
 			multiple
 			options={getOptions({ objects: model.foreignKeys['authors'], label: 'email' })}
 			field="authors"
-			label="Authors"
+			label={m.authors()}
 		/>
 		<AutocompleteSelect
 			{form}
 			multiple
 			options={getOptions({ objects: model.foreignKeys['reviewers'], label: 'email' })}
 			field="reviewers"
-			label="Reviewers"
+			label={m.reviewers()}
 		/>
 		<TextField type="date" {form} field="eta" label={m.eta()} helpText="Estimated time of arrival" />
 		<TextField

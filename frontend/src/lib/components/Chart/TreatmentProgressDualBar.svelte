@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import * as m from '$paraglide/messages.js';
 
 	export let agg_data = []; // Set this type later
 
@@ -10,14 +11,14 @@
 			renderer: 'svg'
 		});
 
-		let risk_open = 'Risk: open';
-		let risk_mitigate = 'Risk: mitigate';
-		let risk_accept = 'Risk: accept';
-		let risk_avoid = 'Risk: avoid';
-		let measure_open = 'Measure: open';
-		let measure_progress = 'Measure: in progress';
-		let measure_hold = 'Measure: on hold';
-		let measure_done = 'Measure: done';
+		let risk_open = m.riskOpen();
+		let risk_mitigate = m.riskMitigate();
+		let risk_accept = m.riskAccept();
+		let risk_avoid = m.riskAvoid();
+		let measure_open = m.measureOpen();
+		let measure_progress = m.measureProgress();
+		let measure_hold = m.measureHold();
+		let measure_done = m.measureDone();
 
 		// specify chart configuration item and data
 		let option = {
