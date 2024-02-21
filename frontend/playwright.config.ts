@@ -4,7 +4,7 @@ import { devices } from '@playwright/test';
 const config: PlaywrightTestConfig = {
 	webServer: {
 		command: process.env.COMPOSE_TEST ? 'echo "The docker compose frontend server didn\'t start correctly"' : 'npm run build && npm run preview',
-		url: process.env.COMPOSE_TEST ? "https://localhost:8443" : "http://localhost:4173",
+		port: process.env.COMPOSE_TEST ? 8443 : 4173,
 		reuseExistingServer: process.env.COMPOSE_TEST
 	},
 	testDir: 'tests',
@@ -27,8 +27,6 @@ const config: PlaywrightTestConfig = {
 		}]
 	],
 	use: {
-		ignoreHTTPSErrors: true,
-		baseURL: process.env.COMPOSE_TEST ? "https://localhost:8443" : "http://localhost:4173",
 		screenshot: 'only-on-failure',
 		video: process.env.CI ? 'retain-on-failure' : 'on',
 		trace: process.env.CI ? 'retain-on-failure' : 'on',
