@@ -99,43 +99,45 @@ class TestProjectsAuthenticated:
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "lc_status": PROJECT_STATUS[1],
             },
+            user_group=test.user_group,
         )
         
 
-    def test_create_projects(self, authenticated_client, test):
+    def test_create_projects(self, test):
         """test to create projects with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Projects",
             Project,
             {
                 "name": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
-                "folder": str(Folder.get_root_folder().id),
+                "folder": str(test.folder.id),
                 "internal_reference": PROJECT_REFERENCE,
                 "lc_status": PROJECT_STATUS[0],
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "lc_status": PROJECT_STATUS[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_update_projects(self, authenticated_client, test):
+    def test_update_projects(self, test):
         """test to update projects with the API with authentication"""
 
         status = ("in_dev", "Development")
-        folder = Folder.objects.create(name="test")
+        folder = Folder.objects.create(name="test2")
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Projects",
             Project,
             {
                 "name": PROJECT_NAME,
                 "description": PROJECT_DESCRIPTION,
-                "folder": Folder.get_root_folder(),
+                "folder": test.folder,
                 "internal_reference": PROJECT_REFERENCE,
                 "lc_status": PROJECT_STATUS[0],
             },
@@ -147,24 +149,26 @@ class TestProjectsAuthenticated:
                 "lc_status": status[0],
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "lc_status": PROJECT_STATUS[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_delete_projects(self, authenticated_client, test):
+    def test_delete_projects(self, test):
         """test to delete projects with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Projects",
             Project,
-            {"name": PROJECT_NAME, "folder": Folder.get_root_folder()},
+            {"name": PROJECT_NAME, "folder": test.folder},
+            user_group=test.user_group,
         )
 
-    def test_get_status_choices(self, authenticated_client, test):
+    def test_get_status_choices(self, test):
         """test to get projects status choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            authenticated_client, "Projects", "lc_status", Project.PRJ_LC_STATUS
+            test.client, "Projects", "lc_status", Project.PRJ_LC_STATUS
         )

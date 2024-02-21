@@ -40,6 +40,19 @@ class EndpointTestsUtils:
         client = APIClient()
         client.force_login(user)
         return client, folder
+    
+    def expected_request_response(action: str, object: str, user_group, expected_status: int = status.HTTP_200_OK):
+        """Get the expected request response"""
+        perm_name = f"{action}_{object.lower().replace(' ', '')[:-1]}"
+
+        if perm_name in GROUPS_PERMISSIONS[user_group]['perms']:
+            fails = False
+            expected_status = expected_status
+        else:
+            fails = True
+            expected_status = status.HTTP_403_FORBIDDEN
+        print(object, user_group, perm_name, fails, expected_status)
+        return fails, expected_status
 
 class EndpointTestsQueries:
     """Provides tests functions for API endpoints testing"""
@@ -277,6 +290,7 @@ class EndpointTestsQueries:
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
         ):
             """Test to get object from the API with authentication
 
@@ -289,6 +303,9 @@ class EndpointTestsQueries:
                 -1 means that the number of objects is unknown
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+
+            if user_group and not fails:
+                fails, expected_status = EndpointTestsUtils.expected_request_response("view", verbose_name, user_group)
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -377,6 +394,7 @@ class EndpointTestsQueries:
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
         ):
             """Test to get object options from the API with authentication
 
@@ -386,6 +404,8 @@ class EndpointTestsQueries:
             :param option: the option to test
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            if user_group and not fails:
+                fails, expected_status = EndpointTestsUtils.expected_request_response("view", verbose_name, user_group)
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -416,6 +436,7 @@ class EndpointTestsQueries:
             query_format: str = "json",
             fails: bool = False,
             expected_status: int = status.HTTP_201_CREATED,
+            user_group: str = None,
         ):
             """Test to create object with the API with authentication
 
@@ -428,6 +449,8 @@ class EndpointTestsQueries:
                 -1 means that the number of objects is unknown
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            if user_group and not fails:
+                fails, expected_status = EndpointTestsUtils.expected_request_response("add", verbose_name, user_group, expected_status)
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -444,7 +467,7 @@ class EndpointTestsQueries:
             # Asserts that the object was created successfully
             assert (
                 response.status_code == expected_status
-            ), f"{verbose_name} can not be created with authentication"
+            ), f"{verbose_name} can not be created with authentication" if expected_status == status.HTTP_201_CREATED else f"{verbose_name} should not be created (expected status: {expected_status})"
 
             for key, value in build_params.items():
                 if key == "attachment":
@@ -500,6 +523,7 @@ class EndpointTestsQueries:
             query_format: str = "json",
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
         ):
             """Test to update object with the API with authentication
 
@@ -511,6 +535,9 @@ class EndpointTestsQueries:
                 the test_params can ovveride the build_params
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            
+            if user_group and not fails:
+                fails, expected_status = EndpointTestsUtils.expected_request_response("change", verbose_name, user_group)
 
             # Creates a test object from the model
             m2m_fields = {}
@@ -558,7 +585,7 @@ class EndpointTestsQueries:
 
             assert (
                 update_response.status_code == expected_status
-            ), f"{verbose_name} can not be updated with authentication"
+            ), f"{verbose_name} can not be updated with authentication" if expected_status == status.HTTP_201_CREATED else f"{verbose_name} should not be updated (expected status: {expected_status})"
             for key, value in {**build_params, **update_params, **test_params}.items():
                 if not fails:
                     if key == "attachment" and update_response.json()[key] != value:
@@ -580,6 +607,7 @@ class EndpointTestsQueries:
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_204_NO_CONTENT,
+            user_group: str = None,
         ):
             """Test to delete object with the API with authentication
 
@@ -588,6 +616,9 @@ class EndpointTestsQueries:
             :param build_params: the parameters to build the object
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+
+            if user_group and not fails:
+                fails, expected_status = EndpointTestsUtils.expected_request_response("delete", verbose_name, user_group, expected_status)
 
             if build_params:
                 # Creates a test object from the model
@@ -624,13 +655,14 @@ class EndpointTestsQueries:
             delete_response = authenticated_client.delete(url)
             assert (
                 delete_response.status_code == expected_status
-            ), f"{verbose_name} can not be deleted with authentication"
+            ), f"{verbose_name} can not be deleted with authentication" if expected_status == status.HTTP_204_NO_CONTENT else f"{verbose_name} should not be deleted (expected status: {expected_status})"
 
-            # Asserts that the objects does not exists anymore
-            response = authenticated_client.get(url)
-            assert (
-                response.status_code == status.HTTP_404_NOT_FOUND
-            ), f"{verbose_name} has not been properly deleted with authentication"
+            if not fails:
+                # Asserts that the objects does not exists anymore
+                response = authenticated_client.get(url)
+                assert (
+                    response.status_code == status.HTTP_404_NOT_FOUND
+                ), f"{verbose_name} has not been properly deleted with authentication"
 
         def import_object(
             authenticated_client,

@@ -32,7 +32,7 @@ def authenticated_client(app_config):
 
 
 @pytest.fixture
-def test(authenticated_client, request):
+def test(authenticated_client, request) -> Test:
     """Get the elements used by the tests such as client and associated folder"""
     client, folder = EndpointTestsUtils.get_test_client_and_folder(authenticated_client, request.param)
     return Test({"client": client, "authenticated_client": authenticated_client, "folder": folder, "user_group": request.param})
