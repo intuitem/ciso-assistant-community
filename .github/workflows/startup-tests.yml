@@ -120,14 +120,15 @@ jobs:
         run: |
           docker compose exec backend python manage.py migrate
           docker compose exec backend /bin/bash -c "DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput"
-      - name: Run tests
+      - name: Run test
         working-directory: ${{ env.working-directory }}
-        run: npx playwright test tests/functional/startup.test.ts
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: startup-docker-test-report
-          path: |
-            ${{ env.working-directory }}/tests/reports/
-            ${{ env.working-directory }}/tests/results/
-          retention-days: 5
+        run: |
+          response=$(curl -d "username=root@gmail.com&password=root" -H "Origin: https://localhost:8443" https://localhost:8443/login -k)
+          server_reponse='{"type":"redirect","status":302,"location":"/analytics"}'
+          if [[ "$response" == "$server_reponse" ]]; then
+            echo "Success"
+            exit 0
+          else
+            echo "Failure"
+            exit 1
+          fi
