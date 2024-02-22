@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from core.models import RequirementNode, Framework
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries, EndpointTestsUtils
+from test_utils import EndpointTestsQueries, EndpointTestsUtils
 
 # Generic requirement data for tests
 REQUIREMENT_NODE_NAME = "Test Requirement Node"

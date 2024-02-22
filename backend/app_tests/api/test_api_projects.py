@@ -4,7 +4,7 @@ from core.models import Project
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic project data for tests
 PROJECT_NAME = "Test Project"

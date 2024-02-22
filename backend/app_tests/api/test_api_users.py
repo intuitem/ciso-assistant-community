@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from iam.models import User
 
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic user data for tests
 USER_FIRSTNAME = "John"

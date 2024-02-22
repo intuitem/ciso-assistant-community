@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from core.models import Policy
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic policy data for tests
 POLICY_NAME = "Test Policy"

@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from core.models import SecurityFunction, SecurityMeasure
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic security measure data for tests
 SECURITY_MEASURE_NAME = "Test Security Measure"

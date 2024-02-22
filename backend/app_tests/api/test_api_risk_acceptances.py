@@ -10,7 +10,7 @@ from core.models import (
 )
 from iam.models import Folder, UserGroup
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic risk acceptance data for tests
 RISK_ACCEPTANCE_NAME = "Test Risk Acceptance"

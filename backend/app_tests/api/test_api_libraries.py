@@ -4,7 +4,7 @@ from core.models import Framework
 from core.models import RiskMatrix
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries, EndpointTestsUtils
+from test_utils import EndpointTestsQueries, EndpointTestsUtils
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from api.test_api import EndpointTestsUtils
+from api.test_utils import EndpointTestsUtils
 from iam.models import User, UserGroup
 from core.apps import startup
 

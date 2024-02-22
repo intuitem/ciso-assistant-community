@@ -692,6 +692,7 @@ class EndpointTestsQueries:
             urn: str | None = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
         ):
             """Imports object with the API with authentication
 
@@ -699,6 +700,10 @@ class EndpointTestsQueries:
             :param verbose_name: the verbose name of the object to test
             :param urn: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status = None, 0
+
+            if user_group:
+                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("add", "library_", user_group)
 
             url = urn or EndpointTestsUtils.get_object_urn(verbose_name)
 
@@ -706,10 +711,18 @@ class EndpointTestsQueries:
             response = authenticated_client.get(url + "import/")
 
             # Asserts that the object was imported successfully
-            assert (
-                response.status_code == expected_status
-            ), f"{verbose_name} can not be imported with authentication"
-            if not fails:
+            if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                # User has permission to import the library
+                assert (
+                    response.status_code == expected_status
+                ), f"{verbose_name} can not be imported with authentication" if expected_status == status.HTTP_200_OK else f"{verbose_name} should not be imported (expected status: {expected_status})"
+            else:
+                # User does not have permission to import the library
+                assert (
+                    response.status_code == user_perm_expected_status
+                ), f"{verbose_name} can be imported without permission" if expected_status == status.HTTP_200_OK else f"Importing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+
+            if not (fails or user_perm_fails):
                 assert response.json() == {
                     "status": "success"
                 }, f"{verbose_name} can not be imported with authentication"

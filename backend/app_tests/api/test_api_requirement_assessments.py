@@ -10,7 +10,7 @@ from core.models import (
 from core.models import Project, SecurityMeasure
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic requirement assessment data for tests
 REQUIREMENT_ASSESSMENT_STATUS = "partially_compliant"

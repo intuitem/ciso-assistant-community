@@ -4,7 +4,7 @@ from core.models import Asset
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic asset data for tests
 ASSET_NAME = "Test Asset"
