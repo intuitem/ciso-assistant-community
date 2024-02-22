@@ -150,6 +150,8 @@ def startup():
             "delete_evidence",
             "view_requirement",
             "view_framework",
+            "view_library",
+            "add_library",
         ]
     )
 
@@ -227,6 +229,8 @@ def startup():
             "delete_framework",
             "view_requirementnode",
             "view_requirementlevel",  # Permits to see the object on api by an admin
+            "view_library",
+            "add_library",
             "delete_library",
             "backup",
             "restore",
