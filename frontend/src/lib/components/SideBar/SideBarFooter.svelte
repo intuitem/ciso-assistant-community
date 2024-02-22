@@ -7,6 +7,11 @@
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import * as m from '$paraglide/messages';
 
+	const language: any = {
+		french: m.french(),
+		english: m.english()
+	}
+
 	const modalStore = getModalStore();
 
 	let value = languageTag();
@@ -63,7 +68,7 @@
 			<a
 				href="/profile"
 				class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2" />My profile</a
+				data-testid="profile-button"><i class="fa-solid fa-address-card mr-2" />{m.myProfile()}</a
 			>
 			<select
 				{value}
@@ -72,7 +77,7 @@
 			>
 				{#each availableLanguageTags as lang}
 					<option value={lang} selected={lang === languageTag()}
-						>{LOCALE_MAP[lang].flag} {LOCALE_MAP[lang].name}</option
+						>{LOCALE_MAP[lang].flag} {language[LOCALE_MAP[lang].name]}</option
 					>
 				{/each}
 			</select>
@@ -80,13 +85,13 @@
 				on:click={modalBuildInfo}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 				data-testid="about-button"
-				><i class="fa-solid fa-circle-info mr-2" />About CISO Assistant</button
+				><i class="fa-solid fa-circle-info mr-2" />{m.aboutCiso()}</button
 			>
 			<form action="/logout" method="POST">
 				<button class="w-full" type="submit" data-testid="logout-button">
 					<span
 						class="flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-						><i class="fa-solid fa-right-from-bracket mr-2" />Log out</span
+						><i class="fa-solid fa-right-from-bracket mr-2" />{m.Logout()}</span
 					>
 				</button>
 			</form>
