@@ -25,8 +25,22 @@ class BaseModelSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
     def create(self, validated_data: Any):
+        logger.debug("validated data", **validated_data)
         folder = Folder.get_folder(validated_data)
-        logger.info(folder)
+        can_create_in_folder = RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"add_{self.Meta.model._meta.model_name}"
+            ),
+            folder=folder,
+        )
+        if not can_create_in_folder:
+            raise serializers.ValidationError(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
+        logger.debug("can create in folder %s", can_create_in_folder)
         return super().create(validated_data)
 
     class Meta:
