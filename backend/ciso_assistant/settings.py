@@ -19,10 +19,8 @@ from django.core.management.utils import get_random_secret_key
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-LOG_OUTPUTS = os.environ.get("LOG_OUTPUTS", "console").split(",")
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
-JSON_LOG_FILE = os.environ.get("JSON_LOG_FILE", "logs/json.log")
-FLAT_LOG_FILE = os.environ.get("FLAT_LOG_FILE", "logs/flat.log")
+LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
@@ -40,35 +38,19 @@ LOGGING = {
             "()": structlog.stdlib.ProcessorFormatter,
             "processor": structlog.processors.JSONRenderer(),
         },
-        "plain_console": {
+        "plain": {
             "()": structlog.stdlib.ProcessorFormatter,
             "processor": structlog.dev.ConsoleRenderer(),
-        },
-        "key_value": {
-            "()": structlog.stdlib.ProcessorFormatter,
-            "processor": structlog.processors.KeyValueRenderer(
-                key_order=["timestamp", "level", "event", "logger"]
-            ),
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "plain_console",
-        },
-        "json": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": JSON_LOG_FILE,
-            "formatter": "json",
-        },
-        "flat": {
-            "class": "logging.handlers.WatchedFileHandler",
-            "filename": FLAT_LOG_FILE,
-            "formatter": "key_value",
+            "formatter": LOG_FORMAT,
         },
     },
     "loggers": {
-        "": {"handlers": LOG_OUTPUTS, "level": LOG_LEVEL},
+        "": {"handlers": ["console"], "level": LOG_LEVEL},
     },
 }
 
