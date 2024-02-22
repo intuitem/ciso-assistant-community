@@ -106,6 +106,8 @@ GROUPS_PERMISSIONS = {
             "delete_framework",
             "view_requirementnode",
             "view_requirementlevel",  # Permits to see the object on api by an admin
+            "add_library",
+            "view_library",
             "delete_library",
             "backup",
             "restore",
@@ -319,3 +321,12 @@ def get_var(varname: str) -> Any:
             f"The test_vars module doesn't contain any variable named '{varname}' !"
         )
     return value
+
+
+def get_singular_name(plural_name: str) -> str:
+    exceptions = {
+        "Libraries": "Library",
+        "Risk matrices": "Risk matrix",
+        "Policies": "Policy",
+    }
+    return exceptions.get(plural_name, plural_name[:-1] if plural_name.endswith("s") else plural_name)
