@@ -132,10 +132,14 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": PAGINATE_BY,
 }
 
-# templates are still used to send email
-REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
-    "rest_framework.renderers.BrowsableAPIRenderer"
-)
+if DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
+        "rest_framework.renderers.BrowsableAPIRenderer"
+    )
+    INSTALLED_APPS.append("django.contrib.staticfiles")
+    STATIC_URL = "/static/"
+    STATIC_ROOT = BASE_DIR / "static"
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
