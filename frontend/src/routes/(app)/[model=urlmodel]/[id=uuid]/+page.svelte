@@ -182,7 +182,7 @@
 						class="text-sm font-medium text-gray-800"
 						data-testid="{key.replace('_', '-')}-field-title"
 					>
-						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
+						{localItems(languageTag())[toCamelCase(key)]}
 					</div>
 					<ul class="text-sm">
 						<li
