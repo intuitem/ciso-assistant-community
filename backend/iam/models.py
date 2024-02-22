@@ -29,13 +29,20 @@ from django.dispatch import receiver
 from ciso_assistant.settings import (
     CISO_ASSISTANT_URL,
     EMAIL_HOST,
+    EMAIL_HOST_USER,
     EMAIL_HOST_USER_RESCUE,
     EMAIL_HOST_PASSWORD_RESCUE,
     EMAIL_HOST_RESCUE,
+    EMAIL_PORT,
     EMAIL_PORT_RESCUE,
+    EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
 from django.core.exceptions import ObjectDoesNotExist
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class UserGroup(models.Model):
@@ -225,6 +232,9 @@ class UserManager(BaseUserManager):
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
         user.save(using=self._db)
+
+        logger.info("user created sucessfully", user=user)
+
         if mailing:
             try:
                 user.mailing(
@@ -236,14 +246,14 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
-        print("Creating user for", email)
+        logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
         if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
             extra_fields.setdefault("mailing", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
-        print("Creating superuser for", email)
+        logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
@@ -294,7 +304,7 @@ class User(AbstractBaseUser):
         )
         objects = UserManager()
     except:
-        print("Exception kludge")
+        logger.debug("Exception kludge")
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
@@ -309,6 +319,14 @@ class User(AbstractBaseUser):
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        logger.info("user deleted", user=self)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        logger.info("user saved", user=self)
 
     def __str__(self):
         return (
@@ -355,9 +373,18 @@ class User(AbstractBaseUser):
                 fail_silently=False,
                 html_message=email,
             )
-            print("mail sent to", self.email)
-        except Exception as e:
-            print("primary mailer failure, try rescue mailer...")
+            logger.info("email sent", recipient=self.email, subject=subject)
+        except Exception as primary_exception:
+            logger.error(
+                "primary mailer failure, trying rescue",
+                recipient=self.email,
+                subject=subject,
+                error=primary_exception,
+                email_host=EMAIL_HOST,
+                email_port=EMAIL_PORT,
+                email_host_user=EMAIL_HOST_USER,
+                email_use_tls=EMAIL_USE_TLS,
+            )
             if EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
@@ -374,12 +401,21 @@ class User(AbstractBaseUser):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    print("mail sent to", self.email)
-                except Exception as ex2:
-                    print("secondary mailer failure")
-                    raise ex2
+                    logger.info("email sent", recipient=self.email, subject=subject)
+                except Exception as rescue_exception:
+                    logger.error(
+                        "rescue mailer failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=rescue_exception,
+                        email_host=EMAIL_HOST_RESCUE,
+                        email_port=EMAIL_PORT_RESCUE,
+                        email_username=EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                    )
+                    raise rescue_exception
             else:
-                raise e
+                raise primary_exception
 
     def get_user_groups(self):
         # pragma pylint: disable=no-member
