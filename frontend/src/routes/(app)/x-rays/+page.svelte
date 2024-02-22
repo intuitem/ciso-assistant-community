@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
 
@@ -47,7 +48,7 @@
 			</h1>
 			<TabGroup>
 				<Tab bind:group={project.tabSet} name="compliance_assessments_tab" value={0}
-					>Compliance assessments
+					>{m.complianceAssessments()}
 					{#if project.compliance_assessments.errors.length > 0}
 						<span class="badge variant-soft-error"
 							>{project.compliance_assessments.errors.length}</span
@@ -65,7 +66,7 @@
 					{/if}
 				</Tab>
 				<Tab bind:group={project.tabSet} name="risk_assessments_tab" value={1}
-					>Risk assessments
+					>{m.riskAssessments()}
 					{#if project.risk_assessments.errors.length > 0}
 						<span class="badge variant-soft-error">{project.risk_assessments.errors.length}</span>
 					{/if}
@@ -91,7 +92,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-error rounded-token px-2 py-1">
 												<i class="fa-solid fa-bug mr-1" />
-												{quality_check.errors.length} <span class="font-bold">errors</span> found
+												{#if quality_check.errors.length === 1}
+													{quality_check.errors.length} <span class="font-bold">{m.error({s: ''})}</span> {m.found({s: '', e: 'e'})}
+												{:else}
+													{quality_check.errors.length} <span class="font-bold">{m.error({s: 's'})}</span> {m.found({s: 's', e: 'e'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
@@ -104,7 +109,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-warning rounded-token px-2 py-1">
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
-												{quality_check.warnings.length} <span class="font-bold">warnings</span> found
+												{#if quality_check.warnings.length === 1}
+													{quality_check.warnings.length} <span class="font-bold">{m.warning({s: ''})}</span> {m.found({s: '', e: ''})}
+												{:else}
+													{quality_check.warnings.length} <span class="font-bold">{m.warning({s: 's'})}</span> {m.found({s: 's', e: ''})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
@@ -117,7 +126,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{quality_check.info.length} <span class="font-bold">infos</span> found
+												{#if quality_check.infos.length === 1}
+													{quality_check.infos.length} <span class="font-bold">{m.info({s: ''})}</span> {m.found({s: '', e: 'e'})}
+												{:else}
+													{quality_check.infos.length} <span class="font-bold">{m.info({s: 's'})}</span> {m.found({s: 's', e: 'e'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
@@ -145,7 +158,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-error rounded-token px-2 py-1">
 												<i class="fa-solid fa-bug mr-1" />
-												{quality_check.errors.length} <span class="font-bold">errors</span> found
+												{#if quality_check.errors.length === 1}
+													{quality_check.errors.length} <span class="font-bold">{m.error({s: ''})}</span> {m.found({s: '', e: 'e'})}
+												{:else}
+													{quality_check.errors.length} <span class="font-bold">{m.error({s: 's'})}</span> {m.found({s: 's', e: 'e'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
@@ -158,7 +175,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-warning rounded-token px-2 py-1">
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
-												{quality_check.warnings.length} <span class="font-bold">warnings</span> found
+												{#if quality_check.warnings.length === 1}
+													{quality_check.warnings.length} <span class="font-bold">{m.warning({s: ''})}</span> {m.found({s: '', e: ''})}
+												{:else}
+													{quality_check.warnings.length} <span class="font-bold">{m.warning({s: 's'})}</span> {m.found({s: 's', e: ''})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
@@ -171,7 +192,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{quality_check.info.length} <span class="font-bold">infos</span> found
+												{#if quality_check.infos.length === 1}
+													{quality_check.infos.length} <span class="font-bold">{m.info({s: ''})}</span> {m.found({s: '', e: 'e'})}
+												{:else}
+													{quality_check.infos.length} <span class="font-bold">{m.info({s: 's'})}</span> {m.found({s: 's', e: 'e'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}

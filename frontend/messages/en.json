@@ -191,5 +191,9 @@
 	"september": "September",
 	"october": "October",
 	"november": "November",
-	"december": "December"
+	"december": "December",
+	"error": "error{s}",
+	"warning": "warning{s}",
+	"info": "info{s}",
+	"found": "found"
 }
