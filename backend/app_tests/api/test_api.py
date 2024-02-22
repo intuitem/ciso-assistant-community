@@ -543,7 +543,8 @@ class EndpointTestsQueries:
                 the test_params can ovveride the build_params
             :param endpoint: the endpoint URL of the object to test (optional)
             """
-            
+            user_perm_fails, user_perm_expected_status = None, 0
+
             if user_group:
                 user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("change", verbose_name, user_group)
 
@@ -581,7 +582,7 @@ class EndpointTestsQueries:
                 assert (
                     response.status_code == status.HTTP_403_FORBIDDEN
                 ), f"{verbose_name} object detail can be accessed without permission"
-                
+
             for key, value in {**build_params, **test_build_params}.items():
                 if key == "attachment":
                     # Asserts that the value file name is present in the JSON response
