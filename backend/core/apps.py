@@ -238,9 +238,12 @@ def startup():
         CISO_ASSISTANT_SUPERUSER_EMAIL
         and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
     ):
-        User.objects.create_superuser(
-            email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-        )
+        try:
+            User.objects.create_superuser(
+                email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+            )
+        except Exception as e:
+            print(e) #NOTE: Add this exception in the logger
     # if root folder does not exist, then create it
     if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
         Folder.objects.create(
