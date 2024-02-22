@@ -1,6 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"addButton": "Add {model}",
+	"addButton": "New {model}",
 	"associatedObject": "Associated {model}",
 	"french": "French",
 	"english": "English",
