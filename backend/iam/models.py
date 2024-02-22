@@ -232,6 +232,7 @@ class UserManager(BaseUserManager):
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
+                print(f"sending email to {email} failed")
                 raise exception
         return user
 
@@ -247,14 +248,13 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
+        extra_fields.setdefault("mailing", not(password) and (EMAIL_HOST or EMAIL_HOST_RESCUE))
         superuser = self._create_user(email, password, **extra_fields)
         # when possible, add superuser to admin group
         try:
             UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         except ObjectDoesNotExist:
-            pass
+            print("cannot add superuser to admin group - will be done on next startup")
         return superuser
 
 
