@@ -63,6 +63,8 @@ class LoginView(views.APIView):
 
 
 class LogoutView(views.APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     @method_decorator(ensure_csrf_cookie)
     def post(self, request) -> Response:
         try:
