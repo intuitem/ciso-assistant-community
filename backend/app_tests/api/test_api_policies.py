@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from core.models import Policy
 from iam.models import Folder
 
+from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic policy data for tests
@@ -27,7 +28,7 @@ class TestPolicysUnauthenticated:
 
         EndpointTestsQueries.get_object(
             self.client,
-            "policies",
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -41,7 +42,7 @@ class TestPolicysUnauthenticated:
 
         EndpointTestsQueries.create_object(
             self.client,
-            "policies",
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -55,7 +56,7 @@ class TestPolicysUnauthenticated:
 
         EndpointTestsQueries.update_object(
             self.client,
-            "policies",
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -74,7 +75,7 @@ class TestPolicysUnauthenticated:
 
         EndpointTestsQueries.delete_object(
             self.client,
-            "policies",
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -84,15 +85,16 @@ class TestPolicysUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestPolicysAuthenticated:
     """Perform tests on policies API endpoint with authentication"""
 
-    def test_get_policies(self, authenticated_client):
+    def test_get_policies(self, test):
         """test to get policies from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
-            "policies",
+            test.client,
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -101,22 +103,23 @@ class TestPolicysAuthenticated:
                 "link": POLICY_LINK,
                 "eta": POLICY_ETA,
                 "effort": POLICY_EFFORT[0],
-                "folder": Folder.get_root_folder(),
+                "folder": test.folder,
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "security_function": None,
                 "status": POLICY_STATUS[1],
                 "effort": POLICY_EFFORT[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_create_policies(self, authenticated_client):
+    def test_create_policies(self, test):
         """test to create policies with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
-            "policies",
+            test.client,
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -125,23 +128,24 @@ class TestPolicysAuthenticated:
                 "link": POLICY_LINK,
                 "eta": POLICY_ETA,
                 "effort": POLICY_EFFORT[0],
-                "folder": str(Folder.get_root_folder().id),
+                "folder": str(test.folder.id),
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "status": POLICY_STATUS[1],
                 "effort": POLICY_EFFORT[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_update_policies(self, authenticated_client):
+    def test_update_policies(self, test):
         """test to update policies with the API with authentication"""
 
-        folder = Folder.objects.create(name="test")
+        folder = Folder.objects.create(name="test2")
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
-            "policies",
+            test.client,
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
@@ -150,7 +154,7 @@ class TestPolicysAuthenticated:
                 "link": POLICY_LINK,
                 "eta": POLICY_ETA,
                 "effort": POLICY_EFFORT[0],
-                "folder": Folder.get_root_folder(),
+                "folder": test.folder,
             },
             {
                 "name": "new " + POLICY_NAME,
@@ -162,45 +166,56 @@ class TestPolicysAuthenticated:
                 "folder": str(folder.id),
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "status": POLICY_STATUS[1],
                 "effort": POLICY_EFFORT[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_delete_policies(self, authenticated_client):
+    def test_delete_policies(self, test):
         """test to delete policies with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
-            "policies",
+            test.client,
+            "Policies",
             Policy,
             {
                 "name": POLICY_NAME,
-                "folder": Folder.objects.create(name="test"),
+                "folder": test.folder,
             },
+            user_group=test.user_group,
         )
     
-    def test_get_category_choices(self, authenticated_client):
+    def test_get_category_choices(self, test):
         """test to get policies category choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            authenticated_client, "policies", "category", Policy.CATEGORY
+            test.client, 
+            "Policies", 
+            "category", 
+            Policy.CATEGORY, 
+            user_group=test.user_group
         )
 
-    def test_get_effort_choices(self, authenticated_client):
+    def test_get_effort_choices(self, test):
         """test to get policies effort choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            authenticated_client, "policies", "effort", Policy.EFFORT
+            test.client, 
+            "Policies", 
+            "effort", 
+            Policy.EFFORT, 
+            user_group=test.user_group
         )
 
-    def test_get_status_choices(self, authenticated_client):
+    def test_get_status_choices(self, test):
         """test to get policies status choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            authenticated_client,
-            "policies",
+            test.client,
+            "Policies",
             "status",
             Policy.Status.choices,
+            user_group=test.user_group,
         )
