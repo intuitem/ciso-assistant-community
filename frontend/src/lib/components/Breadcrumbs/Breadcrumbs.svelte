@@ -22,21 +22,22 @@
 	$: {
 		// Remove zero-length tokens.
 		const tokens = $page.url.pathname.split('/').filter((t) => t !== '');
+		let title = '';
 
 		// Create { label, href } pairs for each token.
 		let tokenPath = '';
 		crumbs = tokens.map((t) => {
 			tokenPath += '/' + t;
 			if (t === $breadcrumbObject.id) {
-				if ($breadcrumbObject.name) t = $breadcrumbObject.name;
-				else t = $breadcrumbObject.email;
+				if ($breadcrumbObject.name) title = $breadcrumbObject.name;
+				else title = $breadcrumbObject.email;
 			} else if (t === 'folders') {
 				t = 'domains';
 			}
 			t = t.replace(/-/g, ' ');
 			t = capitalizeSecondWord(t);
 			return {
-				label: $page.data.label || t,
+				label: $page.data.label || title || t,
 				href: Object.keys(listViewFields).includes(tokens[0]) ? tokenPath : null
 			};
 		});
