@@ -191,6 +191,10 @@
 	"september": "Septembre",
 	"october": "Octobre",
 	"november": "Novembre",
-	"december": "Décembre"
+	"december": "Décembre",
+	"error": "erreur{s}",
+	"warning": "avertissement{s}",
+	"info": "info{s}",
+	"found": "trouvé{e}{s}"
 }
 
