@@ -419,6 +419,13 @@ class EndpointTestsQueries:
             # Uses the API endpoint to create an object with authentication
             response = authenticated_client.post(url, build_params, format=query_format)
 
+            if fails:
+                # Asserts that the object was not created
+                assert (
+                    response.status_code == expected_status
+                ), f"{verbose_name} can not be created with authentication"
+                return
+
             # Asserts that the object was created successfully
             assert (
                 response.status_code == expected_status
