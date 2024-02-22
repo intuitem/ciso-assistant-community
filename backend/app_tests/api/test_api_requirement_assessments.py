@@ -1,4 +1,5 @@
 import pytest
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APIClient
 from core.models import (
     ComplianceAssessment,
@@ -41,7 +42,9 @@ class TestRequirementAssessmentsUnauthenticated:
                     project=Project.objects.create(name="test", folder=folder),
                     framework=Framework.objects.all()[0],
                 ),
-                "requirement": RequirementNode.objects.create(name="test", folder=folder, assessable=False),
+                "requirement": RequirementNode.objects.create(
+                    name="test", folder=folder, assessable=False
+                ),
             },
         )
 
@@ -76,7 +79,9 @@ class TestRequirementAssessmentsUnauthenticated:
                     project=Project.objects.create(name="test", folder=folder),
                     framework=Framework.objects.all()[0],
                 ),
-                "requirement": RequirementNode.objects.create(name="test", folder=folder, assessable=False),
+                "requirement": RequirementNode.objects.create(
+                    name="test", folder=folder, assessable=False
+                ),
             },
             {
                 "status": REQUIREMENT_ASSESSMENT_STATUS2,
@@ -113,7 +118,10 @@ class TestRequirementAssessmentsAuthenticated:
             },
             {
                 "folder": str(folder.id),
-                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name},
+                "compliance_assessment": {
+                    "id": str(compliance_assessment.id),
+                    "str": compliance_assessment.name,
+                },
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
             -1,
@@ -144,9 +152,14 @@ class TestRequirementAssessmentsAuthenticated:
                 "security_measures": [str(security_measure.id)],
             },
             {
-                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name}
+                "compliance_assessment": {
+                    "id": str(compliance_assessment.id),
+                    "str": compliance_assessment.name,
+                }
             },
             base_count=-1,
+            fails=True,
+            expected_status=HTTP_403_FORBIDDEN,
         )
 
     def test_update_requirement_assessments(self, authenticated_client):
@@ -189,7 +202,10 @@ class TestRequirementAssessmentsAuthenticated:
             },
             {
                 "folder": str(Folder.get_root_folder().id),
-                "compliance_assessment": {"id": str(compliance_assessment.id), "str": compliance_assessment.name},
+                "compliance_assessment": {
+                    "id": str(compliance_assessment.id),
+                    "str": compliance_assessment.name,
+                },
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
         )
