@@ -11,6 +11,10 @@
 
 	import { RISK_COLOR_PALETTE } from '$lib/utils/constants';
 
+	import * as m from '$paraglide/messages';
+	import { localItems } from '$lib/utils/locales.js';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data;
 
 	let user: User = data.user;
@@ -29,10 +33,14 @@
 
 	let openTab = 1;
 
-	const cur_rsk_label = 'Current risk';
-	const rsd_rsk_label = 'Residual risk';
+	const cur_rsk_label = m.currentRisk();
+	const rsd_rsk_label = m.residualRisk();
 
 	let dropdown_selected_values: any;
+
+	for (const item in security_measure_status.labels) {
+		security_measure_status.labels[item] = localItems(languageTag())[security_measure_status.localLables[item]];
+	}
 
 	onMount(async () => {
 		const echarts = await import('echarts');
@@ -179,6 +187,10 @@
 	let dropdown = new Dropdown();
 </script>
 
+<svelte:head>
+	<title>{m.analytics()}</title>
+</svelte:head>
+
 <svelte:document
 	on:click={() => {
 		if (openTab === 3 && dropdown.show) {
@@ -199,7 +211,7 @@
 			<span class="">
 				<i class="fas fa-chart-pie" />
 			</span>
-			<div class="w-full">Summary</div>
+			<div class="w-full">{m.summary()}</div>
 		</button>
 		<button
 			class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center {openTab !==
@@ -211,7 +223,7 @@
 			<span class="">
 				<i class="fas fa-star" />
 			</span>
-			<div class="w-full">Compliance</div>
+			<div class="w-full">{m.compliance()}</div>
 		</button>
 		<button
 			class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center {openTab !==
@@ -223,7 +235,7 @@
 			<span class="">
 				<i class="fas fa-heartbeat" />
 			</span>
-			<div class="w-full">Treatment</div>
+			<div class="w-full">{m.treatment()}</div>
 		</button>
 		<button
 			class="space-x-1 flex flex-row cursor-pointer px-4 py-1 w-fit border-slate-300 hover:bg-gray-100 rounded-t-lg hover:border-slate-400 text-center {openTab !==
@@ -235,42 +247,42 @@
 			<span class="">
 				<i class="fas fa-drafting-compass" />
 			</span>
-			<div class="w-full">Composer</div>
+			<div class="w-full">{m.composer()}</div>
 		</button>
 	</div>
 
 	<div class:hide={openTab !== 1}>
 		<section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="stats">
 			<div class="p-2 m-2">
-				<span class="text-2xl font-extrabold text-slate-700">Statistics</span>
+				<span class="text-2xl font-extrabold text-slate-700">{m.statistics()}</span>
 			</div>
 			<div class="flex items-center content-center">
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-blue-500 mr-2"><i class="fas fa-glasses" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.RiskAssessment}</div>
-						<div class="font-semibold text-slate-500 text-sm">Risk assessments</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.riskAssessments()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-yellow-500 mr-2"><i class="fas fa-clone" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.RiskScenario}</div>
-						<div class="font-semibold text-slate-500 text-sm">Scenarios</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.scenarios()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.SecurityMeasure}</div>
-						<div class="font-semibold text-slate-500 text-sm">Security measures</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.securityMeasures()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-green-500 mr-2"><i class="fas fa-user-tie" /></div>
 					<div class=" text-left">
 						<div class="text-4xl font-bold">{counters.RiskAcceptance}</div>
-						<div class="font-semibold text-slate-500 text-sm">Risk acceptances</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.riskAcceptances()}</div>
 					</div>
 				</div>
 			</div>
@@ -278,14 +290,18 @@
 
 		<section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
 			<div class="p-2 m-2">
-				<div class="text-2xl font-extrabold text-slate-700">My projects</div>
+				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
-					Assigned to <span class="font-bold text-slate-700">{counters.Project}</span> projects
+					{#if counters.Project > 1}
+						{m.assignedObjects({number: counters.Project, object: m.projects()})}
+					{:else}
+						{m.assignedObjects({number: counters.Project, object: m.project()})}
+					{/if}
 				</div>
 			</div>
 			<div class="flex items-center content-center">
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">Current risk level per risk scenario</span>
+					<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 					<DonutChart
 						s_label={cur_rsk_label}
@@ -294,7 +310,7 @@
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">Residual risk level per risk scenario</span>
+					<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 					<DonutChart
 						s_label={rsd_rsk_label}
@@ -303,7 +319,7 @@
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">Security measures status</span>
+					<span class="text-sm font-semibold">{m.securityMeasuresStatus()}</span>
 
 					<!-- -----------MEASURE STATUS------------ -->
 
@@ -316,19 +332,19 @@
 
 		<section class="p-2 bg-white rounded-lg shadow-lg mb-6" id="">
 			<div class="p-2 m-2">
-				<div class="text-2xl font-extrabold text-slate-700">Watch list</div>
+				<div class="text-2xl font-extrabold text-slate-700">{m.watchlist()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
-					Items that have expired or with close ETA
+					{m.watchlistDescription()}
 				</div>
 			</div>
 			<div class="p-2 m-2 flex flex-col space-y-5 items-center content-center">
 				<div class="w-full">
-					<span class="text-md font-semibold">Measures to review</span>
+					<span class="text-md font-semibold">{m.measuresToReview()}</span>
 
 					<WatchlistMeasures {measures_to_review} />
 				</div>
 				<div class="w-full">
-					<span class="text-md font-semibold">Exceptions to review</span>
+					<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
 
 					<WatchlistExceptions {acceptances_to_review} {user} />
 				</div>
@@ -338,23 +354,20 @@
 	<div class:hide={openTab !== 4}>
 		<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
 			<div class="p-2 m-2">
-				<div id="title" class="text-lg font-black m-1 p-1">Composer</div>
+				<div id="title" class="text-lg font-black m-1 p-1">{m.composer()}</div>
 				<select id="composer_select" hidden>
 					{#each risk_assessments as risk_assessment}
 						<option value={risk_assessment.id}>{risk_assessment.name}</option>
 					{/each}
 				</select>
 				<div>
-					This will help you aggregate multiple components (projects) to get the compiled view on
-					your risk. This is particularly useful for two use cases:
+					{m.composerDescription()}:
 					<ul class="list-disc px-4 py-2 mx-4 my-2">
 						<li>
-							business intelligence approach to focus on a specific subset across different project
-							domains (eg. across divisions)
+							{m.composerDescription1()}
 						</li>
 						<li>
-							you are interested in the risk assessment of a specific system, for which you need the
-							risk assessment of the underlying components
+							{m.composerDescription2()}
 						</li>
 					</ul>
 				</div>
@@ -372,7 +385,7 @@
 							<button
 								id="process"
 								class="text-md text-white p-2 rounded w-full"
-								on:click|stopPropagation={handle_composer_submit_click}>Process</button
+								on:click|stopPropagation={handle_composer_submit_click}>{m.process()}</button
 							>
 							<div class="flex flex-col items-center relative">
 								<button
@@ -404,7 +417,7 @@
 											{/each}
 											<div class:hide={dropdown.selected.length !== 0} class="flex">
 												<input
-													placeholder="Select your targets"
+													placeholder={m.selectTargets()}
 													class="input bg-transparent text-gray-800 cursor-pointer select-none ring-0 border-0 outline-0"
 												/>
 											</div>
@@ -491,24 +504,24 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 					{#if agg_data.names.length}
 						<div class="m-2 p-2">
 							<div>
-								<div>Treatment progress overview</div>
+								<div>{m.treatmentProgressOverview()}</div>
 								<div class="rounded items-center justify-center">
 									<TreatmentProgressDualBar {agg_data} />
 								</div>
 							</div>
 						</div>
 						<div class="p-4 m-2">
-							<div class="text-lg font-semibold">Your pending measures:</div>
-							<div class="text-sm pb-4">ordered by ranking score</div>
+							<div class="text-lg font-semibold">{m.pendingMeasures()}</div>
+							<div class="text-sm pb-4">{m.orderdByRankingScore()}</div>
 							<div class="flex items-center justify-center">
 								<table class="p-2 m-2 w-full">
 									<tr class="bg-gray-100">
-										<th class="text-left py-2 px-4">Domain</th>
-										<th class="text-left py-2 px-4">Measure</th>
-										<th>Ranking score</th>
-										<th>Status</th>
-										<th>ETA</th>
-										<th class="py-2 px-4">Actions</th>
+										<th class="text-left py-2 px-4">{m.domain()}</th>
+										<th class="text-left py-2 px-4">{m.securityMeasure()}</th>
+										<th>{m.rankingScore()}</th>
+										<th>{m.status()}</th>
+										<th>{m.eta()}</th>
+										<th class="py-2 px-4">{m.actions()}</th>
 									</tr>
 
 									{#if measures}
@@ -542,21 +555,19 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<tr class="text-black p-4 text-center">
 											<td colspan="8" class="py-2">
 												<i class="inline fas fa-exclamation-triangle" />
-												<p class="inline test-gray-900">No pending measure.</p>
+												<p class="inline test-gray-900">{m.noPendingObject({object:m.securityMeasure().toLowerCase(), e:'e'})}.</p>
 											</td>
 										</tr>
 									{/if}
 								</table>
 							</div>
 							<div class="text-sm p-2 m-2">
-								<i class="fas fa-info-circle" /> Ranking score is an adaptive metric that combines the
-								information of effort and current risk level, and crosses it with the other data to assist
-								you for the prioritization.
+								<i class="fas fa-info-circle" /> {m.rankingScoreDefintion()}.
 							</div>
 						</div>
 					{:else}
 						<div class="bg-white shadow-md rounded-lg px-4 py-2 m-8">
-							<div>Projects summary is empty.</div>
+							<div>{m.projectsSummaryEmpty()}.</div>
 						</div>
 					{/if}
 				</div>
@@ -567,7 +578,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 	{#if openTab === 2}
 		<div class="h-full">
 			<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
-				<span class="text-2xl font-extrabold">Overall compliance</span>
+				<span class="text-2xl font-extrabold">{m.overallCompliance()}</span>
 				<div class="flex flex-col space-y-2">
 					{#each data.projects as project}
 						<div class="flex flex-col items-center">
@@ -591,18 +602,18 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 								<div class="card w-full bg-white flex flex-row shadow mx-8 p-4 relative">
 									<div class="w-1/5 flex flex-col space-y-2">
 										<div>
-											<p class="font-medium">Name</p>
+											<p class="font-medium">{m.name()}</p>
 											<p>{compliance_assessment.name}</p>
 										</div>
 										<div>
-											<p class="font-medium">Framework</p>
+											<p class="font-medium">{m.framework()}</p>
 											<p>{compliance_assessment.framework.str}</p>
 										</div>
 									</div>
 									<div class="w-3/5 h-32">
 										<DonutChart
 											name="compliance_assessments"
-											s_label="compliance_assessments"
+											s_label={m.complianceAssessments()}
 											values={compliance_assessment.donut.values}
 										/>
 									</div>
@@ -610,12 +621,12 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<a
 											href="/compliance-assessments/{compliance_assessment.id}/export"
 											class="btn variant-filled-primary"
-											><i class="fa-solid fa-download mr-2" /> Export
+											><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
 										</a>
 										<a
 											href="/compliance-assessments/{compliance_assessment.id}/edit"
 											class="btn variant-filled-primary"
-											><i class="fa-solid fa-edit mr-2" /> Edit
+											><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 										</a>
 									</div>
 								</div>
