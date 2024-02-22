@@ -5,6 +5,7 @@ from core.models import SecurityMeasure
 from core.models import Evidence
 from iam.models import Folder
 
+from test_vars import GROUPS_PERMISSIONS
 from test_api import EndpointTestsQueries
 
 # Generic evidence data for tests
@@ -91,28 +92,28 @@ class TestEvidencesUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestEvidencesAuthenticated:
     """Perform tests on Evidences API endpoint with authentication"""
 
-    def test_get_evidences(self, authenticated_client):
+    def test_get_evidences(self, test):
         """test to get evidences from the API with authentication"""
 
-        folder = Folder.objects.create(name="test")
-        security_measure = SecurityMeasure.objects.create(name="test", folder=folder)
+        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Evidences",
             Evidence,
             {
                 "name": EVIDENCE_NAME,
                 "description": EVIDENCE_DESCRIPTION,
                 "link": EVIDENCE_LINK,
-                "folder": folder,
+                "folder": test.folder,
                 "security_measures": [security_measure],
             },
             {
-                "folder": {"id": str(folder.id), "str": folder.name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "security_measures": [
                     {
                         "id": str(security_measure.id),
@@ -120,101 +121,101 @@ class TestEvidencesAuthenticated:
                     }
                 ],
             },
+            user_group=test.user_group,
         )
 
-    def test_create_evidences(self, authenticated_client):
+    def test_create_evidences(self, test):
         """test to create evidences with the API with authentication"""
 
-        folder = Folder.objects.create(name="test")
-        security_measure = SecurityMeasure.objects.create(name="test", folder=folder)
+        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
 
         with open(
             path.join(path.dirname(path.dirname(__file__)), EVIDENCE_ATTACHMENT), "rb"
         ) as file:
             EndpointTestsQueries.Auth.create_object(
-                authenticated_client,
+                test.client,
                 "Evidences",
                 Evidence,
                 {
                     "name": EVIDENCE_NAME,
                     "description": EVIDENCE_DESCRIPTION,
                     "link": EVIDENCE_LINK,
-                    "folder": str(folder.id),
-                    # "security_measures": [str(security_measure.id)],
+                    "folder": str(test.folder.id),
+                    "security_measures": [str(security_measure.id)],
                     "attachment": file,
                 },
                 {
-                    "folder": {"id": str(folder.id), "str": folder.name},
-                    # "security_measures": [
-                    #     {
-                    #         "id": str(security_measure.id),
-                    #         "str": security_measure.name,
-                    #     }
-                    # ],
+                    "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                    "security_measures": [
+                        {
+                            "id": str(security_measure.id),
+                            "str": security_measure.name,
+                        }
+                    ],
                     "attachment": EVIDENCE_ATTACHMENT,
                 },
                 query_format="multipart",
+                user_group=test.user_group,
             )
 
-    def test_update_evidences(self, authenticated_client):
+    def test_update_evidences(self, test):
         """test to update evidences with the API with authentication"""
 
-        folder = Folder.objects.create(name="test")
-        folder2 = Folder.objects.create(name="test2")
-        # security_measure = SecurityMeasure.objects.create(name="test", folder=folder)
-        # security_measure2 = SecurityMeasure.objects.create(name="test2", folder=folder2)
+        folder = Folder.objects.create(name="test2")
+        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
+        security_measure2 = SecurityMeasure.objects.create(name="test2", folder=folder)
 
         with open(
             path.join(path.dirname(path.dirname(__file__)), EVIDENCE_ATTACHMENT), "rb"
         ) as file:
             EndpointTestsQueries.Auth.update_object(
-                authenticated_client,
+                test.client,
                 "Evidences",
                 Evidence,
                 {
                     "name": EVIDENCE_NAME,
                     "description": EVIDENCE_DESCRIPTION,
                     "link": EVIDENCE_LINK,
-                    "folder": folder,
-                    # "security_measures": [security_measure],
+                    "folder": test.folder,
+                    "security_measures": [security_measure],
                 },
                 {
                     "name": "new " + EVIDENCE_NAME,
                     "description": "new " + EVIDENCE_DESCRIPTION,
                     "link": EVIDENCE_LINK + "/new",
-                    "folder": str(folder2.id),
-                    # "security_measures": [str(security_measure2.id)],
+                    "folder": str(folder.id),
+                    "security_measures": [str(security_measure2.id)],
                     "attachment": file,
                 },
                 {
-                    "folder": {"id": str(folder.id), "str": folder.name},
-                    # "security_measures": [
-                    #     {
-                    #         "id": str(security_measure.id),
-                    #         "str": security_measure.name,
-                    #     }
-                    # ],
+                    "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                    "security_measures": [
+                        {
+                            "id": str(security_measure.id),
+                            "str": security_measure.name,
+                        }
+                    ],
                 },
                 {
                     "attachment": EVIDENCE_ATTACHMENT,
                 },
                 query_format="multipart",
+                user_group=test.user_group,
             )
 
-    def test_delete_evidences(self, authenticated_client):
+    def test_delete_evidences(self, test):
         """test to delete evidences with the API with authentication"""
 
-        folder = Folder.objects.create(name="test")
-
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Evidences",
             Evidence,
             {
                 "name": EVIDENCE_NAME,
-                "folder": folder,
+                "folder": test.folder,
                 "security_measures": [
-                    SecurityMeasure.objects.create(name="test", folder=folder)
+                    SecurityMeasure.objects.create(name="test", folder=test.folder)
                 ],
             },
+            user_group=test.user_group,
         )
