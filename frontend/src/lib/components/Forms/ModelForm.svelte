@@ -390,24 +390,24 @@
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={parent.onClose}>Cancel</button
+				on:click={parent.onClose}>{m.cancel()}</button
 			>
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit">Save</button
+				type="submit">{m.save()}</button
 			>
 		{:else}
 			<button
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={cancel}>Cancel</button
+				on:click={cancel}>{m.cancel()}</button
 			>
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit">Save</button
+				type="submit">{m.save()}</button
 			>
 		{/if}
 	</div>

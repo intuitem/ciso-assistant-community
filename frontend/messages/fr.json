@@ -205,5 +205,7 @@
 	"current": "Courant{e}",
 	"residual": "Residuel{le}",
 	"probability": "Probabilité",
-	"riskLevels": "Niveaux de risque"
+	"riskLevels": "Niveaux de risque",
+	"cancel": "Annuler",
+	"save": "Enregistrer"
 }
