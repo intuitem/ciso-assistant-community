@@ -1,10 +1,10 @@
 import pytest
 from rest_framework.test import APIClient
 from core.models import Project
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
-from test_api import EndpointTestsQueries, EndpointTestsUtils
+from test_api import EndpointTestsQueries
 
 # Generic project data for tests
 PROJECT_NAME = "Test Project"
