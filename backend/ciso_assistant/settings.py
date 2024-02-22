@@ -12,24 +12,84 @@ else it is sqlite, and no env variable is required
 from pathlib import Path
 import os
 import json
-from urllib.parse import urlparse
+import logging.config
+import structlog
 from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-print("BASE_DIR:", BASE_DIR)
+LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
+LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
+
+CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
+
+
+def set_ciso_assistant_url(_, __, event_dict):
+    event_dict["ciso_assistant_url"] = CISO_ASSISTANT_URL
+    return event_dict
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.JSONRenderer(),
+        },
+        "plain": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.dev.ConsoleRenderer(),
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": LOG_FORMAT,
+        },
+    },
+    "loggers": {
+        "": {"handlers": ["console"], "level": LOG_LEVEL},
+    },
+}
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        set_ciso_assistant_url,
+        structlog.stdlib.filter_by_level,
+        structlog.processors.TimeStamper(fmt="iso"),  # ISO 8601 timestamps
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),  # Include stack information in log entries
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+logging.config.dictConfig(LOGGING)
+logger = structlog.getLogger(__name__)
+
+logger.info("BASE_DIR: %s", BASE_DIR)
 
 with open(BASE_DIR / "ciso_assistant/VERSION") as f:
     VERSION = f.read().strip()
-    print(f"CISO Assistant Version: {VERSION}")
+    logger.info("CISO Assistant Version: %s" % VERSION)
 
 try:
     with open(BASE_DIR / "ciso_assistant/build.json") as f:
         BUILD = json.load(f)["build"]
+        logger.info("CISO Assistant Build: %s" % BUILD)
 except FileNotFoundError:
     BUILD = "unset"
-    print("CISO Assistant Build: unset. Please refer to the documentation to set it.")
+    logger.warning(
+        "CISO Assistant Build: unset. Please refer to the documentation to set it."
+    )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -40,12 +100,11 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG") == "True"
 
-print("DEBUG mode:", DEBUG)
-CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
-print("CISO_ASSISTANT_URL:", CISO_ASSISTANT_URL)
+logger.info("DEBUG mode: %s", DEBUG)
+logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-print("ALLOWED_HOSTS", ALLOWED_HOSTS)
+logger.info("ALLOWED_HOSTS: %s", ALLOWED_HOSTS)
 CSRF_TRUSTED_ORIGINS = [CISO_ASSISTANT_URL]
 LOCAL_STORAGE_DIRECTORY = os.environ.get(
     "LOCAL_STORAGE_DIRECTORY", BASE_DIR / "db/attachments"
@@ -65,6 +124,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.forms",
+    "django_structlog",
     "tailwind",
     "iam",
     "core",
@@ -84,6 +144,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
 ]
 
 ROOT_URLCONF = "ciso_assistant.urls"
@@ -205,7 +266,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 if "POSTGRES_NAME" in os.environ:
-    print("Postgresql database engine")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -216,15 +276,14 @@ if "POSTGRES_NAME" in os.environ:
             "PORT": os.environ.get("DB_PORT", "5432"),
         }
     }
-    print("Postgresql database engine")
 else:
-    print("sqlite database engine")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db/ciso-assistant.sqlite3",
         }
     }
+logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
