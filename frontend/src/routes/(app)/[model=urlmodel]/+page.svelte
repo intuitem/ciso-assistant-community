@@ -77,7 +77,10 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${data.model.verboseName}`
+			title: m.addButton({
+							determinant: getDeterminant(languageTag(), 'undefined', data.model),
+							model: localItems(languageTag())[data.model.localName].toLowerCase()
+						})
 		};
 		modalStore.trigger(modal);
 	}

@@ -24,6 +24,10 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import { page } from '$app/stores';
 
+	import * as m from '$paraglide/messages';
+	import { localItems, getDeterminant } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data: PageData;
 
 	breadcrumbObject.set(data.scenario);
@@ -56,7 +60,10 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${data.measureModel.verboseName.toLowerCase()}`
+			title: m.addButton({
+							determinant: getDeterminant(languageTag(), 'undefined', data.measureModel),
+							model: localItems(languageTag())[data.measureModel.localName].toLowerCase()
+						})
 		};
 		modalStore.trigger(modal);
 	}

@@ -205,5 +205,7 @@
 	"current": "Current",
 	"residual": "Residual",
 	"probability": "Probability",
-	"riskLevels": "Risk levels"
+	"riskLevels": "Risk levels",
+	"cancel": "Cancel",
+	"save": "Save"
 }

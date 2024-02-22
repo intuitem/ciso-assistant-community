@@ -62,7 +62,10 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${model.info.verboseName.toLowerCase()}`
+			title: m.addButton({
+							determinant: getDeterminant(languageTag(), 'undefined', model.info),
+							model: localItems(languageTag())[model.info.localName].toLowerCase()
+						})
 		};
 		modalStore.trigger(modal);
 	}
