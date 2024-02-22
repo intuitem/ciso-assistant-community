@@ -33,6 +33,7 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         # to the root view when using DefaultRouter.
         if getattr(view, "_ignore_model_permissions", False):
             return True
+
         queryset = self._queryset(view)
         perms = self.get_required_permissions(request.method, queryset.model)
         if not perms:
