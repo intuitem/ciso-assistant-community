@@ -9,6 +9,6 @@ else
     docker compose exec backend python manage.py migrate
     echo "initialize your superuser account..."
     docker compose exec backend python manage.py createsuperuser
-    echo "connect to ciso assistant on http://localhost:3000"
+    echo "connect to ciso assistant on https://localhost:8443"
     echo "for successive runs you can now use docker compose up"
 fi
