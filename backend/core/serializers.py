@@ -11,7 +11,7 @@ from core.serializer_fields import FieldsRelatedField
 
 import structlog
 
-logger = structlog.get_logger()
+logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
@@ -23,6 +23,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 {"urn": "Imported objects cannot be modified"}
             )
         return super().update(instance, validated_data)
+
+    def create(self, validated_data: Any):
+        folder = Folder.get_folder(validated_data)
+        logger.info(folder)
+        return super().create(validated_data)
 
     class Meta:
         model: models.Model
