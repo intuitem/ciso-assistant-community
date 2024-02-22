@@ -51,12 +51,6 @@ class LibraryViewSet(BaseModelViewSet):
         return Response({"results": get_available_libraries()})
 
     def retrieve(self, request, *args, pk, **kwargs):
-        if not RoleAssignment.has_permission(
-            user=request.user, codename="view_library"
-        ):
-            return Response(
-                status=status.HTTP_403_FORBIDDEN,
-            )
         library = get_library(pk)
         return Response(library)
 
