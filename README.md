@@ -143,9 +143,7 @@ export DJANGO_SECRET_KEY=...
 
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
-export LOG_OUTPUTS=console # optional, default value is console. Available options: console, json, flat
-export JSON_LOG_FILE=logs/json.log # optional, default value is logs/json.log. Path to the JSON log file
-export FLAT_LOG_FILE=logs/flat.log # optional, default value is logs/flat.log Path to the flat log file
+export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
