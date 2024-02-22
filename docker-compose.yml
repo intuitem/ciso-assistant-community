@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       - ALLOWED_HOSTS=backend
-      - CISO_ASSISTANT_URL=http://localhost:3000
+      - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
     volumes:
       - ./db:/code/db
@@ -15,11 +15,25 @@ services:
   frontend:
     container_name: frontend
     environment:
-        - ORIGIN=http://localhost:3000
         - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+        - PROTOCOL_HEADER=x-forwarded-proto 
+        - HOST_HEADER=x-forwarded-host
     build: ./frontend
     depends_on:
       - backend
-    ports:
-      - 3000:3000
 
+  caddy:
+    container_name: caddy
+    image: caddy:2.7.6
+    restart: unless-stopped
+    ports:
+      - 8443:8443
+    command:
+        - caddy
+        - reverse-proxy
+        - --from
+        - https://localhost:8443
+        - --to
+        - frontend:3000
+    volumes:
+      - ./db:/data
