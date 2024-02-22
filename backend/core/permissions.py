@@ -20,7 +20,28 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
     }
 
     def has_permission(self, request: Request, view) -> bool:
-        return True
+        if not request.user or (
+            not request.user.is_authenticated and self.authenticated_users_only
+        ):
+            return False
+        if not request.method:
+            return False
+        # Workaround to ensure DjangoModelPermissions are not applied
+        # to the root view when using DefaultRouter.
+        if getattr(view, "_ignore_model_permissions", False):
+            return True
+        queryset = self._queryset(view)
+        perms = self.get_required_permissions(request.method, queryset.model)
+        if not perms:
+            return False
+        _codename = perms[0].split(".")[1]
+        if queryset.model == User:
+            return RoleAssignment.has_permission(user=request.user, codename=_codename)
+        return RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename=_codename),
+            folder=Folder.get_root_folder(),
+        )
 
     def has_object_permission(self, request: Request, view, obj):
         if not request.method:
