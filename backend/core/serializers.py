@@ -9,6 +9,10 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
+import structlog
+
+logger = structlog.get_logger()
+
 User = get_user_model()
 
 
@@ -245,11 +249,12 @@ class UserWriteSerializer(BaseModelSerializer):
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
-            print(e)
+            logger.error(e)
             if (
                 User.objects.filter(email=validated_data["email"]).exists()
                 and send_mail
             ):
+                logger.warning("mailing failed")
                 raise serializers.ValidationError(
                     {
                         "warning": [
@@ -262,6 +267,22 @@ class UserWriteSerializer(BaseModelSerializer):
                     {"error": ["An error occurred while creating the user"]}
                 )
         return user
+
+    def update(self, instance: User, validated_data: Any) -> User:
+        user_groups_data = validated_data.get("user_groups")
+        if user_groups_data is not None:
+            initial_groups = set(instance.user_groups.all())
+            new_groups = set(group for group in user_groups_data)
+
+            if initial_groups != new_groups:
+                logger.info(
+                    "user groups updated",
+                    user=instance,
+                    initial_user_groups=initial_groups,
+                    new_user_groups=new_groups,
+                )
+                # instance.user_groups.set(user_groups_data)
+        return super().update(instance, validated_data)
 
 
 class UserGroupReadSerializer(BaseModelSerializer):
