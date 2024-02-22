@@ -35,7 +35,7 @@ class EndpointTestsUtils:
         EndpointTestsQueries.Auth.create_object(authenticated_client, "Folders", Folder, {"name": "test"})
         folder = Folder.objects.get(name="test")
 
-        user = User.objects.create_user("user@tests.com")
+        user = User.objects.create_user(TEST_USER_EMAIL)
         UserGroup.objects.get(name=role, folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"])).user_set.add(user)
         client = APIClient()
         client.force_login(user)
@@ -51,7 +51,6 @@ class EndpointTestsUtils:
         else:
             fails = True
             expected_status = status.HTTP_403_FORBIDDEN
-        print(object, user_group, perm_name, fails, expected_status)
         return fails, expected_status
 
 class EndpointTestsQueries:

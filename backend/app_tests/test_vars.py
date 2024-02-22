@@ -28,6 +28,7 @@ TEST_RISK_MATRIX_URN = "urn:intuitem:risk:library:critical_risk_matrix_3x3"
 TEST_RISK_MATRIX2_URN = "urn:intuitem:risk:library:critical_risk_matrix_5x5"
 TEST_REQUIREMENT_NODE_URN = "urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-1"
 
+TEST_USER_EMAIL = "user@tests.com"
 GROUPS_PERMISSIONS = {
     "BI-UG-ADM": {
         "folder": "Global",
