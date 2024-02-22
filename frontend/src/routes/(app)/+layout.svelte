@@ -35,7 +35,7 @@
 		scoringAssistant: m.scoringAssistant(),
 		libraries: m.libraries(),
 		backupRestore: m.backupRestore()
-	}
+	};
 
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
 </script>

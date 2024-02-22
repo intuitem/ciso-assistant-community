@@ -4,7 +4,7 @@
 	import Notifications from './Notifications.svelte';
 	import { showNotification } from '$lib/utils/stores';
 
-	import * as m from '$paraglide/messages'
+	import * as m from '$paraglide/messages';
 
 	export let info: object[];
 
@@ -16,7 +16,15 @@
 	let daysInMonth = new Date(year, month, 0).getDate();
 	let firstDay = new Date(year, month - 1, 1).getDay();
 
-	const daysOfWeek = [m.monday(), m.tuesday(), m.wednesday(), m.thursday(), m.friday(), m.saturday(), m.sunday()];
+	const daysOfWeek = [
+		m.monday(),
+		m.tuesday(),
+		m.wednesday(),
+		m.thursday(),
+		m.friday(),
+		m.saturday(),
+		m.sunday()
+	];
 	const monthNames = [
 		m.january(),
 		m.february(),

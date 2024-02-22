@@ -9,7 +9,7 @@
 	export let colors: string[] = [];
 
 	for (const item in values) {
-		values[item]['name'] = localItems(languageTag())[values[item]['localName']]
+		values[item]['name'] = localItems(languageTag())[values[item]['localName']];
 	}
 
 	let chart_element: HTMLElement | null = null;

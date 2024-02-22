@@ -195,6 +195,15 @@
 	"error": "erreur{s}",
 	"warning": "avertissement{s}",
 	"info": "info{s}",
-	"found": "trouvé{e}{s}"
+	"found": "trouvé{e}{s}",
+	"remediationPlan": "Plan de remédiation",
+	"treatmentPlan": "Plan de traitement",
+	"asPDF": "en PDF",
+	"asCSV": "en CSV",
+	"draft": "Brouillon",
+	"riskMatrixView": "Vue de la matrice de risque",
+	"current": "Courant{e}",
+	"residual": "Residuel{le}",
+	"probability": "Probabilité",
+	"riskLevels": "Niveaux de risque"
 }
-

@@ -13,39 +13,42 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
-	return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-        return index == 0 ? word.toLowerCase() : word.toUpperCase();
-    }).replace(/\s+/g, '');
+	return str
+		.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+			return index == 0 ? word.toLowerCase() : word.toUpperCase();
+		})
+		.replace(/\s+/g, '');
 }
 
-export function getDeterminant(lang: string, defined: string, model: ModelInfo, plural=false): string {
+export function getDeterminant(
+	lang: string,
+	defined: string,
+	model: ModelInfo,
+	plural = false
+): string {
 	const determinantTable = {
-		"fr": {
-			"defined": {
-				"plural": "les",
-				"m": "le",
-				"f": "la"
+		fr: {
+			defined: {
+				plural: 'les',
+				m: 'le',
+				f: 'la'
 			},
-			"undefined": {
-				"plural": "des",
-				"m": "un",
-				"f": "une"
+			undefined: {
+				plural: 'des',
+				m: 'un',
+				f: 'une'
 			}
 		}
 	};
 
-	if (lang === "en")
-		return '';
-	else if (lang === "fr" && plural)
-		return determinantTable[lang][defined]["plural"];
-	else
-		return determinantTable[lang][defined][model.localFrGender];
+	if (lang === 'en') return '';
+	else if (lang === 'fr' && plural) return determinantTable[lang][defined]['plural'];
+	else return determinantTable[lang][defined][model.localFrGender];
 }
 
 interface LocalItems {
 	[key: string]: string;
-};
-
+}
 
 export function localItems(languageTag: string): LocalItems {
 	const LOCAL_ITEMS = {
@@ -165,7 +168,7 @@ export function localItems(languageTag: string): LocalItems {
 		veryHigh: m.veryHigh({ languageTag: languageTag }),
 		planned: m.planned({ languageTag: languageTag }),
 		active: m.active({ languageTag: languageTag }),
-		inactive: m.inactive({ languageTag: languageTag }),
+		inactive: m.inactive({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
