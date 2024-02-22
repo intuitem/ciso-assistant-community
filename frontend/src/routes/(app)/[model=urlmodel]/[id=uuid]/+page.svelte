@@ -175,17 +175,25 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800" data-testid="{key.replace('_', '-')}-field-title">
+					<div
+						class="text-sm font-medium text-gray-800"
+						data-testid="{key.replace('_', '-')}-field-title"
+					>
 						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none" data-testid={!(value instanceof Array) ? key.replace('_', '-') + "-field-value" : null}>
+						<li
+							class="text-gray-600 list-none"
+							data-testid={!(value instanceof Array)
+								? key.replace('_', '-') + '-field-value'
+								: null}
+						>
 							{#if value}
 								{#if Array.isArray(value)}
 									{#if Object.keys(value).length > 0}
 										<ul>
 											{#each value as val}
-												<li data-testid={key.replace('_', '-') + "-field-value"}>
+												<li data-testid={key.replace('_', '-') + '-field-value'}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
@@ -226,7 +234,7 @@
 			<a
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"/>{m.edit()}</a
+				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
 			>
 		{/if}
 	</div>
@@ -249,15 +257,24 @@
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
 								{#if model.info.localFrGender === 'f'}
-									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: 'e'})}
+									{m.associatedObject({
+										model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(),
+										e: 'e'
+									})}
 								{:else}
-									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: ''})}
+									{m.associatedObject({
+										model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(),
+										e: ''
+									})}
 								{/if}
 							</h4>
 							<button
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />{m.addButton({determinant:getDeterminant(languageTag(), "undefined", model.info), model: localItems(languageTag())[model.info.localName].toLowerCase()})}</button
+								><i class="fa-solid fa-plus mr-2 lowercase" />{m.addButton({
+									determinant: getDeterminant(languageTag(), 'undefined', model.info),
+									model: localItems(languageTag())[model.info.localName].toLowerCase()
+								})}</button
 							>
 						</div>
 						{#if model.table}

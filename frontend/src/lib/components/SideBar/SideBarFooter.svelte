@@ -10,7 +10,7 @@
 	const language: any = {
 		french: m.french(),
 		english: m.english()
-	}
+	};
 
 	const modalStore = getModalStore();
 
@@ -84,8 +84,7 @@
 			<button
 				on:click={modalBuildInfo}
 				class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-				data-testid="about-button"
-				><i class="fa-solid fa-circle-info mr-2" />{m.aboutCiso()}</button
+				data-testid="about-button"><i class="fa-solid fa-circle-info mr-2" />{m.aboutCiso()}</button
 			>
 			<form action="/logout" method="POST">
 				<button class="w-full" type="submit" data-testid="logout-button">

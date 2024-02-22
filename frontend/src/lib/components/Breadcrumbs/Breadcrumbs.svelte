@@ -9,15 +9,15 @@
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
 
 	function capitalizeSecondWord(sentence: string) {
-    var words = sentence.split(' ');
+		var words = sentence.split(' ');
 
-    if (words.length >= 2) {
-        words[1] = words[1].charAt(0).toUpperCase() + words[1].substring(1);
-        return words.join('');
-    } else {
-        return sentence;
-    }
-}
+		if (words.length >= 2) {
+			words[1] = words[1].charAt(0).toUpperCase() + words[1].substring(1);
+			return words.join('');
+		} else {
+			return sentence;
+		}
+	}
 
 	$: {
 		// Remove zero-length tokens.
@@ -44,7 +44,7 @@
 
 		crumbs.unshift({ label: m.home(), href: '/', icon: 'fa-regular fa-compass' });
 		if (crumbs[crumbs.length - 1].label != 'edit') pageTitle.set(crumbs[crumbs.length - 1].label);
-		else pageTitle.set(m.edit()+ ' ' + crumbs[crumbs.length - 2].label);
+		else pageTitle.set(m.edit() + ' ' + crumbs[crumbs.length - 2].label);
 	}
 </script>
 

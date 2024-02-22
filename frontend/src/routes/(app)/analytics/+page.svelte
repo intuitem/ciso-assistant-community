@@ -39,7 +39,9 @@
 	let dropdown_selected_values: any;
 
 	for (const item in security_measure_status.labels) {
-		security_measure_status.labels[item] = localItems(languageTag())[security_measure_status.localLables[item]];
+		security_measure_status.labels[item] = localItems(languageTag())[
+			security_measure_status.localLables[item]
+		];
 	}
 
 	onMount(async () => {
@@ -293,9 +295,9 @@
 				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
 					{#if counters.Project > 1}
-						{m.assignedObjects({number: counters.Project, object: m.projects()})}
+						{m.assignedObjects({ number: counters.Project, object: m.projects() })}
 					{:else}
-						{m.assignedObjects({number: counters.Project, object: m.project()})}
+						{m.assignedObjects({ number: counters.Project, object: m.project() })}
 					{/if}
 				</div>
 			</div>
@@ -555,14 +557,20 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<tr class="text-black p-4 text-center">
 											<td colspan="8" class="py-2">
 												<i class="inline fas fa-exclamation-triangle" />
-												<p class="inline test-gray-900">{m.noPendingObject({object:m.securityMeasure().toLowerCase(), e:'e'})}.</p>
+												<p class="inline test-gray-900">
+													{m.noPendingObject({
+														object: m.securityMeasure().toLowerCase(),
+														e: 'e'
+													})}.
+												</p>
 											</td>
 										</tr>
 									{/if}
 								</table>
 							</div>
 							<div class="text-sm p-2 m-2">
-								<i class="fas fa-info-circle" /> {m.rankingScoreDefintion()}.
+								<i class="fas fa-info-circle" />
+								{m.rankingScoreDefintion()}.
 							</div>
 						</div>
 					{:else}

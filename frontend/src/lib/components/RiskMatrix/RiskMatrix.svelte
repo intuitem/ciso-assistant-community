@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { buildRiskMatrix } from './utils';
 
+	import * as m from '$paraglide/messages'
+
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
 
@@ -23,7 +25,7 @@
 </script>
 
 <div class="flex flex-row items-center">
-	<div class="flex font-semibold text-xl -rotate-90">Probability</div>
+	<div class="flex font-semibold text-xl -rotate-90">{m.probability()}</div>
 	<div
 		class="{wrapperClass} grid gap-1 w-full"
 		style="grid-template-columns: repeat({displayedRiskMatrix.length + 1}, minmax(0, 1fr));"
@@ -69,10 +71,10 @@
 		{/each}
 	</div>
 </div>
-<div class="flex font-semibold text-xl items-center justify-center p-2 pl-60">Impact</div>
+<div class="flex font-semibold text-xl items-center justify-center p-2 pl-60">{m.impact()}</div>
 {#if showRisks}
 	<div class="w-full flex flex-col justify-start">
-		<h3 class="flex font-semibold p-2 m-2 text-md">Risk Levels</h3>
+		<h3 class="flex font-semibold p-2 m-2 text-md">{m.riskLevels()}</h3>
 		<div class="flex justify-start mx-2">
 			<table class="w-3/4 border-separate">
 				{#each parsedRiskMatrix.risk as risk}

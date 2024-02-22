@@ -195,5 +195,15 @@
 	"error": "error{s}",
 	"warning": "warning{s}",
 	"info": "info{s}",
-	"found": "found"
+	"found": "found",
+	"remediationPlan": "Remediation plan",
+	"treatmentPlan": "Treatment plan",
+	"asPDF": "as PDF",
+	"asCSV": "as CSV",
+	"draft": "Draft",
+	"riskMatrixView": "Risk matrix view",
+	"current": "Current",
+	"residual": "Residual",
+	"probability": "Probability",
+	"riskLevels": "Risk levels"
 }
