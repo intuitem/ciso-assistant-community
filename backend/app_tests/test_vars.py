@@ -32,7 +32,7 @@ TEST_USER_EMAIL = "user@tests.com"
 GROUPS_PERMISSIONS = {
     "BI-UG-ADM": {
         "folder": "Global",
-        "name": "Global administrator",
+        "name": "Global_administrator",
         "perms": [
             "add_user",
             "view_user",
@@ -115,7 +115,7 @@ GROUPS_PERMISSIONS = {
     },
     "BI-UG-GAD": {
         "folder": "Global",
-        "name": "Global auditor",
+        "name": "Global_auditor",
         "perms": [
             "view_project",
             "view_riskassessment",
@@ -137,7 +137,7 @@ GROUPS_PERMISSIONS = {
     },
     "BI-UG-GVA": {
         "folder": "Global",
-        "name": "Global validator",
+        "name": "Global_validator",
         "perms": [
             "view_project",
             "view_riskassessment",
@@ -252,7 +252,7 @@ GROUPS_PERMISSIONS = {
     },
     "BI-UG-DMA": {
         "folder": "test",
-        "name": "Domain Manager",
+        "name": "Domain_Manager",
         "perms": [
             "change_usergroup",
             "view_usergroup",
