@@ -166,19 +166,54 @@ class Folder(AbstractBaseModel, NameDescriptionMixin):
         )
 
     @staticmethod
-    def get_folder(obj: Any) -> Self:
-        """Return the folder of an object"""
-        # todo: add a folder attribute to all objects to avoid introspection
-        if hasattr(obj, "folder"):
-            return obj.folder
-        if hasattr(obj, "parent_folder"):
-            return obj.parent_folder
-        if hasattr(obj, "project"):
-            return obj.project.folder
-        if hasattr(obj, "risk_assessment"):
-            return obj.risk_assessment.project.folder
-        if hasattr(obj, "risk_scenario"):
-            return obj.risk_scenario.risk_assessment.project.folder
+    def navigate_structure(start, path):
+        """
+        Navigate through a mixed structure of objects and dictionaries.
+
+        :param start: The initial object or dictionary from which to start navigating.
+        :param path: A list of strings representing the path to navigate, with each element
+                     being an attribute name (for objects) or a key (for dictionaries).
+        :return: The value found at the end of the path, or None if any part of the path is invalid.
+        """
+        current = start
+        for p in path:
+            if isinstance(current, dict):
+                # For dictionaries
+                current = current.get(p, None)
+            else:
+                # For objects
+                try:
+                    current = getattr(current, p, None)
+                except AttributeError:
+                    # If the attribute doesn't exist and current is not a dictionary
+                    return None
+            if current is None:
+                return None
+        return current
+
+    @staticmethod
+    def get_folder(obj: Any):
+        """
+        Return the folder of an object using navigation through mixed structures.
+        """
+        # Define paths to try in order. Each path is a list representing the traversal path.
+        # NOTE: There are probably better ways to represent these, but it works.
+        paths = [
+            ["folder"],
+            ["parent_folder"],
+            ["project", "folder"],
+            ["risk_assessment", "project", "folder"],
+            ["risk_scenario", "risk_assessment", "project", "folder"],
+        ]
+
+        # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
+        for path in paths:
+            folder = Folder.navigate_structure(obj, path)
+            if folder is not None:
+                return folder
+
+        # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
+        return None
 
 
 class FolderMixin(models.Model):
