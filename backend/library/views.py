@@ -2,7 +2,7 @@ import json
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import QuerySet
-from rest_framework import status
+from rest_framework import permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.status import (
     HTTP_200_OK,
@@ -20,30 +20,41 @@ import yaml
 
 from core.helpers import get_sorted_requirement_nodes
 from core.models import Library
+from core.views import BaseModelViewSet
+from iam.models import RoleAssignment
 from library.validators import validate_file_extension
 from .helpers import preview_library
 
 
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import LibrarySerializer, LibraryUploadSerializer
 from .utils import get_available_libraries, get_library, import_library_view
 
 
-class LibraryViewSet(viewsets.ModelViewSet):
+class LibraryViewSet(BaseModelViewSet):
     serializer_class = LibrarySerializer
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
     lookup_value_regex = r"[\w.:-]+"
-
-    def get_queryset(self) -> QuerySet:
-        return get_available_libraries()
+    model = Library
 
     def list(self, request, *args, **kwargs):
-        return Response({"results": self.get_queryset()})
+        if not RoleAssignment.has_permission(
+            user=request.user, codename="view_library"
+        ):
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return Response({"results": get_available_libraries()})
 
     def retrieve(self, request, *args, pk, **kwargs):
+        if not RoleAssignment.has_permission(
+            user=request.user, codename="view_library"
+        ):
+            return Response(
+                status=status.HTTP_403_FORBIDDEN,
+            )
         library = get_library(pk)
         return Response(library)
 
