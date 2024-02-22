@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from core.models import Threat
 from iam.models import Folder
 
+from test_vars import GROUPS_PERMISSIONS
 from test_api import EndpointTestsQueries
 
 # Generic threat data for tests
@@ -88,14 +89,15 @@ class TestThreatsUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestThreatsAuthenticated:
     """Perform tests on Threats API endpoint with authentication"""
 
-    def test_get_threats(self, authenticated_client):
+    def test_get_threats(self, test):
         """test to get threats from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Threats",
             Threat,
             {
@@ -108,13 +110,14 @@ class TestThreatsAuthenticated:
             {
                 "folder": {"str": Folder.get_root_folder().name},
             },
+            user_group=test.user_group,
         )
 
-    def test_create_threats(self, authenticated_client):
+    def test_create_threats(self, test):
         """test to create threats with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Threats",
             Threat,
             {
@@ -122,20 +125,21 @@ class TestThreatsAuthenticated:
                 "name": THREAT_NAME,
                 "description": THREAT_DESCRIPTION,
                 "provider": THREAT_PROVIDER,
-                "folder": str(Folder.get_root_folder().id),
+                "folder": str(test.folder.id),
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "urn": None,
             },
+            user_group=test.user_group,
         )
 
-    def test_update_threats_with_url(self, authenticated_client):
+    def test_update_threats_with_url(self, test):
         """test to update imported threat (with URN) with the API with authentication"""
-        folder = Folder.objects.create(name="test")
+        folder = Folder.objects.create(name="test2")
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Threats",
             Threat,
             {
@@ -154,16 +158,17 @@ class TestThreatsAuthenticated:
                 "folder": str(folder.id),
             },
             fails=True,
-            expected_status=HTTP_400_BAD_REQUEST,
+            expected_status=HTTP_400_BAD_REQUEST,   # Imported objects cannot be modified
+            user_group=test.user_group,
         )
 
-    def test_update_threats(self, authenticated_client):
+    def test_update_threats(self, test):
         """test to update threats with the API with authentication"""
 
-        folder = Folder.objects.create(name="test")
+        folder = Folder.objects.create(name="test2")
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Threats",
             Threat,
             {
@@ -171,6 +176,7 @@ class TestThreatsAuthenticated:
                 "name": THREAT_NAME,
                 "description": THREAT_DESCRIPTION,
                 "provider": THREAT_PROVIDER,
+                "folder": test.folder
             },
             {
                 "ref_id": "new " + THREAT_REF_ID,
@@ -179,14 +185,19 @@ class TestThreatsAuthenticated:
                 "provider": "new " + THREAT_PROVIDER,
                 "folder": str(folder.id),
             },
+            {
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+            },
+            user_group=test.user_group,
         )
 
-    def test_delete_threats(self, authenticated_client):
+    def test_delete_threats(self, test):
         """test to delete threats with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Threats",
             Threat,
-            {"name": THREAT_NAME, "folder": Folder.objects.create(name="test")},
+            {"name": THREAT_NAME, "folder": test.folder},
+            user_group=test.user_group,
         )

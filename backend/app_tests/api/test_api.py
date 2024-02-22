@@ -448,8 +448,9 @@ class EndpointTestsQueries:
                 -1 means that the number of objects is unknown
             :param endpoint: the endpoint URL of the object to test (optional)
             """
-            if user_group and not fails:
-                fails, expected_status = EndpointTestsUtils.expected_request_response("add", verbose_name, user_group, expected_status)
+            user_perm_fails, user_perm_expected_status = None, 0
+            if user_group:
+                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("add", verbose_name, user_group, expected_status)
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -464,10 +465,17 @@ class EndpointTestsQueries:
                 return
 
             # Asserts that the object was created successfully
-            assert (
-                response.status_code == expected_status
-            ), f"{verbose_name} can not be created with authentication" if expected_status == status.HTTP_201_CREATED else f"{verbose_name} should not be created (expected status: {expected_status})"
-
+            if not user_group or user_perm_expected_status == status.HTTP_201_CREATED:
+                # User has permission to create the object
+                assert (
+                    response.status_code == expected_status
+                ), f"{verbose_name} can not be created with authentication" if expected_status == status.HTTP_201_CREATED else f"{verbose_name} should not be created (expected status: {expected_status})"
+            else:
+                # User does not have permission to create the object
+                assert (
+                    response.status_code == user_perm_expected_status
+                ), f"{verbose_name} can be created without permission" if expected_status == status.HTTP_201_CREATED else f"Creating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+            
             for key, value in build_params.items():
                 if key == "attachment":
                     # Asserts that the value file name is present in the JSON response
@@ -492,23 +500,24 @@ class EndpointTestsQueries:
             ), f"{verbose_name} are not accessible with authentication"
 
             for key, value in {**build_params, **test_params}.items():
-                if (
-                    key == "attachment"
-                    and response.json()["results"][base_count][key] != value
-                ):
-                    # Asserts that the value file name is present in the JSON response
-                    assert (
-                        re.sub(
-                            r"_([a-z]|[A-Z]|[0-9]){7}(?:\.)",
-                            ".",
-                            response.json()["results"][base_count][key],
-                        )
-                        == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                else:
-                    assert (
-                        response.json()["results"][base_count][key] == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                if not (fails or user_perm_fails):
+                    if (
+                        key == "attachment"
+                        and response.json()["results"][base_count][key] != value
+                    ):
+                        # Asserts that the value file name is present in the JSON response
+                        assert (
+                            re.sub(
+                                r"_([a-z]|[A-Z]|[0-9]){7}(?:\.)",
+                                ".",
+                                response.json()["results"][base_count][key],
+                            )
+                            == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                    else:
+                        assert (
+                            response.json()["results"][base_count][key] == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def update_object(
             authenticated_client,
@@ -535,8 +544,8 @@ class EndpointTestsQueries:
             :param endpoint: the endpoint URL of the object to test (optional)
             """
             
-            if user_group and not fails:
-                fails, expected_status = EndpointTestsUtils.expected_request_response("change", verbose_name, user_group)
+            if user_group:
+                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("change", verbose_name, user_group)
 
             # Creates a test object from the model
             m2m_fields = {}
@@ -564,9 +573,15 @@ class EndpointTestsQueries:
 
             response = authenticated_client.get(url)
 
-            assert (
-                response.status_code == status.HTTP_200_OK
-            ), f"{verbose_name} can not be updated with authentication"
+            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
+                assert (
+                    response.status_code == status.HTTP_200_OK
+                ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
+                
             for key, value in {**build_params, **test_build_params}.items():
                 if key == "attachment":
                     # Asserts that the value file name is present in the JSON response
@@ -582,11 +597,18 @@ class EndpointTestsQueries:
                 url, update_params, format=query_format
             )
 
-            assert (
-                update_response.status_code == expected_status
-            ), f"{verbose_name} can not be updated with authentication" if expected_status == status.HTTP_201_CREATED else f"{verbose_name} should not be updated (expected status: {expected_status})"
+            if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                # User has permission to update the object
+                assert (
+                    update_response.status_code == expected_status
+                ), f"{verbose_name} can not be updated with authentication" if expected_status == status.HTTP_200_OK else f"{verbose_name} should not be updated (expected status: {expected_status})"
+            else:
+                # User does not have permission to update the object
+                assert (
+                    update_response.status_code == user_perm_expected_status
+                ), f"{verbose_name} can be updated without permission" if expected_status == status.HTTP_200_OK else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
             for key, value in {**build_params, **update_params, **test_params}.items():
-                if not fails:
+                if not (fails or user_perm_fails):
                     if key == "attachment" and update_response.json()[key] != value:
                         # Asserts that the value file name is present in the JSON response
                         assert (
