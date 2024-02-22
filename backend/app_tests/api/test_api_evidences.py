@@ -6,7 +6,7 @@ from core.models import Evidence
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic evidence data for tests
 EVIDENCE_NAME = "Test Evidence"

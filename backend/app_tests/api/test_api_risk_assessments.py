@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from core.models import Project, RiskAssessment, RiskMatrix
 from iam.models import Folder, User
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic project data for tests
 RISK_ASSESSMENT_NAME = "Test risk_assessment"

@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic folder data for tests
 FOLDER_NAME = "Test Folder"

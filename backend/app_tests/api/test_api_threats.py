@@ -5,7 +5,7 @@ from core.models import Threat
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic threat data for tests
 THREAT_REF_ID = "Test-Threat-ID"

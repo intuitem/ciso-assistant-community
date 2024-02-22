@@ -11,7 +11,7 @@ from core.models import (
 )
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic project data for tests
 RISK_SCENARIO_NAME = "Test scenario"

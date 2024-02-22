@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 from core.models import SecurityFunction
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic security function data for tests
 SECURITY_FUNCTION_REF_ID = "Test-Security-Function"

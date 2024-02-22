@@ -5,7 +5,7 @@ from core.models import Project
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
-from test_api import EndpointTestsQueries
+from test_utils import EndpointTestsQueries
 
 # Generic compliance assessment data for tests
 COMPLIANCE_ASSESSMENT_NAME = "Test Compliance Assessment"
