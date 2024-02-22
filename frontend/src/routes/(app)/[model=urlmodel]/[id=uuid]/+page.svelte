@@ -15,6 +15,9 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
+	import { localItems, toCamelCase, getDeterminant } from '$lib/utils/locales.js';
+	import { languageTag } from '$paraglide/runtime.js';
+	import * as m from '$paraglide/messages.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -172,30 +175,33 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first"
-					data-testid="{key.replace('_', '-')}-field-title">
-						{key.replace('_', ' ')}
+					<div class="text-sm font-medium text-gray-800" data-testid="{key.replace('_', '-')}-field-title">
+						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
 					</div>
 					<ul class="text-sm">
 						<li class="text-gray-600 list-none" data-testid={!(value instanceof Array) ? key.replace('_', '-') + "-field-value" : null}>
 							{#if value}
 								{#if Array.isArray(value)}
-									<ul>
-										{#each value as val}
-											<li data-testid={key.replace('_', '-') + "-field-value"}>
-												{#if val.str && val.id}
-													{@const itemHref = `/${
-														URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
-															(item) => item.field === key
-														)?.urlModel
-													}/${val.id}`}
-													<a href={itemHref} class="anchor">{val.str}</a>
-												{:else}
-													{value}
-												{/if}
-											</li>
-										{/each}
-									</ul>
+									{#if Object.keys(value).length > 0}
+										<ul>
+											{#each value as val}
+												<li data-testid={key.replace('_', '-') + "-field-value"}>
+													{#if val.str && val.id}
+														{@const itemHref = `/${
+															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
+																(item) => item.field === key
+															)?.urlModel
+														}/${val.id}`}
+														<a href={itemHref} class="anchor">{val.str}</a>
+													{:else}
+														{value}
+													{/if}
+												</li>
+											{/each}
+										</ul>
+									{:else}
+										--
+									{/if}
 								{:else if value.id}
 									{@const itemHref = `/${
 										URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
@@ -220,8 +226,7 @@
 			<a
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit"
-				data-testid="edit-button"
-				><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
+				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"/>{m.edit()}</a
 			>
 		{/if}
 	</div>
@@ -232,7 +237,7 @@
 		<TabGroup justify="justify-center">
 			{#each Object.entries(data.relatedModels) as [urlmodel, model], index}
 				<Tab bind:group={tabSet} value={index} name={`${urlmodel}_tab`}>
-					{model.info.verboseNamePlural}
+					{localItems(languageTag())[model.info.localNamePlural]}
 					{#if model.table.body.length > 0}
 						<span class="badge variant-soft-secondary">{model.table.body.length}</span>
 					{/if}
@@ -243,12 +248,16 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								Associated {model.info.verboseNamePlural}
+								{#if model.info.localFrGender === 'f'}
+									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: 'e'})}
+								{:else}
+									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: ''})}
+								{/if}
 							</h4>
 							<button
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />New {model.info.verboseName}</button
+								><i class="fa-solid fa-plus mr-2 lowercase" />{m.addButton({determinant:getDeterminant(languageTag(), "undefined", model.info), model: localItems(languageTag())[model.info.localName].toLowerCase()})}</button
 							>
 						</div>
 						{#if model.table}

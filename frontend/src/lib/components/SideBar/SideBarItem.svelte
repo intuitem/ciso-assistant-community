@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 	export let item: any; // TODO: type this
 
 	$: classesActive = (href: string) =>
@@ -19,7 +20,7 @@
 	>
 		<span class="px-4 flex items-center w-full space-x-2 text-xs">
 			<i class="{item.fa_icon} w-1/12" />
-			<span class="text-sm tracking-wide truncate">{item.name}</span>
+			<span class="text-sm tracking-wide truncate">{localItems(languageTag())[item.name]}</span>
 		</span></a
 	>
 {/each}
