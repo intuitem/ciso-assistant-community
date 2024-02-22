@@ -5,7 +5,8 @@ import RiskMatrix from './RiskMatrix.svelte';
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
 	title: 'Component/RiskMatrix',
-	component: RiskMatrix
+	component: RiskMatrix,
+	tags: ['autodocs']
 } satisfies Meta<RiskMatrix>;
 
 const riskMatrix = {
@@ -54,15 +55,14 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Empty: Story = {
-	render: () => ({
-		Component: RiskMatrix,
-		props: { riskMatrix: riskMatrix }
-	})
+	args: {
+		riskMatrix: riskMatrix
+	}
 };
 
 export const WithData: Story = {
-	render: () => ({
-		Component: RiskMatrix,
-		props: { riskMatrix: riskMatrix, data: sampleData }
-	})
+	args: {
+		riskMatrix: riskMatrix,
+		data: sampleData
+	}
 };
