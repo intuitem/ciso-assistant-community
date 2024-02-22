@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables';
+	import * as m from '$paraglide/messages';
 	export let handler: DataHandler;
 	const pageNumber = handler.getPageNumber();
 	const pageCount = handler.getPageCount();
@@ -12,7 +13,7 @@
 		class:disabled={$pageNumber === 1}
 		on:click={() => handler.setPage('previous')}
 	>
-		Previous
+		{m.previous()}
 	</button>
 	{#each $pages as page}
 		<button
@@ -29,7 +30,7 @@
 		class:disabled={$pageNumber === $pageCount}
 		on:click={() => handler.setPage('next')}
 	>
-		Next
+		{m.next()}
 	</button>
 </section>
 
