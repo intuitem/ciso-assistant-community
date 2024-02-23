@@ -20,6 +20,8 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
     }
 
     def has_permission(self, request: Request, view) -> bool:
+        """ we don't need this check, as we have queryset for list and serializers for create
+        see https://www.django-rest-framework.org/api-guide/permissions/ """
         return True
 
     def has_object_permission(self, request: Request, view, obj):
@@ -30,8 +32,6 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         if not perms:
             return False
         _codename = perms[0].split(".")[1]
-        if queryset.model == User:
-            return RoleAssignment.has_permission(user=request.user, codename=_codename)
         return RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename=_codename),
