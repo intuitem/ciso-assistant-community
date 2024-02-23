@@ -10,6 +10,7 @@ from core.models import (
 )
 from iam.models import Folder, UserGroup
 
+from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic risk acceptance data for tests
@@ -91,18 +92,18 @@ class TestRiskAcceptanceUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestRiskAcceptanceAuthenticated:
     """Perform tests on Risk Acceptance API endpoint with authentication"""
 
-    def test_get_risk_acceptances(self, authenticated_client):
+    def test_get_risk_acceptances(self, test):
         """test to get risk acceptances from the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         approver = User.objects.create_user(email="approver@test.com")
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Risk Acceptances",
             RiskAcceptance,
             {
@@ -113,35 +114,35 @@ class TestRiskAcceptanceAuthenticated:
                 # 'rejected_date': RISK_ACCEPTANCE_REJECTED_DATE,
                 # 'revoked_date': RISK_ACCEPTANCE_REVOKED_DATE,
                 "state": RISK_ACCEPTANCE_STATE[0],
-                "folder": folder,
+                "folder": test.folder,
                 "approver": approver,
             },
             {
-                "folder": {"id": str(folder.id), "str": folder.name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "approver": {"id": str(approver.id), "str": approver.email},
                 "state": RISK_ACCEPTANCE_STATE[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_create_risk_acceptances(self, authenticated_client):
+    def test_create_risk_acceptances(self, test):
         """test to create risk acceptances with the API with authentication"""
 
         approver = User.objects.create_user(email="approver@test.com")
         UserGroup.objects.get(name="BI-UG-GVA").user_set.add(approver)
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         risk_scenario = RiskScenario.objects.create(
             name="test scenario",
             description="test description",
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
-                project=Project.objects.create(name="test", folder=folder),
-                risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
+                project=Project.objects.create(name="test", folder=test.folder),
+                risk_matrix=RiskMatrix.objects.create(name="test", folder=test.folder),
             ),
         )
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Risk Acceptances",
             RiskAcceptance,
             {
@@ -152,26 +153,26 @@ class TestRiskAcceptanceAuthenticated:
                 # 'rejected_date': RISK_ACCEPTANCE_REJECTED_DATE,
                 # 'revoked_date': RISK_ACCEPTANCE_REVOKED_DATE,
                 # 'state': RISK_ACCEPTANCE_STATE[0],
-                "folder": str(folder.id),
+                "folder": str(test.folder.id),
                 "approver": str(approver.id),
                 "risk_scenarios": [str(risk_scenario.id)],
             },
             {
-                "folder": {"id": str(folder.id), "str": folder.name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "approver": {"id": str(approver.id), "str": approver.email},
                 "risk_scenarios": [
                     {"id": str(risk_scenario.id), "str": str(risk_scenario)}
                 ],
                 # 'state': RISK_ACCEPTANCE_STATE[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_update_risk_acceptances(self, authenticated_client):
+    def test_update_risk_acceptances(self, test):
         """test to update risk acceptances with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
-        folder = Folder.objects.create(name="test")
-        folder2 = Folder.objects.create(name="test2")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
+        folder = Folder.objects.create(name="test2")
         approver = User.objects.create_user(email="approver@test.com")
         UserGroup.objects.get(name="BI-UG-GVA").user_set.add(approver)
         approver2 = User.objects.create_user(email="approver2@test.com")
@@ -181,13 +182,13 @@ class TestRiskAcceptanceAuthenticated:
             description="test description",
             risk_assessment=RiskAssessment.objects.create(
                 name="test",
-                project=Project.objects.create(name="test", folder=folder2),
-                risk_matrix=RiskMatrix.objects.create(name="test", folder=folder2),
+                project=Project.objects.create(name="test", folder=folder),
+                risk_matrix=RiskMatrix.objects.create(name="test", folder=folder),
             ),
         )
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Risk Acceptances",
             RiskAcceptance,
             {
@@ -195,33 +196,35 @@ class TestRiskAcceptanceAuthenticated:
                 "description": RISK_ACCEPTANCE_DESCRIPTION,
                 "expiry_date": RISK_ACCEPTANCE_EXPIRY_DATE,
                 # 'state': RISK_ACCEPTANCE_STATE[0],
-                "folder": folder,
+                "folder": test.folder,
                 "approver": approver,
             },
             {
                 "name": "new " + RISK_ACCEPTANCE_NAME,
                 "description": "new " + RISK_ACCEPTANCE_DESCRIPTION,
                 "expiry_date": "2024-05-05",
-                "folder": str(folder2.id),
+                "folder": str(folder.id),
                 "approver": str(approver2.id),
                 "risk_scenarios": [str(risk_scenario.id)],
             },
             {
-                "folder": {"id": str(folder.id), "str": folder.name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "approver": {"id": str(approver.id), "str": approver.email},
                 # 'state': RISK_ACCEPTANCE_STATE[1],
             },
+            user_group=test.user_group,
         )
 
-    def test_delete_risk_acceptances(self, authenticated_client):
+    def test_delete_risk_acceptances(self, test):
         """test to delete risk acceptances with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Risk Acceptances",
             RiskAcceptance,
             {
                 "name": RISK_ACCEPTANCE_NAME,
-                "folder": Folder.objects.create(name="test"),
+                "folder": test.folder,
             },
+            user_group=test.user_group,
         )
