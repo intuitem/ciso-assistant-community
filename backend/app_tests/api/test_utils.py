@@ -286,6 +286,7 @@ class EndpointTestsQueries:
             build_params: dict = {},
             test_params: dict = {},
             base_count: int = 0,
+            item_search_field: str = None,
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
@@ -388,17 +389,22 @@ class EndpointTestsQueries:
                         ), f"{verbose_name} are not accessible with authentication"
 
             if not (fails or user_perm_fails):
-                for key, value in {**build_params, **test_params}.items():
+                params = {**build_params, **test_params}
+                if response.json()["count"] > 0 and item_search_field:
+                    response_item = [res for res in response.json()["results"] if res[item_search_field] == params[item_search_field]][0]
+                else:
+                    response_item = response.json()["results"][-1]
+                for key, value in params.items():
                     if (
                         type(value) == dict
-                        and type(response.json()["results"][-1][key]) == str
+                        and type(response_item[key]) == str
                     ):
                         assert (
-                            json.loads(response.json()["results"][-1][key]) == value
+                            json.loads(response_item[key]) == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                     else:
                         assert (
-                            response.json()["results"][-1][key] == value
+                            response_item[key] == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def get_object_options(
@@ -456,6 +462,7 @@ class EndpointTestsQueries:
             build_params: dict,
             test_params: dict = {},
             base_count: int = 0,
+            item_search_field: str = None,
             endpoint: str | None = None,
             query_format: str = "json",
             fails: bool = False,
@@ -525,24 +532,29 @@ class EndpointTestsQueries:
                 response.status_code == status.HTTP_200_OK
             ), f"{verbose_name} are not accessible with authentication"
 
-            for key, value in {**build_params, **test_params}.items():
-                if not (fails or user_perm_fails):
+            if not (fails or user_perm_fails):
+                params = {**build_params, **test_params}
+                if response.json()["count"] > 0 and item_search_field:
+                    response_item = [res for res in response.json()["results"] if res[item_search_field] == params[item_search_field]][0]
+                else:
+                    response_item = response.json()["results"][base_count]
+                for key, value in params.items():
                     if (
                         key == "attachment"
-                        and response.json()["results"][base_count][key] != value
+                        and response_item[key] != value
                     ):
                         # Asserts that the value file name is present in the JSON response
                         assert (
                             re.sub(
                                 r"_([a-z]|[A-Z]|[0-9]){7}(?:\.)",
                                 ".",
-                                response.json()["results"][base_count][key],
+                                response_item[key],
                             )
                             == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                     else:
                         assert (
-                            response.json()["results"][base_count][key] == value
+                            response_item[key] == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def update_object(
@@ -609,16 +621,17 @@ class EndpointTestsQueries:
                     response.status_code == status.HTTP_403_FORBIDDEN
                 ), f"{verbose_name} object detail can be accessed without permission"
 
-            for key, value in {**build_params, **test_build_params}.items():
-                if key == "attachment":
-                    # Asserts that the value file name is present in the JSON response
-                    assert (
-                        value.name.split("/")[-1].split(".")[0] in response.json()[key]
-                    ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
-                else:
-                    assert (
-                        response.json()[key] == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+            if not (fails or user_perm_fails):
+                for key, value in {**build_params, **test_build_params}.items():
+                    if key == "attachment":
+                        # Asserts that the value file name is present in the JSON response
+                        assert (
+                            value.name.split("/")[-1].split(".")[0] in response.json()[key]
+                        ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                    else:
+                        assert (
+                            response.json()[key] == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
             update_response = authenticated_client.patch(
                 url, update_params, format=query_format
@@ -634,18 +647,20 @@ class EndpointTestsQueries:
                 assert (
                     update_response.status_code == user_perm_expected_status
                 ), f"{verbose_name} can be updated without permission" if expected_status == status.HTTP_200_OK else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
-            for key, value in {**build_params, **update_params, **test_params}.items():
-                if not (fails or user_perm_fails):
-                    if key == "attachment" and update_response.json()[key] != value:
-                        # Asserts that the value file name is present in the JSON response
-                        assert (
-                            value.split("/")[-1].split(".")[0]
-                            in update_response.json()[key]
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                    else:
-                        assert (
-                            update_response.json()[key] == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+            
+            if not (fails or user_perm_fails):
+                for key, value in {**build_params, **update_params, **test_params}.items():
+                    if not (fails or user_perm_fails):
+                        if key == "attachment" and update_response.json()[key] != value:
+                            # Asserts that the value file name is present in the JSON response
+                            assert (
+                                value.split("/")[-1].split(".")[0]
+                                in update_response.json()[key]
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        else:
+                            assert (
+                                update_response.json()[key] == value
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def delete_object(
             authenticated_client,
