@@ -16,30 +16,8 @@ export function toCamelCase(str: string) {
 	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
 }
 
-export function getDeterminant(
-	lang: string,
-	defined: string,
-	model: ModelInfo,
-	plural = false
-): string {
-	const determinantTable = {
-		fr: {
-			defined: {
-				plural: 'les',
-				m: 'le',
-				f: 'la'
-			},
-			undefined: {
-				plural: 'des',
-				m: 'un',
-				f: 'une'
-			}
-		}
-	};
-
-	if (lang === 'en') return '';
-	else if (lang === 'fr' && plural) return determinantTable[lang][defined]['plural'];
-	else return determinantTable[lang][defined][model.localFrGender];
+export function capitalizeFirstLetter(str: string) {
+	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 interface LocalItems {
@@ -164,7 +142,19 @@ export function localItems(languageTag: string): LocalItems {
 		veryHigh: m.veryHigh({ languageTag: languageTag }),
 		planned: m.planned({ languageTag: languageTag }),
 		active: m.active({ languageTag: languageTag }),
-		inactive: m.inactive({ languageTag: languageTag })
+		inactive: m.inactive({ languageTag: languageTag }),
+		addThreat: m.addThreat({ languageTag: languageTag }),
+		addSecurityFunction: m.addSecurityFunction({ languageTag: languageTag }),
+		addSecurityMeasure: m.addSecurityMeasure({ languageTag: languageTag }),
+		addAsset: m.addAsset({ languageTag: languageTag }),
+		addRiskAssessment: m.addRiskAssessment({ languageTag: languageTag }),
+		addRiskScenario: m.addRiskScenario({ languageTag: languageTag }),
+		addRiskAcceptance: m.addRiskAcceptance({ languageTag: languageTag }),
+		addComplianceAssessment: m.addComplianceAssessment({ languageTag: languageTag }),
+		addEvidence: m.addEvidence({ languageTag: languageTag }),
+		addDomain: m.addDomain({ languageTag: languageTag }),
+		addProject: m.addProject({ languageTag: languageTag }),
+		addUser: m.addUser({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }

@@ -12,7 +12,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
-	import { localItems, getDeterminant } from '$lib/utils/locales';
+	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
@@ -77,15 +77,13 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addButton({
-							determinant: getDeterminant(languageTag(), 'undefined', data.model),
-							model: localItems(languageTag())[data.model.localName].toLowerCase()
-						})
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]
 		};
 		modalStore.trigger(modal);
 	}
 
 	$: search = data.model?.search !== false;
+	console.log('add' + data.model.localName)
 </script>
 
 {#if data.table}
@@ -98,10 +96,7 @@
 						data-testid="add-button"
 						on:click={modalCreateForm}
 						><i class="fa-solid fa-plus mr-2" />
-						{m.addButton({
-							determinant: getDeterminant(languageTag(), 'undefined', data.model),
-							model: localItems(languageTag())[data.model.localName].toLowerCase()
-						})}
+						{localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]}
 					</button>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
