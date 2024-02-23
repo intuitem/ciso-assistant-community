@@ -57,4 +57,10 @@ jobs:
               working-directory: ${{env.working-directory}}
               run: |
                 export $(grep -v '^#' .env | xargs)
-                pytest app_tests/api
+                pytest app_tests/api --html=pytest-report.html --self-contained-html
+            - uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                name: api-tests-report
+                path: pytest-report.html
+                retention-days: 5
