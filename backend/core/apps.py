@@ -32,6 +32,7 @@ def startup(**kwargs):
             "view_requirement",
             "view_evidence",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -55,6 +56,7 @@ def startup(**kwargs):
             "view_requirement",
             "view_evidence",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -102,6 +104,7 @@ def startup(**kwargs):
             "view_riskmatrix",
             "view_requirement",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -155,7 +158,6 @@ def startup(**kwargs):
             "view_requirement",
             "view_framework",
             "view_library",
-            "add_library",
         ]
     )
 
