@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from core.models import Project, RiskAssessment, RiskMatrix
 from iam.models import Folder, User
 
+from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic project data for tests
@@ -98,20 +99,21 @@ class TestRiskAssessmentUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestRiskAssessmentAuthenticated:
     """Perform tests on Risk Assessment API endpoint with authentication"""
 
-    def test_get_risk_assessments(self, authenticated_client):
+    def test_get_risk_assessments(self, test):
         """test to get risk assessments from the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         project = Project.objects.create(
-            name="test", folder=Folder.objects.create(name="test")
+            name="test", folder=test.folder
         )
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Risk Assessment",
             RiskAssessment,
             {
@@ -125,19 +127,20 @@ class TestRiskAssessmentAuthenticated:
                 "project": {"id": str(project.id), "str": project.name},
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
+            user_group=test.user_group,
         )
 
-    def test_create_risk_assessments(self, authenticated_client):
+    def test_create_risk_assessments(self, test):
         """test to create risk assessments with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         project = Project.objects.create(
-            name="test", folder=Folder.objects.create(name="test")
+            name="test", folder=test.folder
         )
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Risk Assessment",
             RiskAssessment,
             {
@@ -151,15 +154,16 @@ class TestRiskAssessmentAuthenticated:
                 "project": {"id": str(project.id), "str": project.name},
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
+            user_group=test.user_group,
         )
 
-    def test_update_risk_assessments(self, authenticated_client):
+    def test_update_risk_assessments(self, test):
         """test to update risk assessments with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix2")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
         project = Project.objects.create(
-            name="test", folder=Folder.objects.create(name="test")
+            name="test", folder=test.folder
         )
         project2 = Project.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
@@ -168,7 +172,7 @@ class TestRiskAssessmentAuthenticated:
         risk_matrix2 = RiskMatrix.objects.all()[1]
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Risk Assessment",
             RiskAssessment,
             {
@@ -183,25 +187,26 @@ class TestRiskAssessmentAuthenticated:
                 "description": "new " + RISK_ASSESSMENT_DESCRIPTION,
                 "version": RISK_ASSESSMENT_VERSION + ".1",
                 "project": str(project2.id),
-                "risk_matrix": str(risk_matrix.id),
+                "risk_matrix": str(risk_matrix2.id),
             },
             {
                 "project": {"id": str(project.id), "str": project.name},
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
+            user_group=test.user_group,
         )
 
-    def test_delete_risk_assessments(self, authenticated_client):
+    def test_delete_risk_assessments(self, test):
         """test to delete risk assessments with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         project = Project.objects.create(
-            name="test", folder=Folder.objects.create(name="test")
+            name="test", folder=test.folder
         )
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Risk Assessment",
             RiskAssessment,
             {
@@ -209,10 +214,11 @@ class TestRiskAssessmentAuthenticated:
                 "project": project,
                 "risk_matrix": risk_matrix,
             },
+            user_group=test.user_group,
         )
 
     # TODO add option quality_check (endpoint /api/risk-assessments/quality_check/ not working)
-    # def test_get_status_choice(self, authenticated_client):
+    # def test_get_status_choice(self, test):
     #     """test to get risk assessments status choices from the API with authentication"""
 
-    #     EndpointTestsQueries.get_object_options_auth(authenticated_client, "Risk Assessment", "lc_status", Project.PRJ_LC_STATUS)
+    #     EndpointTestsQueries.get_object_options_auth(test.client, "Risk Assessment", "lc_status", Project.PRJ_LC_STATUS)
