@@ -11,7 +11,7 @@ from core.serializer_fields import FieldsRelatedField
 
 import structlog
 
-logger = structlog.get_logger()
+logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
@@ -23,6 +23,25 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 {"urn": "Imported objects cannot be modified"}
             )
         return super().update(instance, validated_data)
+
+    def create(self, validated_data: Any):
+        logger.debug("validated data", **validated_data)
+        folder = Folder.get_folder(validated_data)
+        folder = folder if folder else Folder.get_root_folder()
+        can_create_in_folder = RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"add_{self.Meta.model._meta.model_name}"
+            ),
+            folder=folder,
+        )
+        if not can_create_in_folder:
+            raise serializers.ValidationError(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
+        return super().create(validated_data)
 
     class Meta:
         model: models.Model
@@ -442,4 +461,15 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
+        fields = "__all__"
+
+class LibraryReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
+
+
+class LibraryWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
         fields = "__all__"

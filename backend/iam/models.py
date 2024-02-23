@@ -166,19 +166,54 @@ class Folder(AbstractBaseModel, NameDescriptionMixin):
         )
 
     @staticmethod
-    def get_folder(obj: Any) -> Self:
-        """Return the folder of an object"""
-        # todo: add a folder attribute to all objects to avoid introspection
-        if hasattr(obj, "folder"):
-            return obj.folder
-        if hasattr(obj, "parent_folder"):
-            return obj.parent_folder
-        if hasattr(obj, "project"):
-            return obj.project.folder
-        if hasattr(obj, "risk_assessment"):
-            return obj.risk_assessment.project.folder
-        if hasattr(obj, "risk_scenario"):
-            return obj.risk_scenario.risk_assessment.project.folder
+    def navigate_structure(start, path):
+        """
+        Navigate through a mixed structure of objects and dictionaries.
+
+        :param start: The initial object or dictionary from which to start navigating.
+        :param path: A list of strings representing the path to navigate, with each element
+                     being an attribute name (for objects) or a key (for dictionaries).
+        :return: The value found at the end of the path, or None if any part of the path is invalid.
+        """
+        current = start
+        for p in path:
+            if isinstance(current, dict):
+                # For dictionaries
+                current = current.get(p, None)
+            else:
+                # For objects
+                try:
+                    current = getattr(current, p, None)
+                except AttributeError:
+                    # If the attribute doesn't exist and current is not a dictionary
+                    return None
+            if current is None:
+                return None
+        return current
+
+    @staticmethod
+    def get_folder(obj: Any):
+        """
+        Return the folder of an object using navigation through mixed structures.
+        """
+        # Define paths to try in order. Each path is a list representing the traversal path.
+        # NOTE: There are probably better ways to represent these, but it works.
+        paths = [
+            ["folder"],
+            ["parent_folder"],
+            ["project", "folder"],
+            ["risk_assessment", "project", "folder"],
+            ["risk_scenario", "risk_assessment", "project", "folder"],
+        ]
+
+        # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
+        for path in paths:
+            folder = Folder.navigate_structure(obj, path)
+            if folder is not None:
+                return folder
+
+        # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
+        return None
 
 
 class FolderMixin(models.Model):
@@ -228,6 +263,7 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            folder=_get_root_folder()
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
@@ -260,11 +296,7 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
         extra_fields.setdefault("mailing", not(password) and (EMAIL_HOST or EMAIL_HOST_RESCUE))
         superuser = self._create_user(email, password, **extra_fields)
-        # when possible, add superuser to admin group
-        try:
-            UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
-        except ObjectDoesNotExist:
-            print("cannot add superuser to admin group - will be done on next startup")
+        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
 
 
@@ -303,6 +335,13 @@ class User(AbstractBaseUser):
             ),
         )
         objects = UserManager()
+        folder = models.ForeignKey(
+            Folder, 
+            on_delete=models.CASCADE, 
+            verbose_name=_("Folder"),
+            default=_get_root_folder
+        )
+
     except:
         logger.debug("Exception kludge")
 
@@ -649,14 +688,6 @@ class RoleAssignment(models.Model):
 
         return permissions
 
-    @staticmethod
-    def has_permission(user: AbstractBaseUser | AnonymousUser, codename: str):
-        """Determines if a user has a specific permission. To be used cautiously with proper commenting"""
-        for ra in RoleAssignment.get_role_assignments(user):
-            for perm in ra.role.permissions.all():
-                if perm.codename == codename:
-                    return True
-        return False
 
     @staticmethod
     def has_role(user: AbstractBaseUser | AnonymousUser, role: Role):
