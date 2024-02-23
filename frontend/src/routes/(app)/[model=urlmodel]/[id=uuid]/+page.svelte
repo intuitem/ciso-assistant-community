@@ -15,7 +15,7 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { localItems, toCamelCase, getDeterminant } from '$lib/utils/locales.js';
+	import { localItems, toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 
@@ -62,10 +62,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addButton({
-							determinant: getDeterminant(languageTag(), 'undefined', model.info),
-							model: localItems(languageTag())[model.info.localName].toLowerCase()
-						})
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -274,10 +271,7 @@
 							<button
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />{m.addButton({
-									determinant: getDeterminant(languageTag(), 'undefined', model.info),
-									model: localItems(languageTag())[model.info.localName].toLowerCase()
-								})}</button
+								><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]}</button
 							>
 						</div>
 						{#if model.table}

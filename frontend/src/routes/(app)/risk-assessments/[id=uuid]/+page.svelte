@@ -19,7 +19,7 @@
 
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { localItems, getDeterminant } from '$lib/utils/locales.js';
+	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales.js';
 
 	export let data;
 	const showRisks = true;
@@ -86,10 +86,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addButton({
-							determinant: getDeterminant(languageTag(), 'undefined', model.info),
-							model: localItems(languageTag())[model.info.localName].toLowerCase()
-						})
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -279,10 +276,7 @@
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
 								><i class="fa-solid fa-plus mr-2 lowercase" />
-								{m.addButton({
-									determinant: getDeterminant(languageTag(), 'undefined', model.info),
-									model: localItems(languageTag())[model.info.localName].toLowerCase()
-								})}
+								{localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]}
 							</button>
 						</ModelTable>
 					{/if}

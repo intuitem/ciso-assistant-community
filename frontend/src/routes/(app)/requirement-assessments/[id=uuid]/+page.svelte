@@ -29,7 +29,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 
 	import * as m from '$paraglide/messages';
-	import { localItems, getDeterminant } from '$lib/utils/locales';
+	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
 	function cancel(): void {
@@ -68,10 +68,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addButton({
-							determinant: getDeterminant(languageTag(), 'undefined', data.measureModel),
-							model: localItems(languageTag())[data.measureModel.localName].toLowerCase()
-						})
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.measureModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -90,10 +87,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: m.addButton({
-							determinant: getDeterminant(languageTag(), 'undefined', data.evidenceModel),
-							model: localItems(languageTag())[data.evidenceModel.localName].toLowerCase()
-						})
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.evidenceModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
