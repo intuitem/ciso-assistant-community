@@ -21,7 +21,7 @@ import yaml
 from core.helpers import get_sorted_requirement_nodes
 from core.models import Library
 from core.views import BaseModelViewSet
-from iam.models import RoleAssignment, Folder
+from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
 from .helpers import preview_library
 
@@ -42,9 +42,10 @@ class LibraryViewSet(BaseModelViewSet):
     def list(self, request, *args, **kwargs):
         if not RoleAssignment.is_access_allowed(
             user=request.user, 
-            perm="view_library", 
+            perm=Permission.objects.get(codename="view_library"),
             folder=Folder.get_root_folder(),
         ):
+            print("coucou")
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
             )
