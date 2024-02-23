@@ -1,14 +1,18 @@
 from django.apps import AppConfig
+from django.db.models.signals import post_migrate
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
 
 
-def startup():
-    """Implement CISO Assistant 1.0 default Roles and User Groups"""
+def startup(**kwargs):
+    """
+        Implement CISO Assistant 1.0 default Roles and User Groups during migrate
+        This makes sure root folder and global groups are defined before any other object is created
+        Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
+    """
 
-    from ciso_assistant.settings import (
-        CISO_ASSISTANT_SUPERUSER_EMAIL,
-    )
     from django.contrib.auth.models import Permission
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+    print("post-migrate handler: initialize database")
 
     auditor_permissions = Permission.objects.filter(
         codename__in=[
@@ -237,14 +241,6 @@ def startup():
         ]
     )
 
-    # if superuser defined and does not exist, then create it
-    if (
-        CISO_ASSISTANT_SUPERUSER_EMAIL
-        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
-    ):
-        User.objects.create_superuser(
-            email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-        )
     # if root folder does not exist, then create it
     if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
         Folder.objects.create(
@@ -309,12 +305,18 @@ def startup():
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_validators.folder)
-    # add any superuser to the global administrors group, in case it is not yet done
-    for superuser in User.objects.filter(is_superuser=True):
-        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
-    # fix administrator role, to facilitate migrations
-    administrator = Role.objects.filter(name="BI-RL-ADM").first()
-    administrator.permissions.set(administrator_permissions)
+
+    # if superuser defined and does not exist, then create it
+    if (
+        CISO_ASSISTANT_SUPERUSER_EMAIL
+        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+    ):
+        try:
+            User.objects.create_superuser(
+                email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+            )
+        except Exception as e:
+            print(e) #NOTE: Add this exception in the logger
 
 
 class CoreConfig(AppConfig):
@@ -323,8 +325,4 @@ class CoreConfig(AppConfig):
     verbose_name = "Core"
 
     def ready(self):
-        import os
-
-        if os.environ.get("RUN_MAIN"):
-            """Only called in main, not during makemigrations or migrate"""
-            startup()
+        post_migrate.connect(startup, sender=self)
