@@ -83,7 +83,6 @@
 	}
 
 	$: search = data.model?.search !== false;
-	console.log('add' + data.model.localName)
 </script>
 
 {#if data.table}

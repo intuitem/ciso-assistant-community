@@ -15,7 +15,7 @@ export class PageDetail extends BasePage {
 	}
 
 	async hasTitle() {
-		await expect.soft(this.pageTitle).toHaveText(this.item.replaceAll('-', ' '));
+		await expect.soft(this.pageTitle).toHaveText(this.item);
 	}
 
 	setItem(item: string) {

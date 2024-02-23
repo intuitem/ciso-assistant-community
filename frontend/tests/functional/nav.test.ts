@@ -1,3 +1,5 @@
+import { localItems } from '../../src/lib/utils/locales.js';
+import { languageTag } from '../../src/paraglide/runtime.js';
 import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
 
 type StringMap = {
@@ -26,9 +28,9 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 					await sideBar.click(key, item.href);
 					await expect(page).toHaveURL(item.href);
 					if (item.name in temporaryPageTitle) {
-						await expect.soft(logedPage.pageTitle).toHaveText(temporaryPageTitle[item.name]);
+						await expect.soft(logedPage.pageTitle).toHaveText([temporaryPageTitle[item.name]]);
 					} else {
-						await expect.soft(logedPage.pageTitle).toHaveText(item.name);
+						await expect.soft(logedPage.pageTitle).toHaveText(localItems(languageTag())[item.name]);
 					}
 				}
 			}
