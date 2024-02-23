@@ -45,7 +45,6 @@ class LibraryViewSet(BaseModelViewSet):
             perm=Permission.objects.get(codename="view_library"),
             folder=Folder.get_root_folder(),
         ):
-            print("coucou")
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
             )

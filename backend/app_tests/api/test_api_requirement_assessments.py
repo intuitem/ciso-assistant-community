@@ -1,5 +1,5 @@
 import pytest
-from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.test import APIClient
 from core.models import (
     ComplianceAssessment,
@@ -129,6 +129,7 @@ class TestRequirementAssessmentsAuthenticated:
 
     def test_create_requirement_assessments(self, authenticated_client):
         """test to create requirement assessments with the API with authentication"""
+        """nobody has permission to do that, so it will fail"""
 
         EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
         folder = Folder.objects.create(name="test")
