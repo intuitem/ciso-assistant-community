@@ -339,6 +339,7 @@ class User(AbstractBaseUser):
             Folder, 
             on_delete=models.CASCADE, 
             verbose_name=_("Folder"),
+            default=_get_root_folder
         )
 
     except:
