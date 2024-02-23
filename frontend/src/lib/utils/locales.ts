@@ -1,5 +1,4 @@
-import * as m from '$paraglide/messages';
-import type { ModelInfo } from '$lib/utils/types';
+import * as m from '../../paraglide/messages';
 
 export const LOCALE_MAP = {
 	en: {
