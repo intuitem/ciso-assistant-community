@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from core.models import SecurityFunction
 from iam.models import Folder
 
+from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic security function data for tests
@@ -85,14 +86,15 @@ class TestSecurityFunctionsUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
 class TestSecurityFunctionsAuthenticated:
     """Perform tests on Security Functions API endpoint with authentication"""
 
-    def test_get_security_functions(self, authenticated_client):
+    def test_get_security_functions(self, test):
         """test to get security functions from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Security functions",
             SecurityFunction,
             {
@@ -105,13 +107,14 @@ class TestSecurityFunctionsAuthenticated:
             {
                 "folder": {"str": Folder.get_root_folder().name},
             },
+            user_group=test.user_group,
         )
 
-    def test_create_security_functions(self, authenticated_client):
+    def test_create_security_functions(self, test):
         """test to create security functions with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Security functions",
             SecurityFunction,
             {
@@ -120,17 +123,18 @@ class TestSecurityFunctionsAuthenticated:
                 "description": SECURITY_FUNCTION_DESCRIPTION,
                 "urn": SECURITY_FUNCTION_URN,
                 "provider": SECURITY_FUNCTION_PROVIDER,
-                "folder": str(Folder.get_root_folder().id),
+                "folder": str(test.folder.id),
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
             },
+            user_group=test.user_group,
         )
 
-    def test_update_security_function_with_url(self, authenticated_client):
+    def test_update_security_function_with_url(self, test):
         """test to update an imported security function (with a URN) with the API with authentication"""
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Security functions",
             SecurityFunction,
             {
@@ -146,18 +150,19 @@ class TestSecurityFunctionsAuthenticated:
                 "description": "new " + SECURITY_FUNCTION_DESCRIPTION,
                 "urn": SECURITY_FUNCTION_URN,
                 "provider": "new " + SECURITY_FUNCTION_PROVIDER,
-                "folder": str(Folder.objects.create(name="test").id),
+                "folder": str(test.folder.id),
             },
             {
                 "folder": {"str": Folder.get_root_folder().name},
             },
             fails=True,
-            expected_status=status.HTTP_400_BAD_REQUEST,
+            expected_status=status.HTTP_400_BAD_REQUEST, # Imported objects cannot be updated
+            user_group=test.user_group,
         )
 
-    def test_update_security_function(self, authenticated_client):
+    def test_update_security_function(self, test):
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Security functions",
             SecurityFunction,
             {
@@ -171,23 +176,25 @@ class TestSecurityFunctionsAuthenticated:
                 "name": SECURITY_FUNCTION_NAME,
                 "description": "new " + SECURITY_FUNCTION_DESCRIPTION,
                 "provider": "new " + SECURITY_FUNCTION_PROVIDER,
-                "folder": str(Folder.objects.create(name="test").id),
+                "folder": str(test.folder.id),
             },
             {
                 "folder": {"str": Folder.get_root_folder().name},
             },
+            user_group=test.user_group,
         )
 
-    def test_delete_security_functions(self, authenticated_client):
+    def test_delete_security_functions(self, test):
         """test to delete security functions with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Security functions",
             SecurityFunction,
             {
                 "ref_id": SECURITY_FUNCTION_REF_ID,
                 "name": SECURITY_FUNCTION_NAME,
-                "folder": Folder.objects.create(name="test"),
+                "folder": test.folder,
             },
+            user_group=test.user_group,
         )
