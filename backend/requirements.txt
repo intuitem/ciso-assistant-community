@@ -3,7 +3,7 @@ weasyprint==60.2
 psycopg2-binary==2.9.9
 gunicorn==21.2.0
 pytest-django==4.8.0
-pytest-html==1.1.1
+pytest-html==4.1.1
 django-filter==23.5
 whitenoise==6.6.0
 argon2-cffi==23.1.0
