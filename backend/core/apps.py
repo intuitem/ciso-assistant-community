@@ -248,16 +248,17 @@ def startup(**kwargs):
         Folder.objects.create(
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
-        auditor = Role.objects.create(name="BI-RL-AUD", builtin=True)
-        auditor.permissions.set(auditor_permissions)
-        approver = Role.objects.create(name="BI-RL-VAL", builtin=True)
-        approver.permissions.set(approver_permissions)
-        analyst = Role.objects.create(name="BI-RL-ANA", builtin=True)
-        analyst.permissions.set(analyst_permissions)
-        domain_manager = Role.objects.create(name="BI-RL-DMA", builtin=True)
-        domain_manager.permissions.set(domain_manager_permissions)
-        administrator = Role.objects.create(name="BI-RL-ADM", builtin=True)
-        administrator.permissions.set(administrator_permissions)
+    # update builtin roles to facilitate migrations
+    auditor, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
+    auditor.permissions.set(auditor_permissions)
+    approver, created = Role.objects.get_or_create(name="BI-RL-VAL", builtin=True)
+    approver.permissions.set(approver_permissions)
+    analyst, created = Role.objects.get_or_create(name="BI-RL-ANA", builtin=True)
+    analyst.permissions.set(analyst_permissions)
+    domain_manager, created = Role.objects.get_or_create(name="BI-RL-DMA", builtin=True)
+    domain_manager.permissions.set(domain_manager_permissions)
+    administrator, created = Role.objects.get_or_create(name="BI-RL-ADM", builtin=True)
+    administrator.permissions.set(administrator_permissions)
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
