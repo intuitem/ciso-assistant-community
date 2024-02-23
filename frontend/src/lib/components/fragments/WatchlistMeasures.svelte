@@ -69,7 +69,7 @@
 					<td colspan="8" class="py-2">
 						<i class="inline fas fa-exclamation-triangle" />
 						<p class="inline test-gray-900">
-							{m.noObjectYet({ object: m.securityMeasure().toLowerCase(), e: 'e' })}.
+							{m.noSecurityMeasureYet()}.
 						</p>
 					</td>
 				</tr>

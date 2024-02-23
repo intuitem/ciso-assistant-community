@@ -93,13 +93,11 @@
 											<div class="variant-soft-error rounded-token px-2 py-1">
 												<i class="fa-solid fa-bug mr-1" />
 												{#if quality_check.errors.length === 1}
-													{quality_check.errors.length}
-													<span class="font-bold">{m.error({ s: '' })}</span>
-													{m.found({ s: '', e: 'e' })}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
 												{:else}
-													{quality_check.errors.length}
-													<span class="font-bold">{m.error({ s: 's' })}</span>
-													{m.found({ s: 's', e: 'e' })}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -114,13 +112,11 @@
 											<div class="variant-soft-warning rounded-token px-2 py-1">
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
 												{#if quality_check.warnings.length === 1}
-													{quality_check.warnings.length}
-													<span class="font-bold">{m.warning({ s: '' })}</span>
-													{m.found({ s: '', e: '' })}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: ''})}
 												{:else}
-													{quality_check.warnings.length}
-													<span class="font-bold">{m.warning({ s: 's' })}</span>
-													{m.found({ s: 's', e: '' })}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: 's'})}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -135,13 +131,11 @@
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
 												{#if quality_check.infos.length === 1}
-													{quality_check.infos.length}
-													<span class="font-bold">{m.info({ s: '' })}</span>
-													{m.found({ s: '', e: 'e' })}
+													<span class="font-bold">{quality_check.infos.length}</span>
+													{m.infosFound({ s: ''})}
 												{:else}
-													{quality_check.infos.length}
-													<span class="font-bold">{m.info({ s: 's' })}</span>
-													{m.found({ s: 's', e: 'e' })}
+													<span class="font-bold">{quality_check.infos.length}</span>
+													{m.infosFound({ s: 's'})}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -171,13 +165,11 @@
 											<div class="variant-soft-error rounded-token px-2 py-1">
 												<i class="fa-solid fa-bug mr-1" />
 												{#if quality_check.errors.length === 1}
-													{quality_check.errors.length}
-													<span class="font-bold">{m.error({ s: '' })}</span>
-													{m.found({ s: '', e: 'e' })}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
 												{:else}
-													{quality_check.errors.length}
-													<span class="font-bold">{m.error({ s: 's' })}</span>
-													{m.found({ s: 's', e: 'e' })}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -192,13 +184,11 @@
 											<div class="variant-soft-warning rounded-token px-2 py-1">
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
 												{#if quality_check.warnings.length === 1}
-													{quality_check.warnings.length}
-													<span class="font-bold">{m.warning({ s: '' })}</span>
-													{m.found({ s: '', e: '' })}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: ''})}
 												{:else}
-													{quality_check.warnings.length}
-													<span class="font-bold">{m.warning({ s: 's' })}</span>
-													{m.found({ s: 's', e: '' })}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: 's'})}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -213,13 +203,11 @@
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
 												{#if quality_check.infos.length === 1}
-													{quality_check.infos.length}
-													<span class="font-bold">{m.info({ s: '' })}</span>
-													{m.found({ s: '', e: 'e' })}
+													<span class="font-bold">{quality_check.infos.length}</span>
+													{m.infosFound({ s: ''})}
 												{:else}
-													{quality_check.infos.length}
-													<span class="font-bold">{m.info({ s: 's' })}</span>
-													{m.found({ s: 's', e: 'e' })}
+													<span class="font-bold">{quality_check.infos.length}</span>
+													{m.infosFound({ s: 's'})}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">

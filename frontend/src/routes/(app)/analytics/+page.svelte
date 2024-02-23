@@ -295,9 +295,9 @@
 				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
 					{#if counters.Project > 1}
-						{m.assignedObjects({ number: counters.Project, object: m.projects() })}
+						{m.assignedProjects({ number: counters.Project, s: 's' })}
 					{:else}
-						{m.assignedObjects({ number: counters.Project, object: m.project() })}
+						{m.assignedProjects({ number: counters.Project, s: '' })}
 					{/if}
 				</div>
 			</div>
@@ -526,7 +526,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<th class="py-2 px-4">{m.actions()}</th>
 									</tr>
 
-									{#if measures}
+									{#if measures.length > 0}
 										{#each measures as mtg}
 											<tr class="border-b">
 												<td class="text-left py-2 px-4">{mtg.folder.str}</td>
@@ -558,10 +558,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 											<td colspan="8" class="py-2">
 												<i class="inline fas fa-exclamation-triangle" />
 												<p class="inline test-gray-900">
-													{m.noPendingObject({
-														object: m.securityMeasure().toLowerCase(),
-														e: 'e'
-													})}.
+													{m.noPendingSecurityMeasure()}.
 												</p>
 											</td>
 										</tr>
