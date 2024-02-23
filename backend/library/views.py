@@ -42,8 +42,8 @@ class LibraryViewSet(BaseModelViewSet):
     def list(self, request, *args, **kwargs):
         if not RoleAssignment.is_access_allowed(
             user=request.user, 
-            codename="view_library", 
-            Folder.get_root_folder()
+            perm="view_library", 
+            folder=Folder.get_root_folder(),
         ):
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
