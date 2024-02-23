@@ -155,6 +155,18 @@ export function localItems(languageTag: string): LocalItems {
 		addDomain: m.addDomain({ languageTag: languageTag }),
 		addProject: m.addProject({ languageTag: languageTag }),
 		addUser: m.addUser({ languageTag: languageTag }),
+		associatedThreats: m.associatedThreats({ languageTag: languageTag }),
+		associatedSecurityFunctions: m.associatedSecurityFunctions({ languageTag: languageTag }),
+		associatedSecurityMeasures: m.associatedSecurityMeasures({ languageTag: languageTag }),
+		associatedAssets: m.associatedAssets({ languageTag: languageTag }),
+		associatedRiskAssessments: m.associatedRiskAssessments({ languageTag: languageTag }),
+		associatedRiskScenarios: m.associatedRiskScenarios({ languageTag: languageTag }),
+		associatedRiskAcceptances: m.associatedRiskAcceptances({ languageTag: languageTag }),
+		associatedComplianceAssessments: m.associatedComplianceAssessments({ languageTag: languageTag }),
+		associatedEvidences: m.associatedEvidences({ languageTag: languageTag }),
+		associatedDomains: m.associatedDomains({ languageTag: languageTag }),
+		associatedProjects: m.associatedProjects({ languageTag: languageTag }),
+		associatedUsers: m.associatedUsers({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }

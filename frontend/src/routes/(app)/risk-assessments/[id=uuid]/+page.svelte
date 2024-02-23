@@ -256,17 +256,7 @@
 				<div class="bg-white">
 					<div class="flex flex-row justify-between">
 						<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
-							{#if model.info.localFrGender === 'f'}
-								{m.associatedObject({
-									model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(),
-									e: 'e'
-								})}
-							{:else}
-								{m.associatedObject({
-									model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(),
-									e: ''
-								})}
-							{/if}
+							{localItems(languageTag())['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
 						</h4>
 					</div>
 					{#if model.table}
@@ -289,7 +279,7 @@
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex space-x-3">
 			<div class="w-1/2 p-6">
-				<h3 class="font-bold p-2 m-2 text-lg">{m.current({e:'e'})}</h3>
+				<h3 class="font-bold p-2 m-2 text-lg">{m.currentInMatrixView()}</h3>
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
@@ -299,7 +289,7 @@
 				/>
 			</div>
 			<div class="w-1/2 p-6">
-				<h3 class="font-bold p-2 m-2 text-lg">{m.residual({le: 'le'})}</h3>
+				<h3 class="font-bold p-2 m-2 text-lg">{m.residualInMatrixView()}</h3>
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}

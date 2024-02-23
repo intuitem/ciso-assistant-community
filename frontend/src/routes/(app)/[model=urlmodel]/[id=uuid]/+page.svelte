@@ -256,17 +256,7 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{#if model.info.localFrGender === 'f'}
-									{m.associatedObject({
-										model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(),
-										e: 'e'
-									})}
-								{:else}
-									{m.associatedObject({
-										model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(),
-										e: ''
-									})}
-								{/if}
+								{localItems(languageTag())['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
 							</h4>
 							<button
 								class="btn variant-filled-primary self-end my-auto"
