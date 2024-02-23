@@ -263,6 +263,7 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            folder=_get_root_folder()
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
@@ -277,6 +278,7 @@ class UserManager(BaseUserManager):
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
+                print(f"sending email to {email} failed")
                 raise exception
         return user
 
@@ -292,14 +294,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
+        extra_fields.setdefault("mailing", not(password) and (EMAIL_HOST or EMAIL_HOST_RESCUE))
         superuser = self._create_user(email, password, **extra_fields)
-        # when possible, add superuser to admin group
-        try:
-            UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
-        except ObjectDoesNotExist:
-            pass
+        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
 
 
@@ -338,6 +335,13 @@ class User(AbstractBaseUser):
             ),
         )
         objects = UserManager()
+        folder = models.ForeignKey(
+            Folder, 
+            on_delete=models.CASCADE, 
+            verbose_name=_("Folder"),
+            default=_get_root_folder
+        )
+
     except:
         logger.debug("Exception kludge")
 
@@ -684,14 +688,6 @@ class RoleAssignment(models.Model):
 
         return permissions
 
-    @staticmethod
-    def has_permission(user: AbstractBaseUser | AnonymousUser, codename: str):
-        """Determines if a user has a specific permission. To be used cautiously with proper commenting"""
-        for ra in RoleAssignment.get_role_assignments(user):
-            for perm in ra.role.permissions.all():
-                if perm.codename == codename:
-                    return True
-        return False
 
     @staticmethod
     def has_role(user: AbstractBaseUser | AnonymousUser, role: Role):

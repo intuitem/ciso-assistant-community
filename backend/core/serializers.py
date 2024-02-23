@@ -27,6 +27,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
         folder = Folder.get_folder(validated_data)
+        folder = folder if folder else Folder.get_root_folder()
         can_create_in_folder = RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
