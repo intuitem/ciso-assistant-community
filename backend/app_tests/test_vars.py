@@ -106,7 +106,6 @@ GROUPS_PERMISSIONS = {
             "delete_framework",
             "view_requirementnode",
             "view_requirementlevel",  # Permits to see the object on api by an admin
-            "add_library",
             "view_library",
             "delete_library",
             "backup",

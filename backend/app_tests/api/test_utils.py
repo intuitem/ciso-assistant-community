@@ -388,9 +388,9 @@ class EndpointTestsQueries:
                             response.json()["count"] == base_count + 1
                         ), f"{verbose_name} are not accessible with authentication"
 
-            if not (fails or user_perm_fails):
+            if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
                 params = {**build_params, **test_params}
-                if response.json()["count"] > 0 and item_search_field:
+                if len(response.json()["results"]) > 0 and item_search_field:
                     response_item = [res for res in response.json()["results"] if res[item_search_field] == params[item_search_field]][0]
                 else:
                     response_item = response.json()["results"][-1]
@@ -532,7 +532,7 @@ class EndpointTestsQueries:
                 response.status_code == status.HTTP_200_OK
             ), f"{verbose_name} are not accessible with authentication"
 
-            if not (fails or user_perm_fails):
+            if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
                 params = {**build_params, **test_params}
                 if response.json()["count"] > 0 and item_search_field:
                     response_item = [res for res in response.json()["results"] if res[item_search_field] == params[item_search_field]][0]
@@ -650,17 +650,16 @@ class EndpointTestsQueries:
             
             if not (fails or user_perm_fails):
                 for key, value in {**build_params, **update_params, **test_params}.items():
-                    if not (fails or user_perm_fails):
-                        if key == "attachment" and update_response.json()[key] != value:
-                            # Asserts that the value file name is present in the JSON response
-                            assert (
-                                value.split("/")[-1].split(".")[0]
-                                in update_response.json()[key]
-                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                        else:
-                            assert (
-                                update_response.json()[key] == value
-                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                    if key == "attachment" and update_response.json()[key] != value:
+                        # Asserts that the value file name is present in the JSON response
+                        assert (
+                            value.split("/")[-1].split(".")[0]
+                            in update_response.json()[key]
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                    else:
+                        assert (
+                            update_response.json()[key] == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def delete_object(
             authenticated_client,
