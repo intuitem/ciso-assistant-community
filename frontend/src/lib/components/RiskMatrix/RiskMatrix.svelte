@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { buildRiskMatrix } from './utils';
 
-	import * as m from '$paraglide/messages'
+	import * as m from '../../../paraglide/messages'
 
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
