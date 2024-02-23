@@ -462,3 +462,14 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
         fields = "__all__"
+
+class LibraryReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
+
+
+class LibraryWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
