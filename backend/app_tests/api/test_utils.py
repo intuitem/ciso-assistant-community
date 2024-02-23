@@ -793,13 +793,13 @@ class EndpointTestsQueries:
             reference = authenticated_client.get(reference_url)
             assert (
                 reference.status_code == status.HTTP_200_OK
-            ), f"reference endpoint is not accessible with authentication"
+            ), f"reference endpoint is not accessible"
 
             for object in reference.json()["objects"]["framework"][
                 object_name.lower().replace(" ", "_")
             ][:count]:
                 comparelist = authenticated_client.get(compare_url)
-                compare = None
+                compare = dict()
                 assert (
                     comparelist.status_code == expected_status
                 ), f"{object['name']} is not in {compare_url} results"
