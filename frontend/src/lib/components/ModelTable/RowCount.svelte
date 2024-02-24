@@ -7,7 +7,7 @@
 
 <aside class="text-sm">
 	{#if $rowCount.total > 0}
-		{m.rowCount({start: $rowCount.start, end: $rowCount.end, total: $rowCount.total})}
+		{m.rowCount({ start: $rowCount.start, end: $rowCount.end, total: $rowCount.total })}
 	{:else}
 		{m.noEntriesFound()}
 	{/if}
