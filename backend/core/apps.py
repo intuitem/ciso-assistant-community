@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
-
+import os
 
 def startup(**kwargs):
     """
@@ -9,10 +9,9 @@ def startup(**kwargs):
         This makes sure root folder and global groups are defined before any other object is created
         Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
     """
-
     from django.contrib.auth.models import Permission
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-    print("post-migrate handler: initialize database")
+    print("startup handler: initialize database", kwargs)
 
     auditor_permissions = Permission.objects.filter(
         codename__in=[
@@ -328,4 +327,6 @@ class CoreConfig(AppConfig):
     verbose_name = "Core"
 
     def ready(self):
-        post_migrate.connect(startup, sender=self)
+        # avoid post_migrate handler if we are in the main, as it interferes with restore
+        if not os.environ.get('RUN_MAIN'):
+            post_migrate.connect(startup, sender=self)
