@@ -1,9 +1,9 @@
-version: "3.9"
+version: '3.9'
 
 services:
   backend:
     container_name: test-backend
-    build: 
+    build:
       context: ../../backend/
     restart: always
     environment:
@@ -20,11 +20,11 @@ services:
     environment:
       - ORIGIN=http://localhost:4173
       - DOCKER=True
-    build: 
+    build:
       context: ../../frontend/
       dockerfile: ./tests/Dockerfile
       args:
-      - PUBLIC_BACKEND_API_URL=http://backend:8000/api
+        - PUBLIC_BACKEND_API_URL=http://backend:8000/api
     depends_on:
       - backend
     volumes:
