@@ -1,4 +1,5 @@
 import json
+import time
 import os
 from typing import List, Union
 
@@ -15,6 +16,7 @@ from core.models import (
 from django.db import transaction
 from iam.models import Folder
 
+from django.db.utils import OperationalError
 
 def get_available_library_files():
     """
@@ -137,7 +139,6 @@ class RequirementNodeImporter:
             requirement_node.security_functions.add(
                 SecurityFunction.objects.get(urn=security_function.lower())
             )
-
 
 # The couple (URN, locale) is unique. ===> Check it in the future
 class FrameworkImporter:
@@ -505,6 +506,16 @@ class LibraryImporter:
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
 
+    @transaction.atomic
+    def _import_library(self) :
+        library_object = self.create_or_update_library()
+        self.import_objects(library_object)
+        library_object.dependencies.set(
+            Library.objects.filter(
+                urn__in=self._library_data.get("dependencies", [])
+            )
+        )
+
     def import_library(self):
         """Main method to import a library."""
         if (error_message := self.init()) is not None:
@@ -512,20 +523,29 @@ class LibraryImporter:
 
         self.check_and_import_dependencies()
 
-        try:
-            with transaction.atomic():
-                library_object = self.create_or_update_library()
-                self.import_objects(library_object)
-                library_object.dependencies.set(
-                    Library.objects.filter(
-                        urn__in=self._library_data.get("dependencies", [])
-                    )
-                )
-        except Exception as e:
-            # TODO: Switch to proper logging
-            print(f"Library import exception: {e}")
-            raise
-
+        TIMEOUTS = [1,2,3,4,10,15,25] # Put this in settings.py later if we keep it.
+        # The total timeout is sum(TIMEOUTS) = 60s, the timeouts are progressive to not make the user wait too much but not spamming sqlite at the same time.
+        for timeout in TIMEOUTS :
+            try:
+                self._import_library()
+                break
+                """with transaction.atomic():
+                    library_object = self.create_or_update_library()
+                    self.import_objects(library_object)
+                    library_object.dependencies.set(
+                        Library.objects.filter(
+                            urn__in=self._library_data.get("dependencies", [])
+                        )
+                    )"""
+            except OperationalError as e :
+                if e.args and e.args[0] == 'database is locked' :
+                    time.sleep(timeout)
+                else :
+                    raise e
+            except Exception as e :
+                # TODO: Switch to proper logging
+                print(f"Library import exception: {e}")
+                raise e
 
 def import_library_view(library: dict) -> Union[str, None]:
     """
