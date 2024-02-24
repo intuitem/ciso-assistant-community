@@ -32,7 +32,7 @@
 							name="current_risk_level"
 							s_label="Current risk level per risk scenario"
 							values={data.current_level}
-							colors={RISK_COLOR_PALETTE}
+							colors={data.current_level.map(object => object.color)}
 						/>
 					</div>
 				</div>
@@ -56,7 +56,7 @@
 						name="residual_risk_level"
 						s_label="Residual risk level per risk scenario"
 						values={data.residual_level}
-						colors={RISK_COLOR_PALETTE}
+						colors={data.residual_level.map(object => object.color)}
 					/>
 				</div>
 			</div>

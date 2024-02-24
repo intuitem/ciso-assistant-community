@@ -141,6 +141,7 @@
 				name="compliance_assessments"
 				s_label="compliance_assessments"
 				values={compliance_assessment_donut_values.values}
+				colors={compliance_assessment_donut_values.values.map(object => object.itemStyle.color)}
 			/>
 		</div>
 		<div class="flex flex-row space-x-2 ml-4">
