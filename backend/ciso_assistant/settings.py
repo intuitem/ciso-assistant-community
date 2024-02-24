@@ -281,6 +281,9 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db/ciso-assistant.sqlite3",
+            "OPTIONS": {
+                'timeout': 120,
+            },
         }
     }
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
