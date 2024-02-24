@@ -309,7 +309,7 @@
 						name="current_risk"
 						s_label={cur_rsk_label}
 						values={risk_level.current}
-						colors={RISK_COLOR_PALETTE}
+						colors={risk_level.current.map(object => object.color)}
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
@@ -319,7 +319,7 @@
 					name="residual_risk"
 						s_label={rsd_rsk_label}
 						values={risk_level.residual}
-						colors={RISK_COLOR_PALETTE}
+						colors={risk_level.residual.map(object => object.color)}
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
@@ -622,6 +622,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 											name="compliance_assessments"
 											s_label={m.complianceAssessments()}
 											values={compliance_assessment.donut.values}
+											colors={compliance_assessment.donut.values.map(object => object.itemStyle.color)}
 										/>
 									</div>
 									<div class="absolute top-0 right-0 mt-2 space-x-1">
