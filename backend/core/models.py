@@ -21,7 +21,7 @@ from django.utils.html import format_html
 User = get_user_model()
 
 
-class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
+class Library(ReferentialObjectMixin, FolderMixin):
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -81,7 +81,7 @@ class Library(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         super(Library, self).delete(*args, **kwargs)
 
 
-class Assessment(AbstractBaseModel, NameDescriptionMixin):
+class Assessment(NameDescriptionMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -137,7 +137,7 @@ class Assessment(AbstractBaseModel, NameDescriptionMixin):
         abstract = True
 
 
-class Project(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
+class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("--")),
         ("in_design", _("Design")),
@@ -181,7 +181,7 @@ class Project(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
         return self.name
 
 
-class Threat(ReferentialObjectMixin, AbstractBaseModel, RootFolderMixin):
+class Threat(ReferentialObjectMixin, RootFolderMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
@@ -207,7 +207,7 @@ class Threat(ReferentialObjectMixin, AbstractBaseModel, RootFolderMixin):
         return self.name
 
 
-class Asset(AbstractBaseModel, NameDescriptionMixin, RootFolderMixin):
+class Asset(NameDescriptionMixin, RootFolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -259,7 +259,7 @@ class Asset(AbstractBaseModel, NameDescriptionMixin, RootFolderMixin):
         return list(result)
 
 
-class SecurityFunction(ReferentialObjectMixin, AbstractBaseModel, RootFolderMixin):
+class SecurityFunction(ReferentialObjectMixin, RootFolderMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -308,7 +308,7 @@ class SecurityFunction(ReferentialObjectMixin, AbstractBaseModel, RootFolderMixi
         return self.name
 
 
-class RiskMatrix(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
+class RiskMatrix(ReferentialObjectMixin, FolderMixin):
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -624,7 +624,7 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class Evidence(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
+class Evidence(NameDescriptionMixin, FolderMixin):
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
         #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
@@ -688,7 +688,7 @@ class Evidence(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
         return ""
 
 
-class SecurityMeasure(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
+class SecurityMeasure(NameDescriptionMixin, FolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         ACTIVE = "active", _("Active")
@@ -847,7 +847,7 @@ class Policy(SecurityMeasure):
         super(Policy, self).save(*args, **kwargs)
 
 
-class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
+class RiskScenario(NameDescriptionMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -1040,7 +1040,7 @@ class RiskScenario(AbstractBaseModel, NameDescriptionMixin):
         super(RiskScenario, self).save(*args, **kwargs)
 
 
-class RiskAcceptance(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
+class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
         ("created", _("Created")),
         ("submitted", _("Submitted")),
@@ -1128,7 +1128,7 @@ class RiskAcceptance(AbstractBaseModel, NameDescriptionMixin, FolderMixin):
         self.save()
 
 
-class Framework(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
+class Framework(ReferentialObjectMixin, FolderMixin):
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -1162,7 +1162,7 @@ class Framework(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         return True
 
 
-class RequirementLevel(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
+class RequirementLevel(ReferentialObjectMixin, FolderMixin):
     framework = models.ForeignKey(
         Framework,
         on_delete=models.CASCADE,
@@ -1177,7 +1177,7 @@ class RequirementLevel(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Requirements levels")
 
 
-class RequirementNode(ReferentialObjectMixin, AbstractBaseModel, FolderMixin):
+class RequirementNode(ReferentialObjectMixin, FolderMixin):
     threats = models.ManyToManyField(
         "Threat",
         blank=True,

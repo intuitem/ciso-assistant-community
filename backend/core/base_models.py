@@ -7,20 +7,6 @@ import uuid
 from ciso_assistant import settings
 
 
-class NameDescriptionMixin(models.Model):
-    """
-    Mixin for models that have a name and a description.
-    """
-
-    name = models.CharField(max_length=200, verbose_name=_("Name"), unique=False)
-    description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
-
-    class Meta:
-        abstract = True
-
-    def __str__(self) -> str:
-        return self.name
-
 
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -28,7 +14,6 @@ class AbstractBaseModel(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ["name"]
 
     def scoped_id(self, scope: models.QuerySet) -> int:
         """
@@ -119,6 +104,24 @@ class AbstractBaseModel(models.Model):
     def save(self, *args, **kwargs) -> None:
         self.clean()
         super().save(*args, **kwargs)
+
+
+
+class NameDescriptionMixin(AbstractBaseModel):
+    """
+    Mixin for models that have a name and a description.
+    """
+
+    name = models.CharField(max_length=200, verbose_name=_("Name"), unique=False)
+    description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
+
+    class Meta:
+        abstract = True
+        ordering = ["name"]
+
+    def __str__(self) -> str:
+        return self.name
+
 
 
 class ReferentialObjectMixin(AbstractBaseModel):
