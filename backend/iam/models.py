@@ -45,58 +45,6 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class UserGroup(models.Model):
-    """UserGroup objects contain users and can be used as principals in role assignments"""
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    folder = models.ForeignKey(
-        "Folder", verbose_name=_("Domain"), on_delete=models.CASCADE, default=None
-    )
-    name = models.CharField(_("name"), max_length=150, unique=False)
-    builtin = models.BooleanField(default=False)
-
-    class Meta:
-        """for Model"""
-
-        verbose_name = _("user group")
-        verbose_name_plural = _("user groups")
-
-    def __str__(self) -> str:
-        if self.builtin:
-            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
-
-    def get_name_display(self) -> str:
-        return self.name
-
-    @staticmethod
-    def get_user_groups(user):
-        # pragma pylint: disable=no-member
-        """get the list of user groups containing the user given in parameter"""
-        user_group_list = []
-        for user_group in UserGroup.objects.all():
-            if user in user_group.user_set.all():
-                user_group_list.append(user_group)
-        return user_group_list
-
-
-class Role(models.Model):
-    """A role is a list of permissions"""
-
-    permissions = models.ManyToManyField(
-        Permission,
-        verbose_name=_("permissions"),
-        blank=True,
-    )
-    name = models.CharField(_("name"), max_length=150, unique=False)
-    builtin = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
-        return self.name
-
-
 def _get_root_folder():
     """helper function outside of class to facilitate serialization
     to be used only in Folder class"""
@@ -106,7 +54,7 @@ def _get_root_folder():
         return None
 
 
-class Folder(AbstractBaseModel, NameDescriptionMixin):
+class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
     Folders are organized in a tree structure, with a single root folder
     Folders are the base perimeter for role assignments
@@ -216,6 +164,7 @@ class Folder(AbstractBaseModel, NameDescriptionMixin):
         return None
 
 
+
 class FolderMixin(models.Model):
     """
     Add foreign key to Folder
@@ -229,6 +178,7 @@ class FolderMixin(models.Model):
 
     class Meta:
         abstract = True
+
 
 
 class RootFolderMixin(FolderMixin):
@@ -245,6 +195,38 @@ class RootFolderMixin(FolderMixin):
 
     class Meta:
         abstract = True
+
+
+
+class UserGroup(NameDescriptionMixin, RootFolderMixin):
+    """UserGroup objects contain users and can be used as principals in role assignments"""
+
+    builtin = models.BooleanField(default=False)
+
+    class Meta:
+        """for Model"""
+
+        verbose_name = _("user group")
+        verbose_name_plural = _("user groups")
+
+    def __str__(self) -> str:
+        if self.builtin:
+            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
+        return self.name
+
+    def get_name_display(self) -> str:
+        return self.name
+
+    @staticmethod
+    def get_user_groups(user):
+        # pragma pylint: disable=no-member
+        """get the list of user groups containing the user given in parameter"""
+        user_group_list = []
+        for user_group in UserGroup.objects.all():
+            if user in user_group.user_set.all():
+                user_group_list.append(user_group)
+        return user_group_list
+
 
 
 class UserManager(BaseUserManager):
@@ -300,7 +282,7 @@ class UserManager(BaseUserManager):
         return superuser
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, RootFolderMixin):
     """a user is a principal corresponding to a human"""
 
     try:
@@ -335,12 +317,6 @@ class User(AbstractBaseUser):
             ),
         )
         objects = UserManager()
-        folder = models.ForeignKey(
-            Folder, 
-            on_delete=models.CASCADE, 
-            verbose_name=_("Folder"),
-            default=_get_root_folder
-        )
 
     except:
         logger.debug("Exception kludge")
@@ -491,7 +467,25 @@ class User(AbstractBaseUser):
         self.email = username
 
 
-class RoleAssignment(models.Model):
+
+class Role(NameDescriptionMixin, RootFolderMixin):
+    """A role is a list of permissions"""
+
+    permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_("permissions"),
+        blank=True,
+    )
+    builtin = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        if self.builtin:
+            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
+        return self.name
+
+
+
+class RoleAssignment(NameDescriptionMixin, RootFolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -506,7 +500,7 @@ class RoleAssignment(models.Model):
     is_recursive = models.BooleanField(_("sub folders are visible"), default=False)
     builtin = models.BooleanField(default=False)
     folder = models.ForeignKey(
-        Folder, on_delete=models.CASCADE, verbose_name=_("Folder")
+        "Folder", verbose_name=_("Folder"), on_delete=models.CASCADE, default=_get_root_folder
     )
 
     def __str__(self) -> str:
