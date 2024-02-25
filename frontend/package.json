@@ -74,6 +74,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "^1.5.1",
+    "@fortawesome/fontawesome-free": "^6.5.1",
     "@inlang/paraglide-js-adapter-vite": "^1.2.14",
     "dotenv": "^16.4.1",
     "echarts": "^5.4.3",
