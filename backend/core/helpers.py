@@ -551,7 +551,6 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
         residual_level.append(
             {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
-    print("current", current_level, "residual", residual_level)
     return {"current": current_level, "residual": residual_level}
 
 
@@ -709,7 +708,6 @@ def risk_status(user: User, risk_assessment_list):
         names.append(str(risk_assessment.project) + " " + str(risk_assessment.version))
 
     y_max_rsk = max(max_tmp, default=0) + 1
-    print("y_max_rsk: ", y_max_rsk)
 
     return {
         "names": names,
