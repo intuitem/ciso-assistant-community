@@ -682,7 +682,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         return Response(choices)
 
     @action(detail=False, name="Get risk count per level")
-    def count_per_level(self, request):  # _per_level
+    def count_per_level(self, request):
         return Response({"results": risks_count_per_level(request.user)})
 
 
