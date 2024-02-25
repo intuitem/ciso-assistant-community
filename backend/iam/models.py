@@ -114,7 +114,7 @@ class Folder(NameDescriptionMixin):
         )
 
     @staticmethod
-    def navigate_structure(start, path):
+    def _navigate_structure(start, path):
         """
         Navigate through a mixed structure of objects and dictionaries.
 
@@ -156,7 +156,7 @@ class Folder(NameDescriptionMixin):
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
         for path in paths:
-            folder = Folder.navigate_structure(obj, path)
+            folder = Folder._navigate_structure(obj, path)
             if folder is not None:
                 return folder
 
@@ -166,22 +166,6 @@ class Folder(NameDescriptionMixin):
 
 
 class FolderMixin(models.Model):
-    """
-    Add foreign key to Folder
-    """
-
-    folder = models.ForeignKey(
-        Folder,
-        on_delete=models.CASCADE,
-        related_name="%(class)s_folder",
-    )
-
-    class Meta:
-        abstract = True
-
-
-
-class RootFolderMixin(FolderMixin):
     """
     Add foreign key to Folder, defaults to root folder
     """
@@ -198,7 +182,7 @@ class RootFolderMixin(FolderMixin):
 
 
 
-class UserGroup(NameDescriptionMixin, RootFolderMixin):
+class UserGroup(NameDescriptionMixin, FolderMixin):
     """UserGroup objects contain users and can be used as principals in role assignments"""
 
     builtin = models.BooleanField(default=False)
@@ -282,44 +266,39 @@ class UserManager(BaseUserManager):
         return superuser
 
 
-class User(AbstractBaseUser, RootFolderMixin):
+class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     """a user is a principal corresponding to a human"""
 
-    try:
-        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        last_name = models.CharField(_("last name"), max_length=150, blank=True)
-        first_name = models.CharField(_("first name"), max_length=150, blank=True)
-        email = models.CharField(max_length=100, unique=True)
-        first_login = models.BooleanField(default=True)
-        is_active = models.BooleanField(
-            _("active"),
-            default=True,
-            help_text=_(
-                "Designates whether this user should be treated as active. "
-                "Unselect this instead of deleting accounts."
-            ),
-        )
-        date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
-        is_superuser = models.BooleanField(
-            _("superuser status"),
-            default=False,
-            help_text=_(
-                "Designates that this user has all permissions without explicitly assigning them."
-            ),
-        )
-        user_groups = models.ManyToManyField(
-            UserGroup,
-            verbose_name=_("user groups"),
-            blank=True,
-            help_text=_(
-                "The user groups this user belongs to. A user will get all permissions "
-                "granted to each of their user groups."
-            ),
-        )
-        objects = UserManager()
-
-    except:
-        logger.debug("Exception kludge")
+    last_name = models.CharField(_("last name"), max_length=150, blank=True)
+    first_name = models.CharField(_("first name"), max_length=150, blank=True)
+    email = models.CharField(max_length=100, unique=True)
+    first_login = models.BooleanField(default=True)
+    is_active = models.BooleanField(
+        _("active"),
+        default=True,
+        help_text=_(
+            "Designates whether this user should be treated as active. "
+            "Unselect this instead of deleting accounts."
+        ),
+    )
+    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
+    is_superuser = models.BooleanField(
+        _("superuser status"),
+        default=False,
+        help_text=_(
+            "Designates that this user has all permissions without explicitly assigning them."
+        ),
+    )
+    user_groups = models.ManyToManyField(
+        UserGroup,
+        verbose_name=_("user groups"),
+        blank=True,
+        help_text=_(
+            "The user groups this user belongs to. A user will get all permissions "
+            "granted to each of their user groups."
+        ),
+    )
+    objects = UserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
@@ -468,7 +447,7 @@ class User(AbstractBaseUser, RootFolderMixin):
 
 
 
-class Role(NameDescriptionMixin, RootFolderMixin):
+class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""
 
     permissions = models.ManyToManyField(
@@ -485,10 +464,9 @@ class Role(NameDescriptionMixin, RootFolderMixin):
 
 
 
-class RoleAssignment(NameDescriptionMixin, RootFolderMixin):
+class RoleAssignment(NameDescriptionMixin, FolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     perimeter_folders = models.ManyToManyField(
         "Folder", verbose_name=_("Domain"), related_name="perimeter_folders"
     )
@@ -499,9 +477,6 @@ class RoleAssignment(NameDescriptionMixin, RootFolderMixin):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(_("sub folders are visible"), default=False)
     builtin = models.BooleanField(default=False)
-    folder = models.ForeignKey(
-        "Folder", verbose_name=_("Folder"), on_delete=models.CASCADE, default=_get_root_folder
-    )
 
     def __str__(self) -> str:
         # pragma pylint: disable=no-member
