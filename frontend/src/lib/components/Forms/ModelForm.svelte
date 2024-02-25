@@ -126,7 +126,13 @@
 			field="reviewers"
 			label={m.reviewers()}
 		/>
-		<TextField type="date" {form} field="eta" label={m.eta()} helpText="Estimated time of arrival" />
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText="Estimated time of arrival"
+		/>
 		<TextField
 			type="date"
 			{form}
@@ -161,7 +167,12 @@
 		/>
 	{:else if URLModel === 'security-measures' || URLModel === 'policies'}
 		{#if schema.shape.category}
-		<Select {form} options={model.selectOptions['category']} field="category" label={m.category()} />
+			<Select
+				{form}
+				options={model.selectOptions['category']}
+				field="category"
+				label={m.category()}
+			/>
 		{/if}
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
@@ -171,7 +182,13 @@
 			field="evidences"
 			label={m.evidences()}
 		/>
-		<TextField type="date" {form} field="eta" label={m.eta()} helpText="Estimated time of arrival" />
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText="Estimated time of arrival"
+		/>
 		<TextField
 			type="date"
 			{form}
@@ -240,7 +257,12 @@
 		/>
 	{:else if URLModel === 'security-functions'}
 		<TextField {form} field="ref_id" label={m.ref()} />
-		<Select {form} options={model.selectOptions['category']} field="category" label={m.category()} />
+		<Select
+			{form}
+			options={model.selectOptions['category']}
+			field="category"
+			label={m.category()}
+		/>
 		<TextField {form} field="provider" label={m.provider()} />
 		<AutocompleteSelect
 			{form}
@@ -300,7 +322,13 @@
 			field="reviewers"
 			label={m.reviewers()}
 		/>
-		<TextField type="date" {form} field="eta" label={m.eta()} helpText="Estimated time of arrival" />
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText="Estimated time of arrival"
+		/>
 		<TextField
 			type="date"
 			{form}
@@ -362,24 +390,24 @@
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={parent.onClose}>Cancel</button
+				on:click={parent.onClose}>{m.cancel()}</button
 			>
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit">Save</button
+				type="submit">{m.save()}</button
 			>
 		{:else}
 			<button
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={cancel}>Cancel</button
+				on:click={cancel}>{m.cancel()}</button
 			>
 			<button
 				class="btn variant-filled-primary font-semibold w-full"
 				data-testid="save-button"
-				type="submit">Save</button
+				type="submit">{m.save()}</button
 			>
 		{/if}
 	</div>

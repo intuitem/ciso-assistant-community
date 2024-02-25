@@ -12,7 +12,7 @@ export const navData = {
 		// 	]
 		// },
 		{
-			name: "overview",
+			name: 'overview',
 			items: [
 				{
 					name: 'analytics',

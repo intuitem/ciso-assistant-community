@@ -15,7 +15,7 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { localItems, toCamelCase, getDeterminant } from '$lib/utils/locales.js';
+	import { localItems, toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 
@@ -62,7 +62,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${model.info.verboseName.toLowerCase()}`
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -175,17 +175,25 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800" data-testid="{key.replace('_', '-')}-field-title">
-						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
+					<div
+						class="text-sm font-medium text-gray-800"
+						data-testid="{key.replace('_', '-')}-field-title"
+					>
+						{localItems(languageTag())[toCamelCase(key)]}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none" data-testid={!(value instanceof Array) ? key.replace('_', '-') + "-field-value" : null}>
+						<li
+							class="text-gray-600 list-none"
+							data-testid={!(value instanceof Array)
+								? key.replace('_', '-') + '-field-value'
+								: null}
+						>
 							{#if value}
 								{#if Array.isArray(value)}
 									{#if Object.keys(value).length > 0}
 										<ul>
 											{#each value as val}
-												<li data-testid={key.replace('_', '-') + "-field-value"}>
+												<li data-testid={key.replace('_', '-') + '-field-value'}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
@@ -226,7 +234,7 @@
 			<a
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"/>{m.edit()}</a
+				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
 			>
 		{/if}
 	</div>
@@ -248,16 +256,12 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{#if model.info.localFrGender === 'f'}
-									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: 'e'})}
-								{:else}
-									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: ''})}
-								{/if}
+								{localItems(languageTag())['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
 							</h4>
 							<button
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />{m.addButton({determinant:getDeterminant(languageTag(), "undefined", model.info), model: localItems(languageTag())[model.info.localName].toLowerCase()})}</button
+								><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]}</button
 							>
 						</div>
 						{#if model.table}
