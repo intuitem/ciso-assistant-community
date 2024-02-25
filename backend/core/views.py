@@ -682,7 +682,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         return Response(choices)
 
     @action(detail=False, name="Get risk count per level")
-    def count_per_level(self, request):  # _per_level
+    def count_per_level(self, request):
         return Response({"results": risks_count_per_level(request.user)})
 
 
@@ -766,9 +766,10 @@ class UserFilter(df.FilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
 
     def filter_approver(self, queryset, name, value):
+        """ we don't know yet which folders will be used, so filter on any folder"""
         approvers_id = []
         for candidate in User.objects.all():
-            if RoleAssignment.has_permission(candidate, "approve_riskacceptance"):
+            if 'approve_riskacceptance' in candidate.permissions:
                 approvers_id.append(candidate.id)
         if value:
             return queryset.filter(id__in=approvers_id)

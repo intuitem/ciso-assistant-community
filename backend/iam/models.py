@@ -29,13 +29,20 @@ from django.dispatch import receiver
 from ciso_assistant.settings import (
     CISO_ASSISTANT_URL,
     EMAIL_HOST,
+    EMAIL_HOST_USER,
     EMAIL_HOST_USER_RESCUE,
     EMAIL_HOST_PASSWORD_RESCUE,
     EMAIL_HOST_RESCUE,
+    EMAIL_PORT,
     EMAIL_PORT_RESCUE,
+    EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
 from django.core.exceptions import ObjectDoesNotExist
+
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class UserGroup(models.Model):
@@ -159,19 +166,54 @@ class Folder(AbstractBaseModel, NameDescriptionMixin):
         )
 
     @staticmethod
-    def get_folder(obj: Any) -> Self:
-        """Return the folder of an object"""
-        # todo: add a folder attribute to all objects to avoid introspection
-        if hasattr(obj, "folder"):
-            return obj.folder
-        if hasattr(obj, "parent_folder"):
-            return obj.parent_folder
-        if hasattr(obj, "project"):
-            return obj.project.folder
-        if hasattr(obj, "risk_assessment"):
-            return obj.risk_assessment.project.folder
-        if hasattr(obj, "risk_scenario"):
-            return obj.risk_scenario.risk_assessment.project.folder
+    def navigate_structure(start, path):
+        """
+        Navigate through a mixed structure of objects and dictionaries.
+
+        :param start: The initial object or dictionary from which to start navigating.
+        :param path: A list of strings representing the path to navigate, with each element
+                     being an attribute name (for objects) or a key (for dictionaries).
+        :return: The value found at the end of the path, or None if any part of the path is invalid.
+        """
+        current = start
+        for p in path:
+            if isinstance(current, dict):
+                # For dictionaries
+                current = current.get(p, None)
+            else:
+                # For objects
+                try:
+                    current = getattr(current, p, None)
+                except AttributeError:
+                    # If the attribute doesn't exist and current is not a dictionary
+                    return None
+            if current is None:
+                return None
+        return current
+
+    @staticmethod
+    def get_folder(obj: Any):
+        """
+        Return the folder of an object using navigation through mixed structures.
+        """
+        # Define paths to try in order. Each path is a list representing the traversal path.
+        # NOTE: There are probably better ways to represent these, but it works.
+        paths = [
+            ["folder"],
+            ["parent_folder"],
+            ["project", "folder"],
+            ["risk_assessment", "project", "folder"],
+            ["risk_scenario", "risk_assessment", "project", "folder"],
+        ]
+
+        # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
+        for path in paths:
+            folder = Folder.navigate_structure(obj, path)
+            if folder is not None:
+                return folder
+
+        # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
+        return None
 
 
 class FolderMixin(models.Model):
@@ -221,10 +263,14 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            folder=_get_root_folder()
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
         user.save(using=self._db)
+
+        logger.info("user created sucessfully", user=user)
+
         if mailing:
             try:
                 user.mailing(
@@ -232,29 +278,25 @@ class UserManager(BaseUserManager):
                     subject=_("Welcome to Ciso Assistant!"),
                 )
             except Exception as exception:
+                print(f"sending email to {email} failed")
                 raise exception
         return user
 
     def create_user(self, email, password=None, **extra_fields):
-        print("Creating user for", email)
+        logger.info("creating user", email=email)
         extra_fields.setdefault("is_superuser", False)
         if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
             extra_fields.setdefault("mailing", False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
-        print("Creating superuser for", email)
+        logger.info("creating superuser", email=email)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        if not (EMAIL_HOST or EMAIL_HOST_RESCUE):
-            extra_fields.setdefault("mailing", False)
+        extra_fields.setdefault("mailing", not(password) and (EMAIL_HOST or EMAIL_HOST_RESCUE))
         superuser = self._create_user(email, password, **extra_fields)
-        # when possible, add superuser to admin group
-        try:
-            UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
-        except ObjectDoesNotExist:
-            pass
+        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
 
 
@@ -293,8 +335,15 @@ class User(AbstractBaseUser):
             ),
         )
         objects = UserManager()
+        folder = models.ForeignKey(
+            Folder, 
+            on_delete=models.CASCADE, 
+            verbose_name=_("Folder"),
+            default=_get_root_folder
+        )
+
     except:
-        print("Exception kludge")
+        logger.debug("Exception kludge")
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
@@ -309,6 +358,14 @@ class User(AbstractBaseUser):
         verbose_name_plural = _("users")
         #        swappable = 'AUTH_USER_MODEL'
         permissions = (("backup", "backup"), ("restore", "restore"))
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        logger.info("user deleted", user=self)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        logger.info("user saved", user=self)
 
     def __str__(self):
         return (
@@ -355,9 +412,18 @@ class User(AbstractBaseUser):
                 fail_silently=False,
                 html_message=email,
             )
-            print("mail sent to", self.email)
-        except Exception as e:
-            print("primary mailer failure, try rescue mailer...")
+            logger.info("email sent", recipient=self.email, subject=subject)
+        except Exception as primary_exception:
+            logger.error(
+                "primary mailer failure, trying rescue",
+                recipient=self.email,
+                subject=subject,
+                error=primary_exception,
+                email_host=EMAIL_HOST,
+                email_port=EMAIL_PORT,
+                email_host_user=EMAIL_HOST_USER,
+                email_use_tls=EMAIL_USE_TLS,
+            )
             if EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
@@ -374,12 +440,21 @@ class User(AbstractBaseUser):
                             [self.email],
                             connection=new_connection,
                         ).send()
-                    print("mail sent to", self.email)
-                except Exception as ex2:
-                    print("secondary mailer failure")
-                    raise ex2
+                    logger.info("email sent", recipient=self.email, subject=subject)
+                except Exception as rescue_exception:
+                    logger.error(
+                        "rescue mailer failure",
+                        recipient=self.email,
+                        subject=subject,
+                        error=rescue_exception,
+                        email_host=EMAIL_HOST_RESCUE,
+                        email_port=EMAIL_PORT_RESCUE,
+                        email_username=EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                    )
+                    raise rescue_exception
             else:
-                raise e
+                raise primary_exception
 
     def get_user_groups(self):
         # pragma pylint: disable=no-member
@@ -392,7 +467,11 @@ class User(AbstractBaseUser):
 
     @property
     def has_backup_permission(self) -> bool:
-        return RoleAssignment.has_permission(self, "backup")
+        return RoleAssignment.is_access_allowed(
+            user=self, 
+            perm=Permission.objects.get(codename="backup"),
+            folder=Folder.get_root_folder(),
+        )
 
     @property
     def edit_url(self) -> str:
@@ -613,14 +692,6 @@ class RoleAssignment(models.Model):
 
         return permissions
 
-    @staticmethod
-    def has_permission(user: AbstractBaseUser | AnonymousUser, codename: str):
-        """Determines if a user has a specific permission. To be used cautiously with proper commenting"""
-        for ra in RoleAssignment.get_role_assignments(user):
-            for perm in ra.role.permissions.all():
-                if perm.codename == codename:
-                    return True
-        return False
 
     @staticmethod
     def has_role(user: AbstractBaseUser | AnonymousUser, role: Role):

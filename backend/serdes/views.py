@@ -49,6 +49,8 @@ class LoadBackupView(APIView):
     serializer_class = LoadBackupSerializer
 
     def post(self, request, *args, **kwargs):
+        if not is_admin_check(request.user):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         if request.data:
             sys.stdin = io.StringIO(json.dumps(request.data[1]))
             request.session.flush()

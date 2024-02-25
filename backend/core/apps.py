@@ -1,14 +1,17 @@
 from django.apps import AppConfig
+from django.db.models.signals import post_migrate
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+import os
 
-
-def startup():
-    """Implement CISO Assistant 1.0 default Roles and User Groups"""
-
-    from ciso_assistant.settings import (
-        CISO_ASSISTANT_SUPERUSER_EMAIL,
-    )
+def startup(**kwargs):
+    """
+        Implement CISO Assistant 1.0 default Roles and User Groups during migrate
+        This makes sure root folder and global groups are defined before any other object is created
+        Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
+    """
     from django.contrib.auth.models import Permission
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+    print("startup handler: initialize database", kwargs)
 
     auditor_permissions = Permission.objects.filter(
         codename__in=[
@@ -28,6 +31,7 @@ def startup():
             "view_requirement",
             "view_evidence",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -51,6 +55,7 @@ def startup():
             "view_requirement",
             "view_evidence",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -98,6 +103,7 @@ def startup():
             "view_riskmatrix",
             "view_requirement",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -150,6 +156,7 @@ def startup():
             "delete_evidence",
             "view_requirement",
             "view_framework",
+            "view_library",
         ]
     )
 
@@ -227,35 +234,30 @@ def startup():
             "delete_framework",
             "view_requirementnode",
             "view_requirementlevel",  # Permits to see the object on api by an admin
+            "view_library",
+            "add_library",
             "delete_library",
             "backup",
             "restore",
         ]
     )
 
-    # if superuser defined and does not exist, then create it
-    if (
-        CISO_ASSISTANT_SUPERUSER_EMAIL
-        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
-    ):
-        User.objects.create_superuser(
-            email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-        )
     # if root folder does not exist, then create it
     if not Folder.objects.filter(content_type=Folder.ContentType.ROOT).exists():
         Folder.objects.create(
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
-        auditor = Role.objects.create(name="BI-RL-AUD", builtin=True)
-        auditor.permissions.set(auditor_permissions)
-        approver = Role.objects.create(name="BI-RL-VAL", builtin=True)
-        approver.permissions.set(approver_permissions)
-        analyst = Role.objects.create(name="BI-RL-ANA", builtin=True)
-        analyst.permissions.set(analyst_permissions)
-        domain_manager = Role.objects.create(name="BI-RL-DMA", builtin=True)
-        domain_manager.permissions.set(domain_manager_permissions)
-        administrator = Role.objects.create(name="BI-RL-ADM", builtin=True)
-        administrator.permissions.set(administrator_permissions)
+    # update builtin roles to facilitate migrations
+    auditor, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
+    auditor.permissions.set(auditor_permissions)
+    approver, created = Role.objects.get_or_create(name="BI-RL-VAL", builtin=True)
+    approver.permissions.set(approver_permissions)
+    analyst, created = Role.objects.get_or_create(name="BI-RL-ANA", builtin=True)
+    analyst.permissions.set(analyst_permissions)
+    domain_manager, created = Role.objects.get_or_create(name="BI-RL-DMA", builtin=True)
+    domain_manager.permissions.set(domain_manager_permissions)
+    administrator, created = Role.objects.get_or_create(name="BI-RL-ADM", builtin=True)
+    administrator.permissions.set(administrator_permissions)
     # if global administrators user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
@@ -305,12 +307,18 @@ def startup():
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_validators.folder)
-    # add any superuser to the global administrors group, in case it is not yet done
-    for superuser in User.objects.filter(is_superuser=True):
-        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
-    # fix administrator role, to facilitate migrations
-    administrator = Role.objects.filter(name="BI-RL-ADM").first()
-    administrator.permissions.set(administrator_permissions)
+
+    # if superuser defined and does not exist, then create it
+    if (
+        CISO_ASSISTANT_SUPERUSER_EMAIL
+        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+    ):
+        try:
+            User.objects.create_superuser(
+                email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+            )
+        except Exception as e:
+            print(e) #NOTE: Add this exception in the logger
 
 
 class CoreConfig(AppConfig):
@@ -319,8 +327,6 @@ class CoreConfig(AppConfig):
     verbose_name = "Core"
 
     def ready(self):
-        import os
-
-        if os.environ.get("RUN_MAIN"):
-            """Only called in main, not during makemigrations or migrate"""
-            startup()
+        # avoid post_migrate handler if we are in the main, as it interferes with restore
+        if not os.environ.get('RUN_MAIN'):
+            post_migrate.connect(startup, sender=self)

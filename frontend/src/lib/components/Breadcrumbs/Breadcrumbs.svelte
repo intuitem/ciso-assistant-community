@@ -1,36 +1,50 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { localItems } from '$lib/utils/locales';
 	import { breadcrumbObject, pageTitle } from '$lib/utils/stores';
 	import { listViewFields } from '$lib/utils/table';
 	import * as m from '$paraglide/messages';
+	import { languageTag } from '$paraglide/runtime';
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
+
+	function capitalizeSecondWord(sentence: string) {
+		var words = sentence.split(' ');
+
+		if (words.length >= 2) {
+			words[1] = words[1].charAt(0).toUpperCase() + words[1].substring(1);
+			return words.join('');
+		} else {
+			return sentence;
+		}
+	}
 
 	$: {
 		// Remove zero-length tokens.
 		const tokens = $page.url.pathname.split('/').filter((t) => t !== '');
+		let title = '';
 
 		// Create { label, href } pairs for each token.
 		let tokenPath = '';
 		crumbs = tokens.map((t) => {
 			tokenPath += '/' + t;
 			if (t === $breadcrumbObject.id) {
-				if ($breadcrumbObject.name) t = $breadcrumbObject.name;
-				else t = $breadcrumbObject.email;
+				if ($breadcrumbObject.name) title = $breadcrumbObject.name;
+				else title = $breadcrumbObject.email;
 			} else if (t === 'folders') {
 				t = 'domains';
 			}
-			t = t.charAt(0).toUpperCase() + t.slice(1);
 			t = t.replace(/-/g, ' ');
+			t = capitalizeSecondWord(t);
 			return {
-				label: $page.data.label || t,
+				label: $page.data.label || title || t,
 				href: Object.keys(listViewFields).includes(tokens[0]) ? tokenPath : null
 			};
 		});
 
-		crumbs.unshift({ label: m.Home(), href: '/', icon: 'fa-regular fa-compass' });
-		if (crumbs[crumbs.length - 1].label != 'Edit') pageTitle.set(crumbs[crumbs.length - 1].label);
-		else pageTitle.set('Edit ' + crumbs[crumbs.length - 2].label);
+		crumbs.unshift({ label: m.home(), href: '/', icon: 'fa-regular fa-compass' });
+		if (crumbs[crumbs.length - 1].label != 'edit') pageTitle.set(crumbs[crumbs.length - 1].label);
+		else pageTitle.set(m.edit() + ' ' + crumbs[crumbs.length - 2].label);
 	}
 </script>
 
@@ -41,7 +55,11 @@
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
-				{c.label}
+				{#if localItems(languageTag())[c.label]}
+					{localItems(languageTag())[c.label]}
+				{:else}
+					{c.label}
+				{/if}
 			</span>
 		{:else}
 			<li class="crumb">
@@ -53,14 +71,22 @@
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{c.label}
+						{#if localItems(languageTag())[c.label]}
+							{localItems(languageTag())[c.label]}
+						{:else}
+							{c.label}
+						{/if}
 					</a>
 				{:else}
 					<span class="text-sm text-gray-500 font-semibold antialiased">
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
-						{c.label}
+						{#if localItems(languageTag())[c.label]}
+							{localItems(languageTag())[c.label]}
+						{:else}
+							{c.label}
+						{/if}
 					</span>
 				{/if}
 			</li>
