@@ -20,6 +20,7 @@ from django.utils.html import format_html
 
 User = get_user_model()
 
+########################### Referential objects #########################
 
 class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     """
@@ -134,106 +135,6 @@ class Library(ReferentialObjectMixin):
         super(Library, self).delete(*args, **kwargs)
 
 
-class Assessment(NameDescriptionMixin):
-    class Status(models.TextChoices):
-        PLANNED = "planned", _("Planned")
-        IN_PROGRESS = "in_progress", _("In progress")
-        IN_REVIEW = "in_review", _("In review")
-        DONE = "done", _("Done")
-        DEPRECATED = "deprecated", _("Deprecated")
-
-    project = models.ForeignKey(
-        "Project", on_delete=models.CASCADE, verbose_name=_("Project")
-    )
-    version = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text=_("Version of the compliance assessment (eg. 1.0, 2.0, etc.)"),
-        verbose_name=_("Version"),
-        default="1.0",
-    )
-    status = models.CharField(
-        max_length=100,
-        choices=Status.choices,
-        default=Status.PLANNED,
-        verbose_name=_("Status"),
-    )
-    authors = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Authors"),
-        related_name="%(class)s_authors",
-    )
-    reviewers = models.ManyToManyField(
-        User,
-        blank=True,
-        verbose_name=_("Reviewers"),
-        related_name="%(class)s_reviewers",
-    )
-    eta = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_("Estimated time of arrival"),
-        verbose_name=_("ETA"),
-    )
-    due_date = models.DateField(
-        null=True,
-        blank=True,
-        help_text=_("Due date"),
-        verbose_name=_("Due date"),
-    )
-
-    fields_to_check = ["name", "version"]
-
-    class Meta:
-        abstract = True
-
-
-class Project(NameDescriptionMixin, FolderMixin):
-    PRJ_LC_STATUS = [
-        ("undefined", _("--")),
-        ("in_design", _("Design")),
-        ("in_dev", _("Development")),
-        ("in_prod", _("Production")),
-        ("eol", _("End Of Life")),
-        ("dropped", _("Dropped")),
-    ]
-    internal_reference = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
-    )
-    lc_status = models.CharField(
-        max_length=20,
-        default="in_design",
-        choices=PRJ_LC_STATUS,
-        verbose_name=_("Status"),
-    )
-
-    class Meta:
-        verbose_name = _("Project")
-        verbose_name_plural = _("Projects")
-
-    def overall_compliance(self):
-        compliance_assessments_list = [
-            compliance_assessment
-            for compliance_assessment in self.compliance_assessment_set.all()
-        ]
-        count = (
-            RequirementAssessment.objects.filter(status="compliant")
-            .filter(compliance_assessment__in=compliance_assessments_list)
-            .count()
-        )
-        total = RequirementAssessment.objects.filter(
-            compliance_assessment__in=compliance_assessments_list
-        ).count()
-        if total == 0:
-            return 0
-        return round(count * 100 / total)
-
-    def __str__(self):
-        return self.name
-
-
 class Threat(ReferentialObjectMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
@@ -258,58 +159,6 @@ class Threat(ReferentialObjectMixin):
 
     def __str__(self):
         return self.name
-
-
-class Asset(NameDescriptionMixin, FolderMixin):
-    class Type(models.TextChoices):
-        """
-        The type of the asset.
-
-        An asset can either be a primary or a support asset.
-        A support asset can be linked to another "parent" asset of type primary or support.
-        Cycles are not allowed
-        """
-
-        PRIMARY = "PR", _("Primary")
-        SUPPORT = "SP", _("Support")
-
-    business_value = models.CharField(
-        max_length=200, blank=True, verbose_name=_("business value")
-    )
-    type = models.CharField(
-        max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_("type")
-    )
-    parent_assets = models.ManyToManyField(
-        "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
-    )
-    is_published = models.BooleanField(_("published"), default=True)
-
-    fields_to_check = ["name"]
-
-    class Meta:
-        verbose_name_plural = _("Assets")
-        verbose_name = _("Asset")
-
-    def __str__(self) -> str:
-        return str(self.name)
-
-    def is_primary(self) -> bool:
-        """
-        Returns True if the asset is a primary asset.
-        """
-        return self.type == Asset.Type.PRIMARY
-
-    def is_support(self) -> bool:
-        """
-        Returns True if the asset is a support asset.
-        """
-        return self.type == Asset.Type.SUPPORT
-
-    def ancestors_plus_self(self) -> list[Self]:
-        result = {self}
-        for x in self.parent_assets.all():
-            result.update(x.ancestors_plus_self())
-        return list(result)
 
 
 class SecurityFunction(ReferentialObjectMixin):
@@ -420,6 +269,465 @@ class RiskMatrix(ReferentialObjectMixin):
 
     def __str__(self) -> str:
         return self.name
+
+
+class Framework(ReferentialObjectMixin):
+    library = models.ForeignKey(
+        Library,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="frameworks",
+    )
+
+    class Meta:
+        verbose_name = _("Framework")
+        verbose_name_plural = _("Frameworks")
+
+    def get_next_order_id(self, obj_type: models.Model, _parent_urn: str = None) -> int:
+        """
+        Returns the next order id for a given object type
+        """
+        if _parent_urn:
+            return (
+                obj_type.objects.filter(framework=self, parent_urn=_parent_urn).count()
+                + 1
+            )
+        else:
+            return obj_type.objects.filter(framework=self).count() + 1
+
+    def is_deletable(self) -> bool:
+        """
+        Returns True if the framework can be deleted
+        """
+        if self.compliance_assessment_set.count() > 0:
+            return False
+        return True
+
+
+class RequirementLevel(ReferentialObjectMixin):
+    framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("Framework"),
+    )
+    level = models.IntegerField(null=False, blank=False, verbose_name=_("Level"))
+
+    class Meta:
+        verbose_name = _("Requirements level")
+        verbose_name_plural = _("Requirements levels")
+
+
+class RequirementNode(ReferentialObjectMixin):
+    threats = models.ManyToManyField(
+        "Threat",
+        blank=True,
+        verbose_name=_("Threats"),
+        related_name="requirements",
+    )
+    security_functions = models.ManyToManyField(
+        "SecurityFunction",
+        blank=True,
+        verbose_name=_("Security functions"),
+        related_name="requirements",
+    )
+    framework = models.ForeignKey(
+        Framework,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("Framework"),
+    )
+    parent_urn = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
+    )
+    order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
+    level = models.IntegerField(null=True, verbose_name=_("Level"))
+    maturity = models.IntegerField(null=True, verbose_name=_("Maturity"))
+    assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
+
+    class Meta:
+        verbose_name = _("RequirementNode")
+        verbose_name_plural = _("RequirementNodes")
+
+
+########################### Domain objects #########################
+
+class Project(NameDescriptionMixin, FolderMixin):
+    PRJ_LC_STATUS = [
+        ("undefined", _("--")),
+        ("in_design", _("Design")),
+        ("in_dev", _("Development")),
+        ("in_prod", _("Production")),
+        ("eol", _("End Of Life")),
+        ("dropped", _("Dropped")),
+    ]
+    internal_reference = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
+    )
+    lc_status = models.CharField(
+        max_length=20,
+        default="in_design",
+        choices=PRJ_LC_STATUS,
+        verbose_name=_("Status"),
+    )
+
+    class Meta:
+        verbose_name = _("Project")
+        verbose_name_plural = _("Projects")
+
+    def overall_compliance(self):
+        compliance_assessments_list = [
+            compliance_assessment
+            for compliance_assessment in self.compliance_assessment_set.all()
+        ]
+        count = (
+            RequirementAssessment.objects.filter(status="compliant")
+            .filter(compliance_assessment__in=compliance_assessments_list)
+            .count()
+        )
+        total = RequirementAssessment.objects.filter(
+            compliance_assessment__in=compliance_assessments_list
+        ).count()
+        if total == 0:
+            return 0
+        return round(count * 100 / total)
+
+    def __str__(self):
+        return self.name
+
+
+class Asset(NameDescriptionMixin, FolderMixin):
+    class Type(models.TextChoices):
+        """
+        The type of the asset.
+
+        An asset can either be a primary or a support asset.
+        A support asset can be linked to another "parent" asset of type primary or support.
+        Cycles are not allowed
+        """
+
+        PRIMARY = "PR", _("Primary")
+        SUPPORT = "SP", _("Support")
+
+    business_value = models.CharField(
+        max_length=200, blank=True, verbose_name=_("business value")
+    )
+    type = models.CharField(
+        max_length=2, choices=Type.choices, default=Type.SUPPORT, verbose_name=_("type")
+    )
+    parent_assets = models.ManyToManyField(
+        "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
+    )
+    is_published = models.BooleanField(_("published"), default=True)
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        verbose_name_plural = _("Assets")
+        verbose_name = _("Asset")
+
+    def __str__(self) -> str:
+        return str(self.name)
+
+    def is_primary(self) -> bool:
+        """
+        Returns True if the asset is a primary asset.
+        """
+        return self.type == Asset.Type.PRIMARY
+
+    def is_support(self) -> bool:
+        """
+        Returns True if the asset is a support asset.
+        """
+        return self.type == Asset.Type.SUPPORT
+
+    def ancestors_plus_self(self) -> list[Self]:
+        result = {self}
+        for x in self.parent_assets.all():
+            result.update(x.ancestors_plus_self())
+        return list(result)
+
+
+class Evidence(NameDescriptionMixin, FolderMixin):
+    # TODO: Manage file upload to S3/MiniO
+    attachment = models.FileField(
+        #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
+        blank=True,
+        null=True,
+        help_text=_("Attachment for evidence (eg. screenshot, log file, etc.)"),
+        verbose_name=_("Attachment"),
+        validators=[validate_file_size, validate_file_name],
+    )
+    link = models.URLField(
+        blank=True,
+        null=True,
+        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
+        verbose_name=_("Link"),
+    )
+
+    class Meta:
+        verbose_name = _("Evidence")
+        verbose_name_plural = _("Evidences")
+
+    def get_folder(self):
+        if self.security_measures:
+            return self.security_measures.first().folder
+        elif self.requirement_assessments:
+            return self.requirement_assessments.first().folder
+        else:
+            return None
+
+    def filename(self):
+        return os.path.basename(self.attachment.name)
+
+    def preview(self):
+        if self.attachment:
+            if self.filename().endswith((".png", ".jpg", ".jpeg")):
+                return (
+                    "image",
+                    mark_safe('<img src="{}">'.format(self.attachment.url)),
+                )
+            if self.filename().endswith(".txt"):
+                with open(self.attachment.path, "r") as text:
+                    return ("text", text.read())
+            if self.filename().endswith(".pdf"):
+                return (
+                    "pdf",
+                    mark_safe(
+                        '<embed class="h-full w-full" src="{}" type="application/pdf"/>'.format(
+                            self.attachment.url
+                        )
+                    ),
+                )
+            if self.filename().endswith(".docx"):
+                return (
+                    "icon",
+                    mark_safe('<img src="{}">'.format("/static/icons/word.png")),
+                )
+            if self.filename().endswith((".xls", ".xlsx", ".csv")):
+                return (
+                    "icon",
+                    mark_safe('<img src="{}">'.format("/static/icons/excel.png")),
+                )
+        return ""
+
+
+class SecurityMeasure(NameDescriptionMixin, FolderMixin):
+    class Status(models.TextChoices):
+        PLANNED = "planned", _("Planned")
+        ACTIVE = "active", _("Active")
+        INACTIVE = "inactive", _("Inactive")
+
+    CATEGORY = SecurityFunction.CATEGORY
+
+    EFFORT = [
+        ("S", _("Small")),
+        ("M", _("Medium")),
+        ("L", _("Large")),
+        ("XL", _("Extra-Large")),
+    ]
+
+    MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
+    # todo: think about a smarter model for ranking
+    security_function = models.ForeignKey(
+        SecurityFunction,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("Security Function"),
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        verbose_name=_("Evidences"),
+        related_name="security_measures",
+    )
+    category = models.CharField(
+        max_length=20,
+        choices=CATEGORY,
+        null=True,
+        blank=True,
+        verbose_name=_("Category"),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Status"),
+    )
+    eta = models.DateField(
+        blank=True,
+        null=True,
+        help_text=_("Estimated Time of Arrival"),
+        verbose_name=_("ETA"),
+    )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        help_text=_("Date after which the security measure is no longer valid"),
+        verbose_name=_("Expiry date"),
+    )
+    link = models.CharField(
+        null=True,
+        blank=True,
+        max_length=1000,
+        help_text=_("External url for action follow-up (eg. Jira ticket)"),
+        verbose_name=_("Link"),
+    )
+    effort = models.CharField(
+        null=True,
+        blank=True,
+        max_length=2,
+        choices=EFFORT,
+        help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
+        verbose_name=_("Effort"),
+    )
+
+    fields_to_check = ["name", "category"]
+
+    class Meta:
+        verbose_name = _("Security measure")
+        verbose_name_plural = _("Security measures")
+
+    def save(self, *args, **kwargs):
+        if self.security_function and self.category is None:
+            self.category = self.security_function.category
+        super(SecurityMeasure, self).save(*args, **kwargs)
+
+    @property
+    def risk_scenarios(self):
+        return self.risk_scenarios.all()
+
+    @property
+    def risk_assessments(self):
+        return {scenario.risk_assessment for scenario in self.risk_scenarios}
+
+    @property
+    def projects(self):
+        return {risk_assessment.project for risk_assessment in self.risk_assessments}
+
+    def parent_project(self):
+        pass
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def mid(self):
+        return f"M.{self.scoped_id(scope=SecurityMeasure.objects.filter(folder=self.folder))}"
+
+    @property
+    def csv_value(self):
+        return f"[{self.status}] {self.name}" if self.status else self.name
+
+    def get_ranking_score(self):
+        if self.effort:
+            value = 0
+            for risk_scenario in self.risk_scenarios.all():
+                current = risk_scenario.current_level
+                residual = risk_scenario.residual_level
+                if current >= 0 and residual >= 0:
+                    value += (1 + current - residual) * (current + 1)
+            return round(value / self.MAP_EFFORT[self.effort], 4)
+        else:
+            return 0
+
+    @property
+    def get_html_url(self):
+        url = reverse("securitymeasure-detail", args=(self.id,))
+        return format_html(
+            '<a class="" href="{}"> <b>[MT-eta]</b> {}: {} </a>',
+            url,
+            self.folder.name,
+            self.name,
+        )
+
+    def get_linked_requirements_count(self):
+        return RequirementNode.objects.filter(
+            requirementassessment__security_measures=self
+        ).count()
+
+
+class PolicyManager(models.Manager):
+    def create(self, *args, **kwargs):
+        kwargs["category"] = "policy"  # Ensure category is always "policy"
+        return super().create(*args, **kwargs)
+
+
+class Policy(SecurityMeasure):
+    class Meta:
+        proxy = True
+        verbose_name = _("Policy")
+        verbose_name_plural = _("Policies")
+
+    objects = PolicyManager()  # Use the custom manager
+
+    def save(self, *args, **kwargs):
+        self.category = "policy"
+        super(Policy, self).save(*args, **kwargs)
+
+
+########################### Secondary objects #########################
+        
+
+class Assessment(NameDescriptionMixin):
+    class Status(models.TextChoices):
+        PLANNED = "planned", _("Planned")
+        IN_PROGRESS = "in_progress", _("In progress")
+        IN_REVIEW = "in_review", _("In review")
+        DONE = "done", _("Done")
+        DEPRECATED = "deprecated", _("Deprecated")
+
+    project = models.ForeignKey(
+        "Project", on_delete=models.CASCADE, verbose_name=_("Project")
+    )
+    version = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=_("Version of the compliance assessment (eg. 1.0, 2.0, etc.)"),
+        verbose_name=_("Version"),
+        default="1.0",
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.PLANNED,
+        verbose_name=_("Status"),
+    )
+    authors = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Authors"),
+        related_name="%(class)s_authors",
+    )
+    reviewers = models.ManyToManyField(
+        User,
+        blank=True,
+        verbose_name=_("Reviewers"),
+        related_name="%(class)s_reviewers",
+    )
+    eta = models.DateField(
+        null=True,
+        blank=True,
+        help_text=_("Estimated time of arrival"),
+        verbose_name=_("ETA"),
+    )
+    due_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text=_("Due date"),
+        verbose_name=_("Due date"),
+    )
+
+    fields_to_check = ["name", "version"]
+
+    class Meta:
+        abstract = True
 
 
 class RiskAssessment(Assessment):
@@ -676,226 +984,6 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class Evidence(NameDescriptionMixin, FolderMixin):
-    # TODO: Manage file upload to S3/MiniO
-    attachment = models.FileField(
-        #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
-        blank=True,
-        null=True,
-        help_text=_("Attachment for evidence (eg. screenshot, log file, etc.)"),
-        verbose_name=_("Attachment"),
-        validators=[validate_file_size, validate_file_name],
-    )
-    link = models.URLField(
-        blank=True,
-        null=True,
-        help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
-        verbose_name=_("Link"),
-    )
-
-    class Meta:
-        verbose_name = _("Evidence")
-        verbose_name_plural = _("Evidences")
-
-    def get_folder(self):
-        if self.security_measures:
-            return self.security_measures.first().folder
-        elif self.requirement_assessments:
-            return self.requirement_assessments.first().folder
-        else:
-            return None
-
-    def filename(self):
-        return os.path.basename(self.attachment.name)
-
-    def preview(self):
-        if self.attachment:
-            if self.filename().endswith((".png", ".jpg", ".jpeg")):
-                return (
-                    "image",
-                    mark_safe('<img src="{}">'.format(self.attachment.url)),
-                )
-            if self.filename().endswith(".txt"):
-                with open(self.attachment.path, "r") as text:
-                    return ("text", text.read())
-            if self.filename().endswith(".pdf"):
-                return (
-                    "pdf",
-                    mark_safe(
-                        '<embed class="h-full w-full" src="{}" type="application/pdf"/>'.format(
-                            self.attachment.url
-                        )
-                    ),
-                )
-            if self.filename().endswith(".docx"):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/word.png")),
-                )
-            if self.filename().endswith((".xls", ".xlsx", ".csv")):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/excel.png")),
-                )
-        return ""
-
-
-class SecurityMeasure(NameDescriptionMixin, FolderMixin):
-    class Status(models.TextChoices):
-        PLANNED = "planned", _("Planned")
-        ACTIVE = "active", _("Active")
-        INACTIVE = "inactive", _("Inactive")
-
-    CATEGORY = SecurityFunction.CATEGORY
-
-    EFFORT = [
-        ("S", _("Small")),
-        ("M", _("Medium")),
-        ("L", _("Large")),
-        ("XL", _("Extra-Large")),
-    ]
-
-    MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
-    # todo: think about a smarter model for ranking
-    security_function = models.ForeignKey(
-        SecurityFunction,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name=_("Security Function"),
-    )
-    evidences = models.ManyToManyField(
-        Evidence,
-        blank=True,
-        verbose_name=_("Evidences"),
-        related_name="security_measures",
-    )
-    category = models.CharField(
-        max_length=20,
-        choices=CATEGORY,
-        null=True,
-        blank=True,
-        verbose_name=_("Category"),
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        null=True,
-        blank=True,
-        verbose_name=_("Status"),
-    )
-    eta = models.DateField(
-        blank=True,
-        null=True,
-        help_text=_("Estimated Time of Arrival"),
-        verbose_name=_("ETA"),
-    )
-    expiry_date = models.DateField(
-        blank=True,
-        null=True,
-        help_text=_("Date after which the security measure is no longer valid"),
-        verbose_name=_("Expiry date"),
-    )
-    link = models.CharField(
-        null=True,
-        blank=True,
-        max_length=1000,
-        help_text=_("External url for action follow-up (eg. Jira ticket)"),
-        verbose_name=_("Link"),
-    )
-    effort = models.CharField(
-        null=True,
-        blank=True,
-        max_length=2,
-        choices=EFFORT,
-        help_text=_("Relative effort of the measure (using T-Shirt sizing)"),
-        verbose_name=_("Effort"),
-    )
-
-    fields_to_check = ["name", "category"]
-
-    class Meta:
-        verbose_name = _("Security measure")
-        verbose_name_plural = _("Security measures")
-
-    def save(self, *args, **kwargs):
-        if self.security_function and self.category is None:
-            self.category = self.security_function.category
-        super(SecurityMeasure, self).save(*args, **kwargs)
-
-    @property
-    def risk_scenarios(self):
-        return self.risk_scenarios.all()
-
-    @property
-    def risk_assessments(self):
-        return {scenario.risk_assessment for scenario in self.risk_scenarios}
-
-    @property
-    def projects(self):
-        return {risk_assessment.project for risk_assessment in self.risk_assessments}
-
-    def parent_project(self):
-        pass
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def mid(self):
-        return f"M.{self.scoped_id(scope=SecurityMeasure.objects.filter(folder=self.folder))}"
-
-    @property
-    def csv_value(self):
-        return f"[{self.status}] {self.name}" if self.status else self.name
-
-    def get_ranking_score(self):
-        if self.effort:
-            value = 0
-            for risk_scenario in self.risk_scenarios.all():
-                current = risk_scenario.current_level
-                residual = risk_scenario.residual_level
-                if current >= 0 and residual >= 0:
-                    value += (1 + current - residual) * (current + 1)
-            return round(value / self.MAP_EFFORT[self.effort], 4)
-        else:
-            return 0
-
-    @property
-    def get_html_url(self):
-        url = reverse("securitymeasure-detail", args=(self.id,))
-        return format_html(
-            '<a class="" href="{}"> <b>[MT-eta]</b> {}: {} </a>',
-            url,
-            self.folder.name,
-            self.name,
-        )
-
-    def get_linked_requirements_count(self):
-        return RequirementNode.objects.filter(
-            requirementassessment__security_measures=self
-        ).count()
-
-
-class PolicyManager(models.Manager):
-    def create(self, *args, **kwargs):
-        kwargs["category"] = "policy"  # Ensure category is always "policy"
-        return super().create(*args, **kwargs)
-
-
-class Policy(SecurityMeasure):
-    class Meta:
-        proxy = True
-        verbose_name = _("Policy")
-        verbose_name_plural = _("Policies")
-
-    objects = PolicyManager()  # Use the custom manager
-
-    def save(self, *args, **kwargs):
-        self.category = "policy"
-        super(Policy, self).save(*args, **kwargs)
-
-
 class RiskScenario(NameDescriptionMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
@@ -1066,6 +1154,7 @@ class RiskScenario(NameDescriptionMixin):
 
     @property
     def rid(self):
+        """return associated risk assessment id"""
         return f"R.{self.scoped_id(scope=RiskScenario.objects.filter(risk_assessment=self.risk_assessment))}"
 
     def save(self, *args, **kwargs):
@@ -1086,175 +1175,6 @@ class RiskScenario(NameDescriptionMixin):
         else:
             self.residual_level = -1
         super(RiskScenario, self).save(*args, **kwargs)
-
-
-class RiskAcceptance(NameDescriptionMixin, FolderMixin):
-    ACCEPTANCE_STATE = [
-        ("created", _("Created")),
-        ("submitted", _("Submitted")),
-        ("accepted", _("Accepted")),
-        ("rejected", _("Rejected")),
-        ("revoked", _("Revoked")),
-    ]
-
-    risk_scenarios = models.ManyToManyField(
-        RiskScenario,
-        verbose_name=_("Risk scenarios"),
-        help_text=_(
-            "Select the risk scenarios to be accepted, attention they must be part of the chosen domain"
-        ),
-    )
-    approver = models.ForeignKey(
-        User,
-        max_length=200,
-        help_text=_("Risk owner and approver identity"),
-        verbose_name=_("Approver"),
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    state = models.CharField(
-        max_length=20,
-        choices=ACCEPTANCE_STATE,
-        default="created",
-        verbose_name=_("State"),
-    )
-    expiry_date = models.DateField(
-        help_text=_("Specify when the risk acceptance will no longer apply"),
-        null=True,
-        verbose_name=_("Expiry date"),
-    )
-    accepted_at = models.DateTimeField(
-        blank=True, null=True, verbose_name=_("Acceptance date")
-    )
-    rejected_at = models.DateTimeField(
-        blank=True, null=True, verbose_name=_("Rejection date")
-    )
-    revoked_at = models.DateTimeField(
-        blank=True, null=True, verbose_name=_("Revocation date")
-    )
-    justification = models.CharField(
-        max_length=500, blank=True, null=True, verbose_name=_("Justification")
-    )
-
-    fields_to_check = ["name"]
-
-    class Meta:
-        permissions = [
-            ("approve_riskacceptance", "Can validate/rejected risk acceptances")
-        ]
-        verbose_name = _("Risk acceptance")
-        verbose_name_plural = _("Risk acceptances")
-
-    def __str__(self):
-        if self.name:
-            return self.name
-        scenario_names: str = ", ".join(
-            [str(scenario) for scenario in self.risk_scenarios.all()]
-        )
-        return f"{scenario_names}"
-
-    @property
-    def get_html_url(self):
-        url = reverse("riskacceptance-detail", args=(self.id,))
-        return format_html(
-            '<a class="" href="{}"> <b>[RA-exp]</b> {}: {} </a>',
-            url,
-            self.folder.name,
-            self.name,
-        )
-
-    def set_state(self, state):
-        self.state = state
-        if state == "accepted":
-            self.accepted_at = datetime.now()
-        if state == "rejected":
-            self.rejected_at = datetime.now()
-        elif state == "revoked":
-            self.revoked_at = datetime.now()
-        self.save()
-
-
-class Framework(ReferentialObjectMixin):
-    library = models.ForeignKey(
-        Library,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="frameworks",
-    )
-
-    class Meta:
-        verbose_name = _("Framework")
-        verbose_name_plural = _("Frameworks")
-
-    def get_next_order_id(self, obj_type: models.Model, _parent_urn: str = None) -> int:
-        """
-        Returns the next order id for a given object type
-        """
-        if _parent_urn:
-            return (
-                obj_type.objects.filter(framework=self, parent_urn=_parent_urn).count()
-                + 1
-            )
-        else:
-            return obj_type.objects.filter(framework=self).count() + 1
-
-    def is_deletable(self) -> bool:
-        """
-        Returns True if the framework can be deleted
-        """
-        if self.compliance_assessment_set.count() > 0:
-            return False
-        return True
-
-
-class RequirementLevel(ReferentialObjectMixin):
-    framework = models.ForeignKey(
-        Framework,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name=_("Framework"),
-    )
-    level = models.IntegerField(null=False, blank=False, verbose_name=_("Level"))
-
-    class Meta:
-        verbose_name = _("Requirements level")
-        verbose_name_plural = _("Requirements levels")
-
-
-class RequirementNode(ReferentialObjectMixin):
-    threats = models.ManyToManyField(
-        "Threat",
-        blank=True,
-        verbose_name=_("Threats"),
-        related_name="requirements",
-    )
-    security_functions = models.ManyToManyField(
-        "SecurityFunction",
-        blank=True,
-        verbose_name=_("Security functions"),
-        related_name="requirements",
-    )
-    framework = models.ForeignKey(
-        Framework,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name=_("Framework"),
-    )
-    parent_urn = models.CharField(
-        max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
-    )
-    order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
-    level = models.IntegerField(null=True, verbose_name=_("Level"))
-    maturity = models.IntegerField(null=True, verbose_name=_("Maturity"))
-    assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
-
-    class Meta:
-        verbose_name = _("RequirementNode")
-        verbose_name_plural = _("RequirementNodes")
 
 
 class ComplianceAssessment(Assessment):
@@ -1485,3 +1405,94 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = _("Requirement assessment")
         verbose_name_plural = _("Requirement assessments")
+
+
+########################### RiskAcesptance is a domain object relying on secondary objects #########################
+        
+
+class RiskAcceptance(NameDescriptionMixin, FolderMixin):
+    ACCEPTANCE_STATE = [
+        ("created", _("Created")),
+        ("submitted", _("Submitted")),
+        ("accepted", _("Accepted")),
+        ("rejected", _("Rejected")),
+        ("revoked", _("Revoked")),
+    ]
+
+    risk_scenarios = models.ManyToManyField(
+        RiskScenario,
+        verbose_name=_("Risk scenarios"),
+        help_text=_(
+            "Select the risk scenarios to be accepted, attention they must be part of the chosen domain"
+        ),
+    )
+    approver = models.ForeignKey(
+        User,
+        max_length=200,
+        help_text=_("Risk owner and approver identity"),
+        verbose_name=_("Approver"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    state = models.CharField(
+        max_length=20,
+        choices=ACCEPTANCE_STATE,
+        default="created",
+        verbose_name=_("State"),
+    )
+    expiry_date = models.DateField(
+        help_text=_("Specify when the risk acceptance will no longer apply"),
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
+    accepted_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Acceptance date")
+    )
+    rejected_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Rejection date")
+    )
+    revoked_at = models.DateTimeField(
+        blank=True, null=True, verbose_name=_("Revocation date")
+    )
+    justification = models.CharField(
+        max_length=500, blank=True, null=True, verbose_name=_("Justification")
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        permissions = [
+            ("approve_riskacceptance", "Can validate/rejected risk acceptances")
+        ]
+        verbose_name = _("Risk acceptance")
+        verbose_name_plural = _("Risk acceptances")
+
+    def __str__(self):
+        if self.name:
+            return self.name
+        scenario_names: str = ", ".join(
+            [str(scenario) for scenario in self.risk_scenarios.all()]
+        )
+        return f"{scenario_names}"
+
+    @property
+    def get_html_url(self):
+        url = reverse("riskacceptance-detail", args=(self.id,))
+        return format_html(
+            '<a class="" href="{}"> <b>[RA-exp]</b> {}: {} </a>',
+            url,
+            self.folder.name,
+            self.name,
+        )
+
+    def set_state(self, state):
+        self.state = state
+        if state == "accepted":
+            self.accepted_at = datetime.now()
+        if state == "rejected":
+            self.rejected_at = datetime.now()
+        elif state == "revoked":
+            self.revoked_at = datetime.now()
+        self.save()
+
