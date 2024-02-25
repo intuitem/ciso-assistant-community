@@ -467,7 +467,11 @@ class User(AbstractBaseUser):
 
     @property
     def has_backup_permission(self) -> bool:
-        return RoleAssignment.has_permission(self, "backup")
+        return RoleAssignment.is_access_allowed(
+            user=self, 
+            perm=Permission.objects.get(codename="backup"),
+            folder=Folder.get_root_folder(),
+        )
 
     @property
     def edit_url(self) -> str:

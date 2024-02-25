@@ -39,7 +39,9 @@
 	let dropdown_selected_values: any;
 
 	for (const item in security_measure_status.labels) {
-		security_measure_status.labels[item] = localItems(languageTag())[security_measure_status.localLables[item]];
+		security_measure_status.labels[item] = localItems(languageTag())[
+			security_measure_status.localLables[item]
+		];
 	}
 
 	onMount(async () => {
@@ -293,9 +295,9 @@
 				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
 					{#if counters.Project > 1}
-						{m.assignedObjects({number: counters.Project, object: m.projects()})}
+						{m.assignedProjects({ number: counters.Project, s: 's' })}
 					{:else}
-						{m.assignedObjects({number: counters.Project, object: m.project()})}
+						{m.assignedProjects({ number: counters.Project, s: '' })}
 					{/if}
 				</div>
 			</div>
@@ -304,18 +306,20 @@
 					<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 					<DonutChart
+						name="current_risk"
 						s_label={cur_rsk_label}
 						values={risk_level.current}
-						colors={RISK_COLOR_PALETTE}
+						colors={risk_level.current.map(object => object.color)}
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
 					<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 					<DonutChart
+					name="residual_risk"
 						s_label={rsd_rsk_label}
 						values={risk_level.residual}
-						colors={RISK_COLOR_PALETTE}
+						colors={risk_level.residual.map(object => object.color)}
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
@@ -524,7 +528,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<th class="py-2 px-4">{m.actions()}</th>
 									</tr>
 
-									{#if measures}
+									{#if measures.length > 0}
 										{#each measures as mtg}
 											<tr class="border-b">
 												<td class="text-left py-2 px-4">{mtg.folder.str}</td>
@@ -555,14 +559,17 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<tr class="text-black p-4 text-center">
 											<td colspan="8" class="py-2">
 												<i class="inline fas fa-exclamation-triangle" />
-												<p class="inline test-gray-900">{m.noPendingObject({object:m.securityMeasure().toLowerCase(), e:'e'})}.</p>
+												<p class="inline test-gray-900">
+													{m.noPendingSecurityMeasure()}.
+												</p>
 											</td>
 										</tr>
 									{/if}
 								</table>
 							</div>
 							<div class="text-sm p-2 m-2">
-								<i class="fas fa-info-circle" /> {m.rankingScoreDefintion()}.
+								<i class="fas fa-info-circle" />
+								{m.rankingScoreDefintion()}.
 							</div>
 						</div>
 					{:else}
@@ -615,6 +622,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 											name="compliance_assessments"
 											s_label={m.complianceAssessments()}
 											values={compliance_assessment.donut.values}
+											colors={compliance_assessment.donut.values.map(object => object.itemStyle.color)}
 										/>
 									</div>
 									<div class="absolute top-0 right-0 mt-2 space-x-1">

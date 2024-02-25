@@ -1,5 +1,4 @@
-import * as m from '$paraglide/messages';
-import type { ModelInfo } from '$lib/utils/types';
+import * as m from '../../paraglide/messages';
 
 export const LOCALE_MAP = {
 	en: {
@@ -13,39 +12,16 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
-	return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
-        return index == 0 ? word.toLowerCase() : word.toUpperCase();
-    }).replace(/\s+/g, '');
+	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
 }
 
-export function getDeterminant(lang: string, defined: string, model: ModelInfo, plural=false): string {
-	const determinantTable = {
-		"fr": {
-			"defined": {
-				"plural": "les",
-				"m": "le",
-				"f": "la"
-			},
-			"undefined": {
-				"plural": "des",
-				"m": "un",
-				"f": "une"
-			}
-		}
-	};
-
-	if (lang === "en")
-		return '';
-	else if (lang === "fr" && plural)
-		return determinantTable[lang][defined]["plural"];
-	else
-		return determinantTable[lang][defined][model.localFrGender];
+export function capitalizeFirstLetter(str: string) {
+	return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 interface LocalItems {
 	[key: string]: string;
-};
-
+}
 
 export function localItems(languageTag: string): LocalItems {
 	const LOCAL_ITEMS = {
@@ -166,6 +142,30 @@ export function localItems(languageTag: string): LocalItems {
 		planned: m.planned({ languageTag: languageTag }),
 		active: m.active({ languageTag: languageTag }),
 		inactive: m.inactive({ languageTag: languageTag }),
+		addThreat: m.addThreat({ languageTag: languageTag }),
+		addSecurityFunction: m.addSecurityFunction({ languageTag: languageTag }),
+		addSecurityMeasure: m.addSecurityMeasure({ languageTag: languageTag }),
+		addAsset: m.addAsset({ languageTag: languageTag }),
+		addRiskAssessment: m.addRiskAssessment({ languageTag: languageTag }),
+		addRiskScenario: m.addRiskScenario({ languageTag: languageTag }),
+		addRiskAcceptance: m.addRiskAcceptance({ languageTag: languageTag }),
+		addComplianceAssessment: m.addComplianceAssessment({ languageTag: languageTag }),
+		addEvidence: m.addEvidence({ languageTag: languageTag }),
+		addDomain: m.addDomain({ languageTag: languageTag }),
+		addProject: m.addProject({ languageTag: languageTag }),
+		addUser: m.addUser({ languageTag: languageTag }),
+		associatedThreats: m.associatedThreats({ languageTag: languageTag }),
+		associatedSecurityFunctions: m.associatedSecurityFunctions({ languageTag: languageTag }),
+		associatedSecurityMeasures: m.associatedSecurityMeasures({ languageTag: languageTag }),
+		associatedAssets: m.associatedAssets({ languageTag: languageTag }),
+		associatedRiskAssessments: m.associatedRiskAssessments({ languageTag: languageTag }),
+		associatedRiskScenarios: m.associatedRiskScenarios({ languageTag: languageTag }),
+		associatedRiskAcceptances: m.associatedRiskAcceptances({ languageTag: languageTag }),
+		associatedComplianceAssessments: m.associatedComplianceAssessments({ languageTag: languageTag }),
+		associatedEvidences: m.associatedEvidences({ languageTag: languageTag }),
+		associatedDomains: m.associatedDomains({ languageTag: languageTag }),
+		associatedProjects: m.associatedProjects({ languageTag: languageTag }),
+		associatedUsers: m.associatedUsers({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
