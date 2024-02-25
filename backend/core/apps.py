@@ -11,7 +11,7 @@ def startup(**kwargs):
     """
     from django.contrib.auth.models import Permission
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-    print("startup handler: initialize database", kwargs)
+    print("startup handler: initialize database")
 
     auditor_permissions = Permission.objects.filter(
         codename__in=[
