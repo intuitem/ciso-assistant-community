@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { SecurityMeasureSchema } from '$lib/utils/schemas';
+	import * as m from '$paraglide/messages';
 	import { formatStringToDate } from '$lib/utils/helpers';
 
 	let request_path: string | null;
@@ -27,10 +28,10 @@
 	<table class="w-full text-sm text-left" id="measuresTable">
 		<thead class="text-xs text-gray-700 uppercase bg-gray-50">
 			<tr>
-				<th data-sort="measure" scope="col" class="px-3 py-3"> Measure </th>
-				<th data-sort="parent_project" scope="col" class="px-3 py-3"> Domain </th>
-				<th data-sort="status" scope="col" class="px-3 py-3"> Status </th>
-				<th data-sort="expiry_date" scope="col" class="px-3 py-3"> Expiry date </th>
+				<th data-sort="measure" scope="col" class="px-3 py-3"> {m.name()} </th>
+				<th data-sort="parent_project" scope="col" class="px-3 py-3"> {m.domain()} </th>
+				<th data-sort="status" scope="col" class="px-3 py-3"> {m.status()} </th>
+				<th data-sort="expiry_date" scope="col" class="px-3 py-3"> {m.expiryDate()} </th>
 			</tr>
 		</thead>
 		<tbody>
@@ -53,11 +54,11 @@
 						</td>
 						<td class="px-3 py-4">
 							{#if measureState(measure.expiry_date) === 'expired'}
-								<span class="rounded bg-red-500 text-white p-1 text-xs mr-1">expired</span>
+								<span class="rounded bg-red-500 text-white p-1 text-xs mr-1">{m.expired()}</span>
 							{:else if measureState(measure.expiry_date) === 'upcoming'}
-								<span class="rounded bg-blue-500 text-white p-1 text-xs mr-1">upcoming</span>
+								<span class="rounded bg-blue-500 text-white p-1 text-xs mr-1">{m.upcoming()}</span>
 							{:else if measureState(measure.expiry_date) === 'today'}
-								<span class="rounded bg-yellow-500 text-white p-1 text-xs mr-1">today</span>
+								<span class="rounded bg-yellow-500 text-white p-1 text-xs mr-1">{m.today()}</span>
 							{/if}
 							{formatStringToDate(measure.expiry_date)}
 						</td>
@@ -67,7 +68,9 @@
 				<tr class="text-black p-4 text-center">
 					<td colspan="8" class="py-2">
 						<i class="inline fas fa-exclamation-triangle" />
-						<p class="inline test-gray-900">No measures yet.</p>
+						<p class="inline test-gray-900">
+							{m.noSecurityMeasureYet()}.
+						</p>
 					</td>
 				</tr>
 			{/if}

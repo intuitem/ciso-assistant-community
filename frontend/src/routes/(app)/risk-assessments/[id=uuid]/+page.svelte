@@ -17,6 +17,10 @@
 	import { page } from '$app/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
 
+	import * as m from '$paraglide/messages';
+	import { languageTag } from '$paraglide/runtime';
+	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales.js';
+
 	export let data;
 	const showRisks = true;
 	const risk_assessment = data.risk_assessment;
@@ -82,7 +86,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${model.info.verboseName.toLowerCase()}`
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -155,32 +159,34 @@
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="absolute right-2 top-2 py-2 px-4">
 				<a href="/risk-assessments/{risk_assessment.id}/plan" class="btn variant-filled-primary"
-					><i class="fa-solid fa-heart-pulse mr-2" />Remediation plan</a
+					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</a
 				>
 				<button class="btn variant-filled-primary" use:popup={popupDownload}
-					><i class="fa-solid fa-download mr-2" />Export</button
+					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
 				>
 				<div
 					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
 					data-popup="popupDownload"
 				>
-					<p class="block px-4 py-2 text-sm text-gray-800">Risk assessment</p>
+					<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
 					<a
 						href="/risk-assessments/{risk_assessment.id}/export/pdf"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... as PDF</a
+						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 					>
 					<a
 						href="/risk-assessments/{risk_assessment.id}/export/csv"
-						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">... as csv</a
+						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+						>... {m.asCSV()}</a
 					>
-					<p class="block px-4 py-2 text-sm text-gray-800">Treatment plan</p>
+					<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
 					<a
 						href="/risk-assessments/{risk_assessment.id}/plan/export/pdf"
-						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... as PDF</a
+						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 					>
 					<a
 						href="/risk-assessments/{risk_assessment.id}/plan/export/csv"
-						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200">... as csv</a
+						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+						>... {m.asCSV()}</a
 					>
 				</div>
 				{#if canEditObject}
@@ -190,14 +196,14 @@
 						data-testid="edit-button"
 					>
 						<i class="fa-solid fa-edit mr-2" />
-						Edit</a
+						{m.edit()}</a
 					>
 				{/if}
 			</div>
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{#if risk_assessment.is_draft}
-						<span class="badge bg-blue-200">Draft</span>
+						<span class="badge bg-blue-200">{m.draft()}</span>
 					{/if}
 					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
 				</div>
@@ -205,7 +211,7 @@
 				<div class="text-sm">
 					<ul>
 						<li class="pb-1">
-							<span class="font-semibold">Authors:</span>
+							<span class="font-semibold">{m.authors()}:</span>
 							<ul>
 								{#each risk_assessment.authors as author}
 									<li>{author.str}</li>
@@ -213,11 +219,11 @@
 							</ul>
 						</li>
 						<li class="pb-1">
-							<span class="font-semibold">Created at:</span>
+							<span class="font-semibold">{m.createdAt()}:</span>
 							{new Date(risk_assessment.created_at).toLocaleString()}
 						</li>
 						<li class="pb-1">
-							<span class="font-semibold">Updated at:</span>
+							<span class="font-semibold">{m.updatedAt()}:</span>
 							{new Date(risk_assessment.updated_at).toLocaleString()}
 						</li>
 					</ul>
@@ -225,7 +231,7 @@
 			</div>
 			<div class="container w-2/3">
 				<div class="text-sm">
-					<span class="font-semibold" data-testid="risk-matrix-field-title">Risk matrix:</span>
+					<span class="font-semibold" data-testid="risk-matrix-field-title">{m.riskMatrix()}:</span>
 					<a
 						href="/risk-matrices/{risk_assessment.risk_matrix.id}"
 						class="anchor"
@@ -234,7 +240,8 @@
 				</div>
 				<br />
 				<div class="text-sm">
-					<span class="font-semibold" data-testid="description-field-title">Description:</span>
+					<span class="font-semibold" data-testid="description-field-title">{m.description()}:</span
+					>
 				</div>
 				<div class="text-sm" data-testid="description-field-value">
 					{risk_assessment.description ?? '-'}
@@ -249,7 +256,7 @@
 				<div class="bg-white">
 					<div class="flex flex-row justify-between">
 						<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
-							Associated {model.info.verboseNamePlural}
+							{localItems(languageTag())['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
 						</h4>
 					</div>
 					{#if model.table}
@@ -258,8 +265,9 @@
 								slot="addButton"
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />New {model.info.verboseName}</button
-							>
+								><i class="fa-solid fa-plus mr-2 lowercase" />
+								{localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]}
+							</button>
 						</ModelTable>
 					{/if}
 				</div>
@@ -268,10 +276,10 @@
 	</div>
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow bg-white page-break">
-		<div class="text-lg font-semibold">Risk matrix view</div>
+		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex space-x-3">
 			<div class="w-1/2 p-6">
-				<h3 class="font-bold p-2 m-2 text-lg">Current</h3>
+				<h3 class="font-bold p-2 m-2 text-lg">{m.currentInMatrixView()}</h3>
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}
@@ -281,7 +289,7 @@
 				/>
 			</div>
 			<div class="w-1/2 p-6">
-				<h3 class="font-bold p-2 m-2 text-lg">Residual</h3>
+				<h3 class="font-bold p-2 m-2 text-lg">{m.residualInMatrixView()}</h3>
 
 				<RiskMatrix
 					riskMatrix={risk_assessment.risk_matrix}

@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize]
-    paths:
-      - 'frontend/tests/**'
   workflow_dispatch:
 
 env:
