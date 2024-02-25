@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
-from iam.models import FolderMixin, RootFolderMixin
+from iam.models import FolderMixin
 from django.core import serializers
 
 import os
@@ -21,7 +21,60 @@ from django.utils.html import format_html
 User = get_user_model()
 
 
-class Library(ReferentialObjectMixin, FolderMixin):
+class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
+    """
+    Mixin for referential objects.
+    """
+
+    urn = models.CharField(
+        max_length=100, null=True, blank=True, unique=True, verbose_name=_("URN")
+    )
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
+    )
+    locale = models.CharField(
+        max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
+    )
+    default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
+    provider = models.CharField(
+        max_length=200, blank=True, null=True, verbose_name=_("Provider")
+    )
+    name = models.CharField(
+        null=True, max_length=200, verbose_name=_("Name"), unique=False
+    )
+    description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
+    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
+
+    class Meta:
+        abstract = True
+
+    def display_short(self) -> str:
+        _name = (
+            self.ref_id
+            if not self.name
+            else self.name
+            if not self.ref_id
+            else f"{self.ref_id} - {self.name}"
+        )
+        _name = "" if not _name else _name
+        return _name
+
+    def display_long(self) -> str:
+        _name = self.display_short()
+        _display = (
+            _name
+            if not self.description
+            else self.description
+            if _name == ""
+            else f"{_name}: {self.description}"
+        )
+        return _display
+
+    def __str__(self) -> str:
+        return self.display_short()
+
+
+class Library(ReferentialObjectMixin):
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -181,7 +234,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         return self.name
 
 
-class Threat(ReferentialObjectMixin, RootFolderMixin):
+class Threat(ReferentialObjectMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
@@ -207,7 +260,7 @@ class Threat(ReferentialObjectMixin, RootFolderMixin):
         return self.name
 
 
-class Asset(NameDescriptionMixin, RootFolderMixin):
+class Asset(NameDescriptionMixin, FolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -259,7 +312,7 @@ class Asset(NameDescriptionMixin, RootFolderMixin):
         return list(result)
 
 
-class SecurityFunction(ReferentialObjectMixin, RootFolderMixin):
+class SecurityFunction(ReferentialObjectMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -308,7 +361,7 @@ class SecurityFunction(ReferentialObjectMixin, RootFolderMixin):
         return self.name
 
 
-class RiskMatrix(ReferentialObjectMixin, FolderMixin):
+class RiskMatrix(ReferentialObjectMixin):
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -376,7 +429,6 @@ class RiskAssessment(Assessment):
         help_text=_("WARNING! After choosing it, you will not be able to change it"),
         verbose_name=_("Risk matrix"),
     )
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _("Risk assessment")
@@ -760,9 +812,6 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Effort"),
     )
 
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
-
     fields_to_check = ["name", "category"]
 
     class Meta:
@@ -934,7 +983,6 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     strength_of_knowledge = models.CharField(
         max_length=20,
         choices=SOK_OPTIONS,
@@ -1076,7 +1124,6 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         null=True,
         verbose_name=_("Expiry date"),
     )
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     accepted_at = models.DateTimeField(
         blank=True, null=True, verbose_name=_("Acceptance date")
     )
@@ -1128,7 +1175,7 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         self.save()
 
 
-class Framework(ReferentialObjectMixin, FolderMixin):
+class Framework(ReferentialObjectMixin):
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -1162,7 +1209,7 @@ class Framework(ReferentialObjectMixin, FolderMixin):
         return True
 
 
-class RequirementLevel(ReferentialObjectMixin, FolderMixin):
+class RequirementLevel(ReferentialObjectMixin):
     framework = models.ForeignKey(
         Framework,
         on_delete=models.CASCADE,
@@ -1177,7 +1224,7 @@ class RequirementLevel(ReferentialObjectMixin, FolderMixin):
         verbose_name_plural = _("Requirements levels")
 
 
-class RequirementNode(ReferentialObjectMixin, FolderMixin):
+class RequirementNode(ReferentialObjectMixin):
     threats = models.ManyToManyField(
         "Threat",
         blank=True,
