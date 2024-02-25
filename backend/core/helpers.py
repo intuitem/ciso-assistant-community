@@ -535,23 +535,23 @@ def aggregate_risks_per_field(
     return values
 
 def risks_count_per_level(user: User, risk_assessments: list | None = None):
-    current_level  = []
-    residual_level = []
+    current_level = list()
+    residual_level = list()
 
-    for level_name, level_data in aggregate_risks_per_field(
+    for r in aggregate_risks_per_field(
         user, "name", risk_assessments=risk_assessments
     ).items():
         current_level.append(
             {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
 
-    for level_name, level_data in aggregate_risks_per_field(
+    for r in aggregate_risks_per_field(
         user, "name", residual=True, risk_assessments=risk_assessments
     ).items():
         residual_level.append(
             {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
-
+    print("current", current_level, "residual", residual_level)
     return {"current": current_level, "residual": residual_level}
 
 

@@ -16,7 +16,7 @@
 	let chart_element: HTMLElement | null = null;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		const chart_element = document.getElementById(chart_id);
+		const chart_element = document.getElementById('chart_id');
 		let chart = echarts.init(chart_element, null, { renderer: 'svg' });
 
 		// specify chart configuration item and data
@@ -77,4 +77,4 @@
 	});
 </script>
 
-<div id="{chart_id}" class="bg-white w-auto h-full"/> <!-- bind:this={chart_element} -->
+<div id="chart_id" class="bg-white w-auto h-full"/> <!-- bind:this={chart_element} -->
