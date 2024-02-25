@@ -3,6 +3,7 @@
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
+	export let name: string;
 	export let s_label: string;
 
 	export let values: any[]; // Set the types for these variables later on

@@ -516,16 +516,16 @@ def aggregate_risks_per_field(
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(residual_level=i)
-                    .filter(risk_assessment__risk_matrix__name=["name"])
+                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )
+                ) # What the second filter does ? Is this usefull ?
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
-                    .filter(risk_assessment__risk_matrix__name=["name"])
+                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )
+                ) # What the second filter does ? Is this usefull ?
 
             if "count" not in values[m["risk"][i][field]]:
                 values[m["risk"][i][field]]["count"] = count
@@ -551,7 +551,6 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
         residual_level.append(
             {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
-
     return {"current": current_level, "residual": residual_level}
 
 
@@ -709,7 +708,6 @@ def risk_status(user: User, risk_assessment_list):
         names.append(str(risk_assessment.project) + " " + str(risk_assessment.version))
 
     y_max_rsk = max(max_tmp, default=0) + 1
-    print("y_max_rsk: ", y_max_rsk)
 
     return {
         "names": names,
