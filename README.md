@@ -284,6 +284,8 @@ CISO_ASSISTANT_URL=http://localhost:4173 python manage.py runserver
 PUBLIC_BACKEND_API_URL=http://localhost:8000/api npx playwright test
 ```
 
+For tests requiring mail sending, it is necessary to launch mailhog in a separate terminal.
+
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful. This is achieved for API tests, and will be soon achieved for functional tests.
 
 ## Built With
