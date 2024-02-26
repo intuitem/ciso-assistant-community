@@ -236,5 +236,6 @@
 	"changePasswordText": "Vous pouvez changer votre mot de passe ici. Vous devrez vous reconnecter avec le nouveau mot de passe après cette opération",
 	"oldPassword": "Ancien mot de passe",
 	"newPassword": "Nouveau mot de passe",
-	"confirmNewPassword": "Confirmer le nouveau mot de passe"
+	"confirmNewPassword": "Confirmer le nouveau mot de passe",
+	"label": "Label"
 }

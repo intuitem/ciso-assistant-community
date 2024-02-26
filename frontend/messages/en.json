@@ -236,5 +236,6 @@
 	"changePasswordText": "You can change your password here. You'll need to log in with your new password after this operation",
 	"oldPassword": "Old password",
 	"newPassword": "New password",
-	"confirmNewPassword": "Confirm new password"
+	"confirmNewPassword": "Confirm new password",
+	"label": "Label"
 }
