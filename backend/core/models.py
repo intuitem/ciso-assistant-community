@@ -996,11 +996,40 @@ class RiskScenario(NameDescriptionMixin):
     ]
 
     DEFAULT_SOK_OPTIONS = {
-        -1: _("--"),
-        0: _("Low"),
-        1: _("Medium"),
-        2: _("High"),
-        3: _("Very High"),
+        -1: {
+            "name": _("--"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is undefined"
+            ),
+        },
+        0: {
+            "name": _("Low"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is low"
+            ),
+            "symbol": "◔",
+        },
+        1: {
+            "name": _("Medium"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is medium"
+            ),
+            "symbol": "◑",
+        },
+        2: {
+            "name": _("High"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is high"
+            ),
+            "symbol": "◕",
+        },
+        3: {
+            "name": _("Very High"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is very high"
+            ),
+            "symbol": "●",
+        },
     }
 
     risk_assessment = models.ForeignKey(
