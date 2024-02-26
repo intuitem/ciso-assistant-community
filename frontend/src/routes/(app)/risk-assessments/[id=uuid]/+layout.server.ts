@@ -86,7 +86,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				);
 
 				const table: TableSource = {
-					head: listViewFields[e.urlModel].head.filter((field) => field !== 'Risk assessment'),
+					head: listViewFields[e.urlModel].head.filter((field) => field !== 'riskAssessment'),
 					body: bodyData,
 					meta: metaData
 				};
