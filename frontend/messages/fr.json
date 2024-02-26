@@ -327,5 +327,7 @@
 	"errorOccuredWhileLoadingLibrary": "L'erreur suivante s'est produite lors du chargement du formulaire de bibliothèque",
 	"packager": "Éditeur",
 	"dependencies": "Dépendances",
-	"copyright": "Droits d'auteur"
+	"copyright": "Droits d'auteur",
+	"uploadYourLibrary": "Téléchargez votre propre bibliothèque",
+	"libraryFileInYaml": "Fichier de librairie en format YAML"
 }
