@@ -17,6 +17,7 @@
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
+	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
@@ -33,6 +34,15 @@
 	breadcrumbObject.set(data.scenario);
 
 	const schema = modelSchema(data.model.urlModel!);
+
+	const strengthOfKnowledgeFormChoices: { label: string; value: number }[] = (
+		Object.entries(data.strengthOfKnowledgeChoices) as StrengthOfKnowledgeEntry[]
+	)
+		.map(([key, value]) => ({
+			label: value.name,
+			value: parseInt(key)
+		}))
+		.sort((a, b) => a.value - b.value);
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -297,7 +307,7 @@
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<Select
 				{form}
-				options={data.strengthOfKnowledgeChoices}
+				options={strengthOfKnowledgeFormChoices}
 				field="strength_of_knowledge"
 				label="Strength of knowledge"
 			/>

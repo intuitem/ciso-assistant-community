@@ -256,7 +256,9 @@
 				<div class="bg-white">
 					<div class="flex flex-row justify-between">
 						<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
-							{localItems(languageTag())['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
+							{localItems(languageTag())[
+								'associated' + capitalizeFirstLetter(model.info.localNamePlural)
+							]}
 						</h4>
 					</div>
 					{#if model.table}
