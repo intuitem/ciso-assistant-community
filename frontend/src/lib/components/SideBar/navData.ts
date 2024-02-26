@@ -65,7 +65,8 @@ export const navData = {
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-user',
-					href: '/policies'
+					href: '/policies',
+					permissions: ['view_securitymeasure']
 				},
 				{
 					name: 'riskMatrices',
