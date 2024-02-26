@@ -49,16 +49,18 @@
 			</div>
 			{#each row as cell, j}
 				<div
-					class="flex items-center justify-center space-x-1 h-20 [&>*]:pointer-events-none"
+					class="flex flex-wrap items-center space-x-1 justify-center h-20 [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar"
 					style="background-color: {cell.level.hexcolor};"
 					data-testid="cell"
 				>
-					{#if dataItemComponent}
-						{#each data[i][j] as item}
-							<svelte:component this={dataItemComponent} data={item} />
-						{/each}
-					{:else if displayedData}
-						<div class="mx-auto text-center">{displayedData[i][j]}</div>
+					{#if displayedData}
+						{#if dataItemComponent}
+							{#each displayedData[i][j] as item}
+								<svelte:component this={dataItemComponent} data={item} />
+							{/each}
+						{:else}
+							<div class="mx-auto text-center">{displayedData[i][j]}</div>
+						{/if}
 					{/if}
 				</div>
 			{/each}
