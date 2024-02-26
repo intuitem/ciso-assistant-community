@@ -318,5 +318,6 @@
 	"lossOfAccountabilityText": "Are the threat agents' actions traceable to an individual?",
 	"lossOfAccountabilityChoice1": "Fully traceable",
 	"lossOfAccountabilityChoice2": "Possibly traceable",
-	"lossOfAccountabilityChoice3": "Completely anonymous"
+	"lossOfAccountabilityChoice3": "Completely anonymous",
+	"ignore": "Ignore"
 }
