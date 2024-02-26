@@ -509,21 +509,22 @@ class EndpointTestsQueries:
                     response.status_code == user_perm_expected_status
                 ), f"{verbose_name} can be created without permission" if response.status_code == status.HTTP_201_CREATED else f"Creating {verbose_name.lower()} should give a status {user_perm_expected_status}"
             
-            for key, value in build_params.items():
-                if key == "attachment":
-                    # Asserts that the value file name is present in the JSON response
-                    assert (
-                        value.name.split("/")[-1].split(".")[0] in response.json()[key]
-                    ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
-                else:
-                    assert (
-                        response.json()[key] == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+            if not (fails or user_perm_fails):
+                for key, value in build_params.items():
+                    if key == "attachment":
+                        # Asserts that the value file name is present in the JSON response
+                        assert (
+                            value.name.split("/")[-1].split(".")[0] in response.json()[key]
+                        ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                    else:
+                        assert (
+                            response.json()[key] == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
 
-            # Checks that the object was created in the database
-            assert (
-                object.objects.filter(id=response.json()["id"]).exists()
-            ), f"{verbose_name} created with the API are not saved in the database"
+                # Checks that the object was created in the database
+                assert (
+                    object.objects.filter(id=response.json()["id"]).exists()
+                ), f"{verbose_name} created with the API are not saved in the database"
 
             # Uses the API endpoint to assert that the created object is accessible
             response = authenticated_client.get(url)
