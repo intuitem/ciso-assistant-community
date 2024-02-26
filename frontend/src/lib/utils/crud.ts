@@ -190,6 +190,26 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' }
 		]
 	},
+	policies: {
+		name: 'securitymeasure',
+		localName: 'policy',
+		localNamePlural: 'policies',
+		localFrGender: 'f',
+		verboseName: 'Policy',
+		verboseNamePlural: 'Policies',
+		foreignKeyFields: [
+			{ field: 'security_function', urlModel: 'security-functions' },
+			{ field: 'folder', urlModel: 'folders' },
+			{ field: 'evidences', urlModel: 'evidences' }
+		],
+		selectFields: [{ field: 'status' }, { field: 'effort' }],
+		filters: [
+			{ field: 'security_function' },
+			{ field: 'status' },
+			{ field: 'effort' },
+			{ field: 'folder' }
+		]
+	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
 		localName: 'riskAcceptance',
