@@ -3,6 +3,7 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
+	import * as m from '$paraglide/messages';
 
 	export let data;
 	let loading = false;
@@ -93,12 +94,12 @@
 			</div>
 		</span>
 		<div class="space-y-1">
-			<p class="text-md leading-5 text-gray-700">Description: {data.library.description}</p>
-			<p class="text-md leading-5 text-gray-700">Provider: {data.library.provider}</p>
-			<p class="text-md leading-5 text-gray-700">Packager: {data.library.packager}</p>
+			<p class="text-md leading-5 text-gray-700">{m.description()}: {data.library.description}</p>
+			<p class="text-md leading-5 text-gray-700">{m.provider()}: {data.library.provider}</p>
+			<p class="text-md leading-5 text-gray-700">{m.packager()}: {data.library.packager}</p>
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
-					Dependendies:
+					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
 						<li>
 							<a href="/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a>
@@ -107,7 +108,7 @@
 				</p>
 			{/if}
 			{#if data.library.copyright}
-				<p class="text-sm leading-5 text-gray-500">Copyright: {data.library.copyright}</p>
+				<p class="text-sm leading-5 text-gray-500">{m.copyright()}: {data.library.copyright}</p>
 			{/if}
 		</div>
 	</div>
@@ -155,7 +156,7 @@
 	{/if}
 
 	{#if framework}
-		<h4 class="h4 font-medium">Framework</h4>
+		<h4 class="h4 font-medium">{m.framework()}</h4>
 		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
 	{/if}
 </div>

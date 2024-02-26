@@ -319,5 +319,13 @@
 	"lossOfAccountabilityChoice1": "Fully traceable",
 	"lossOfAccountabilityChoice2": "Possibly traceable",
 	"lossOfAccountabilityChoice3": "Completely anonymous",
-	"ignore": "Ignore"
+	"ignore": "Ignore",
+	"importedLibraries": "Imported libraries",
+	"librariesStore": "Libraries store",
+	"currentlyNoImportedLibraries": "You currently have no imported libraries",
+	"loadingLibraryUploadButton":  "Loading the library upload button",
+	"errorOccuredWhileLoadingLibrary": "The following error occured while loading the library form",
+	"packager": "Packager",
+	"dependencies": "Dependencies",
+	"copyright": "Copyright"
 }
