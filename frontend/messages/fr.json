@@ -224,7 +224,7 @@
 	"asPDF": "en PDF",
 	"asCSV": "en CSV",
 	"draft": "Brouillon",
-	"riskMatrixView": "Vue de la matrice de risque",
+	"riskMatrixView": "Vue matricielle",
 	"currentInMatrixView": "Courante",
 	"residualInMatrixView": "Residuelle",
 	"probability": "Probabilité",
