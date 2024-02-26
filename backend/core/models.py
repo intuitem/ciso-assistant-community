@@ -22,6 +22,7 @@ User = get_user_model()
 
 ########################### Referential objects #########################
 
+
 class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     """
     Mixin for referential objects.
@@ -355,6 +356,7 @@ class RequirementNode(ReferentialObjectMixin):
 
 ########################### Domain objects #########################
 
+
 class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("--")),
@@ -672,7 +674,7 @@ class Policy(SecurityMeasure):
 
 
 ########################### Secondary objects #########################
-        
+
 
 class Assessment(NameDescriptionMixin):
     class Status(models.TextChoices):
@@ -993,11 +995,13 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
-    SOK_OPTIONS = [
-        ("0", _("Low")),
-        ("1", _("Medium")),
-        ("2", _("High")),
-    ]
+    DEFAULT_SOK_OPTIONS = {
+        -1: _("--"),
+        0: _("Low"),
+        1: _("Medium"),
+        2: _("High"),
+        3: _("Very High"),
+    }
 
     risk_assessment = models.ForeignKey(
         RiskAssessment,
@@ -1070,12 +1074,10 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    strength_of_knowledge = models.CharField(
-        max_length=20,
-        choices=SOK_OPTIONS,
-        null=True,
-        blank=True,
+    strength_of_knowledge = models.IntegerField(
+        default=-1,
         verbose_name=_("Strength of Knowledge"),
+        help_text=_("The strength of the knowledge supporting the assessment"),
     )
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
@@ -1408,7 +1410,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
-        
+
 
 class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
@@ -1495,4 +1497,3 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
-
