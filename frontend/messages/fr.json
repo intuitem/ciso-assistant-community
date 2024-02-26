@@ -230,5 +230,13 @@
 	"probability": "Probabilité",
 	"riskLevels": "Niveaux de risque",
 	"cancel": "Annuler",
-	"save": "Enregistrer"
+	"save": "Enregistrer",
+	"currentAssessment": "Évaluation actuelle",
+	"scope": "Périmètre",
+	"assetsImpactedByTheRiskScenario": "Biens sensibles impactés par le scénario de risque",
+	"ecistingMeasures": "Mesures existantes",
+	"theExistingSecurityMeasuresToManageThisRisk": "Les mesures de sécurité existantes pour gérer ce risque",
+	"currentRiskLevelGivenCurrentMeasures": "Niveau de risque courant compte tenu des mesures actuelles",
+	"targetAssessment": "Évaluation cible",
+	"riskLevelWhenAllExtraMeasuresDone": "Niveau de risque lorsque toutes les mesures supplémentaires sont appliquées"
 }
