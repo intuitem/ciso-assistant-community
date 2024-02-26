@@ -125,6 +125,7 @@
 	"justification": "Justification",
 	"parentFolder": "Domaine parent",
 	"contentType": "Type de contenu",
+	"type": "Type",
 	"lcStatus": "Statut",
 	"internalReference": "Référence interne",
 	"isActive": "Est actif",
