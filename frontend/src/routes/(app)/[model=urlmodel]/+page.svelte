@@ -11,6 +11,9 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
 	import type { PageData } from './$types';
+	import * as m from '$paraglide/messages';
+	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
 
@@ -74,7 +77,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${data.model.verboseName}`
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -91,15 +94,16 @@
 						class="btn variant-filled-primary self-end"
 						data-testid="add-button"
 						on:click={modalCreateForm}
-						><i class="fa-solid fa-plus mr-2" />New {data.model.verboseName.toLowerCase()}</button
-					>
+						><i class="fa-solid fa-plus mr-2" />
+						{localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]}
+					</button>
 				{:else if data.URLModel === 'risk-matrices'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-						><i class="fa-solid fa-file-import mr-2" />Import matrices</a
+						><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
 					>
 				{:else if data.URLModel === 'frameworks'}
 					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
-						><i class="fa-solid fa-file-import mr-2" />Import framework</a
+						><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
 					>
 				{/if}
 			</div>

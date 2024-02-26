@@ -7,6 +7,9 @@
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	let sidebarOpen = true;
 
 	$: classesSidebarOpen = (open: boolean) => (open ? 'ml-64' : 'ml-7');
@@ -22,7 +25,13 @@
 	</svelte:fragment>
 	<svelte:fragment slot="pageHeader">
 		<AppBar background="bg-white" padding="py-2 px-4">
-			<span class="text-2xl font-bold pb-1" id="page-title">{$pageTitle}</span>
+			<span class="text-2xl font-bold pb-1" id="page-title">
+				{#if localItems(languageTag())[$pageTitle]}
+					{localItems(languageTag())[$pageTitle]}
+				{:else}
+					{$pageTitle}
+				{/if}
+			</span>
 			<hr class="w-screen my-1" />
 			<Breadcrumbs />
 		</AppBar>

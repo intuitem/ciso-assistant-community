@@ -13,8 +13,9 @@ CISO Assistant brings a different take on Cyber Security Posture Management:
 ![](posture.png)
 
 This decoupling allows you to save considerable amount of time:
+
 - reuse previous assessments,
-- assess a scope against multiple frameworks at the same time, 
+- assess a scope against multiple frameworks at the same time,
 - leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
 
 Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) about the community editions on our blog.
@@ -29,7 +30,8 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - CMMC v2
 - PSPF
 
-Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
+Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
+
 ### Coming soon
 
 - GDPR checklist
@@ -69,9 +71,11 @@ cd ciso-assistant-community
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO Assistant using your web brower at [http://localhost:3000/](http://localhost:3000/)
+You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
 
 For the following executions, use "docker-compose up" directly.
+
+If you want to restart a fresh install, simply delete the db directory, where the database is stored.
 
 ## Setting up CISO Assistant for development
 
@@ -130,14 +134,18 @@ export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
 
-# You can define the email of the first superuser, useful for automation
+# You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initlization
 export CISO_SUPERUSER_EMAIL=<XXX>
 
-# By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test, 
-# but not recommended for production, as it can break the sessions (see 
-# this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information). 
+# By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test,
+# but not recommended for production, as it can break the sessions (see
+# this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information).
 # To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
 export DJANGO_SECRET_KEY=...
+
+# Logging configuration
+export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
@@ -162,14 +170,14 @@ pip install -r requirements.txt
 5. If you want to setup Postgres:
 
 - Launch one of these commands to enter in Postgres:
-  - ```psql as superadmin```
-  - ```sudo su postgres```
-  - ```psql```
+  - `psql as superadmin`
+  - `sudo su postgres`
+  - `psql`
 - Create the database "ciso-assistant"
-  - ```create database ciso-assistant;```
+  - `create database ciso-assistant;`
 - Create user "ciso-assistantuser" and grant it access
-  - ```create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';```
-  -  ```grant all privileges on database ciso-assistant to ciso-assistantuser;```
+  - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
+  - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
 6. Apply migrations.
 
@@ -185,17 +193,16 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-
 8.  Run development server.
 
 ```sh
 python manage.py runserver
 ```
 
-9.   Configure the git hooks for generating the build name.
+9.  Configure the git hooks for generating the build name.
 
 ```sh
-cd .git/hooks 
+cd .git/hooks
 ln -fs ../../git_hooks/post-commit .
 ln -fs ../../git_hooks/post-merge .
 ```
@@ -221,8 +228,8 @@ OR
 ```bash
 export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
 ```
-Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
 
+Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
 
 3. Install dependencies
 
@@ -236,26 +243,9 @@ npm install
 npm run dev
 ```
 
-5. If you want to setup Postgres:
+5. Reach the frontend on http://localhost:5173
 
-- Launch one of these commands to enter in Postgres:
-  - ```psql as superadmin```
-  - ```sudo su postgres```
-  - ```psql```
-- Create the database "mira"
-  - ```create database mira;```
-- Create user "mirauser" and grant it access
-  - ```create user mirauser with password '<POSTGRES_PASSWORD>';```
-  -  ```grant all privileges on database mira to mirauser;```
-
-6. Prepare and apply migrations.
-
-```sh
-(venv)$ cd backend
-(venv)$ pytest
-```
-
-Coming soon.
+Note: Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
 
 ## Managing migrations
 
@@ -278,6 +268,25 @@ python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
+
+## Test harness
+
+To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
+
+To run functional tests on the frontend, do the following actions:
+- in the backend folder, launch the following commands:
+```shell
+DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput
+CISO_ASSISTANT_URL=http://localhost:4173 python manage.py runserver
+```
+- in parallel, in the frontend folder, launch the following command:
+```shell
+PUBLIC_BACKEND_API_URL=http://localhost:8000/api npx playwright test
+```
+
+For tests requiring mail sending, it is necessary to launch mailhog in a separate terminal.
+
+The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful. This is achieved for API tests, and will be soon achieved for functional tests.
 
 ## Built With
 

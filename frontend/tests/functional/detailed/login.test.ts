@@ -1,4 +1,4 @@
-import { test, baseTest, expect} from '../../utils/test-utils.js';
+import { test, baseTest, expect } from '../../utils/test-utils.js';
 
 baseTest.beforeEach(async ({ page }) => {
 	await page.goto('/');
@@ -8,7 +8,12 @@ baseTest.skip('login page as expected title', async ({ page }) => {
 	await expect.soft(page.getByRole('heading', { name: 'Hello there 👋' })).toBeVisible();
 });
 
-test('login / logout process is working properly', async ({ loginPage, analyticsPage: overviewPage, sideBar, page }) => {
+test('login / logout process is working properly', async ({
+	loginPage,
+	analyticsPage: overviewPage,
+	sideBar,
+	page
+}) => {
 	await loginPage.hasUrl(1);
 	await expect.soft(page.getByRole('heading', { name: 'Login into your account' })).toBeVisible();
 	await loginPage.login();

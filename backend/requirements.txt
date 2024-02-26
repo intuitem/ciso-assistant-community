@@ -12,3 +12,5 @@ django-stubs==4.2.7
 coverage==7.4.1
 django-tailwind==3.8.0
 pyyaml==6.0.1
+django-structlog==7.1.0
+structlog==24.1.0
