@@ -28,6 +28,7 @@
 	"associatedUsers": "Associated users",
 	"home": "Home",
 	"edit": "Edit",
+	"changePassword": "Change password",
 	"overview": "Overview",
 	"context": "Context",
 	"governance": "Governance",
@@ -230,5 +231,10 @@
 	"probability": "Probability",
 	"riskLevels": "Risk levels",
 	"cancel": "Cancel",
-	"save": "Save"
+	"save": "Save",
+	"myUserGroups": "My user groups",
+	"changePasswordText": "You can change your password here. You'll need to log in with your new password after this operation",
+	"oldPassword": "Old password",
+	"newPassword": "New password",
+	"confirmNewPassword": "Confirm new password"
 }

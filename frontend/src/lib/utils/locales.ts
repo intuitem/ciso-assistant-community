@@ -1,3 +1,4 @@
+import { changePassword } from '$paraglide/messages/en';
 import * as m from '../../paraglide/messages';
 
 export const LOCALE_MAP = {
@@ -167,6 +168,7 @@ export function localItems(languageTag: string): LocalItems {
 		associatedDomains: m.associatedDomains({ languageTag: languageTag }),
 		associatedProjects: m.associatedProjects({ languageTag: languageTag }),
 		associatedUsers: m.associatedUsers({ languageTag: languageTag }),
+		changePassword: m.changePassword({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
