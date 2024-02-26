@@ -20,6 +20,7 @@
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales.js';
+	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 
 	export let data;
 	const showRisks = true;
@@ -129,9 +130,7 @@
 		scenarios.forEach((scenario: RiskScenario, index: number) => {
 			const probability = scenario[`${risk}_proba`].value;
 			const impact = scenario[`${risk}_impact`].value;
-			probability >= 0 && impact >= 0
-				? grid[probability][impact].push(`R.${index + 1}`)
-				: undefined;
+			probability >= 0 && impact >= 0 ? grid[probability][impact].push(scenario) : undefined;
 		});
 		return grid;
 	};
@@ -288,6 +287,7 @@
 					{showRisks}
 					data={currentCluster}
 					wrapperClass="mt-8"
+					dataItemComponent={RiskScenarioItem}
 				/>
 			</div>
 			<div class="w-1/2 p-6">
@@ -297,6 +297,7 @@
 					riskMatrix={risk_assessment.risk_matrix}
 					data={residualCluster}
 					wrapperClass="mt-8"
+					dataItemComponent={RiskScenarioItem}
 				/>
 			</div>
 		</div>
