@@ -12,10 +12,10 @@ export const navData = {
 		// 	]
 		// },
 		{
-			name: 'Overview',
+			name: 'overview',
 			items: [
 				{
-					name: 'Analytics',
+					name: 'analytics',
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics',
 					permissions: [
@@ -27,7 +27,7 @@ export const navData = {
 					]
 				},
 				{
-					name: 'Calendar',
+					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
 					permissions: ['view_event']
@@ -35,60 +35,60 @@ export const navData = {
 			]
 		},
 		{
-			name: 'Context',
+			name: 'context',
 			items: [
 				{
-					name: 'Threats',
+					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
 					href: '/threats'
 				},
 				{
-					name: 'Security functions',
+					name: 'securityFunctions',
 					fa_icon: 'fa-solid fa-gears',
 					href: '/security-functions'
 				},
 				{
-					name: 'Security measures',
+					name: 'securityMeasures',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
 					href: '/security-measures'
 				},
 				{
-					name: 'Assets',
+					name: 'assets',
 					fa_icon: 'fa-solid fa-gem',
 					href: '/assets'
 				}
 			]
 		},
 		{
-			name: 'Governance',
+			name: 'governance',
 			items: [
 				{
-					name: 'Policies',
+					name: 'policies',
 					fa_icon: 'fa-solid fa-user',
 					href: '/policies'
 				},
 				{
-					name: 'Risk matrices',
+					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
 				}
 			]
 		},
 		{
-			name: 'Risk',
+			name: 'risk',
 			items: [
 				{
-					name: 'Risk assessments',
+					name: 'riskAssessments',
 					fa_icon: 'fa-solid fa-magnifying-glass-chart',
 					href: '/risk-assessments'
 				},
 				{
-					name: 'Risk scenarios',
+					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
 					href: '/risk-scenarios'
 				},
 				{
-					name: 'Risk acceptances',
+					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/risk-acceptances'
 				}
@@ -96,50 +96,50 @@ export const navData = {
 		},
 
 		{
-			name: 'Compliance',
+			name: 'compliance',
 			items: [
 				{
-					name: 'Compliance assessments',
+					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-arrows-to-eye',
 					href: '/compliance-assessments'
 				},
 				{
-					name: 'Evidences',
+					name: 'evidences',
 					fa_icon: 'fa-solid fa-file',
 					href: '/evidences'
 				},
 				{
-					name: 'Frameworks',
+					name: 'frameworks',
 					fa_icon: 'fa-solid fa-folder',
 					href: '/frameworks'
 				}
 			]
 		},
 		{
-			name: 'Organization',
+			name: 'organization',
 			items: [
 				{
-					name: 'Domains',
+					name: 'domains',
 					fa_icon: 'fa-solid fa-diagram-project',
 					href: '/folders'
 				},
 				{
-					name: 'Projects',
+					name: 'projects',
 					fa_icon: 'fa-solid fa-cubes',
 					href: '/projects'
 				},
 				{
-					name: 'Users',
+					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users'
 				},
 				{
-					name: 'User groups',
+					name: 'userGroups',
 					fa_icon: 'fa-solid fa-users',
 					href: '/user-groups'
 				},
 				{
-					name: 'Role assignments',
+					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
 					href: '/role-assignments'
 				}
@@ -147,28 +147,28 @@ export const navData = {
 		},
 
 		{
-			name: 'Extra',
+			name: 'extra',
 			items: [
 				{
-					name: 'X-Rays',
+					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']
 				},
 				{
-					name: 'Scoring assistant',
+					name: 'scoringAssistant',
 					fa_icon: 'fa-solid fa-star-half-stroke',
 					href: '/scoring-assistant',
 					permissions: ['view_riskmatrix']
 				},
 				{
-					name: 'Libraries',
+					name: 'libraries',
 					fa_icon: 'fa-solid fa-folder-plus',
 					href: '/libraries',
 					permissions: ['add_threat', 'add_riskmatrix', 'add_securityfunction', 'add_framework']
 				},
 				{
-					name: 'Backup & restore',
+					name: 'backupRestore',
 					fa_icon: 'fa-solid fa-floppy-disk',
 					href: '/backup-restore',
 					permissions: ['backup']

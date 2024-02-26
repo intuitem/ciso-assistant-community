@@ -9,6 +9,10 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 User = get_user_model()
 
 
@@ -19,6 +23,25 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 {"urn": "Imported objects cannot be modified"}
             )
         return super().update(instance, validated_data)
+
+    def create(self, validated_data: Any):
+        logger.debug("validated data", **validated_data)
+        folder = Folder.get_folder(validated_data)
+        folder = folder if folder else Folder.get_root_folder()
+        can_create_in_folder = RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"add_{self.Meta.model._meta.model_name}"
+            ),
+            folder=folder,
+        )
+        if not can_create_in_folder:
+            raise serializers.ValidationError(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
+        return super().create(validated_data)
 
     class Meta:
         model: models.Model
@@ -245,11 +268,12 @@ class UserWriteSerializer(BaseModelSerializer):
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
-            print(e)
+            logger.error(e)
             if (
                 User.objects.filter(email=validated_data["email"]).exists()
                 and send_mail
             ):
+                logger.warning("mailing failed")
                 raise serializers.ValidationError(
                     {
                         "warning": [
@@ -262,6 +286,22 @@ class UserWriteSerializer(BaseModelSerializer):
                     {"error": ["An error occurred while creating the user"]}
                 )
         return user
+
+    def update(self, instance: User, validated_data: Any) -> User:
+        user_groups_data = validated_data.get("user_groups")
+        if user_groups_data is not None:
+            initial_groups = set(instance.user_groups.all())
+            new_groups = set(group for group in user_groups_data)
+
+            if initial_groups != new_groups:
+                logger.info(
+                    "user groups updated",
+                    user=instance,
+                    initial_user_groups=initial_groups,
+                    new_user_groups=new_groups,
+                )
+                # instance.user_groups.set(user_groups_data)
+        return super().update(instance, validated_data)
 
 
 class UserGroupReadSerializer(BaseModelSerializer):
@@ -421,4 +461,15 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
+        fields = "__all__"
+
+class LibraryReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
+
+
+class LibraryWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
         fields = "__all__"
