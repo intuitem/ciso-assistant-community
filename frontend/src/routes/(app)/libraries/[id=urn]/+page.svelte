@@ -37,17 +37,17 @@
 	import { enhance } from '$app/forms';
 
 	const riskMatricesTable: TableSource = {
-		head: ['Name', 'Description'],
+		head: ['name', 'description'],
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
 	const securityFunctionsTable: TableSource = {
-		head: { ref_id: 'Ref', name: 'Name', description: 'Description', category: 'Category' },
+		head: { ref_id: 'ref', name: 'name', description: 'description', category: 'category' },
 		body: tableSourceMapper(securityFunctions, ['ref_id', 'name', 'description', 'category'])
 	};
 
 	const threatsTable: TableSource = {
-		head: { ref_id: 'Ref', name: 'Name', description: 'Description' },
+		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description'])
 	};
 
