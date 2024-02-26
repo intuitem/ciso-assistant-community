@@ -155,6 +155,7 @@ export function localItems(languageTag: string): LocalItems {
 		addDomain: m.addDomain({ languageTag: languageTag }),
 		addProject: m.addProject({ languageTag: languageTag }),
 		addUser: m.addUser({ languageTag: languageTag }),
+		addPolicy: m.addPolicy({ languageTag: languageTag }),
 		associatedThreats: m.associatedThreats({ languageTag: languageTag }),
 		associatedSecurityFunctions: m.associatedSecurityFunctions({ languageTag: languageTag }),
 		associatedSecurityMeasures: m.associatedSecurityMeasures({ languageTag: languageTag }),
