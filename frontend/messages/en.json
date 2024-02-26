@@ -230,5 +230,13 @@
 	"probability": "Probability",
 	"riskLevels": "Risk levels",
 	"cancel": "Cancel",
-	"save": "Save"
+	"save": "Save",
+	"currentAssessment": "Current assessment",
+	"scope": "Scope",
+	"assetsImpactedByTheRiskScenario": "Assets impacted by the risk scenario",
+	"ecistingMeasures": "Existing measures",
+	"theExistingSecurityMeasuresToManageThisRisk": "The existing security measures to manage this risk",
+	"currentRiskLevelGivenCurrentMeasures": "The current risk level given the current security measures",
+	"targetAssessment": "Target assessment",
+	"riskLevelWhenAllExtraMeasuresDone": "The risk level when all extra measures are done"
 }
