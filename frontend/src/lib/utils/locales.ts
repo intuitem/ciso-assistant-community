@@ -169,6 +169,7 @@ export function localItems(languageTag: string): LocalItems {
 		associatedProjects: m.associatedProjects({ languageTag: languageTag }),
 		associatedUsers: m.associatedUsers({ languageTag: languageTag }),
 		changePassword: m.changePassword({ languageTag: languageTag }),
+		label: m.label({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
