@@ -160,7 +160,7 @@
 									bind:checked={is_business_impact_ignored}
 								/>
 								<label class="ml-2 text-sm font-medium text-gray-100" for="ignore_business_impact">
-									Ignore
+									{m.ignore()}
 								</label>
 							</div>
 						</div>
