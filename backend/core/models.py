@@ -1174,6 +1174,11 @@ class RiskScenario(NameDescriptionMixin):
         risk_matrix = self.get_matrix()
         return risk_matrix["probability"][self.residual_proba]
 
+    def get_strength_of_knowledge(self):
+        if self.strength_of_knowledge < 0:
+            return self.DEFAULT_SOK_OPTIONS[-1]
+        return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
+
     def __str__(self):
         return (
             str(self.parent_project().folder)
