@@ -319,5 +319,13 @@
 	"lossOfAccountabilityChoice1": "Entièrement traçable",
 	"lossOfAccountabilityChoice2": "Peut-être traçable",
 	"lossOfAccountabilityChoice3": "Complètement anonyme",
-	"ignore": "Ignorer"
+	"ignore": "Ignorer",
+	"importedLibraries": "Bibliothèques importées",
+	"librariesStore": "Magasin de bibliothèques",
+	"currentlyNoImportedLibraries": "Vous n'avez actuellement aucune bibliothèque importée",
+	"loadingLibraryUploadButton": "Chargement du bouton de téléchargement de la bibliothèque",
+	"errorOccuredWhileLoadingLibrary": "L'erreur suivante s'est produite lors du chargement du formulaire de bibliothèque",
+	"packager": "Éditeur",
+	"dependencies": "Dépendances",
+	"copyright": "Droits d'auteur"
 }
