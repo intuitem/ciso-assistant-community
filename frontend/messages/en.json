@@ -327,5 +327,7 @@
 	"errorOccuredWhileLoadingLibrary": "The following error occured while loading the library form",
 	"packager": "Packager",
 	"dependencies": "Dependencies",
-	"copyright": "Copyright"
+	"copyright": "Copyright",
+	"uploadYourLibrary": "Upload your own library",
+	"libraryFileInYaml": "Library file in YAML format"
 }

@@ -38,17 +38,17 @@
 	import { enhance } from '$app/forms';
 
 	const riskMatricesTable: TableSource = {
-		head: ['Name', 'Description'],
+		head: ['name', 'description'],
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
 	const securityFunctionsTable: TableSource = {
-		head: { ref_id: 'Ref', name: 'Name', description: 'Description', category: 'Category' },
+		head: { ref_id: 'ref', name: 'name', description: 'description', category: 'category' },
 		body: tableSourceMapper(securityFunctions, ['ref_id', 'name', 'description', 'category'])
 	};
 
 	const threatsTable: TableSource = {
-		head: { ref_id: 'Ref', name: 'Name', description: 'Description' },
+		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description'])
 	};
 
@@ -118,7 +118,7 @@
 			open={riskMatrices.length == 1}
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-table-cells-large"
-			header="{riskMatrices.length} Risk matrix"
+			header="{riskMatrices.length} {m.riskMatrices()}"
 		>
 			<ModelTable
 				source={riskMatricesTable}
@@ -139,7 +139,7 @@
 		<Dropdown
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-gears"
-			header="{securityFunctions.length} Security functions"
+			header="{securityFunctions.length} {m.securityFunctions()}"
 		>
 			<ModelTable source={securityFunctionsTable} displayActions={false} interactive={false} />
 		</Dropdown>
@@ -149,7 +149,7 @@
 		<Dropdown
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-biohazard"
-			header="{threats.length} Threats"
+			header="{threats.length} {m.threats()}"
 		>
 			<ModelTable source={threatsTable} displayActions={false} interactive={false} />
 		</Dropdown>

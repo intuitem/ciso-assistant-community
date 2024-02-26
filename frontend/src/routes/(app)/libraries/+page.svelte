@@ -63,10 +63,10 @@
 			>
 				<FileInput
 					{form}
-					helpText="Library file in YAML format"
+					helpText= {m.libraryFileInYaml()}
 					mandatory={true}
 					field="file"
-					label="Upload your own library :"
+					label={m.uploadYourLibrary()}
 				/>
 
 				<button
