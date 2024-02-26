@@ -2,6 +2,7 @@
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import Selector from './selector.svelte';
 	import { average, forms } from './utils';
+	import * as m from '$paraglide/messages';
 
 	export let data;
 	export let risk_matrices = data.risk_matrices;
@@ -68,7 +69,7 @@
 <main class="text-sm h-full flex flex-col">
 	<div class="mx-auto">
 		<div class="flex flex-col">
-			<p class="text-sm">Risk matrix</p>
+			<p class="text-sm">{m.riskMatrix()}</p>
 			<select
 				class="select form-input w-fit pr-8"
 				bind:value={risk_matrix_index}
@@ -95,7 +96,7 @@
 					</div>
 					<div class="my-auto ml-2 col-span 1 w-full">
 						<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-							<div class="text-gray-100 text-xs">Threat agent factors</div>
+							<div class="text-gray-100 text-xs">{m.threatAgentFactors()}</div>
 							<div class="font-bold text-white text-lg" id="threat_agent_score">
 								{threat_agent_score}
 							</div>
@@ -116,7 +117,7 @@
 					</div>
 					<div class="my-auto ml-2 col-span 1 w-full">
 						<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-							<div class="text-gray-100 text-xs">Vulnerability factors</div>
+							<div class="text-gray-100 text-xs">{m.vulnerabilityFactors()}</div>
 							<div class="font-bold text-white text-lg" id="vulnerability_score">
 								{vulnerability_score}
 							</div>
@@ -146,7 +147,7 @@
 					</div>
 					<div class="my-auto ml-2 col-span 1 w-full">
 						<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl">
-							<div class="text-gray-100 text-xs">Business impact factors</div>
+							<div class="text-gray-100 text-xs">{m.businessImpactFactors()}</div>
 							<div class="font-bold text-white text-lg" id="business_impact_score">
 								{is_business_impact_ignored ? '--' : business_impact_score}
 							</div>
@@ -185,7 +186,7 @@
 					</div>
 					<div class="my-auto ml-2 col-span 1 w-full">
 						<div class="shadow-lg bg-indigo-700 px-2 py-4 rounded-xl mx-auto">
-							<div class="text-gray-100 text-xs">Technical impact factors</div>
+							<div class="text-gray-100 text-xs">{m.technicalImpactFactors()}</div>
 							<div class="font-bold text-white text-lg" id="technical_impact_score">
 								{is_business_impact_ignored ? technical_impact_score : '--'}
 							</div>
@@ -196,11 +197,11 @@
 		</div>
 
 		<div class="p-2 my-8 bg-white rounded shadow">
-			<div class="p-1 m-1 text-xs">Assessment vector:<span id="vector">{vector_string}</span></div>
+			<div class="p-1 m-1 text-xs">{m.assessmentVector()}: <span id="vector">{vector_string}</span></div>
 			<div class="grid grid-cols-3 grid-rows-1 items-center justify-center">
 				<div class="mx-auto w-full">
 					<div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
-						<div class="text-gray-100 font-semibold">Probability</div>
+						<div class="text-gray-100 font-semibold">{m.probability()}</div>
 						<div>
 							<span class="text-xl text-white font-bold" id="probability_label"
 								>{labels.probability.name}
@@ -215,7 +216,7 @@
 					class="text-2xl p-2 grid grid-rows-2 grid-cols-3 items-center text-center w-full mb-4"
 					id="score"
 				>
-					<div class="text-lg p-1 col-span-3">Risk level</div>
+					<div class="text-lg p-1 col-span-3">{m.riskLevel()}</div>
 					<i class="fas fa-arrow-alt-circle-right" />
 					<span
 						class="py-2 px-0 font-semibold rounded shadow"
@@ -229,7 +230,7 @@
 
 				<div class="mx-auto w-full">
 					<div class="bg-cyan-600 p-4 m-2 rounded-lg shadow-lg lg:mx-4">
-						<div class="text-gray-100 font-semibold">Impact</div>
+						<div class="text-gray-100 font-semibold">{m.impact()}</div>
 						<div>
 							<span class="text-xl text-white font-bold" id="impact_label"
 								>{labels.impact.name} {impact_score === 0 ? '--' : impact_score}</span

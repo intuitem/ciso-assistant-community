@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	export let text: string;
 	export let id: string;
@@ -12,11 +14,11 @@
 	$: dispatch('change', value);
 </script>
 
-<div>{text}</div>
+<div>{localItems(languageTag())[text]}</div>
 <select class="select w-full" {id} bind:value {disabled}>
 	{#each choices as text, i}
 		<option class="text-{i}" value={i}
-			>{i}{#if text} - {text}{/if}</option
+			>{i}{#if text} - {localItems(languageTag())[text]}{/if}</option
 		>
 	{/each}
 </select>
