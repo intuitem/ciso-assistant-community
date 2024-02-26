@@ -5,7 +5,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import type { StrengthOfKnowledgeEntry, urlModel } from '$lib/utils/types';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -87,20 +87,24 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const probabilityChoices = await fetch(probabilityChoicesEndpoint)
 		.then((res) => res.json())
 		.then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: parseInt(key)
-			}))
+			Object.entries(data)
+				.map(([key, value]) => ({
+					label: value,
+					value: parseInt(key)
+				}))
+				.sort((a, b) => a.value - b.value)
 		);
 
 	const impactChoicesEndpoint = `${baseEndpoint}impact/`;
 	const impactChoices = await fetch(impactChoicesEndpoint)
 		.then((res) => res.json())
 		.then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: parseInt(key)
-			}))
+			Object.entries(data)
+				.map(([key, value]) => ({
+					label: value,
+					value: parseInt(key)
+				}))
+				.sort((a, b) => a.value - b.value)
 		);
 
 	const treatmentChoicesEndpoint = `${BASE_API_URL}/${URLModel}/treatment/`;
@@ -113,15 +117,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			}))
 		);
 
-	const strengthOfKnowledgeChoicesEndpoint = `${BASE_API_URL}/${URLModel}/strength_of_knowledge/`;
-	const strengthOfKnowledgeChoices = await fetch(strengthOfKnowledgeChoicesEndpoint)
-		.then((res) => res.json())
-		.then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: key
-			}))
-		);
+	const strengthOfKnowledgeChoicesEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/strength_of_knowledge/`;
+	const strengthOfKnowledgeChoices: Record<string, StrengthOfKnowledgeEntry> = await fetch(
+		strengthOfKnowledgeChoicesEndpoint
+	).then((res) => res.json());
 
 	const measureCreateSchema = modelSchema('security-measures');
 	const initialData = {
@@ -180,7 +179,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		probabilityChoices,
 		impactChoices,
 		treatmentChoices,
-		strengthOfKnowledgeChoices,
+		strengthOfKnowledgeChoices: strengthOfKnowledgeChoices,
 		tables,
 		measureModel,
 		measureCreateForm
