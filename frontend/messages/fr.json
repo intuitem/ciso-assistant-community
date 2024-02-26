@@ -28,6 +28,7 @@
 	"associatedUsers": "Utilisateurs associés",
 	"home": "Accueil",
 	"edit": "Modifier",
+	"changePassword": "Changer le mot de passe",
 	"overview": "Vue d'ensemble",
 	"context": "Contexte",
 	"governance": "Gouvernance",
@@ -230,5 +231,10 @@
 	"probability": "Probabilité",
 	"riskLevels": "Niveaux de risque",
 	"cancel": "Annuler",
-	"save": "Enregistrer"
+	"save": "Enregistrer",
+	"myUserGroups": "Mes groupes d'utilisateurs",
+	"changePasswordText": "Vous pouvez changer votre mot de passe ici. Vous devrez vous reconnecter avec le nouveau mot de passe après cette opération",
+	"oldPassword": "Ancien mot de passe",
+	"newPassword": "Nouveau mot de passe",
+	"confirmNewPassword": "Confirmer le nouveau mot de passe"
 }

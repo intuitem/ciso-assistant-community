@@ -3,6 +3,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ChangePasswordSchema } from '$lib/utils/schemas';
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
 </script>
@@ -13,8 +14,7 @@
 			<i class="fa-solid fa-key" />
 		</div>
 		<p class="text-gray-600 text-sm text-center">
-			You can change your password here.<br />
-			You'll need to log in with your new password after this operation.
+			{m.changePasswordText()}.
 		</p>
 		<!-- SuperForm with dataType 'form' -->
 		<div class="flex w-full">
@@ -25,19 +25,29 @@
 				let:form
 				validators={ChangePasswordSchema}
 			>
-				<TextField type="password" {form} field="old_password" label="Old password" />
-				<TextField type="password" {form} field="new_password" label="New password" />
+				<TextField type="password" {form} field="old_password" label={m.oldPassword()} />
+				<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 				<TextField
 					type="password"
 					{form}
 					field="confirm_new_password"
-					label="Confirm new password"
+					label={m.confirmNewPassword()}
 				/>
-				<p class="pt-3">
-					<button class="btn variant-filled-primary font-semibold w-full" type="submit"
-						>Change Password</button
+				<div class="flex flex-row space-x-2 pt-3">
+					<a
+						class="btn bg-gray-400 text-white font-semibold w-full"
+						href="/my-profile"
+						data-testid="cancel-button"
+						type="button">
+						{m.cancel()}
+					</a>
+					<button class="btn variant-filled-primary font-semibold w-full" 
+					type="submit"
+					data-testid="save-button"
 					>
-				</p>
+					{m.changePassword()}
+					</button>
+				</div>
 			</SuperForm>
 		</div>
 	</div>
