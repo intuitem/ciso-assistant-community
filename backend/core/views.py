@@ -657,10 +657,6 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def treatment(self, request):
         return Response(dict(RiskScenario.TREATMENT_OPTIONS))
 
-    @action(detail=False, name="Get strength of knowledge choices")
-    def strength_of_knowledge(self, request):
-        return Response(dict(RiskScenario.SOK_OPTIONS))
-
     @action(detail=True, name="Get probability choices")
     def probability(self, request, pk):
         undefined = dict([(-1, "--")])
@@ -683,6 +679,29 @@ class RiskScenarioViewSet(BaseModelViewSet):
             )
         )
         choices = undefined | _choices
+        return Response(choices)
+
+    @action(detail=True, name="Get strength of knowledge choices")
+    def strength_of_knowledge(self, request, pk):
+        undefined = {-1: RiskScenario.DEFAULT_SOK_OPTIONS[-1]}
+        _sok_choices = self.get_object().get_matrix().get("strength_of_knowledge")
+        if _sok_choices is not None:
+            sok_choices = dict(
+                zip(
+                    list(range(0, 64)),
+                    [
+                        {
+                            "name": x["name"],
+                            "description": x.get("description"),
+                            "symbol": x.get("symbol"),
+                        }
+                        for x in _sok_choices
+                    ],
+                )
+            )
+        else:
+            sok_choices = RiskScenario.DEFAULT_SOK_OPTIONS
+        choices = undefined | sok_choices
         return Response(choices)
 
     @action(detail=False, name="Get risk count per level")
@@ -770,10 +789,10 @@ class UserFilter(df.FilterSet):
     is_approver = df.BooleanFilter(method="filter_approver", label="Approver")
 
     def filter_approver(self, queryset, name, value):
-        """ we don't know yet which folders will be used, so filter on any folder"""
+        """we don't know yet which folders will be used, so filter on any folder"""
         approvers_id = []
         for candidate in User.objects.all():
-            if 'approve_riskacceptance' in candidate.permissions:
+            if "approve_riskacceptance" in candidate.permissions:
                 approvers_id.append(candidate.id)
         if value:
             return queryset.filter(id__in=approvers_id)
