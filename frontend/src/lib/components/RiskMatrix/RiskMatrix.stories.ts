@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/svelte';
 
 import RiskMatrix from './RiskMatrix.svelte';
+import RiskScenarioItem from './RiskScenarioItem.svelte';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 const meta = {
@@ -45,10 +46,27 @@ const riskMatrix = {
 	})
 };
 
+const riskScenario = {
+	id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
+	name: 'RS1',
+	rid: 'R.1',
+	strength_of_knowledge: {
+		name: 'Very High',
+		description: 'The strength of the knowledge supporting the assessment is very high',
+		symbol: '●'
+	}
+};
+
 const sampleData = [
 	[['R.1'], ['R.5'], ['R.8']],
 	[['R.7'], [], ['R.9', 'R.6']],
 	[['R.2'], ['R.3'], ['R.4']]
+];
+
+const sampleDataItems = [
+	[[riskScenario], [], []],
+	[[], [], [riskScenario, riskScenario]],
+	[[], [riskScenario], []]
 ];
 
 export default meta;
@@ -64,5 +82,13 @@ export const WithData: Story = {
 	args: {
 		riskMatrix: riskMatrix,
 		data: sampleData
+	}
+};
+
+export const WithRiskScenarioItemComponent: Story = {
+	args: {
+		riskMatrix: riskMatrix,
+		data: sampleDataItems,
+		dataItemComponent: RiskScenarioItem
 	}
 };

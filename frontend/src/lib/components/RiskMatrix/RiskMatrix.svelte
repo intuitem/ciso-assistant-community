@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { buildRiskMatrix } from './utils';
 
-	import * as m from '../../../paraglide/messages'
+	import * as m from '$paraglide/messages';
+	import type { ComponentType } from 'svelte';
 
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
@@ -13,6 +14,7 @@
 
 	const displayedRiskMatrix = buildRiskMatrix(grid, risk);
 	export let data: Array<any> | undefined = undefined;
+	export let dataItemComponent: ComponentType | undefined = undefined;
 	// reverse data array to display it in the right order
 	let displayedData: typeof data;
 	if (data) {
@@ -47,14 +49,16 @@
 			</div>
 			{#each row as cell, j}
 				<div
-					class="flex items-center justify-center h-20 [&>*]:pointer-events-none"
+					class="flex items-center justify-center space-x-1 h-20 [&>*]:pointer-events-none"
 					style="background-color: {cell.level.hexcolor};"
 					data-testid="cell"
 				>
-					{#if displayedData}
-						<slot name="data">
-							<div class="mx-auto text-center">{displayedData[i][j]}</div>
-						</slot>
+					{#if dataItemComponent}
+						{#each data[i][j] as item}
+							<svelte:component this={dataItemComponent} data={item} />
+						{/each}
+					{:else if displayedData}
+						<div class="mx-auto text-center">{displayedData[i][j]}</div>
 					{/if}
 				</div>
 			{/each}
