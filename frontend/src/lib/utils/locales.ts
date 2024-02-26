@@ -119,6 +119,7 @@ export function localItems(languageTag: string): LocalItems {
 		justification: m.justification({ languageTag: languageTag }),
 		parentFolder: m.parentFolder({ languageTag: languageTag }),
 		contentType: m.contentType({ languageTag: languageTag }),
+		type: m.type({ languageTag: languageTag }),
 		lcStatus: m.lcStatus({ languageTag: languageTag }),
 		internalReference: m.internalReference({ languageTag: languageTag }),
 		isActive: m.isActive({ languageTag: languageTag }),

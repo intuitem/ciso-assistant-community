@@ -48,7 +48,7 @@ export const listViewFields = {
 		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
 	},
 	policies: {
-		head: ['Name', 'Description', 'ETA', 'Domain', 'Security function'],
+		head: ['name', 'description', 'eta', 'domain', 'securityFunction'],
 		body: ['name', 'description', 'eta', 'folder', 'security_function']
 	},
 	'security-functions': {
