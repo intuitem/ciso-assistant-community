@@ -356,5 +356,6 @@
 	"inconsistenciesFoundComposer": "Found {count} inconsistenc{plural}. For more details, check",
 	"current": "Current",
 	"residual": "Residual",
-	"jumpToRiskAssessment": "Jump to risk assessment"
+	"jumpToRiskAssessment": "Jump to risk assessment",
+	"additionalMeasures": "Additional measures"
 }
