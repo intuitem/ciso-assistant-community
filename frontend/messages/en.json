@@ -223,6 +223,7 @@
 	"infosFound": "info{s} found",
 	"remediationPlan": "Remediation plan",
 	"treatmentPlan": "Treatment plan",
+	"plan": "Plan",
 	"asPDF": "as PDF",
 	"asCSV": "as CSV",
 	"draft": "Draft",
