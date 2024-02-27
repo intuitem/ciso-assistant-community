@@ -334,5 +334,13 @@
 	"libraryFileInYaml": "Fichier de librairie en format YAML",
 	"scope": "Périmètre",
 	"auditor": "Auditeur",
-	"lastUpdate": "Dernière mise à jour"
+	"lastUpdate": "Dernière mise à jour",
+	"riskScenarioAssetHelpText": "Biens sensibles impactés par ce scénario de risque",
+	"riskScenarioMeasureHelpText": "Les mesures de sécurité existantes pour gérer ce risque",
+	"currentAssessment": "Évaluation actuelle",
+	"targetAssessment": "Évaluation cible",
+	"currentRiskLevel": "Niveau de risque courrant",
+	"residualRiskLevel": "Niveau de risque résiduel",
+	"currentRiskLevelHelpText": "Le niveau de risque compte tenu des mesures actuelles",
+	"residualRiskLevelHelpText": "Le niveau de risque lorsque toutes les mesures supplémentaires sont prises"
 }
