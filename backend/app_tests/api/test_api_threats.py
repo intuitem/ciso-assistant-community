@@ -1,5 +1,5 @@
 import pytest
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APIClient
 from core.models import Threat
 from iam.models import Folder
@@ -134,7 +134,7 @@ class TestThreatsAuthenticated:
             user_group=test.user_group,
         )
 
-    def test_update_threats_with_url(self, test):
+    def test_update_threats_with_urn(self, test):
         """test to update imported threat (with URN) with the API with authentication"""
         folder = Folder.objects.create(name="test2")
 
@@ -158,7 +158,7 @@ class TestThreatsAuthenticated:
                 "folder": str(folder.id),
             },
             fails=True,
-            expected_status=HTTP_400_BAD_REQUEST,   # Imported objects cannot be modified
+            expected_status=HTTP_403_FORBIDDEN,   # Imported objects cannot be modified
             user_group=test.user_group,
         )
 
