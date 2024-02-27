@@ -126,6 +126,7 @@ export function localItems(languageTag: string): LocalItems {
 		dateJoined: m.dateJoined({ languageTag: languageTag }),
 		version: m.version({ languageTag: languageTag }),
 		treatment: m.treatment({ languageTag: languageTag }),
+		rid: m.rid({ languageTag: languageTag }),
 		currentProba: m.currentProba({ languageTag: languageTag }),
 		currentImpact: m.currentImpact({ languageTag: languageTag }),
 		residualProba: m.residualProba({ languageTag: languageTag }),

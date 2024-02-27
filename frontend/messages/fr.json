@@ -240,7 +240,7 @@
 	"theExistingSecurityMeasuresToManageThisRisk": "Les mesures de sécurité existantes pour gérer ce risque",
 	"currentRiskLevelGivenCurrentMeasures": "Niveau de risque courant compte tenu des mesures actuelles",
 	"targetAssessment": "Évaluation cible",
-	"riskLevelWhenAllExtraMeasuresDone": "Niveau de risque lorsque toutes les mesures supplémentaires sont appliquées"
+	"riskLevelWhenAllExtraMeasuresDone": "Niveau de risque lorsque toutes les mesures supplémentaires sont appliquées",
 	"NA": "N/A",
 	"threatAgentFactors": "Facteurs liés aux agents de menace",
 	"vulnerabilityFactors": "Facteurs de vulnérabilité",
