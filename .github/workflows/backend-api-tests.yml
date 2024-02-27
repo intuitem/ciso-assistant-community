@@ -62,5 +62,5 @@ jobs:
               if: always()
               with:
                 name: api-tests-report
-                path: pytest-report.html
+                path: ${{ env.working-directory }}/pytest-report.html
                 retention-days: 5
