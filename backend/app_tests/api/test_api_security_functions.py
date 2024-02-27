@@ -1,5 +1,5 @@
 import pytest
-from rest_framework import status
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APIClient
 from core.models import SecurityFunction
 from iam.models import Folder
@@ -155,7 +155,7 @@ class TestSecurityFunctionsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             fails=True,
-            expected_status=status.HTTP_400_BAD_REQUEST, # Imported objects cannot be updated
+            expected_status=HTTP_403_FORBIDDEN, # Imported objects cannot be updated
             user_group=test.user_group,
         )
 
