@@ -357,5 +357,6 @@
 	"inconsistenciesFoundComposer": "Il y a {count} incohérence{s}. Pour plus de détail, vérifiez",
 	"current": "Courrant",
 	"residual": "Résiduel",
-	"jumpToRiskAssessment": "Passer à l'évaluation des risques"
+	"jumpToRiskAssessment": "Passer à l'évaluation des risques",
+	"additionalMeasures": "Mesures supplémentaires"
 }
