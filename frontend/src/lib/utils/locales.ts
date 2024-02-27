@@ -254,7 +254,9 @@ export function localItems(languageTag: string): LocalItems {
 		lossOfAccountabilityText: m.lossOfAccountabilityText({ languageTag: languageTag }),
 		lossOfAccountabilityChoice1: m.lossOfAccountabilityChoice1({ languageTag: languageTag }),
 		lossOfAccountabilityChoice2: m.lossOfAccountabilityChoice2({ languageTag: languageTag }),
-		lossOfAccountabilityChoice3: m.lossOfAccountabilityChoice3({ languageTag: languageTag })
+		lossOfAccountabilityChoice3: m.lossOfAccountabilityChoice3({ languageTag: languageTag }),
+		composer: m.composer({ languageTag: languageTag }),
+		plan: m.plan({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
