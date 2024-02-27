@@ -131,7 +131,7 @@ class TestSecurityFunctionsAuthenticated:
             user_group=test.user_group,
         )
 
-    def test_update_security_function_with_url(self, test):
+    def test_update_security_function_with_urn(self, test):
         """test to update an imported security function (with a URN) with the API with authentication"""
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -150,7 +150,6 @@ class TestSecurityFunctionsAuthenticated:
                 "description": "new " + SECURITY_FUNCTION_DESCRIPTION,
                 "urn": SECURITY_FUNCTION_URN,
                 "provider": "new " + SECURITY_FUNCTION_PROVIDER,
-                "folder": str(test.folder.id),
             },
             {
                 "folder": {"str": Folder.get_root_folder().name},
@@ -170,16 +169,19 @@ class TestSecurityFunctionsAuthenticated:
                 "name": SECURITY_FUNCTION_NAME,
                 "description": SECURITY_FUNCTION_DESCRIPTION,
                 "provider": SECURITY_FUNCTION_PROVIDER,
+                "folder": test.folder,
             },
             {
                 "ref_id": SECURITY_FUNCTION_REF_ID,
                 "name": SECURITY_FUNCTION_NAME,
                 "description": "new " + SECURITY_FUNCTION_DESCRIPTION,
                 "provider": "new " + SECURITY_FUNCTION_PROVIDER,
-                "folder": str(test.folder.id),
             },
             {
-                "folder": {"str": Folder.get_root_folder().name},
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+            },
+            {
+                "folder": str(test.folder.id)
             },
             user_group=test.user_group,
         )
