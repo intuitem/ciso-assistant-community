@@ -234,7 +234,7 @@
 							riskMatrix={data.riskMatrix}
 							probabilityField="current_proba"
 							impactField="current_impact"
-							helpText="The risk level given the current measures"
+							helpText={m.currentRiskLevelHelpText()}
 						/>
 					</div>
 				</div>
