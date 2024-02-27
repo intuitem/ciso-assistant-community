@@ -240,7 +240,7 @@
 	"theExistingSecurityMeasuresToManageThisRisk": "The existing security measures to manage this risk",
 	"currentRiskLevelGivenCurrentMeasures": "The current risk level given the current security measures",
 	"targetAssessment": "Target assessment",
-	"riskLevelWhenAllExtraMeasuresDone": "The risk level when all extra measures are done"
+	"riskLevelWhenAllExtraMeasuresDone": "The risk level when all extra measures are done",
 	"NA": "N/A",
 	"threatAgentFactors": "Threat agent factors",
 	"vulnerabilityFactors": "Vulnerability factors",
@@ -338,5 +338,6 @@
 	"dependencies": "Dependencies",
 	"copyright": "Copyright",
 	"uploadYourLibrary": "Upload your own library",
-	"libraryFileInYaml": "Library file in YAML format"
+	"libraryFileInYaml": "Library file in YAML format",
+	"rid": "RID"
 }
