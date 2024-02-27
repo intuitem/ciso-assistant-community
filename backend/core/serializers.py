@@ -5,6 +5,7 @@ from core.models import *
 from iam.models import *
 
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
@@ -36,7 +37,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             folder=folder,
         )
         if not can_create_in_folder:
-            raise serializers.ValidationError(
+            raise PermissionDenied(
                 {
                     "folder": "You do not have permission to create objects in this folder"
                 }
