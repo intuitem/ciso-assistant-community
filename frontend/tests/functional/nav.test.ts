@@ -22,6 +22,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 			'Backup & restore': 'Backup restore'
 		};
 
+		const locals = localItems(languageTag());
+
 		for await (const [key, value] of sideBar.items) {
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {
@@ -30,9 +32,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 					if (item.name in temporaryPageTitle) {
 						await expect.soft(logedPage.pageTitle).toHaveText([temporaryPageTitle[item.name]]);
 					} else {
-						console.log(localItems(languageTag()));
-						console.log(localItems(languageTag())[item.name]);
-						await expect.soft(logedPage.pageTitle).toHaveText(localItems(languageTag())[item.name]);
+						await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
 					}
 				}
 			}
