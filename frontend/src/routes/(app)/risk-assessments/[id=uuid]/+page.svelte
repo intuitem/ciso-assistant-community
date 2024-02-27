@@ -1,26 +1,23 @@
 <script lang="ts">
-	import type { RiskScenario, RiskMatrixJsonDefinition } from '$lib/utils/types';
+	import { page } from '$app/stores';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud.js';
+	import { breadcrumbObject } from '$lib/utils/stores';
+	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
 	import type {
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
+		PopupSettings,
 		ToastStore
 	} from '@skeletonlabs/skeleton';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import type { PopupSettings } from '@skeletonlabs/skeleton';
-	import { popup } from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { breadcrumbObject } from '$lib/utils/stores';
+	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
-	import { page } from '$app/stores';
-	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
 
-	import * as m from '$paraglide/messages';
-	import { languageTag } from '$paraglide/runtime';
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales.js';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import * as m from '$paraglide/messages';
 
 	export let data;
 	const showRisks = true;
@@ -56,30 +53,35 @@
 		}
 	}
 
-	function getForms(model: Record<string, any>) {
-		let { form: createForm, message: createMessage } = superForm(model.createForm, {
+	let { form: deleteForm, message: deleteMessage } = {
+		form: {},
+		message: {}
+	};
+
+	let { form: createForm, message: createMessage } = {
+		form: {},
+		message: {}
+	};
+
+	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
+	// invalidateAll() did not work.
+	$: {
+		({ form: createForm, message: createMessage } = superForm(data.scenarioCreateForm, {
 			onUpdated: ({ form }) =>
 				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		});
-		let { form: deleteForm, message: deleteMessage } = superForm(model.deleteForm, {
+		}));
+		({ form: deleteForm, message: deleteMessage } = superForm(data.scenarioDeleteForm, {
 			onUpdated: ({ form }) =>
 				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		});
-		return { createForm, createMessage, deleteForm, deleteMessage };
+		}));
 	}
 
-	let forms = {};
-
-	$: Object.entries(data.relatedModels).forEach(([key, value]) => {
-		forms[key] = getForms(value);
-	});
-
-	function modalCreateForm(model: Record<string, any>): void {
+	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
-				form: model.createForm,
-				model: model,
+				form: data.scenarioCreateForm,
+				model: data.scenarioModel,
 				debug: false
 			}
 		};
@@ -87,7 +89,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]
+			title: m.addRiskScenario()
 		};
 		modalStore.trigger(modal);
 	}
@@ -250,30 +252,27 @@
 	</div>
 	<!--Risk risk_assessment-->
 	<div class="card m-4 p-4 shadow bg-white">
-		{#if data.relatedModels}
-			{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-				<div class="bg-white">
-					<div class="flex flex-row justify-between">
-						<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
-							{localItems(languageTag())[
-								'associated' + capitalizeFirstLetter(model.info.localNamePlural)
-							]}
-						</h4>
-					</div>
-					{#if model.table}
-						<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
-							<button
-								slot="addButton"
-								class="btn variant-filled-primary self-end my-auto"
-								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />
-								{localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]}
-							</button>
-						</ModelTable>
-					{/if}
-				</div>
-			{/each}
-		{/if}
+		<div class="bg-white">
+			<div class="flex flex-row justify-between">
+				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
+					{m.associatedRiskScenarios()}
+				</h4>
+			</div>
+			<ModelTable
+				source={data.scenariosTable}
+				deleteForm={data.scenarioDeleteForm}
+				model={getModelInfo('risk-scenarios')}
+				URLModel="risk-scenarios"
+			>
+				<button
+					slot="addButton"
+					class="btn variant-filled-primary self-end my-auto"
+					on:click={(_) => modalCreateForm()}
+					><i class="fa-solid fa-plus mr-2 lowercase" />
+					{m.addRiskScenario()}
+				</button>
+			</ModelTable>
+		</div>
 	</div>
 	<!--Matrix view-->
 	<div class="card m-4 p-4 shadow bg-white page-break">
