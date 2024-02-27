@@ -1,5 +1,5 @@
 import pytest
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APIClient
 from core.models import (
     ComplianceAssessment,
@@ -161,7 +161,7 @@ class TestRequirementAssessmentsAuthenticated:
             },
             base_count=-1,
             fails=True,
-            expected_status=HTTP_400_BAD_REQUEST
+            expected_status=HTTP_403_FORBIDDEN
         )
 
     def test_update_requirement_assessments(self, test):
