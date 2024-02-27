@@ -89,12 +89,12 @@ export const RiskScenarioSchema = baseNamedObject({
 
 export const SecurityMeasureSchema = baseNamedObject({
 	category: z.string().optional(),
-	status: z.string().optional(),
+	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
 	link: z.string().url().optional().nullable(),
-	effort: z.string().optional(),
+	effort: z.string().optional().nullable(),
 	folder: z.string(),
 	security_function: z.string().optional()
 });

@@ -56,7 +56,7 @@
 			{...$$restProps}
 		>
 			{#if !$constraints?.required && !options.find((o) => o.label === '--')}
-				<option selected>--</option>
+				<option value={undefined} selected>--</option>
 			{/if}
 			{#each options as option}
 				<option value={option.value} style="background-color: {color_map[option.value]}"
