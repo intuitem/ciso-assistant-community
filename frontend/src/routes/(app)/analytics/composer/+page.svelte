@@ -173,7 +173,7 @@
 									<a
 										class="text-indigo-800 hover:text-indigo-600 py-2 my-2"
 										href="/risk-assessments/{item.risk_assessment.id}/"
-										><i class="fas fa-external-link-square-alt" />{m.jumpToRiskAssessment()}</a
+										><i class="fas fa-external-link-square-alt" /> {m.jumpToRiskAssessment()}</a
 									>
 								</div>
 							</div>
