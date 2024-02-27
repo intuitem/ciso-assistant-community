@@ -2,9 +2,9 @@ import { expect, type Locator, type Page } from './test-utils.js';
 import { BasePage } from './base-page.js';
 
 enum State {
-    Unset = -1,
-    False = 0,
-    True = 1
+	Unset = -1,
+	False = 0,
+	True = 1
 }
 
 export class LoginPage extends BasePage	{
@@ -41,20 +41,20 @@ export class LoginPage extends BasePage	{
         }
     }
 
-    async hasUrl(redirect: State=State.Unset) {
-        switch (redirect) {
-            case State.Unset:
-                // url can be /login or /login?next=/
-                await expect(this.page).toHaveURL(/^.*\/login(\?next=\/.*)?$/);
-                break;
-            case State.False:
-                // url must be /login
-                await expect(this.page).toHaveURL(/^.*\/login$/);
-                break;
-            case State.True:
-                //url must be /login?next=/
-                await expect(this.page).toHaveURL(/^.*\/login\?next=\/.*$/);
-                break;
-        }
-    }
+	async hasUrl(redirect: State = State.Unset) {
+		switch (redirect) {
+			case State.Unset:
+				// url can be /login or /login?next=/
+				await expect(this.page).toHaveURL(/^.*\/login(\?next=\/.*)?$/);
+				break;
+			case State.False:
+				// url must be /login
+				await expect(this.page).toHaveURL(/^.*\/login$/);
+				break;
+			case State.True:
+				//url must be /login?next=/
+				await expect(this.page).toHaveURL(/^.*\/login\?next=\/.*$/);
+				break;
+		}
+	}
 }

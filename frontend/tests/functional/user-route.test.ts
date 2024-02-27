@@ -258,4 +258,3 @@ test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await usersPage.deleteModalConfirmButton.click();
 	await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
 });
-

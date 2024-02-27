@@ -84,11 +84,13 @@ class SetPasswordSerializer(serializers.Serializer):
                 {"confirm_new_password": "The two password fields didn't match."}
             )
         return data
-    
+
+
 class ResetPasswordConfirmSerializer(serializers.Serializer):
     """
     Serializer for password reset endpoint.
     """
+
     uidb64 = serializers.CharField(write_only=True)
     token = serializers.CharField(write_only=True)
     new_password = serializers.CharField(

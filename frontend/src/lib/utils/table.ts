@@ -1,34 +1,34 @@
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'parent domain'],
+		head: ['name', 'description', 'parentDomain'],
 		body: ['name', 'description', 'parent_folder']
 	},
 	projects: {
-		head: ['Name', 'Description', 'Domain'],
+		head: ['name', 'description', 'domain'],
 		body: ['name', 'description', 'folder']
 	},
 	'risk-matrices': {
-		head: ['Name', 'Description', 'Provider', 'Domain'],
+		head: ['name', 'description', 'provider', 'domain'],
 		body: ['name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn']
 	},
 	'risk-assessments': {
-		head: ['Name', 'Risk matrix', 'Description', 'Risk Scenarios', 'Project'],
+		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
 		body: ['name', 'risk_matrix', 'description', 'risk_scenarios', 'project']
 	},
 	threats: {
-		head: ['Ref', 'Name', 'Description', 'Provider', 'Domain'],
+		head: ['ref', 'name', 'description', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'provider', 'folder'],
 		meta: ['id', 'urn']
 	},
 	'risk-scenarios': {
 		head: [
-			'Name',
-			'Threats',
-			'Risk assessment',
-			'Security measures',
-			'Current level',
-			'Residual level'
+			'name',
+			'threats',
+			'riskAssessment',
+			'securityMeasures',
+			'currentLevel',
+			'residualLevel'
 		],
 		body: [
 			'name',
@@ -40,67 +40,67 @@ export const listViewFields = {
 		]
 	},
 	'risk-acceptances': {
-		head: ['Name', 'Description', 'Risk scenarios'],
+		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios']
 	},
 	'security-measures': {
-		head: ['Name', 'Description', 'Category', 'ETA', 'Domain', 'Security function'],
+		head: ['name', 'description', 'category', 'eta', 'domain', 'securityFunction'],
 		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
 	},
 	policies: {
-		head: ['Name', 'Description', 'ETA', 'Domain', 'Security function'],
+		head: ['name', 'description', 'eta', 'domain', 'securityFunction'],
 		body: ['name', 'description', 'eta', 'folder', 'security_function']
 	},
 	'security-functions': {
-		head: ['Ref', 'Name', 'Description', 'Category', 'Provider', 'Domain'],
+		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
 		meta: ['id', 'urn']
 	},
 	assets: {
-		head: ['Name', 'Description', 'Business value', 'Domain'],
+		head: ['name', 'description', 'businessValue', 'domain'],
 		body: ['name', 'description', 'business_value', 'folder']
 	},
 	users: {
-		head: ['Email', 'First name', 'Last name'],
+		head: ['email', 'firstName', 'lastName'],
 		body: ['email', 'first_name', 'last_name']
 	},
 	'user-groups': {
-		head: ['Name'],
+		head: ['name'],
 		body: ['name'],
 		meta: ['id', 'builtin']
 	},
 	roles: {
-		head: ['Name', 'Description'],
+		head: ['name', 'description'],
 		body: ['name', 'description']
 	},
 	'role-assignments': {
-		head: ['User', 'User group', 'Role', 'Perimeter'],
+		head: ['user', 'userGroup', 'role', 'perimeter'],
 		body: ['user', 'user_group', 'role', 'perimeter_folders']
 	},
 	frameworks: {
-		head: ['Name', 'Description', 'Provider', 'Compliance assessments', 'Domain'],
+		head: ['name', 'description', 'provider', 'complianceAssessments', 'domain'],
 		body: ['name', 'description', 'provider', 'compliance_assessments', 'folder'],
 		meta: ['id', 'urn']
 	},
 	'compliance-assessments': {
-		head: ['Name', 'Framework', 'Description', 'Project'],
+		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project']
 	},
 	'requirement-assessments': {
-		head: ['Name', 'Description', 'Compliance Assessment'],
+		head: ['name', 'description', 'complianceAssessment'],
 		body: ['name', 'description', 'compliance_assessment']
 	},
 	evidences: {
-		head: ['Name', 'File', 'Description'],
+		head: ['name', 'file', 'description'],
 		body: ['name', 'attachment', 'description']
 	},
 	requirements: {
-		head: ['Ref', 'Name', 'Description', 'Framework'],
+		head: ['ref', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],
 		meta: ['id', 'urn']
 	},
 	libraries: {
-		head: ['Ref', 'Name', 'Description', 'Language', 'Overview'],
+		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview']
 	}
 };
