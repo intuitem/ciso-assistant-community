@@ -286,6 +286,7 @@
 					riskMatrix={risk_assessment.risk_matrix}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
+					{showRisks}
 				/>
 			</div>
 			<div class="flex-1">
