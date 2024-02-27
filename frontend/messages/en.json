@@ -342,5 +342,19 @@
 	"currentRiskLevel": "Current risk level",
 	"residualRiskLevel": "Residual risk level",
 	"currentRiskLevelHelpText": "The risk level given the current measures",
-	"residualRiskLevelHelpText": "The risk level when all the extra measures are done"
+	"residualRiskLevelHelpText": "The risk level when all the extra measures are done",
+	"yourSelection": "Your selection",
+	"composerHint": "Hint: you can bookmark this page for future usage",
+	"composerTitle": "Here is the overview for the selected risk assessment",
+	"composerTitlePlural": "Here is the overview for the {number} selected risk assessments",
+	"statusOfAssociatedMeasures": "Status of associated measures",
+	"forTheSelectedScope": "For the selected scope, you have",
+	"untreatedRiskScenarios": "{count} untreated risk scenario{s}",
+	"acceptedRiskScenarios": "{count} accepted risk scenario{s}",
+	"reviewNeeded": "Review needed",
+	"ok": "Ok",
+	"inconsistenciesFoundComposer": "Found {count} inconsistenc{plural}. For more details, check",
+	"current": "Current",
+	"residual": "Residual",
+	"jumpToRiskAssessment": "Jump to risk assessment"
 }
