@@ -1,7 +1,9 @@
-import { test, expect, setHttpResponsesListener} from '../utils/test-utils.js';
+import { localItems } from '../../src/lib/utils/locales.js';
+import { languageTag } from '../../src/paraglide/runtime.js';
+import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
 
 type StringMap = {
-    [key: string]: string;
+	[key: string]: string;
 };
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
@@ -68,10 +70,10 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 });
 
 test('sidebar component tests', async ({ logedPage, sideBar, page }) => {
-    await test.step('sidebar can be collapsed and expanded', async () => {
-        sideBar.toggleButton.click();
-        await expect(sideBar.toggleButton).toHaveClass(/rotate-180/);
-        sideBar.toggleButton.click();
-        await expect(sideBar.toggleButton).not.toHaveClass(/rotate-180/);
-    });
+	await test.step('sidebar can be collapsed and expanded', async () => {
+		sideBar.toggleButton.click();
+		await expect(sideBar.toggleButton).toHaveClass(/rotate-180/);
+		sideBar.toggleButton.click();
+		await expect(sideBar.toggleButton).not.toHaveClass(/rotate-180/);
+	});
 });

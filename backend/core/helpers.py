@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from re import sub
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -22,6 +23,11 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "done": "#91cc75",
     "transfer": "#91cc75",
 }
+
+def camel_case(s):
+    s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
+
+    return ''.join([s[0].lower(), s[1:]])
 
 
 def security_measure_priority(user: User):
@@ -410,6 +416,7 @@ def risk_per_status(user: User):
 def security_measure_per_status(user: User):
     values = list()
     labels = list()
+    local_lables = list()
     color_map = {
         "--": "#93c5fd",
         "planned": "#fdba74",
@@ -432,7 +439,8 @@ def security_measure_per_status(user: User):
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
-    return {"labels": labels, "values": values}
+    local_lables = [camel_case(str(l)) for l in labels]
+    return {"localLables": local_lables,"labels": labels, "values": values}
 
 
 def security_measure_per_cur_risk(user: User):
@@ -508,16 +516,16 @@ def aggregate_risks_per_field(
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(residual_level=i)
-                    .filter(risk_assessment__risk_matrix__name=["name"])
+                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )
+                ) # What the second filter does ? Is this usefull ?
             else:
                 count = (
                     RiskScenario.objects.filter(id__in=object_ids_view)
                     .filter(current_level=i)
-                    .filter(risk_assessment__risk_matrix__name=["name"])
+                    # .filter(risk_assessment__risk_matrix__name=["name"])
                     .count()
-                )
+                ) # What the second filter does ? Is this usefull ?
 
             if "count" not in values[m["risk"][i][field]]:
                 values[m["risk"][i][field]]["count"] = count
@@ -525,7 +533,6 @@ def aggregate_risks_per_field(
                 continue
             values[m["risk"][i][field]]["count"] += count
     return values
-
 
 def risks_count_per_level(user: User, risk_assessments: list | None = None):
     current_level = list()
@@ -535,16 +542,15 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
         user, "name", risk_assessments=risk_assessments
     ).items():
         current_level.append(
-            {"name": r[0], "value": r[1]["count"], "color": r[1]["color"]}
+            {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
 
     for r in aggregate_risks_per_field(
         user, "name", residual=True, risk_assessments=risk_assessments
     ).items():
         residual_level.append(
-            {"name": r[0], "value": r[1]["count"], "color": r[1]["color"]}
+            {"name": r[0], "value": r[1]["count"], "color": r[1]["color"], "localName": camel_case(r[0])}
         )
-
     return {"current": current_level, "residual": residual_level}
 
 
@@ -702,7 +708,6 @@ def risk_status(user: User, risk_assessment_list):
         names.append(str(risk_assessment.project) + " " + str(risk_assessment.version))
 
     y_max_rsk = max(max_tmp, default=0) + 1
-    print("y_max_rsk: ", y_max_rsk)
 
     return {
         "names": names,

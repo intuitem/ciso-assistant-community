@@ -31,18 +31,9 @@ User = get_user_model()
 SAMPLE_640x480_JPG = BASE_DIR / "app_tests" / "sample_640x480.jpg"
 
 
-@pytest.fixture
-def root_folder_fixture():
-    Folder.objects.create(
-        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-    )
-
 
 @pytest.fixture
 def domain_project_fixture():
-    Folder.objects.create(
-        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-    )
     folder = Folder.objects.create(
         name="test folder", description="test folder description"
     )
@@ -52,9 +43,6 @@ def domain_project_fixture():
 
 @pytest.fixture
 def risk_matrix_fixture():
-    Folder.objects.create(
-        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-    )
     library = get_library("urn:intuitem:risk:library:critical_risk_matrix_5x5")
     assert library is not None
     import_library_view(library)
@@ -64,7 +52,6 @@ def risk_matrix_fixture():
 class TestEvidence:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_evidence_parameters(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
@@ -92,7 +79,6 @@ class TestEvidence:
         assert evidence.attachment.name.endswith(".jpg")
         assert evidence.attachment.size == 106_201
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_evidence_with_no_attachment(self):
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
@@ -641,21 +627,18 @@ class TestRiskMatrix:
 class TestSecurityMeasure:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_measure_creation(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         measure = SecurityMeasure.objects.create(name="Measure", folder=root_folder)
         assert measure.name == "Measure"
         assert measure.folder == root_folder
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_measure_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         SecurityMeasure.objects.create(name="Measure", folder=root_folder)
         with pytest.raises(ValidationError):
             SecurityMeasure.objects.create(name="Measure", folder=root_folder)
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_measure_creation_same_name_different_folder(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
@@ -666,7 +649,6 @@ class TestSecurityMeasure:
         assert measure1.folder == root_folder
         assert measure2.folder == folder
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_measure_category_inherited_from_function(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
@@ -683,7 +665,6 @@ class TestSecurityMeasure:
 class TestPolicy:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_policy_creation(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         policy = Policy.objects.create(name="Policy", folder=root_folder)
@@ -693,7 +674,6 @@ class TestPolicy:
         assert policy.folder == root_folder
         assert policy.category == "policy"
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_policy_does_not_inherit_category_from_security_function(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
@@ -705,14 +685,12 @@ class TestPolicy:
         )
         assert policy.category == "policy"
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_policy_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         Policy.objects.create(name="Policy", folder=root_folder)
         with pytest.raises(ValidationError):
             Policy.objects.create(name="Policy", folder=root_folder)
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_policy_creation_same_name_different_folder(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
@@ -854,7 +832,6 @@ class TestRiskAcceptance:
 class TestAsset:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_asset_creation(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         asset = Asset.objects.create(name="Asset", folder=root_folder)
@@ -862,14 +839,12 @@ class TestAsset:
         assert asset.folder == root_folder
         assert asset.type == Asset.Type.SUPPORT
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_asset_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         Asset.objects.create(name="Asset", folder=root_folder)
         with pytest.raises(ValidationError):
             Asset.objects.create(name="Asset", folder=root_folder)
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_asset_creation_same_name_different_folder(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
@@ -888,7 +863,6 @@ class TestAsset:
 class TestLibrary:
     pytestmark = pytest.mark.django_db
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_library_creation(self):
         library = Library.objects.create(
             name="Library",
@@ -903,7 +877,6 @@ class TestLibrary:
         assert library.version == 1
         assert library.folder == Folder.get_root_folder()
 
-    @pytest.mark.usefixtures("root_folder_fixture")
     def test_library_reference_count_zero_if_unused(self):
         library = Library.objects.create(
             name="Library",

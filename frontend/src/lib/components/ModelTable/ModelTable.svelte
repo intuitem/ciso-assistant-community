@@ -11,6 +11,9 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
+	import * as m from '$paraglide/messages';
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 	// Event Dispatcher
 	type TableEvent = {
 		selected: string[];
@@ -145,7 +148,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{heading}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{localItems(languageTag())[heading]}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>

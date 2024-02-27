@@ -4,6 +4,8 @@
 	import Notifications from './Notifications.svelte';
 	import { showNotification } from '$lib/utils/stores';
 
+	import * as m from '$paraglide/messages';
+
 	export let info: object[];
 
 	let showNotificationBool = JSON.parse($showNotification);
@@ -14,20 +16,28 @@
 	let daysInMonth = new Date(year, month, 0).getDate();
 	let firstDay = new Date(year, month - 1, 1).getDay();
 
-	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+	const daysOfWeek = [
+		m.monday(),
+		m.tuesday(),
+		m.wednesday(),
+		m.thursday(),
+		m.friday(),
+		m.saturday(),
+		m.sunday()
+	];
 	const monthNames = [
-		'january',
-		'february',
-		'march',
-		'april',
-		'may',
-		'june',
-		'july',
-		'august',
-		'september',
-		'october',
-		'november',
-		'december'
+		m.january(),
+		m.february(),
+		m.march(),
+		m.april(),
+		m.may(),
+		m.june(),
+		m.july(),
+		m.august(),
+		m.september(),
+		m.october(),
+		m.november(),
+		m.december()
 	];
 
 	function todayDay() {
@@ -112,19 +122,19 @@
 					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-primary-500 transition duration-300"
 				>
 					<i class="fas fa-calendar-day" />
-					Today
+					{m.today()}
 				</button>
-				<button
+				<!-- <button
 					on:click={notification}
 					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-secondary-400 transition duration-300"
 				>
 					<i class="fa-solid fa-envelope" />
 					Notifications
-				</button>
+				</button> -->
 			</div>
 		</div>
 	</div>
-	{#if showNotificationBool}
+	<!-- {#if showNotificationBool}
 		<Notifications {info} />
-	{/if}
+	{/if} -->
 </div>

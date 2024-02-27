@@ -1,4 +1,4 @@
-import { test, baseTest, expect} from '../../utils/test-utils.js';
+import { test, baseTest, expect } from '../../utils/test-utils.js';
 
 baseTest.beforeEach(async ({ page }) => {
 	await page.goto('/');
