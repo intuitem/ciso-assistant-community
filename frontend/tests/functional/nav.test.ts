@@ -51,7 +51,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await sideBar.profileButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(page).toHaveURL('/my-profile');
-		await expect.soft(logedPage.pageTitle).toHaveText('My Profile');
+		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
 
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
