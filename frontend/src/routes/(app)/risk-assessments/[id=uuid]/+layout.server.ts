@@ -48,9 +48,52 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const scenarioDeleteForm = await superValidate(deleteSchema);
 
 	const scenarioSchema = modelSchema('risk-scenarios');
-	const scenarioCreateForm = await superValidate(scenarioSchema);
+	const initialData = {
+		risk_assessment: params.id
+	};
+	const scenarioCreateForm = await superValidate(initialData, scenarioSchema, {
+		errors: false
+	});
 
 	const scenarioModel = getModelInfo('risk-scenarios');
+
+	const foreignKeys: Record<string, any> = {};
+
+	if (scenarioModel.foreignKeyFields) {
+		for (const keyField of scenarioModel.foreignKeyFields) {
+			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			const response = await fetch(url);
+			if (response.ok) {
+				foreignKeys[keyField.field] = await response.json().then((data) => data.results);
+			} else {
+				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	scenarioModel.foreignKeys = foreignKeys;
+
+	const selectOptions: Record<string, any> = {};
+
+	if (scenarioModel.selectFields) {
+		for (const selectField of scenarioModel.selectFields) {
+			const url = `${BASE_API_URL}/risk-scenarios/${selectField.field}/`;
+			const response = await fetch(url);
+			if (response.ok) {
+				selectOptions[selectField.field] = await response.json().then((data) =>
+					Object.entries(data).map(([key, value]) => ({
+						label: value,
+						value: key
+					}))
+				);
+			} else {
+				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+			}
+		}
+	}
+
+	scenarioModel.selectOptions = selectOptions;
 
 	return { risk_assessment, scenarioModel, scenariosTable, scenarioDeleteForm, scenarioCreateForm };
 };
