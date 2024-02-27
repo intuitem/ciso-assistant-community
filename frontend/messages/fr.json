@@ -342,5 +342,6 @@
 	"currentRiskLevel": "Niveau de risque courrant",
 	"residualRiskLevel": "Niveau de risque résiduel",
 	"currentRiskLevelHelpText": "Le niveau de risque compte tenu des mesures actuelles",
-	"residualRiskLevelHelpText": "Le niveau de risque lorsque toutes les mesures supplémentaires sont prises"
+	"residualRiskLevelHelpText": "Le niveau de risque lorsque toutes les mesures supplémentaires sont prises",
+	"inconsistenciesFoundComposer": "Il y a {count} incohérence{s}. Pour plus de détail, vérifiez"
 }
