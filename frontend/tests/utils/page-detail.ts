@@ -69,9 +69,17 @@ export class PageDetail extends BasePage {
 		} else {
 			for (const key in values) {
 				if (await this.page.getByTestId(key.replaceAll('_', '-') + '-field-title').isVisible()) {
-					await expect
+					if (key === 'lc_status') {
+						//TODO replace this with a better solution
+						await expect
 						.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
-						.toHaveText(new RegExp(key.replaceAll('_', ' '), 'i'));
+						.toHaveText(new RegExp(key.replaceAll('_', ' ').replace('lc ', ''), 'i'));
+					}
+					else {
+						await expect
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText(new RegExp(key.replaceAll('_', ' '), 'i'));
+					}
 
 					if (this.form.fields.get(key)?.type === FormFieldType.CHECKBOX) {
 						await expect
