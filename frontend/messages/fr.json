@@ -331,5 +331,8 @@
 	"dependencies": "Dépendances",
 	"copyright": "Droits d'auteur",
 	"uploadYourLibrary": "Téléchargez votre propre bibliothèque",
-	"libraryFileInYaml": "Fichier de librairie en format YAML"
+	"libraryFileInYaml": "Fichier de librairie en format YAML",
+	"scope": "Périmètre",
+	"auditor": "Auditeur",
+	"lastUpdate": "Dernière mise à jour"
 }

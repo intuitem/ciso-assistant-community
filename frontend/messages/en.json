@@ -331,5 +331,16 @@
 	"dependencies": "Dependencies",
 	"copyright": "Copyright",
 	"uploadYourLibrary": "Upload your own library",
-	"libraryFileInYaml": "Library file in YAML format"
+	"libraryFileInYaml": "Library file in YAML format",
+	"scope": "Scope",
+	"auditor": "Auditor",
+	"lastUpdate": "Last update",
+	"riskScenarioAssetHelpText": "Assets impacted by this risk scenario",
+	"riskScenarioMeasureHelpText": "The existing security measures to manage this risk",
+	"currentAssessment": "Current assessment",
+	"targetAssessment": "Target assessment",
+	"currentRiskLevel": "Current risk level",
+	"residualRiskLevel": "Residual risk level",
+	"currentRiskLevelHelpText": "The risk level given the current measures",
+	"residualRiskLevelHelpText": "The risk level when all the extra measures are done"
 }
