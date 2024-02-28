@@ -1,4 +1,4 @@
-import { expect, type Page } from './test-utils.js';
+import { expect, type Locator, type Page } from './test-utils.js';
 import { BasePage } from './base-page.js';
 
 enum State {
@@ -7,33 +7,39 @@ enum State {
 	True = 1
 }
 
-export class LoginPage extends BasePage {
-	static readonly defaultEmail: string = 'admin@tests.com';
-	static readonly defaultPassword: string = '1234';
-	email: string;
-	password: string;
+export class LoginPage extends BasePage	{
+    static readonly defaultEmail: string = 'admin@tests.com';
+    static readonly defaultPassword: string = '1234';
+    readonly usernameInput: Locator;
+    readonly passwordInput: Locator;
+    readonly loginButton: Locator;
+    readonly forgotPasswordButton: Locator;
+    email: string;
+    password: string;
 
-	constructor(public readonly page: Page) {
-		super(page, '/login', 'Login');
-		this.email = LoginPage.defaultEmail;
-		this.password = LoginPage.defaultPassword;
-	}
+    constructor(public readonly page: Page) {
+        super(page, '/login', 'Login');
+        this.usernameInput = this.page.getByTestId('form-input-username');
+        this.passwordInput = this.page.getByTestId('form-input-password');
+        this.loginButton = this.page.getByTestId('login-btn');
+        this.forgotPasswordButton = this.page.getByTestId('forgot-password-btn');
+        this.email = LoginPage.defaultEmail;
+        this.password = LoginPage.defaultPassword;
+    }
 
-	async login(
-		email: string = LoginPage.defaultEmail,
-		password: string = LoginPage.defaultPassword
-	) {
-		this.email = email;
-		this.password = password;
-		await this.page.locator('input[name="username"]').fill(email);
-		await this.page.locator('input[name="password"]').fill(password);
-		await this.page.getByRole('button', { name: 'Log in' }).click();
-		if (email === LoginPage.defaultEmail && password === LoginPage.defaultPassword) {
-			await this.page.waitForURL(/^.*\/((?!login).)*$/, { timeout: 10000 });
-		} else {
-			await this.page.waitForURL(/^.*\/login(\?next=\/.*)?$/);
-		}
-	}
+    async login(email: string=LoginPage.defaultEmail, password: string=LoginPage.defaultPassword) {
+        this.email = email;
+        this.password = password;
+        await this.usernameInput.fill(email);
+        await this.passwordInput.fill(password);
+        await this.loginButton.click();
+        if (email === LoginPage.defaultEmail && password === LoginPage.defaultPassword) {
+            await this.page.waitForURL(/^.*\/((?!login).)*$/, { timeout: 10000 });
+        }
+        else {
+            await this.page.waitForURL(/^.*\/login(\?next=\/.*)?$/);
+        }
+    }
 
 	async hasUrl(redirect: State = State.Unset) {
 		switch (redirect) {
