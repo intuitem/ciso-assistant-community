@@ -62,11 +62,11 @@
 										href="/password-reset"
 										class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 									>
-										<p class="">Forgot password?</p>
+										<p class="" data-testid="forgot-password-btn">Forgot password?</p>
 									</a>
 								</div>
 								<p class="">
-									<button class="btn variant-filled-primary font-semibold w-full" type="submit"
+									<button class="btn variant-filled-primary font-semibold w-full" data-testid="login-btn" type="submit"
 										>Log in</button
 									>
 								</p>
