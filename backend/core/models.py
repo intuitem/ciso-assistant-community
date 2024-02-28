@@ -164,10 +164,10 @@ class Threat(ReferentialObjectMixin):
 
 class SecurityFunction(ReferentialObjectMixin):
     CATEGORY = [
-        ("policy", _("Policy")),
-        ("process", _("Process")),
-        ("technical", _("Technical")),
-        ("physical", _("Physical")),
+        ("policy", _("policy")),
+        ("process", _("process")),
+        ("technical", _("technical")),
+        ("physical", _("physical")),
     ]
 
     library = models.ForeignKey(
@@ -359,12 +359,12 @@ class RequirementNode(ReferentialObjectMixin):
 
 class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
-        ("undefined", _("--")),
-        ("in_design", _("Design")),
-        ("in_dev", _("Development")),
-        ("in_prod", _("Production")),
-        ("eol", _("End Of Life")),
-        ("dropped", _("Dropped")),
+        ("undefined", _("undefined")),
+        ("in_design", _("design")),
+        ("in_dev", _("development")),
+        ("in_prod", _("production")),
+        ("eol", _("endOfLife")),
+        ("dropped", _("dropped")),
     ]
     internal_reference = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Internal reference")
@@ -519,17 +519,17 @@ class Evidence(NameDescriptionMixin, FolderMixin):
 
 class SecurityMeasure(NameDescriptionMixin, FolderMixin):
     class Status(models.TextChoices):
-        PLANNED = "planned", _("Planned")
-        ACTIVE = "active", _("Active")
-        INACTIVE = "inactive", _("Inactive")
+        PLANNED = "planned", _("planned")
+        ACTIVE = "active", _("active")
+        INACTIVE = "inactive", _("inactive")
 
     CATEGORY = SecurityFunction.CATEGORY
 
     EFFORT = [
-        ("S", _("Small")),
-        ("M", _("Medium")),
-        ("L", _("Large")),
-        ("XL", _("Extra-Large")),
+        ("S", _("small")),
+        ("M", _("medium")),
+        ("L", _("large")),
+        ("XL", _("extraLarge")),
     ]
 
     MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}

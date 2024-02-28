@@ -389,7 +389,7 @@
 							<button
 								id="process"
 								class="text-md text-white p-2 rounded w-full"
-								on:click|stopPropagation={handle_composer_submit_click}>{m.process()}</button
+								on:click|stopPropagation={handle_composer_submit_click}>{m.processButton()}</button
 							>
 							<div class="flex flex-col items-center relative">
 								<button

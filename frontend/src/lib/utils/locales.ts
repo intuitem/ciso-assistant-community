@@ -256,7 +256,20 @@ export function localItems(languageTag: string): LocalItems {
 		lossOfAccountabilityText: m.lossOfAccountabilityText({ languageTag: languageTag }),
 		lossOfAccountabilityChoice1: m.lossOfAccountabilityChoice1({ languageTag: languageTag }),
 		lossOfAccountabilityChoice2: m.lossOfAccountabilityChoice2({ languageTag: languageTag }),
-		lossOfAccountabilityChoice3: m.lossOfAccountabilityChoice3({ languageTag: languageTag })
+		lossOfAccountabilityChoice3: m.lossOfAccountabilityChoice3({ languageTag: languageTag }),
+		undefined: m.undefined({ languageTag: languageTag }),
+		production: m.production({ languageTag: languageTag }),
+		development: m.development({ languageTag: languageTag }),
+		design: m.design({ languageTag: languageTag }),
+		endOfLife: m.endOfLife({ languageTag: languageTag }),
+		dropped: m.dropped({ languageTag: languageTag }),
+		technical: m.technical({ languageTag: languageTag }),
+		physical: m.physical({ languageTag: languageTag }),
+		small: m.small({ languageTag: languageTag }),
+		large: m.large({ languageTag: languageTag }),
+		extraLarge: m.extraLarge({ languageTag: languageTag }),
+		policy: m.policy({ languageTag: languageTag }),
+		process: m.process({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }

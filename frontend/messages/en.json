@@ -177,7 +177,7 @@
 	"noSecurityMeasureYet": "No security measure yet",
 	"authors": "Authors",
 	"reviewers": "Reviewers",
-	"process": "Process",
+	"processButton": "Process",
 	"selectTargets": "Select your targets",
 	"composerDescription": "This will help you aggregate multiple components (projects) to get the compiled view on your risk. This is particularly useful for two use cases",
 	"composerDescription1": "business intelligence approach to focus on a specific subset across different project domains (eg. across divisions)",
@@ -343,5 +343,17 @@
 	"exportBackup": "Export backup",
 	"confirmImportBackup": "Are you sure you want to import this backup? This will overwrite all existing data.",
 	"exportDatabase": "Export database",
-	"upload": "Upload"
+	"upload": "Upload",
+	"undefined": "--",
+	"production": "Production",
+	"design": "Design",
+	"development": "Development",
+	"endOfLife": "End of life",
+	"dropped": "Dropped",
+	"technical": "Technical",
+	"physical": "Physical",
+	"process": "Process",
+	"small": "Small",
+	"large": "Large",
+	"extraLarge": "Extra-large"
 }

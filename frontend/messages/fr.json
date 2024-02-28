@@ -177,7 +177,7 @@
 	"noSecurityMeasureYet": "Aucune mesure de sécurité pour le moment",
 	"authors": "Auteurs",
 	"reviewers": "Relecteurs",
-	"process": "Traiter",
+	"processButton": "Traiter",
 	"selectTargets": "Selectionnez vos cibles",
 	"composerDescription": "Cela vous aidera à agréger plusieurs composants (projets) pour obtenir une vue d'ensemble de vos risques. Ceci est particulièrement utile pour deux cas d'utilisation",
 	"composerDescription1": "une approche de veille stratégique pour se concentrer sur un sous-ensemble spécifique à travers différents domaines de projet (par exemple, à travers les divisions)",
