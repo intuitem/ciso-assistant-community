@@ -34,9 +34,10 @@
 			} else if (t === 'folders') {
 				t = 'domains';
 			}
-			t = t.replace(/-/g, ' ');
-			t = capitalizeSecondWord(t);
-			console.log(title)
+			else{
+				t = t.replace(/-/g, ' ');
+				t = capitalizeSecondWord(t);
+			}
 			return {
 				label: $page.data.label || t,
 				href: Object.keys(listViewFields).includes(tokens[0]) ? tokenPath : null
