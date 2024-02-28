@@ -99,7 +99,12 @@ class TestRiskAssessmentUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestRiskAssessmentAuthenticated:
     """Perform tests on Risk Assessment API endpoint with authentication"""
 
@@ -107,9 +112,7 @@ class TestRiskAssessmentAuthenticated:
         """test to get risk assessments from the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.get_object(
@@ -134,9 +137,7 @@ class TestRiskAssessmentAuthenticated:
         """test to create risk assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.create_object(
@@ -162,9 +163,7 @@ class TestRiskAssessmentAuthenticated:
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
         project2 = Project.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
@@ -200,9 +199,7 @@ class TestRiskAssessmentAuthenticated:
         """test to delete risk assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
         risk_matrix = RiskMatrix.objects.all()[0]
 
         EndpointTestsQueries.Auth.delete_object(

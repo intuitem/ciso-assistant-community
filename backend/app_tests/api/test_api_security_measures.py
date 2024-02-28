@@ -87,7 +87,12 @@ class TestSecurityMeasuresUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestSecurityMeasuresAuthenticated:
     """Perform tests on Security Measures API endpoint with authentication"""
 
@@ -207,11 +212,11 @@ class TestSecurityMeasuresAuthenticated:
         """test to get security measures effort choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            test.client, 
-            "Security measures", 
-            "effort", 
-            SecurityMeasure.EFFORT, 
-            user_group=test.user_group
+            test.client,
+            "Security measures",
+            "effort",
+            SecurityMeasure.EFFORT,
+            user_group=test.user_group,
         )
 
     def test_get_status_choices(self, test):

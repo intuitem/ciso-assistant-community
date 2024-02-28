@@ -85,7 +85,12 @@ class TestPolicysUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestPolicysAuthenticated:
     """Perform tests on policies API endpoint with authentication"""
 
@@ -186,27 +191,23 @@ class TestPolicysAuthenticated:
             },
             user_group=test.user_group,
         )
-    
+
     def test_get_category_choices(self, test):
         """test to get policies category choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            test.client, 
-            "Policies", 
-            "category", 
-            Policy.CATEGORY, 
-            user_group=test.user_group
+            test.client,
+            "Policies",
+            "category",
+            Policy.CATEGORY,
+            user_group=test.user_group,
         )
 
     def test_get_effort_choices(self, test):
         """test to get policies effort choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            test.client, 
-            "Policies", 
-            "effort", 
-            Policy.EFFORT, 
-            user_group=test.user_group
+            test.client, "Policies", "effort", Policy.EFFORT, user_group=test.user_group
         )
 
     def test_get_status_choices(self, test):
