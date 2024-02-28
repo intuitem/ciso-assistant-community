@@ -6,6 +6,8 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import Typewriter from 'svelte-typewriter';
 
+	import * as m from '$paraglide/messages.js';
+
 	export let data: PageData;
 
 	const cursor = false;
@@ -22,15 +24,15 @@
 			<div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-gray-900">
 				<Typewriter mode="loopOnce" cursor={false} interval={50}>
 					<div class="text-2xl unstyled text-center pb-4">
-						<span class="text-2xl text-center">Hello there 👋</span>
-						<span> This is CISO Assistant. </span>
+						<span class="text-2xl text-center">{m.helloThere()} </span>
+						<span> {m.thisIsCisoAssistant()} </span>
 					</div>
 				</Typewriter>
 				<Typewriter mode="cascade" cursor={false} interval={45} delay={5000}>
 					<div class="text-2xl unstyled text-center">
-						<span> Your streamlined </span>
-						<span class="font-black"> one-stop shop </span>
-						<span> for compliance and risk management. </span>
+						<span> {m.yourStreamlined()} </span>
+						<span class="font-black"> {m.oneStopShop()} </span>
+						<span> {m.forComplianceRiskManagement()} </span>
 					</div>
 				</Typewriter>
 			</div>
@@ -41,10 +43,10 @@
 							<i class="fa-solid fa-right-to-bracket" />
 						</div>
 						<h3 class="font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
-							Login into your account
+							{m.logIntoYourAccount()}
 						</h3>
 						<p class="text-center text-gray-600 text-sm">
-							You need to login to access all the features
+							{m.youNeedToLogIn()}
 						</p>
 						<div class="w-full">
 							<!-- SuperForm with dataType 'form' -->
@@ -55,19 +57,19 @@
 								let:form
 								validators={loginSchema}
 							>
-								<TextField type="email" {form} field="username" label="E-mail" />
-								<TextField type="password" {form} field="password" label="Password" />
+								<TextField type="email" {form} field="username" label={m.email()} />
+								<TextField type="password" {form} field="password" label={m.password()} />
 								<div class="flex flex-row justify-end">
 									<a
 										href="/password-reset"
 										class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 									>
-										<p class="">Forgot password?</p>
+										<p class="">{m.forgtPassword()}?</p>
 									</a>
 								</div>
 								<p class="">
 									<button class="btn variant-filled-primary font-semibold w-full" type="submit"
-										>Log in</button
+										>{m.login()}</button
 									>
 								</p>
 							</SuperForm>
