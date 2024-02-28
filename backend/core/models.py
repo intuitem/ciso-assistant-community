@@ -1007,28 +1007,21 @@ class RiskScenario(NameDescriptionMixin):
             "description": _(
                 "The strength of the knowledge supporting the assessment is low"
             ),
-            "symbol": "◔",
+            "symbol": "◇",
         },
         1: {
             "name": _("Medium"),
             "description": _(
                 "The strength of the knowledge supporting the assessment is medium"
             ),
-            "symbol": "◑",
+            "symbol": "⬙",
         },
         2: {
             "name": _("High"),
             "description": _(
                 "The strength of the knowledge supporting the assessment is high"
             ),
-            "symbol": "◕",
-        },
-        3: {
-            "name": _("Very High"),
-            "description": _(
-                "The strength of the knowledge supporting the assessment is very high"
-            ),
-            "symbol": "●",
+            "symbol": "◆",
         },
     }
 
