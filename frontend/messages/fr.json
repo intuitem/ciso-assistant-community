@@ -338,5 +338,10 @@
 	"dependencies": "Dépendances",
 	"copyright": "Droits d'auteur",
 	"uploadYourLibrary": "Téléchargez votre propre bibliothèque",
-	"libraryFileInYaml": "Fichier de librairie en format YAML"
+	"libraryFileInYaml": "Fichier de librairie en format YAML",
+	"importBackup": "Importer une sauvegarde",
+	"exportBackup": "Exporter une sauvegarde",
+	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes.",
+	"exportDatabase": "Exporter la base de données",
+	"upload": "Télécharger"
 }
