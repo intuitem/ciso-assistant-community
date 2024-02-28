@@ -46,14 +46,46 @@ const riskMatrix = {
 	})
 };
 
-const riskScenario = {
-	id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
-	name: 'RS1',
-	rid: 'R.1',
-	strength_of_knowledge: {
-		name: 'Very High',
-		description: 'The strength of the knowledge supporting the assessment is very high',
-		symbol: '●'
+const riskScenarios = [
+	{
+		id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
+		name: 'RS1',
+		rid: 'R.1',
+		strength_of_knowledge: {
+			name: 'Low',
+			description: 'The strength of the knowledge supporting the assessment is very high',
+			symbol: '◇'
+		}
+	},
+	{
+		id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
+		name: 'RS1',
+		rid: 'R.2',
+		strength_of_knowledge: {
+			name: 'Low',
+			description: 'The strength of the knowledge supporting the assessment is very high',
+			symbol: '⬙'
+		}
+	},
+	{
+		id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
+		name: 'RS1',
+		rid: 'R.3',
+		strength_of_knowledge: {
+			name: 'Low',
+			description: 'The strength of the knowledge supporting the assessment is very high',
+			symbol: '◆'
+		}
+	},
+	{
+		id: '7059ef1b-7d4f-46bc-b735-ed41b531bb22',
+		name: 'RS4',
+		rid: 'R.1',
+		strength_of_knowledge: {
+			name: 'Low',
+			description: 'The strength of the knowledge supporting the assessment is very high',
+			symbol: '◆'
+		}
 	}
 };
 
