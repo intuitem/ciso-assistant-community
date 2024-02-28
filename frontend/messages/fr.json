@@ -394,5 +394,20 @@
 	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
 	"attachmentHelpText": "Fichier de preuve (eg. capture d'écran, fichier journal, etc.)",
 	"attachmentWarningText": "ATTENTION: le téléchargement d'un nouveau fichier écrasera celui existant",
-	"isActiveHelpText": "Désigne si cet utilisateur doit être traité comme actif"
+	"isActiveHelpText": "Désigne si cet utilisateur doit être traité comme actif",
+	"helloThere": "Bonjour 👋",
+	"thisIsCisoAssistant": "Voici CISO Assistant.",
+	"yourStreamlined": "Votre solution",
+	"oneStopShop": "tout en un",
+	"forComplianceRiskManagement": "pour la conformité et la gestion des risques.",
+	"youCanSetPAsswordHere": "Vous pouvez définir votre mot de passe ici",
+	"setPassword": "Définir le mot de passe",
+	"logIntoYourAccount": "Connectez-vous à votre compte",
+	"youNeedToLogIn": "Vous devez vous connecter pour accéder à toutes les fonctionnalités",
+	"forgtPassword": "Mot de passe oublié",
+	"login": "Se connecter",
+	"password": "Mot de passe",
+	"enterYourEmail": "Entrez votre adresse e-mail ci-dessous et nous vous enverrons des instructions pour en définir un nouveau.",
+	"send": "Envoyer",
+	"goBackToLogin": "Revenir à la page de connexion"
 }
