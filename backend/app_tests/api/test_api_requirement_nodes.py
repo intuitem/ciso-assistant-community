@@ -40,7 +40,12 @@ class TestRequirementNodesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestRequirementNodesAuthenticated:
     """Perform tests on RequirementNodes API endpoint with authentication"""
 
@@ -73,7 +78,9 @@ class TestRequirementNodesAuthenticated:
 
     def test_import_requirement_nodes(self, test):
         """test that the requirements values imported from a library are correct"""
-        EndpointTestsQueries.Auth.import_object(test.client, "Framework", user_group=test.user_group)
+        EndpointTestsQueries.Auth.import_object(
+            test.client, "Framework", user_group=test.user_group
+        )
         EndpointTestsQueries.Auth.compare_results(
             test.client,
             "Requirement nodes",

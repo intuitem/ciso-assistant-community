@@ -10,7 +10,11 @@ urlpatterns = [
     path("current-user/", CurrentUserView.as_view(), name="current-user"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("password-reset/", PasswordResetView.as_view(), name="password-reset"),
-    path("password-reset/confirm/", ResetPasswordConfirmView.as_view(), name="password-reset-confirm"),
+    path(
+        "password-reset/confirm/",
+        ResetPasswordConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
     path(
         "first_connexion/<uidb64>/<token>/",
