@@ -12,7 +12,7 @@
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
 	import * as m from '$paraglide/messages';
-	import { localItems } from '$lib/utils/locales';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	// Event Dispatcher
 	type TableEvent = {
@@ -229,9 +229,17 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str)]}
+				  		<p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{localItems(languageTag())[toCamelCase(value.name ?? value.str)]}</p>
+					{:else}
+                  		<p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+					{/if}
                 {:else}
-                  {value ?? '-'}
+					{#if localItems(languageTag())[value]}
+						{localItems(languageTag())[value]}
+					{:else}
+						{value ?? '-'}
+					{/if}
                 {/if}
                 </span>
 							{/if}
