@@ -409,5 +409,10 @@
 	"password": "Mot de passe",
 	"enterYourEmail": "Entrez votre adresse e-mail ci-dessous et nous vous enverrons des instructions pour en définir un nouveau",
 	"send": "Envoyer",
-	"goBackToLogin": "Revenir à la page de connexion"
+	"goBackToLogin": "Revenir à la page de connexion",
+	"riskAcceptanceReviewMessage": "Cette acceptation de risque est en attente de traitement. Pensez à la consulter avant de la valider ou de la rejeter, vous ne pourrez pas revenir en arrière.",
+	"validate": "Valider",
+	"reject": "Rejeter",
+	"revoke": "Révoquer",
+	"riskAcceptanceValidatedMessage": "Cette acceptation de risque est actuellement validée. Elle peut être révoquée à tout moment, mais cela sera irrévocable. Vous devrez la dupliquer avec une version différente si nécessaire."
 }
