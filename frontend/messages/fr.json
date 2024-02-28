@@ -151,7 +151,7 @@
 	"statistics": "Statistiques",
 	"myProjects": "Mes projets",
 	"scenarios": "Scénarios",
-	"assignedProjects": "Assigné à {number} project{s}",
+	"assignedProjects": "Assigné à {number} projet{s}",
 	"currentRiskLevelPerScenario": "Niveau de risque courant par scénario de risque",
 	"residualRiskLevelPerScenario": "Niveau de risque résiduel par scénario de risque",
 	"securityMeasuresStatus": "Statut des mesures de sécurité",
