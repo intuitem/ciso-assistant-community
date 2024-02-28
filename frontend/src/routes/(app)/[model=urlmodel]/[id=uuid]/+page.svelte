@@ -133,7 +133,7 @@
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
 					class="btn variant-filled-success"
 				>
-					<i class="fas fa-check mr-2" /> {m.accept()}</button
+					<i class="fas fa-check mr-2" /> {m.validate()}</button
 				>
 				<button
 					on:click={(_) => {
