@@ -29,6 +29,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 				if (item.href !== '/role-assignments') {
 					await sideBar.click(key, item.href);
 					await expect(page).toHaveURL(item.href);
+					await logedPage.checkForUndefinedText();
 					if (item.name in temporaryPageTitle) {
 						await expect.soft(logedPage.pageTitle).toHaveText([temporaryPageTitle[item.name]]);
 					} else {
@@ -47,19 +48,23 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	await test.step('more panel links are working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await logedPage.checkForUndefinedText();
 		await expect(sideBar.profileButton).toBeVisible();
 		await sideBar.profileButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(page).toHaveURL('/my-profile');
 		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
-
+		await logedPage.checkForUndefinedText();
+		
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await logedPage.checkForUndefinedText();
 		await expect(sideBar.aboutButton).toBeVisible();
 		await sideBar.aboutButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(logedPage.modalTitle).toBeVisible();
 		await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
+		await logedPage.checkForUndefinedText();
 		await page.mouse.click(20, 20); // click outside the modal to close it
 		await expect(logedPage.modalTitle).not.toBeVisible();
 

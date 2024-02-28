@@ -16,6 +16,7 @@ test('login / logout process is working properly', async ({
 }) => {
 	await loginPage.hasUrl(1);
 	await expect.soft(page.getByRole('heading', { name: 'Login into your account' })).toBeVisible();
+	await loginPage.checkForUndefinedText();
 	await loginPage.login();
 	await overviewPage.hasUrl();
 	sideBar.moreButton.click();
