@@ -17,6 +17,7 @@
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
+	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
@@ -33,6 +34,15 @@
 	breadcrumbObject.set(data.scenario);
 
 	const schema = modelSchema(data.model.urlModel!);
+
+	const strengthOfKnowledgeFormChoices: { label: string; value: number }[] = (
+		Object.entries(data.strengthOfKnowledgeChoices) as StrengthOfKnowledgeEntry[]
+	)
+		.map(([key, value]) => ({
+			label: value.name,
+			value: parseInt(key)
+		}))
+		.sort((a, b) => a.value - b.value);
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -140,14 +150,6 @@
 						label={m.riskAssessment()}
 					/>
 					<span>
-						<p class="text-sm font-semibold text-gray-400">{m.auditor()}</p>
-						{#if data.scenario.auditor}
-							<a class="anchor text-sm font-semibold" href="/users/{data.scenario.auditor.id}"
-								>{data.scenario.auditor.str}</a
-							>
-						{/if}
-					</span>
-					<span>
 						<p class="text-sm font-semibold text-gray-400">{m.version()}</p>
 						<p class="text-sm font-semibold">{data.scenario.version}</p>
 					</span>
@@ -244,7 +246,7 @@
 		<div class="card px-4 py-2 bg-white shadow-lg">
 			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<div class="flex flex-row space-x-4 justify-between">
-				<div class="flex flex-col w-1/2">
+				<div class="flex flex-col space-y-4 w-1/2">
 					<span class="flex flex-row justify-between items-center">
 						<h5 class="h5 font-medium">{m.associatedSecurityMeasures()}</h5>
 						<button
@@ -295,6 +297,12 @@
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
+			<Select
+				{form}
+				options={strengthOfKnowledgeFormChoices}
+				field="strength_of_knowledge"
+				label={m.strengthOfKnowledge()}
+			/>
 			<TextArea {form} field="justification" label={m.justification()} />
 		</div>
 		<div class="flex flex-row justify-between space-x-4">
