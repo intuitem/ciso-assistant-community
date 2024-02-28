@@ -22,6 +22,7 @@ AUDITOR_PERMISSIONS_LIST = [
     "view_evidence",
     "view_framework",
     "view_library",
+    "view_user",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -44,6 +45,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_evidence",
     "view_framework",
     "view_library",
+    "view_user",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -90,6 +92,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_requirementnode",
     "view_framework",
     "view_library",
+    "view_user",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -141,6 +144,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_requirementnode",
     "view_framework",
     "view_library",
+    "view_user",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [

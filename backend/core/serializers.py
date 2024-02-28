@@ -266,6 +266,16 @@ class UserWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(codename=f"add_user"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied(
+                {
+                    "error": ["You do not have permission to create users"]
+                }
+            )            
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
