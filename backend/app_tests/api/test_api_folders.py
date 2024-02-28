@@ -2,7 +2,8 @@ import pytest
 from rest_framework.test import APIClient
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
+from test_utils import EndpointTestsQueries
 
 # Generic folder data for tests
 FOLDER_NAME = "Test Folder"
@@ -61,67 +62,88 @@ class TestFoldersUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestFoldersAuthenticated:
     """Perform tests on Folders API endpoint with authentication"""
 
-    def test_get_folders(self, authenticated_client):
+    def test_get_folders(self, test):
         """test to get folders from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Folders",
             Folder,
-            {"name": FOLDER_NAME, "description": FOLDER_DESCRIPTION},
             {
-                "parent_folder": {"str": Folder.get_root_folder().name},
+                "name": FOLDER_NAME,
+                "description": FOLDER_DESCRIPTION,
+                "parent_folder": test.folder,
+            },
+            {
+                "parent_folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "content_type": FOLDER_CONTENT_TYPE,
             },
+            base_count=-1,
+            user_group=test.user_group,
         )
 
-    def test_create_folders(self, authenticated_client):
+    def test_create_folders(self, test):
         """test to create folders with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Folders",
             Folder,
             {
                 "name": FOLDER_NAME,
                 "description": FOLDER_DESCRIPTION,
-                "parent_folder": str(Folder.get_root_folder().id),
+                "parent_folder": str(test.folder.id),
             },
             {
-                "parent_folder": {"str": Folder.get_root_folder().name},
+                "parent_folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "content_type": FOLDER_CONTENT_TYPE,
             },
+            base_count=-1,
+            user_group=test.user_group,
         )
 
-    def test_update_folders(self, authenticated_client):
+    def test_update_folders(self, test):
         """test to update folders with the API with authentication"""
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Folders",
             Folder,
             {
                 "name": FOLDER_NAME,
                 "description": FOLDER_DESCRIPTION,
+                "parent_folder": test.folder,
             },
             {
                 "name": "new " + FOLDER_NAME,
                 "description": "new " + FOLDER_DESCRIPTION,
-                "parent_folder": str(Folder.objects.create(name="test").id),
+                "parent_folder": str(Folder.objects.create(name="test2").id),
             },
+            {
+                "parent_folder": {"id": str(test.folder.id), "str": test.folder.name},
+            },
+            user_group=test.user_group,
         )
 
-    def test_delete_folders(self, authenticated_client):
+    def test_delete_folders(self, test):
         """test to delete folders with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Folders",
             Folder,
             {
                 "name": FOLDER_NAME,
+                "parent_folder": test.folder,
             },
+            user_group=test.user_group,
         )

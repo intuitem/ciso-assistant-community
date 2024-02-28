@@ -1,5 +1,5 @@
 import pytest
-from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APIClient
 from core.models import (
     ComplianceAssessment,
@@ -10,7 +10,8 @@ from core.models import (
 from core.models import Project, SecurityMeasure
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
+from test_utils import EndpointTestsQueries
 
 # Generic requirement assessment data for tests
 REQUIREMENT_ASSESSMENT_STATUS = "partially_compliant"
@@ -91,63 +92,70 @@ class TestRequirementAssessmentsUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestRequirementAssessmentsAuthenticated:
     """Perform tests on Requirement Assessments API endpoint with authentication"""
 
-    def test_get_requirement_assessments(self, authenticated_client):
+    def test_get_requirement_assessments(self, test):
         """test to get requirement assessments from the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=folder),
+            project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Requirement Assessments",
             RequirementAssessment,
             {
                 "status": REQUIREMENT_ASSESSMENT_STATUS,
                 "observation": REQUIREMENT_ASSESSMENT_OBSERVATION,
-                "folder": folder,
+                "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
             },
             {
-                "folder": str(folder.id),
+                "folder": str(test.folder.id),
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                 },
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
-            -1,
+            base_count=-1,
+            user_group=test.user_group,
         )
 
-    def test_create_requirement_assessments(self, authenticated_client):
+    def test_create_requirement_assessments(self, test):
         """test to create requirement assessments with the API with authentication"""
         """nobody has permission to do that, so it will fail"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=folder),
+            project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
-        security_measure = SecurityMeasure.objects.create(name="test", folder=folder)
+        security_measure = SecurityMeasure.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Requirement Assessments",
             RequirementAssessment,
             {
                 "status": REQUIREMENT_ASSESSMENT_STATUS,
                 "observation": REQUIREMENT_ASSESSMENT_OBSERVATION,
-                "folder": str(folder.id),
+                "folder": str(test.folder.id),
                 "compliance_assessment": str(compliance_assessment.id),
                 "requirement": str(RequirementNode.objects.all()[0].id),
                 "security_measures": [str(security_measure.id)],
@@ -160,19 +168,17 @@ class TestRequirementAssessmentsAuthenticated:
             },
             base_count=-1,
             fails=True,
-            expected_status=HTTP_400_BAD_REQUEST
+            expected_status=HTTP_403_FORBIDDEN,
         )
 
-    def test_update_requirement_assessments(self, authenticated_client):
+    def test_update_requirement_assessments(self, test):
         """test to update requirement assessments with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
+        folder = Folder.objects.create(name="test2")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(
-                name="test", folder=Folder.get_root_folder()
-            ),
+            project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
         compliance_assessment2 = ComplianceAssessment.objects.create(
@@ -183,13 +189,13 @@ class TestRequirementAssessmentsAuthenticated:
         security_measure = SecurityMeasure.objects.create(name="test", folder=folder)
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Requirement Assessments",
             RequirementAssessment,
             {
                 "status": REQUIREMENT_ASSESSMENT_STATUS,
                 "observation": REQUIREMENT_ASSESSMENT_OBSERVATION,
-                "folder": Folder.get_root_folder(),
+                "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
             },
@@ -202,21 +208,23 @@ class TestRequirementAssessmentsAuthenticated:
                 "security_measures": [str(security_measure.id)],
             },
             {
-                "folder": str(Folder.get_root_folder().id),
+                "folder": str(test.folder.id),
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
                 },
                 "requirement": str(RequirementNode.objects.all()[0].id),
             },
+            user_group=test.user_group,
         )
 
-    def test_get_status_choices(self, authenticated_client):
+    def test_get_status_choices(self, test):
         """test to get requirement assessments status choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            authenticated_client,
+            test.client,
             "Requirement Assessments",
             "status",
             RequirementAssessment.Status.choices,
+            user_group=test.user_group,
         )

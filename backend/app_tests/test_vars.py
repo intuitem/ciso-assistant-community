@@ -1,4 +1,11 @@
 from typing import Any
+from core.apps import (
+    AUDITOR_PERMISSIONS_LIST,
+    APPROVER_PERMISSIONS_LIST,
+    ANALYST_PERMISSIONS_LIST,
+    DOMAIN_MANAGER_PERMISSIONS_LIST,
+    ADMINISTRATOR_PERMISSIONS_LIST,
+)
 
 # API endpoint to test
 COMPLIANCE_ASSESSMENTS_ENDPOINT = "compliance-assessments-list"
@@ -28,6 +35,45 @@ TEST_RISK_MATRIX_URN = "urn:intuitem:risk:library:critical_risk_matrix_3x3"
 TEST_RISK_MATRIX2_URN = "urn:intuitem:risk:library:critical_risk_matrix_5x5"
 TEST_REQUIREMENT_NODE_URN = "urn:intuitem:risk:req_node:nist-csf-1.1:rs.an-1"
 
+TEST_USER_EMAIL = "user@tests.com"
+GROUPS_PERMISSIONS = {
+    "BI-UG-ADM": {
+        "folder": "Global",
+        "name": "Global_administrator",
+        "perms": ADMINISTRATOR_PERMISSIONS_LIST,
+    },
+    "BI-UG-GAD": {
+        "folder": "Global",
+        "name": "Global_auditor",
+        "perms": AUDITOR_PERMISSIONS_LIST,
+    },
+    "BI-UG-GVA": {
+        "folder": "Global",
+        "name": "Global_validator",
+        "perms": APPROVER_PERMISSIONS_LIST,
+    },
+    "BI-UG-AUD": {
+        "folder": "test",
+        "name": "Auditor",
+        "perms": AUDITOR_PERMISSIONS_LIST,
+    },
+    "BI-UG-VAL": {
+        "folder": "test",
+        "name": "Validator",
+        "perms": APPROVER_PERMISSIONS_LIST,
+    },
+    "BI-UG-ANA": {
+        "folder": "test",
+        "name": "Analyst",
+        "perms": ANALYST_PERMISSIONS_LIST,
+    },
+    "BI-UG-DMA": {
+        "folder": "test",
+        "name": "Domain_Manager",
+        "perms": DOMAIN_MANAGER_PERMISSIONS_LIST,
+    },
+}
+
 __globals__ = globals()
 
 
@@ -45,3 +91,14 @@ def get_var(varname: str) -> Any:
             f"The test_vars module doesn't contain any variable named '{varname}' !"
         )
     return value
+
+
+def get_singular_name(plural_name: str) -> str:
+    exceptions = {
+        "Libraries": "Library",
+        "Risk matrices": "Risk matrix",
+        "Policies": "Policy",
+    }
+    return exceptions.get(
+        plural_name, plural_name[:-1] if plural_name.endswith("s") else plural_name
+    )
