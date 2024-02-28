@@ -411,7 +411,7 @@
 	"send": "Send",
 	"goBackToLogin": "Go back to login",
 	"riskAcceptanceReviewMessage": "This risk acceptance is awaiting processing. Remember to review it before accepting or rejecting it, you will not be able to go back.",
-	"accept": "Accept",
+	"validate": "Validate",
 	"reject": "Reject",
 	"revoke": "Revoke",
 	"riskAcceptanceAcceptedMessage": "This risk acceptance is currently accepted. It can be revoked at any time, but this will be irrevocable. You will need to duplicate it with a different verison if necessary."
