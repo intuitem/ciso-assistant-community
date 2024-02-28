@@ -193,7 +193,7 @@
 									{#if tagData}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-											{text}
+											{localItems(languageTag())[text]}
 										</span>
 									{/if}
 								{/each}
