@@ -419,9 +419,9 @@
 	"deleteModalMessage": "Are you sure you want to delete the following object",
 	"download": "Download",
 	"loading": "Loading",
-	"open": "Open",
-	"mitigate": "Mitigate",
-	"accept": "Accept",
-	"avoid": "Avoid",
-	"transfer": "Transfer"
+	"open": "Opened",
+	"mitigate": "Mitigated",
+	"accept": "Accepted",
+	"avoid": "Avoided",
+	"transfer": "Transfered"
 }

@@ -409,5 +409,19 @@
 	"validate": "Valider",
 	"reject": "Rejeter",
 	"revoke": "Révoquer",
-	"riskAcceptanceValidatedMessage": "Cette acceptation de risque est actuellement validée. Elle peut être révoquée à tout moment, mais cela sera irrévocable. Vous devrez la dupliquer avec une version différente si nécessaire."
+	"riskAcceptanceValidatedMessage": "Cette acceptation de risque est actuellement validée. Elle peut être révoquée à tout moment, mais cela sera irrévocable. Vous devrez la dupliquer avec une version différente si nécessaire.",
+	"confirmModalTitle": "Confirmer",
+	"confirmModalMessage": "Êtes-vous sûr? Cette action affectera définitivement l'objet suivant",
+	"submit": "Soumettre",
+	"requirementAssessment": "Évaluation d'exigence",
+	"requirementAssessments": "Évaluations des exigences",
+	"deleteModalTitle": "Supprimer",
+	"deleteModalMessage": "Etes-vous sûr de vouloir supprimer l'objet suivant",
+	"download": "Télécharger",
+	"loading": "Chargement",
+	"open": "Ouvert",
+	"mitigate": "Atténué",
+	"accept": "Accepté",
+	"avoid": "Évité",
+	"transfer": "Transféré"
 }
