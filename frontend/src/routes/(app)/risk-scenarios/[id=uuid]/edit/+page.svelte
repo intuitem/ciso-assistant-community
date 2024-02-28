@@ -87,7 +87,6 @@
 	}
 
 	for (const index in data.treatmentChoices) {
-		console.log(data.treatmentChoices[index]['label'])
 		data.treatmentChoices[index]['label'] = localItems(languageTag())[data.treatmentChoices[index]['value']];
 	}
 
