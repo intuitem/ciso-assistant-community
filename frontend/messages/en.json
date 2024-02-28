@@ -342,6 +342,6 @@
 	"importBackup": "Import backup",
 	"exportBackup": "Export backup",
 	"confirmImportBackup": "Are you sure you want to import this backup? This will overwrite all existing data.",
-	"dumpDatabase": "Dump database",
+	"exportDatabase": "Export database",
 	"upload": "Upload"
 }
