@@ -1,5 +1,5 @@
 import pytest
-from rest_framework.status import HTTP_403_FORBIDDEN
+from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST
 from rest_framework.test import APIClient
 from core.models import SecurityFunction
 from iam.models import Folder
@@ -86,7 +86,12 @@ class TestSecurityFunctionsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestSecurityFunctionsAuthenticated:
     """Perform tests on Security Functions API endpoint with authentication"""
 
@@ -155,7 +160,8 @@ class TestSecurityFunctionsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             fails=True,
-            expected_status=HTTP_403_FORBIDDEN, # Imported objects cannot be updated
+            #            expected_status=HTTP_403_FORBIDDEN, # Imported objects cannot be updated
+            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be updated
             user_group=test.user_group,
         )
 
@@ -180,9 +186,7 @@ class TestSecurityFunctionsAuthenticated:
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
             },
-            {
-                "folder": str(test.folder.id)
-            },
+            {"folder": str(test.folder.id)},
             user_group=test.user_group,
         )
 

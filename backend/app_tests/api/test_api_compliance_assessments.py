@@ -97,7 +97,12 @@ class TestComplianceAssessmentsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestComplianceAssessmentsAuthenticated:
     """Perform tests on ComplianceAssessments API endpoint with authentication"""
 
@@ -105,9 +110,7 @@ class TestComplianceAssessmentsAuthenticated:
         """test to get compliance assessments from the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.get_object(
             test.client,
@@ -134,9 +137,7 @@ class TestComplianceAssessmentsAuthenticated:
         """test to create compliance assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
@@ -165,9 +166,7 @@ class TestComplianceAssessmentsAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Documents")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework2")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
         project2 = Project.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
@@ -204,9 +203,7 @@ class TestComplianceAssessmentsAuthenticated:
         """test to delete compliance assessments with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
-        project = Project.objects.create(
-            name="test", folder=test.folder
-        )
+        project = Project.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.delete_object(
             test.client,
