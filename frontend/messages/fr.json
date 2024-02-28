@@ -343,5 +343,17 @@
 	"exportBackup": "Exporter une sauvegarde",
 	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes.",
 	"exportDatabase": "Exporter la base de données",
-	"upload": "Télécharger"
+	"upload": "Télécharger",
+	"undefined": "--",
+	"production": "Production",
+	"design": "Conception",
+	"development": "Développement",
+	"endOfLife": "Fin de vie",
+	"dropped": "Abandonné",
+	"technical": "Technique",
+	"physical": "Physique",
+	"process": "Processus",
+	"small": "Petit",
+	"large": "Grand",
+	"extraLarge": "Extra large"
 }
