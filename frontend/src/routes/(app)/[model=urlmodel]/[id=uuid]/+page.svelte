@@ -151,7 +151,7 @@
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
 			<div class="text-green-900">
-				{m.riskAcceptanceValidatedMessage}
+				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if $page.data.user.id === data.data.approver.id}
 				<div class="ml-auto whitespace-nowrap">
