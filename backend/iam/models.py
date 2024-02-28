@@ -164,7 +164,6 @@ class Folder(NameDescriptionMixin):
         return None
 
 
-
 class FolderMixin(models.Model):
     """
     Add foreign key to Folder, defaults to root folder
@@ -179,7 +178,6 @@ class FolderMixin(models.Model):
 
     class Meta:
         abstract = True
-
 
 
 class UserGroup(NameDescriptionMixin, FolderMixin):
@@ -212,7 +210,6 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         return user_group_list
 
 
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -229,7 +226,7 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
-            folder=_get_root_folder()
+            folder=_get_root_folder(),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
@@ -260,7 +257,9 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        extra_fields.setdefault("mailing", not(password) and (EMAIL_HOST or EMAIL_HOST_RESCUE))
+        extra_fields.setdefault(
+            "mailing", not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)
+        )
         superuser = self._create_user(email, password, **extra_fields)
         UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
@@ -423,7 +422,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     @property
     def has_backup_permission(self) -> bool:
         return RoleAssignment.is_access_allowed(
-            user=self, 
+            user=self,
             perm=Permission.objects.get(codename="backup"),
             folder=Folder.get_root_folder(),
         )
@@ -446,7 +445,6 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self.email = username
 
 
-
 class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""
 
@@ -461,7 +459,6 @@ class Role(NameDescriptionMixin, FolderMixin):
         if self.builtin:
             return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
         return self.name
-
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -660,7 +657,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 permissions.update(permission_dict)
 
         return permissions
-
 
     @staticmethod
     def has_role(user: AbstractBaseUser | AnonymousUser, role: Role):

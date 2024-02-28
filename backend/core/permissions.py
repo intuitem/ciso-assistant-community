@@ -20,8 +20,8 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
     }
 
     def has_permission(self, request: Request, view) -> bool:
-        """ we don't need this check, as we have queryset for list and serializers for create
-        see https://www.django-rest-framework.org/api-guide/permissions/ """
+        """we don't need this check, as we have queryset for list and serializers for create
+        see https://www.django-rest-framework.org/api-guide/permissions/"""
         return True
 
     def has_object_permission(self, request: Request, view, obj):
