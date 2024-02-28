@@ -82,8 +82,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'Confirm',
-			body: `Are you sure? This action will permanently affect the following object: ${name}?`
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
