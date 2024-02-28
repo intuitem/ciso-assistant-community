@@ -76,7 +76,7 @@ test('user usual routine actions are working correctly', async ({
 
 		await sideBar.click('Compliance', pages.frameworksPage.url);
 		await expect(page).toHaveURL(pages.frameworksPage.url);
-		await expect(page.getByRole('row', { name: vars.framework.ref })).toBeVisible();
+		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
 	});
 
 	await test.step('user can create a security function', async () => {
