@@ -803,6 +803,7 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
         v = {"value": count, "itemStyle": {"color": STATUS_COLOR_MAP[st[0]]}}
         values.append(v)
         labels.append(st[1])
+    local_lables = [camel_case(str(l)) for l in labels]
 
     risk_assessment_objects = list()
 
@@ -843,6 +844,6 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
             "untreated_h_vh": untreated_h_vh,
             "accepted": accepted,
         },
-        "security_measure_status": {"labels": labels, "values": values},
+        "security_measure_status": {"localLables":local_lables, "labels": labels, "values": values},
         "colors": get_risk_color_ordered_list(user, risk_assessment_list),
     }
