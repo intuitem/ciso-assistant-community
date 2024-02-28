@@ -31,7 +31,7 @@
 	<div class="card bg-white shadow py-4 px-6 space-y-2">
 		<h4 class="h4 font-semibold">{m.exportBackup()}</h4>
 		<form action="/backup-restore/dump-db/">
-			<button type="submit" class="btn variant-filled-primary">{m.dumpDatabase()}</button>
+			<button type="submit" class="btn variant-filled-primary">{m.exportDatabase()}</button>
 		</form>
 	</div>
 
