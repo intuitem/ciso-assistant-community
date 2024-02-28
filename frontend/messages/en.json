@@ -407,7 +407,7 @@
 	"forgtPassword": "Forgot password",
 	"login": "Login",
 	"password": "Password",
-	"enterYourEmail": "Enter your email address below, and we'll email instructions for setting a new one",
+	"enterYourEmail": "Enter your email address below, and we'll send instructions for setting a new one",
 	"send": "Send",
 	"goBackToLogin": "Go back to login"
 }
