@@ -7,11 +7,10 @@ import uuid
 from ciso_assistant import settings
 
 
-
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True,  verbose_name=_("UpdatedÒ at"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("UpdatedÒ at"))
 
     class Meta:
         abstract = True
@@ -105,7 +104,6 @@ class AbstractBaseModel(models.Model):
     def save(self, *args, **kwargs) -> None:
         self.clean()
         super().save(*args, **kwargs)
-
 
 
 class NameDescriptionMixin(AbstractBaseModel):

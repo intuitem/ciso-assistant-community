@@ -815,6 +815,7 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
+        # TODO: Implement a proper filter for the queryset
         return User.objects.all()
 
 

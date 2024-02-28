@@ -22,6 +22,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 			'Backup & restore': 'Backup restore'
 		};
 
+		const locals = localItems(languageTag());
+
 		for await (const [key, value] of sideBar.items) {
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {
@@ -30,7 +32,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 					if (item.name in temporaryPageTitle) {
 						await expect.soft(logedPage.pageTitle).toHaveText([temporaryPageTitle[item.name]]);
 					} else {
-						await expect.soft(logedPage.pageTitle).toHaveText(localItems(languageTag())[item.name]);
+						await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
 					}
 				}
 			}
@@ -48,8 +50,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await expect(sideBar.profileButton).toBeVisible();
 		await sideBar.profileButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
-		await expect(page).toHaveURL('/profile');
-		await expect.soft(logedPage.pageTitle).toHaveText('Profile');
+		await expect(page).toHaveURL('/my-profile');
+		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
 
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');

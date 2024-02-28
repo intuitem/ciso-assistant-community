@@ -5,6 +5,7 @@ from core.models import *
 from iam.models import *
 
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
@@ -36,7 +37,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
             folder=folder,
         )
         if not can_create_in_folder:
-            raise serializers.ValidationError(
+            raise PermissionDenied(
                 {
                     "folder": "You do not have permission to create objects in this folder"
                 }
@@ -268,6 +269,14 @@ class UserWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(codename=f"add_user"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied(
+                {"error": ["You do not have permission to create users"]}
+            )
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:

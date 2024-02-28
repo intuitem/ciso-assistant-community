@@ -4,8 +4,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from iam.models import User
 
-from test_vars import USERS_ENDPOINT as API_ENDPOINT
-from test_api import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS, USERS_ENDPOINT as API_ENDPOINT
+from test_utils import EndpointTestsQueries
 
 # Generic user data for tests
 USER_FIRSTNAME = "John"
@@ -72,36 +72,46 @@ class TestUsersUnauthenticated:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestUsersAuthenticated:
     """Perform tests on Users API endpoint with authentication"""
 
-    def test_get_users(self, authenticated_client):
+    def test_get_users(self, test):
         """test to get users from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Users",
             User,
             {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
-            base_count=1,
+            base_count=2,
+            item_search_field="email",
+            user_group=test.user_group,
         )
 
-    def test_create_users(self, authenticated_client):
+    def test_create_users(self, test):
         """test to create users with the API with authentication"""
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Users",
             User,
             {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
-            base_count=1,
+            base_count=2,
+            item_search_field="email",
+            user_group=test.user_group,
         )
 
-    def test_update_users(self, authenticated_client):
+    def test_update_users(self, test):
         """test to update users with the API with authentication"""
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Users",
             User,
             {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
@@ -110,19 +120,21 @@ class TestUsersAuthenticated:
                 "first_name": "new" + USER_FIRSTNAME,
                 "last_name": "new" + USER_NAME,
             },
+            user_group=test.user_group,
         )
 
-    def test_delete_users(self, authenticated_client):
+    def test_delete_users(self, test):
         """test to delete users with the API with authentication"""
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Users",
             User,
             {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
+            user_group=test.user_group,
         )
 
-    def test_uniqueness_emails(self, authenticated_client):
+    def test_uniqueness_emails(self, test):
         """test to create users with the API with authentication and already existing email"""
 
         url = reverse(API_ENDPOINT)
@@ -133,11 +145,11 @@ class TestUsersAuthenticated:
         }
 
         # Uses the API endpoint to create a user
-        response = authenticated_client.post(url, data, format="json")
+        response = test.admin_client.post(url, data, format="json")
         assert response.status_code == status.HTTP_201_CREATED
 
         # Uses the API endpoint to create another user with the same email
-        response = authenticated_client.post(url, data, format="json")
+        response = test.admin_client.post(url, data, format="json")
 
         # Asserts that the user was not created
         assert (
@@ -147,7 +159,7 @@ class TestUsersAuthenticated:
             "email": ["user with this email already exists."]
         }, "users can be created with an already used email"
 
-    def test_invalid_emails(self, authenticated_client):
+    def test_invalid_emails(self, test):
         """test to create users with the API with authentication and invalid emails"""
 
         url = reverse(API_ENDPOINT)
@@ -169,7 +181,7 @@ class TestUsersAuthenticated:
             }
 
             # Uses the API endpoint to create a user
-            response = authenticated_client.post(url, data, format="json")
+            response = test.admin_client.post(url, data, format="json")
 
             # Asserts that the user was not created
             assert (

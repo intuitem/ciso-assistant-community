@@ -171,6 +171,8 @@ export function localItems(languageTag: string): LocalItems {
 		associatedDomains: m.associatedDomains({ languageTag: languageTag }),
 		associatedProjects: m.associatedProjects({ languageTag: languageTag }),
 		associatedUsers: m.associatedUsers({ languageTag: languageTag }),
+		changePassword: m.changePassword({ languageTag: languageTag }),
+		label: m.label({ languageTag: languageTag }),
 		NA: m.NA({ languageTag: languageTag }),
 		threatAgentFactors: m.threatAgentFactors({ languageTag: languageTag }),
 		vulnerabilityFactors: m.vulnerabilityFactors({ languageTag: languageTag }),
