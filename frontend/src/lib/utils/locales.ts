@@ -1,3 +1,4 @@
+import { mitigate } from '$paraglide/messages/en';
 import * as m from '../../paraglide/messages';
 
 export const LOCALE_MAP = {
@@ -268,6 +269,11 @@ export function localItems(languageTag: string): LocalItems {
 		process: m.process({ languageTag: languageTag }),
 		composer: m.composer({ languageTag: languageTag }),
 		plan: m.plan({ languageTag: languageTag }),
+		open: m.open({ languageTag: languageTag }),
+		mitigate: m.mitigate({ languageTag: languageTag }),
+		accept: m.accept({ languageTag: languageTag }),
+		transfer: m.transfer({ languageTag: languageTag }),
+		avoid: m.avoid({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }

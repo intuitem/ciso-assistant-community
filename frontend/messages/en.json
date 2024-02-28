@@ -418,5 +418,10 @@
 	"deleteModalTitle": "Delete",
 	"deleteModalMessage": "Are you sure you want to delete the following object",
 	"download": "Download",
-	"loading": "Loading"
+	"loading": "Loading",
+	"open": "Open",
+	"mitigate": "Mitigate",
+	"accept": "Accept",
+	"avoid": "Avoid",
+	"transfer": "Transfer"
 }
