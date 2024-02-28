@@ -69,7 +69,7 @@ export class PageContent extends BasePage {
 		}
 	}
 
-	async importLibrary(name: string, urn: string, language: string = 'English') {
+	async importLibrary(name: string, urn?: string, language: string = 'English') {
 		if (await this.tab('Imported libraries').isVisible()) {
 			if (await this.getRow(name).isHidden()) {
 				await this.tab('Libraries store').click();
@@ -78,10 +78,10 @@ export class PageContent extends BasePage {
 				return;
 			}
 		}
-		await this.importItemButton(name, language).click();
-		await this.isToastVisible('Successfully imported library ' + urn + '.+', undefined, {
+		await this.importItemButton(name, language === 'any' ? undefined : language).click();
+		urn ? await this.isToastVisible('Successfully imported library ' + urn + '.+', undefined, {
 			timeout: 15000
-		});
+		}) : null;
 		await this.tab('Imported libraries').click();
 		expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
 		expect(this.getRow(name)).toBeVisible();
