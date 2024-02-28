@@ -394,5 +394,20 @@
 	"riskAcceptanceRiskScenariosHelpText": "The risk scenarios that are accepted",
 	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.)",
 	"attachmentWarningText": "WARNING: Uploading a new file will overwrite the existing one",
-	"isActiveHelpText": "Designates whether this user should be treated as active"
+	"isActiveHelpText": "Designates whether this user should be treated as active",
+	"helloThere": "Hello there 👋",
+	"thisIsCisoAssistant": "This is CISO Assistant.",
+	"yourStreamlined": "Your streamlined",
+	"oneStopShop": "one-stop shop",
+	"forComplianceRiskManagement": "for compliance and risk management.",
+	"youCanSetPAsswordHere": "You can set your password here",
+	"setPassword": "Set password",
+	"logIntoYourAccount": "Log into your account",
+	"youNeedToLogIn": "You need to login to access all the features",
+	"forgtPassword": "Forgot password",
+	"login": "Login",
+	"password": "Password",
+	"enterYourEmail": "Enter your email address below, and we'll email instructions for setting a new one",
+	"send": "Send",
+	"goBackToLogin": "Go back to login"
 }
