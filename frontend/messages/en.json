@@ -382,5 +382,17 @@
 	"current": "Current",
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Jump to risk assessment",
-	"additionalMeasures": "Additional measures"
+	"additionalMeasures": "Additional measures",
+	"riskAssessmentMatrixHelpText": "WARNING: You will not be able to change the risk matrix after the risk assessment is created",
+	"etaHelpText": "Estimated time of arrival",
+	"dueDateHelpText": "Date by which the assessment must be completed",
+	"expiryDateHelpText": "Date by which the object is no longer valid",
+	"linkHelpText": "External URL for action follow-up (eg. Jira ticket)",
+	"effortHelpText": "The effort required to implement the security measure",
+	"riskAcceptanceJusitficationHelpText": "Justification for the risk acceptance. Only the approver can edit this field.",
+	"approverHelpText": "Risk owner and approver identity",
+	"riskAcceptanceRiskScenariosHelpText": "The risk scenarios that are accepted",
+	"attachmentHelpText": "File for evidence (eg. screenshot, log file, etc.)",
+	"attachmentWarningText": "WARNING: Uploading a new file will overwrite the existing one",
+	"isActiveHelpText": "Designates whether this user should be treated as active"
 }
