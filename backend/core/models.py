@@ -655,6 +655,9 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
 
 
 class PolicyManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category="policy")
+
     def create(self, *args, **kwargs):
         kwargs["category"] = "policy"  # Ensure category is always "policy"
         return super().create(*args, **kwargs)
