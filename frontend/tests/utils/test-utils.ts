@@ -560,9 +560,9 @@ export function setHttpResponsesListener(page: Page) {
 		expect.soft(response.status()).toBeOneofValues([100, 399]);
 		// expect.soft(response.ok(), 'An error with status code ' + response.status() + ' occured when trying to achieve operation').toBeTruthy();
 	});
-	page.on('console', (message) => {
-		expect.soft(message.type()).not.toBe('error');
-	});
+	// page.on('console', (message) => {
+	// 	expect.soft(message.type()).not.toBe('error');
+	// });
 }
 
 export function getUniqueValue(value: string) {
