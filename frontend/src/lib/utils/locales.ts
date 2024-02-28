@@ -12,6 +12,7 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
+	str = str.charAt(0).toLowerCase() + str.slice(1);
 	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
 }
 
@@ -135,11 +136,6 @@ export function localItems(languageTag: string): LocalItems {
 		dueDate: m.dueDate({ languageTag: languageTag }),
 		attachment: m.attachment({ languageTag: languageTag }),
 		observation: m.observation({ languageTag: languageTag }),
-		veryLow: m.veryLow({ languageTag: languageTag }),
-		low: m.low({ languageTag: languageTag }),
-		medium: m.medium({ languageTag: languageTag }),
-		high: m.high({ languageTag: languageTag }),
-		veryHigh: m.veryHigh({ languageTag: languageTag }),
 		planned: m.planned({ languageTag: languageTag }),
 		active: m.active({ languageTag: languageTag }),
 		inactive: m.inactive({ languageTag: languageTag }),

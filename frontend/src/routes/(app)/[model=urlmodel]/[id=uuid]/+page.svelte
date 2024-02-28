@@ -217,8 +217,8 @@
 								{:else if isURL(value)}
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else}
-									{#if localItems(languageTag())[value]}
-										{localItems(languageTag())[value]}
+									{#if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+										{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
 									{:else}
 										{(value.str || value.name) ?? value}
 									{/if}
