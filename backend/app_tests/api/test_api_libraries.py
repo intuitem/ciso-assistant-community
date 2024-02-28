@@ -44,7 +44,12 @@ class TestLibrariesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestLibrariesAuthenticated:
     """Perform tests on Libraries API endpoint with authentication"""
 
@@ -58,7 +63,6 @@ class TestLibrariesAuthenticated:
     def test_import_frameworks(self, test):
         """test to import frameworks with the API with authentication"""
 
-
         # Uses the API endpoint to get library details with the admin client
         lib_detail_response = test.admin_client.get(
             EndpointTestsUtils.get_object_urn("Framework")
@@ -68,17 +72,28 @@ class TestLibrariesAuthenticated:
         assert (
             Framework.objects.all().count() == 0
         ), "libraries are already imported in the database"
-        EndpointTestsQueries.Auth.get_object(test.client, "Frameworks", user_group=test.user_group)
+        EndpointTestsQueries.Auth.get_object(
+            test.client, "Frameworks", user_group=test.user_group
+        )
 
-        EndpointTestsQueries.Auth.import_object(test.client, "Framework", user_group=test.user_group)
+        EndpointTestsQueries.Auth.import_object(
+            test.client, "Framework", user_group=test.user_group
+        )
 
-        expect = {"BI-UG-ADM": True, "BI-UG-GAD": False, "BI-UG-GVA": False, "BI-UG-DMA": False, 
-            "BI-UG-ANA": False, "BI-UG-VAL": False, "BI-UG-AUD": False}
+        expect = {
+            "BI-UG-ADM": True,
+            "BI-UG-GAD": False,
+            "BI-UG-GVA": False,
+            "BI-UG-DMA": False,
+            "BI-UG-ANA": False,
+            "BI-UG-VAL": False,
+            "BI-UG-AUD": False,
+        }
 
-        assert (
-            Framework.objects.all().count() == (1 if expect[test['user_group']] else 0)
+        assert Framework.objects.all().count() == (
+            1 if expect[test["user_group"]] else 0
         ), "frameworks are not correctly imported in the database"
-        if expect[test['user_group']]:
+        if expect[test["user_group"]]:
             # Uses the API endpoint to assert that the library was properly imported
             EndpointTestsQueries.Auth.get_object(
                 test.client,
@@ -100,14 +115,27 @@ class TestLibrariesAuthenticated:
         assert (
             Framework.objects.all().count() == 1
         ), "frameworks for deletion are not correctly imported in the database"
-        expect = {"BI-UG-ADM": True, "BI-UG-GAD": False, "BI-UG-GVA": False, "BI-UG-DMA": False, 
-            "BI-UG-ANA": False, "BI-UG-VAL": False, "BI-UG-AUD": False}
-        should_work = expect[test['user_group']]
-        if should_work: # this if should be removed, but it is not working as expected, todo
+        expect = {
+            "BI-UG-ADM": True,
+            "BI-UG-GAD": False,
+            "BI-UG-GVA": False,
+            "BI-UG-DMA": False,
+            "BI-UG-ANA": False,
+            "BI-UG-VAL": False,
+            "BI-UG-AUD": False,
+        }
+        should_work = expect[test["user_group"]]
+        if (
+            should_work
+        ):  # this if should be removed, but it is not working as expected, todo
             EndpointTestsQueries.Auth.delete_object(
-                test.client, "Frameworks", Framework, user_group=test.user_group, fails=not(should_work)
+                test.client,
+                "Frameworks",
+                Framework,
+                user_group=test.user_group,
+                fails=not (should_work),
             )
-        if not should_work: # remove object
+        if not should_work:  # remove object
             EndpointTestsQueries.Auth.delete_object(
                 test.admin_client, "Frameworks", Framework
             )
@@ -124,18 +152,29 @@ class TestLibrariesAuthenticated:
         assert (
             RiskMatrix.objects.all().count() == 0
         ), "libraries are already imported in the database"
-        EndpointTestsQueries.Auth.get_object(test.client, "Risk matrices", user_group=test.user_group)
-        
-        EndpointTestsQueries.Auth.import_object(test.client, "Risk matrix", user_group=test.user_group)
+        EndpointTestsQueries.Auth.get_object(
+            test.client, "Risk matrices", user_group=test.user_group
+        )
+
+        EndpointTestsQueries.Auth.import_object(
+            test.client, "Risk matrix", user_group=test.user_group
+        )
 
         # Uses the API endpoint to assert that the library was properly imported
-        expect = {"BI-UG-ADM": True, "BI-UG-GAD": False, "BI-UG-GVA": False, "BI-UG-DMA": False, 
-            "BI-UG-ANA": False, "BI-UG-VAL": False, "BI-UG-AUD": False}
+        expect = {
+            "BI-UG-ADM": True,
+            "BI-UG-GAD": False,
+            "BI-UG-GVA": False,
+            "BI-UG-DMA": False,
+            "BI-UG-ANA": False,
+            "BI-UG-VAL": False,
+            "BI-UG-AUD": False,
+        }
 
-        assert (
-            RiskMatrix.objects.all().count() == (1 if expect[test['user_group']] else 0)
+        assert RiskMatrix.objects.all().count() == (
+            1 if expect[test["user_group"]] else 0
         ), "Risk matrices are not correctly imported in the database"
-        if expect[test['user_group']]:
+        if expect[test["user_group"]]:
             EndpointTestsQueries.Auth.get_object(
                 test.client,
                 "Risk matrices",
@@ -154,15 +193,27 @@ class TestLibrariesAuthenticated:
         """test to delete risk matrix with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        expect = {"BI-UG-ADM": True, "BI-UG-GAD": False, "BI-UG-GVA": False, "BI-UG-DMA": False, 
-            "BI-UG-ANA": False, "BI-UG-VAL": False, "BI-UG-AUD": False}
-        should_work = expect[test['user_group']]
-        if should_work: # this if should be removed, but it is not working as expected, todo
+        expect = {
+            "BI-UG-ADM": True,
+            "BI-UG-GAD": False,
+            "BI-UG-GVA": False,
+            "BI-UG-DMA": False,
+            "BI-UG-ANA": False,
+            "BI-UG-VAL": False,
+            "BI-UG-AUD": False,
+        }
+        should_work = expect[test["user_group"]]
+        if (
+            should_work
+        ):  # this if should be removed, but it is not working as expected, todo
             EndpointTestsQueries.Auth.delete_object(
-                test.client, "Risk matrices", RiskMatrix, user_group=test.user_group,  fails=not(should_work)
+                test.client,
+                "Risk matrices",
+                RiskMatrix,
+                user_group=test.user_group,
+                fails=not (should_work),
             )
-        if not should_work: # remove object
+        if not should_work:  # remove object
             EndpointTestsQueries.Auth.delete_object(
                 test.admin_client, "Risk matrices", RiskMatrix
             )
- 

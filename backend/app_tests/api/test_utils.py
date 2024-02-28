@@ -12,7 +12,7 @@ from test_vars import *
 
 class EndpointTestsUtils:
     """Provides utils functions for API endpoints testing"""
-    
+
     def get_endpoint_url(verbose_name: str, resolved: bool = True):
         """Get the endpoint URL for the given object"""
 
@@ -32,26 +32,34 @@ class EndpointTestsUtils:
         """Get an authenticated client with a specific role and the folder associated to the role"""
         from iam.models import Folder, User, UserGroup
 
-        EndpointTestsQueries.Auth.create_object(authenticated_client, "Folders", Folder, {"name": "test"})
+        EndpointTestsQueries.Auth.create_object(
+            authenticated_client, "Folders", Folder, {"name": "test"}
+        )
         folder = Folder.objects.get(name="test")
 
         user = User.objects.create_user(TEST_USER_EMAIL)
-        UserGroup.objects.get(name=role, folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"])).user_set.add(user)
+        UserGroup.objects.get(
+            name=role,
+            folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
+        ).user_set.add(user)
         client = APIClient()
         client.force_login(user)
         return client, folder
-    
-    def expected_request_response(action: str, object: str, user_group, expected_status: int = status.HTTP_200_OK):
+
+    def expected_request_response(
+        action: str, object: str, user_group, expected_status: int = status.HTTP_200_OK
+    ):
         """Get the expected request response"""
         perm_name = f"{action}_{get_singular_name(object).lower().replace(' ', '')}"
 
-        if perm_name in GROUPS_PERMISSIONS[user_group]['perms']:
+        if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
             fails = False
             expected_status = expected_status
         else:
             fails = True
             expected_status = status.HTTP_403_FORBIDDEN
         return fails, expected_status
+
 
 class EndpointTestsQueries:
     """Provides tests functions for API endpoints testing"""
@@ -304,9 +312,14 @@ class EndpointTestsQueries:
             :param endpoint: the endpoint URL of the object to test (optional)
             """
             user_perm_fails, user_perm_expected_status = None, 0
-            
+
             if user_group:
-                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("view", verbose_name, user_group, expected_status)
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                ) = EndpointTestsUtils.expected_request_response(
+                    "view", verbose_name, user_group, expected_status
+                )
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -315,14 +328,18 @@ class EndpointTestsQueries:
 
             if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                 # User has permission to view the object
-                assert (
-                    response.status_code == expected_status
-                ), f"{verbose_name} are not accessible with permission" if expected_status == status.HTTP_200_OK else f"{verbose_name} should not be accessible (expected status: {expected_status})"
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} are not accessible with permission"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} should not be accessible (expected status: {expected_status})"
+                )
             else:
                 # User does not have permission to view the object
-                assert (
-                    response.status_code == user_perm_expected_status
-                ), f"{verbose_name} are accessible without permission" if response.status_code == status.HTTP_200_OK else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} are accessible without permission"
+                    if response.status_code == status.HTTP_200_OK
+                    else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
 
             if (
                 base_count == 0
@@ -369,14 +386,18 @@ class EndpointTestsQueries:
 
                 if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                     # User has permission to view the object
-                    assert (
-                        response.status_code == expected_status
-                    ), f"{verbose_name} are not accessible with permission" if expected_status == status.HTTP_200_OK else f"{verbose_name} should not be accessible (expected status: {expected_status})"
+                    assert response.status_code == expected_status, (
+                        f"{verbose_name} are not accessible with permission"
+                        if expected_status == status.HTTP_200_OK
+                        else f"{verbose_name} should not be accessible (expected status: {expected_status})"
+                    )
                 else:
                     # User does not have permission to view the object
-                    assert (
-                        response.status_code == user_perm_expected_status
-                    ), f"{verbose_name} are accessible without permission" if response.status_code == status.HTTP_200_OK else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    assert response.status_code == user_perm_expected_status, (
+                        f"{verbose_name} are accessible without permission"
+                        if response.status_code == status.HTTP_200_OK
+                        else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    )
 
                 if not (fails or user_perm_fails):
                     if base_count < 0:
@@ -391,14 +412,15 @@ class EndpointTestsQueries:
             if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
                 params = {**build_params, **test_params}
                 if len(response.json()["results"]) > 0 and item_search_field:
-                    response_item = [res for res in response.json()["results"] if res[item_search_field] == params[item_search_field]][0]
+                    response_item = [
+                        res
+                        for res in response.json()["results"]
+                        if res[item_search_field] == params[item_search_field]
+                    ][0]
                 else:
                     response_item = response.json()["results"][-1]
                 for key, value in params.items():
-                    if (
-                        type(value) == dict
-                        and type(response_item[key]) == str
-                    ):
+                    if type(value) == dict and type(response_item[key]) == str:
                         assert (
                             json.loads(response_item[key]) == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -428,7 +450,12 @@ class EndpointTestsQueries:
             user_perm_fails, user_perm_expected_status = None, 0
 
             if user_group and not fails:
-                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("view", verbose_name, user_group, expected_status)
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                ) = EndpointTestsUtils.expected_request_response(
+                    "view", verbose_name, user_group, expected_status
+                )
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -437,14 +464,18 @@ class EndpointTestsQueries:
 
             if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                 # User has permission to view the object
-                assert (
-                    response.status_code == expected_status
-                ), f"{verbose_name} {option} choices are not accessible with permission" if expected_status == status.HTTP_200_OK else f"{verbose_name} {option} should not be accessible (expected status: {expected_status})"
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} {option} choices are not accessible with permission"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} {option} should not be accessible (expected status: {expected_status})"
+                )
             else:
                 # User does not have permission to view the object
-                assert (
-                    response.status_code == user_perm_expected_status
-                ), f"{verbose_name} {option} choices are accessible without permission" if response.status_code == status.HTTP_200_OK else f"Accessing {verbose_name.lower()} {option} should give a status {user_perm_expected_status}"
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} {option} choices are accessible without permission"
+                    if response.status_code == status.HTTP_200_OK
+                    else f"Accessing {verbose_name.lower()} {option} should give a status {user_perm_expected_status}"
+                )
 
             if not (fails or user_perm_fails):
                 for choice in choices:
@@ -481,9 +512,14 @@ class EndpointTestsQueries:
             :param endpoint: the endpoint URL of the object to test (optional)
             """
             user_perm_fails, user_perm_expected_status = None, 0
-            
+
             if user_group:
-                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("add", verbose_name, user_group, expected_status)
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                ) = EndpointTestsUtils.expected_request_response(
+                    "add", verbose_name, user_group, expected_status
+                )
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
@@ -500,21 +536,26 @@ class EndpointTestsQueries:
             # Asserts that the object was created successfully
             if not user_group or user_perm_expected_status == status.HTTP_201_CREATED:
                 # User has permission to create the object
-                assert (
-                    response.status_code == expected_status
-                ), f"{verbose_name} can not be created with authentication" if expected_status == status.HTTP_201_CREATED else f"{verbose_name} should not be created (expected status: {expected_status})"
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} can not be created with authentication"
+                    if expected_status == status.HTTP_201_CREATED
+                    else f"{verbose_name} should not be created (expected status: {expected_status})"
+                )
             else:
                 # User does not have permission to create the object
-                assert (
-                    response.status_code == user_perm_expected_status
-                ), f"{verbose_name} can be created without permission" if response.status_code == status.HTTP_201_CREATED else f"Creating {verbose_name.lower()} should give a status {user_perm_expected_status}"
-            
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} can be created without permission"
+                    if response.status_code == status.HTTP_201_CREATED
+                    else f"Creating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
+
             if not (fails or user_perm_fails):
                 for key, value in build_params.items():
                     if key == "attachment":
                         # Asserts that the value file name is present in the JSON response
                         assert (
-                            value.name.split("/")[-1].split(".")[0] in response.json()[key]
+                            value.name.split("/")[-1].split(".")[0]
+                            in response.json()[key]
                         ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                     else:
                         assert (
@@ -536,14 +577,15 @@ class EndpointTestsQueries:
             if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
                 params = {**build_params, **test_params}
                 if response.json()["count"] > 0 and item_search_field:
-                    response_item = [res for res in response.json()["results"] if res[item_search_field] == params[item_search_field]][0]
+                    response_item = [
+                        res
+                        for res in response.json()["results"]
+                        if res[item_search_field] == params[item_search_field]
+                    ][0]
                 else:
                     response_item = response.json()["results"][base_count]
                 for key, value in params.items():
-                    if (
-                        key == "attachment"
-                        and response_item[key] != value
-                    ):
+                    if key == "attachment" and response_item[key] != value:
                         # Asserts that the value file name is present in the JSON response
                         assert (
                             re.sub(
@@ -585,7 +627,12 @@ class EndpointTestsQueries:
             user_perm_fails, user_perm_expected_status = None, 0
 
             if user_group:
-                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("change", verbose_name, user_group, expected_status)
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                ) = EndpointTestsUtils.expected_request_response(
+                    "change", verbose_name, user_group, expected_status
+                )
 
             # Creates a test object from the model
             m2m_fields = {}
@@ -627,7 +674,8 @@ class EndpointTestsQueries:
                     if key == "attachment":
                         # Asserts that the value file name is present in the JSON response
                         assert (
-                            value.name.split("/")[-1].split(".")[0] in response.json()[key]
+                            value.name.split("/")[-1].split(".")[0]
+                            in response.json()[key]
                         ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                     else:
                         assert (
@@ -640,17 +688,25 @@ class EndpointTestsQueries:
 
             if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                 # User has permission to update the object
-                assert (
-                    update_response.status_code == expected_status
-                ), f"{verbose_name} can not be updated with authentication" if expected_status == status.HTTP_200_OK else f"{verbose_name} should not be updated (expected status: {expected_status})"
+                assert update_response.status_code == expected_status, (
+                    f"{verbose_name} can not be updated with authentication"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} should not be updated (expected status: {expected_status})"
+                )
             else:
                 # User does not have permission to update the object
-                assert (
-                    update_response.status_code == user_perm_expected_status
-                ), f"{verbose_name} can be updated without permission" if update_response.status_code == status.HTTP_200_OK else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
-            
+                assert update_response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} can be updated without permission"
+                    if update_response.status_code == status.HTTP_200_OK
+                    else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
+
             if not (fails or user_perm_fails):
-                for key, value in {**build_params, **update_params, **test_params}.items():
+                for key, value in {
+                    **build_params,
+                    **update_params,
+                    **test_params,
+                }.items():
                     if key == "attachment" and update_response.json()[key] != value:
                         # Asserts that the value file name is present in the JSON response
                         assert (
@@ -682,7 +738,12 @@ class EndpointTestsQueries:
             user_perm_fails, user_perm_expected_status = None, 0
 
             if user_group:
-                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("delete", verbose_name, user_group, expected_status)
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                ) = EndpointTestsUtils.expected_request_response(
+                    "delete", verbose_name, user_group, expected_status
+                )
 
             if build_params:
                 # Creates a test object from the model
@@ -726,16 +787,23 @@ class EndpointTestsQueries:
             # Asserts that the object was deleted successfully
             delete_response = authenticated_client.delete(url)
 
-            if not user_group or user_perm_expected_status == status.HTTP_204_NO_CONTENT:
+            if (
+                not user_group
+                or user_perm_expected_status == status.HTTP_204_NO_CONTENT
+            ):
                 # User has permission to delete the object
-                assert (
-                    delete_response.status_code == expected_status
-                ), f"{verbose_name} can not be deleted with authentication" if expected_status == status.HTTP_204_NO_CONTENT else f"{verbose_name} should not be deleted (expected status: {expected_status})"
+                assert delete_response.status_code == expected_status, (
+                    f"{verbose_name} can not be deleted with authentication"
+                    if expected_status == status.HTTP_204_NO_CONTENT
+                    else f"{verbose_name} should not be deleted (expected status: {expected_status})"
+                )
             else:
                 # User does not have permission to delete the object
-                assert (
-                    delete_response.status_code == user_perm_expected_status
-                ), f"{verbose_name} can be deleted without permission" if delete_response.status_code == status.HTTP_204_NO_CONTENT else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                assert delete_response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} can be deleted without permission"
+                    if delete_response.status_code == status.HTTP_204_NO_CONTENT
+                    else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
 
             if not (fails or user_perm_fails):
                 # Asserts that the objects does not exists anymore
@@ -761,7 +829,12 @@ class EndpointTestsQueries:
             user_perm_fails, user_perm_expected_status = None, 0
 
             if user_group:
-                user_perm_fails, user_perm_expected_status = EndpointTestsUtils.expected_request_response("add", "library", user_group, expected_status)
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                ) = EndpointTestsUtils.expected_request_response(
+                    "add", "library", user_group, expected_status
+                )
 
             url = urn or EndpointTestsUtils.get_object_urn(verbose_name)
 
@@ -771,14 +844,18 @@ class EndpointTestsQueries:
             # Asserts that the object was imported successfully
             if not user_group or user_perm_expected_status == status.HTTP_200_OK:
                 # User has permission to import the library
-                assert (
-                    response.status_code == expected_status
-                ), f"{verbose_name} can not be imported with authentication" if expected_status == status.HTTP_200_OK else f"{verbose_name} should not be imported (expected status: {expected_status})"
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} can not be imported with authentication"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} should not be imported (expected status: {expected_status})"
+                )
             else:
                 # User does not have permission to import the library
-                assert (
-                    response.status_code == user_perm_expected_status
-                ), f"{verbose_name} can be imported without permission" if response.status_code == status.HTTP_200_OK else f"Importing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} can be imported without permission"
+                    if response.status_code == status.HTTP_200_OK
+                    else f"Importing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
 
             if not (fails or user_perm_fails):
                 assert response.json() == {

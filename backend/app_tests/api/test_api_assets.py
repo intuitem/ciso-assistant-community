@@ -79,7 +79,12 @@ class TestAssetsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestAssetsAuthenticated:
     """Perform tests on Assets API endpoint with authentication"""
 
@@ -97,7 +102,10 @@ class TestAssetsAuthenticated:
                 "type": ASSET_TYPE[0],
                 "folder": test.folder,
             },
-            {"folder": {"id": str(test.folder.id), "str": test.folder.name}, "type": ASSET_TYPE[1]},
+            {
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "type": ASSET_TYPE[1],
+            },
             user_group=test.user_group,
         )
 
@@ -116,7 +124,10 @@ class TestAssetsAuthenticated:
                 "parent_assets": [],
                 "folder": str(test.folder.id),
             },
-            {"folder": {"id": str(test.folder.id), "str": test.folder.name}, "type": ASSET_TYPE[1]},
+            {
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "type": ASSET_TYPE[1],
+            },
             user_group=test.user_group,
         )
 
@@ -174,7 +185,10 @@ class TestAssetsAuthenticated:
                 "type": ASSET_TYPE2[0],
                 "folder": str(folder.id),
             },
-            {"folder": {"id": str(test.folder.id), "str": test.folder.name}, "type": ASSET_TYPE[1]},
+            {
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
+                "type": ASSET_TYPE[1],
+            },
             user_group=test.user_group,
         )
 

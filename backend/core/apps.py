@@ -227,14 +227,16 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
 ]
 
+
 def startup(**kwargs):
     """
-        Implement CISO Assistant 1.0 default Roles and User Groups during migrate
-        This makes sure root folder and global groups are defined before any other object is created
-        Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
+    Implement CISO Assistant 1.0 default Roles and User Groups during migrate
+    This makes sure root folder and global groups are defined before any other object is created
+    Create superuser if CISO_ASSISTANT_SUPERUSER_EMAIL defined
     """
     from django.contrib.auth.models import Permission
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
+
     print("startup handler: initialize database")
 
     auditor_permissions = Permission.objects.filter(
@@ -333,7 +335,7 @@ def startup(**kwargs):
                 email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
             )
         except Exception as e:
-            print(e) #NOTE: Add this exception in the logger
+            print(e)  # NOTE: Add this exception in the logger
 
 
 class CoreConfig(AppConfig):
@@ -343,5 +345,5 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         # avoid post_migrate handler if we are in the main, as it interferes with restore
-        if not os.environ.get('RUN_MAIN'):
+        if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)

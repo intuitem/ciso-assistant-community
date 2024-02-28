@@ -40,12 +40,12 @@ class LibraryViewSet(BaseModelViewSet):
     model = Library
 
     def list(self, request, *args, **kwargs):
-        if  not 'view_library' in request.user.permissions:
+        if not "view_library" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
         return Response({"results": get_available_libraries()})
 
     def retrieve(self, request, *args, pk, **kwargs):
-        if  not 'view_library' in request.user.permissions:
+        if not "view_library" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
             return Response(
                 status=status.HTTP_403_FORBIDDEN,
@@ -55,7 +55,7 @@ class LibraryViewSet(BaseModelViewSet):
 
     def destroy(self, request, *args, pk, **kwargs):
         if not RoleAssignment.is_access_allowed(
-            user=request.user, 
+            user=request.user,
             perm=Permission.objects.get(codename="delete_library"),
             folder=Folder.get_root_folder(),
         ):
@@ -109,7 +109,7 @@ class LibraryViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="import")
     def import_library(self, request, pk=None):
         if not RoleAssignment.is_access_allowed(
-            user=request.user, 
+            user=request.user,
             perm=Permission.objects.get(codename="add_library"),
             folder=Folder.get_root_folder(),
         ):
