@@ -72,11 +72,11 @@ test('user usual routine actions are working correctly', async ({
 		await expect(page).toHaveURL(pages.librariesPage.url);
 		await pages.librariesPage.hasTitle();
 
-		await pages.librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
+		await pages.librariesPage.importLibrary(vars.framework.ref, vars.framework.urn);
 
 		await sideBar.click('Compliance', pages.frameworksPage.url);
 		await expect(page).toHaveURL(pages.frameworksPage.url);
-		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
+		await expect(page.getByRole('row', { name: vars.framework.ref })).toBeVisible();
 	});
 
 	await test.step('user can create a security function', async () => {
