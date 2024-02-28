@@ -660,14 +660,14 @@ class EndpointTestsQueries:
 
             response = authenticated_client.get(url)
 
-            # if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
-            #     assert (
-            #         response.status_code == status.HTTP_200_OK
-            #     ), f"{verbose_name} object detail can not be accessed with permission"
-            # else:
-            #     assert (
-            #         response.status_code == status.HTTP_403_FORBIDDEN
-            #     ), f"{verbose_name} object detail can be accessed without permission"
+            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
+                assert (
+                    response.status_code == status.HTTP_200_OK
+                ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
 
             if not (fails or user_perm_fails):
                 for key, value in {**build_params, **test_build_params}.items():
@@ -775,14 +775,14 @@ class EndpointTestsQueries:
             print("url=", url)
             response = authenticated_client.get(url)
 
-            # if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
-            #     assert (
-            #         response.status_code == status.HTTP_200_OK
-            #     ), f"{verbose_name} object detail can not be accessed with permission"
-            # else:
-            #     assert (
-            #         response.status_code == status.HTTP_403_FORBIDDEN
-            #     ), f"{verbose_name} object detail can be accessed without permission"
+            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
+                assert (
+                    response.status_code == status.HTTP_200_OK
+                ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
 
             # Asserts that the object was deleted successfully
             delete_response = authenticated_client.delete(url)
