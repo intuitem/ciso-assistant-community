@@ -147,7 +147,7 @@
 						{form}
 						options={getOptions({ objects: data.foreignKeys['risk_assessment'] })}
 						field="risk_assessment"
-						label={m.riskAssessments()}
+						label={m.riskAssessment()}
 					/>
 					<span>
 						<p class="text-sm font-semibold text-gray-400">{m.version()}</p>
@@ -159,7 +159,7 @@
 				<h4 class="h4 font-semibold">{m.status()}</h4>
 				<div class="flex flex-row justify-between">
 					<span>
-						<p class="text-sm font-semibold text-gray-400">{m.updatedAt()}</p>
+						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 						<p class="text-sm font-semibold">
 							{new Date(data.scenario.updated_at).toLocaleString()}
 						</p>
@@ -193,7 +193,7 @@
 					options={getOptions({ objects: data.foreignKeys['assets'] })}
 					field="assets"
 					label={m.assets()}
-					helpText={m.assetsImpactedByTheRiskScenario()}
+					helpText={m.riskScenarioAssetHelpText()}
 				/>
 				<ModelTable source={data.tables['assets']} URLModel="assets" />
 			</div>
@@ -206,8 +206,8 @@
 				<TextArea
 					{form}
 					field="existing_measures"
-					label={m.ecistingMeasures()}
-					helpText={m.theExistingSecurityMeasuresToManageThisRisk()}
+					label={m.existingMeasures()}
+					helpText={m.riskScenarioMeasureHelpText()}
 					regionContainer="w-1/2"
 				/>
 				<div class="flex flex-col">
@@ -232,11 +232,11 @@
 						<RiskLevel
 							{form}
 							field="current_risk_level"
-							label={m.currentRisk()}
+							label={m.currentRiskLevel()}
 							riskMatrix={data.riskMatrix}
 							probabilityField="current_proba"
 							impactField="current_impact"
-							helpText={m.currentRiskLevelGivenCurrentMeasures()}
+							helpText={m.currentRiskLevelHelpText()}
 						/>
 					</div>
 				</div>
@@ -260,6 +260,7 @@
 						{form}
 						options={getOptions({ objects: data.foreignKeys['security_measures'] })}
 						field="security_measures"
+						label={m.securityMeasures()}
 					/>
 					<ModelTable source={data.tables['security-measures']} URLModel="security-measures" />
 				</div>
@@ -284,12 +285,12 @@
 						<i class="fa-solid fa-equals my-auto" />
 						<RiskLevel
 							{form}
-							field="residual_risk_level"
-							label={m.residualRisk()}
+							field="current_risk_level"
+							label={m.residualRiskLevel()}
 							riskMatrix={data.riskMatrix}
 							probabilityField="residual_proba"
 							impactField="residual_impact"
-							helpText={m.riskLevelWhenAllExtraMeasuresDone()}
+							helpText={m.residualRiskLevelHelpText()}
 						/>
 					</div>
 				</div>
@@ -309,10 +310,10 @@
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={cancel}>Cancel</button
+				on:click={cancel}>{m.cancel()}</button
 			>
 			<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button"
-				>Save</button
+				>{m.save()}</button
 			>
 		</div>
 	</SuperForm>
