@@ -338,5 +338,10 @@
 	"dependencies": "Dependencies",
 	"copyright": "Copyright",
 	"uploadYourLibrary": "Upload your own library",
-	"libraryFileInYaml": "Library file in YAML format"
+	"libraryFileInYaml": "Library file in YAML format",
+	"importBackup": "Import backup",
+	"exportBackup": "Export backup",
+	"confirmImportBackup": "Are you sure you want to import this backup? This will overwrite all existing data.",
+	"dumpDatabase": "Dump database",
+	"upload": "Upload"
 }
