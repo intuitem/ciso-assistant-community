@@ -92,7 +92,12 @@ class TestRequirementAssessmentsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestRequirementAssessmentsAuthenticated:
     """Perform tests on Requirement Assessments API endpoint with authentication"""
 
@@ -139,7 +144,9 @@ class TestRequirementAssessmentsAuthenticated:
             project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
-        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
+        security_measure = SecurityMeasure.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
@@ -161,7 +168,7 @@ class TestRequirementAssessmentsAuthenticated:
             },
             base_count=-1,
             fails=True,
-            expected_status=HTTP_403_FORBIDDEN
+            expected_status=HTTP_403_FORBIDDEN,
         )
 
     def test_update_requirement_assessments(self, test):
@@ -171,9 +178,7 @@ class TestRequirementAssessmentsAuthenticated:
         folder = Folder.objects.create(name="test2")
         compliance_assessment = ComplianceAssessment.objects.create(
             name="test",
-            project=Project.objects.create(
-                name="test", folder=test.folder
-            ),
+            project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
         compliance_assessment2 = ComplianceAssessment.objects.create(

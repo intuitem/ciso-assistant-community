@@ -272,10 +272,8 @@ class UserWriteSerializer(BaseModelSerializer):
             folder=Folder.get_root_folder(),
         ):
             raise PermissionDenied(
-                {
-                    "error": ["You do not have permission to create users"]
-                }
-            )            
+                {"error": ["You do not have permission to create users"]}
+            )
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
@@ -473,6 +471,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
         fields = "__all__"
+
 
 class LibraryReadSerializer(BaseModelSerializer):
     class Meta:
