@@ -269,7 +269,9 @@ export function localItems(languageTag: string): LocalItems {
 		large: m.large({ languageTag: languageTag }),
 		extraLarge: m.extraLarge({ languageTag: languageTag }),
 		policy: m.policy({ languageTag: languageTag }),
-		process: m.process({ languageTag: languageTag })
+		process: m.process({ languageTag: languageTag }),
+		composer: m.composer({ languageTag: languageTag }),
+		plan: m.plan({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
