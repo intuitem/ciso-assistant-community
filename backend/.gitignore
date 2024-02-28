@@ -17,3 +17,4 @@ db/django_secret_key
 db/pg_password.txt
 ./db/
 .coverage
+pytest-report.html

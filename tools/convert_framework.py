@@ -75,6 +75,7 @@ library_vars = {}
 library_vars_dict = defaultdict(dict)
 library_vars_dict_reverse = defaultdict(dict)
 library_vars_dict_arg = defaultdict(dict)
+urn_unicity_checker = set()
 
 if len(sys.argv) <= 1:
     print("missing input file parameter")
@@ -155,9 +156,12 @@ for tab in dataframe:
                 annotation = row[header['annotation']].value if 'annotation' in header else None
                 level = row[header['level']].value if 'level' in header else None
                 maturity = row[header['maturity']].value if 'maturity' in header else None
-                ref_id_urn = ref_id.lower().replace(' ', '-') if ref_id else \
-                    name.lower().replace(' ', '-') if name else f"node{counter}"
+                ref_id_urn = ref_id.lower().replace(' ', '-') if ref_id else f"node{counter}"
                 urn = f"{root_nodes_urn}:{ref_id_urn}"
+                if urn in urn_unicity_checker:
+                    print("URN duplicate:", urn)
+                    exit(1)
+                urn_unicity_checker.add(urn)
                 if depth == current_depth + 1:
                     parent_for_depth[depth]=current_node_urn
                     parent_urn = parent_for_depth[depth]

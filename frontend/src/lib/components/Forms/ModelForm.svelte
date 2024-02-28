@@ -61,7 +61,7 @@
 				suggestions: suggestions['security_function']
 			})}
 			field="security_function"
-			label="Security function"
+			label={m.securityFunction()}
 			on:change={async (e) => {
 				if (e.detail) {
 					await fetch(`/security-functions/${e.detail}`)

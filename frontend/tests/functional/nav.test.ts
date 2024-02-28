@@ -21,6 +21,8 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 			'X-Rays': "X rays",
 			'Backup & restore': "Backup restore"
         };
+
+		const locals = localItems(languageTag());
         
         for await (const [key, value] of sideBar.items) {            
             for await (const item of value) {
@@ -37,36 +39,36 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
         }
     });
 
-    await test.step('user email is showing properly', async () => {
-        await expect(page.getByTestId('sidebar-user-account-display')).toHaveText(logedPage.email);
-        //TODO test also that user name and first name are displayed instead of the email when sets
-    });
-    
-    await test.step('more panel links are working properly', async () => {
-        await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-        await expect(sideBar.profileButton).toBeVisible();
-        await sideBar.profileButton.click();
-        await expect(sideBar.morePanel).toHaveAttribute('inert');
-        await expect(page).toHaveURL('/profile');
-        await expect.soft(logedPage.pageTitle).toHaveText('Profile');
-        
-        await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-        await expect(sideBar.aboutButton).toBeVisible();
-        await sideBar.aboutButton.click();
-        await expect(sideBar.morePanel).toHaveAttribute('inert');
-        await expect(logedPage.modalTitle).toBeVisible();
-        await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
-        await page.mouse.click(20, 20); // click outside the modal to close it
-        await expect(logedPage.modalTitle).not.toBeVisible();
-        
-        await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-        await expect(sideBar.logoutButton).toBeVisible();
-        await sideBar.logoutButton.click();
-        await logedPage.hasUrl(0);
-    });
+	await test.step('user email is showing properly', async () => {
+		await expect(page.getByTestId('sidebar-user-account-display')).toHaveText(logedPage.email);
+		//TODO test also that user name and first name are displayed instead of the email when sets
+	});
+
+	await test.step('more panel links are working properly', async () => {
+		await sideBar.moreButton.click();
+		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await expect(sideBar.profileButton).toBeVisible();
+		await sideBar.profileButton.click();
+		await expect(sideBar.morePanel).toHaveAttribute('inert');
+		await expect(page).toHaveURL('/my-profile');
+		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
+
+		await sideBar.moreButton.click();
+		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await expect(sideBar.aboutButton).toBeVisible();
+		await sideBar.aboutButton.click();
+		await expect(sideBar.morePanel).toHaveAttribute('inert');
+		await expect(logedPage.modalTitle).toBeVisible();
+		await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
+		await page.mouse.click(20, 20); // click outside the modal to close it
+		await expect(logedPage.modalTitle).not.toBeVisible();
+
+		await sideBar.moreButton.click();
+		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await expect(sideBar.logoutButton).toBeVisible();
+		await sideBar.logoutButton.click();
+		await logedPage.hasUrl(0);
+	});
 });
 
 test('sidebar component tests', async ({ logedPage, sideBar, page }) => {
