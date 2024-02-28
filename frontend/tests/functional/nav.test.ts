@@ -32,7 +32,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
                     if (item.name in temporaryPageTitle) {
                         await expect.soft(logedPage.pageTitle).toHaveText(temporaryPageTitle[item.name]);
                     } else {
-                        await expect.soft(logedPage.pageTitle).toHaveText(item.name);
+                        await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
                     }
                 }         
             }
