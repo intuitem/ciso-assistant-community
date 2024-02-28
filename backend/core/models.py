@@ -610,7 +610,7 @@ class RiskAssessment(Assessment):
             "errors": errors_lst,
             "warnings": warnings_lst,
             "info": info_lst,
-            "count": sum(len(errors_lst), len(warnings_lst), len(info_lst)),
+            "count": sum([len(errors_lst), len(warnings_lst), len(info_lst)]),
         }
         return findings
 
@@ -1389,7 +1389,7 @@ class ComplianceAssessment(Assessment):
             "errors": errors_lst,
             "warnings": warnings_lst,
             "info": info_lst,
-            "count": sum(len(errors_lst), len(warnings_lst), len(info_lst)),
+            "count": sum([len(errors_lst), len(warnings_lst), len(info_lst)]),
         }
         return findings
 
