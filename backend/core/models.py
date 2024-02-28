@@ -22,6 +22,7 @@ User = get_user_model()
 
 ########################### Referential objects #########################
 
+
 class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     """
     Mixin for referential objects.
@@ -355,6 +356,7 @@ class RequirementNode(ReferentialObjectMixin):
 
 ########################### Domain objects #########################
 
+
 class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("--")),
@@ -672,7 +674,7 @@ class Policy(SecurityMeasure):
 
 
 ########################### Secondary objects #########################
-        
+
 
 class Assessment(NameDescriptionMixin):
     class Status(models.TextChoices):
@@ -1408,7 +1410,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
-        
+
 
 class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
@@ -1495,4 +1497,3 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
-

@@ -72,7 +72,12 @@ class TestUsersUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestUsersAuthenticated:
     """Perform tests on Users API endpoint with authentication"""
 
@@ -109,11 +114,7 @@ class TestUsersAuthenticated:
             test.client,
             "Users",
             User,
-            {
-                "email": USER_EMAIL, 
-                "first_name": USER_FIRSTNAME, 
-                "last_name": USER_NAME
-            },
+            {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
             {
                 "email": "new" + USER_EMAIL,
                 "first_name": "new" + USER_FIRSTNAME,
