@@ -382,5 +382,17 @@
 	"current": "Courrant",
 	"residual": "Résiduel",
 	"jumpToRiskAssessment": "Passer à l'évaluation des risques",
-	"additionalMeasures": "Mesures supplémentaires"
+	"additionalMeasures": "Mesures supplémentaires",
+	"riskAssessmentMatrixHelpText": "ATTENTION: Vous ne pourrez pas changer la matrice de risque une fois l'évaluation de risque créée.",
+	"etaHelpText": "Date d'arrivée estimée",
+	"dueDateHelpText": "Date à laquelle l'évaluation doit être complétée",
+	"expiryDateHelpText": "Date à laquelle l'objet n'est plus valide",
+	"linkHelpText": "URL externe pour le suivi des actions (ex. ticket Jira)",
+	"effortHelpText": "L'effort requis pour mettre en œuvre la mesure de sécurité",
+	"riskAcceptanceJusitficationHelpText": "Justification de l'acceptation du risque. Seul l'approbateur peut modifier ce champ.",
+	"approverHelpText": "Identité du propriétaire du risque et de l’approbateur",
+	"riskAcceptanceRiskScenariosHelpText": "Les scénarios de risques acceptés",
+	"attachmentHelpText": "Fichier de preuve (eg. capture d'écran, fichier journal, etc.)",
+	"attachmentWarningText": "ATTENTION: le téléchargement d'un nouveau fichier écrasera celui existant",
+	"isActiveHelpText": "Désigne si cet utilisateur doit être traité comme actif"
 }
