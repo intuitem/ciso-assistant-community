@@ -49,12 +49,11 @@ class EndpointTestsUtils:
     def expected_request_response(
         action: str, object: str, user_group, expected_status: int = status.HTTP_200_OK
     ):
-        """Get the expected request response"""
+        """Get the expected request response for a specific action on an object for a specific user group"""
         perm_name = f"{action}_{get_singular_name(object).lower().replace(' ', '')}"
 
         if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
             fails = False
-            expected_status = expected_status
         else:
             fails = True
             expected_status = status.HTTP_403_FORBIDDEN
@@ -765,7 +764,6 @@ class EndpointTestsQueries:
                     getattr(test_object, field).set(value)
             else:
                 id = str(object.objects.all()[0].id)
-                print("id=", id, object.objects.all())
 
             url = endpoint or (
                 EndpointTestsUtils.get_endpoint_url(verbose_name) + id + "/"
