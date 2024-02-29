@@ -9,12 +9,12 @@ from test_utils import EndpointTestsQueries
 # Generic security measure data for tests
 SECURITY_MEASURE_NAME = "Test Security Measure"
 SECURITY_MEASURE_DESCRIPTION = "Test Description"
-SECURITY_MEASURE_CATEGORY = ("technical", "Technical")
-SECURITY_MEASURE_CATEGORY2 = ("process", "Process")
-SECURITY_MEASURE_STATUS = ("planned", "Planned")
-SECURITY_MEASURE_STATUS2 = ("active", "Active")
-SECURITY_MEASURE_EFFORT = ("L", "Large")
-SECURITY_MEASURE_EFFORT2 = ("M", "Medium")
+SECURITY_MEASURE_CATEGORY = ("technical", "technical")
+SECURITY_MEASURE_CATEGORY2 = ("process", "process")
+SECURITY_MEASURE_STATUS = ("planned", "planned")
+SECURITY_MEASURE_STATUS2 = ("active", "active")
+SECURITY_MEASURE_EFFORT = ("L", "large")
+SECURITY_MEASURE_EFFORT2 = ("M", "medium")
 SECURITY_MEASURE_LINK = "https://example.com"
 SECURITY_MEASURE_ETA = "2024-01-01"
 
