@@ -16,7 +16,8 @@
 	<p class="text-gray-500 text-sm">
 		In case the user cannot set their own password, you can <a
 			href="{$page.url.pathname}/set-password"
-			class="text-primary-700 hover:text-primary-500">set a temporary password</a
+			class="text-primary-700 hover:text-primary-500"
+			data-testid="set-password-btn">set a temporary password</a
 		>. Please use a strong one and make sure to inform the user to change it as soon as possible.
 	</p>
 </div>

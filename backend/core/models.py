@@ -776,11 +776,11 @@ class RiskAssessment(Assessment):
                     "object": _object,
                 }
             )
-        if not self.authors:
+        if not self.authors.all():
             info_lst.append(
                 {
                     "msg": _(
-                        "{}: No author assigned to this risk risk assessment"
+                        "{}: No author assigned to this risk assessment"
                     ).format(str(self)),
                     "obj_type": "risk_assessment",
                     "object": _object,
@@ -998,12 +998,35 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
-    SOK_OPTIONS = [
-        ("--", _("--")),
-        ("0", _("Low")),
-        ("1", _("Medium")),
-        ("2", _("High")),
-    ]
+    DEFAULT_SOK_OPTIONS = {
+        -1: {
+            "name": _("--"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is undefined"
+            ),
+        },
+        0: {
+            "name": _("Low"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is low"
+            ),
+            "symbol": "◇",
+        },
+        1: {
+            "name": _("Medium"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is medium"
+            ),
+            "symbol": "⬙",
+        },
+        2: {
+            "name": _("High"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is high"
+            ),
+            "symbol": "◆",
+        },
+    }
 
     risk_assessment = models.ForeignKey(
         RiskAssessment,
@@ -1076,11 +1099,10 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    strength_of_knowledge = models.CharField(
-        max_length=20,
-        choices=SOK_OPTIONS,
-        default="--",
+    strength_of_knowledge = models.IntegerField(
+        default=-1,
         verbose_name=_("Strength of Knowledge"),
+        help_text=_("The strength of the knowledge supporting the assessment"),
     )
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
@@ -1147,6 +1169,11 @@ class RiskScenario(NameDescriptionMixin):
             return {"abbreviation": "--", "name": "--", "description": "not rated"}
         risk_matrix = self.get_matrix()
         return risk_matrix["probability"][self.residual_proba]
+
+    def get_strength_of_knowledge(self):
+        if self.strength_of_knowledge < 0:
+            return self.DEFAULT_SOK_OPTIONS[-1]
+        return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
     def __str__(self):
         return (
@@ -1283,6 +1310,17 @@ class ComplianceAssessment(Assessment):
                     "msg": _("{}: Compliance assessment is still in progress").format(
                         str(self)
                     ),
+                    "obj_type": "complianceassessment",
+                    "object": _object,
+                }
+            )
+
+        if not self.authors.all():
+            info_lst.append(
+                {
+                    "msg": _(
+                        "{}: No author assigned to this compliance assessment"
+                    ).format(str(self)),
                     "obj_type": "complianceassessment",
                     "object": _object,
                 }
