@@ -681,6 +681,29 @@ class RiskScenarioViewSet(BaseModelViewSet):
         choices = undefined | _choices
         return Response(choices)
 
+    @action(detail=True, name="Get strength of knowledge choices")
+    def strength_of_knowledge(self, request, pk):
+        undefined = {-1: RiskScenario.DEFAULT_SOK_OPTIONS[-1]}
+        _sok_choices = self.get_object().get_matrix().get("strength_of_knowledge")
+        if _sok_choices is not None:
+            sok_choices = dict(
+                zip(
+                    list(range(0, 64)),
+                    [
+                        {
+                            "name": x["name"],
+                            "description": x.get("description"),
+                            "symbol": x.get("symbol"),
+                        }
+                        for x in _sok_choices
+                    ],
+                )
+            )
+        else:
+            sok_choices = RiskScenario.DEFAULT_SOK_OPTIONS
+        choices = undefined | sok_choices
+        return Response(choices)
+
     @action(detail=False, name="Get risk count per level")
     def count_per_level(self, request):
         return Response({"results": risks_count_per_level(request.user)})
