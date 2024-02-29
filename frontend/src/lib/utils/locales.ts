@@ -262,6 +262,12 @@ export function localItems(languageTag: string): LocalItems {
 		lossOfAccountabilityChoice3: m.lossOfAccountabilityChoice3({ languageTag: languageTag }),
 		composer: m.composer({ languageTag: languageTag }),
 		plan: m.plan({ languageTag: languageTag }),
+		toDo: m.toDo({ languageTag: languageTag }),
+		inProgress: m.inProgress({ languageTag: languageTag }),
+		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
+		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
+		compliant: m.compliant({ languageTag: languageTag }),
+		notApplicable: m.notApplicable({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
