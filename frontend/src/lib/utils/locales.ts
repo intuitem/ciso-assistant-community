@@ -13,6 +13,7 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
+	if ( typeof str !== 'string' ) return str;
 	str = str.charAt(0).toLowerCase() + str.slice(1);
 	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
 }
