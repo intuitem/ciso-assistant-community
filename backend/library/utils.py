@@ -488,6 +488,7 @@ class LibraryImporter:
                 "provider": self._library_data.get("provider", None),
                 "packager": self._library_data.get("packager", None),
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable
+                "is_published": True
             },
             urn=_urn,
             locale=_locale,

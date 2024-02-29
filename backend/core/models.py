@@ -98,7 +98,6 @@ class Library(ReferentialObjectMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     @property
     def reference_count(self) -> int:
