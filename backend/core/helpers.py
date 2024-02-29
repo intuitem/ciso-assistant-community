@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-from re import sub
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
@@ -8,6 +7,7 @@ from iam.models import Folder, Permission, RoleAssignment, User
 from core.serializers import SecurityFunctionReadSerializer, ThreatReadSerializer
 
 from .models import *
+from .utils import camel_case
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "--": "#fac858",
@@ -23,12 +23,6 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "done": "#91cc75",
     "transfer": "#91cc75",
 }
-
-
-def camel_case(s):
-    s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
-
-    return "".join([s[0].lower(), s[1:]])
 
 
 def security_measure_priority(user: User):
@@ -253,6 +247,7 @@ def get_sorted_requirement_nodes(
                             "leaf_content": req.display_long(),
                             "status": req_as.status,
                             "status_display": req_as.get_status_display(),
+                            "status_i18n": camel_case(req_as.status),
                             "style": "leaf",
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
@@ -844,6 +839,10 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
             "untreated_h_vh": untreated_h_vh,
             "accepted": accepted,
         },
-        "security_measure_status": {"localLables":local_lables, "labels": labels, "values": values},
+        "security_measure_status": {
+            "localLables": local_lables,
+            "labels": labels,
+            "values": values,
+        },
         "colors": get_risk_color_ordered_list(user, risk_assessment_list),
     }
