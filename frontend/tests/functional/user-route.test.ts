@@ -72,7 +72,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.librariesPage.hasTitle();
 		await pages.librariesPage.hasTitle();
 
-		await pages.librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
+		await pages.librariesPage.importLibrary(vars.framework.ref, vars.framework.urn);
 
 		await sideBar.click('Compliance', pages.frameworksPage.url);
 		await pages.frameworksPage.hasUrl();

@@ -130,11 +130,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{#if quality_check.infos.length === 1}
-													<span class="font-bold">{quality_check.infos.length}</span>
+												{#if quality_check.info.length === 1}
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: ''})}
 												{:else}
-													<span class="font-bold">{quality_check.infos.length}</span>
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: 's'})}
 												{/if}
 											</div>
@@ -202,11 +202,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{#if quality_check.infos.length === 1}
-													<span class="font-bold">{quality_check.infos.length}</span>
+												{#if quality_check.info.length === 1}
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: ''})}
 												{:else}
-													<span class="font-bold">{quality_check.infos.length}</span>
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: 's'})}
 												{/if}
 											</div>
