@@ -229,7 +229,7 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
                 {:else}
                   {value ?? '-'}
                 {/if}

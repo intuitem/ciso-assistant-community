@@ -198,7 +198,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     residual_impact = serializers.CharField(source="get_residual_impact.name")
     residual_level = serializers.JSONField(source="get_residual_risk")
 
+    strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
+
     security_measures = FieldsRelatedField(many=True)
+    rid = serializers.CharField()
 
 
 class SecurityMeasureWriteSerializer(BaseModelSerializer):
