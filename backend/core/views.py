@@ -1348,7 +1348,7 @@ def generate_html(
     )
 
     assessments = RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment
+        compliance_assessment=compliance_assessment,
     ).all()
 
     node_per_urn = {r.urn: r for r in requirement_nodes}
@@ -1366,7 +1366,9 @@ def generate_html(
         content = ""
         compliance_assessments_status = []
         candidates = [
-            c for c in assessments if not (node) or c == node or node in ancestors[c]
+            c
+            for c in assessments.filter(requirement__assessable=True)
+            if not (node) or c == node or node in ancestors[c]
         ]
         total = len(candidates)
         for st in RequirementAssessment.Status:
@@ -1388,9 +1390,11 @@ def generate_html(
                     content += "bg-green-500"
                 elif stat[0] == "not_applicable":
                     content += "bg-black text-white dark:bg-white dark:text-black"
-                content += (
-                    '" style="width:' + str(stat[1]) + '%"> ' + str(stat[1]) + "%</div>"
-                )
+                content += '" style="width:' + str(stat[1]) + '%"> '
+                if stat[0] != "to_do":
+                    content += str(stat[1]) + "%"
+
+                content += "</div>"
         content += "</div></div>"
         return content
 
