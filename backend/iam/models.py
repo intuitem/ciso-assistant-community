@@ -602,9 +602,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             for my_folder in folders_with_local_view:
                 target_folders = []
                 my_folder2 = my_folder
-                while my_folder2 and not getattr(
-                    my_folder2, f"block_published_{class_name}", False
-                ):
+                while my_folder2:
                     if my_folder2 != my_folder:
                         target_folders.append(my_folder2)
                     my_folder2 = my_folder2.parent_folder
