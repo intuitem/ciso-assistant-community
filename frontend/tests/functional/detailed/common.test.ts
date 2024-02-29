@@ -68,6 +68,7 @@ for (const key of testPages) {
 				page
 			}) => {
 				await pages[key].itemDetail.verifyItem(items[key].build);
+				await pages[key].checkForUndefinedText();
 				page.url().includes('evidences') ? await pages[key].page.waitForTimeout(1000) : null; // prevent crashing
 			});
 

@@ -45,7 +45,7 @@ export class PageContent extends BasePage {
 			await this.page.goto('/libraries');
 			await this.page.waitForURL('/libraries');
 
-			await this.importLibrary(dependency.name, dependency.urn);
+			await this.importLibrary(dependency.ref || dependency.name, dependency.urn);
 			await this.goto();
 		}
 
@@ -69,22 +69,22 @@ export class PageContent extends BasePage {
 		}
 	}
 
-	async importLibrary(name: string, urn: string, language: string = 'English') {
+	async importLibrary(ref: string, urn: string, language: string = 'English') {
 		if (await this.tab('Imported libraries').isVisible()) {
-			if (await this.getRow(name).isHidden()) {
+			if (await this.getRow(ref).isHidden()) {
 				await this.tab('Libraries store').click();
 				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 			} else {
 				return;
 			}
 		}
-		await this.importItemButton(name, language).click();
+		await this.importItemButton(ref, language).click();
 		await this.isToastVisible('Successfully imported library ' + urn + '.+', undefined, {
 			timeout: 15000
 		});
 		await this.tab('Imported libraries').click();
 		expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
-		expect(this.getRow(name)).toBeVisible();
+		expect(this.getRow(ref)).toBeVisible();
 	}
 
 	async viewItemDetail(value?: string) {
@@ -134,6 +134,6 @@ export class PageContent extends BasePage {
 	importItemButton(value: string, language?: string) {
 		return language
 			? this.getRow(value, language).getByTestId('tablerow-import-button')
-			: this.getRow(value).getByTestId('tablerow-import-button').first();
+			: this.getRow(value).getByTestId('tablerow-import-button');
 	}
 }
