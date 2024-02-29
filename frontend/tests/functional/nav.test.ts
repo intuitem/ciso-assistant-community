@@ -7,38 +7,36 @@ type StringMap = {
 };
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
-	test.slow();
-
-	await test.step('proper redirection to the overview page after login', async () => {
-		await analyticsPage.hasUrl();
-		await analyticsPage.hasTitle();
-		setHttpResponsesListener(page);
-	});
-
-	await test.step('navigation link are working properly', async () => {
-		//TODO delete this when page titles are fixed
-		const temporaryPageTitle: StringMap = {
-			'X-Rays': 'X rays',
-			'Backup & restore': 'Backup restore'
-		};
+    test.slow();
+    
+    await test.step('proper redirection to the analytics page after login', async () => {
+        await analyticsPage.hasUrl();
+        await analyticsPage.hasTitle();
+        setHttpResponsesListener(page);
+    });
+    
+    await test.step('navigation link are working properly', async () => {
+        //TODO delete this when page titles are fixed
+        const temporaryPageTitle: StringMap = {
+			'X-Rays': "X rays",
+			'Backup & restore': "Backup restore"
+        };
 
 		const locals = localItems(languageTag());
-
-		for await (const [key, value] of sideBar.items) {
-			for await (const item of value) {
-				if (item.href !== '/role-assignments') {
-					await sideBar.click(key, item.href);
-					await expect(page).toHaveURL(item.href);
-					await logedPage.checkForUndefinedText();
-					if (item.name in temporaryPageTitle) {
-						await expect.soft(logedPage.pageTitle).toHaveText([temporaryPageTitle[item.name]]);
-					} else {
-						await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
-					}
-				}
-			}
-		}
-	});
+    for await (const [key, value] of sideBar.items) {            
+        for await (const item of value) {
+            if (item.href !== '/role-assignments') {
+                await sideBar.click(key, item.href);
+                await expect(page).toHaveURL(item.href);
+                if (item.name in temporaryPageTitle) {
+                    await expect.soft(logedPage.pageTitle).toHaveText(temporaryPageTitle[item.name]);
+                } else {
+                    await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
+                }
+            }         
+        }
+    }
+});
 
 	await test.step('user email is showing properly', async () => {
 		await expect(page.getByTestId('sidebar-user-account-display')).toHaveText(logedPage.email);

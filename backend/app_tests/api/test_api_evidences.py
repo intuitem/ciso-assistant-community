@@ -92,14 +92,21 @@ class TestEvidencesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestEvidencesAuthenticated:
     """Perform tests on Evidences API endpoint with authentication"""
 
     def test_get_evidences(self, test):
         """test to get evidences from the API with authentication"""
 
-        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
+        security_measure = SecurityMeasure.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.get_object(
             test.client,
@@ -127,7 +134,9 @@ class TestEvidencesAuthenticated:
     def test_create_evidences(self, test):
         """test to create evidences with the API with authentication"""
 
-        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
+        security_measure = SecurityMeasure.objects.create(
+            name="test", folder=test.folder
+        )
 
         with open(
             path.join(path.dirname(path.dirname(__file__)), EVIDENCE_ATTACHMENT), "rb"
@@ -162,7 +171,9 @@ class TestEvidencesAuthenticated:
         """test to update evidences with the API with authentication"""
 
         folder = Folder.objects.create(name="test2")
-        security_measure = SecurityMeasure.objects.create(name="test", folder=test.folder)
+        security_measure = SecurityMeasure.objects.create(
+            name="test", folder=test.folder
+        )
         security_measure2 = SecurityMeasure.objects.create(name="test2", folder=folder)
 
         with open(

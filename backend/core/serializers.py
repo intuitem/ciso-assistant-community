@@ -198,7 +198,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     residual_impact = serializers.CharField(source="get_residual_impact.name")
     residual_level = serializers.JSONField(source="get_residual_risk")
 
+    strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
+
     security_measures = FieldsRelatedField(many=True)
+    rid = serializers.CharField()
 
 
 class SecurityMeasureWriteSerializer(BaseModelSerializer):
@@ -266,6 +269,14 @@ class UserWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(codename=f"add_user"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied(
+                {"error": ["You do not have permission to create users"]}
+            )
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
@@ -463,6 +474,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
         fields = "__all__"
+
 
 class LibraryReadSerializer(BaseModelSerializer):
     class Meta:

@@ -22,6 +22,7 @@ User = get_user_model()
 
 ########################### Referential objects #########################
 
+
 class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     """
     Mixin for referential objects.
@@ -355,6 +356,7 @@ class RequirementNode(ReferentialObjectMixin):
 
 ########################### Domain objects #########################
 
+
 class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
         ("undefined", _("--")),
@@ -653,6 +655,9 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
 
 
 class PolicyManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(category="policy")
+
     def create(self, *args, **kwargs):
         kwargs["category"] = "policy"  # Ensure category is always "policy"
         return super().create(*args, **kwargs)
@@ -672,7 +677,7 @@ class Policy(SecurityMeasure):
 
 
 ########################### Secondary objects #########################
-        
+
 
 class Assessment(NameDescriptionMixin):
     class Status(models.TextChoices):
@@ -993,12 +998,35 @@ class RiskScenario(NameDescriptionMixin):
         ("transfer", _("Transfer")),
     ]
 
-    SOK_OPTIONS = [
-        ("--", _("--")),
-        ("0", _("Low")),
-        ("1", _("Medium")),
-        ("2", _("High")),
-    ]
+    DEFAULT_SOK_OPTIONS = {
+        -1: {
+            "name": _("--"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is undefined"
+            ),
+        },
+        0: {
+            "name": _("Low"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is low"
+            ),
+            "symbol": "◇",
+        },
+        1: {
+            "name": _("Medium"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is medium"
+            ),
+            "symbol": "⬙",
+        },
+        2: {
+            "name": _("High"),
+            "description": _(
+                "The strength of the knowledge supporting the assessment is high"
+            ),
+            "symbol": "◆",
+        },
+    }
 
     risk_assessment = models.ForeignKey(
         RiskAssessment,
@@ -1071,11 +1099,10 @@ class RiskScenario(NameDescriptionMixin):
         verbose_name=_("Treatment status"),
     )
 
-    strength_of_knowledge = models.CharField(
-        max_length=20,
-        choices=SOK_OPTIONS,
-        default="--",
+    strength_of_knowledge = models.IntegerField(
+        default=-1,
         verbose_name=_("Strength of Knowledge"),
+        help_text=_("The strength of the knowledge supporting the assessment"),
     )
     justification = models.CharField(
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
@@ -1142,6 +1169,11 @@ class RiskScenario(NameDescriptionMixin):
             return {"abbreviation": "--", "name": "--", "description": "not rated"}
         risk_matrix = self.get_matrix()
         return risk_matrix["probability"][self.residual_proba]
+
+    def get_strength_of_knowledge(self):
+        if self.strength_of_knowledge < 0:
+            return self.DEFAULT_SOK_OPTIONS[-1]
+        return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
     def __str__(self):
         return (
@@ -1408,7 +1440,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 
 
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
-        
+
 
 class RiskAcceptance(NameDescriptionMixin, FolderMixin):
     ACCEPTANCE_STATE = [
@@ -1495,4 +1527,3 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         elif state == "revoked":
             self.revoked_at = datetime.now()
         self.save()
-

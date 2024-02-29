@@ -80,6 +80,7 @@ export const RiskScenarioSchema = baseNamedObject({
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
 	treatment: z.string().optional(),
+	strength_of_knowledge: z.number().default(-1).optional(),
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array(),
