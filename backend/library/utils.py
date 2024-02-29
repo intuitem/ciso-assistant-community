@@ -289,7 +289,7 @@ class SecurityFunctionImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid"}
+    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
 
     def __init__(self, risk_matrix_data):
         self.risk_matrix_data = risk_matrix_data
