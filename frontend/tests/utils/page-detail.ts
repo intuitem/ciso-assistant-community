@@ -14,10 +14,6 @@ export class PageDetail extends BasePage {
 		this.editButton = this.page.getByTestId('edit-button');
 	}
 
-	async hasTitle() {
-		await expect.soft(this.pageTitle).toHaveText(this.item);
-	}
-
 	setItem(item: string) {
 		this.item = item;
 	}

@@ -5,17 +5,23 @@ export abstract class BasePage {
 	readonly name: string | RegExp;
 	readonly pageTitle: Locator;
 	readonly modalTitle: Locator;
+	readonly breadcrumbs: Locator;
 
 	constructor(public readonly page: Page, url: string, name: string | RegExp) {
 		this.url = url;
 		this.name = name;
 		this.pageTitle = this.page.locator('#page-title');
 		this.modalTitle = this.page.getByTestId('modal-title');
+		this.breadcrumbs = this.page.getByTestId('crumb-item');
 	}
 
 	async goto() {
 		await this.page.goto(this.url);
 		await this.page.waitForURL(this.url);
+	}
+	
+	async hasTitle(title: string | RegExp = this.name) {
+		await expect.soft(this.pageTitle).toHaveText(title);
 	}
 
 	async hasUrl() {

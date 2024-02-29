@@ -29,9 +29,9 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
                 await sideBar.click(key, item.href);
                 await expect(page).toHaveURL(item.href);
                 if (item.name in temporaryPageTitle) {
-                    await expect.soft(logedPage.pageTitle).toHaveText(temporaryPageTitle[item.name]);
+					await logedPage.hasTitle(temporaryPageTitle[item.name]);
                 } else {
-                    await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
+					await logedPage.hasTitle(locals[item.name]);
                 }
             }         
         }
