@@ -23,39 +23,46 @@ RISK_SCENARIO_CURRENT_PROBABILITIES = (2, "High")
 RISK_SCENARIO_CURRENT_PROBABILITIES2 = (1, "Medium")
 RISK_SCENARIO_CURRENT_IMPACT = (2, "High")
 RISK_SCENARIO_CURRENT_IMPACT2 = (1, "Medium")
-RISK_SCENARIO_CURRENT_LEVEL = (2,
-                               {
-                                    "abbreviation": "H",
-                                    "name": "High",
-                                    "description": "unacceptable risk",
-                                    "hexcolor": "#FF0000"
-                                }
-                                )
-RISK_SCENARIO_CURRENT_LEVEL2 = (1,
-                                {
-                                    "abbreviation": "M",
-                                    "name": "Medium",
-                                    "description": "risk requiring mitigation within 2 years",
-                                    "hexcolor": "#FFFF00"
-                                })
+RISK_SCENARIO_CURRENT_LEVEL = (
+    2,
+    {
+        "abbreviation": "H",
+        "name": "High",
+        "description": "unacceptable risk",
+        "hexcolor": "#FF0000",
+    },
+)
+RISK_SCENARIO_CURRENT_LEVEL2 = (
+    1,
+    {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "risk requiring mitigation within 2 years",
+        "hexcolor": "#FFFF00",
+    },
+)
 RISK_SCENARIO_RESIDUAL_PROBABILITIES = (1, "Medium")
 RISK_SCENARIO_RESIDUAL_PROBABILITIES2 = (0, "Low")
 RISK_SCENARIO_RESIDUAL_IMPACT = (1, "Medium")
 RISK_SCENARIO_RESIDUAL_IMPACT2 = (0, "Low")
-RISK_SCENARIO_RESIDUAL_LEVEL = (1,
-                                {
-                                    "abbreviation": "M",
-                                    "name": "Medium",
-                                    "description": "risk requiring mitigation within 2 years",
-                                    "hexcolor": "#FFFF00"
-                                })
-RISK_SCENARIO_RESIDUAL_LEVEL2 = (0,
-                                {
-                                    "abbreviation": "L",
-                                    "name": "Low",
-                                    "description": "acceptable risk",
-                                    "hexcolor": "#00FF00"
-                                })
+RISK_SCENARIO_RESIDUAL_LEVEL = (
+    1,
+    {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "risk requiring mitigation within 2 years",
+        "hexcolor": "#FFFF00",
+    },
+)
+RISK_SCENARIO_RESIDUAL_LEVEL2 = (
+    0,
+    {
+        "abbreviation": "L",
+        "name": "Low",
+        "description": "acceptable risk",
+        "hexcolor": "#00FF00",
+    },
+)
 RISK_SCENARIO_TREATMENT_STATUS = ("accept", "Accept")
 RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "Mitigate")
 RISK_SCENARIO_JUSTIFICATION = "Test justification"
@@ -148,7 +155,12 @@ class TestRiskScenariosUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("test", GROUPS_PERMISSIONS.keys(), ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()], indirect=True)
+@pytest.mark.parametrize(
+    "test",
+    GROUPS_PERMISSIONS.keys(),
+    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
+    indirect=True,
+)
 class TestRiskScenariosAuthenticated:
     """Perform tests on Risk Scenarios API endpoint with authentication"""
 
@@ -214,7 +226,9 @@ class TestRiskScenariosAuthenticated:
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
         asset = Asset.objects.create(name="test", folder=test.folder)
-        security_measures = SecurityMeasure.objects.create(name="test", folder=test.folder)
+        security_measures = SecurityMeasure.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
@@ -270,9 +284,7 @@ class TestRiskScenariosAuthenticated:
         folder = Folder.objects.create(name="test2")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(
-                name="test", folder=test.folder
-            ),
+            project=Project.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         risk_assessment2 = RiskAssessment.objects.create(

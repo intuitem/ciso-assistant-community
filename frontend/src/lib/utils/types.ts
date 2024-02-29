@@ -97,6 +97,12 @@ export interface RiskLevel {
 	residual: string[];
 }
 
+export interface StrengthOfKnowledgeEntry {
+	name: string;
+	description: string;
+	symbol: string;
+}
+
 export interface AggregatedData {
 	names: string[];
 }

@@ -31,7 +31,6 @@ User = get_user_model()
 SAMPLE_640x480_JPG = BASE_DIR / "app_tests" / "sample_640x480.jpg"
 
 
-
 @pytest.fixture
 def domain_project_fixture():
     folder = Folder.objects.create(
