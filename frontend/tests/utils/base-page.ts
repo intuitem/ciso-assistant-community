@@ -24,6 +24,10 @@ export abstract class BasePage {
 
 	//TODO function to assert breadcrumb path is accurate
 
+	async checkForUndefinedText() {
+		await expect.soft(this.page.getByText('undefined'), "An undefined text is visible on the page").toHaveCount(0);
+	}
+
 	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
 		await expect(toast).toBeVisible(options);

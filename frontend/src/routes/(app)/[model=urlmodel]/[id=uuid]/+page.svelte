@@ -62,7 +62,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -256,12 +256,16 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{localItems(languageTag())['associated' + capitalizeFirstLetter(model.info.localNamePlural)]}
+								{localItems(languageTag())[
+									'associated' + capitalizeFirstLetter(model.info.localNamePlural)
+								]}
 							</h4>
 							<button
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]}</button
+								><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())[
+									'add' + capitalizeFirstLetter(model.info.localName)
+								]}</button
 							>
 						</div>
 						{#if model.table}

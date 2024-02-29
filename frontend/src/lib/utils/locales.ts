@@ -12,7 +12,7 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
-	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
+	return str.replace(/[_-]\w/g, (match) => match.charAt(1).toUpperCase());
 }
 
 export function capitalizeFirstLetter(str: string) {
@@ -126,6 +126,7 @@ export function localItems(languageTag: string): LocalItems {
 		dateJoined: m.dateJoined({ languageTag: languageTag }),
 		version: m.version({ languageTag: languageTag }),
 		treatment: m.treatment({ languageTag: languageTag }),
+		rid: m.rid({ languageTag: languageTag }),
 		currentProba: m.currentProba({ languageTag: languageTag }),
 		currentImpact: m.currentImpact({ languageTag: languageTag }),
 		residualProba: m.residualProba({ languageTag: languageTag }),
@@ -163,7 +164,9 @@ export function localItems(languageTag: string): LocalItems {
 		associatedRiskAssessments: m.associatedRiskAssessments({ languageTag: languageTag }),
 		associatedRiskScenarios: m.associatedRiskScenarios({ languageTag: languageTag }),
 		associatedRiskAcceptances: m.associatedRiskAcceptances({ languageTag: languageTag }),
-		associatedComplianceAssessments: m.associatedComplianceAssessments({ languageTag: languageTag }),
+		associatedComplianceAssessments: m.associatedComplianceAssessments({
+			languageTag: languageTag
+		}),
 		associatedEvidences: m.associatedEvidences({ languageTag: languageTag }),
 		associatedDomains: m.associatedDomains({ languageTag: languageTag }),
 		associatedProjects: m.associatedProjects({ languageTag: languageTag }),
