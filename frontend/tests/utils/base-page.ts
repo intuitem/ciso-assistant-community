@@ -28,7 +28,15 @@ export abstract class BasePage {
 		await expect(this.page).toHaveURL(this.url);
 	}
 
-	//TODO function to assert breadcrumb path is accurate
+	async hasBreadcrumbPath(paths: (string | RegExp)[], fullPath: boolean = true, origin: string = 'Home') {
+		paths.unshift(new RegExp('.+' + origin));
+		if (fullPath) {
+			await expect.soft(this.breadcrumbs).toHaveText(paths);
+		}
+		else {
+			await expect.soft(this.breadcrumbs.last()).toHaveText(paths[paths.length - 1]);
+		}
+	}
 
 	async checkForUndefinedText() {
 		await expect.soft(this.page.getByText('undefined'), "An undefined text is visible on the page").toHaveCount(0);
