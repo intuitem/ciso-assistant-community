@@ -77,3 +77,4 @@
 </script>
 
 <div class="bg-white w-auto h-full" bind:this={chart_element} />
+
