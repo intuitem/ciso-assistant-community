@@ -776,11 +776,11 @@ class RiskAssessment(Assessment):
                     "object": _object,
                 }
             )
-        if not self.authors:
+        if not self.authors.all():
             info_lst.append(
                 {
                     "msg": _(
-                        "{}: No author assigned to this risk risk assessment"
+                        "{}: No author assigned to this risk assessment"
                     ).format(str(self)),
                     "obj_type": "risk_assessment",
                     "object": _object,
@@ -1310,6 +1310,17 @@ class ComplianceAssessment(Assessment):
                     "msg": _("{}: Compliance assessment is still in progress").format(
                         str(self)
                     ),
+                    "obj_type": "complianceassessment",
+                    "object": _object,
+                }
+            )
+
+        if not self.authors.all():
+            info_lst.append(
+                {
+                    "msg": _(
+                        "{}: No author assigned to this compliance assessment"
+                    ).format(str(self)),
                     "obj_type": "complianceassessment",
                     "object": _object,
                 }
