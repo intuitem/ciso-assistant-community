@@ -7,6 +7,7 @@ from django.db.models import Q
 
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
+from .utils import camel_case
 from iam.models import FolderMixin
 from django.core import serializers
 
@@ -779,9 +780,9 @@ class RiskAssessment(Assessment):
         if not self.authors.all():
             info_lst.append(
                 {
-                    "msg": _(
-                        "{}: No author assigned to this risk assessment"
-                    ).format(str(self)),
+                    "msg": _("{}: No author assigned to this risk assessment").format(
+                        str(self)
+                    ),
                     "obj_type": "risk_assessment",
                     "object": _object,
                 }
@@ -1281,6 +1282,7 @@ class ComplianceAssessment(Assessment):
             count = (
                 RequirementAssessment.objects.filter(status=st)
                 .filter(compliance_assessment=self)
+                .filter(requirement__assessable=True)
                 .count()
             )
             total = RequirementAssessment.objects.filter(
@@ -1288,6 +1290,7 @@ class ComplianceAssessment(Assessment):
             ).count()
             v = {
                 "name": st.label,
+                "localName": camel_case(st.value),
                 "value": count,
                 "itemStyle": {"color": color_map[st]},
             }
