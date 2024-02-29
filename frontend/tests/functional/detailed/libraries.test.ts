@@ -1,20 +1,29 @@
-import { test, baseTest, expect } from '../../utils/test-utils.js';
+import { test, expect } from '../../utils/test-utils.js';
 
 test('every libraries can be imported', async ({
 	logedPage,
     librariesPage,
 	page
 }) => {
-	librariesPage.goto();
-    librariesPage.hasUrl();
-    const librariesRefs = page.locator('tbody tr td:nth-child(1)');
-    const libCount = await librariesRefs.count();
-    //TODO: make sure that all the the libraries are loaded
+    test.slow();
+	await librariesPage.goto();
+    await librariesPage.hasUrl();
     
-    for (let i = 0 ; i < libCount ; i++) {
-        const libraryRef = await librariesRefs.nth(i).innerText();
-        console.log(libraryRef);
-        await librariesPage.importLibrary(libraryRef, undefined, 'any');
+    let previousRemainingLibrary = '';
+    let nextRemainingLibrary = await page.locator('tbody tr td:nth-child(1)').first()?.innerText();
+    while (nextRemainingLibrary) {
+        await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
+        
         await librariesPage.tab('Libraries store').click();
+        expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+        
+        previousRemainingLibrary = nextRemainingLibrary;
+        if (await page.locator('tbody tr td:nth-child(1)').count() !== 0) {
+            nextRemainingLibrary = await page.locator('tbody tr td:nth-child(1)').first()?.innerText();
+        }
+        else {
+            break;    
+        }
+        expect(previousRemainingLibrary, "An error occured while importing library: " + previousRemainingLibrary).not.toEqual(nextRemainingLibrary);
     }
 });
