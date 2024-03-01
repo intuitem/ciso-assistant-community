@@ -109,7 +109,7 @@
 		return (
 			canEditObject &&
 			!['Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn
+			!data.data.urn && !data.data.builtin
 		);
 	};
 	$: Object.entries(data.relatedModels).forEach(([key, value]) => {
