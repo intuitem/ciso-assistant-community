@@ -379,7 +379,7 @@ export class TestContent {
 				}
 			},
 			securityFunctionsPage: {
-				displayName: 'Security functions',
+				displayName: 'reference controls',
 				build: {
 					name: vars.securityFunctionName,
 					description: vars.description,
