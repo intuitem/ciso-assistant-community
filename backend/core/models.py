@@ -141,7 +141,6 @@ class Threat(ReferentialObjectMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     class Meta:
         verbose_name = _("Threat")
@@ -190,7 +189,6 @@ class SecurityFunction(ReferentialObjectMixin):
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     class Meta:
         verbose_name = _("Security function")
@@ -424,7 +422,6 @@ class Asset(NameDescriptionMixin, FolderMixin):
     parent_assets = models.ManyToManyField(
         "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
