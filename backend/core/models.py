@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -99,6 +100,23 @@ class Library(ReferentialObjectMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
+
+    @property
+    def _objects(self):
+        res = {}
+        if self.frameworks.count() > 0:
+            res["framework"] = model_to_dict(self.frameworks.first())
+            res["framework"].update(self.frameworks.first().library_entry)
+        if self.threats.count() > 0:
+            res["threats"] = [model_to_dict(threat) for threat in self.threats.all()]
+        if self.security_functions.count() > 0:
+            res["security_functions"] = [
+                model_to_dict(security_function)
+                for security_function in self.security_functions.all()
+            ]
+        if self.risk_matrices.count() > 0:
+            res["risk_matrix"] = model_to_dict(self.risk_matrices.first())
+        return res
 
     @property
     def reference_count(self) -> int:
@@ -304,6 +322,49 @@ class Framework(ReferentialObjectMixin):
             return False
         return True
 
+    @property
+    def library_entry(self):
+        res = {}
+        requirement_nodes = self.get_requirement_nodes()
+        if requirement_nodes:
+            res["requirement_nodes"] = requirement_nodes
+
+        requirement_levels = self.get_requirement_levels()
+        if requirement_levels:
+            res["requirement_levels"] = requirement_levels
+
+        return res
+
+    def get_requirement_nodes(self):
+        # Prefetch related objects if they exist to reduce database queries.
+        # Adjust prefetch_related paths according to your model relationships.
+        nodes_queryset = self.requirement_nodes.prefetch_related(
+            "threats", "security_functions"
+        )
+        if nodes_queryset.exists():
+            return [self.process_node(node) for node in nodes_queryset]
+        return []
+
+    def process_node(self, node):
+        # Convert the node to dict and process threats and security functions.
+        node_dict = model_to_dict(node)
+        if node.threats.exists():
+            node_dict["threats"] = [
+                model_to_dict(threat) for threat in node.threats.all()
+            ]
+        if node.security_functions.exists():
+            node_dict["security_functions"] = [
+                model_to_dict(security_function)
+                for security_function in node.security_functions.all()
+            ]
+        return node_dict
+
+    def get_requirement_levels(self):
+        levels_queryset = self.requirement_levels.all()
+        if levels_queryset.exists():
+            return [model_to_dict(level) for level in levels_queryset]
+        return []
+
 
 class RequirementLevel(ReferentialObjectMixin):
     framework = models.ForeignKey(
@@ -312,6 +373,7 @@ class RequirementLevel(ReferentialObjectMixin):
         null=True,
         blank=True,
         verbose_name=_("Framework"),
+        related_name="requirement_levels",
     )
     level = models.IntegerField(null=False, blank=False, verbose_name=_("Level"))
 
@@ -339,6 +401,7 @@ class RequirementNode(ReferentialObjectMixin):
         null=True,
         blank=True,
         verbose_name=_("Framework"),
+        related_name="requirement_nodes",
     )
     parent_urn = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Parent URN")

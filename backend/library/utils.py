@@ -15,6 +15,10 @@ from core.models import (
 from django.db import transaction
 from iam.models import Folder
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 def get_available_library_files():
     """
@@ -71,18 +75,44 @@ def get_library_names(libraries):
 
 def get_library(urn: str) -> dict | None:
     """
-    Returns a library by urn
+    Returns a library by urn, trying to minimize file I/O by directly accessing the specific YAML file.
 
     Args:
-        urn: urn of the library to return
+        urn: URN of the library to return.
 
     Returns:
-        library: library with the given urn
+        The library with the given urn, or None if not found.
     """
-    libraries = get_available_libraries()
-    for lib in libraries:
-        if lib["urn"] == urn:
-            return lib
+    # First, try to fetch the library from the database.
+    lib = Library.objects.filter(urn=urn).first()
+    if lib is not None:
+        return {
+            "id": lib.id,
+            "urn": lib.urn,
+            "name": lib.name,
+            "description": lib.description,
+            "provider": lib.provider,
+            "packager": lib.packager,
+            "copyright": lib.copyright,
+            "reference_count": lib.reference_count,
+            "objects": lib._objects,
+        }
+
+    # Construct the path to the YAML file from the urn.
+    filename = urn.split(":")[-1]
+    path = settings.BASE_DIR / "library/libraries" / f"{filename}.yaml"
+    logger.info(f"Attempting to load library from file {path}")
+
+    # Attempt to directly load the library from its specific YAML file.
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            library_data = yaml.safe_load(file)
+            if library_data and library_data.get("urn") == urn:
+                return library_data
+    except FileNotFoundError:
+        pass
+
+    # Return None if the library is neither in the database nor found in the specific YAML file.
     return None
 
 
@@ -128,7 +158,7 @@ class RequirementNodeImporter:
             maturity=self.requirement_data.get("maturity"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
-            is_published=True
+            is_published=True,
         )
 
         for threat in self.requirement_data.get("threats", []):
@@ -218,7 +248,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
-            is_published=True
+            is_published=True,
         )
 
         for requirement_node in self._requirement_nodes:
@@ -325,7 +355,7 @@ class RiskMatrixImporter:
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
-            is_published=True
+            is_published=True,
         )
 
 
@@ -488,7 +518,7 @@ class LibraryImporter:
                 "provider": self._library_data.get("provider", None),
                 "packager": self._library_data.get("packager", None),
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable
-                "is_published": True
+                "is_published": True,
             },
             urn=_urn,
             locale=_locale,

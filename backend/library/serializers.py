@@ -1,16 +1,20 @@
 from rest_framework import serializers
+from core.models import Library
+
+from core.serializers import (
+    BaseModelSerializer,
+    FrameworkReadSerializer,
+    RiskMatrixReadSerializer,
+    SecurityFunctionReadSerializer,
+    ThreatReadSerializer,
+)
 
 
 class LibraryObjectSerializer(serializers.Serializer):
-    type = serializers.ChoiceField(
-        choices=[
-            "risk_matrix",
-            "security_function",
-            "threat",
-            "framework",
-        ]
-    )
-    fields = serializers.DictField(child=serializers.CharField())
+    framework = FrameworkReadSerializer()
+    risk_matrix = RiskMatrixReadSerializer()
+    threats = ThreatReadSerializer(many=True)
+    security_functions = SecurityFunctionReadSerializer(many=True)
 
 
 class LibrarySerializer(serializers.Serializer):
@@ -20,6 +24,12 @@ class LibrarySerializer(serializers.Serializer):
     objects = LibraryObjectSerializer(many=True)
     format_version = serializers.CharField()
     copyright = serializers.CharField()
+
+
+class LibraryModelSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
 
 
 class LibraryUploadSerializer(serializers.Serializer):
