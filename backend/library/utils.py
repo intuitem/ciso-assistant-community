@@ -128,6 +128,7 @@ class RequirementNodeImporter:
             maturity=self.requirement_data.get("maturity"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
+            is_published=True
         )
 
         for threat in self.requirement_data.get("threats", []):
@@ -217,6 +218,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            is_published=True
         )
 
         for requirement_node in self._requirement_nodes:
@@ -242,7 +244,7 @@ class ThreatImporter:
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
             provider=library_object.provider,
-            is_published=self.threat_data.get("is_published", True),
+            is_published=True,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
@@ -278,7 +280,7 @@ class SecurityFunctionImporter:
             provider=library_object.provider,
             typical_evidence=self.security_function_data.get("typical_evidence"),
             category=self.security_function_data.get("category"),
-            is_published=self.security_function_data.get("is_published", True),
+            is_published=True,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
@@ -323,6 +325,7 @@ class RiskMatrixImporter:
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            is_published=True
         )
 
 
@@ -485,6 +488,7 @@ class LibraryImporter:
                 "provider": self._library_data.get("provider", None),
                 "packager": self._library_data.get("packager", None),
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable
+                "is_published": True
             },
             urn=_urn,
             locale=_locale,
