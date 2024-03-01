@@ -354,6 +354,7 @@
 	"physical": "Physical",
 	"process": "Process",
 	"small": "Small",
+	"medium": "Medium",
 	"large": "Large",
 	"extraLarge": "Extra-large",
 	"rid": "RID",
@@ -428,5 +429,7 @@
 	"mitigate": "Mitigated",
 	"accept": "Accepted",
 	"avoid": "Avoided",
-	"transfer": "Shared"
+	"transfer": "Shared",
+	"primary": "Primary",
+	"support": "Support"
 }

@@ -9,10 +9,10 @@ from test_utils import EndpointTestsQueries
 # Generic policy data for tests
 POLICY_NAME = "Test Policy"
 POLICY_DESCRIPTION = "Test Description"
-POLICY_STATUS = ("planned", "planned")
-POLICY_STATUS2 = ("active", "active")
-POLICY_EFFORT = ("L", "large")
-POLICY_EFFORT2 = ("M", "medium")
+POLICY_STATUS = ("planned", "Planned")
+POLICY_STATUS2 = ("active", "Active")
+POLICY_EFFORT = ("L", "Large")
+POLICY_EFFORT2 = ("M", "Medium")
 POLICY_LINK = "https://example.com"
 POLICY_ETA = "2024-01-01"
 

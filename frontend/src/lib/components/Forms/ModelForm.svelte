@@ -17,7 +17,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
-	import { localItems } from '$lib/utils/locales';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
 	export let form: SuperValidated<AnyZodObject>;
@@ -32,8 +32,8 @@
 
 	for (const index in model.selectOptions) {
 		for (const item in model.selectOptions[index]) {
-			console.log(model.selectOptions[index][item]['label'])
-			model.selectOptions[index][item]['label'] = localItems(languageTag())[model.selectOptions[index][item]['label']];
+			console.log(toCamelCase(model.selectOptions[index][item]['label']))
+			model.selectOptions[index][item]['label'] = localItems(languageTag())[toCamelCase(model.selectOptions[index][item]['label'])];
 		}
 	}
 
