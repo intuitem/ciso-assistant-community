@@ -10,14 +10,16 @@ import type { LayoutServerLoad } from './$types';
 import type { SuperValidated } from 'sveltekit-superforms';
 import type { urlModel } from '$lib/utils/types';
 
-export const load: LayoutServerLoad = async ({ fetch, params }) => {
+import { languageTag } from '$paraglide/runtime';
+
+export const load: LayoutServerLoad = async ({ fetch, params, cookies }) => {
 	const endpoint = `${BASE_API_URL}/${params.model}/${params.id}/`;
 
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
 	processObject(data, ISO_8601_REGEX, (matchedString: string): string =>
-		new Date(matchedString).toLocaleString()
+		new Date(matchedString).toLocaleString(cookies.get("lang") || languageTag()) // languageTag() seems to always return "en"
 	);
 
 	type RelatedModel = {
