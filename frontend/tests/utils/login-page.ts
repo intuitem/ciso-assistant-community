@@ -13,6 +13,8 @@ export class LoginPage extends BasePage	{
     readonly usernameInput: Locator;
     readonly passwordInput: Locator;
     readonly loginButton: Locator;
+    readonly emailInput: Locator;
+    readonly sendEmailButton: Locator;
     readonly forgotPasswordButton: Locator;
     email: string;
     password: string;
@@ -22,6 +24,8 @@ export class LoginPage extends BasePage	{
         this.usernameInput = this.page.getByTestId('form-input-username');
         this.passwordInput = this.page.getByTestId('form-input-password');
         this.loginButton = this.page.getByTestId('login-btn');
+        this.emailInput = this.page.getByTestId('form-input-email');
+        this.sendEmailButton = this.page.getByTestId('send-btn');
         this.forgotPasswordButton = this.page.getByTestId('forgot-password-btn');
         this.email = LoginPage.defaultEmail;
         this.password = LoginPage.defaultPassword;

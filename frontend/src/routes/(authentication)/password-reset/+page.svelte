@@ -37,7 +37,7 @@
 					>
 						<TextField type="email" {form} field="email" label="E-mail" />
 						<p class="pt-3">
-							<button class="btn variant-filled-primary font-semibold w-full" type="submit"
+							<button class="btn variant-filled-primary font-semibold w-full" data-testid="send-btn" type="submit"
 								>Send</button
 							>
 						</p>
