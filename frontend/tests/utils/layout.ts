@@ -8,6 +8,4 @@ export class Layout {
 		this.pageTitle = this.page.locator('#page-title');
 		this.modalTitle = this.page.getByTestId('modal-title');
 	}
-
-	//TODO function to assert breadcrumb path is accurate
 }
