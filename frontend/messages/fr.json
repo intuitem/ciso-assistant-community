@@ -354,6 +354,7 @@
 	"physical": "Physique",
 	"process": "Processus",
 	"small": "Petit",
+	"medium": "Moyen",
 	"large": "Grand",
 	"extraLarge": "Extra large",
 	"rid": "RID",
@@ -434,5 +435,7 @@
 	"nonCompliant": "Non conforme",
 	"partiallyCompliant": "Partiellement conforme",
 	"compliant": "Conforme",
-	"notApplicable": "Non applicable"
+	"notApplicable": "Non applicable",
+	"primary": "Primaire",
+	"support": "Support"
 }
