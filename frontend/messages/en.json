@@ -370,5 +370,11 @@
 	"current": "Current",
 	"residual": "Residual",
 	"jumpToRiskAssessment": "Jump to risk assessment",
-	"additionalMeasures": "Additional measures"
+	"additionalMeasures": "Additional measures",
+	"toDo": "To do",
+	"inProgress": "In progress",
+	"nonCompliant": "Non compliant",
+	"partiallyCompliant": "Partially compliant",
+	"compliant": "Compliant",
+	"notApplicable": "Not applicable"
 }
