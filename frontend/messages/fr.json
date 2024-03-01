@@ -230,13 +230,10 @@
 	"riskLevel": "Niveau de risque",
 	"cancel": "Annuler",
 	"save": "Enregistrer",
-	"currentAssessment": "Évaluation actuelle",
-	"scope": "Périmètre",
 	"assetsImpactedByTheRiskScenario": "Biens sensibles impactés par le scénario de risque",
 	"ecistingMeasures": "Mesures existantes",
 	"theExistingSecurityMeasuresToManageThisRisk": "Les mesures de sécurité existantes pour gérer ce risque",
 	"currentRiskLevelGivenCurrentMeasures": "Niveau de risque courant compte tenu des mesures actuelles",
-	"targetAssessment": "Évaluation cible",
 	"riskLevelWhenAllExtraMeasuresDone": "Niveau de risque lorsque toutes les mesures supplémentaires sont appliquées",
 	"myUserGroups": "Mes groupes d'utilisateurs",
 	"changePasswordText": "Vous pouvez changer votre mot de passe ici. Vous devrez vous reconnecter avec le nouveau mot de passe après cette opération",
@@ -357,8 +354,10 @@
 	"physical": "Physique",
 	"process": "Processus",
 	"small": "Petit",
+	"medium": "Moyen",
 	"large": "Grand",
 	"extraLarge": "Extra large",
+	"rid": "RID",
 	"scope": "Périmètre",
 	"auditor": "Auditeur",
 	"lastUpdate": "Dernière mise à jour",
@@ -430,5 +429,7 @@
 	"mitigate": "Atténué",
 	"accept": "Accepté",
 	"avoid": "Refusé",
-	"transfer": "Partagé"
+	"transfer": "Partagé",
+	"primary": "Primaire",
+	"support": "Support"
 }
