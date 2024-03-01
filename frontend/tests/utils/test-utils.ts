@@ -540,14 +540,15 @@ export class TestContent {
 		};
 	}
 
-	static generateTestVars() {
-		const vars = structuredClone(testData);
-		for (const key in testData) {
-			if (key === 'user') {
-				const email = testData[key].email.split('@');
-				vars[key].email = getUniqueValue(email[0]) + '@' + email[1];
-			} else if (key.match(/.*Name/)) {
-				vars[key] = getUniqueValue(testData[key]);
+	static generateTestVars(data = testData) {
+		const vars = structuredClone(data);
+		for (const key in data) {
+			if (typeof data[key] === 'object') {
+				if ('email' in data[key]) {
+					vars[key] = this.generateTestVars(data[key]);
+				}
+			} else if (key.match(/.*Name/) || vars[key].match(/.+@.+/)) {
+				vars[key] = getUniqueValue(data[key]);
 			}
 		}
 		return vars;
@@ -565,7 +566,11 @@ export function setHttpResponsesListener(page: Page) {
 	// });
 }
 
-export function getUniqueValue(value: string) {
+export function getUniqueValue(value: string): string {
+	if (value.match(/.+@.+/)) {
+		const email = value.split('@');
+		return getUniqueValue(email[0]) + '@' + email[1];
+	}
 	return process.env.TEST_WORKER_INDEX + '-' + value + '-' + randomBytes(2).toString('hex');
 }
 
