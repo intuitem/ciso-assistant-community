@@ -17,4 +17,4 @@ COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=development
 ENV BODY_SIZE_LIMIT=20000000
-CMD [ "node", "build" ]
+CMD [ "node", "server" ]
