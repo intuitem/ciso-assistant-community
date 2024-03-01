@@ -9,7 +9,7 @@ from test_utils import EndpointTestsQueries
 # Generic project data for tests
 PROJECT_NAME = "Test Project"
 PROJECT_DESCRIPTION = "Test Description"
-PROJECT_STATUS = ("in_prod", "production")
+PROJECT_STATUS = ("in_prod", "Production")
 PROJECT_REFERENCE = "test:project"
 
 

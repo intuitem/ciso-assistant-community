@@ -1,4 +1,3 @@
-import { mitigate } from '$paraglide/messages/en';
 import * as m from '../../paraglide/messages';
 
 export const LOCALE_MAP = {
@@ -14,7 +13,7 @@ export const LOCALE_MAP = {
 
 export function toCamelCase(str: string) {
 	if ( typeof str !== 'string' ) return str;
-	str = str.charAt(0).toLowerCase() + str.slice(1);
+	str = str.charAt(0).toLowerCase() + str.slice(1).replace(' ', '');
 	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
 }
 
@@ -267,6 +266,7 @@ export function localItems(languageTag: string): LocalItems {
 		technical: m.technical({ languageTag: languageTag }),
 		physical: m.physical({ languageTag: languageTag }),
 		small: m.small({ languageTag: languageTag }),
+		medium: m.medium({ languageTag: languageTag }),
 		large: m.large({ languageTag: languageTag }),
 		extraLarge: m.extraLarge({ languageTag: languageTag }),
 		policy: m.policy({ languageTag: languageTag }),
@@ -278,6 +278,8 @@ export function localItems(languageTag: string): LocalItems {
 		accept: m.accept({ languageTag: languageTag }),
 		transfer: m.transfer({ languageTag: languageTag }),
 		avoid: m.avoid({ languageTag: languageTag }),
+		primary: m.primary({ languageTag: languageTag }),
+		support: m.support({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }
