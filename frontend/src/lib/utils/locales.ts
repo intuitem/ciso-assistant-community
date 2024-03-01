@@ -280,6 +280,12 @@ export function localItems(languageTag: string): LocalItems {
 		avoid: m.avoid({ languageTag: languageTag }),
 		primary: m.primary({ languageTag: languageTag }),
 		support: m.support({ languageTag: languageTag }),
+		toDo: m.toDo({ languageTag: languageTag }),
+		inProgress: m.inProgress({ languageTag: languageTag }),
+		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
+		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
+		compliant: m.compliant({ languageTag: languageTag }),
+		notApplicable: m.notApplicable({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }

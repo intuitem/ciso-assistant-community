@@ -19,7 +19,7 @@ export const actions: Actions = {
 			method: 'POST',
 			body: file
 		});
-		const data = await response.json();
+		const data = await response.text();
 		return {
 			status: response.status,
 			body: data
