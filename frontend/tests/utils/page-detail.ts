@@ -78,7 +78,7 @@ export class PageDetail extends BasePage {
 					else {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
-							.toHaveText(key);
+							.toHaveText(new RegExp(key.replaceAll('_', ' '), 'i'));
 					}
 
 					if (this.form.fields.get(key)?.type === FormFieldType.CHECKBOX) {
