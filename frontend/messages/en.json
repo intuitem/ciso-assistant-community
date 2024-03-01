@@ -431,5 +431,11 @@
 	"avoid": "Avoided",
 	"transfer": "Shared",
 	"primary": "Primary",
-	"support": "Support"
+	"support": "Support",
+	"toDo": "To do",
+	"inProgress": "In progress",
+	"nonCompliant": "Non compliant",
+	"partiallyCompliant": "Partially compliant",
+	"compliant": "Compliant",
+	"notApplicable": "Not applicable"
 }
