@@ -79,7 +79,7 @@ test('user usual routine actions are working correctly', async ({
 		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
 	});
 
-	await test.step('user can create a security function', async () => {
+	await test.step('user can create a reference control', async () => {
 		await sideBar.click('Context', pages.securityFunctionsPage.url);
 		await pages.securityFunctionsPage.hasUrl();
 		await pages.securityFunctionsPage.hasTitle();
@@ -92,10 +92,10 @@ test('user usual routine actions are working correctly', async ({
 			folder: vars.folderName
 		});
 
-		//TODO assert that the security function data are displayed in the table
+		//TODO assert that the reference control data are displayed in the table
 	});
 
-	await test.step('user can create a security measure', async () => {
+	await test.step('user can create a applied control', async () => {
 		await sideBar.click('Context', pages.securityMeasuresPage.url);
 		await pages.securityMeasuresPage.hasUrl();
 		await pages.securityMeasuresPage.hasTitle();
@@ -112,7 +112,7 @@ test('user usual routine actions are working correctly', async ({
 			security_function: vars.securityFunctionName
 		});
 
-		//TODO assert that the security measure data are displayed in the table
+		//TODO assert that the applied control data are displayed in the table
 	});
 
 	await test.step('user can create a compliance assessment', async () => {
