@@ -38,7 +38,7 @@
 			</div>
 			<div class="flex justify-center pr-5 items-center space-y-4 w-2/5">
 				<div class="flex flex-col w-3/4 p-10 rounded-lg shadow-lg bg-white bg-opacity-[.90]">
-					<div id="login" class="flex flex-col w-full items-center space-y-4">
+					<div data-testid="login" class="flex flex-col w-full items-center space-y-4">
 						<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 							<i class="fa-solid fa-right-to-bracket" />
 						</div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	export let name: string;
+	// export let name: string;
 	export let s_label: string;
 
 	export let values: any[]; // Set the types for these variables later on
