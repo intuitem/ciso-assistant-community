@@ -199,11 +199,20 @@ def get_sorted_requirement_nodes(
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
     """
+
+    # cope for old version not creating order_id correctly
+    for req in requirement_nodes:
+        if req.order_id is None:
+            req.order_id = req.created_at
+            if req.order_id is None:
+                print("arghh", req)
+
     requirement_assessment_from_requirement_id = (
-        {str(ra.requirement.id): ra for ra in requirements_assessed}
+        {str(ra.requirement_id): ra for ra in requirements_assessed}
         if requirements_assessed
         else {}
     )
+
 
     def get_sorted_requirement_nodes_rec(
         requirement_nodes: list,
@@ -278,19 +287,12 @@ def get_sorted_requirement_nodes(
                     )
         return result
 
-    # cope for old version not creating order_id correctly
-    requirement_nodes_with_order_id = list(requirement_nodes.all())
-    for req in requirement_nodes_with_order_id:
-        if req.order_id is None:
-            req.order_id = req.created_at
-
     tree = get_sorted_requirement_nodes_rec(
-        requirement_nodes_with_order_id,
+        requirement_nodes,
         requirements_assessed,
-        sorted([rg for rg in requirement_nodes_with_order_id if not rg.parent_urn],
+        sorted([rn for rn in requirement_nodes if not rn.parent_urn],
                key=lambda x: x.order_id),
     )
-
     return tree
 
 
