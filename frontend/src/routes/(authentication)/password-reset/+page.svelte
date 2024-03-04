@@ -5,6 +5,8 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
+	import * as m from '$paraglide/messages.js';
+
 	export let data: PageData;
 </script>
 
@@ -21,10 +23,10 @@
 					<i class="fa-solid fa-lock" />
 				</div>
 				<h3 class="font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
-					Forgot your password?
+					{m.forgtPassword()}
 				</h3>
 				<p class="text-center text-gray-600 text-sm">
-					Enter your email address below, and we'll email instructions for setting a new one.
+					{m.enterYourEmail()}.
 				</p>
 				<div>
 					<!-- SuperForm with dataType 'form' -->
@@ -35,10 +37,10 @@
 						let:form
 						validators={emailSchema}
 					>
-						<TextField type="email" {form} field="email" label="E-mail" />
+						<TextField type="email" {form} field="email" label={m.email()} />
 						<p class="pt-3">
 							<button class="btn variant-filled-primary font-semibold w-full" data-testid="send-btn" type="submit"
-								>Send</button
+								>{m.send()}</button
 							>
 						</p>
 					</SuperForm>
@@ -48,7 +50,7 @@
 					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 				>
 					<i class="fa-solid fa-arrow-left" />
-					<p class="">go back to login</p>
+					<p class="">{m.goBackToLogin()}</p>
 				</a>
 			</div>
 		</div>
