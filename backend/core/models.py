@@ -358,11 +358,11 @@ class RequirementNode(ReferentialObjectMixin):
 
 class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
-        ("undefined", _("--")),
+        ("undefined", _("Undefined")),
         ("in_design", _("Design")),
         ("in_dev", _("Development")),
         ("in_prod", _("Production")),
-        ("eol", _("End Of Life")),
+        ("eol", _("EndOfLife")),
         ("dropped", _("Dropped")),
     ]
     internal_reference = models.CharField(
@@ -527,7 +527,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
         ("S", _("Small")),
         ("M", _("Medium")),
         ("L", _("Large")),
-        ("XL", _("Extra-Large")),
+        ("XL", _("Extra Large")),
     ]
 
     MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}

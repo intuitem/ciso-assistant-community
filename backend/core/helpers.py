@@ -543,7 +543,6 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "name": r[0],
                 "value": r[1]["count"],
                 "color": r[1]["color"],
-                "localName": camel_case(r[0]),
             }
         )
 
@@ -555,7 +554,6 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "name": r[0],
                 "value": r[1]["count"],
                 "color": r[1]["color"],
-                "localName": camel_case(r[0]),
             }
         )
     return {"current": current_level, "residual": residual_level}

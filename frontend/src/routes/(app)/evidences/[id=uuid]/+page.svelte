@@ -16,6 +16,10 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 
+	import * as m from '$paraglide/messages';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data: PageData;
 	breadcrumbObject.set(data.evidence);
 
@@ -44,8 +48,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'Confirm',
-			body: `Are you sure? This action will permanently affect the following object: ${name}?`
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -75,11 +79,7 @@
 						class="text-sm font-medium text-gray-800 capitalize-first"
 						data-testid={key.replace('_', '-') + '-field-title'}
 					>
-						{#if key === 'urn'}
-							URN
-						{:else}
-							{key.replace('_', ' ')}
-						{/if}
+						{localItems(languageTag())[toCamelCase(key)]}
 					</div>
 					<ul class="text-sm">
 						<li
@@ -135,15 +135,15 @@
 				<a
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
-					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
+					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
 				>
 			{/if}
 		</span>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
 		<TabGroup>
-			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>Security measures</Tab>
-			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>Requirement assessments</Tab>
+			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>{m.securityMeasures()}</Tab>
+			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.requirementAssessments()}</Tab>
 			<svelte:fragment slot="panel">
 				{#if tabSet === 0}
 					<div
@@ -176,7 +176,7 @@
 						href={`./${data.evidence.id}/attachment`}
 						class="btn variant-filled-primary h-fit"
 						data-testid="attachment-download-button"
-						><i class="fa-solid fa-download mr-2" /> Download</a
+						><i class="fa-solid fa-download mr-2" /> {m.download()}</a
 					>
 					<button
 						on:click={(_) => {
@@ -195,7 +195,7 @@
 					<embed src={attachment.url} type="application/pdf" width="100%" height="600px" />
 				{/if}
 			{:else}
-				loading...
+				{m.loading()}...
 			{/if}
 		</div>
 	{/if}
