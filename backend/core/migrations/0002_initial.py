@@ -324,7 +324,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="referencecontrol",
+            model_name="securityfunction",
             name="folder",
             field=models.ForeignKey(
                 default=iam.models.Folder.get_root_folder,
@@ -334,38 +334,38 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="referencecontrol",
+            model_name="securityfunction",
             name="library",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="reference_controls",
+                related_name="security_functions",
                 to="core.library",
             ),
         ),
         migrations.AddField(
             model_name="requirementnode",
-            name="reference_controls",
+            name="security_functions",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="requirements",
-                to="core.referencecontrol",
-                verbose_name="Reference controls",
+                to="core.securityfunction",
+                verbose_name="Security functions",
             ),
         ),
         migrations.AddField(
-            model_name="appliedcontrol",
+            model_name="securitymeasure",
             name="evidences",
             field=models.ManyToManyField(
                 blank=True,
-                related_name="applied_controls",
+                related_name="security_measures",
                 to="core.evidence",
                 verbose_name="Evidences",
             ),
         ),
         migrations.AddField(
-            model_name="appliedcontrol",
+            model_name="securitymeasure",
             name="folder",
             field=models.ForeignKey(
                 default=iam.models.Folder.get_root_folder,
@@ -375,34 +375,34 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="appliedcontrol",
-            name="reference_control",
+            model_name="securitymeasure",
+            name="security_function",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="core.referencecontrol",
-                verbose_name="Reference Control",
+                to="core.securityfunction",
+                verbose_name="Security Function",
             ),
         ),
         migrations.AddField(
             model_name="riskscenario",
-            name="applied_controls",
+            name="security_measures",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="risk_scenarios",
-                to="core.appliedcontrol",
-                verbose_name="Applied controls",
+                to="core.securitymeasure",
+                verbose_name="Security measures",
             ),
         ),
         migrations.AddField(
             model_name="requirementassessment",
-            name="applied_controls",
+            name="security_measures",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="requirement_assessments",
-                to="core.appliedcontrol",
-                verbose_name="Applied controls",
+                to="core.securitymeasure",
+                verbose_name="Security measures",
             ),
         ),
         migrations.CreateModel(
@@ -415,7 +415,7 @@ class Migration(migrations.Migration):
                 "indexes": [],
                 "constraints": [],
             },
-            bases=("core.appliedcontrol",),
+            bases=("core.securitymeasure",),
         ),
         migrations.AddField(
             model_name="threat",

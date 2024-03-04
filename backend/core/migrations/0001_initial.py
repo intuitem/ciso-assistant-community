@@ -906,7 +906,7 @@ class Migration(migrations.Migration):
                     "existing_measures",
                     models.TextField(
                         blank=True,
-                        help_text="The existing applied controls to manage this risk. Edit the risk scenario to add extra applied controls.",
+                        help_text="The existing security measures to manage this risk. Edit the risk scenario to add extra security measures.",
                         max_length=2000,
                         verbose_name="Existing measures",
                     ),
@@ -994,7 +994,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="ReferenceControl",
+            name="SecurityFunction",
             fields=[
                 (
                     "id",
@@ -1087,12 +1087,12 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Reference control",
-                "verbose_name_plural": "Reference controls",
+                "verbose_name": "Security function",
+                "verbose_name_plural": "Security functions",
             },
         ),
         migrations.CreateModel(
-            name="AppliedControl",
+            name="SecurityMeasure",
             fields=[
                 (
                     "id",
@@ -1158,7 +1158,7 @@ class Migration(migrations.Migration):
                     "expiry_date",
                     models.DateField(
                         blank=True,
-                        help_text="Date after which the applied control is no longer valid",
+                        help_text="Date after which the security measure is no longer valid",
                         null=True,
                         verbose_name="Expiry date",
                     ),
@@ -1191,8 +1191,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Applied control",
-                "verbose_name_plural": "Applied controls",
+                "verbose_name": "Security measure",
+                "verbose_name_plural": "Security measures",
             },
         ),
         migrations.CreateModel(
