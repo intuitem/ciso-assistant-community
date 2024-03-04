@@ -3,6 +3,7 @@
 	import type { SecurityMeasureSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
 	import { formatStringToDate } from '$lib/utils/helpers';
+	import { languageTag } from '$paraglide/runtime';
 
 	let request_path: string | null;
 	$: request_path = $page.route.id;
@@ -60,7 +61,7 @@
 							{:else if measureState(measure.expiry_date) === 'today'}
 								<span class="rounded bg-yellow-500 text-white p-1 text-xs mr-1">{m.today()}</span>
 							{/if}
-							{formatStringToDate(measure.expiry_date)}
+							{formatStringToDate(measure.expiry_date,languageTag())}
 						</td>
 					</tr>
 				{/each}

@@ -65,7 +65,7 @@
 				<div class="items-center h-96">
 					<DonutChart
 						name="residual_risk_level"
-						s_label="Residual risk level per risk scenario"
+						s_label={m.residualRiskLevelPerScenario()}
 						values={data.residual_level}
 						colors={data.residual_level.map(object => object.color)}
 					/>
