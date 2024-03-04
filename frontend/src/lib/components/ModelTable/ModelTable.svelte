@@ -236,8 +236,8 @@
 				{:else if ISO_8601_REGEX.test(value)}
 					{new Date(value).toLocaleString(languageTag())}
                 {:else}
-					{#if localItems(languageTag())[value]}
-						{localItems(languageTag())[value]}
+					{#if localItems(languageTag())[toCamelCase(value)]}
+						{localItems(languageTag())[toCamelCase(value)]}
 					{:else}
 						{value ?? '-'}
 					{/if}
