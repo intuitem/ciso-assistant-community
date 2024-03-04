@@ -103,8 +103,9 @@ def get_library_items(library, type: str) -> list[dict]:
 class RequirementNodeImporter:
     REQUIRED_FIELDS = {"urn"}
 
-    def __init__(self, requirement_data: dict):
+    def __init__(self, requirement_data: dict, index: int):
         self.requirement_data = requirement_data
+        self.index = index
 
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.requirement_data.keys()):
@@ -121,7 +122,7 @@ class RequirementNodeImporter:
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
             provider=framework_object.provider,
-            order_id=self.requirement_data.get("order_id"),
+            order_id=self.index,
             level=self.requirement_data.get("level"),
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
@@ -154,7 +155,7 @@ class FrameworkImporter:
         requirement_node_importers = []
         import_errors = []
         for index, requirement_node_data in enumerate(requirement_nodes):
-            requirement_node_importer = RequirementNodeImporter(requirement_node_data)
+            requirement_node_importer = RequirementNodeImporter(requirement_node_data, index)
             requirement_node_importers.append(requirement_node_importer)
             if (
                 requirement_node_error := requirement_node_importer.is_valid()

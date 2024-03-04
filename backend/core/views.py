@@ -1015,7 +1015,7 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework), None
+                RequirementNode.objects.filter(framework=_framework).all(), None
             )
         )
 
@@ -1181,10 +1181,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         _framework = self.get_object().framework
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework),
+                RequirementNode.objects.filter(framework=_framework).all(),
                 RequirementAssessment.objects.filter(
                     compliance_assessment=self.get_object()
-                ),
+                ).all(),
             )
         )
 

@@ -284,17 +284,6 @@ class Framework(ReferentialObjectMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
-    def get_next_order_id(self, obj_type: models.Model, _parent_urn: str = None) -> int:
-        """
-        Returns the next order id for a given object type
-        """
-        if _parent_urn:
-            return (
-                obj_type.objects.filter(framework=self, parent_urn=_parent_urn).count()
-                + 1
-            )
-        else:
-            return obj_type.objects.filter(framework=self).count() + 1
 
     def is_deletable(self) -> bool:
         """
