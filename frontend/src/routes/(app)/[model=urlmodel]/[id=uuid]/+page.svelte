@@ -82,8 +82,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'Confirm',
-			body: `Are you sure? This action will permanently affect the following object: ${name}?`
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -123,8 +123,7 @@
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
 		>
 			<div class="text-yellow-900">
-				This risk acceptance is awaiting processing. Remember to <strong>review</strong> it before accepting
-				or rejecting it, you will not be able to go back.
+				{m.riskAcceptanceReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
 				<button
@@ -134,7 +133,7 @@
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
 					class="btn variant-filled-success"
 				>
-					<i class="fas fa-check mr-2" /> Accept</button
+					<i class="fas fa-check mr-2" /> {m.validate()}</button
 				>
 				<button
 					on:click={(_) => {
@@ -143,7 +142,7 @@
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/reject')}
 					class="btn variant-filled-error"
 				>
-					<i class="fas fa-xmark mr-2" /> Reject</button
+					<i class="fas fa-xmark mr-2" /> {m.reject()}</button
 				>
 			</div>
 		</div>
@@ -152,9 +151,7 @@
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
 			<div class="text-green-900">
-				This risk acceptance is currently accepted. It can be revoked at any time, but this will be <strong
-					>irrevocable</strong
-				>. You will need to duplicate it with a different verison if necessary.
+				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if $page.data.user.id === data.data.approver.id}
 				<div class="ml-auto whitespace-nowrap">
@@ -165,7 +162,7 @@
 						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/revoke')}
 						class="btn variant-filled-error"
 					>
-						<i class="fas fa-xmark mr-2" /> Revoke</button
+						<i class="fas fa-xmark mr-2" /> {m.revoke()}</button
 					>
 				</div>
 			{/if}
@@ -220,7 +217,11 @@
 								{:else if isURL(value)}
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else}
-									{(value.str || value.name) ?? value}
+									{#if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+										{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+									{:else}
+										{(value.str || value.name) ?? value}
+									{/if}
 								{/if}
 							{:else}
 								--
