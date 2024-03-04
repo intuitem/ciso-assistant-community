@@ -267,7 +267,12 @@ export function localItems(languageTag: string): LocalItems {
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
 		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
 		compliant: m.compliant({ languageTag: languageTag }),
-		notApplicable: m.notApplicable({ languageTag: languageTag })
+		notApplicable: m.notApplicable({ languageTag: languageTag }),
+		administrator: m.administrator({ languageTag: languageTag }),
+		analyst: m.analyst({ languageTag: languageTag }),
+		auditor: m.auditor({ languageTag: languageTag }),
+		domainManager: m.domainManager({ languageTag: languageTag }),
+
 	};
 	return LOCAL_ITEMS;
 }
