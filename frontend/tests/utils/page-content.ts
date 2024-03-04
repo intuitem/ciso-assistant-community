@@ -36,10 +36,6 @@ export class PageContent extends BasePage {
 		this.deleteModalCancelButton = this.page.getByTestId('delete-cancel-button');
 	}
 
-	async hasTitle() {
-		await expect.soft(this.pageTitle).toHaveText(this.name);
-	}
-
 	async createItem(values: { [k: string]: any }, dependency?: any) {
 		if (dependency) {
 			await this.page.goto('/libraries');
