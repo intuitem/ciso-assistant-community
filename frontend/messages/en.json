@@ -376,5 +376,8 @@
 	"nonCompliant": "Non compliant",
 	"partiallyCompliant": "Partially compliant",
 	"compliant": "Compliant",
-	"notApplicable": "Not applicable"
+	"notApplicable": "Not applicable",
+	"administrator": "Administrator",
+	"domainManager": "Domain manager",
+	"analyst": "Analyst"
 }
