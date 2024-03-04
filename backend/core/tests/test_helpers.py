@@ -48,12 +48,12 @@ def test_get_rating_options_perm_to_view_matrix():
         codename__in=[
             "view_project",
             "view_riskassessment",
-            "view_securitymeasure",
+            "view_appliedcontrol",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_securityfunction",
+            "view_referencecontrol",
             "view_folder",
             "view_usergroup",
         ]
@@ -112,12 +112,12 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
         codename__in=[
             "view_project",
             "view_riskassessment",
-            "view_securitymeasure",
+            "view_appliedcontrol",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_securityfunction",
+            "view_referencecontrol",
             "view_folder",
             "view_usergroup",
         ]

@@ -47,15 +47,15 @@ def validate_threat(threat):
     pass
 
 
-def validate_security_function(security_function):
+def validate_reference_control(reference_control):
     """
-    Checks if the given security function is valid
+    Checks if the given reference control is valid
 
     Args:
-        security_function: security function to check
+        reference_control: reference control to check
 
     Returns:
-        valid: True if the security function is valid, False otherwise
+        valid: True if the reference control is valid, False otherwise
     """
     pass
 

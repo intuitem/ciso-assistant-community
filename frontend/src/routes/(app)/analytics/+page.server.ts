@@ -2,11 +2,11 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, fetch, params }) => {
-	const req_security_measure_status = await fetch(`${BASE_API_URL}/security-measures/per_status/`);
-	const security_measure_status = await req_security_measure_status.json();
+	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
+	const applied_control_status = await req_applied_control_status.json();
 
-	const req_ord_security_measures = await fetch(`${BASE_API_URL}/security-measures/todo/`);
-	const ord_security_measures = await req_ord_security_measures.json();
+	const req_ord_applied_controls = await fetch(`${BASE_API_URL}/applied-controls/todo/`);
+	const ord_applied_controls = await req_ord_applied_controls.json();
 
 	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
 	const counters = await req_get_counters.json();
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	);
 	const risks_count_per_level = await req_get_risks_count_per_level.json();
 
-	const req_get_measures_to_review = await fetch(`${BASE_API_URL}/security-measures/to_review/`);
+	const req_get_measures_to_review = await fetch(`${BASE_API_URL}/applied-controls/to_review/`);
 	const measures_to_review = await req_get_measures_to_review.json();
 
 	const req_get_acceptances_to_review = await fetch(`${BASE_API_URL}/risk-acceptances/to_review/`);
@@ -31,10 +31,10 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
 	const risk_assessments = await req_risk_assessments.json();
 
-	const req_viewable_measures = await fetch(`${BASE_API_URL}/security-measures/`);
+	const req_viewable_measures = await fetch(`${BASE_API_URL}/applied-controls/`);
 	const viewable_measures = await req_viewable_measures.json();
 
-	const req_updatable_measures = await fetch(`${BASE_API_URL}/security-measures/updatables/`);
+	const req_updatable_measures = await fetch(`${BASE_API_URL}/applied-controls/updatables/`);
 	const updatable_measures = await req_updatable_measures.json();
 
 	const projects = await fetch(`${BASE_API_URL}/projects/`)
@@ -129,8 +129,8 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		updatable_measures: updatable_measures.results,
 		agg_data: agg_data.results,
 		get_counters: counters.results,
-		measures: ord_security_measures.results,
-		security_measure_status: security_measure_status.results,
+		measures: ord_applied_controls.results,
+		applied_control_status: applied_control_status.results,
 		projects,
 		user: locals.user
 	};
