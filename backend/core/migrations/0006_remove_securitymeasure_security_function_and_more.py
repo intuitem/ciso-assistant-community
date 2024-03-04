@@ -52,6 +52,9 @@ class Migration(migrations.Migration):
             name='library',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='reference_controls', to='core.library'),
         ),
+        migrations.RenameField(
+            model_name='riskscenario', old_name='existing_measures', new_name='existing_controls',
+        ),
         migrations.AlterField(
             model_name='riskscenario',
             name='existing_controls',

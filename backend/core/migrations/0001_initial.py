@@ -903,12 +903,12 @@ class Migration(migrations.Migration):
                     models.TextField(blank=True, null=True, verbose_name="Description"),
                 ),
                 (
-                    "existing_controls",
+                    "existing_measures",
                     models.TextField(
                         blank=True,
                         help_text="The existing security measures to manage this risk. Edit the risk scenario to add extra security measures.",
                         max_length=2000,
-                        verbose_name="Existing controls",
+                        verbose_name="Existing measures",
                     ),
                 ),
                 (
