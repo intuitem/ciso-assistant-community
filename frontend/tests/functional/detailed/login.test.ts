@@ -1,4 +1,5 @@
 import { test, baseTest, expect, getUniqueValue } from '../../utils/test-utils.js';
+import { LoginPage } from '../../utils/login-page.js';
 import testData from '../../utils/test-data.js';
 
 baseTest.beforeEach(async ({ page }) => {
@@ -34,7 +35,7 @@ test('login invalid message is showing properly', async ({ loginPage, page }) =>
 	await loginPage.hasUrl();
 });
 
-test('forgot password link is working properly', async ({ logedPage, usersPage, sideBar, mailer, page }) => {
+test('forgot password process is working properly', async ({ logedPage, usersPage, sideBar, mailer, page }) => {
 	const email = getUniqueValue(testData.user.email);
 	
 	await usersPage.goto();
@@ -73,9 +74,37 @@ test('forgot password link is working properly', async ({ logedPage, usersPage, 
 	await logedPage.sendEmailButton.click();
 	await logedPage.isToastVisible('The request has been received, you should receive a reset link at the following address: ' + email);
 	
-	await mailer.goto();
-	console.log(await (await mailer.lastEmail()).innerText());
-	await logedPage.hasUrl(0);
+	const lastMail = await mailer.getLastEmail();
+	await lastMail.hasResetPasswordEmailDetails();
+	await lastMail.hasEmailRecipient(email);
+	
+	await lastMail.open();
+	const pagePromise = page.context().waitForEvent('page');
+	await mailer.emailContent.resetPasswordButton.click();
+	const resetPasswordPage = await pagePromise;
+	await resetPasswordPage.waitForLoadState();
+	await expect(resetPasswordPage).toHaveURL(await mailer.emailContent.resetPasswordButton.getAttribute('href') || 'Reset password link could not be found');
 
-	//TODO test that the email is received and the link is working properly
+	const resetLoginPage = new LoginPage(resetPasswordPage);
+	await resetLoginPage.newPasswordInput.fill("new" + testData.user.password);
+	await resetLoginPage.confirmPasswordInput.fill("new" + testData.user.password);
+	await resetLoginPage.setPasswordButton.click();
+
+	await resetLoginPage.isToastVisible('Your password was successfully reset');
+	await resetLoginPage.hasUrl(0);
+	await resetPasswordPage.close();
+
+	// check that the old password is not working anymore
+	await logedPage.usernameInput.fill(email);
+	await logedPage.passwordInput.fill(testData.user.password);
+	await logedPage.loginButton.click();
+	await expect.soft(page.getByText('Unable to log in with provided credentials.')).toBeVisible();
+	await logedPage.hasUrl();
+
+	await logedPage.usernameInput.clear();
+	await logedPage.passwordInput.clear();
+
+	// login with the new password
+	await logedPage.login(email, "new" + testData.user.password);
+	await expect(page).toHaveURL('/analytics');
 });
