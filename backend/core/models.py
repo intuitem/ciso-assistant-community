@@ -1051,12 +1051,12 @@ class RiskScenario(NameDescriptionMixin):
         blank=True,
         related_name="risk_scenarios",
     )
-    existing_measures = models.TextField(
+    existing_controls = models.TextField(
         max_length=2000,
         help_text=_(
-            "The existing applied controls to manage this risk. Edit the risk scenario to add extra applied controls."
+            "The existing controls to manage this risk. Edit the risk scenario to add extra applied controls."
         ),
-        verbose_name=_("Existing measures"),
+        verbose_name=_("Existing controls"),
         blank=True,
     )
 

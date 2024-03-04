@@ -133,7 +133,7 @@ export function localItems(languageTag: string): LocalItems {
 		currentImpact: m.currentImpact({ languageTag: languageTag }),
 		residualProba: m.residualProba({ languageTag: languageTag }),
 		residualImpact: m.residualImpact({ languageTag: languageTag }),
-		existingMeasures: m.existingMeasures({ languageTag: languageTag }),
+		existingControls: m.existingControls({ languageTag: languageTag }),
 		strengthOfKnowledge: m.strengthOfKnowledge({ languageTag: languageTag }),
 		dueDate: m.dueDate({ languageTag: languageTag }),
 		attachment: m.attachment({ languageTag: languageTag }),

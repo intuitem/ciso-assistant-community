@@ -209,8 +209,8 @@
 			<div class="flex flex-row space-x-4 justify-between">
 				<TextArea
 					{form}
-					field="existing_measures"
-					label={m.existingMeasures()}
+					field="existing_controls"
+					label={m.existingControls()}
 					helpText={m.riskScenarioMeasureHelpText()}
 					regionContainer="w-1/2"
 				/>

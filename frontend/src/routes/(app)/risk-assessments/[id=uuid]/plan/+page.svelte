@@ -73,12 +73,12 @@
 						>
 					</td>
 				</tr>
-				{#if scenario.existing_measures}
+				{#if scenario.existing_controls}
 					<tr>
-						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.existingMeasures()}: </td>
+						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.existingControls()}: </td>
 					</tr>
 					<tr>
-						<td class="text-sm pl-6 pb-3" colspan="9"> {scenario.existing_measures} </td>
+						<td class="text-sm pl-6 pb-3" colspan="9"> {scenario.existing_controls} </td>
 					</tr>
 				{/if}
 
@@ -122,7 +122,7 @@
 					{/each}
 				{/if}
 
-				{#if !scenario.existing_measures && !(scenario.applied_controls.length > 0)}
+				{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 					<tr>
 						<td colspan="9" class="p-2 text-left">
 							<i class="fas fa-exclamation-circle" /> {m.noAppliedControlYet()}

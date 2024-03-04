@@ -17,8 +17,8 @@ from test_utils import EndpointTestsQueries
 # Generic project data for tests
 RISK_SCENARIO_NAME = "Test scenario"
 RISK_SCENARIO_DESCRIPTION = "Test Description"
-RISK_SCENARIO_EXISTING_MEASURES = "Test Existing Measures"
-RISK_SCENARIO_EXISTING_MEASURES2 = "Test New Existing Measures"
+RISK_SCENARIO_existing_controls = "Test Existing Controls"
+RISK_SCENARIO_existing_controls2 = "Test New Existing Controls"
 RISK_SCENARIO_CURRENT_PROBABILITIES = (2, "High")
 RISK_SCENARIO_CURRENT_PROBABILITIES2 = (1, "Medium")
 RISK_SCENARIO_CURRENT_IMPACT = (2, "High")
@@ -182,7 +182,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -237,7 +237,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -304,7 +304,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -319,7 +319,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": "new " + RISK_SCENARIO_NAME,
                 "description": "new " + RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES2[0],
+                "existing_controls": RISK_SCENARIO_existing_controls2[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT2[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL2[0],
