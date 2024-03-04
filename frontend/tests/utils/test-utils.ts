@@ -4,10 +4,12 @@ import { LoginPage } from './login-page.js';
 import { AnalyticsPage } from './analytics-page.js';
 import { PageContent } from './page-content.js';
 import { FormFieldType as type } from './form-content.js';
+import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
 
 type Fixtures = {
+	mailer: Mailer;
 	sideBar: SideBar;
 	pages: { [page: string]: PageContent };
 	analyticsPage: AnalyticsPage;
@@ -31,6 +33,12 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
+	mailer: async ({ browser }, use) => {
+		const context = await browser.newContext();
+		await use(new Mailer(await context.newPage()));
+		await context.close();
+	},
+	
 	sideBar: async ({ page }, use) => {
 		await use(new SideBar(page));
 	},
