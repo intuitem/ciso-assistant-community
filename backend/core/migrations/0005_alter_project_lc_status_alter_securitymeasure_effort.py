@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             field=models.CharField(choices=[('undefined', 'Undefined'), ('in_design', 'Design'), ('in_dev', 'Development'), ('in_prod', 'Production'), ('eol', 'EndOfLife'), ('dropped', 'Dropped')], default='in_design', max_length=20, verbose_name='Status'),
         ),
         migrations.AlterField(
-            model_name='appliedcontrol',
+            model_name='securitymeasure',
             name='effort',
             field=models.CharField(blank=True, choices=[('S', 'Small'), ('M', 'Medium'), ('L', 'Large'), ('XL', 'Extra Large')], help_text='Relative effort of the measure (using T-Shirt sizing)', max_length=2, null=True, verbose_name='Effort'),
         ),
