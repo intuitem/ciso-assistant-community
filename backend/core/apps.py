@@ -267,7 +267,7 @@ def startup(**kwargs):
     # update builtin roles to facilitate migrations
     auditor, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
     auditor.permissions.set(auditor_permissions)
-    approver, created = Role.objects.get_or_create(name="BI-RL-VAL", builtin=True)
+    approver, created = Role.objects.get_or_create(name="BI-RL-APP", builtin=True)
     approver.permissions.set(approver_permissions)
     analyst, created = Role.objects.get_or_create(name="BI-RL-ANA", builtin=True)
     analyst.permissions.set(analyst_permissions)
@@ -307,23 +307,23 @@ def startup(**kwargs):
             folder=Folder.get_root_folder(),
         )
         ra2.perimeter_folders.add(global_auditors.folder)
-    # if global validators user group does not exist, then create it
+    # if global approvers user group does not exist, then create it
     if not UserGroup.objects.filter(
-        name="BI-UG-GVA", folder=Folder.get_root_folder()
+        name="BI-UG-GAP", folder=Folder.get_root_folder()
     ).exists():
-        global_validators = UserGroup.objects.create(
-            name="BI-UG-GVA",
+        global_approvers = UserGroup.objects.create(
+            name="BI-UG-GAP",
             folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
             builtin=True,
         )
         ra2 = RoleAssignment.objects.create(
-            user_group=global_validators,
-            role=Role.objects.get(name="BI-RL-VAL"),
+            user_group=global_approvers,
+            role=Role.objects.get(name="BI-RL-APP"),
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
         )
-        ra2.perimeter_folders.add(global_validators.folder)
+        ra2.perimeter_folders.add(global_approvers.folder)
 
     # if superuser defined and does not exist, then create it
     if (

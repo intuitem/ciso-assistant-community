@@ -83,10 +83,10 @@ class TestLibrariesAuthenticated:
         expect = {
             "BI-UG-ADM": True,
             "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
+            "BI-UG-GAP": False,
             "BI-UG-DMA": False,
             "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
+            "BI-UG-APP": False,
             "BI-UG-AUD": False,
         }
 
@@ -118,10 +118,10 @@ class TestLibrariesAuthenticated:
         expect = {
             "BI-UG-ADM": True,
             "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
+            "BI-UG-GAP": False,
             "BI-UG-DMA": False,
             "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
+            "BI-UG-APP": False,
             "BI-UG-AUD": False,
         }
         should_work = expect[test["user_group"]]
@@ -164,10 +164,10 @@ class TestLibrariesAuthenticated:
         expect = {
             "BI-UG-ADM": True,
             "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
+            "BI-UG-GAP": False,
             "BI-UG-DMA": False,
             "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
+            "BI-UG-APP": False,
             "BI-UG-AUD": False,
         }
 
@@ -196,10 +196,10 @@ class TestLibrariesAuthenticated:
         expect = {
             "BI-UG-ADM": True,
             "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
+            "BI-UG-GAP": False,
             "BI-UG-DMA": False,
             "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
+            "BI-UG-APP": False,
             "BI-UG-AUD": False,
         }
         should_work = expect[test["user_group"]]
