@@ -187,7 +187,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	securityFunctionsPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-functions', 'Reference controls', [
+		const sPage = new PageContent(page, '/security-functions', 'Security functions', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
@@ -198,7 +198,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	securityMeasuresPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-measures', 'Applied controls', [
+		const sPage = new PageContent(page, '/security-measures', 'Security measures', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
@@ -379,7 +379,7 @@ export class TestContent {
 				}
 			},
 			securityFunctionsPage: {
-				displayName: 'reference controls',
+				displayName: 'security functions',
 				build: {
 					name: vars.securityFunctionName,
 					description: vars.description,
@@ -395,7 +395,7 @@ export class TestContent {
 				}
 			},
 			securityMeasuresPage: {
-				displayName: 'Applied controls',
+				displayName: 'Security measures',
 				dependency: vars.securityFunction.library,
 				build: {
 					security_function: {
