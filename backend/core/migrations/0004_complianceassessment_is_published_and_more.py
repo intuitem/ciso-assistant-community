@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False, verbose_name='published'),
         ),
         migrations.AddField(
-            model_name='securitymeasure',
+            model_name='appliedcontrol',
             name='is_published',
             field=models.BooleanField(default=False, verbose_name='published'),
         ),

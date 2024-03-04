@@ -26,7 +26,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 			'threats',
 			'existingMeasures',
 			'currentLevel',
-			'securityMeasures',
+			'appliedControls',
 			'residualLevel'
 		],
 		body: tableSourceMapper(scenarios, [
@@ -35,7 +35,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 			'threats',
 			'existing_measures',
 			'current_level',
-			'security_measures',
+			'applied_controls',
 			'residual_level'
 		]),
 		meta: scenarios

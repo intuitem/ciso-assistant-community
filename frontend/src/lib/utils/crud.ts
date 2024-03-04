@@ -161,7 +161,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'assets', urlModel: 'assets' },
-			{ field: 'security_measures', urlModel: 'security-measures' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'project', urlModel: 'projects' },
 			{ field: 'risk_matrix', urlModel: 'risk-matrices' },
 			{ field: 'auditor', urlModel: 'users' }
@@ -169,13 +169,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		filters: [{ field: 'threats' }, { field: 'risk_assessment' }],
 		search: false
 	},
-	'security-measures': {
-		name: 'securitymeasure',
-		localName: 'securityMeasure',
-		localNamePlural: 'securityMeasures',
+	'applied-controls': {
+		name: 'appliedcontrol',
+		localName: 'appliedControl',
+		localNamePlural: 'appliedControls',
 		localFrGender: 'f',
-		verboseName: 'Security measure',
-		verboseNamePlural: 'Security measures',
+		verboseName: 'Applied control',
+		verboseNamePlural: 'Applied controls',
 		foreignKeyFields: [
 			{ field: 'security_function', urlModel: 'security-functions' },
 			{ field: 'folder', urlModel: 'folders' },
@@ -191,7 +191,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		]
 	},
 	policies: {
-		name: 'securitymeasure',
+		name: 'appliedcontrol',
 		localName: 'policy',
 		localNamePlural: 'policies',
 		localFrGender: 'f',
@@ -308,7 +308,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Evidences',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
-			{ field: 'security_measures', urlModel: 'security-measures' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' }
 		]
 	},
@@ -344,7 +344,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Requirement assessments',
 		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
-			{ field: 'security_measures', urlModel: 'security-measures' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		]
@@ -432,7 +432,7 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 			}
 		}
 	},
-	'security-measures': {
+	'applied-controls': {
 		name: {
 			key: 'status',
 			values: {

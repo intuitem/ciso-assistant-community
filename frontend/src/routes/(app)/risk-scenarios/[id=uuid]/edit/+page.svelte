@@ -61,7 +61,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.measureCreateForm,
-				formAction: 'createSecurityMeasure',
+				formAction: 'createAppliedControl',
 				model: data.measureModel,
 				debug: false
 			}
@@ -252,21 +252,21 @@
 			<div class="flex flex-row space-x-4 justify-between">
 				<div class="flex flex-col space-y-4 w-1/2">
 					<span class="flex flex-row justify-between items-center">
-						<h5 class="h5 font-medium">{m.associatedSecurityMeasures()}</h5>
+						<h5 class="h5 font-medium">{m.associatedAppliedControls()}</h5>
 						<button
 							class="btn variant-filled-primary self-end"
 							on:click={modalMeasureCreateForm}
-							type="button"><i class="fa-solid fa-plus mr-2" />{m.addSecurityMeasure()}</button
+							type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
 						>
 					</span>
 					<AutocompleteSelect
 						multiple
 						{form}
-						options={getOptions({ objects: data.foreignKeys['security_measures'] })}
-						field="security_measures"
-						label={m.securityMeasures()}
+						options={getOptions({ objects: data.foreignKeys['applied_controls'] })}
+						field="applied_controls"
+						label={m.appliedControls()}
 					/>
-					<ModelTable source={data.tables['security-measures']} URLModel="security-measures" />
+					<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 				</div>
 				<div class="flex flex-col">
 					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>

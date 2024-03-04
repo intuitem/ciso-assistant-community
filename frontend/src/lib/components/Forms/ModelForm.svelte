@@ -173,7 +173,7 @@
 			field="threats"
 			label={m.threats()}
 		/>
-	{:else if URLModel === 'security-measures' || URLModel === 'policies'}
+	{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 		{#if schema.shape.category}
 			<Select
 				{form}
@@ -293,7 +293,7 @@
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
 			label={m.domain()}
-			hide={initialData.security_measures || initialData.requirement_assessments}
+			hide={initialData.applied_controls || initialData.requirement_assessments}
 		/>
 		<TextField
 			{form}

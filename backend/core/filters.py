@@ -15,7 +15,7 @@ from django.db.models import Q
 from core.models import *
 from core.forms import SearchableSelect, SearchableCheckboxSelectMultiple
 from iam.models import User, UserGroup, RoleAssignment, Folder
-from core.models import Project, Threat, SecurityFunction, SecurityMeasure
+from core.models import Project, Threat, SecurityFunction, AppliedControl
 from django.utils.translation import gettext_lazy as _
 
 
@@ -115,12 +115,12 @@ def viewable_folders(request):
     return Folder.objects.filter(id__in=accessible_folders)
 
 
-class SecurityMeasureFilter(GenericFilterSet):
+class AppliedControlFilter(GenericFilterSet):
     name = GenericCharFilter(
         widget=TextInput(
             attrs={
                 "class": "h-10 rounded-r-lg border-none focus:ring-0",
-                "placeholder": _("Search security measure..."),
+                "placeholder": _("Search applied control..."),
             }
         )
     )
@@ -146,7 +146,7 @@ class SecurityMeasureFilter(GenericFilterSet):
     )
 
     class Meta:
-        model = SecurityMeasure
+        model = AppliedControl
         fields = ["name", "folder", "security_function"]
 
 

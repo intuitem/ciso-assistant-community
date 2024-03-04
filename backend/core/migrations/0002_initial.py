@@ -355,17 +355,17 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="securitymeasure",
+            model_name="appliedcontrol",
             name="evidences",
             field=models.ManyToManyField(
                 blank=True,
-                related_name="security_measures",
+                related_name="applied_controls",
                 to="core.evidence",
                 verbose_name="Evidences",
             ),
         ),
         migrations.AddField(
-            model_name="securitymeasure",
+            model_name="appliedcontrol",
             name="folder",
             field=models.ForeignKey(
                 default=iam.models.Folder.get_root_folder,
@@ -375,7 +375,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="securitymeasure",
+            model_name="appliedcontrol",
             name="security_function",
             field=models.ForeignKey(
                 blank=True,
@@ -387,22 +387,22 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="riskscenario",
-            name="security_measures",
+            name="applied_controls",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="risk_scenarios",
-                to="core.securitymeasure",
-                verbose_name="Security measures",
+                to="core.appliedcontrol",
+                verbose_name="Applied controls",
             ),
         ),
         migrations.AddField(
             model_name="requirementassessment",
-            name="security_measures",
+            name="applied_controls",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="requirement_assessments",
-                to="core.securitymeasure",
-                verbose_name="Security measures",
+                to="core.appliedcontrol",
+                verbose_name="Applied controls",
             ),
         ),
         migrations.CreateModel(
@@ -415,7 +415,7 @@ class Migration(migrations.Migration):
                 "indexes": [],
                 "constraints": [],
             },
-            bases=("core.securitymeasure",),
+            bases=("core.appliedcontrol",),
         ),
         migrations.AddField(
             model_name="threat",

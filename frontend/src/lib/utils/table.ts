@@ -26,7 +26,7 @@ export const listViewFields = {
 			'name',
 			'threats',
 			'riskAssessment',
-			'securityMeasures',
+			'appliedControls',
 			'currentLevel',
 			'residualLevel'
 		],
@@ -34,7 +34,7 @@ export const listViewFields = {
 			'name',
 			'threats',
 			'risk_assessment',
-			'security_measures',
+			'applied_controls',
 			'current_level',
 			'residual_level'
 		]
@@ -43,7 +43,7 @@ export const listViewFields = {
 		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios']
 	},
-	'security-measures': {
+	'applied-controls': {
 		head: ['name', 'description', 'category', 'eta', 'domain', 'securityFunction'],
 		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
 	},

@@ -48,7 +48,7 @@ def test_get_rating_options_perm_to_view_matrix():
         codename__in=[
             "view_project",
             "view_riskassessment",
-            "view_securitymeasure",
+            "view_appliedcontrol",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
@@ -112,7 +112,7 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
         codename__in=[
             "view_project",
             "view_riskassessment",
-            "view_securitymeasure",
+            "view_appliedcontrol",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",

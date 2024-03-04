@@ -109,14 +109,14 @@ class Library(ReferentialObjectMixin):
             RiskAssessment.objects.filter(
                 Q(risk_scenarios__threats__library=self)
                 | Q(risk_matrix__library=self)
-                | Q(risk_scenarios__security_measures__security_function__library=self)
+                | Q(risk_scenarios__applied_controls__security_function__library=self)
             )
             .distinct()
             .count()
             + ComplianceAssessment.objects.filter(
                 Q(framework__library=self)
                 | Q(
-                    requirement_assessments__security_measures__security_function__library=self
+                    requirement_assessments__applied_controls__security_function__library=self
                 )
             )
             .distinct()
@@ -198,7 +198,7 @@ class SecurityFunction(ReferentialObjectMixin):
         """
         Returns True if the framework can be deleted
         """
-        if self.requirements.count() or self.securitymeasure_set.count() > 0:
+        if self.requirements.count() or self.appliedcontrol_set.count() > 0:
             return False
         return True
 
@@ -473,8 +473,8 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("Evidences")
 
     def get_folder(self):
-        if self.security_measures:
-            return self.security_measures.first().folder
+        if self.applied_controls:
+            return self.applied_controls.first().folder
         elif self.requirement_assessments:
             return self.requirement_assessments.first().folder
         else:
@@ -515,7 +515,7 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         return ""
 
 
-class SecurityMeasure(NameDescriptionMixin, FolderMixin):
+class AppliedControl(NameDescriptionMixin, FolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         ACTIVE = "active", _("Active")
@@ -543,7 +543,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
         Evidence,
         blank=True,
         verbose_name=_("Evidences"),
-        related_name="security_measures",
+        related_name="applied_controls",
     )
     category = models.CharField(
         max_length=20,
@@ -568,7 +568,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
     expiry_date = models.DateField(
         blank=True,
         null=True,
-        help_text=_("Date after which the security measure is no longer valid"),
+        help_text=_("Date after which the applied control is no longer valid"),
         verbose_name=_("Expiry date"),
     )
     link = models.CharField(
@@ -590,13 +590,13 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name", "category"]
 
     class Meta:
-        verbose_name = _("Security measure")
-        verbose_name_plural = _("Security measures")
+        verbose_name = _("Applied control")
+        verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
         if self.security_function and self.category is None:
             self.category = self.security_function.category
-        super(SecurityMeasure, self).save(*args, **kwargs)
+        super(AppliedControl, self).save(*args, **kwargs)
 
     @property
     def risk_scenarios(self):
@@ -618,7 +618,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
 
     @property
     def mid(self):
-        return f"M.{self.scoped_id(scope=SecurityMeasure.objects.filter(folder=self.folder))}"
+        return f"M.{self.scoped_id(scope=AppliedControl.objects.filter(folder=self.folder))}"
 
     @property
     def csv_value(self):
@@ -638,7 +638,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
 
     @property
     def get_html_url(self):
-        url = reverse("securitymeasure-detail", args=(self.id,))
+        url = reverse("appliedcontrol-detail", args=(self.id,))
         return format_html(
             '<a class="" href="{}"> <b>[MT-eta]</b> {}: {} </a>',
             url,
@@ -648,7 +648,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
 
     def get_linked_requirements_count(self):
         return RequirementNode.objects.filter(
-            requirementassessment__security_measures=self
+            requirementassessment__applied_controls=self
         ).count()
 
 
@@ -661,7 +661,7 @@ class PolicyManager(models.Manager):
         return super().create(*args, **kwargs)
 
 
-class Policy(SecurityMeasure):
+class Policy(AppliedControl):
     class Meta:
         proxy = True
         verbose_name = _("Policy")
@@ -860,7 +860,7 @@ class RiskAssessment(Assessment):
                 or ri["residual_impact"] < ri["current_impact"]
             ):
                 if (
-                    len(ri.get("security_measures", {})) == 0
+                    len(ri.get("applied_controls", {})) == 0
                     and ri["residual_level"] >= 0
                 ):
                     errors_lst.append(
@@ -884,10 +884,10 @@ class RiskAssessment(Assessment):
                             "object": ri,
                         }
                     )
-        # --- checks on the security measures
+        # --- checks on the applied controls
         _measures = serializers.serialize(
             "json",
-            SecurityMeasure.objects.filter(
+            AppliedControl.objects.filter(
                 risk_scenarios__risk_assessment=self
             ).order_by("created_at"),
         )
@@ -900,7 +900,7 @@ class RiskAssessment(Assessment):
                 warnings_lst.append(
                     {
                         "msg": _("{} does not have an ETA").format(mtg["name"]),
-                        "obj_type": "securitymeasure",
+                        "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
                 )
@@ -911,7 +911,7 @@ class RiskAssessment(Assessment):
                             "msg": _(
                                 "{} ETA is in the past now. Consider updating its status or the date"
                             ).format(mtg["name"]),
-                            "obj_type": "securitymeasure",
+                            "obj_type": "appliedcontrol",
                             "object": {"name": mtg["name"], "id": mtg["id"]},
                         }
                     )
@@ -922,7 +922,7 @@ class RiskAssessment(Assessment):
                         "msg": _(
                             "{} does not have an estimated effort. This will help you for prioritization"
                         ).format(mtg["name"]),
-                        "obj_type": "securitymeasure",
+                        "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
                 )
@@ -931,9 +931,9 @@ class RiskAssessment(Assessment):
                 info_lst.append(
                     {
                         "msg": _(
-                            "{}: Security measure does not have an external link attached. This will help you for follow-up"
+                            "{}: Applied control does not have an external link attached. This will help you for follow-up"
                         ).format(mtg["name"]),
-                        "obj_type": "securitymeasure",
+                        "obj_type": "appliedcontrol",
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
                 )
@@ -953,7 +953,7 @@ class RiskAssessment(Assessment):
                         "msg": _("{}: Acceptance has no expiry date").format(
                             ra["name"]
                         ),
-                        "obj_type": "securitymeasure",
+                        "obj_type": "appliedcontrol",
                         "object": ra,
                     }
                 )
@@ -1039,9 +1039,9 @@ class RiskScenario(NameDescriptionMixin):
         help_text=_("Assets impacted by the risk scenario"),
         related_name="risk_scenarios",
     )
-    security_measures = models.ManyToManyField(
-        SecurityMeasure,
-        verbose_name=_("Security measures"),
+    applied_controls = models.ManyToManyField(
+        AppliedControl,
+        verbose_name=_("Applied controls"),
         blank=True,
         related_name="risk_scenarios",
     )
@@ -1054,7 +1054,7 @@ class RiskScenario(NameDescriptionMixin):
     existing_measures = models.TextField(
         max_length=2000,
         help_text=_(
-            "The existing security measures to manage this risk. Edit the risk scenario to add extra security measures."
+            "The existing applied controls to manage this risk. Edit the risk scenario to add extra applied controls."
         ),
         verbose_name=_("Existing measures"),
         blank=True,
@@ -1246,20 +1246,20 @@ class ComplianceAssessment(Assessment):
         measures_status_count = []
         measures_list = []
         for requirement_assessment in self.requirement_assessments.all():
-            measures_list += requirement_assessment.security_measures.all().values_list(
+            measures_list += requirement_assessment.applied_controls.all().values_list(
                 "id", flat=True
             )
-        for st in "SecurityMeasure".Status.choices:
+        for st in "AppliedControl".Status.choices:
             measures_status_count.append(
                 (
-                    "SecurityMeasure".objects.filter(status=st[0])
+                    "AppliedControl".objects.filter(status=st[0])
                     .filter(id__in=measures_list)
                     .count(),
                     st,
                 )
             )
         print(
-            "SecurityMeasure".objects.filter(status=st[0])
+            "AppliedControl".objects.filter(status=st[0])
             .filter(id__in=measures_list)
             .count()
         )
@@ -1296,7 +1296,7 @@ class ComplianceAssessment(Assessment):
         return compliance_assessments_status
 
     def quality_check(self) -> dict:
-        SecurityMeasure = apps.get_model("core", "SecurityMeasure")
+        AppliedControl = apps.get_model("core", "AppliedControl")
 
         errors_lst = list()
         warnings_lst = list()
@@ -1339,12 +1339,12 @@ class ComplianceAssessment(Assessment):
         for requirement_assessment in requirement_assessments:
             if (
                 requirement_assessment["status"] in ("compliant", "partially_compliant")
-                and len(requirement_assessment["security_measures"]) == 0
+                and len(requirement_assessment["applied_controls"]) == 0
             ):
                 warnings_lst.append(
                     {
                         "msg": _(
-                            "{}: Requirement assessment status is compliant or partially compliant with no security measure applied"
+                            "{}: Requirement assessment status is compliant or partially compliant with no applied control applied"
                         ).format(requirement_assessment["repr"]),
                         "obj_type": "requirementassessment",
                         "object": requirement_assessment,
@@ -1352,23 +1352,23 @@ class ComplianceAssessment(Assessment):
                 )
         # ---
 
-        # --- check on security measures:
-        _security_measures = serializers.serialize(
+        # --- check on applied controls:
+        _applied_controls = serializers.serialize(
             "json",
-            SecurityMeasure.objects.filter(
+            AppliedControl.objects.filter(
                 requirement_assessments__compliance_assessment=self
             ).order_by("created_at"),
         )
-        security_measures = [x["fields"] for x in json.loads(_security_measures)]
-        for security_measure in security_measures:
-            if not security_measure["security_function"]:
+        applied_controls = [x["fields"] for x in json.loads(_applied_controls)]
+        for applied_control in applied_controls:
+            if not applied_control["security_function"]:
                 info_lst.append(
                     {
                         "msg": _(
-                            "{}: Security measure has no security function selected"
-                        ).format(security_measure["name"]),
-                        "obj_type": "securitymeasure",
-                        "object": security_measure,
+                            "{}: Applied control has no security function selected"
+                        ).format(applied_control["name"]),
+                        "obj_type": "appliedcontrol",
+                        "object": applied_control,
                     }
                 )
         # ---
@@ -1377,7 +1377,7 @@ class ComplianceAssessment(Assessment):
         _evidences = serializers.serialize(
             "json",
             Evidence.objects.filter(
-                security_measures__in=SecurityMeasure.objects.filter(
+                applied_controls__in=AppliedControl.objects.filter(
                     requirement_assessments__compliance_assessment=self
                 )
             ).order_by("created_at"),
@@ -1435,10 +1435,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
     requirement = models.ForeignKey(
         RequirementNode, on_delete=models.CASCADE, verbose_name=_("Requirement")
     )
-    security_measures = models.ManyToManyField(
-        "SecurityMeasure",
+    applied_controls = models.ManyToManyField(
+        "AppliedControl",
         blank=True,
-        verbose_name=_("Security measures"),
+        verbose_name=_("Applied controls"),
         related_name="requirement_assessments",
     )
 
