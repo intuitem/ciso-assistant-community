@@ -10,7 +10,7 @@ from test_utils import EndpointTestsQueries
 SECURITY_MEASURE_NAME = "Test Security Measure"
 SECURITY_MEASURE_DESCRIPTION = "Test Description"
 SECURITY_MEASURE_CATEGORY = ("technical", "Technical")
-SECURITY_MEASURE_CATEGORY2 = ("process", "Trocess")
+SECURITY_MEASURE_CATEGORY2 = ("process", "Process")
 SECURITY_MEASURE_STATUS = ("planned", "Planned")
 SECURITY_MEASURE_STATUS2 = ("active", "Active")
 SECURITY_MEASURE_EFFORT = ("L", "Large")
