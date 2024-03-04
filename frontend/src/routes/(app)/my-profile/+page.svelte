@@ -13,7 +13,7 @@
 		sortedKeys.forEach((key) => {
 			if (!filter.includes(key) && Object.prototype.hasOwnProperty.call($page.data.user, key)) {
 				const str = toCamelCase(key);
-				if (key === 'date_joined') filtered[str] = new Date($page.data.user[key]).toLocaleString();
+				if (key === 'date_joined') filtered[str] = new Date($page.data.user[key]).toLocaleString(languageTag());
 				else filtered[str] = $page.data.user[key];
 			}
 		});
