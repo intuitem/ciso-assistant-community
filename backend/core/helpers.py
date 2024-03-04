@@ -196,12 +196,21 @@ def get_sorted_requirement_nodes(
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
+    Values are correctly sorted based on order_id
+    If order_id is missing, sorting is based on created_at
     """
+
+    # cope for old version not creating order_id correctly
+    for req in requirement_nodes:
+        if req.order_id is None:
+            req.order_id = req.created_at
+
     requirement_assessment_from_requirement_id = (
-        {str(ra.requirement.id): ra for ra in requirements_assessed}
+        {str(ra.requirement_id): ra for ra in requirements_assessed}
         if requirements_assessed
         else {}
     )
+
 
     def get_sorted_requirement_nodes_rec(
         requirement_nodes: list,
@@ -209,7 +218,7 @@ def get_sorted_requirement_nodes(
         start: list,
     ) -> dict:
         """
-        Recursive function to build framework groups tree, within get_sorted_requirements_and_groups
+        Recursive function to build framework groups tree, within get_sorted_requirements_nodes
         start: the initial list
         """
         result = {}
@@ -231,11 +240,12 @@ def get_sorted_requirement_nodes(
                     requirement_nodes, requirements_assessed, children
                 ),
             }
-            for req in [
+            for req in sorted([
                 requirement_node
                 for requirement_node in requirement_nodes
                 if requirement_node.parent_urn == node.urn
-            ]:
+            ], key=lambda x: x.order_id):
+
                 if requirements_assessed:
                     req_as = requirement_assessment_from_requirement_id[str(req.id)]
                     result[str(node.id)]["children"][str(req.id)].update(
@@ -278,9 +288,9 @@ def get_sorted_requirement_nodes(
     tree = get_sorted_requirement_nodes_rec(
         requirement_nodes,
         requirements_assessed,
-        [rg for rg in requirement_nodes if not rg.parent_urn],
+        sorted([rn for rn in requirement_nodes if not rn.parent_urn],
+               key=lambda x: x.order_id),
     )
-
     return tree
 
 
