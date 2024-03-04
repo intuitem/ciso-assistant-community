@@ -389,7 +389,7 @@
 							<button
 								id="process"
 								class="text-md text-white p-2 rounded w-full"
-								on:click|stopPropagation={handle_composer_submit_click}>{m.process()}</button
+								on:click|stopPropagation={handle_composer_submit_click}>{m.processButton()}</button
 							>
 							<div class="flex flex-col items-center relative">
 								<button
@@ -534,7 +534,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 												<td class="text-left py-2 px-4">{mtg.folder.str}</td>
 												<td class="text-left py-2 px-4">{mtg.name}</td>
 												<td class="text-center py-2 px-4">{mtg.ranking_score}</td>
-												<td class="text-center py-2 px-4 {get_measure_style(mtg)}">{mtg.status}</td>
+												<td class="text-center py-2 px-4 {get_measure_style(mtg)}">{localItems(languageTag())[mtg.status]}</td>
 												<td class="text-center py-2 px-4"
 													>{#if mtg.meta} {formatDate(mtg.meta)} {:else} -- {/if}</td
 												>
