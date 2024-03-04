@@ -243,7 +243,7 @@ objects:
         Ex2: Determine whether to purchase cybersecurity insurance
 
         Ex3: Document conditions under which shared responsibility models are acceptable
-        (e.g., outsourcing certain cyberreference controls, having a third party perform
+        (e.g., outsourcing certain cybersecurity functions, having a third party perform
         financial transactions on behalf of the organization, using public cloud-based
         services)'
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05

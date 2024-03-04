@@ -491,7 +491,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:pspf:physec-15
       ref_id: '15.1'
-      description: 'Each entity must implement physical applied controls that minimise
+      description: 'Each entity must implement physical security measures that minimise
         or remove the risk of:'
     - urn: urn:intuitem:risk:req_node:pspf:15.1.a
       assessable: true

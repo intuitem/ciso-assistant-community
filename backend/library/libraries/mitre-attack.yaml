@@ -903,7 +903,7 @@ objects:
     ref_id: T1615
     name: Group Policy Discovery
     description: 'Adversaries may gather information on Group Policy settings to identify
-      paths for privilege escalation, applied controls applied within a domain, and
+      paths for privilege escalation, security measures applied within a domain, and
       to discover patterns in domain objects that can be manipulated or used to blend
       in the environment. Group Policy allows for centralized management of user and
       computer settings in Active Directory (AD). Group policy objects (GPOs) are
@@ -4641,7 +4641,7 @@ objects:
 
 
       Adversaries may attempt to enumerate software for a variety of reasons, such
-      as figuring out what applied controls are present or if the compromised system
+      as figuring out what security measures are present or if the compromised system
       has a version of software that is vulnerable to [Exploitation for Privilege
       Escalation](https://attack.mitre.org/techniques/T1068).
 

@@ -119,14 +119,14 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
-      description: '- general applied controls, including the management and security
+      description: '- general security measures, including the management and security
         of EIS hardware and software resources, access control to EIS, operation and
         administration of EIS, and network, workstation and data security;'
     - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node17
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:2.4
-      description: '- general applied controls, including the management and security
+      description: '- general security measures, including the management and security
         of EIS hardware and software resources, access control to EIS, operation and
         administration of EIS, and network, workstation and data security;'
     - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node18
@@ -258,7 +258,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:3.5
-      description: '- the procedures and applied controls applied to the EIS;'
+      description: '- the procedures and security measures applied to the EIS;'
     - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node39
       assessable: true
       depth: 4
@@ -410,7 +410,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:rule-5
       ref_id: '5.2'
       description: The purpose of this audit is to verify the application and effectiveness
-        of the EIS applied controls and in particular compliance with these safety
+        of the EIS security measures and in particular compliance with these safety
         rules.
     - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node63
       assessable: true
@@ -1595,7 +1595,7 @@ objects:
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:anssi-nis-rules:22.1
       description: It implements a procedure to process the information thus received
-        and, if necessary, to take the necessary applied controls to protect its
+        and, if necessary, to take the necessary security measures to protect its
         essential information systems (EIS).
     - urn: urn:intuitem:risk:req_node:anssi-nis-rules:node224
       assessable: true
