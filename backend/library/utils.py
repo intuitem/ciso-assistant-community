@@ -1,6 +1,10 @@
 import json
 import os
+from pathlib import Path
+import re
 from typing import List, Union
+from django.core.exceptions import SuspiciousFileOperation
+from django.http import Http404
 
 import yaml
 from ciso_assistant import settings
@@ -18,6 +22,16 @@ from iam.models import Folder
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$"
+
+
+def match_urn(urn_string):
+    match = re.match(URN_REGEX, urn_string)
+    if match:
+        return match.groups()  # Returns all captured groups from the regex match
+    else:
+        return None
 
 
 def get_available_library_files():
@@ -83,9 +97,13 @@ def get_library(urn: str) -> dict | None:
     Returns:
         The library with the given urn, or None if not found.
     """
-    # First, try to fetch the library from the database.
-    lib = Library.objects.filter(urn=urn).first()
-    if lib is not None:
+    if match_urn(urn) is None:
+        logger.error("Invalid URN", urn=urn)
+        raise ValueError("Invalid URN")
+
+    # First, try to fetch the library from the database.dd
+    try:
+        lib = Library.objects.get(urn=urn)
         return {
             "id": lib.id,
             "urn": lib.urn,
@@ -97,23 +115,40 @@ def get_library(urn: str) -> dict | None:
             "reference_count": lib.reference_count,
             "objects": lib._objects,
         }
+    except Library.DoesNotExist:
+        # Construct the path to the YAML file from the urn.
+        filename = urn.split(":")[-1]
+        libraries_path = settings.BASE_DIR / "library/libraries"
+        _path = libraries_path / f"{filename}.yaml"
 
-    # Construct the path to the YAML file from the urn.
-    filename = urn.split(":")[-1]
-    path = settings.BASE_DIR / "library/libraries" / f"{filename}.yaml"
-    logger.info(f"Attempting to load library from file {path}")
+        # Ensure that the path is within the libraries directory to prevent directory traversal attacks.
+        path = Path(os.path.abspath(_path))
 
-    # Attempt to directly load the library from its specific YAML file.
-    try:
-        with open(path, "r", encoding="utf-8") as file:
-            library_data = yaml.safe_load(file)
-            if library_data and library_data.get("urn") == urn:
-                return library_data
-    except FileNotFoundError:
-        pass
+        logger.info(
+            "Attempting to load library",
+            filename=filename,
+            path=path,
+        )
+        if not path.parent.samefile(libraries_path):
+            logger.error(
+                "Attempted to access file outside of libraries directory",
+                path=path,
+                libraries_path=libraries_path,
+            )
+            raise SuspiciousFileOperation(
+                "Attempted to access file outside of libraries directory"
+            )
 
-    # Return None if the library is neither in the database nor found in the specific YAML file.
-    return None
+        # Attempt to directly load the library from its specific YAML file.
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as file:
+                library_data = yaml.safe_load(file)
+                if library_data and library_data.get("urn") == urn:
+                    return library_data
+        logger.error("File not found", path=path)
+
+    logger.error("Library not found", urn=urn)
+    raise Http404("Library not found")
 
 
 def get_library_items(library, type: str) -> list[dict]:

@@ -141,6 +141,7 @@ class UploadLibraryView(APIView):
         try:
             attachment = request.FILES["file"]
             validate_file_extension(attachment)
+            # Use safe_load to prevent arbitrary code execution.
             library = yaml.safe_load(attachment)
 
             # This code doesn't handle the library "dependencies" field yet as decribed in the architecture.
