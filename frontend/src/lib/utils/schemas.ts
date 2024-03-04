@@ -73,7 +73,7 @@ export const ThreatSchema = baseNamedObject({
 });
 
 export const RiskScenarioSchema = baseNamedObject({
-	existing_measures: z.string().optional(),
+	existing_controls: z.string().optional(),
 	applied_controls: z.string().uuid().optional().array(),
 	current_proba: z.number().optional(),
 	current_impact: z.number().optional(),
