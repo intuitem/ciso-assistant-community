@@ -33,6 +33,7 @@ class TestSecurityFunctionsUnauthenticated:
                 "name": SECURITY_FUNCTION_NAME,
                 "description": SECURITY_FUNCTION_DESCRIPTION,
                 "folder": Folder.objects.create(name="test"),
+                "is_published": True,
             },
         )
 
@@ -62,6 +63,7 @@ class TestSecurityFunctionsUnauthenticated:
                 "name": SECURITY_FUNCTION_NAME,
                 "description": SECURITY_FUNCTION_DESCRIPTION,
                 "folder": Folder.objects.create(name="test"),
+                "is_published": True,
             },
             {
                 "ref_id": "new " + SECURITY_FUNCTION_REF_ID,
@@ -81,6 +83,7 @@ class TestSecurityFunctionsUnauthenticated:
                 "ref_id": SECURITY_FUNCTION_REF_ID,
                 "name": SECURITY_FUNCTION_NAME,
                 "folder": Folder.objects.create(name="test"),
+                "is_published": True,
             },
         )
 
@@ -108,6 +111,7 @@ class TestSecurityFunctionsAuthenticated:
                 "description": SECURITY_FUNCTION_DESCRIPTION,
                 "urn": SECURITY_FUNCTION_URN,
                 "provider": SECURITY_FUNCTION_PROVIDER,
+                "is_published": True,
             },
             {
                 "folder": {"str": Folder.get_root_folder().name},
@@ -148,6 +152,7 @@ class TestSecurityFunctionsAuthenticated:
                 "description": SECURITY_FUNCTION_DESCRIPTION,
                 "urn": SECURITY_FUNCTION_URN,
                 "provider": SECURITY_FUNCTION_PROVIDER,
+                "is_published": True,
             },
             {
                 "ref_id": SECURITY_FUNCTION_REF_ID,
