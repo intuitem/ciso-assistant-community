@@ -8,18 +8,13 @@ import type { urlModel } from '$lib/utils/types';
 import { superValidate } from 'sveltekit-superforms/server';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
-import { sourceLanguageTag } from '$paraglide/runtime';
 
-export const load: LayoutServerLoad = async ({ fetch, params, cookies }) => {
+export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const URLModel: urlModel = 'risk-matrices';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
 	const res = await fetch(endpoint);
 	const data = await res.json();
-
-	processObject(data, ISO_8601_REGEX, (matchedString: string): string =>
-		new Date(matchedString).toLocaleString(cookies.get("lang") || sourceLanguageTag)
-	);
 
 	const model = getModelInfo(URLModel);
 	const relatedModels: Record<string, any> = {};
