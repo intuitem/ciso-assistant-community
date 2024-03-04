@@ -149,6 +149,8 @@ MIDDLEWARE = [
     "django_structlog.middlewares.RequestMiddleware",
 ]
 
+SILKY_PYTHON_PROFILER = True
+
 ROOT_URLCONF = "ciso_assistant.urls"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"

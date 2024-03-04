@@ -14,6 +14,7 @@ from core.models import (
 )
 from django.db import transaction
 from iam.models import Folder
+from silk.profiling.profiler import silk_profile
 
 
 def get_available_library_files():
@@ -35,6 +36,7 @@ def get_available_library_files():
     return files
 
 
+@silk_profile()
 def get_available_libraries():
     """
     Returns a list of available libraries
