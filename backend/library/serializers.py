@@ -5,7 +5,7 @@ class LibraryObjectSerializer(serializers.Serializer):
     type = serializers.ChoiceField(
         choices=[
             "risk_matrix",
-            "security_function",
+            "reference_control",
             "threat",
             "framework",
         ]

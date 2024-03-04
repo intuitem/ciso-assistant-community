@@ -2,16 +2,16 @@
 	import Calendar from '$lib/components/Calendar/Calendar.svelte';
 
 	export let data;
-	const security_measures = data.security_measures;
+	const applied_controls = data.applied_controls;
 	const risk_acceptances = data.risk_acceptances;
 	let info: object[] = [];
 
-	for (let i = 0; i < security_measures.length; i++) {
-		let date = new Date(security_measures[i].eta);
+	for (let i = 0; i < applied_controls.length; i++) {
+		let date = new Date(applied_controls[i].eta);
 		info.push({
-			label: 'SM: ' + security_measures[i].name,
+			label: 'SM: ' + applied_controls[i].name,
 			date: date,
-			link: `/security-measures/${security_measures[i].id}`
+			link: `/applied-controls/${applied_controls[i].id}`
 		});
 	}
 	for (let i = 0; i < risk_acceptances.length; i++) {
