@@ -2296,7 +2296,7 @@ objects:
 
         - Logs of all critical system components.
 
-        - Logs of all servers and system components that perform security functions
+        - Logs of all servers and system components that perform reference controls
         (for example, network security controls, intrusion-detection systems/intrusion-prevention
         systems (IDS/IPS), authentication servers).'
     - urn: urn:intuitem:risk:req_node:pcidss-4_0:10.4.1.1
@@ -2456,7 +2456,7 @@ objects:
       description: 'Failures of any critical security controls systems are responded
         to promptly, including but not limited to:
 
-        - Restoring security functions.
+        - Restoring reference controls.
 
         - Identifying and documenting the duration (date and time from start to end)
         of the security failure.
@@ -3741,7 +3741,7 @@ objects:
         to promptly. Processes for responding to failures in security control systems
         include:
 
-        - Restoring security functions.
+        - Restoring reference controls.
 
         - Identifying and documenting the duration (date and time from start to end)
         of the security failure.

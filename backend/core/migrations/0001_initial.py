@@ -994,7 +994,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="SecurityFunction",
+            name="ReferenceControl",
             fields=[
                 (
                     "id",
@@ -1087,8 +1087,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "Security function",
-                "verbose_name_plural": "Security functions",
+                "verbose_name": "Reference control",
+                "verbose_name_plural": "Reference controls",
             },
         ),
         migrations.CreateModel(

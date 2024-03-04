@@ -8,7 +8,7 @@ version: 1
 provider: intuitem
 packager: intuitem
 objects:
-  security_functions:
+  reference_controls:
   - urn: urn:intuitem:risk:function:doc-pol:doc.overview
     ref_id: DOC.OVERVIEW
     name: Organization overview document

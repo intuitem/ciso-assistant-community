@@ -61,18 +61,18 @@
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
 	<!--NOTE: Not the cleanest pattern, will refactor-->
 	<!--TODO: Refactor-->
-	{#if shape.security_function}
+	{#if shape.reference_control}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
-				objects: model.foreignKeys['security_function'],
-				suggestions: suggestions['security_function']
+				objects: model.foreignKeys['reference_control'],
+				suggestions: suggestions['reference_control']
 			})}
-			field="security_function"
-			label={m.securityFunction()}
+			field="reference_control"
+			label={m.referenceControl()}
 			on:change={async (e) => {
 				if (e.detail) {
-					await fetch(`/security-functions/${e.detail}`)
+					await fetch(`/reference-controls/${e.detail}`)
 						.then((r) => r.json())
 						.then((r) => {
 							form.form.update((currentData) => {
@@ -263,7 +263,7 @@
 			helpText={m.riskAcceptanceRiskScenariosHelpText()}
 			multiple
 		/>
-	{:else if URLModel === 'security-functions'}
+	{:else if URLModel === 'reference-controls'}
 		<TextField {form} field="ref_id" label={m.ref()} />
 		<Select
 			{form}

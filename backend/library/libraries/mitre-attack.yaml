@@ -24,7 +24,7 @@ version: 1
 provider: Mitre ATT&CK
 packager: intuitem
 objects:
-  security_functions:
+  reference_controls:
   - urn: urn:intuitem:risk:function:mitre-attack:m1031
     ref_id: M1031
     name: Network Intrusion Prevention

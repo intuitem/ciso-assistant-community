@@ -26,7 +26,7 @@ export const URL_MODEL = [
 	'applied-controls',
 	'policies',
 	'risk-acceptances',
-	'security-functions',
+	'reference-controls',
 	'assets',
 	'users',
 	'user-groups',
@@ -74,7 +74,7 @@ export interface RiskMatrix {
 export type RiskScenario = z.infer<typeof RiskScenarioSchema>;
 
 interface LibraryObject {
-	type: 'risk_matrix' | 'security_function' | 'threat';
+	type: 'risk_matrix' | 'reference_control' | 'threat';
 	fields: Record<string, any>;
 }
 

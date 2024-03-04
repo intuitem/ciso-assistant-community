@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False, verbose_name='published'),
         ),
         migrations.AlterField(
-            model_name='securityfunction',
+            model_name='referencecontrol',
             name='is_published',
             field=models.BooleanField(default=False, verbose_name='published'),
         ),

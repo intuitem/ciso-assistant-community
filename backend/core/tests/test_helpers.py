@@ -53,7 +53,7 @@ def test_get_rating_options_perm_to_view_matrix():
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_securityfunction",
+            "view_referencecontrol",
             "view_folder",
             "view_usergroup",
         ]
@@ -117,7 +117,7 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_securityfunction",
+            "view_referencecontrol",
             "view_folder",
             "view_usergroup",
         ]

@@ -44,14 +44,14 @@ export const listViewFields = {
 		body: ['name', 'description', 'risk_scenarios']
 	},
 	'applied-controls': {
-		head: ['name', 'description', 'category', 'eta', 'domain', 'securityFunction'],
-		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
+		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control']
 	},
 	policies: {
-		head: ['name', 'description', 'eta', 'domain', 'securityFunction'],
-		body: ['name', 'description', 'eta', 'folder', 'security_function']
+		head: ['name', 'description', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'eta', 'folder', 'reference_control']
 	},
-	'security-functions': {
+	'reference-controls': {
 		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
 		meta: ['id', 'urn']

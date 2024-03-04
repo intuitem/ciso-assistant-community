@@ -21,7 +21,7 @@ router.register(
 router.register(r"policies", PolicyViewSet, basename="policies")
 router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-acceptances")
 router.register(
-    r"security-functions", SecurityFunctionViewSet, basename="security-functions"
+    r"reference-controls", ReferenceControlViewSet, basename="reference-controls"
 )
 router.register(r"assets", AssetViewSet, basename="assets")
 

@@ -4,7 +4,7 @@
 
 	export let data: PageData;
 	const threats = data.requirement.threats;
-	const security_functions = data.requirement.security_functions;
+	const reference_controls = data.requirement.reference_controls;
 
 	import { page } from '$app/stores';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
@@ -61,7 +61,7 @@
 				formAction: 'createAppliedControl',
 				model: data.measureModel,
 				debug: false,
-				suggestions: { security_function: security_functions }
+				suggestions: { reference_control: reference_controls }
 			}
 		};
 		const modal: ModalSettings = {
@@ -152,21 +152,21 @@
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line">{data.requirement.description}</p>
 	{/if}
-	{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
+	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 		<div class="card p-4 variant-glass-primary text-sm flex flex-row cursor-auto">
 			<div class="flex-1">
 				<p class="font-medium">
 					<i class="fa-solid fa-gears" />
-					Suggested security functions
+					Suggested reference controls
 				</p>
-				{#if security_functions.length === 0}
+				{#if reference_controls.length === 0}
 					<p>--</p>
 				{:else}
 					<ul class="list-disc ml-4">
-						{#each security_functions as func}
+						{#each reference_controls as func}
 							<li>
 								{#if func.id}
-									<a class="anchor" href="/security-functions/{func.id}">
+									<a class="anchor" href="/reference-controls/{func.id}">
 										{func.str}
 									</a>
 								{:else}

@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
 
-from core.serializers import SecurityFunctionReadSerializer, ThreatReadSerializer
+from core.serializers import ReferenceControlReadSerializer, ThreatReadSerializer
 
 from .models import *
 from .utils import camel_case
@@ -252,8 +252,8 @@ def get_sorted_requirement_nodes(
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
                             ).data,
-                            "security_functions": SecurityFunctionReadSerializer(
-                                req.security_functions.all(), many=True
+                            "reference_controls": ReferenceControlReadSerializer(
+                                req.reference_controls.all(), many=True
                             ).data,
                         }
                     )
@@ -268,8 +268,8 @@ def get_sorted_requirement_nodes(
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
                             ).data,
-                            "security_functions": SecurityFunctionReadSerializer(
-                                req.security_functions.all(), many=True
+                            "reference_controls": ReferenceControlReadSerializer(
+                                req.reference_controls.all(), many=True
                             ).data,
                         }
                     )
@@ -460,7 +460,7 @@ def applied_control_per_cur_risk(user: User):
     return {"values": output}
 
 
-def applied_control_per_security_function(user: User):
+def applied_control_per_reference_control(user: User):
     indicators = list()
     values = list()
     (
@@ -473,12 +473,12 @@ def applied_control_per_security_function(user: User):
 
     tmp = (
         AppliedControl.objects.filter(id__in=object_ids_view)
-        .values("security_function__name")
-        .annotate(total=Count("security_function"))
-        .order_by("security_function")
+        .values("reference_control__name")
+        .annotate(total=Count("reference_control"))
+        .order_by("reference_control")
     )
     for entry in tmp:
-        indicators.append(entry["security_function__name"])
+        indicators.append(entry["reference_control__name"])
         values.append(entry["total"])
 
     return {
@@ -625,7 +625,7 @@ def get_counters(user: User):
         "AppliedControl": AppliedControl,
         "RiskAssessment": RiskAssessment,
         "Project": Project,
-        "Security Function": SecurityFunction,
+        "Reference Control": ReferenceControl,
         "RiskAcceptance": RiskAcceptance,
         "Threat": Threat,
         "Compliance Assessment": ComplianceAssessment,
