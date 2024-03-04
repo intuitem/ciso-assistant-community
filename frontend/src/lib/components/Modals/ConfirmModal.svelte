@@ -9,6 +9,8 @@
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 
+	import * as m from '$paraglide/messages';
+
 	const modalStore: ModalStore = getModalStore();
 
 	export let _form;
@@ -36,10 +38,10 @@
 		<form method="POST" action={formAction} class="modal-form {cForm}" use:enhance>
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
-        <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button>
+        <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-        <button class="btn variant-filled-error" type="submit" on:click={parent.onClose}>{parent.buttonTextSubmit}</button>
+        <button class="btn variant-filled-error" type="submit" on:click={parent.onClose}>{m.submit()}</button>
     </footer>
 		</form>
 		{#if debug === true}
