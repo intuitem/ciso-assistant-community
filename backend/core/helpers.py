@@ -204,8 +204,6 @@ def get_sorted_requirement_nodes(
     for req in requirement_nodes:
         if req.order_id is None:
             req.order_id = req.created_at
-            if req.order_id is None:
-                print("arghh", req)
 
     requirement_assessment_from_requirement_id = (
         {str(ra.requirement_id): ra for ra in requirements_assessed}
