@@ -870,7 +870,7 @@ class FolderViewSet(BaseModelViewSet):
                 name=UserGroupCodename.AUDITOR, folder=folder, builtin=True
             )
             approvers = UserGroup.objects.create(
-                name=UserGroupCodename.VALIDATOR, folder=folder, builtin=True
+                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
             )
             analysts = UserGroup.objects.create(
                 name=UserGroupCodename.ANALYST, folder=folder, builtin=True
@@ -887,7 +887,7 @@ class FolderViewSet(BaseModelViewSet):
             ra1.perimeter_folders.add(folder)
             ra2 = RoleAssignment.objects.create(
                 user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.VALIDATOR),
+                role=Role.objects.get(name=RoleCodename.APPROVER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
             )

@@ -23,7 +23,7 @@ export default {
 		analyst: 'Analyst',
 		auditor: 'Auditor',
 		domainManager: 'Domain manager',
-		validator: 'Validator'
+		approver: 'Approver'
 	},
 	framework: {
 		name: 'NIST CSF v1.1',

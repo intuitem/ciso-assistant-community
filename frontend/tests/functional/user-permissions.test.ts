@@ -24,7 +24,7 @@ test.beforeEach('create user', async ({ logedPage, usersPage, foldersPage, sideB
             `${vars.folderName} - ${vars.usergroups.analyst}`,
             `${vars.folderName} - ${vars.usergroups.auditor}`,
             `${vars.folderName} - ${vars.usergroups.domainManager}`,
-            `${vars.folderName} - ${vars.usergroups.validator}`,
+            `${vars.folderName} - ${vars.usergroups.approver}`,
         ],
     });
     await usersPage.form.saveButton.click();
