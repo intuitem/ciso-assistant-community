@@ -34,51 +34,48 @@ test('login invalid message is showing properly', async ({ loginPage, page }) =>
 	await loginPage.hasUrl();
 });
 
-test('forgot password link is working properly', async ({ logedPage, usersPage, sideBar, page }) => {
+test('forgot password link is working properly', async ({ logedPage, usersPage, sideBar, mailer, page }) => {
 	const email = getUniqueValue(testData.user.email);
-	console.log(email);
 	
-	test.step('create user', async () => {
-		await usersPage.goto();
-		await usersPage.createItem({
-			email: email
-		});
-	
-		await usersPage.editItemButton(email).click();
-		await page.getByTestId('set-password-btn').click();
-		await expect(page).toHaveURL(/.*\/users\/.+\/edit\/set-password/);
-		await usersPage.form.fill({
-			new_password: testData.user.password,
-			confirm_new_password: testData.user.password
-		});
-		await usersPage.form.saveButton.click();
-		await usersPage.isToastVisible('The password was successfully set');
-	
-		await sideBar.moreButton.click();
-		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await expect(sideBar.logoutButton).toBeVisible();
-		await sideBar.logoutButton.click();
-		await logedPage.hasUrl(0);
-	});
-	
-	test.step('test to login with the new user', async () => {
-		await logedPage.login(email, testData.user.password);
-		await expect(page).toHaveURL(/.*\/analytics/);
-
-		await sideBar.moreButton.click();
-		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await expect(sideBar.logoutButton).toBeVisible();
-		await sideBar.logoutButton.click();
-		await logedPage.hasUrl(0); 
+	await usersPage.goto();
+	await usersPage.createItem({
+		email: email
 	});
 
-	test.step('test to use the forgot password link', async () => {
-		await logedPage.forgotPasswordButton.click();
-		await expect(page).toHaveURL('/password-reset');
-		await logedPage.emailInput.fill(email);
-		await logedPage.sendEmailButton.click();
-		await logedPage.isToastVisible('The request has been received, you should receive a reset link at the following address: ' + email);
+	await usersPage.editItemButton(email).click();
+	await page.getByTestId('set-password-btn').click();
+	await expect(page).toHaveURL(/.*\/users\/.+\/edit\/set-password/);
+	await usersPage.form.fill({
+		new_password: testData.user.password,
+		confirm_new_password: testData.user.password
 	});
+	await usersPage.form.saveButton.click();
+	await usersPage.isToastVisible('The password was successfully set');
+
+	await sideBar.moreButton.click();
+	await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+	await expect(sideBar.logoutButton).toBeVisible();
+	await sideBar.logoutButton.click();
+	await logedPage.hasUrl(0);
+	
+	await logedPage.login(email, testData.user.password);
+	await expect(page).toHaveURL(/.*\/analytics/);
+
+	await sideBar.moreButton.click();
+	await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+	await expect(sideBar.logoutButton).toBeVisible();
+	await sideBar.logoutButton.click();
+	await logedPage.hasUrl(0); 
+
+	await logedPage.forgotPasswordButton.click();
+	await expect(page).toHaveURL('/password-reset');
+	await logedPage.emailInput.fill(email);
+	await logedPage.sendEmailButton.click();
+	await logedPage.isToastVisible('The request has been received, you should receive a reset link at the following address: ' + email);
+	
+	await mailer.goto();
+	console.log(await (await mailer.lastEmail()).innerText());
+	await logedPage.hasUrl(0);
 
 	//TODO test that the email is received and the link is working properly
 });
