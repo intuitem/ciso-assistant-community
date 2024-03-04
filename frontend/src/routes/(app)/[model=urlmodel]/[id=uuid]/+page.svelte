@@ -18,6 +18,7 @@
 	import { localItems, toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -216,6 +217,8 @@
 									<a href={itemHref} class="anchor">{value.str}</a>
 								{:else if isURL(value)}
 									<a href={value} target="_blank" class="anchor">{value}</a>
+								{:else if ISO_8601_REGEX.test(value)}
+									{new Date(value).toLocaleString(languageTag())}
 								{:else}
 									{#if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
 										{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
