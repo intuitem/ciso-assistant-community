@@ -165,7 +165,7 @@
 					<span>
 						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 						<p class="text-sm font-semibold">
-							{new Date(data.scenario.updated_at).toLocaleString()}
+							{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
 						</p>
 					</span>
 					<Select
