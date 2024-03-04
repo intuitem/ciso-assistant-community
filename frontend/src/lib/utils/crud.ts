@@ -177,13 +177,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
 		foreignKeyFields: [
-			{ field: 'security_function', urlModel: 'security-functions' },
+			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
 		filters: [
-			{ field: 'security_function' },
+			{ field: 'reference_control' },
 			{ field: 'status' },
 			{ field: 'category' },
 			{ field: 'effort' },
@@ -198,13 +198,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Policy',
 		verboseNamePlural: 'Policies',
 		foreignKeyFields: [
-			{ field: 'security_function', urlModel: 'security-functions' },
+			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'effort' }],
 		filters: [
-			{ field: 'security_function' },
+			{ field: 'reference_control' },
 			{ field: 'status' },
 			{ field: 'effort' },
 			{ field: 'folder' }
@@ -228,14 +228,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		filters: [{ field: 'risk_scenarios' }, { field: 'folder' }, { field: 'approver' }]
 	},
-	'security-functions': {
+	'reference-controls': {
 		ref_id: 'ref_id',
-		name: 'securityfunction',
-		localName: 'securityFunction',
-		localNamePlural: 'securityFunctions',
+		name: 'referencecontrol',
+		localName: 'referenceControl',
+		localNamePlural: 'referenceControls',
 		localFrGender: 'f',
-		verboseName: 'Security function',
-		verboseNamePlural: 'Security functions',
+		verboseName: 'Reference control',
+		verboseNamePlural: 'Reference controls',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
 		selectFields: [{ field: 'category' }],
 		filters: [{ field: 'folder' }]

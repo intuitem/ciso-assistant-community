@@ -58,7 +58,7 @@
                 <td class="px-2 font-semibold">{% trans "Name" %}</td>
                 <td class="px-2 font-semibold">{% trans "Description" %}</td>
                 <td class="px-2 font-semibold">{% trans "Type" %}</td>
-                <td class="px-2 font-semibold">{% trans "Security function" %}</td>
+                <td class="px-2 font-semibold">{% trans "Reference control" %}</td>
                 <td class="px-2 font-semibold">{% trans "ETA" %}</td>
                 <td class="px-2 font-semibold">{% trans "Effort" %}</td>
                 <td class="px-2 font-semibold text-center">{% trans "Link" %}</td>
@@ -71,7 +71,7 @@
                 <td class="px-2 py-3">{{ appliedcontrol.name }}</td>
                 <td class="px-2 py-3 max-w-md">{% if appliedcontrol.description %}{{ appliedcontrol.description|linebreaksbr }}{% endif %}</td>
                 <td class="px-2 py-3">{{ appliedcontrol.get_type_display }}</td>
-                <td class="px-2 py-3">{% if appliedcontrol.security_function %}{{ appliedcontrol.security_function }}{% else %}--{% endif %}</td>
+                <td class="px-2 py-3">{% if appliedcontrol.reference_control %}{{ appliedcontrol.reference_control }}{% else %}--{% endif %}</td>
                 <td class="px-2 py-3">{% if appliedcontrol.eta %}{{ appliedcontrol.eta }}{% else %}--{%endif%}</td>
                 <td class="px-2 py-3">{% if appliedcontrol.effort %}{{ appliedcontrol.effort }}{% else %}--{%endif%}</td>
                 <td class="px-2 py-3 text-center">{% if appliedcontrol.link %}<a onclick="event.stopPropagation();" href="{{ appliedcontrol.link }}"

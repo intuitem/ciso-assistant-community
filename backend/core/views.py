@@ -272,18 +272,18 @@ class AssetViewSet(BaseModelViewSet):
         return Response(dict(Asset.Type.choices))
 
 
-class SecurityFunctionViewSet(BaseModelViewSet):
+class ReferenceControlViewSet(BaseModelViewSet):
     """
-    API endpoint that allows security functions to be viewed or edited.
+    API endpoint that allows reference controls to be viewed or edited.
     """
 
-    model = SecurityFunction
+    model = ReferenceControl
     filterset_fields = ["folder", "category"]
     search_fields = ["name", "description", "provider"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(SecurityFunction.CATEGORY))
+        return Response(dict(ReferenceControl.CATEGORY))
 
 
 class RiskMatrixViewSet(BaseModelViewSet):
@@ -396,7 +396,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "measure_name",
                 "measure_desc",
                 "category",
-                "security_function",
+                "reference_control",
                 "eta",
                 "effort",
                 "link",
@@ -421,7 +421,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.name,
                     mtg.description,
                     mtg.get_category_display(),
-                    mtg.security_function,
+                    mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
                     mtg.link,
@@ -531,7 +531,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         "folder",
         "category",
         "status",
-        "security_function",
+        "reference_control",
         "effort",
         "risk_scenarios",
         "requirement_assessments",
@@ -583,7 +583,7 @@ class AppliedControlViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","security_function","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -628,7 +628,7 @@ class PolicyViewSet(AppliedControlViewSet):
     filterset_fields = [
         "folder",
         "status",
-        "security_function",
+        "reference_control",
         "effort",
         "risk_scenarios",
         "requirement_assessments",
@@ -1269,7 +1269,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","security_function","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -1567,7 +1567,7 @@ def export_mp_csv(request):
         "measure_name",
         "measure_desc",
         "category",
-        "security_function",
+        "reference_control",
         "eta",
         "effort",
         "link",
@@ -1587,7 +1587,7 @@ def export_mp_csv(request):
             mtg.name,
             mtg.description,
             mtg.category,
-            mtg.security_function,
+            mtg.reference_control,
             mtg.eta,
             mtg.effort,
             mtg.link,

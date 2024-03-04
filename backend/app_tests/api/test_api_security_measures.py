@@ -1,6 +1,6 @@
 import pytest
 from rest_framework.test import APIClient
-from core.models import SecurityFunction, AppliedControl
+from core.models import ReferenceControl, AppliedControl
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
@@ -115,7 +115,7 @@ class TestAppliedControlsAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "security_function": None,
+                "reference_control": None,
                 "category": APPLIED_CONTROL_CATEGORY[1],
                 "status": APPLIED_CONTROL_STATUS[1],
                 "effort": APPLIED_CONTROL_EFFORT[1],
@@ -126,7 +126,7 @@ class TestAppliedControlsAuthenticated:
     def test_create_applied_controls(self, test):
         """test to create applied controls with the API with authentication"""
 
-        security_function = SecurityFunction.objects.create(
+        reference_control = ReferenceControl.objects.create(
             name="test", typical_evidence={}, folder=Folder.objects.create(name="test2")
         )
 
@@ -157,7 +157,7 @@ class TestAppliedControlsAuthenticated:
         """test to update applied controls with the API with authentication"""
 
         folder = Folder.objects.create(name="test2")
-        security_function = SecurityFunction.objects.create(
+        reference_control = ReferenceControl.objects.create(
             name="test", typical_evidence={}, folder=folder
         )
 

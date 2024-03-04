@@ -22,7 +22,7 @@ type Fixtures = {
 	riskAssessmentsPage: PageContent;
 	riskMatricesPage: PageContent;
 	riskScenariosPage: PageContent;
-	securityFunctionsPage: PageContent;
+	referenceControlsPage: PageContent;
 	appliedControlsPage: PageContent;
 	threatsPage: PageContent;
 	usersPage: PageContent;
@@ -49,7 +49,7 @@ export const test = base.extend<Fixtures>({
 			riskAssessmentsPage,
 			riskMatricesPage,
 			riskScenariosPage,
-			securityFunctionsPage,
+			referenceControlsPage,
 			appliedControlsPage,
 			threatsPage,
 			usersPage
@@ -68,7 +68,7 @@ export const test = base.extend<Fixtures>({
 			riskAssessmentsPage,
 			riskMatricesPage,
 			riskScenariosPage,
-			securityFunctionsPage,
+			referenceControlsPage,
 			appliedControlsPage,
 			threatsPage,
 			usersPage
@@ -186,8 +186,8 @@ export const test = base.extend<Fixtures>({
 		await use(rPage);
 	},
 
-	securityFunctionsPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-functions', 'Security functions', [
+	referenceControlsPage: async ({ page }, use) => {
+		const sPage = new PageContent(page, '/reference-controls', 'Reference controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
@@ -208,7 +208,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'link', type: type.TEXT },
 			{ name: 'effort', type: type.SELECT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'security_function', type: type.SELECT_AUTOCOMPLETE }
+			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(sPage);
 	},
@@ -378,10 +378,10 @@ export class TestContent {
 					provider: ''
 				}
 			},
-			securityFunctionsPage: {
-				displayName: 'Security functions',
+			referenceControlsPage: {
+				displayName: 'Reference controls',
 				build: {
-					name: vars.securityFunctionName,
+					name: vars.referenceControlName,
 					description: vars.description,
 					category: 'Technical',
 					provider: 'Test provider',
@@ -396,13 +396,13 @@ export class TestContent {
 			},
 			appliedControlsPage: {
 				displayName: 'Applied controls',
-				dependency: vars.securityFunction.library,
+				dependency: vars.referenceControl.library,
 				build: {
-					security_function: {
-						value: vars.securityFunction.name,
-						category: vars.securityFunction.category,
+					reference_control: {
+						value: vars.referenceControl.name,
+						category: vars.referenceControl.category,
 						request: {
-							url: 'security-functions'
+							url: 'reference-controls'
 						}
 					},
 					name: vars.appliedControlName,
@@ -413,14 +413,14 @@ export class TestContent {
 					link: 'https://intuitem.com/',
 					effort: 'Large',
 					folder: vars.folderName,
-					category: vars.securityFunction.category
+					category: vars.referenceControl.category
 				},
 				editParams: {
-					security_function: {
-						value: vars.securityFunction2.name,
-						category: vars.securityFunction2.category,
+					reference_control: {
+						value: vars.referenceControl2.name,
+						category: vars.referenceControl2.category,
 						request: {
-							url: 'security-functions'
+							url: 'reference-controls'
 						}
 					},
 					name: '',
@@ -430,7 +430,7 @@ export class TestContent {
 					expiry_date: '2026-02-25',
 					link: 'https://intuitem.com/community/',
 					effort: 'Medium',
-					category: vars.securityFunction2.category
+					category: vars.referenceControl2.category
 				}
 			},
 			complianceAssessmentsPage: {

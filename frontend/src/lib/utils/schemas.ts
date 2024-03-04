@@ -96,7 +96,7 @@ export const AppliedControlSchema = baseNamedObject({
 	link: z.string().url().optional().nullable(),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
-	security_function: z.string().optional()
+	reference_control: z.string().optional()
 });
 
 export const PolicySchema = baseNamedObject({
@@ -107,7 +107,7 @@ export const PolicySchema = baseNamedObject({
 	link: z.string().url().optional().nullable(),
 	effort: z.string().optional(),
 	folder: z.string(),
-	security_function: z.string().optional()
+	reference_control: z.string().optional()
 });
 
 export const RiskAcceptanceSchema = baseNamedObject({
@@ -118,7 +118,7 @@ export const RiskAcceptanceSchema = baseNamedObject({
 	risk_scenarios: z.array(z.string())
 });
 
-export const SecurityFunctionSchema = baseNamedObject({
+export const ReferenceControlSchema = baseNamedObject({
 	provider: z.string().optional().nullable(),
 	category: z.string().optional(),
 	folder: z.string()
@@ -195,7 +195,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'applied-controls': AppliedControlSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
-	'security-functions': SecurityFunctionSchema,
+	'reference-controls': ReferenceControlSchema,
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,

@@ -109,14 +109,14 @@ class Library(ReferentialObjectMixin):
             RiskAssessment.objects.filter(
                 Q(risk_scenarios__threats__library=self)
                 | Q(risk_matrix__library=self)
-                | Q(risk_scenarios__applied_controls__security_function__library=self)
+                | Q(risk_scenarios__applied_controls__reference_control__library=self)
             )
             .distinct()
             .count()
             + ComplianceAssessment.objects.filter(
                 Q(framework__library=self)
                 | Q(
-                    requirement_assessments__applied_controls__security_function__library=self
+                    requirement_assessments__applied_controls__reference_control__library=self
                 )
             )
             .distinct()
@@ -162,7 +162,7 @@ class Threat(ReferentialObjectMixin):
         return self.name
 
 
-class SecurityFunction(ReferentialObjectMixin):
+class ReferenceControl(ReferentialObjectMixin):
     CATEGORY = [
         ("policy", _("Policy")),
         ("process", _("Process")),
@@ -175,7 +175,7 @@ class SecurityFunction(ReferentialObjectMixin):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="security_functions",
+        related_name="reference_controls",
     )
 
     category = models.CharField(
@@ -191,8 +191,8 @@ class SecurityFunction(ReferentialObjectMixin):
     )
 
     class Meta:
-        verbose_name = _("Security function")
-        verbose_name_plural = _("Security functions")
+        verbose_name = _("Reference control")
+        verbose_name_plural = _("Reference controls")
 
     def is_deletable(self) -> bool:
         """
@@ -204,7 +204,7 @@ class SecurityFunction(ReferentialObjectMixin):
 
     @property
     def frameworks(self):
-        return Framework.objects.filter(requirement__security_functions=self).distinct()
+        return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
     def __str__(self):
         return self.name
@@ -327,10 +327,10 @@ class RequirementNode(ReferentialObjectMixin):
         verbose_name=_("Threats"),
         related_name="requirements",
     )
-    security_functions = models.ManyToManyField(
-        "SecurityFunction",
+    reference_controls = models.ManyToManyField(
+        "ReferenceControl",
         blank=True,
-        verbose_name=_("Security functions"),
+        verbose_name=_("Reference controls"),
         related_name="requirements",
     )
     framework = models.ForeignKey(
@@ -521,7 +521,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
         ACTIVE = "active", _("Active")
         INACTIVE = "inactive", _("Inactive")
 
-    CATEGORY = SecurityFunction.CATEGORY
+    CATEGORY = ReferenceControl.CATEGORY
 
     EFFORT = [
         ("S", _("Small")),
@@ -532,12 +532,12 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
 
     MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
     # todo: think about a smarter model for ranking
-    security_function = models.ForeignKey(
-        SecurityFunction,
+    reference_control = models.ForeignKey(
+        ReferenceControl,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        verbose_name=_("Security Function"),
+        verbose_name=_("Reference Control"),
     )
     evidences = models.ManyToManyField(
         Evidence,
@@ -594,8 +594,8 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("Applied controls")
 
     def save(self, *args, **kwargs):
-        if self.security_function and self.category is None:
-            self.category = self.security_function.category
+        if self.reference_control and self.category is None:
+            self.category = self.reference_control.category
         super(AppliedControl, self).save(*args, **kwargs)
 
     @property
@@ -1361,11 +1361,11 @@ class ComplianceAssessment(Assessment):
         )
         applied_controls = [x["fields"] for x in json.loads(_applied_controls)]
         for applied_control in applied_controls:
-            if not applied_control["security_function"]:
+            if not applied_control["reference_control"]:
                 info_lst.append(
                     {
                         "msg": _(
-                            "{}: Applied control has no security function selected"
+                            "{}: Applied control has no reference control selected"
                         ).format(applied_control["name"]),
                         "obj_type": "appliedcontrol",
                         "object": applied_control,

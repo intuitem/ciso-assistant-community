@@ -12,7 +12,7 @@ from core.models import (
     RequirementNode,
     RequirementAssessment,
     AppliedControl,
-    SecurityFunction,
+    ReferenceControl,
     Evidence,
     RiskAcceptance,
     Asset,
@@ -651,11 +651,11 @@ class TestAppliedControl:
     def test_measure_category_inherited_from_function(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
-        function = SecurityFunction.objects.create(
+        function = ReferenceControl.objects.create(
             name="Function", folder=root_folder, category="technical"
         )
         measure = AppliedControl.objects.create(
-            name="Measure", folder=folder, security_function=function
+            name="Measure", folder=folder, reference_control=function
         )
         assert measure.category == "technical"
 
@@ -673,14 +673,14 @@ class TestPolicy:
         assert policy.folder == root_folder
         assert policy.category == "policy"
 
-    def test_policy_does_not_inherit_category_from_security_function(self):
+    def test_policy_does_not_inherit_category_from_reference_control(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
-        function = SecurityFunction.objects.create(
+        function = ReferenceControl.objects.create(
             name="Function", folder=root_folder, category="technical"
         )
         policy = Policy.objects.create(
-            name="Policy", folder=folder, security_function=function
+            name="Policy", folder=folder, reference_control=function
         )
         assert policy.category == "policy"
 
@@ -920,7 +920,7 @@ class TestLibrary:
         assert library.reference_count == 0
 
     @pytest.mark.usefixtures("domain_project_fixture")
-    def test_library_reference_count_incremented_when_security_function_is_referenced_by_complance_assessment_and_decremented_when_compliance_assessment_is_deleted(
+    def test_library_reference_count_incremented_when_reference_control_is_referenced_by_complance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
         library = Library.objects.create(
@@ -957,9 +957,9 @@ class TestLibrary:
             folder=Folder.get_root_folder(),
         )
 
-        security_function = SecurityFunction.objects.create(
-            name="SecurityFunction",
-            description="SecurityFunction description",
+        reference_control = ReferenceControl.objects.create(
+            name="ReferenceControl",
+            description="ReferenceControl description",
             folder=Folder.get_root_folder(),
             library=library,
         )
@@ -967,7 +967,7 @@ class TestLibrary:
             name="AppliedControl",
             description="AppliedControl description",
             folder=Folder.get_root_folder(),
-            security_function=security_function,
+            reference_control=reference_control,
         )
 
         requirement_assessment.applied_controls.add(applied_control)
@@ -1047,7 +1047,7 @@ class TestLibrary:
         assert library.reference_count == 0
 
     @pytest.mark.usefixtures("risk_matrix_fixture")
-    def test_library_reference_count_incremented_when_security_function_is_referenced_by_risk_scenario_and_decremented_when_risk_scenario_is_deleted(
+    def test_library_reference_count_incremented_when_reference_control_is_referenced_by_risk_scenario_and_decremented_when_risk_scenario_is_deleted(
         self,
     ):
         domain = Folder.objects.create(name="Domain", description="Domain description")
@@ -1062,9 +1062,9 @@ class TestLibrary:
             locale="en",
             version=1,
         )
-        security_function = SecurityFunction.objects.create(
-            name="SecurityFunction",
-            description="SecurityFunction description",
+        reference_control = ReferenceControl.objects.create(
+            name="ReferenceControl",
+            description="ReferenceControl description",
             folder=Folder.get_root_folder(),
             library=library,
         )
@@ -1072,7 +1072,7 @@ class TestLibrary:
             name="AppliedControl",
             description="AppliedControl description",
             folder=Folder.get_root_folder(),
-            security_function=security_function,
+            reference_control=reference_control,
         )
 
         risk_assessment = RiskAssessment.objects.create(

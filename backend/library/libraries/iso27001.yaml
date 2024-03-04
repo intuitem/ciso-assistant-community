@@ -34,7 +34,7 @@ objects:
       ref_id: '4.1'
       name: Understanding the organization and its context
       description: Understand the context and the organization.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
       assessable: true
@@ -44,7 +44,7 @@ objects:
       name: Understanding the needs and expectations of interested parties
       description: Determine interested parties and understand therir requirements
         in relation with the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.CONTEXT
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
       assessable: true
@@ -53,7 +53,7 @@ objects:
       ref_id: '4.3'
       name: Determining the scope of the information security management system
       description: Determine the scope of the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.SCOPE
     - urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
       assessable: true
@@ -62,7 +62,7 @@ objects:
       ref_id: '4.4'
       name: Information security management system
       description: Design and implement the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5
       assessable: false
@@ -78,7 +78,7 @@ objects:
       name: Leadership and commitment
       description: Ensure top management provides adequate commitment and resources
         for the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.OVERVIEW
       - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
       - urn:intuitem:risk:function:doc-pol:DOC.COM
@@ -92,7 +92,7 @@ objects:
       ref_id: '5.2'
       name: ' Policy'
       description: Define an adequate security policy.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
     - urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
       assessable: true
@@ -101,7 +101,7 @@ objects:
       ref_id: '5.3'
       name: Organizational roles, responsibilities and authorities
       description: Ensure roles and responsibilities are properly defined.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6
       assessable: false
@@ -123,7 +123,7 @@ objects:
       name: General
       description: When planning for the ISMS, take into account risks and opportunities,
         and actions to address them.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
@@ -133,7 +133,7 @@ objects:
       ref_id: 6.1.2
       name: Information security risk assessment requirement
       description: Establish a proper risk assessment process.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
@@ -144,7 +144,7 @@ objects:
       name: Information security risk treatment
       description: Establish a proper risk treatment process, and produce a Statement
         of Applicability.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.SOA
@@ -155,7 +155,7 @@ objects:
       ref_id: '6.2'
       name: Information security objectives and planning to achieve them
       description: Define and maintain relevant security objectives.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       - urn:intuitem:risk:function:doc-pol:DOC.SO_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
@@ -173,7 +173,7 @@ objects:
       ref_id: '7.1'
       name: Resources
       description: Provide adequate resources for the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.COMPETENCY
       - urn:intuitem:risk:function:doc-pol:DOC.CONTROLS
@@ -184,7 +184,7 @@ objects:
       ref_id: '7.2'
       name: Competence
       description: Manage competence of workforce interacting with the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
@@ -194,7 +194,7 @@ objects:
       ref_id: '7.3'
       name: Awareness
       description: Manage awareness of all employees and contractors.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
@@ -204,7 +204,7 @@ objects:
       ref_id: '7.4'
       name: Communication
       description: Manage communication relevant to the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.COM
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
       assessable: true
@@ -219,7 +219,7 @@ objects:
       ref_id: 7.5.1
       name: General
       description: Document adequate information relevant to the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.2
       assessable: true
@@ -228,7 +228,7 @@ objects:
       ref_id: 7.5.2
       name: Creating and Updating documented information
       description: Identify properly the documents, and manage reviews and approvals.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
       assessable: true
@@ -237,7 +237,7 @@ objects:
       ref_id: 7.5.3
       name: Control of documented information
       description: Ensure the ISM documentation is available and adequately protected.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.DOC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8
       assessable: false
@@ -252,7 +252,7 @@ objects:
       ref_id: '8.1'
       name: Operational planning and control
       description: Define and implement adequate processes, and control them.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.RACI
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
@@ -262,7 +262,7 @@ objects:
       ref_id: '8.2'
       name: Information security risk assessment
       description: Perform risk assessments periodically.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
@@ -272,7 +272,7 @@ objects:
       ref_id: '8.3'
       name: Information security risk treatment
       description: Implement risk treatment plan.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.PROC_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9
@@ -289,7 +289,7 @@ objects:
       name: Monitoring, measurement, analysis, evaluation
       description: Implement relevant monitoring, and evaluate performance and effectiveness
         of the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MONITOR
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
@@ -305,7 +305,7 @@ objects:
       ref_id: 9.2.1
       name: General
       description: Perform regular internal audits of the ISMS.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.AUDIT
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.2.2
       assessable: true
@@ -314,7 +314,7 @@ objects:
       ref_id: 9.2.2
       name: Internal audit programme
       description: Manage the internal audit programme appropriately.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.AUDIT_PLAN
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
       assessable: true
@@ -329,7 +329,7 @@ objects:
       ref_id: 9.3.1
       name: General
       description: Organize management reviews of the ISMS periodically.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.2
       assessable: true
@@ -338,7 +338,7 @@ objects:
       ref_id: 9.3.2
       name: Management review inputs
       description: Include appropriate data for effective management reviews.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
     - urn: urn:intuitem:risk:req_node:iso27001-2022:9.3.3
       assessable: true
@@ -347,7 +347,7 @@ objects:
       ref_id: 9.3.3
       name: Management review results
       description: Document the results of the management reviews.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10
       assessable: false
@@ -362,7 +362,7 @@ objects:
       ref_id: '10.1'
       name: "Continual improvement\_"
       description: Improve the ISMS continuously.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
     - urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
       assessable: true
@@ -371,7 +371,7 @@ objects:
       ref_id: '10.2'
       name: Nonconformity and corrective action
       description: Manage nonconformities appropriately.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
       - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
       - urn:intuitem:risk:function:doc-pol:DOC.NC_LOG

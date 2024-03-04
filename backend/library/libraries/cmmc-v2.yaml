@@ -82,7 +82,7 @@ objects:
       ref_id: AC.L2-3.1.5
       name: Least Privilege
       description: "Employ the principle of least privilege, including for specific\
-        \ security functions and privileged accounts.\n\u2022 NIST SP 800-171 Rev\
+        \ reference controls and privileged accounts.\n\u2022 NIST SP 800-171 Rev\
         \ 2 3.1.5"
       maturity: 2
     - urn: urn:intuitem:risk:req_node:cmmc-2.0:ac.l2-3.1.6

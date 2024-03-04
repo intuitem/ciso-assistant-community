@@ -324,7 +324,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="securityfunction",
+            model_name="referencecontrol",
             name="folder",
             field=models.ForeignKey(
                 default=iam.models.Folder.get_root_folder,
@@ -334,24 +334,24 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AddField(
-            model_name="securityfunction",
+            model_name="referencecontrol",
             name="library",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="security_functions",
+                related_name="reference_controls",
                 to="core.library",
             ),
         ),
         migrations.AddField(
             model_name="requirementnode",
-            name="security_functions",
+            name="reference_controls",
             field=models.ManyToManyField(
                 blank=True,
                 related_name="requirements",
-                to="core.securityfunction",
-                verbose_name="Security functions",
+                to="core.referencecontrol",
+                verbose_name="Reference controls",
             ),
         ),
         migrations.AddField(
@@ -376,13 +376,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="appliedcontrol",
-            name="security_function",
+            name="reference_control",
             field=models.ForeignKey(
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="core.securityfunction",
-                verbose_name="Security Function",
+                to="core.referencecontrol",
+                verbose_name="Reference Control",
             ),
         ),
         migrations.AddField(

@@ -143,13 +143,13 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
 
 
-class SecurityFunctionWriteSerializer(BaseModelSerializer):
+class ReferenceControlWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = SecurityFunction
+        model = ReferenceControl
         fields = "__all__"
 
 
-class SecurityFunctionReadSerializer(SecurityFunctionWriteSerializer):
+class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
     folder = FieldsRelatedField()
 
 
@@ -212,7 +212,7 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
 
 class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
-    security_function = FieldsRelatedField()
+    reference_control = FieldsRelatedField()
 
     category = serializers.CharField(
         source="get_category_display"
@@ -401,7 +401,7 @@ class RequirementLevelWriteSerializer(RequirementLevelReadSerializer):
 
 
 class RequirementNodeReadSerializer(BaseModelSerializer):
-    security_functions = FieldsRelatedField(many=True)
+    reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
     display_long = serializers.CharField()

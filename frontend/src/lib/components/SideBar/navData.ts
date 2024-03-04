@@ -21,7 +21,7 @@ export const navData = {
 					permissions: [
 						'view_project',
 						'view_riskscenario',
-						'view_securityfunction',
+						'view_referencecontrol',
 						'view_assessment',
 						'view_riskassessment'
 					]
@@ -48,9 +48,9 @@ export const navData = {
 					href: '/threats'
 				},
 				{
-					name: 'securityFunctions',
+					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
-					href: '/security-functions'
+					href: '/reference-controls'
 				},
 				{
 					name: 'appliedControls',
@@ -171,7 +171,7 @@ export const navData = {
 					name: 'libraries',
 					fa_icon: 'fa-solid fa-folder-plus',
 					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_securityfunction', 'add_framework']
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				},
 				{
 					name: 'backupRestore',

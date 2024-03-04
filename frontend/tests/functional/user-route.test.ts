@@ -79,20 +79,20 @@ test('user usual routine actions are working correctly', async ({
 		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
 	});
 
-	await test.step('user can create a security function', async () => {
-		await sideBar.click('Context', pages.securityFunctionsPage.url);
-		await pages.securityFunctionsPage.hasUrl();
-		await pages.securityFunctionsPage.hasTitle();
+	await test.step('user can create a reference control', async () => {
+		await sideBar.click('Context', pages.referenceControlsPage.url);
+		await pages.referenceControlsPage.hasUrl();
+		await pages.referenceControlsPage.hasTitle();
 
-		await pages.securityFunctionsPage.createItem({
-			name: vars.securityFunctionName,
+		await pages.referenceControlsPage.createItem({
+			name: vars.referenceControlName,
 			description: vars.description,
 			category: 'Physical',
 			provider: 'Test provider',
 			folder: vars.folderName
 		});
 
-		//TODO assert that the security function data are displayed in the table
+		//TODO assert that the reference control data are displayed in the table
 	});
 
 	await test.step('user can create a applied control', async () => {
@@ -109,7 +109,7 @@ test('user usual routine actions are working correctly', async ({
 			link: 'https://intuitem.com/',
 			effort: 'Large',
 			folder: vars.folderName,
-			security_function: vars.securityFunctionName
+			reference_control: vars.referenceControlName
 		});
 
 		//TODO assert that the applied control data are displayed in the table
