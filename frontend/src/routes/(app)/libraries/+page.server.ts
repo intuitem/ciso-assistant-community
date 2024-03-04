@@ -131,9 +131,8 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			const model: string = urlParamModelVerboseName(event.params.model!);
 			setFlash(
-				{ type: 'success', message: `Successfully deleted ${model.toLowerCase()} with id ${id}` },
+				{ type: 'success', message: `Successfully deleted library with id ${id}` },
 				event
 			);
 		}

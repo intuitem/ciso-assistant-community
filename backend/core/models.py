@@ -141,7 +141,6 @@ class Threat(ReferentialObjectMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     class Meta:
         verbose_name = _("Threat")
@@ -190,7 +189,6 @@ class SecurityFunction(ReferentialObjectMixin):
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     class Meta:
         verbose_name = _("Security function")
@@ -360,11 +358,11 @@ class RequirementNode(ReferentialObjectMixin):
 
 class Project(NameDescriptionMixin, FolderMixin):
     PRJ_LC_STATUS = [
-        ("undefined", _("--")),
+        ("undefined", _("Undefined")),
         ("in_design", _("Design")),
         ("in_dev", _("Development")),
         ("in_prod", _("Production")),
-        ("eol", _("End Of Life")),
+        ("eol", _("EndOfLife")),
         ("dropped", _("Dropped")),
     ]
     internal_reference = models.CharField(
@@ -424,7 +422,6 @@ class Asset(NameDescriptionMixin, FolderMixin):
     parent_assets = models.ManyToManyField(
         "self", blank=True, verbose_name=_("parent assets"), symmetrical=False
     )
-    is_published = models.BooleanField(_("published"), default=True)
 
     fields_to_check = ["name"]
 
@@ -530,7 +527,7 @@ class SecurityMeasure(NameDescriptionMixin, FolderMixin):
         ("S", _("Small")),
         ("M", _("Medium")),
         ("L", _("Large")),
-        ("XL", _("Extra-Large")),
+        ("XL", _("Extra Large")),
     ]
 
     MAP_EFFORT = {None: -1, "S": 1, "M": 2, "L": 4, "XL": 8}
@@ -976,7 +973,7 @@ class RiskAssessment(Assessment):
             "errors": errors_lst,
             "warnings": warnings_lst,
             "info": info_lst,
-            "count": len(errors_lst + warnings_lst + info_lst),
+            "count": sum([len(errors_lst), len(warnings_lst), len(info_lst)]),
         }
         return findings
 
@@ -1402,7 +1399,7 @@ class ComplianceAssessment(Assessment):
             "errors": errors_lst,
             "warnings": warnings_lst,
             "info": info_lst,
-            "count": len(errors_lst + warnings_lst + info_lst),
+            "count": sum([len(errors_lst), len(warnings_lst), len(info_lst)]),
         }
         return findings
 

@@ -26,7 +26,7 @@
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
+	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
@@ -94,6 +94,10 @@
 			};
 			toastStore.trigger(toast);
 		}
+	}
+
+	for (const index in data.treatmentChoices) {
+		data.treatmentChoices[index]['label'] = localItems(languageTag())[data.treatmentChoices[index]['value']];
 	}
 
 	let { form: measureCreateForm, message: measureCreateMessage } = {

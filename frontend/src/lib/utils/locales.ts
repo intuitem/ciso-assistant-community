@@ -12,7 +12,9 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
-	return str.replace(/[_-]\w/g, (match) => match.charAt(1).toUpperCase());
+	if ( typeof str !== 'string' ) return str;
+	str = str.charAt(0).toLowerCase() + str.slice(1).replace(' ', '');
+	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
 }
 
 export function capitalizeFirstLetter(str: string) {
@@ -136,11 +138,6 @@ export function localItems(languageTag: string): LocalItems {
 		dueDate: m.dueDate({ languageTag: languageTag }),
 		attachment: m.attachment({ languageTag: languageTag }),
 		observation: m.observation({ languageTag: languageTag }),
-		veryLow: m.veryLow({ languageTag: languageTag }),
-		low: m.low({ languageTag: languageTag }),
-		medium: m.medium({ languageTag: languageTag }),
-		high: m.high({ languageTag: languageTag }),
-		veryHigh: m.veryHigh({ languageTag: languageTag }),
 		planned: m.planned({ languageTag: languageTag }),
 		active: m.active({ languageTag: languageTag }),
 		inactive: m.inactive({ languageTag: languageTag }),
@@ -260,8 +257,29 @@ export function localItems(languageTag: string): LocalItems {
 		lossOfAccountabilityChoice1: m.lossOfAccountabilityChoice1({ languageTag: languageTag }),
 		lossOfAccountabilityChoice2: m.lossOfAccountabilityChoice2({ languageTag: languageTag }),
 		lossOfAccountabilityChoice3: m.lossOfAccountabilityChoice3({ languageTag: languageTag }),
+		undefined: m.undefined({ languageTag: languageTag }),
+		production: m.production({ languageTag: languageTag }),
+		development: m.development({ languageTag: languageTag }),
+		design: m.design({ languageTag: languageTag }),
+		endOfLife: m.endOfLife({ languageTag: languageTag }),
+		dropped: m.dropped({ languageTag: languageTag }),
+		technical: m.technical({ languageTag: languageTag }),
+		physical: m.physical({ languageTag: languageTag }),
+		small: m.small({ languageTag: languageTag }),
+		medium: m.medium({ languageTag: languageTag }),
+		large: m.large({ languageTag: languageTag }),
+		extraLarge: m.extraLarge({ languageTag: languageTag }),
+		policy: m.policy({ languageTag: languageTag }),
+		process: m.process({ languageTag: languageTag }),
 		composer: m.composer({ languageTag: languageTag }),
 		plan: m.plan({ languageTag: languageTag }),
+		open: m.open({ languageTag: languageTag }),
+		mitigate: m.mitigate({ languageTag: languageTag }),
+		accept: m.accept({ languageTag: languageTag }),
+		transfer: m.transfer({ languageTag: languageTag }),
+		avoid: m.avoid({ languageTag: languageTag }),
+		primary: m.primary({ languageTag: languageTag }),
+		support: m.support({ languageTag: languageTag }),
 		toDo: m.toDo({ languageTag: languageTag }),
 		inProgress: m.inProgress({ languageTag: languageTag }),
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),

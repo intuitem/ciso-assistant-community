@@ -344,7 +344,7 @@ export class TestContent {
 					name: '',
 					description: '',
 					internal_reference: '',
-					lc_status: 'End Of Life'
+					lc_status: 'End of life'
 				}
 			},
 			assetsPage: {
@@ -508,7 +508,7 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					treatment: 'Accept',
+					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
 					assets: [vars.assetName],
 					existing_measures: 'Test existing measures',
