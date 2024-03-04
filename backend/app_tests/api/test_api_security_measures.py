@@ -10,7 +10,7 @@ from test_utils import EndpointTestsQueries
 APPLIED_CONTROL_NAME = "Test Applied Control"
 APPLIED_CONTROL_DESCRIPTION = "Test Description"
 APPLIED_CONTROL_CATEGORY = ("technical", "Technical")
-APPLIED_CONTROL_CATEGORY2 = ("process", "Trocess")
+APPLIED_CONTROL_CATEGORY2 = ("process", "Process")
 APPLIED_CONTROL_STATUS = ("planned", "Planned")
 APPLIED_CONTROL_STATUS2 = ("active", "Active")
 APPLIED_CONTROL_EFFORT = ("L", "Large")
