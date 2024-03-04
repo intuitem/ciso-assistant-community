@@ -1374,7 +1374,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:soc2-2017:cc6
       ref_id: CC6.6
-      description: The entity implements logical access security measures to protect
+      description: The entity implements logical access applied controls to protect
         against threats from sources outside its system boundaries.
     - urn: urn:intuitem:risk:req_node:soc2-2017:cc6.6.1
       assessable: true

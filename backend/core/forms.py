@@ -54,18 +54,18 @@ class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
     """
 
     template_name = "forms/widgets/select_multiple.html"
-    recommended_security_measures = None
+    recommended_applied_controls = None
 
-    def __init__(self, recommended_security_measures=None, *args, **kwargs) -> None:
+    def __init__(self, recommended_applied_controls=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.recommended_security_measures = recommended_security_measures
+        self.recommended_applied_controls = recommended_applied_controls
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
-        if self.recommended_security_measures:
+        if self.recommended_applied_controls:
             context[
-                "recommended_security_measures"
-            ] = self.recommended_security_measures
+                "recommended_applied_controls"
+            ] = self.recommended_applied_controls
         return context
 
 

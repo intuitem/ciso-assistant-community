@@ -95,13 +95,13 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the security function data are displayed in the table
 	});
 
-	await test.step('user can create a security measure', async () => {
-		await sideBar.click('Context', pages.securityMeasuresPage.url);
-		await pages.securityMeasuresPage.hasUrl();
-		await pages.securityMeasuresPage.hasTitle();
+	await test.step('user can create a applied control', async () => {
+		await sideBar.click('Context', pages.appliedControlsPage.url);
+		await pages.appliedControlsPage.hasUrl();
+		await pages.appliedControlsPage.hasTitle();
 
-		await pages.securityMeasuresPage.createItem({
-			name: vars.securityMeasureName,
+		await pages.appliedControlsPage.createItem({
+			name: vars.appliedControlName,
 			description: vars.description,
 			category: 'Technical',
 			status: 'Planned',
@@ -112,7 +112,7 @@ test('user usual routine actions are working correctly', async ({
 			security_function: vars.securityFunctionName
 		});
 
-		//TODO assert that the security measure data are displayed in the table
+		//TODO assert that the applied control data are displayed in the table
 	});
 
 	await test.step('user can create a compliance assessment', async () => {

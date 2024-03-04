@@ -1,5 +1,5 @@
 from calendar import LocaleHTMLCalendar
-from core.models import SecurityMeasure, RiskAcceptance
+from core.models import AppliedControl, RiskAcceptance
 from django.utils.html import format_html
 
 
@@ -33,7 +33,7 @@ class Calendar(LocaleHTMLCalendar):
     # filter events by year and month
     def formatmonth(self, withyear=True):
         events = {
-            "mtg": SecurityMeasure.objects.filter(
+            "mtg": AppliedControl.objects.filter(
                 eta__year=self.year, eta__month=self.month
             ),
             "ra": RiskAcceptance.objects.filter(

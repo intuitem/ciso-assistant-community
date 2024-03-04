@@ -31,7 +31,7 @@ export const navData = {
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
 					permissions: [
-						'view_securitymeasure',
+						'view_appliedcontrol',
 						'view_riskacceptance',
 						'view_riskassessment',
 						'view_complianceassessment'
@@ -53,9 +53,9 @@ export const navData = {
 					href: '/security-functions'
 				},
 				{
-					name: 'securityMeasures',
+					name: 'appliedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
-					href: '/security-measures'
+					href: '/applied-controls'
 				},
 				{
 					name: 'assets',
@@ -71,7 +71,7 @@ export const navData = {
 					name: 'policies',
 					fa_icon: 'fa-solid fa-user',
 					href: '/policies',
-					permissions: ['view_securitymeasure']
+					permissions: ['view_appliedcontrol']
 				},
 				{
 					name: 'riskMatrices',

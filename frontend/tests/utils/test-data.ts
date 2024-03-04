@@ -8,7 +8,7 @@ export default {
 	riskAssessmentName: 'Test risk assessment',
 	riskScenarioName: 'Test risk scenario',
 	securityFunctionName: 'Test security function',
-	securityMeasureName: 'Test security measure',
+	appliedControlName: 'Test applied control',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,

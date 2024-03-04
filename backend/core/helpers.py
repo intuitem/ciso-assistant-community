@@ -25,11 +25,11 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
 }
 
 
-def security_measure_priority(user: User):
-    def get_quadrant(security_measure):
-        if security_measure.effort in ["S", "M"]:
+def applied_control_priority(user: User):
+    def get_quadrant(applied_control):
+        if applied_control.effort in ["S", "M"]:
             return "1st"
-        elif security_measure.effort in ["L", "XL"]:
+        elif applied_control.effort in ["L", "XL"]:
             return "2nd"
         else:
             return "undefined"
@@ -46,10 +46,10 @@ def security_measure_priority(user: User):
         object_ids_change,
         object_ids_delete,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
 
-    for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view):
+    for mtg in AppliedControl.objects.filter(id__in=object_ids_view):
         clusters[get_quadrant(mtg)].append(mtg)
 
     return clusters
@@ -61,10 +61,10 @@ def measures_to_review(user: User):
         object_ids_change,
         object_ids_delete,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
     measures = (
-        SecurityMeasure.objects.filter(id__in=object_ids_view)
+        AppliedControl.objects.filter(id__in=object_ids_view)
         .filter(eta__lte=date.today() + timedelta(days=30))
         .exclude(status__iexact="done")
         .order_by("eta")
@@ -78,7 +78,7 @@ def compile_project_for_composer(user: User, projects_list: list):
     Compiling information from choosen projects for composer
     """
     compliance_assessments_status = {"values": [], "labels": []}
-    security_measure_status = {"values": [], "labels": []}
+    applied_control_status = {"values": [], "labels": []}
 
     # Requirements assessment bar chart
     color_map = {
@@ -99,22 +99,22 @@ def compile_project_for_composer(user: User, projects_list: list):
         compliance_assessments_status["values"].append(v)
         compliance_assessments_status["labels"].append(st.label)
 
-    # Security measures bar chart
+    # Applied controls bar chart
     color_map = {
         "open": "#93c5fd",
         "in_progress": "#fdba74",
         "on_hold": "#f87171",
         "done": "#86efac",
     }
-    for st in SecurityMeasure.Status.choices:
+    for st in AppliedControl.Status.choices:
         count = (
-            SecurityMeasure.objects.filter(status=st[0])
+            AppliedControl.objects.filter(status=st[0])
             .filter(requirement_assessments__assessment__project__in=projects_list)
             .count()
         )
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
-        security_measure_status["values"].append(v)
-        security_measure_status["labels"].append(st[1])
+        applied_control_status["values"].append(v)
+        applied_control_status["labels"].append(st[1])
 
     project_objects = []
     for project in projects_list:
@@ -123,7 +123,7 @@ def compile_project_for_composer(user: User, projects_list: list):
     return {
         "project_objects": project_objects,
         "compliance_assessments_status": compliance_assessments_status,
-        "security_measure_status": security_measure_status,
+        "applied_control_status": applied_control_status,
         "change_usergroup": RoleAssignment.is_access_allowed(
             user=user,
             perm=Permission.objects.get(codename="change_usergroup"),
@@ -409,7 +409,7 @@ def risk_per_status(user: User):
     return {"labels": labels, "values": values}
 
 
-def security_measure_per_status(user: User):
+def applied_control_per_status(user: User):
     values = list()
     labels = list()
     local_lables = list()
@@ -424,11 +424,11 @@ def security_measure_per_status(user: User):
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
-    for st in SecurityMeasure.Status.choices:
+    for st in AppliedControl.Status.choices:
         count = (
-            SecurityMeasure.objects.filter(id__in=object_ids_view)
+            AppliedControl.objects.filter(id__in=object_ids_view)
             .filter(status=st[0])
             .count()
         )
@@ -439,18 +439,18 @@ def security_measure_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def security_measure_per_cur_risk(user: User):
+def applied_control_per_cur_risk(user: User):
     output = list()
     (
         object_ids_view,
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
     for lvl in get_rating_options(user):
         cnt = (
-            SecurityMeasure.objects.filter(id__in=object_ids_view)
+            AppliedControl.objects.filter(id__in=object_ids_view)
             .exclude(status="done")
             .filter(risk_scenarios__current_level=lvl[0])
             .count()
@@ -460,7 +460,7 @@ def security_measure_per_cur_risk(user: User):
     return {"values": output}
 
 
-def security_measure_per_security_function(user: User):
+def applied_control_per_security_function(user: User):
     indicators = list()
     values = list()
     (
@@ -468,11 +468,11 @@ def security_measure_per_security_function(user: User):
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
 
     tmp = (
-        SecurityMeasure.objects.filter(id__in=object_ids_view)
+        AppliedControl.objects.filter(id__in=object_ids_view)
         .values("security_function__name")
         .annotate(total=Count("security_function"))
         .order_by("security_function")
@@ -622,7 +622,7 @@ def get_counters(user: User):
     output = {}
     objects_dict = {
         "RiskScenario": RiskScenario,
-        "SecurityMeasure": SecurityMeasure,
+        "AppliedControl": AppliedControl,
         "RiskAssessment": RiskAssessment,
         "Project": Project,
         "Security Function": SecurityFunction,
@@ -702,8 +702,8 @@ def risk_status(user: User, risk_assessment_list):
                 {"value": cnt, "itemStyle": {"color": STATUS_COLOR_MAP[option[0]]}}
             )
 
-        for status in SecurityMeasure.Status.choices:
-            cnt = SecurityMeasure.objects.filter(
+        for status in AppliedControl.Status.choices:
+            cnt = AppliedControl.objects.filter(
                 risk_scenarios__risk_assessment=risk_assessment, status=status[0]
             ).count()
             mtg_status_out[status[0]].append(
@@ -787,9 +787,9 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
     values = list()
     labels = list()
 
-    for st in SecurityMeasure.Status.choices:
+    for st in AppliedControl.Status.choices:
         count = (
-            SecurityMeasure.objects.filter(status=st[0])
+            AppliedControl.objects.filter(status=st[0])
             .filter(risk_scenarios__risk_assessment__in=risk_assessment_list)
             .count()
         )
@@ -837,7 +837,7 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
             "untreated_h_vh": untreated_h_vh,
             "accepted": accepted,
         },
-        "security_measure_status": {
+        "applied_control_status": {
             "localLables": local_lables,
             "labels": labels,
             "values": values,

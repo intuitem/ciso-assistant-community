@@ -23,7 +23,7 @@ type Fixtures = {
 	riskMatricesPage: PageContent;
 	riskScenariosPage: PageContent;
 	securityFunctionsPage: PageContent;
-	securityMeasuresPage: PageContent;
+	appliedControlsPage: PageContent;
 	threatsPage: PageContent;
 	usersPage: PageContent;
 	logedPage: LoginPage;
@@ -50,7 +50,7 @@ export const test = base.extend<Fixtures>({
 			riskMatricesPage,
 			riskScenariosPage,
 			securityFunctionsPage,
-			securityMeasuresPage,
+			appliedControlsPage,
 			threatsPage,
 			usersPage
 		},
@@ -69,7 +69,7 @@ export const test = base.extend<Fixtures>({
 			riskMatricesPage,
 			riskScenariosPage,
 			securityFunctionsPage,
-			securityMeasuresPage,
+			appliedControlsPage,
 			threatsPage,
 			usersPage
 		});
@@ -178,7 +178,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'existing_measures', type: type.TEXT },
 			{ name: 'current_proba', type: type.SELECT },
 			{ name: 'current_impact', type: type.SELECT },
-			{ name: 'security_measures', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'applied_controls', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'residual_proba', type: type.SELECT },
 			{ name: 'residual_impact', type: type.SELECT },
 			{ name: 'justification', type: type.TEXT }
@@ -197,8 +197,8 @@ export const test = base.extend<Fixtures>({
 		await use(sPage);
 	},
 
-	securityMeasuresPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-measures', 'Security measures', [
+	appliedControlsPage: async ({ page }, use) => {
+		const sPage = new PageContent(page, '/applied-controls', 'Applied controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
@@ -394,8 +394,8 @@ export class TestContent {
 					provider: ''
 				}
 			},
-			securityMeasuresPage: {
-				displayName: 'Security measures',
+			appliedControlsPage: {
+				displayName: 'Applied controls',
 				dependency: vars.securityFunction.library,
 				build: {
 					security_function: {
@@ -405,7 +405,7 @@ export class TestContent {
 							url: 'security-functions'
 						}
 					},
-					name: vars.securityMeasureName,
+					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'Planned',
 					eta: '2025-01-01',
@@ -514,7 +514,7 @@ export class TestContent {
 					existing_measures: 'Test existing measures',
 					current_proba: 'High',
 					current_impact: 'Medium',
-					security_measures: [vars.securityMeasureName],
+					applied_controls: [vars.appliedControlName],
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
 					justification: 'Test comments'

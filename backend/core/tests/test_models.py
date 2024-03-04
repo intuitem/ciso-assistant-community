@@ -11,7 +11,7 @@ from core.models import (
     RiskScenario,
     RequirementNode,
     RequirementAssessment,
-    SecurityMeasure,
+    AppliedControl,
     SecurityFunction,
     Evidence,
     RiskAcceptance,
@@ -55,9 +55,9 @@ class TestEvidence:
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
-        security_measure = SecurityMeasure.objects.create(
-            name="test security measure",
-            description="test security measure description",
+        applied_control = AppliedControl.objects.create(
+            name="test applied control",
+            description="test applied control description",
             folder=folder,
         )
         with open(SAMPLE_640x480_JPG, "rb") as f:
@@ -67,11 +67,11 @@ class TestEvidence:
                 attachment=SimpleUploadedFile(SAMPLE_640x480_JPG.name, f.read()),
                 folder=folder,
             )
-            evidence.security_measures.add(security_measure)  # pyright: ignore[reportAttributeAccessIssue]
+            evidence.applied_controls.add(applied_control)  # pyright: ignore[reportAttributeAccessIssue]
 
         assert evidence.name == "test evidence"
         assert evidence.description == "test evidence description"
-        assert list(evidence.security_measures.all()) == [security_measure]  # pyright: ignore[reportAttributeAccessIssue]
+        assert list(evidence.applied_controls.all()) == [applied_control]  # pyright: ignore[reportAttributeAccessIssue]
         assert evidence.attachment.name.startswith(
             SAMPLE_640x480_JPG.name.split(".")[0]
         )
@@ -82,9 +82,9 @@ class TestEvidence:
         folder = Folder.objects.create(
             name="test folder", description="test folder description"
         )
-        security_measure = SecurityMeasure.objects.create(
-            name="test security measure",
-            description="test security measure description",
+        applied_control = AppliedControl.objects.create(
+            name="test applied control",
+            description="test applied control description",
             folder=folder,
         )
         evidence = Evidence.objects.create(
@@ -92,7 +92,7 @@ class TestEvidence:
             name="test evidence",
             description="test evidence description",
         )
-        evidence.security_measures.add(security_measure)  # pyright: ignore[reportAttributeAccessIssue]
+        evidence.applied_controls.add(applied_control)  # pyright: ignore[reportAttributeAccessIssue]
         assert not evidence.attachment
 
 
@@ -623,26 +623,26 @@ class TestRiskMatrix:
 
 
 @pytest.mark.django_db
-class TestSecurityMeasure:
+class TestAppliedControl:
     pytestmark = pytest.mark.django_db
 
     def test_measure_creation(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        measure = SecurityMeasure.objects.create(name="Measure", folder=root_folder)
+        measure = AppliedControl.objects.create(name="Measure", folder=root_folder)
         assert measure.name == "Measure"
         assert measure.folder == root_folder
 
     def test_measure_creation_same_name(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
-        SecurityMeasure.objects.create(name="Measure", folder=root_folder)
+        AppliedControl.objects.create(name="Measure", folder=root_folder)
         with pytest.raises(ValidationError):
-            SecurityMeasure.objects.create(name="Measure", folder=root_folder)
+            AppliedControl.objects.create(name="Measure", folder=root_folder)
 
     def test_measure_creation_same_name_different_folder(self):
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         folder = Folder.objects.create(name="Parent", folder=root_folder)
-        measure1 = SecurityMeasure.objects.create(name="Measure", folder=root_folder)
-        measure2 = SecurityMeasure.objects.create(name="Measure", folder=folder)
+        measure1 = AppliedControl.objects.create(name="Measure", folder=root_folder)
+        measure2 = AppliedControl.objects.create(name="Measure", folder=folder)
         assert measure1.name == "Measure"
         assert measure2.name == "Measure"
         assert measure1.folder == root_folder
@@ -654,7 +654,7 @@ class TestSecurityMeasure:
         function = SecurityFunction.objects.create(
             name="Function", folder=root_folder, category="technical"
         )
-        measure = SecurityMeasure.objects.create(
+        measure = AppliedControl.objects.create(
             name="Measure", folder=folder, security_function=function
         )
         assert measure.category == "technical"
@@ -668,7 +668,7 @@ class TestPolicy:
         root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
         policy = Policy.objects.create(name="Policy", folder=root_folder)
         assert Policy.objects.count() == 1
-        assert SecurityMeasure.objects.count() == 1
+        assert AppliedControl.objects.count() == 1
         assert policy.name == "Policy"
         assert policy.folder == root_folder
         assert policy.category == "policy"
@@ -963,14 +963,14 @@ class TestLibrary:
             folder=Folder.get_root_folder(),
             library=library,
         )
-        security_measure = SecurityMeasure.objects.create(
-            name="SecurityMeasure",
-            description="SecurityMeasure description",
+        applied_control = AppliedControl.objects.create(
+            name="AppliedControl",
+            description="AppliedControl description",
             folder=Folder.get_root_folder(),
             security_function=security_function,
         )
 
-        requirement_assessment.security_measures.add(security_measure)
+        requirement_assessment.applied_controls.add(applied_control)
 
         assert library.reference_count == 1
         compliance_assessment.delete()
@@ -1068,9 +1068,9 @@ class TestLibrary:
             folder=Folder.get_root_folder(),
             library=library,
         )
-        security_measure = SecurityMeasure.objects.create(
-            name="SecurityMeasure",
-            description="SecurityMeasure description",
+        applied_control = AppliedControl.objects.create(
+            name="AppliedControl",
+            description="AppliedControl description",
             folder=Folder.get_root_folder(),
             security_function=security_function,
         )
@@ -1089,7 +1089,7 @@ class TestLibrary:
             description="RiskScenario description",
             risk_assessment=risk_assessment,
         )
-        risk_scenario.security_measures.add(security_measure)
+        risk_scenario.applied_controls.add(applied_control)
 
         assert library.reference_count == 1
 

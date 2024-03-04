@@ -200,17 +200,17 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
 
     strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
 
-    security_measures = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
     rid = serializers.CharField()
 
 
-class SecurityMeasureWriteSerializer(BaseModelSerializer):
+class AppliedControlWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = SecurityMeasure
+        model = AppliedControl
         fields = "__all__"
 
 
-class SecurityMeasureReadSerializer(SecurityMeasureWriteSerializer):
+class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
     security_function = FieldsRelatedField()
 
@@ -222,13 +222,13 @@ class SecurityMeasureReadSerializer(SecurityMeasureWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
 
 
-class PolicyWriteSerializer(SecurityMeasureWriteSerializer):
+class PolicyWriteSerializer(AppliedControlWriteSerializer):
     class Meta:
         model = Policy
         fields = "__all__"
 
 
-class PolicyReadSerializer(SecurityMeasureReadSerializer):
+class PolicyReadSerializer(AppliedControlReadSerializer):
     class Meta:
         model = Policy
         fields = "__all__"
@@ -418,7 +418,7 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 class EvidenceReadSerializer(BaseModelSerializer):
     attachment = serializers.CharField(source="filename")
     folder = FieldsRelatedField()
-    security_measures = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
 
     class Meta:
@@ -427,8 +427,8 @@ class EvidenceReadSerializer(BaseModelSerializer):
 
 
 class EvidenceWriteSerializer(BaseModelSerializer):
-    security_measures = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=SecurityMeasure.objects.all()
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=AppliedControl.objects.all()
     )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all()

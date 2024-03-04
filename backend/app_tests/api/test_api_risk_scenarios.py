@@ -6,7 +6,7 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
-    SecurityMeasure,
+    AppliedControl,
     Threat,
 )
 from iam.models import Folder
@@ -226,7 +226,7 @@ class TestRiskScenariosAuthenticated:
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
         asset = Asset.objects.create(name="test", folder=test.folder)
-        security_measures = SecurityMeasure.objects.create(
+        applied_controls = AppliedControl.objects.create(
             name="test", folder=test.folder
         )
 
@@ -249,7 +249,7 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": str(risk_assessment.id),
                 "threats": [str(threat.id)],
                 "assets": [str(asset.id)],
-                "security_measures": [str(security_measures.id)],
+                "applied_controls": [str(applied_controls.id)],
             },
             {
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
@@ -269,8 +269,8 @@ class TestRiskScenariosAuthenticated:
                     "str": risk_assessment.risk_matrix.name,
                 },
                 "assets": [{"id": str(asset.id), "str": asset.name}],
-                "security_measures": [
-                    {"id": str(security_measures.id), "str": security_measures.name}
+                "applied_controls": [
+                    {"id": str(applied_controls.id), "str": applied_controls.name}
                 ],
             },
             user_group=test.user_group,
@@ -295,7 +295,7 @@ class TestRiskScenariosAuthenticated:
         threat = Threat.objects.create(name="test", folder=test.folder)
         threat2 = Threat.objects.create(name="test2", folder=folder)
         asset = Asset.objects.create(name="test", folder=folder)
-        security_measures = SecurityMeasure.objects.create(name="test", folder=folder)
+        applied_controls = AppliedControl.objects.create(name="test", folder=folder)
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -331,7 +331,7 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": str(risk_assessment2.id),
                 "threats": [str(threat2.id)],
                 "assets": [str(asset.id)],
-                "security_measures": [str(security_measures.id)],
+                "applied_controls": [str(applied_controls.id)],
             },
             {
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
