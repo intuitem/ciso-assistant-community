@@ -15,5 +15,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RenameModel('SecurityFunction', 'ReferenceControl'),
+        migrations.DeleteModel("Policy"),
         migrations.RenameModel('SecurityMeasure', 'AppliedControl'),
     ]
