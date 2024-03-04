@@ -26,7 +26,7 @@
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';
-	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
+	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
@@ -96,6 +96,10 @@
 		}
 	}
 
+	for (const index in data.treatmentChoices) {
+		data.treatmentChoices[index]['label'] = localItems(languageTag())[data.treatmentChoices[index]['value']];
+	}
+
 	let { form: measureCreateForm, message: measureCreateMessage } = {
 		form: {},
 		message: {}
@@ -161,7 +165,7 @@
 					<span>
 						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 						<p class="text-sm font-semibold">
-							{new Date(data.scenario.updated_at).toLocaleString()}
+							{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
 						</p>
 					</span>
 					<Select

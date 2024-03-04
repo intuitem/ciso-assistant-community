@@ -8,6 +8,8 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 
+	import * as m from '$paraglide/messages';
+
 	const modalStore: ModalStore = getModalStore();
 
 	export let row: Record<string, any>;
@@ -40,8 +42,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'Delete',
-			body: `Are you sure you want to delete the following object: ${name}?`
+			title: m.deleteModalTitle(),
+			body: `${m.deleteModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
