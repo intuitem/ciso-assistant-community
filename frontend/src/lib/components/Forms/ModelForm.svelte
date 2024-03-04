@@ -32,7 +32,6 @@
 
 	for (const index in model.selectOptions) {
 		for (const item in model.selectOptions[index]) {
-			console.log(toCamelCase(model.selectOptions[index][item]['label']))
 			model.selectOptions[index][item]['label'] = localItems(languageTag())[toCamelCase(model.selectOptions[index][item]['label'])];
 		}
 	}
