@@ -174,8 +174,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'securityMeasure',
 		localNamePlural: 'securityMeasures',
 		localFrGender: 'f',
-		verboseName: 'Applied control',
-		verboseNamePlural: 'Applied controls',
+		verboseName: 'Security measure',
+		verboseNamePlural: 'Security measures',
 		foreignKeyFields: [
 			{ field: 'security_function', urlModel: 'security-functions' },
 			{ field: 'folder', urlModel: 'folders' },
@@ -234,8 +234,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'securityFunction',
 		localNamePlural: 'securityFunctions',
 		localFrGender: 'f',
-		verboseName: 'Reference control',
-		verboseNamePlural: 'Reference controls',
+		verboseName: 'Security function',
+		verboseNamePlural: 'Security functions',
 		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
 		selectFields: [{ field: 'category' }],
 		filters: [{ field: 'folder' }]
