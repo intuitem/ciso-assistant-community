@@ -210,7 +210,6 @@ def get_sorted_requirement_nodes(
         else {}
     )
 
-
     def get_sorted_requirement_nodes_rec(
         requirement_nodes: list,
         requirements_assessed: list,
@@ -232,12 +231,14 @@ def get_sorted_requirement_nodes(
                 "description": node.description,
                 "children": get_sorted_requirement_nodes_rec(node.urn),
             }
-            for req in sorted([
-                requirement_node
-                for requirement_node in requirement_nodes
-                if requirement_node.parent_urn == node.urn
-            ], key=lambda x: x.order_id):
-
+            for req in sorted(
+                [
+                    requirement_node
+                    for requirement_node in requirement_nodes
+                    if requirement_node.parent_urn == node.urn
+                ],
+                key=lambda x: x.order_id,
+            ):
                 if requirements_assessed:
                     req_as = requirement_assessment_from_requirement_id[str(req.id)]
                     result[str(node.id)]["children"][str(req.id)].update(
@@ -283,8 +284,10 @@ def get_sorted_requirement_nodes(
     tree = get_sorted_requirement_nodes_rec(
         requirement_nodes,
         requirements_assessed,
-        sorted([rn for rn in requirement_nodes if not rn.parent_urn],
-               key=lambda x: x.order_id),
+        sorted(
+            [rn for rn in requirement_nodes if not rn.parent_urn],
+            key=lambda x: x.order_id,
+        ),
     )
     return tree
 

@@ -302,7 +302,6 @@ class Framework(ReferentialObjectMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
-
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted

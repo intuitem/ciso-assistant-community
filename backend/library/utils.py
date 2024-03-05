@@ -220,7 +220,9 @@ class FrameworkImporter:
         requirement_node_importers = []
         import_errors = []
         for index, requirement_node_data in enumerate(requirement_nodes):
-            requirement_node_importer = RequirementNodeImporter(requirement_node_data, index)
+            requirement_node_importer = RequirementNodeImporter(
+                requirement_node_data, index
+            )
             requirement_node_importers.append(requirement_node_importer)
             if (
                 requirement_node_error := requirement_node_importer.is_valid()
