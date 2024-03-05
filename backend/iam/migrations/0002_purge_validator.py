@@ -2,19 +2,20 @@
 
 from django.db import migrations
 
-def purge_validator(apps, schema_editor):
+def rename_validator(apps, schema_editor):
     """
-    Purge the validator role since it has been replaced by approver.
+    rename the validator role since it has been replaced by approver.
     """
     UserGroup = apps.get_model("iam", "UserGroup")
-    validator_user_group = UserGroup.objects.filter(name="BI-UG-GVA")
-    if validator_user_group.exists():
-        validator_user_group.delete()
+    for ug in UserGroup.objects.filter(name="BI-UG-GVA").all():
+        ug.name="BI-UG-GAP"
+        ug.save()
+    for ug in UserGroup.objects.filter(name="BI-UG-VAL").all():
+        ug.name="BI-UG-APP"
+        ug.save()
     Role = apps.get_model("iam", "Role")
-    validator_role = Role.objects.filter(name="BI-RL-VAL")
-    if validator_role.exists():
-        validator_role.delete()
-
+    for role in Role.objects.filter(name="BI-RL-VAL"):
+        role.name="BI-RL-APP"
 
 
 class Migration(migrations.Migration):
@@ -24,5 +25,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(purge_validator),
+        migrations.RunPython(rename_validator),
     ]
