@@ -155,7 +155,7 @@
 	{#if framework}
 		<h4 class="h4 font-medium">{m.framework()}</h4>
 		{#await data.tree}
-			loading...
+			{m.loading()}...
 		{:then tree}
 			<RecursiveTreeView
 				nodes={transformToTreeView(Object.entries(tree))}
