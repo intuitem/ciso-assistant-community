@@ -1,13 +1,13 @@
 from datetime import date, timedelta
-from re import sub
 
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
 
-from core.serializers import SecurityFunctionReadSerializer, ThreatReadSerializer
+from core.serializers import ReferenceControlReadSerializer, ThreatReadSerializer
 
 from .models import *
+from .utils import camel_case
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "--": "#fac858",
@@ -25,17 +25,11 @@ STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
 }
 
 
-def camel_case(s):
-    s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
-
-    return "".join([s[0].lower(), s[1:]])
-
-
-def security_measure_priority(user: User):
-    def get_quadrant(security_measure):
-        if security_measure.effort in ["S", "M"]:
+def applied_control_priority(user: User):
+    def get_quadrant(applied_control):
+        if applied_control.effort in ["S", "M"]:
             return "1st"
-        elif security_measure.effort in ["L", "XL"]:
+        elif applied_control.effort in ["L", "XL"]:
             return "2nd"
         else:
             return "undefined"
@@ -52,10 +46,10 @@ def security_measure_priority(user: User):
         object_ids_change,
         object_ids_delete,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
 
-    for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view):
+    for mtg in AppliedControl.objects.filter(id__in=object_ids_view):
         clusters[get_quadrant(mtg)].append(mtg)
 
     return clusters
@@ -67,10 +61,10 @@ def measures_to_review(user: User):
         object_ids_change,
         object_ids_delete,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
     measures = (
-        SecurityMeasure.objects.filter(id__in=object_ids_view)
+        AppliedControl.objects.filter(id__in=object_ids_view)
         .filter(eta__lte=date.today() + timedelta(days=30))
         .exclude(status__iexact="done")
         .order_by("eta")
@@ -84,7 +78,7 @@ def compile_project_for_composer(user: User, projects_list: list):
     Compiling information from choosen projects for composer
     """
     compliance_assessments_status = {"values": [], "labels": []}
-    security_measure_status = {"values": [], "labels": []}
+    applied_control_status = {"values": [], "labels": []}
 
     # Requirements assessment bar chart
     color_map = {
@@ -105,22 +99,22 @@ def compile_project_for_composer(user: User, projects_list: list):
         compliance_assessments_status["values"].append(v)
         compliance_assessments_status["labels"].append(st.label)
 
-    # Security measures bar chart
+    # Applied controls bar chart
     color_map = {
         "open": "#93c5fd",
         "in_progress": "#fdba74",
         "on_hold": "#f87171",
         "done": "#86efac",
     }
-    for st in SecurityMeasure.Status.choices:
+    for st in AppliedControl.Status.choices:
         count = (
-            SecurityMeasure.objects.filter(status=st[0])
+            AppliedControl.objects.filter(status=st[0])
             .filter(requirement_assessments__assessment__project__in=projects_list)
             .count()
         )
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
-        security_measure_status["values"].append(v)
-        security_measure_status["labels"].append(st[1])
+        applied_control_status["values"].append(v)
+        applied_control_status["labels"].append(st[1])
 
     project_objects = []
     for project in projects_list:
@@ -129,7 +123,7 @@ def compile_project_for_composer(user: User, projects_list: list):
     return {
         "project_objects": project_objects,
         "compliance_assessments_status": compliance_assessments_status,
-        "security_measure_status": security_measure_status,
+        "applied_control_status": applied_control_status,
         "change_usergroup": RoleAssignment.is_access_allowed(
             user=user,
             perm=Permission.objects.get(codename="change_usergroup"),
@@ -202,12 +196,21 @@ def get_sorted_requirement_nodes(
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
     Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
+    Values are correctly sorted based on order_id
+    If order_id is missing, sorting is based on created_at
     """
+
+    # cope for old version not creating order_id correctly
+    for req in requirement_nodes:
+        if req.order_id is None:
+            req.order_id = req.created_at
+
     requirement_assessment_from_requirement_id = (
-        {str(ra.requirement.id): ra for ra in requirements_assessed}
+        {str(ra.requirement_id): ra for ra in requirements_assessed}
         if requirements_assessed
         else {}
     )
+
 
     def get_sorted_requirement_nodes_rec(
         requirement_nodes: list,
@@ -215,7 +218,7 @@ def get_sorted_requirement_nodes(
         start: list,
     ) -> dict:
         """
-        Recursive function to build framework groups tree, within get_sorted_requirements_and_groups
+        Recursive function to build framework groups tree, within get_sorted_requirements_nodes
         start: the initial list
         """
         result = {}
@@ -237,11 +240,12 @@ def get_sorted_requirement_nodes(
                     requirement_nodes, requirements_assessed, children
                 ),
             }
-            for req in [
+            for req in sorted([
                 requirement_node
                 for requirement_node in requirement_nodes
                 if requirement_node.parent_urn == node.urn
-            ]:
+            ], key=lambda x: x.order_id):
+
                 if requirements_assessed:
                     req_as = requirement_assessment_from_requirement_id[str(req.id)]
                     result[str(node.id)]["children"][str(req.id)].update(
@@ -253,12 +257,13 @@ def get_sorted_requirement_nodes(
                             "leaf_content": req.display_long(),
                             "status": req_as.status,
                             "status_display": req_as.get_status_display(),
+                            "status_i18n": camel_case(req_as.status),
                             "style": "leaf",
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
                             ).data,
-                            "security_functions": SecurityFunctionReadSerializer(
-                                req.security_functions.all(), many=True
+                            "reference_controls": ReferenceControlReadSerializer(
+                                req.reference_controls.all(), many=True
                             ).data,
                         }
                     )
@@ -273,8 +278,8 @@ def get_sorted_requirement_nodes(
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
                             ).data,
-                            "security_functions": SecurityFunctionReadSerializer(
-                                req.security_functions.all(), many=True
+                            "reference_controls": ReferenceControlReadSerializer(
+                                req.reference_controls.all(), many=True
                             ).data,
                         }
                     )
@@ -283,9 +288,9 @@ def get_sorted_requirement_nodes(
     tree = get_sorted_requirement_nodes_rec(
         requirement_nodes,
         requirements_assessed,
-        [rg for rg in requirement_nodes if not rg.parent_urn],
+        sorted([rn for rn in requirement_nodes if not rn.parent_urn],
+               key=lambda x: x.order_id),
     )
-
     return tree
 
 
@@ -414,7 +419,7 @@ def risk_per_status(user: User):
     return {"labels": labels, "values": values}
 
 
-def security_measure_per_status(user: User):
+def applied_control_per_status(user: User):
     values = list()
     labels = list()
     local_lables = list()
@@ -429,11 +434,11 @@ def security_measure_per_status(user: User):
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
-    for st in SecurityMeasure.Status.choices:
+    for st in AppliedControl.Status.choices:
         count = (
-            SecurityMeasure.objects.filter(id__in=object_ids_view)
+            AppliedControl.objects.filter(id__in=object_ids_view)
             .filter(status=st[0])
             .count()
         )
@@ -444,18 +449,18 @@ def security_measure_per_status(user: User):
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
-def security_measure_per_cur_risk(user: User):
+def applied_control_per_cur_risk(user: User):
     output = list()
     (
         object_ids_view,
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
     for lvl in get_rating_options(user):
         cnt = (
-            SecurityMeasure.objects.filter(id__in=object_ids_view)
+            AppliedControl.objects.filter(id__in=object_ids_view)
             .exclude(status="done")
             .filter(risk_scenarios__current_level=lvl[0])
             .count()
@@ -465,7 +470,7 @@ def security_measure_per_cur_risk(user: User):
     return {"values": output}
 
 
-def security_measure_per_security_function(user: User):
+def applied_control_per_reference_control(user: User):
     indicators = list()
     values = list()
     (
@@ -473,17 +478,17 @@ def security_measure_per_security_function(user: User):
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, SecurityMeasure
+        Folder.get_root_folder(), user, AppliedControl
     )
 
     tmp = (
-        SecurityMeasure.objects.filter(id__in=object_ids_view)
-        .values("security_function__name")
-        .annotate(total=Count("security_function"))
-        .order_by("security_function")
+        AppliedControl.objects.filter(id__in=object_ids_view)
+        .values("reference_control__name")
+        .annotate(total=Count("reference_control"))
+        .order_by("reference_control")
     )
     for entry in tmp:
-        indicators.append(entry["security_function__name"])
+        indicators.append(entry["reference_control__name"])
         values.append(entry["total"])
 
     return {
@@ -548,7 +553,6 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "name": r[0],
                 "value": r[1]["count"],
                 "color": r[1]["color"],
-                "localName": camel_case(r[0]),
             }
         )
 
@@ -560,7 +564,6 @@ def risks_count_per_level(user: User, risk_assessments: list | None = None):
                 "name": r[0],
                 "value": r[1]["count"],
                 "color": r[1]["color"],
-                "localName": camel_case(r[0]),
             }
         )
     return {"current": current_level, "residual": residual_level}
@@ -629,10 +632,10 @@ def get_counters(user: User):
     output = {}
     objects_dict = {
         "RiskScenario": RiskScenario,
-        "SecurityMeasure": SecurityMeasure,
+        "AppliedControl": AppliedControl,
         "RiskAssessment": RiskAssessment,
         "Project": Project,
-        "Security Function": SecurityFunction,
+        "Reference Control": ReferenceControl,
         "RiskAcceptance": RiskAcceptance,
         "Threat": Threat,
         "Compliance Assessment": ComplianceAssessment,
@@ -709,8 +712,8 @@ def risk_status(user: User, risk_assessment_list):
                 {"value": cnt, "itemStyle": {"color": STATUS_COLOR_MAP[option[0]]}}
             )
 
-        for status in SecurityMeasure.Status.choices:
-            cnt = SecurityMeasure.objects.filter(
+        for status in AppliedControl.Status.choices:
+            cnt = AppliedControl.objects.filter(
                 risk_scenarios__risk_assessment=risk_assessment, status=status[0]
             ).count()
             mtg_status_out[status[0]].append(
@@ -794,15 +797,16 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
     values = list()
     labels = list()
 
-    for st in SecurityMeasure.Status.choices:
+    for st in AppliedControl.Status.choices:
         count = (
-            SecurityMeasure.objects.filter(status=st[0])
+            AppliedControl.objects.filter(status=st[0])
             .filter(risk_scenarios__risk_assessment__in=risk_assessment_list)
             .count()
         )
         v = {"value": count, "itemStyle": {"color": STATUS_COLOR_MAP[st[0]]}}
         values.append(v)
         labels.append(st[1])
+    local_lables = [camel_case(str(l)) for l in labels]
 
     risk_assessment_objects = list()
 
@@ -843,6 +847,10 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
             "untreated_h_vh": untreated_h_vh,
             "accepted": accepted,
         },
-        "security_measure_status": {"labels": labels, "values": values},
+        "applied_control_status": {
+            "localLables": local_lables,
+            "labels": labels,
+            "values": values,
+        },
         "colors": get_risk_color_ordered_list(user, risk_assessment_list),
     }

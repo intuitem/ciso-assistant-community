@@ -1,7 +1,7 @@
 from os import path
 import pytest
 from rest_framework.test import APIClient
-from core.models import SecurityMeasure
+from core.models import AppliedControl
 from core.models import Evidence
 from iam.models import Folder
 
@@ -33,8 +33,8 @@ class TestEvidencesUnauthenticated:
             {
                 "name": EVIDENCE_NAME,
                 "folder": folder,
-                "security_measures": [
-                    SecurityMeasure.objects.create(name="test", folder=folder)
+                "applied_controls": [
+                    AppliedControl.objects.create(name="test", folder=folder)
                 ],
             },
         )
@@ -62,8 +62,8 @@ class TestEvidencesUnauthenticated:
             {
                 "name": EVIDENCE_NAME,
                 "folder": folder,
-                "security_measures": [
-                    SecurityMeasure.objects.create(name="test", folder=folder)
+                "applied_controls": [
+                    AppliedControl.objects.create(name="test", folder=folder)
                 ],
             },
             {
@@ -84,8 +84,8 @@ class TestEvidencesUnauthenticated:
             {
                 "name": EVIDENCE_NAME,
                 "folder": folder,
-                "security_measures": [
-                    SecurityMeasure.objects.create(name="test", folder=folder)
+                "applied_controls": [
+                    AppliedControl.objects.create(name="test", folder=folder)
                 ],
             },
         )
@@ -104,7 +104,7 @@ class TestEvidencesAuthenticated:
     def test_get_evidences(self, test):
         """test to get evidences from the API with authentication"""
 
-        security_measure = SecurityMeasure.objects.create(
+        applied_control = AppliedControl.objects.create(
             name="test", folder=test.folder
         )
 
@@ -117,14 +117,14 @@ class TestEvidencesAuthenticated:
                 "description": EVIDENCE_DESCRIPTION,
                 "link": EVIDENCE_LINK,
                 "folder": test.folder,
-                "security_measures": [security_measure],
+                "applied_controls": [applied_control],
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "security_measures": [
+                "applied_controls": [
                     {
-                        "id": str(security_measure.id),
-                        "str": security_measure.name,
+                        "id": str(applied_control.id),
+                        "str": applied_control.name,
                     }
                 ],
             },
@@ -134,7 +134,7 @@ class TestEvidencesAuthenticated:
     def test_create_evidences(self, test):
         """test to create evidences with the API with authentication"""
 
-        security_measure = SecurityMeasure.objects.create(
+        applied_control = AppliedControl.objects.create(
             name="test", folder=test.folder
         )
 
@@ -150,15 +150,15 @@ class TestEvidencesAuthenticated:
                     "description": EVIDENCE_DESCRIPTION,
                     "link": EVIDENCE_LINK,
                     "folder": str(test.folder.id),
-                    "security_measures": [str(security_measure.id)],
+                    "applied_controls": [str(applied_control.id)],
                     "attachment": file,
                 },
                 {
                     "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                    "security_measures": [
+                    "applied_controls": [
                         {
-                            "id": str(security_measure.id),
-                            "str": security_measure.name,
+                            "id": str(applied_control.id),
+                            "str": applied_control.name,
                         }
                     ],
                     "attachment": EVIDENCE_ATTACHMENT,
@@ -171,10 +171,10 @@ class TestEvidencesAuthenticated:
         """test to update evidences with the API with authentication"""
 
         folder = Folder.objects.create(name="test2")
-        security_measure = SecurityMeasure.objects.create(
+        applied_control = AppliedControl.objects.create(
             name="test", folder=test.folder
         )
-        security_measure2 = SecurityMeasure.objects.create(name="test2", folder=folder)
+        applied_control2 = AppliedControl.objects.create(name="test2", folder=folder)
 
         with open(
             path.join(path.dirname(path.dirname(__file__)), EVIDENCE_ATTACHMENT), "rb"
@@ -188,22 +188,22 @@ class TestEvidencesAuthenticated:
                     "description": EVIDENCE_DESCRIPTION,
                     "link": EVIDENCE_LINK,
                     "folder": test.folder,
-                    "security_measures": [security_measure],
+                    "applied_controls": [applied_control],
                 },
                 {
                     "name": "new " + EVIDENCE_NAME,
                     "description": "new " + EVIDENCE_DESCRIPTION,
                     "link": EVIDENCE_LINK + "/new",
                     "folder": str(folder.id),
-                    "security_measures": [str(security_measure2.id)],
+                    "applied_controls": [str(applied_control2.id)],
                     "attachment": file,
                 },
                 {
                     "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                    "security_measures": [
+                    "applied_controls": [
                         {
-                            "id": str(security_measure.id),
-                            "str": security_measure.name,
+                            "id": str(applied_control.id),
+                            "str": applied_control.name,
                         }
                     ],
                 },
@@ -224,8 +224,8 @@ class TestEvidencesAuthenticated:
             {
                 "name": EVIDENCE_NAME,
                 "folder": test.folder,
-                "security_measures": [
-                    SecurityMeasure.objects.create(name="test", folder=test.folder)
+                "applied_controls": [
+                    AppliedControl.objects.create(name="test", folder=test.folder)
                 ],
             },
             user_group=test.user_group,

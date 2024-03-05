@@ -12,8 +12,9 @@
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
 	import * as m from '$paraglide/messages';
-	import { localItems } from '$lib/utils/locales';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	// Event Dispatcher
 	type TableEvent = {
 		selected: string[];
@@ -193,7 +194,7 @@
 									{#if tagData}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-											{text}
+											{localItems(languageTag())[text]}
 										</span>
 									{/if}
 								{/each}
@@ -229,9 +230,20 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+								{:else if ISO_8601_REGEX.test(value)}
+									{new Date(value).toLocaleString(languageTag())}
+					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str)]}
+				  		<p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{localItems(languageTag())[toCamelCase(value.name ?? value.str)]}</p>
+					{:else}
+                  		<p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+					{/if}
                 {:else}
-                  {value ?? '-'}
+					{#if localItems(languageTag())[value]}
+						{localItems(languageTag())[value]}
+					{:else}
+						{value ?? '-'}
+					{/if}
                 {/if}
                 </span>
 							{/if}

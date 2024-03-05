@@ -6,6 +6,7 @@
 	import { availableLanguageTags, languageTag, setLanguageTag } from '$paraglide/runtime';
 	import { LOCALE_MAP } from '$lib/utils/locales';
 	import * as m from '$paraglide/messages';
+	import { setCookie } from '$lib/utils/cookies';
 
 	const language: any = {
 		french: m.french(),
@@ -20,7 +21,8 @@
 		event.preventDefault();
 		value = event?.target?.value;
 		setLanguageTag(value);
-		sessionStorage.setItem('lang', value);
+		// sessionStorage.setItem('lang', value);
+		setCookie('lang', value);
 	}
 
 	const popupUser: PopupSettings = {

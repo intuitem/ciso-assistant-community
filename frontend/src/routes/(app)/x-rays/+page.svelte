@@ -11,7 +11,7 @@
 
 		types.forEach((type) => {
 			result[type] = Object.entries(item.objects).reduce((acc, [key, value]) => {
-				if (key !== 'object') {
+				if (key !== 'object') { // if key === 'quality_check'
 					acc = [...acc, ...value.quality_check[type]];
 				}
 				return acc;
@@ -84,7 +84,7 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									{compliance_assessment.object.name}
+									<a href="/compliance-assessments/{compliance_assessment.object.id}" class="hover:underline text-blue-600">{compliance_assessment.object.name}</a>
 								</li>
 								{@const quality_check = compliance_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -130,11 +130,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{#if quality_check.infos.length === 1}
-													<span class="font-bold">{quality_check.infos.length}</span>
+												{#if quality_check.info.length === 1}
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: ''})}
 												{:else}
-													<span class="font-bold">{quality_check.infos.length}</span>
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: 's'})}
 												{/if}
 											</div>
@@ -156,7 +156,7 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									{risk_assessment.object.name}
+									<a href="/risk-assessments/{risk_assessment.object.id}" class="hover:underline text-blue-600">{risk_assessment.object.name}</a>
 								</li>
 								{@const quality_check = risk_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -202,11 +202,11 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{#if quality_check.infos.length === 1}
-													<span class="font-bold">{quality_check.infos.length}</span>
+												{#if quality_check.info.length === 1}
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: ''})}
 												{:else}
-													<span class="font-bold">{quality_check.infos.length}</span>
+													<span class="font-bold">{quality_check.info.length}</span>
 													{m.infosFound({ s: 's'})}
 												{/if}
 											</div>

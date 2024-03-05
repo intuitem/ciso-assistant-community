@@ -8,16 +8,12 @@ baseTest.skip('login page as expected title', async ({ page }) => {
 	await expect.soft(page.getByRole('heading', { name: 'Hello there 👋' })).toBeVisible();
 });
 
-test('login / logout process is working properly', async ({
-	loginPage,
-	analyticsPage: overviewPage,
-	sideBar,
-	page
-}) => {
+test('login / logout process is working properly', async ({ loginPage, analyticsPage, sideBar, page }) => {
 	await loginPage.hasUrl(1);
-	await expect.soft(page.getByRole('heading', { name: 'Login into your account' })).toBeVisible();
+	await expect.soft(page.getByTestId('login')).toBeVisible();
+	await loginPage.checkForUndefinedText();
 	await loginPage.login();
-	await overviewPage.hasUrl();
+	await analyticsPage.hasUrl();
 	sideBar.moreButton.click();
 	sideBar.logoutButton.click();
 	await loginPage.hasUrl(0);

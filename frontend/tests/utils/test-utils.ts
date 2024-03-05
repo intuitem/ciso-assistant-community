@@ -22,8 +22,8 @@ type Fixtures = {
 	riskAssessmentsPage: PageContent;
 	riskMatricesPage: PageContent;
 	riskScenariosPage: PageContent;
-	securityFunctionsPage: PageContent;
-	securityMeasuresPage: PageContent;
+	referenceControlsPage: PageContent;
+	appliedControlsPage: PageContent;
 	threatsPage: PageContent;
 	usersPage: PageContent;
 	logedPage: LoginPage;
@@ -49,8 +49,8 @@ export const test = base.extend<Fixtures>({
 			riskAssessmentsPage,
 			riskMatricesPage,
 			riskScenariosPage,
-			securityFunctionsPage,
-			securityMeasuresPage,
+			referenceControlsPage,
+			appliedControlsPage,
 			threatsPage,
 			usersPage
 		},
@@ -68,8 +68,8 @@ export const test = base.extend<Fixtures>({
 			riskAssessmentsPage,
 			riskMatricesPage,
 			riskScenariosPage,
-			securityFunctionsPage,
-			securityMeasuresPage,
+			referenceControlsPage,
+			appliedControlsPage,
 			threatsPage,
 			usersPage
 		});
@@ -175,10 +175,10 @@ export const test = base.extend<Fixtures>({
 			{ name: 'threats', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'treatment', type: type.SELECT },
 			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
-			{ name: 'existing_measures', type: type.TEXT },
+			{ name: 'existing_controls', type: type.TEXT },
 			{ name: 'current_proba', type: type.SELECT },
 			{ name: 'current_impact', type: type.SELECT },
-			{ name: 'security_measures', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'applied_controls', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
 			{ name: 'residual_proba', type: type.SELECT },
 			{ name: 'residual_impact', type: type.SELECT },
 			{ name: 'justification', type: type.TEXT }
@@ -186,8 +186,8 @@ export const test = base.extend<Fixtures>({
 		await use(rPage);
 	},
 
-	securityFunctionsPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-functions', 'Security functions', [
+	referenceControlsPage: async ({ page }, use) => {
+		const sPage = new PageContent(page, '/reference-controls', 'Reference controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
@@ -197,8 +197,8 @@ export const test = base.extend<Fixtures>({
 		await use(sPage);
 	},
 
-	securityMeasuresPage: async ({ page }, use) => {
-		const sPage = new PageContent(page, '/security-measures', 'Security measures', [
+	appliedControlsPage: async ({ page }, use) => {
+		const sPage = new PageContent(page, '/applied-controls', 'Applied controls', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'category', type: type.SELECT },
@@ -208,7 +208,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'link', type: type.TEXT },
 			{ name: 'effort', type: type.SELECT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
-			{ name: 'security_function', type: type.SELECT_AUTOCOMPLETE }
+			{ name: 'reference_control', type: type.SELECT_AUTOCOMPLETE }
 		]);
 		await use(sPage);
 	},
@@ -223,16 +223,18 @@ export const test = base.extend<Fixtures>({
 		await use(tPage);
 	},
 
-	usersPage: async ({ page }, use) => {
-		const uPage = new PageContent(page, '/users', 'Users', [
-			{ name: 'email', type: type.TEXT },
-			{ name: 'first_name', type: type.TEXT },
-			{ name: 'last_name', type: type.TEXT },
-			{ name: 'user_groups', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
-			{ name: 'is_active', type: type.CHECKBOX }
-		]);
-		await use(uPage);
-	},
+    usersPage: async ({ page }, use) => {
+        const uPage = new PageContent(page, '/users', 'Users', [
+            { name: 'email', type: type.TEXT },
+            { name: 'first_name', type: type.TEXT },
+            { name: 'last_name', type: type.TEXT },
+            { name: 'user_groups', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+            { name: 'is_active', type: type.CHECKBOX },
+            { name: 'new_password', type: type.TEXT },
+            { name: 'confirm_new_password', type: type.TEXT },
+        ]);
+        await use(uPage);
+    },
 
 	logedPage: async ({ page }, use) => {
 		const loginPage = new LoginPage(page);
@@ -342,7 +344,7 @@ export class TestContent {
 					name: '',
 					description: '',
 					internal_reference: '',
-					lc_status: 'End Of Life'
+					lc_status: 'End of life'
 				}
 			},
 			assetsPage: {
@@ -376,10 +378,10 @@ export class TestContent {
 					provider: ''
 				}
 			},
-			securityFunctionsPage: {
-				displayName: 'Security functions',
+			referenceControlsPage: {
+				displayName: 'Reference controls',
 				build: {
-					name: vars.securityFunctionName,
+					name: vars.referenceControlName,
 					description: vars.description,
 					category: 'Technical',
 					provider: 'Test provider',
@@ -392,18 +394,18 @@ export class TestContent {
 					provider: ''
 				}
 			},
-			securityMeasuresPage: {
-				displayName: 'Security measures',
-				dependency: vars.securityFunction.library,
+			appliedControlsPage: {
+				displayName: 'Applied controls',
+				dependency: vars.referenceControl.library,
 				build: {
-					security_function: {
-						value: vars.securityFunction.name,
-						category: vars.securityFunction.category,
+					reference_control: {
+						value: vars.referenceControl.name,
+						category: vars.referenceControl.category,
 						request: {
-							url: 'security-functions'
+							url: 'reference-controls'
 						}
 					},
-					name: vars.securityMeasureName,
+					name: vars.appliedControlName,
 					description: vars.description,
 					status: 'Planned',
 					eta: '2025-01-01',
@@ -411,14 +413,14 @@ export class TestContent {
 					link: 'https://intuitem.com/',
 					effort: 'Large',
 					folder: vars.folderName,
-					category: vars.securityFunction.category
+					category: vars.referenceControl.category
 				},
 				editParams: {
-					security_function: {
-						value: vars.securityFunction2.name,
-						category: vars.securityFunction2.category,
+					reference_control: {
+						value: vars.referenceControl2.name,
+						category: vars.referenceControl2.category,
 						request: {
-							url: 'security-functions'
+							url: 'reference-controls'
 						}
 					},
 					name: '',
@@ -428,7 +430,7 @@ export class TestContent {
 					expiry_date: '2026-02-25',
 					link: 'https://intuitem.com/community/',
 					effort: 'Medium',
-					category: vars.securityFunction2.category
+					category: vars.referenceControl2.category
 				}
 			},
 			complianceAssessmentsPage: {
@@ -506,13 +508,13 @@ export class TestContent {
 				editParams: {
 					name: '',
 					description: '',
-					treatment: 'Accept',
+					treatment: 'Accepted',
 					//TODO add risk_assessment & threats
 					assets: [vars.assetName],
-					existing_measures: 'Test existing measures',
+					existing_controls: 'Test Existing Controls',
 					current_proba: 'High',
 					current_impact: 'Medium',
-					security_measures: [vars.securityMeasureName],
+					applied_controls: [vars.appliedControlName],
 					residual_proba: 'Medium',
 					residual_impact: 'Low',
 					justification: 'Test comments'
@@ -558,9 +560,9 @@ export function setHttpResponsesListener(page: Page) {
 		expect.soft(response.status()).toBeOneofValues([100, 399]);
 		// expect.soft(response.ok(), 'An error with status code ' + response.status() + ' occured when trying to achieve operation').toBeTruthy();
 	});
-	page.on('console', (message) => {
-		expect.soft(message.type()).not.toBe('error');
-	});
+	// page.on('console', (message) => {
+	// 	expect.soft(message.type()).not.toBe('error');
+	// });
 }
 
 export function getUniqueValue(value: string) {

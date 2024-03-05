@@ -29,15 +29,17 @@
 		crumbs = tokens.map((t) => {
 			tokenPath += '/' + t;
 			if (t === $breadcrumbObject.id) {
-				if ($breadcrumbObject.name) title = $breadcrumbObject.name;
-				else title = $breadcrumbObject.email;
+				if ($breadcrumbObject.name) t = $breadcrumbObject.name;
+				else t = $breadcrumbObject.email;
 			} else if (t === 'folders') {
 				t = 'domains';
 			}
-			t = t.replace(/-/g, ' ');
-			t = capitalizeSecondWord(t);
+			else{
+				t = t.replace(/-/g, ' ');
+				t = capitalizeSecondWord(t);
+			}
 			return {
-				label: $page.data.label || title || t,
+				label: $page.data.label || t,
 				href: Object.keys(listViewFields).includes(tokens[0]) ? tokenPath : null
 			};
 		});
@@ -51,7 +53,7 @@
 <ol class="breadcrumb-nonresponsive">
 	{#each crumbs as c, i}
 		{#if i == crumbs.length - 1}
-			<span class="text-sm text-gray-500 font-semibold antialiased">
+			<span class="text-sm text-gray-500 font-semibold antialiased" data-testid="crumb-item">
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
@@ -66,6 +68,7 @@
 				{#if c.href}
 					<a
 						class="unstyled text-sm hover:text-primary-500 font-semibold antialiased whitespace-nowrap"
+						data-testid="crumb-item"
 						href={c.href}
 					>
 						{#if c.icon}
@@ -78,7 +81,7 @@
 						{/if}
 					</a>
 				{:else}
-					<span class="text-sm text-gray-500 font-semibold antialiased">
+					<span class="text-sm text-gray-500 font-semibold antialiased" data-testid="crumb-item">
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}
