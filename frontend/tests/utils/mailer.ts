@@ -15,12 +15,12 @@ class Email {
     }
 
     async hasWelcomeEmailDetails() {
-        expect.soft(await this.getFrom()).toEqual(process.env.DEFAULT_FROM_EMAIL);
+        expect.soft(await this.getFrom()).toEqual('ciso-assistant@tests.net');
         expect.soft(await this.getSubject()).toEqual('Welcome to Ciso Assistant!');
     }
 
     async hasResetPasswordEmailDetails() {
-        expect.soft(await this.getFrom()).toEqual(process.env.DEFAULT_FROM_EMAIL);
+        expect.soft(await this.getFrom()).toEqual('ciso-assistant@tests.net');
         expect.soft(await this.getSubject()).toEqual('CISO Assistant: Password Reset');
     }
 
