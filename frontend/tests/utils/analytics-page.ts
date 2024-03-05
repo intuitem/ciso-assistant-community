@@ -6,8 +6,4 @@ export class AnalyticsPage extends BasePage {
 		super(page, '/analytics', 'Analytics');
 		// this.page.goto('/analytics');
 	}
-
-	async hasTitle() {
-		await expect.soft(this.pageTitle).toHaveText('Analytics');
-	}
 }

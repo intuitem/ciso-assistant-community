@@ -11,7 +11,7 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.request import Request
 from rest_framework.views import APIView
 from core.forms import FirstConnexionConfirmForm, ResetConfirmForm
-from core.models import SecurityMeasure
+from core.models import AppliedControl
 
 from core.helpers import *
 from rest_framework.response import Response
@@ -272,18 +272,18 @@ class AssetViewSet(BaseModelViewSet):
         return Response(dict(Asset.Type.choices))
 
 
-class SecurityFunctionViewSet(BaseModelViewSet):
+class ReferenceControlViewSet(BaseModelViewSet):
     """
-    API endpoint that allows security functions to be viewed or edited.
+    API endpoint that allows reference controls to be viewed or edited.
     """
 
-    model = SecurityFunction
+    model = ReferenceControl
     filterset_fields = ["folder", "category"]
     search_fields = ["name", "description", "provider"]
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(SecurityFunction.CATEGORY))
+        return Response(dict(ReferenceControl.CATEGORY))
 
 
 class RiskMatrixViewSet(BaseModelViewSet):
@@ -363,8 +363,8 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             [
                 risk_scenario.update(
                     {
-                        "security_measures": SecurityMeasureReadSerializer(
-                            SecurityMeasure.objects.filter(
+                        "applied_controls": AppliedControlReadSerializer(
+                            AppliedControl.objects.filter(
                                 risk_scenarios__id=risk_scenario["id"]
                             ),
                             many=True,
@@ -396,7 +396,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "measure_name",
                 "measure_desc",
                 "category",
-                "security_function",
+                "reference_control",
                 "eta",
                 "effort",
                 "link",
@@ -404,9 +404,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             ]
             writer.writerow(columns)
             (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, SecurityMeasure
+                Folder.get_root_folder(), request.user, AppliedControl
             )
-            for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view).filter(
+            for mtg in AppliedControl.objects.filter(id__in=object_ids_view).filter(
                 risk_scenarios__risk_assessment=risk_assessment
             ):
                 risk_scenarios = ",".join(
@@ -421,7 +421,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     mtg.name,
                     mtg.description,
                     mtg.get_category_display(),
-                    mtg.security_function,
+                    mtg.reference_control,
                     mtg.eta,
                     mtg.effort,
                     mtg.link,
@@ -449,17 +449,17 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 "threats",
                 "name",
                 "description",
-                "existing_measures",
+                "existing_controls",
                 "current_level",
-                "security_measures",
+                "applied_controls",
                 "residual_level",
                 "treatment",
             ]
             writer.writerow(columns)
 
             for scenario in risk_assessment.risk_scenarios.all().order_by("created_at"):
-                security_measures = ",".join(
-                    [m.csv_value for m in scenario.security_measures.all()]
+                applied_controls = ",".join(
+                    [m.csv_value for m in scenario.applied_controls.all()]
                 )
                 threats = ",".join([t.name for t in scenario.threats.all()])
                 row = [
@@ -467,9 +467,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                     threats,
                     scenario.name,
                     scenario.description,
-                    scenario.existing_measures,
+                    scenario.existing_controls,
                     scenario.get_current_risk()["name"],
-                    security_measures,
+                    applied_controls,
                     scenario.get_residual_risk()["name"],
                     scenario.treatment,
                 ]
@@ -521,17 +521,17 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             return Response({"error": "Permission denied"})
 
 
-class SecurityMeasureViewSet(BaseModelViewSet):
+class AppliedControlViewSet(BaseModelViewSet):
     """
-    API endpoint that allows security measures to be viewed or edited.
+    API endpoint that allows applied controls to be viewed or edited.
     """
 
-    model = SecurityMeasure
+    model = AppliedControl
     filterset_fields = [
         "folder",
         "category",
         "status",
-        "security_function",
+        "reference_control",
         "effort",
         "risk_scenarios",
         "requirement_assessments",
@@ -541,20 +541,20 @@ class SecurityMeasureViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
-        return Response(dict(SecurityMeasure.Status.choices))
+        return Response(dict(AppliedControl.Status.choices))
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
-        return Response(dict(SecurityMeasure.CATEGORY))
+        return Response(dict(AppliedControl.CATEGORY))
 
     @action(detail=False, name="Get effort choices")
     def effort(self, request):
-        return Response(dict(SecurityMeasure.EFFORT))
+        return Response(dict(AppliedControl.EFFORT))
 
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
         (_, object_ids_change, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityMeasure
+            Folder.get_root_folder(), request.user, AppliedControl
         )
 
         return Response({"results": object_ids_change})
@@ -563,17 +563,17 @@ class SecurityMeasureViewSet(BaseModelViewSet):
         detail=False, name="Something"
     )  # Write a good name for the "name" keyword argument
     def per_status(self, request):
-        data = security_measure_per_status(request.user)
+        data = applied_control_per_status(request.user)
         return Response({"results": data})
 
-    @action(detail=False, name="Get the ordered todo security measures")
+    @action(detail=False, name="Get the ordered todo applied controls")
     def todo(self, request):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityMeasure
+            Folder.get_root_folder(), request.user, AppliedControl
         )
 
         measures = sorted(
-            SecurityMeasure.objects.filter(id__in=object_ids_view)
+            AppliedControl.objects.filter(id__in=object_ids_view)
             .exclude(status="done")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
@@ -583,7 +583,7 @@ class SecurityMeasureViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","security_function","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -594,7 +594,7 @@ class SecurityMeasureViewSet(BaseModelViewSet):
 
         ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 
-        measures = [SecurityMeasureReadSerializer(mtg).data for mtg in measures]
+        measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         # How to add ranking_score directly in the serializer ?
 
@@ -602,7 +602,7 @@ class SecurityMeasureViewSet(BaseModelViewSet):
             measures[i]["ranking_score"] = ranking_scores[measures[i]["id"]]
 
         """
-        The serializer of SecurityMeasure isn't applied automatically for this function
+        The serializer of AppliedControl isn't applied automatically for this function
         """
 
         return Response({"results": measures})
@@ -614,21 +614,21 @@ class SecurityMeasureViewSet(BaseModelViewSet):
         """print("ODZFFHZ")
         print(measures[0].get_ranking_score())"""
 
-        measures = [SecurityMeasureReadSerializer(mtg).data for mtg in measures]
+        measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
-        The serializer of SecurityMeasure isn't applied automatically for this function
+        The serializer of AppliedControl isn't applied automatically for this function
         """
 
         return Response({"results": measures})
 
 
-class PolicyViewSet(SecurityMeasureViewSet):
+class PolicyViewSet(AppliedControlViewSet):
     model = Policy
     filterset_fields = [
         "folder",
         "status",
-        "security_function",
+        "reference_control",
         "effort",
         "risk_scenarios",
         "requirement_assessments",
@@ -650,7 +650,7 @@ class RiskScenarioViewSet(BaseModelViewSet):
         "treatment",
         "threats",
         "assets",
-        "security_measures",
+        "applied_controls",
     ]
 
     @action(detail=False, name="Get treatment choices")
@@ -742,7 +742,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         ]
 
         """
-        The serializer of SecurityMeasure isn't applied automatically for this function
+        The serializer of AppliedControl isn't applied automatically for this function
         """
 
         return Response({"results": acceptances})
@@ -1015,7 +1015,7 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework), None
+                RequirementNode.objects.filter(framework=_framework).all(), None
             )
         )
 
@@ -1056,7 +1056,7 @@ class EvidenceViewSet(BaseModelViewSet):
     """
 
     model = Evidence
-    filterset_fields = ["folder", "security_measures", "requirement_assessments"]
+    filterset_fields = ["folder", "applied_controls", "requirement_assessments"]
     search_fields = ["name"]
     ordering_fields = ["name", "description"]
 
@@ -1181,10 +1181,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         _framework = self.get_object().framework
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework),
+                RequirementNode.objects.filter(framework=_framework).all(),
                 RequirementAssessment.objects.filter(
                     compliance_assessment=self.get_object()
-                ),
+                ).all(),
             )
         )
 
@@ -1240,7 +1240,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get updatable measures")
     def updatables(self, request):
         (_, object_ids_change, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityMeasure
+            Folder.get_root_folder(), request.user, AppliedControl
         )
 
         return Response({"results": object_ids_change})
@@ -1249,17 +1249,17 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         detail=False, name="Something"
     )  # Write a good name for the "name" keyword argument
     def per_status(self, request):
-        data = security_measure_per_status(request.user)
+        data = applied_control_per_status(request.user)
         return Response({"results": data})
 
-    @action(detail=False, name="Get the ordered todo security measures")
+    @action(detail=False, name="Get the ordered todo applied controls")
     def todo(self, request):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, SecurityMeasure
+            Folder.get_root_folder(), request.user, AppliedControl
         )
 
         measures = sorted(
-            SecurityMeasure.objects.filter(id__in=object_ids_view)
+            AppliedControl.objects.filter(id__in=object_ids_view)
             .exclude(status="done")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
@@ -1269,7 +1269,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         """measures = [{
             key: getattr(mtg,key)
             for key in [
-                "id","folder","security_function","type","status","effort","name","description","eta","link","created_at","updated_at"
+                "id","folder","reference_control","type","status","effort","name","description","eta","link","created_at","updated_at"
             ]
         } for mtg in measures]
         for i in range(len(measures)) :
@@ -1280,7 +1280,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         ranking_scores = {str(mtg.id): mtg.get_ranking_score() for mtg in measures}
 
-        measures = [SecurityMeasureReadSerializer(mtg).data for mtg in measures]
+        measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         # How to add ranking_score directly in the serializer ?
 
@@ -1288,7 +1288,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
             measures[i]["ranking_score"] = ranking_scores[measures[i]["id"]]
 
         """
-        The serializer of SecurityMeasure isn't applied automatically for this function
+        The serializer of AppliedControl isn't applied automatically for this function
         """
 
         return Response({"results": measures})
@@ -1300,10 +1300,10 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         """print("ODZFFHZ")
         print(measures[0].get_ranking_score())"""
 
-        measures = [SecurityMeasureReadSerializer(mtg).data for mtg in measures]
+        measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
-        The serializer of SecurityMeasure isn't applied automatically for this function
+        The serializer of AppliedControl isn't applied automatically for this function
         """
 
         return Response({"results": measures})
@@ -1348,7 +1348,7 @@ def generate_html(
     )
 
     assessments = RequirementAssessment.objects.filter(
-        compliance_assessment=compliance_assessment
+        compliance_assessment=compliance_assessment,
     ).all()
 
     node_per_urn = {r.urn: r for r in requirement_nodes}
@@ -1366,7 +1366,9 @@ def generate_html(
         content = ""
         compliance_assessments_status = []
         candidates = [
-            c for c in assessments if not (node) or c == node or node in ancestors[c]
+            c
+            for c in assessments.filter(requirement__assessable=True)
+            if not (node) or c == node or node in ancestors[c]
         ]
         total = len(candidates)
         for st in RequirementAssessment.Status:
@@ -1388,9 +1390,11 @@ def generate_html(
                     content += "bg-green-500"
                 elif stat[0] == "not_applicable":
                     content += "bg-black text-white dark:bg-white dark:text-black"
-                content += (
-                    '" style="width:' + str(stat[1]) + '%"> ' + str(stat[1]) + "%</div>"
-                )
+                content += '" style="width:' + str(stat[1]) + '%"> '
+                if stat[0] != "to_do":
+                    content += str(stat[1]) + "%"
+
+                content += "</div>"
         content += "</div></div>"
         return content
 
@@ -1506,14 +1510,14 @@ def generate_html(
                         table += f"<li> {direct_evidence.name}</li>"
                 table += "</div>"
 
-            measures = assessment.security_measures.all()
+            measures = assessment.applied_controls.all()
             if measures:
                 table += '<div class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200">'
                 evidences = ""
                 table += (
                     '<div class="grid grid-cols-2 justify-items-left font-semibold">'
                 )
-                table += f'<p>{("Applied security measures")}:</p>'
+                table += f'<p>{("Applied applied controls")}:</p>'
                 table += f'<p>{("Associated evidence")}:</p>'
                 table += "</div>"
                 table += '<div class="flex flex-row">'
@@ -1563,7 +1567,7 @@ def export_mp_csv(request):
         "measure_name",
         "measure_desc",
         "category",
-        "security_function",
+        "reference_control",
         "eta",
         "effort",
         "link",
@@ -1575,15 +1579,15 @@ def export_mp_csv(request):
         object_ids_change,
         object_ids_delete,
     ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), request.user, SecurityMeasure
+        Folder.get_root_folder(), request.user, AppliedControl
     )
-    for mtg in SecurityMeasure.objects.filter(id__in=object_ids_view):
+    for mtg in AppliedControl.objects.filter(id__in=object_ids_view):
         row = [
             mtg.id,
             mtg.name,
             mtg.description,
             mtg.category,
-            mtg.security_function,
+            mtg.reference_control,
             mtg.eta,
             mtg.effort,
             mtg.link,

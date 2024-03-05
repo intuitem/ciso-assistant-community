@@ -7,8 +7,8 @@ export default {
 	riskAcceptanceName: 'Test risk acceptance',
 	riskAssessmentName: 'Test risk assessment',
 	riskScenarioName: 'Test risk scenario',
-	securityFunctionName: 'Test security function',
-	securityMeasureName: 'Test security measure',
+	referenceControlName: 'Test reference control',
+	appliedControlName: 'Test applied control',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
@@ -35,7 +35,7 @@ export default {
 		displayName: 'critical 5x5',
 		urn: 'urn:intuitem:risk:library:critical_risk_matrix_5x5'
 	},
-	securityFunction: {
+	referenceControl: {
 		name: 'Physical security policy',
 		category: 'policy',
 		library: {
@@ -45,7 +45,7 @@ export default {
 		},
 		urn: 'urn:intuitem:risk:function:POL.PHYSICAL'
 	},
-	securityFunction2: {
+	referenceControl2: {
 		name: 'Controls accountability matrix',
 		category: 'process',
 		library: {

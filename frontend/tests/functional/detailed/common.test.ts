@@ -56,7 +56,11 @@ for (const key of testPages) {
 
 				await pages[key].waitUntilLoaded();
 				await pages[key].viewItemDetail(items[key].build.name || items[key].build.email);
-				await pages[key].itemDetail.hasTitle();
+				await pages[key].itemDetail.hasTitle(items[key].build.name || items[key].build.email);
+				await pages[key].itemDetail.hasBreadcrumbPath([
+					items[key].displayName, 
+					items[key].build.name || items[key].build.email
+				]);
 				//wait fore the file to load to prevent crashing
 				page.url().includes('evidences')
 					? await pages[key].page.getByTestId('attachment-name-title').waitFor({ state: 'visible' })
