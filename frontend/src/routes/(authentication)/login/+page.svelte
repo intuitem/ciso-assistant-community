@@ -63,6 +63,7 @@
 									<a
 										href="/password-reset"
 										class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
+										data-testid="forgot-password-btn"
 									>
 										<p class="">{m.forgtPassword()}?</p>
 									</a>
