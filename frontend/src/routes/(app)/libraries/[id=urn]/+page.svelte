@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { breadcrumbObject } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -11,6 +12,12 @@
 	interface LibraryObjects {
 		[key: string]: any;
 	}
+
+	const breadcrumb_library_data = {
+		...data.library,
+		id: data.library.urn
+	};
+	$: breadcrumbObject.set(breadcrumb_library_data);
 
 	const libraryObjects: LibraryObjects = data.library.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
