@@ -11,10 +11,15 @@ from core.serializers import (
 
 
 class LibraryObjectSerializer(serializers.Serializer):
-    framework = FrameworkReadSerializer()
-    risk_matrix = RiskMatrixReadSerializer()
-    threats = ThreatReadSerializer(many=True)
-    security_functions = SecurityFunctionReadSerializer(many=True)
+    type = serializers.ChoiceField(
+        choices=[
+            "risk_matrix",
+            "reference_control",
+            "threat",
+            "framework",
+        ]
+    )
+    fields = serializers.DictField(child=serializers.CharField())
 
 
 class LibrarySerializer(serializers.Serializer):

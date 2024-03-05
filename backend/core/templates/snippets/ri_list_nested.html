@@ -13,7 +13,7 @@
             {% trans "Threat" %}
         </th>
         <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            {% trans "Existing measures" %}
+            {% trans "Existing controls" %}
         </th>
         <th class="px-4 py-3 border-b border-gray-200 bg-white text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             {% trans "Current risk level" %}
@@ -50,7 +50,7 @@
                     </p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
-                    <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_measures|linebreaksbr }}</p>
+                    <p class="max-h-64 max-w-full box overflow-hidden">{{ scenario.existing_controls|linebreaksbr }}</p>
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                 {% for risk in risk_matrix.parse_json.risk %}
@@ -87,7 +87,7 @@
                 </td>
                 <td class="px-4 py-5 border-b border-gray-200 text-sm">
                     <ul class="list-disc space-y-4 ml-4">
-                        {% for measure in scenario.security_measures.all %}
+                        {% for measure in scenario.applied_controls.all %}
                             <li class="text-gray-900">
                                 <p
                                     class="text-gray-900 text-md font-semibold whitespace-no-wrap hover:text-blue-400">

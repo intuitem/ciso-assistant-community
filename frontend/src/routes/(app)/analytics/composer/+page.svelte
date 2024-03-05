@@ -4,7 +4,7 @@
 	import * as m from '$paraglide/messages';
 	import {localItems} from '$lib/utils/locales';
 	import {languageTag} from '$paraglide/runtime';
-	import type { SecurityMeasureStatus } from '$lib/utils/types';
+	import type { AppliedControlStatus } from '$lib/utils/types';
 	import { RISK_COLOR_PALETTE } from '$lib/utils/constants.js';
 
 	export let data;
@@ -12,10 +12,10 @@
 		risk_assessment.show = false;
 	});
 
-	let security_measure_status: SecurityMeasureStatus = data.security_measure_status;
-	for (const item in security_measure_status.labels) {
-		security_measure_status.labels[item] = localItems(languageTag())[
-			security_measure_status.localLables[item]
+	let applied_control_status: AppliedControlStatus = data.applied_control_status;
+	for (const item in applied_control_status.labels) {
+		applied_control_status.labels[item] = localItems(languageTag())[
+			applied_control_status.localLables[item]
 		];
 	}
 </script>
@@ -54,8 +54,8 @@
 					<div class="items-center justify-center h-96">
 						<BarChart
 							name="mtg"
-							labels={data.security_measure_status.labels}
-							values={data.security_measure_status.values}
+							labels={data.applied_control_status.labels}
+							values={data.applied_control_status.values}
 						/>
 					</div>
 				</div>
@@ -65,7 +65,7 @@
 				<div class="items-center h-96">
 					<DonutChart
 						name="residual_risk_level"
-						s_label="Residual risk level per risk scenario"
+						s_label={m.residualRiskLevelPerScenario()}
 						values={data.residual_level}
 						colors={data.residual_level.map(object => object.color)}
 					/>

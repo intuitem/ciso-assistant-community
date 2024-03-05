@@ -36,12 +36,12 @@ Conventions:
         framework_ref_id            | <ref_id>
         framework_name              | <name>
         framework_description       | <description>
-        security_function_base_urn  | <base_urn>            | id
+        reference_control_base_urn  | <base_urn>            | id
         threat_base_urn             | <base_urn>            | id
         tab                         | <tab_name>            | levels
         tab                         | <tab_name>            | requirements       | <section_name>
         tab                         | <tab_name>            | threats            | <base_urn>
-        tab                         | <tab_name>            | security_functions | <base_urn>
+        tab                         | <tab_name>            | reference_controls | <base_urn>
 
 
     For levels:
@@ -63,12 +63,12 @@ Conventions:
             - level
             - maturity
             - threats
-            - security_functions
+            - reference_controls
             - annotation
         The normal tree order shall be respected
-        If multiple threats or security_function are given for a requirements, they shall be separated by blank or comma.
+        If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
         They shall be prefixed by the id of the corresponding base_urn and a semicolumn.
-    For security functions:
+    For reference controls:
         The first line is a header, with the following possible fields (* for required):
             - depth(*): 1/2/3/.. for requirement groups, empty for a requirement.
             - ref_id(*)

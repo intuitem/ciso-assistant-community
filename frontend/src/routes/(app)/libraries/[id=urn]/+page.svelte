@@ -14,7 +14,7 @@
 
 	const libraryObjects: LibraryObjects = data.library.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
-	const securityFunctions = libraryObjects['security_functions'] ?? [];
+	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
 	const framework = libraryObjects['framework'];
 
@@ -39,9 +39,9 @@
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
-	const securityFunctionsTable: TableSource = {
+	const referenceControlsTable: TableSource = {
 		head: { ref_id: 'ref', name: 'name', description: 'description', category: 'category' },
-		body: tableSourceMapper(securityFunctions, ['ref_id', 'name', 'description', 'category'])
+		body: tableSourceMapper(referenceControls, ['ref_id', 'name', 'description', 'category'])
 	};
 
 	const threatsTable: TableSource = {
@@ -132,13 +132,13 @@
 		</Dropdown>
 	{/if}
 
-	{#if securityFunctions.length > 0}
+	{#if referenceControls.length > 0}
 		<Dropdown
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-gears"
-			header="{securityFunctions.length} {m.securityFunctions()}"
+			header="{referenceControls.length} {m.referenceControls()}"
 		>
-			<ModelTable source={securityFunctionsTable} displayActions={false} interactive={false} />
+			<ModelTable source={referenceControlsTable} displayActions={false} interactive={false} />
 		</Dropdown>
 	{/if}
 

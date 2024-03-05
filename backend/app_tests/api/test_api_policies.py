@@ -112,7 +112,7 @@ class TestPolicysAuthenticated:
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
-                "security_function": None,
+                "reference_control": None,
                 "status": POLICY_STATUS[1],
                 "effort": POLICY_EFFORT[1],
             },

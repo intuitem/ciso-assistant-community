@@ -16,10 +16,6 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const res = await fetch(endpoint);
 	const data = await res.json();
 
-	processObject(data, ISO_8601_REGEX, (matchedString: string): string =>
-		new Date(matchedString).toLocaleString()
-	);
-
 	const model = getModelInfo(URLModel);
 	const relatedModels: Record<string, any> = {};
 
