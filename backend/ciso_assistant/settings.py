@@ -139,7 +139,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "silk.middleware.SilkyMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -201,6 +200,9 @@ if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
         "rest_framework.renderers.BrowsableAPIRenderer"
     )
+
+    MIDDLEWARE.insert(2, "silk.middleware.SilkyMiddleware")
+
     INSTALLED_APPS.append("django.contrib.staticfiles")
     STATIC_URL = "/static/"
     STATIC_ROOT = BASE_DIR / "static"
