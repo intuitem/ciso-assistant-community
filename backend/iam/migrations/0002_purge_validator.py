@@ -14,7 +14,7 @@ def rename_validator(apps, schema_editor):
         ug.name="BI-UG-APP"
         ug.save()
     Role = apps.get_model("iam", "Role")
-    for role in Role.objects.filter(name="BI-RL-VAL"):
+    for role in Role.objects.filter(name="BI-RL-VAL").all():
         role.name="BI-RL-APP"
 
 
