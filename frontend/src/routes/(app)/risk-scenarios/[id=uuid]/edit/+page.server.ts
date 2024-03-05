@@ -5,7 +5,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import type { StrengthOfKnowledgeEntry, urlModel } from '$lib/utils/types';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['assets', 'security-measures'] as urlModel[]) {
+	for (const key of ['assets', 'applied-controls'] as urlModel[]) {
 		const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
 		const response = await fetch(keyEndpoint);
 		if (response.ok) {
@@ -87,20 +87,24 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const probabilityChoices = await fetch(probabilityChoicesEndpoint)
 		.then((res) => res.json())
 		.then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: parseInt(key)
-			}))
+			Object.entries(data)
+				.map(([key, value]) => ({
+					label: value,
+					value: parseInt(key)
+				}))
+				.sort((a, b) => a.value - b.value)
 		);
 
 	const impactChoicesEndpoint = `${baseEndpoint}impact/`;
 	const impactChoices = await fetch(impactChoicesEndpoint)
 		.then((res) => res.json())
 		.then((data) =>
-			Object.entries(data).map(([key, value]) => ({
-				label: value,
-				value: parseInt(key)
-			}))
+			Object.entries(data)
+				.map(([key, value]) => ({
+					label: value,
+					value: parseInt(key)
+				}))
+				.sort((a, b) => a.value - b.value)
 		);
 
 	const treatmentChoicesEndpoint = `${BASE_API_URL}/${URLModel}/treatment/`;
@@ -113,7 +117,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 			}))
 		);
 
-	const measureCreateSchema = modelSchema('security-measures');
+	const strengthOfKnowledgeChoicesEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/strength_of_knowledge/`;
+	const strengthOfKnowledgeChoices: Record<string, StrengthOfKnowledgeEntry> = await fetch(
+		strengthOfKnowledgeChoicesEndpoint
+	).then((res) => res.json());
+
+	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
 		folder: scenario.project.folder.id
 	};
@@ -121,12 +130,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		errors: false
 	});
 
-	const measureModel = getModelInfo('security-measures');
+	const measureModel = getModelInfo('applied-controls');
 	const measureSelectOptions: Record<string, any> = {};
 
 	if (measureModel.selectFields) {
 		for (const selectField of measureModel.selectFields) {
-			const url = `${BASE_API_URL}/security-measures/${selectField.field}/`;
+			const url = `${BASE_API_URL}/applied-controls/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
 				measureSelectOptions[selectField.field] = await response.json().then((data) =>
@@ -170,6 +179,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		probabilityChoices,
 		impactChoices,
 		treatmentChoices,
+		strengthOfKnowledgeChoices: strengthOfKnowledgeChoices,
 		tables,
 		measureModel,
 		measureCreateForm
@@ -210,8 +220,8 @@ export const actions: Actions = {
 			event.url.searchParams.get('/updateRiskScenario') ?? `/risk-scenarios/${event.params.id}`
 		);
 	},
-	createSecurityMeasure: async (event) => {
-		const URLModel = 'security-measures';
+	createAppliedControl: async (event) => {
+		const URLModel = 'applied-controls';
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
 		const form = await superValidate(event.request, schema);
@@ -242,11 +252,11 @@ export const actions: Actions = {
 		const scenarioEndpoint = `${BASE_API_URL}/risk-scenarios/${event.params.id}/`;
 		const scenario = await event.fetch(`${scenarioEndpoint}object`).then((res) => res.json());
 
-		const measures = [...scenario.security_measures, measure.id];
+		const measures = [...scenario.applied_controls, measure.id];
 
 		const patchRequestInitOptions: RequestInit = {
 			method: 'PATCH',
-			body: JSON.stringify({ security_measures: measures })
+			body: JSON.stringify({ applied_controls: measures })
 		};
 
 		const patchRes = await event.fetch(scenarioEndpoint, patchRequestInitOptions);

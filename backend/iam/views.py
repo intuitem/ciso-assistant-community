@@ -59,6 +59,8 @@ class LoginView(views.APIView):
                     status=HTTP_401_UNAUTHORIZED,
                 )
 
+        user.first_login=False
+        user.save()
         return Response(None, status=HTTP_202_ACCEPTED)
 
 
@@ -111,7 +113,7 @@ class PasswordResetView(views.APIView):
                 try:
                     associated_user.mailing(
                         email_template_name="registration/password_reset_email.html",
-                        subject=_("Ciso: Password Reset"),
+                        subject=_("CISO Assistant: Password Reset"),
                     )
                     print("Sending reset mail to", email)
                 except Exception as e:

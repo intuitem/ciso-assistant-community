@@ -7,15 +7,15 @@ export default {
 	riskAcceptanceName: 'Test risk acceptance',
 	riskAssessmentName: 'Test risk assessment',
 	riskScenarioName: 'Test risk scenario',
-	securityFunctionName: 'Test security function',
-	securityMeasureName: 'Test security measure',
+	referenceControlName: 'Test reference control',
+	appliedControlName: 'Test applied control',
 	threatName: 'Test threat',
 	description: 'Test description',
 	file: new URL('../utils/test_image.jpg', import.meta.url).pathname,
 	file2: new URL('../utils/test_file.txt', import.meta.url).pathname,
 	user: {
 		email: 'User@tests.com',
-		password: 'password',
+		password: 'pass123wordTest',
 		firstName: 'Test',
 		lastName: 'User'
 	},
@@ -26,7 +26,8 @@ export default {
 		validator: 'Validator'
 	},
 	framework: {
-		name: 'NIST CSF',
+		name: 'NIST CSF v1.1',
+		ref: 'NIST-CSF-1.1',
 		urn: 'urn:intuitem:risk:library:nist-csf-1.1'
 	},
 	matrix: {
@@ -34,20 +35,22 @@ export default {
 		displayName: 'critical 5x5',
 		urn: 'urn:intuitem:risk:library:critical_risk_matrix_5x5'
 	},
-	securityFunction: {
+	referenceControl: {
 		name: 'Physical security policy',
 		category: 'policy',
 		library: {
 			name: 'Documents and policies',
+			ref: 'doc-pol',
 			urn: 'urn:intuitem:risk:library:doc-pol'
 		},
 		urn: 'urn:intuitem:risk:function:POL.PHYSICAL'
 	},
-	securityFunction2: {
+	referenceControl2: {
 		name: 'Controls accountability matrix',
 		category: 'process',
 		library: {
 			name: 'Documents and policies',
+			ref: 'doc-pol',
 			urn: 'urn:intuitem:risk:library:doc-pol'
 		},
 		urn: 'urn:intuitem:risk:function:DOC.CONTROLS'
@@ -56,6 +59,7 @@ export default {
 		name: 'Exfiltration Over Other Network Medium',
 		library: {
 			name: 'Mitre ATT&CK v14 - Threats and mitigations',
+			ref: 'mitre-attack',
 			urn: 'urn:intuitem:risk:library:mitre-attack-v14'
 		},
 		urn: 'urn:intuitem:risk:threat:mitre-attack:T1011'
@@ -64,6 +68,7 @@ export default {
 		name: 'Exfiltration Over Physical Medium',
 		library: {
 			name: 'Mitre ATT&CK v14 - Threats and mitigations',
+			ref: 'mitre-attack',
 			urn: 'urn:intuitem:risk:library:mitre-attack-v14'
 		},
 		urn: 'urn:intuitem:risk:threat:mitre-attack:T1052'
@@ -71,14 +76,16 @@ export default {
 	requirement_assessment: {
 		name: 'RC.RP - Recovery Planning',
 		library: {
-			name: 'NIST CSF',
+			name: 'NIST CSF v1.1',
+			ref: 'NIST-CSF-1.1',
 			urn: 'urn:intuitem:risk:library:nist-csf-1.1'
 		}
 	},
 	requirement_assessment2: {
 		name: 'ID.GV - Governance',
 		library: {
-			name: 'NIST CSF',
+			name: 'NIST CSF v1.1',
+			ref: 'NIST-CSF-1.1',
 			urn: 'urn:intuitem:risk:library:nist-csf-1.1'
 		}
 	}

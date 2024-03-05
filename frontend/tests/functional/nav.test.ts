@@ -2,39 +2,25 @@ import { localItems } from '../../src/lib/utils/locales.js';
 import { languageTag } from '../../src/paraglide/runtime.js';
 import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
 
-type StringMap = {
-	[key: string]: string;
-};
-
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
-	test.slow();
-
-	await test.step('proper redirection to the overview page after login', async () => {
-		await analyticsPage.hasUrl();
-		await analyticsPage.hasTitle();
-		setHttpResponsesListener(page);
-	});
-
-	await test.step('navigation link are working properly', async () => {
-		//TODO delete this when page titles are fixed
-		const temporaryPageTitle: StringMap = {
-			'X-Rays': 'X rays',
-			'Backup & restore': 'Backup restore'
-		};
-
+    test.slow();
+    
+    await test.step('proper redirection to the analytics page after login', async () => {
+        await analyticsPage.hasUrl();
+        await analyticsPage.hasTitle();
+        setHttpResponsesListener(page);
+    });
+    
+    await test.step('navigation link are working properly', async () => {
 		const locals = localItems(languageTag());
-
-		for await (const [key, value] of sideBar.items) {
+    	for await (const [key, value] of sideBar.items) {            
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {
 					await sideBar.click(key, item.href);
 					await expect(page).toHaveURL(item.href);
-					if (item.name in temporaryPageTitle) {
-						await expect.soft(logedPage.pageTitle).toHaveText([temporaryPageTitle[item.name]]);
-					} else {
-						await expect.soft(logedPage.pageTitle).toHaveText(locals[item.name]);
-					}
-				}
+					await logedPage.hasTitle(locals[item.name]);
+					await logedPage.hasBreadcrumbPath([locals[item.name]]);
+				}         
 			}
 		}
 	});
@@ -47,19 +33,23 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	await test.step('more panel links are working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await logedPage.checkForUndefinedText();
 		await expect(sideBar.profileButton).toBeVisible();
 		await sideBar.profileButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(page).toHaveURL('/my-profile');
 		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
-
+		await logedPage.checkForUndefinedText();
+		
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+		await logedPage.checkForUndefinedText();
 		await expect(sideBar.aboutButton).toBeVisible();
 		await sideBar.aboutButton.click();
 		await expect(sideBar.morePanel).toHaveAttribute('inert');
 		await expect(logedPage.modalTitle).toBeVisible();
 		await expect.soft(logedPage.modalTitle).toHaveText('About CISO Assistant');
+		await logedPage.checkForUndefinedText();
 		await page.mouse.click(20, 20); // click outside the modal to close it
 		await expect(logedPage.modalTitle).not.toBeVisible();
 

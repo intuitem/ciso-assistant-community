@@ -56,6 +56,10 @@ Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact wit
 
 To run CISO Assistant locally in a straightforward way, you can use Docker compose.
 
+0. Update docker
+
+Make sure you have a recent version of docker (>= 25.0).
+
 1. Clone the repository
 
 ```sh
@@ -73,7 +77,7 @@ When asked for, enter your email and password for your superuser.
 
 You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
 
-For the following executions, use "docker-compose up" directly.
+For the following executions, use "docker compose up" directly.
 
 If you want to restart a fresh install, simply delete the db directory, where the database is stored.
 

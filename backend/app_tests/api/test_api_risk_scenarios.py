@@ -6,7 +6,7 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
-    SecurityMeasure,
+    AppliedControl,
     Threat,
 )
 from iam.models import Folder
@@ -17,8 +17,8 @@ from test_utils import EndpointTestsQueries
 # Generic project data for tests
 RISK_SCENARIO_NAME = "Test scenario"
 RISK_SCENARIO_DESCRIPTION = "Test Description"
-RISK_SCENARIO_EXISTING_MEASURES = "Test Existing Measures"
-RISK_SCENARIO_EXISTING_MEASURES2 = "Test New Existing Measures"
+RISK_SCENARIO_existing_controls = "Test Existing Controls"
+RISK_SCENARIO_existing_controls2 = "Test New Existing Controls"
 RISK_SCENARIO_CURRENT_PROBABILITIES = (2, "High")
 RISK_SCENARIO_CURRENT_PROBABILITIES2 = (1, "Medium")
 RISK_SCENARIO_CURRENT_IMPACT = (2, "High")
@@ -182,7 +182,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -226,7 +226,7 @@ class TestRiskScenariosAuthenticated:
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
         asset = Asset.objects.create(name="test", folder=test.folder)
-        security_measures = SecurityMeasure.objects.create(
+        applied_controls = AppliedControl.objects.create(
             name="test", folder=test.folder
         )
 
@@ -237,7 +237,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -249,7 +249,7 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": str(risk_assessment.id),
                 "threats": [str(threat.id)],
                 "assets": [str(asset.id)],
-                "security_measures": [str(security_measures.id)],
+                "applied_controls": [str(applied_controls.id)],
             },
             {
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
@@ -269,8 +269,8 @@ class TestRiskScenariosAuthenticated:
                     "str": risk_assessment.risk_matrix.name,
                 },
                 "assets": [{"id": str(asset.id), "str": asset.name}],
-                "security_measures": [
-                    {"id": str(security_measures.id), "str": security_measures.name}
+                "applied_controls": [
+                    {"id": str(applied_controls.id), "str": applied_controls.name}
                 ],
             },
             user_group=test.user_group,
@@ -295,7 +295,7 @@ class TestRiskScenariosAuthenticated:
         threat = Threat.objects.create(name="test", folder=test.folder)
         threat2 = Threat.objects.create(name="test2", folder=folder)
         asset = Asset.objects.create(name="test", folder=folder)
-        security_measures = SecurityMeasure.objects.create(name="test", folder=folder)
+        applied_controls = AppliedControl.objects.create(name="test", folder=folder)
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -304,7 +304,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -319,7 +319,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": "new " + RISK_SCENARIO_NAME,
                 "description": "new " + RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES2[0],
+                "existing_controls": RISK_SCENARIO_existing_controls2[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT2[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL2[0],
@@ -331,7 +331,7 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": str(risk_assessment2.id),
                 "threats": [str(threat2.id)],
                 "assets": [str(asset.id)],
-                "security_measures": [str(security_measures.id)],
+                "applied_controls": [str(applied_controls.id)],
             },
             {
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
