@@ -43,7 +43,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['assets', 'security-measures'] as urlModel[]) {
+	for (const key of ['assets', 'applied-controls'] as urlModel[]) {
 		const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
 		const response = await fetch(keyEndpoint);
 		if (response.ok) {
@@ -122,7 +122,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		strengthOfKnowledgeChoicesEndpoint
 	).then((res) => res.json());
 
-	const measureCreateSchema = modelSchema('security-measures');
+	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
 		folder: scenario.project.folder.id
 	};
@@ -130,12 +130,12 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		errors: false
 	});
 
-	const measureModel = getModelInfo('security-measures');
+	const measureModel = getModelInfo('applied-controls');
 	const measureSelectOptions: Record<string, any> = {};
 
 	if (measureModel.selectFields) {
 		for (const selectField of measureModel.selectFields) {
-			const url = `${BASE_API_URL}/security-measures/${selectField.field}/`;
+			const url = `${BASE_API_URL}/applied-controls/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
 				measureSelectOptions[selectField.field] = await response.json().then((data) =>
@@ -220,8 +220,8 @@ export const actions: Actions = {
 			event.url.searchParams.get('/updateRiskScenario') ?? `/risk-scenarios/${event.params.id}`
 		);
 	},
-	createSecurityMeasure: async (event) => {
-		const URLModel = 'security-measures';
+	createAppliedControl: async (event) => {
+		const URLModel = 'applied-controls';
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
 		const form = await superValidate(event.request, schema);
@@ -252,11 +252,11 @@ export const actions: Actions = {
 		const scenarioEndpoint = `${BASE_API_URL}/risk-scenarios/${event.params.id}/`;
 		const scenario = await event.fetch(`${scenarioEndpoint}object`).then((res) => res.json());
 
-		const measures = [...scenario.security_measures, measure.id];
+		const measures = [...scenario.applied_controls, measure.id];
 
 		const patchRequestInitOptions: RequestInit = {
 			method: 'PATCH',
-			body: JSON.stringify({ security_measures: measures })
+			body: JSON.stringify({ applied_controls: measures })
 		};
 
 		const patchRes = await event.fetch(scenarioEndpoint, patchRequestInitOptions);

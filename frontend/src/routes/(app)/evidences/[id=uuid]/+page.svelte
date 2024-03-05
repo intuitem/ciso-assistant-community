@@ -142,14 +142,14 @@
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
 		<TabGroup>
-			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>{m.securityMeasures()}</Tab>
+			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>{m.appliedControls()}</Tab>
 			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.requirementAssessments()}</Tab>
 			<svelte:fragment slot="panel">
 				{#if tabSet === 0}
 					<div
 						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 					>
-						<ModelTable source={data.tables['security-measures']} URLModel="security-measures" />
+						<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 					</div>
 				{/if}
 				{#if tabSet === 1}
