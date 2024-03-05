@@ -7,7 +7,7 @@ from core.models import (
     RequirementAssessment,
     Framework,
 )
-from core.models import Project, SecurityMeasure
+from core.models import Project, AppliedControl
 from iam.models import Folder
 
 from test_vars import GROUPS_PERMISSIONS
@@ -144,7 +144,7 @@ class TestRequirementAssessmentsAuthenticated:
             project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
-        security_measure = SecurityMeasure.objects.create(
+        applied_control = AppliedControl.objects.create(
             name="test", folder=test.folder
         )
 
@@ -158,7 +158,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": str(test.folder.id),
                 "compliance_assessment": str(compliance_assessment.id),
                 "requirement": str(RequirementNode.objects.all()[0].id),
-                "security_measures": [str(security_measure.id)],
+                "applied_controls": [str(applied_control.id)],
             },
             {
                 "compliance_assessment": {
@@ -186,7 +186,7 @@ class TestRequirementAssessmentsAuthenticated:
             project=Project.objects.create(name="test2", folder=folder),
             framework=Framework.objects.all()[0],
         )
-        security_measure = SecurityMeasure.objects.create(name="test", folder=folder)
+        applied_control = AppliedControl.objects.create(name="test", folder=folder)
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -205,7 +205,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": str(folder.id),
                 "compliance_assessment": str(compliance_assessment2.id),
                 "requirement": str(RequirementNode.objects.all()[1].id),
-                "security_measures": [str(security_measure.id)],
+                "applied_controls": [str(applied_control.id)],
             },
             {
                 "folder": str(test.folder.id),

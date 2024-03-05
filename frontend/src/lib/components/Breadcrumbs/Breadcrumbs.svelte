@@ -53,7 +53,7 @@
 <ol class="breadcrumb-nonresponsive">
 	{#each crumbs as c, i}
 		{#if i == crumbs.length - 1}
-			<span class="text-sm text-gray-500 font-semibold antialiased">
+			<span class="text-sm text-gray-500 font-semibold antialiased" data-testid="crumb-item">
 				{#if c.icon}
 					<i class={c.icon} />
 				{/if}
@@ -68,6 +68,7 @@
 				{#if c.href}
 					<a
 						class="unstyled text-sm hover:text-primary-500 font-semibold antialiased whitespace-nowrap"
+						data-testid="crumb-item"
 						href={c.href}
 					>
 						{#if c.icon}
@@ -80,7 +81,7 @@
 						{/if}
 					</a>
 				{:else}
-					<span class="text-sm text-gray-500 font-semibold antialiased">
+					<span class="text-sm text-gray-500 font-semibold antialiased" data-testid="crumb-item">
 						{#if c.icon}
 							<i class={c.icon} />
 						{/if}

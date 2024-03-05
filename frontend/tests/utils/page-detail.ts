@@ -14,16 +14,14 @@ export class PageDetail extends BasePage {
 		this.editButton = this.page.getByTestId('edit-button');
 	}
 
-	async hasTitle() {
-		await expect.soft(this.pageTitle).toHaveText(this.item);
-	}
-
 	setItem(item: string) {
 		this.item = item;
 	}
 
 	async editItem(buildParams: { [k: string]: string }, editParams: { [k: string]: string }) {
 		await this.editButton.click();
+		await this.hasTitle('Edit ' + this.item);
+		await this.hasBreadcrumbPath(['Edit'], false);
 
 		let editedValues: { [k: string]: string } = {};
 		for (const key in editParams) {
