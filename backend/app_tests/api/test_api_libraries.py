@@ -81,8 +81,10 @@ class TestLibrariesAuthenticated:
         )
 
         assert (
-            Framework.objects.all().count() == 1
-        ), "frameworks are not correctly imported in the database"
+            Framework.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0] else 0)
+        ), "Frameworks are not correctly imported in the database"
         
         # Uses the API endpoint to assert that the library was properly imported
         EndpointTestsQueries.Auth.get_object(
@@ -96,6 +98,9 @@ class TestLibrariesAuthenticated:
             },
             base_count=1,
             user_group=test.user_group,
+            fails=EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0]
         )
 
     def test_delete_frameworks(self, test):
@@ -104,7 +109,7 @@ class TestLibrariesAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         assert (
             Framework.objects.all().count() == 1
-        ), "frameworks are not correctly imported in the database"
+        ), "Frameworks are not correctly imported in the database"
 
         EndpointTestsQueries.Auth.delete_object(
             test.client,
@@ -133,10 +138,13 @@ class TestLibrariesAuthenticated:
             test.client, "Risk matrix", user_group=test.user_group
         )
 
-        # Uses the API endpoint to assert that the library was properly imported
         assert (
-            RiskMatrix.objects.all().count() == 1
+            RiskMatrix.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0] else 0)
         ), "Risk matrices are not correctly imported in the database"
+
+        # Uses the API endpoint to assert that the library was properly imported
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Risk matrices",
@@ -149,6 +157,9 @@ class TestLibrariesAuthenticated:
             },
             base_count=1,
             user_group=test.user_group,
+            fails=EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0]
         )
 
     def test_delete_matrix(self, test):
