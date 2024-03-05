@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import include, path
-from django.contrib.auth import views as auth_views
+
+from ciso_assistant import settings
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
@@ -22,3 +23,6 @@ urlpatterns = [
     path("serdes/", include("serdes.urls")),
     path("i18n/", include("django.conf.urls.i18n")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]
