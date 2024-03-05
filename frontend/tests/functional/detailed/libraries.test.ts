@@ -34,7 +34,6 @@ test('every libraries can be deleted', async ({
     librariesPage,
     page
 }) => {
-    test.fail(true, "This test is currently failing due to a bug with delete buttons and dependencies. Check JIRA for more information.");
     test.slow();
     await librariesPage.goto();
     await librariesPage.hasUrl();
@@ -64,16 +63,17 @@ test('every libraries can be deleted', async ({
 		    await librariesPage.isToastVisible('Successfully deleted.+', undefined, {
                 timeout: 15000
             });
-            await expect(librariesPage.getRow(nextRemainingLibrary)).not.toBeVisible();
+            if (await page.getByText(' You currently have no imported libraries.').isHidden()) {
+                await expect(librariesPage.getRow(nextRemainingLibrary)).not.toBeVisible();
+            }
+            else {
+                break;
+            }
             count = 0;
         }
         else {
             count++;
             continue;
         }
-        // const toast = page.getByTestId('toast').first();
-		// await toast.getByLabel('Dismiss toast').click();
-		// await expect(toast).toBeHidden();
-        
-    } while (nextRemainingLibrary);
+    } while (nextRemainingLibrary || await page.getByText(' You currently have no imported libraries.').isHidden());
 });
