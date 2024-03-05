@@ -133,6 +133,7 @@ INSTALLED_APPS = [
     "library",
     "serdes",
     "rest_framework",
+    "silk",
 ]
 
 MIDDLEWARE = [
@@ -146,6 +147,8 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_structlog.middlewares.RequestMiddleware",
 ]
+
+SILKY_PYTHON_PROFILER = True
 
 ROOT_URLCONF = "ciso_assistant.urls"
 LOGIN_REDIRECT_URL = "home"
@@ -197,6 +200,9 @@ if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
         "rest_framework.renderers.BrowsableAPIRenderer"
     )
+
+    MIDDLEWARE.insert(2, "silk.middleware.SilkyMiddleware")
+
     INSTALLED_APPS.append("django.contrib.staticfiles")
     STATIC_URL = "/static/"
     STATIC_ROOT = BASE_DIR / "static"
