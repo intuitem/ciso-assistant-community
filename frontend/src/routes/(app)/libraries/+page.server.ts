@@ -41,7 +41,7 @@ export const load = (async ({ fetch }) => {
 			`Packager: ${row.packager}`,
 			...Object.entries(countObjects(row)).map(([key, value]) => `${key}: ${value}`)
 		];
-		row.preventDelete = (row.reference_count && row.reference_count > 0) ?? false;
+		row.preventDelete = row.reference_count && row.reference_count > 0 ? true : false;
 	});
 
 	const headData: Record<string, string> = listViewFields['libraries' as urlModel].body.reduce(
@@ -131,10 +131,7 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			setFlash(
-				{ type: 'success', message: `Successfully deleted library with id ${id}` },
-				event
-			);
+			setFlash({ type: 'success', message: `Successfully deleted library with id ${id}` }, event);
 		}
 		return { deleteForm };
 	}
