@@ -35,7 +35,7 @@
 	import { enhance } from '$app/forms';
 
 	const riskMatricesTable: TableSource = {
-		head: ['name', 'description'],
+		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
