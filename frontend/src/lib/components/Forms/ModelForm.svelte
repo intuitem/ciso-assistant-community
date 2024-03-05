@@ -22,6 +22,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
+	export let origin: string = "default";
 	export let closeModal = false;
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
@@ -76,6 +77,9 @@
 						.then((r) => r.json())
 						.then((r) => {
 							form.form.update((currentData) => {
+								if (origin === "edit") {
+									return currentData; // Keep the current values in the edit form.
+								}
 								return { ...currentData, category: r.category };
 							});
 						});

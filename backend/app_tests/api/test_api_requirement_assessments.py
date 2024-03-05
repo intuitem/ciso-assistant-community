@@ -144,9 +144,7 @@ class TestRequirementAssessmentsAuthenticated:
             project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
-        applied_control = AppliedControl.objects.create(
-            name="test", folder=test.folder
-        )
+        applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
