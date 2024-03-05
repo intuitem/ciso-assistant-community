@@ -18,8 +18,6 @@
 	const threats = libraryObjects['threats'] ?? [];
 	const framework = libraryObjects['framework'];
 
-	const tree = data.tree;
-
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
 			return {
@@ -30,7 +28,6 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
 	import { ProgressRadial, tableSourceMapper, type TreeViewNode } from '@skeletonlabs/skeleton';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
@@ -38,7 +35,7 @@
 	import { enhance } from '$app/forms';
 
 	const riskMatricesTable: TableSource = {
-		head: ['name', 'description'],
+		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
@@ -157,6 +154,13 @@
 
 	{#if framework}
 		<h4 class="h4 font-medium">{m.framework()}</h4>
-		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
+		{#await data.tree}
+			{m.loading()}...
+		{:then tree}
+			<RecursiveTreeView
+				nodes={transformToTreeView(Object.entries(tree))}
+				hover="hover:bg-initial"
+			/>
+		{/await}
 	{/if}
 </div>
