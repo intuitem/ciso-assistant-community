@@ -188,7 +188,8 @@ def get_compliance_assessment_stats(
 
 
 def get_sorted_requirement_nodes(
-    requirement_nodes: list, requirements_assessed: list | None
+    requirement_nodes: list,
+    requirements_assessed: list | None,
 ) -> dict:
     """
     Recursive function to build framework groups tree
@@ -220,16 +221,23 @@ def get_sorted_requirement_nodes(
         start: the initial list
         """
         result = {}
-        for node in children_dict.get(parent_urn, []):
-            node_info = {
+        for node in start:
+            children = [
+                requirement_node
+                for requirement_node in requirement_nodes
+                if requirement_node.parent_urn == node.urn
+            ]
+            result[str(node.id)] = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "name": node.display_short(),
                 "node_content": node.display_long(),
-                "style": "node" if node.urn in children_dict else "leaf",
+                "style": "node",
                 "assessable": node.assessable,
                 "description": node.description,
-                "children": get_sorted_requirement_nodes_rec(node.urn),
+                "children": get_sorted_requirement_nodes_rec(
+                    requirement_nodes, requirements_assessed, children
+                ),
             }
             for req in sorted(
                 [
@@ -243,13 +251,17 @@ def get_sorted_requirement_nodes(
                     req_as = requirement_assessment_from_requirement_id[str(req.id)]
                     result[str(node.id)]["children"][str(req.id)].update(
                         {
-                            "ra_id": str(ra.id),
-                            "leaf_content": node_info.get("node_content", ""),
-                            "status": ra.status,
-                            "status_display": ra.get_status_display(),
-                            "status_i18n": camel_case(ra.status),
+                            "urn": req.urn,
+                            "name": req.display_short(),
+                            "description": req.description,
+                            "ra_id": str(req_as.id),
+                            "leaf_content": req.display_long(),
+                            "status": req_as.status,
+                            "status_display": req_as.get_status_display(),
+                            "status_i18n": camel_case(req_as.status),
+                            "style": "leaf",
                             "threats": ThreatReadSerializer(
-                                ra.requirement.threats.all(), many=True
+                                req.threats.all(), many=True
                             ).data,
                             "reference_controls": ReferenceControlReadSerializer(
                                 req.reference_controls.all(), many=True
@@ -272,15 +284,8 @@ def get_sorted_requirement_nodes(
                             ).data,
                         }
                     )
-                    node_info[
-                        "style"
-                    ] = "leaf"  # Update style to leaf if it has an assessment
-
-            result[str(node.id)] = node_info
-
         return result
 
-    # Initialize the recursive building from root nodes (those without a parent_urn).
     tree = get_sorted_requirement_nodes_rec(
         requirement_nodes,
         requirements_assessed,
