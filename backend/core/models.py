@@ -109,13 +109,20 @@ class Library(ReferentialObjectMixin):
             res["framework"].update(self.frameworks.first().library_entry)
         if self.threats.count() > 0:
             res["threats"] = [model_to_dict(threat) for threat in self.threats.all()]
-        if self.security_functions.count() > 0:
-            res["security_functions"] = [
-                model_to_dict(security_function)
-                for security_function in self.security_functions.all()
+        if self.reference_controls.count() > 0:
+            res["reference_controls"] = [
+                model_to_dict(reference_control)
+                for reference_control in self.reference_controls.all()
             ]
         if self.risk_matrices.count() > 0:
-            res["risk_matrix"] = model_to_dict(self.risk_matrices.first())
+            matrix = self.risk_matrices.first()
+            res["risk_matrix"] = model_to_dict(matrix)
+            res["risk_matrix"]["probability"] = matrix.probability
+            res["risk_matrix"]["impact"] = matrix.impact
+            res["risk_matrix"]["risk"] = matrix.risk
+            res["risk_matrix"]["grid"] = matrix.grid
+            res["strength_of_knowledge"] = matrix.strength_of_knowledge
+            res["risk_matrix"] = [res["risk_matrix"]]
         return res
 
     @property
@@ -271,12 +278,33 @@ class RiskMatrix(ReferentialObjectMixin):
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
-    def get_detailed_grid(self) -> list:
+    @property
+    def grid(self) -> list:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:
             grid.append([item for item in row])
         return grid
+
+    @property
+    def probability(self) -> list:
+        risk_matrix = self.parse_json()
+        return risk_matrix["probability"]
+
+    @property
+    def impact(self) -> list:
+        risk_matrix = self.parse_json()
+        return risk_matrix["impact"]
+
+    @property
+    def risk(self) -> list:
+        risk_matrix = self.parse_json()
+        return risk_matrix["risk"]
+
+    @property
+    def strength_of_knowledge(self):
+        risk_matrix = self.parse_json()
+        return risk_matrix.get("strength_of_knowledge")
 
     def render_grid_as_colors(self):
         risk_matrix = self.parse_json()
@@ -327,7 +355,7 @@ class Framework(ReferentialObjectMixin):
         # Prefetch related objects if they exist to reduce database queries.
         # Adjust prefetch_related paths according to your model relationships.
         nodes_queryset = self.requirement_nodes.prefetch_related(
-            "threats", "security_functions"
+            "threats", "reference_controls"
         )
         if nodes_queryset.exists():
             return [self.process_node(node) for node in nodes_queryset]
@@ -340,10 +368,10 @@ class Framework(ReferentialObjectMixin):
             node_dict["threats"] = [
                 model_to_dict(threat) for threat in node.threats.all()
             ]
-        if node.security_functions.exists():
-            node_dict["security_functions"] = [
-                model_to_dict(security_function)
-                for security_function in node.security_functions.all()
+        if node.reference_controls.exists():
+            node_dict["reference_controls"] = [
+                model_to_dict(reference_control)
+                for reference_control in node.reference_controls.all()
             ]
         return node_dict
 
