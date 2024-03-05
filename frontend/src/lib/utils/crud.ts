@@ -139,7 +139,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
 		selectFields: [{ field: 'status' }],
-		filters: [{ field: 'project' }, { field: 'auditor' }]
+		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	threats: {
 		ref_id: 'ref_id',
@@ -326,7 +326,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users' }
 		],
-		selectFields: [{ field: 'status' }]
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'status' }]
 	},
 	requirements: {
 		ref_id: 'ref_id',
