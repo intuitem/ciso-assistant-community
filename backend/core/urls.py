@@ -15,9 +15,7 @@ router.register(r"risk-matrices", RiskMatrixViewSet, basename="risk-matrices")
 router.register(r"risk-assessments", RiskAssessmentViewSet, basename="risk-assessments")
 router.register(r"threats", ThreatViewSet, basename="threats")
 router.register(r"risk-scenarios", RiskScenarioViewSet, basename="risk-scenarios")
-router.register(
-    r"applied-controls", AppliedControlViewSet, basename="applied-controls"
-)
+router.register(r"applied-controls", AppliedControlViewSet, basename="applied-controls")
 router.register(r"policies", PolicyViewSet, basename="policies")
 router.register(r"risk-acceptances", RiskAcceptanceViewSet, basename="risk-acceptances")
 router.register(
