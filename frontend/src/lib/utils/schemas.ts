@@ -57,7 +57,7 @@ export const LibraryUploadSchema = z.object({
 	file: z.string()
 });
 
-export const RiskRiskAssessmentSchema = baseNamedObject({
+export const RiskAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional(),
@@ -191,7 +191,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
-	'risk-assessments': RiskRiskAssessmentSchema,
+	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
