@@ -73,16 +73,16 @@
 						>
 					</td>
 				</tr>
-				{#if scenario.existing_measures}
+				{#if scenario.existing_controls}
 					<tr>
-						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.existingMeasures()}: </td>
+						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.existingControls()}: </td>
 					</tr>
 					<tr>
-						<td class="text-sm pl-6 pb-3" colspan="9"> {scenario.existing_measures} </td>
+						<td class="text-sm pl-6 pb-3" colspan="9"> {scenario.existing_controls} </td>
 					</tr>
 				{/if}
 
-				{#if scenario.security_measures.length > 0}
+				{#if scenario.applied_controls.length > 0}
 					<tr>
 						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.additionalMeasures()}: </td>
 					</tr>
@@ -91,22 +91,22 @@
 						<td class="px-2 font-semibold">{m.name()}</td>
 						<td class="px-2 font-semibold">{m.description()}</td>
 						<td class="px-2 font-semibold">{m.type()}</td>
-						<td class="px-2 font-semibold">{m.securityFunction()}</td>
+						<td class="px-2 font-semibold">{m.referenceControl()}</td>
 						<td class="px-2 font-semibold">{m.eta()}</td>
 						<td class="px-2 font-semibold">{m.effort()}</td>
 						<td class="px-2 font-semibold text-center">{m.link()}</td>
 						<td class="px-2 font-semibold text-center">{m.status()}</td>
 					</tr>
-					{#each scenario.security_measures as measure, index}
+					{#each scenario.applied_controls as measure, index}
 						<tr
 							class="hover:text-primary-500 border-b cursor-pointer hover:scale-[0.99] duration-200"
-							on:click={(_) => goto(`/security-measures/${measure.id}`)}
+							on:click={(_) => goto(`/applied-controls/${measure.id}`)}
 						>
 							<td class="px-2 py-3 text-center pl-4">M.{index + 1}</td>
 							<td class="px-2 py-3">{measure.name ?? '--'}</td>
 							<td class="px-2 py-3 max-w-md">{measure.description ?? '--'}</td>
 							<td class="px-2 py-3">{measure.type ?? '--'}</td>
-							<td class="px-2 py-3">{measure.security_function.str ?? '--'}</td>
+							<td class="px-2 py-3">{measure.reference_control.str ?? '--'}</td>
 							<td class="px-2 py-3">{measure.eta ?? '--'}</td>
 							<td class="px-2 py-3">{measure.effort ?? '--'}</td>
 							<td class="px-2 py-3 text-center">{measure.link ?? '--'} </td>
@@ -122,10 +122,10 @@
 					{/each}
 				{/if}
 
-				{#if !scenario.existing_measures && !(scenario.security_measures.length > 0)}
+				{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 					<tr>
 						<td colspan="9" class="p-2 text-left">
-							<i class="fas fa-exclamation-circle" /> {m.noSecurityMeasureYet()}
+							<i class="fas fa-exclamation-circle" /> {m.noAppliedControlYet()}
 						</td>
 					</tr>
 				{/if}
