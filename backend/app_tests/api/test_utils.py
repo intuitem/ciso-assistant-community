@@ -791,7 +791,7 @@ class EndpointTestsQueries:
             ):
                 # User has permission to delete the object
                 assert delete_response.status_code == expected_status, (
-                    f"{verbose_name} can not be deleted with authentication"
+                    f"{verbose_name} can not be deleted with permission"
                     if expected_status == status.HTTP_204_NO_CONTENT
                     else f"{verbose_name} should not be deleted (expected status: {expected_status})"
                 )
