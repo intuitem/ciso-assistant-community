@@ -138,6 +138,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
+		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'project' }, { field: 'auditor' }]
 	},
 	threats: {
@@ -324,7 +325,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users' }
-		]
+		],
+		selectFields: [{ field: 'status' }]
 	},
 	requirements: {
 		ref_id: 'ref_id',
@@ -390,10 +392,14 @@ interface FieldColoredTagMap {
 export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	'risk-assessments': {
 		name: {
-			key: 'is_draft',
+			key: 'status',
 			values: {
-				true: { text: 'draft', cssClasses: 'badge bg-blue-200' }
-			} // badge bg-blue-200 | bg-blue-500
+				planned: {text: 'planned', cssClasses: 'badge bg-indigo-300'},
+				in_progress: {text: 'inprogress', cssClasses: 'badge bg-yellow-300'},
+				in_review: {text: 'inreview', cssClasses: 'badge bg-cyan-300'},
+				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
+				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
+			}
 		}
 	},
 	'risk-scenarios': {
@@ -409,8 +415,16 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		}
 	},
 	'compliance-assessments': {
-		name: [
-			{
+		name: {
+			key: 'status',
+			values: {
+				planned: {text: 'planned', cssClasses: 'badge bg-indigo-300'},
+				in_progress: {text: 'inprogress', cssClasses: 'badge bg-yellow-300'},
+				in_review: {text: 'inreview', cssClasses: 'badge bg-cyan-300'},
+				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
+				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
+			}
+			/* { // These values seem to not exist anymore
 				key: 'is_draft',
 				values: {
 					true: { text: 'draft', cssClasses: 'badge bg-blue-200' }
@@ -421,8 +435,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				values: {
 					true: { text: 'obsolete', cssClasses: 'badge bg-red-300' }
 				}
-			}
-		]
+			} */
+		}
 	},
 	assets: {
 		name: {
