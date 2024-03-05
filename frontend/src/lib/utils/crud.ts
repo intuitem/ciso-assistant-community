@@ -396,8 +396,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 			key: 'status',
 			values: {
 				planned: {text: 'planned', cssClasses: 'badge bg-indigo-300'},
-				in_progress: {text: 'inprogress', cssClasses: 'badge bg-yellow-300'},
-				in_review: {text: 'inreview', cssClasses: 'badge bg-cyan-300'},
+				in_progress: {text: 'inProgress', cssClasses: 'badge bg-yellow-300'},
+				in_review: {text: 'inReview', cssClasses: 'badge bg-cyan-300'},
 				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
 				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
 			}
@@ -420,8 +420,8 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 			key: 'status',
 			values: {
 				planned: {text: 'planned', cssClasses: 'badge bg-indigo-300'},
-				in_progress: {text: 'inprogress', cssClasses: 'badge bg-yellow-300'},
-				in_review: {text: 'inreview', cssClasses: 'badge bg-cyan-300'},
+				in_progress: {text: 'inProgress', cssClasses: 'badge bg-yellow-300'},
+				in_review: {text: 'inReview', cssClasses: 'badge bg-cyan-300'},
 				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
 				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
 			}

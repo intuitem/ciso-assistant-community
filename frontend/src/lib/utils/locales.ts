@@ -282,8 +282,7 @@ export function localItems(languageTag: string): LocalItems {
 		support: m.support({ languageTag: languageTag }),
 		toDo: m.toDo({ languageTag: languageTag }),
 		inProgress: m.inProgress({ languageTag: languageTag }),
-		inprogress: m.inProgress({ languageTag: languageTag }), // Support for "In progress"
-		inreview: m.inReview({ languageTag: languageTag }),
+		inReview: m.inReview({ languageTag: languageTag }),
 		deprecated: m.deprecated({ languageTag: languageTag }),
 		done: m.done({ languageTag: languageTag }),
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
