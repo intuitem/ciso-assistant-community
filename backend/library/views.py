@@ -31,8 +31,6 @@ from rest_framework.response import Response
 from .serializers import LibrarySerializer, LibraryUploadSerializer
 from .utils import get_available_libraries, get_library, import_library_view
 
-from silk.profiling.profiler import silk_profile
-
 
 class LibraryViewSet(BaseModelViewSet):
     serializer_class = LibrarySerializer
@@ -41,7 +39,6 @@ class LibraryViewSet(BaseModelViewSet):
     lookup_value_regex = r"[\w.:-]+"
     model = Library
 
-    @silk_profile(name="LibraryViewSet.list")
     def list(self, request, *args, **kwargs):
         if not "view_library" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
