@@ -17,6 +17,8 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -27,6 +29,12 @@
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
 	export let object: Record<string, any> = {};
+
+	for (const index in model.selectOptions) {
+		for (const item in model.selectOptions[index]) {
+			model.selectOptions[index][item]['label'] = localItems(languageTag())[toCamelCase(model.selectOptions[index][item]['label'])];
+		}
+	}
 
 	function cancel(): void {
 		if (browser) {
@@ -53,18 +61,18 @@
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
 	<!--NOTE: Not the cleanest pattern, will refactor-->
 	<!--TODO: Refactor-->
-	{#if shape.security_function}
+	{#if shape.reference_control}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({
-				objects: model.foreignKeys['security_function'],
-				suggestions: suggestions['security_function']
+				objects: model.foreignKeys['reference_control'],
+				suggestions: suggestions['reference_control']
 			})}
-			field="security_function"
-			label={m.securityFunction()}
+			field="reference_control"
+			label={m.referenceControl()}
 			on:change={async (e) => {
 				if (e.detail) {
-					await fetch(`/security-functions/${e.detail}`)
+					await fetch(`/reference-controls/${e.detail}`)
 						.then((r) => r.json())
 						.then((r) => {
 							form.form.update((currentData) => {
@@ -110,7 +118,7 @@
 			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
 			field="risk_matrix"
 			label={m.riskMatrix()}
-			helpText="WARNING: You will not be able to change the risk matrix after the risk assessment is created"
+			helpText={m.riskAssessmentMatrixHelpText()}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -131,14 +139,14 @@
 			{form}
 			field="eta"
 			label={m.eta()}
-			helpText="Estimated time of arrival"
+			helpText={m.etaHelpText()}
 		/>
 		<TextField
 			type="date"
 			{form}
 			field="due_date"
 			label={m.dueDate()}
-			helpText="Date by which the assessment must be completed"
+			helpText={m.dueDateHelpText()}
 		/>
 	{:else if URLModel === 'threats'}
 		<TextField {form} field="ref_id" label={m.ref()} />
@@ -165,7 +173,7 @@
 			field="threats"
 			label={m.threats()}
 		/>
-	{:else if URLModel === 'security-measures' || URLModel === 'policies'}
+	{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 		{#if schema.shape.category}
 			<Select
 				{form}
@@ -187,27 +195,27 @@
 			{form}
 			field="eta"
 			label={m.eta()}
-			helpText="Estimated time of arrival"
+			helpText={m.etaHelpText()}
 		/>
 		<TextField
 			type="date"
 			{form}
 			field="expiry_date"
 			label={m.expiryDate()}
-			helpText="Date after which the security measure is no longer valid"
+			helpText={m.expiryDateHelpText()}
 		/>
 		<TextField
 			{form}
 			field="link"
 			label={m.link()}
-			helpText="External URL for action follow-up (eg. Jira ticket)"
+			helpText={m.linkHelpText()}
 		/>
 		<Select
 			{form}
 			options={model.selectOptions['effort']}
 			field="effort"
 			label={m.effort()}
-			helpText="Relative effort of the measure (using T-Shirt sizing)"
+			helpText={m.effortHelpText()}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -222,7 +230,7 @@
 			type="date"
 			field="expiry_date"
 			label={m.expiryDate()}
-			helpText="Date after which the risk acceptance will no longer apply"
+			helpText={m.expiryDateHelpText()}
 		/>
 		{#if object.id && $page.data.user.id === object.approver}
 			<TextArea
@@ -230,7 +238,7 @@
 				{form}
 				field="justification"
 				label={m.justification()}
-				helpText="Justification for the risk acceptance. Only the approver can edit this field."
+				helpText={m.riskAcceptanceJusitficationHelpText()}
 			/>
 		{/if}
 		<AutocompleteSelect
@@ -245,17 +253,17 @@
 			options={getOptions({ objects: model.foreignKeys['approver'], label: 'email' })}
 			field="approver"
 			label={m.approver()}
-			helpText="Risk owner and approver identity"
+			helpText={m.approverHelpText()}
 		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['risk_scenarios'] })}
 			field="risk_scenarios"
 			label={m.riskScenarios()}
-			helpText="Risk scenarios to accept"
+			helpText={m.riskAcceptanceRiskScenariosHelpText()}
 			multiple
 		/>
-	{:else if URLModel === 'security-functions'}
+	{:else if URLModel === 'reference-controls'}
 		<TextField {form} field="ref_id" label={m.ref()} />
 		<Select
 			{form}
@@ -275,8 +283,8 @@
 		<FileInput
 			{form}
 			helpText={object.attachment
-				? `WARNING: Uploading a new file will overwrite the existing one: ${object.attachment}`
-				: 'File for evidence (eg. screenshot, log file, etc.)'}
+				? `${m.attachmentWarningText()}: ${object.attachment}`
+				: m.attachmentHelpText()}
 			field="attachment"
 			label={m.attachment()}
 		/>
@@ -285,13 +293,13 @@
 			options={getOptions({ objects: model.foreignKeys['folder'] })}
 			field="folder"
 			label={m.domain()}
-			hide={initialData.security_measures || initialData.requirement_assessments}
+			hide={initialData.applied_controls || initialData.requirement_assessments}
 		/>
 		<TextField
 			{form}
 			field="link"
 			label={m.link()}
-			helpText="Link to the evidence (eg. Jira ticket, etc.)"
+			helpText={m.linkHelpText()}
 		/>
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
@@ -327,14 +335,14 @@
 			{form}
 			field="eta"
 			label={m.eta()}
-			helpText="Estimated time of arrival"
+			helpText={m.etaHelpText()}
 		/>
 		<TextField
 			type="date"
 			{form}
 			field="due_date"
 			label={m.dueDate()}
-			helpText="Date by which the assessment must be completed"
+			helpText={m.dueDateHelpText()}
 		/>
 	{:else if URLModel === 'assets'}
 		<TextArea {form} field="business_value" label={m.businessValue()} />
@@ -380,7 +388,7 @@
 				{form}
 				field="is_active"
 				label={m.isActive()}
-				helpText="Designates whether this user should be treated as active"
+				helpText={m.isActiveHelpText()}
 			/>
 		{/if}
 	{/if}
