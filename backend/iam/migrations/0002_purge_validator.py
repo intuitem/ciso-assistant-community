@@ -7,15 +7,16 @@ def rename_validator(apps, schema_editor):
     rename the validator role since it has been replaced by approver.
     """
     UserGroup = apps.get_model("iam", "UserGroup")
-    for ug in UserGroup.objects.filter(name="BI-UG-GVA").all():
+    for ug in UserGroup.objects.filter(name="BI-UG-GVA"):
         ug.name="BI-UG-GAP"
         ug.save()
-    for ug in UserGroup.objects.filter(name="BI-UG-VAL").all():
+    for ug in UserGroup.objects.filter(name="BI-UG-VAL"):
         ug.name="BI-UG-APP"
         ug.save()
     Role = apps.get_model("iam", "Role")
-    for role in Role.objects.filter(name="BI-RL-VAL").all():
+    for role in Role.objects.filter(name="BI-RL-VAL"):
         role.name="BI-RL-APP"
+        role.save()
 
 
 class Migration(migrations.Migration):
