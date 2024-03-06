@@ -80,33 +80,28 @@ class TestLibrariesAuthenticated:
             test.client, "Framework", user_group=test.user_group
         )
 
-        expect = {
-            "BI-UG-ADM": True,
-            "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
-            "BI-UG-DMA": False,
-            "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
-            "BI-UG-AUD": False,
-        }
-
-        assert Framework.objects.all().count() == (
-            1 if expect[test["user_group"]] else 0
-        ), "frameworks are not correctly imported in the database"
-        if expect[test["user_group"]]:
-            # Uses the API endpoint to assert that the library was properly imported
-            EndpointTestsQueries.Auth.get_object(
-                test.client,
-                "Frameworks",
-                test_params={
-                    "name": lib_detail_response["name"],
-                    "description": lib_detail_response["description"],
-                    "urn": lib_detail_response["urn"],
-                    "folder": {"str": Folder.get_root_folder().name},
-                },
-                base_count=1,
-                user_group=test.user_group,
-            )
+        assert (
+            Framework.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0] else 0)
+        ), "Frameworks are not correctly imported in the database"
+        
+        # Uses the API endpoint to assert that the library was properly imported
+        EndpointTestsQueries.Auth.get_object(
+            test.client,
+            "Frameworks",
+            test_params={
+                "name": lib_detail_response["name"],
+                "description": lib_detail_response["description"],
+                "urn": lib_detail_response["urn"],
+                "folder": {"str": Folder.get_root_folder().name},
+            },
+            base_count=1,
+            user_group=test.user_group,
+            fails=EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0]
+        )
 
     def test_delete_frameworks(self, test):
         """test to delete frameworks with the API with authentication"""
@@ -114,31 +109,14 @@ class TestLibrariesAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         assert (
             Framework.objects.all().count() == 1
-        ), "frameworks for deletion are not correctly imported in the database"
-        expect = {
-            "BI-UG-ADM": True,
-            "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
-            "BI-UG-DMA": False,
-            "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
-            "BI-UG-AUD": False,
-        }
-        should_work = expect[test["user_group"]]
-        if (
-            should_work
-        ):  # this if should be removed, but it is not working as expected, todo
-            EndpointTestsQueries.Auth.delete_object(
-                test.client,
-                "Frameworks",
-                Framework,
-                user_group=test.user_group,
-                fails=not (should_work),
-            )
-        if not should_work:  # remove object
-            EndpointTestsQueries.Auth.delete_object(
-                test.admin_client, "Frameworks", Framework
-            )
+        ), "Frameworks are not correctly imported in the database"
+
+        EndpointTestsQueries.Auth.delete_object(
+            test.client,
+            "Frameworks",
+            Framework,
+            user_group=test.user_group,
+        )
 
     def test_import_risk_matrix(self, test):
         """test to import risk matrix with the API with authentication"""
@@ -160,60 +138,43 @@ class TestLibrariesAuthenticated:
             test.client, "Risk matrix", user_group=test.user_group
         )
 
-        # Uses the API endpoint to assert that the library was properly imported
-        expect = {
-            "BI-UG-ADM": True,
-            "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
-            "BI-UG-DMA": False,
-            "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
-            "BI-UG-AUD": False,
-        }
-
-        assert RiskMatrix.objects.all().count() == (
-            1 if expect[test["user_group"]] else 0
+        assert (
+            RiskMatrix.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0] else 0)
         ), "Risk matrices are not correctly imported in the database"
-        if expect[test["user_group"]]:
-            EndpointTestsQueries.Auth.get_object(
-                test.client,
-                "Risk matrices",
-                test_params={
-                    "name": lib_detail_response["name"],
-                    "description": lib_detail_response["description"],
-                    "urn": lib_detail_response["urn"],
-                    "folder": {"str": Folder.get_root_folder().name},
-                    #                                 'json_definition': lib_detail_response  # TODO: restore this test
-                },
-                base_count=1,
-                user_group=test.user_group,
-            )
+
+        # Uses the API endpoint to assert that the library was properly imported
+        EndpointTestsQueries.Auth.get_object(
+            test.client,
+            "Risk matrices",
+            test_params={
+                "name": lib_detail_response["name"],
+                "description": lib_detail_response["description"],
+                "urn": lib_detail_response["urn"],
+                "folder": {"str": Folder.get_root_folder().name},
+                #                                 'json_definition': lib_detail_response  # TODO: restore this test
+            },
+            base_count=1,
+            user_group=test.user_group,
+            fails=EndpointTestsUtils.expected_request_response(
+                    "add", "library", test.user_group
+                )[0]
+        )
 
     def test_delete_matrix(self, test):
         """test to delete risk matrix with the API with authentication"""
 
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
-        expect = {
-            "BI-UG-ADM": True,
-            "BI-UG-GAD": False,
-            "BI-UG-GVA": False,
-            "BI-UG-DMA": False,
-            "BI-UG-ANA": False,
-            "BI-UG-VAL": False,
-            "BI-UG-AUD": False,
-        }
-        should_work = expect[test["user_group"]]
-        if (
-            should_work
-        ):  # this if should be removed, but it is not working as expected, todo
-            EndpointTestsQueries.Auth.delete_object(
-                test.client,
-                "Risk matrices",
-                RiskMatrix,
-                user_group=test.user_group,
-                fails=not (should_work),
+        EndpointTestsQueries.Auth.delete_object(
+            test.client,
+            "Risk matrices", 
+            RiskMatrix, 
+            user_group=test.user_group,
+            **({
+                    "fails": True, 
+                    "expected_status": status.HTTP_403_FORBIDDEN
+                } 
+                if test.user_group == "BI-UG-DMA" else {} # Domain Manager can't delete Global risk matrices (i.e. imported matrices)
             )
-        if not should_work:  # remove object
-            EndpointTestsQueries.Auth.delete_object(
-                test.admin_client, "Risk matrices", RiskMatrix
-            )
+        )
