@@ -88,7 +88,7 @@ export const RiskScenarioSchema = baseNamedObject({
 });
 
 export const AppliedControlSchema = baseNamedObject({
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
@@ -120,7 +120,7 @@ export const RiskAcceptanceSchema = baseNamedObject({
 
 export const ReferenceControlSchema = baseNamedObject({
 	provider: z.string().optional().nullable(),
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	folder: z.string()
 });
 
