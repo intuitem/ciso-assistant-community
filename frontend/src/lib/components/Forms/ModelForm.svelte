@@ -22,6 +22,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
+	export let origin: string = "default";
 	export let closeModal = false;
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
@@ -29,12 +30,6 @@
 	const URLModel = model.urlModel as urlModel;
 	export let schema = modelSchema(URLModel);
 	export let object: Record<string, any> = {};
-
-	for (const index in model.selectOptions) {
-		for (const item in model.selectOptions[index]) {
-			model.selectOptions[index][item]['label'] = localItems(languageTag())[toCamelCase(model.selectOptions[index][item]['label'])];
-		}
-	}
 
 	function cancel(): void {
 		if (browser) {
@@ -76,6 +71,9 @@
 						.then((r) => r.json())
 						.then((r) => {
 							form.form.update((currentData) => {
+								if (origin === "edit") {
+									return currentData; // Keep the current values in the edit form.
+								}
 								return { ...currentData, category: r.category };
 							});
 						});

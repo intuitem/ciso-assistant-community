@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0002_initial'),
+        ("core", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='riskscenario',
-            name='strength_of_knowledge',
-            field=models.IntegerField(default=-1, help_text='The strength of the knowledge supporting the assessment', verbose_name='Strength of Knowledge'),
+            model_name="riskscenario",
+            name="strength_of_knowledge",
+            field=models.IntegerField(
+                default=-1,
+                help_text="The strength of the knowledge supporting the assessment",
+                verbose_name="Strength of Knowledge",
+            ),
         ),
     ]
