@@ -9,7 +9,7 @@
 
 <TreeView hover={style}>
 	{#if icon}
-		<TreeViewItem {open} caretOpen="-rotate-90">
+		<TreeViewItem {open} caretClosed="-rotate-90" caretOpen="">
 			<svelte:fragment slot="lead"><i class={icon} /></svelte:fragment>
 			<p class="font-medium">{header}</p>
 			<svelte:fragment slot="children">
@@ -17,7 +17,7 @@
 			</svelte:fragment>
 		</TreeViewItem>
 	{:else}
-		<TreeViewItem {open} caretOpen="-rotate-90">
+		<TreeViewItem {open} caretClosed="-rotate-90" caretOpen="">
 			<p class="font-medium">{header}</p>
 			<svelte:fragment slot="children">
 				<slot />
