@@ -1,6 +1,10 @@
 import json
 import os
+from pathlib import Path
+import re
 from typing import List, Union
+from django.core.exceptions import SuspiciousFileOperation
+from django.http import Http404
 
 import yaml
 from ciso_assistant import settings
@@ -14,6 +18,20 @@ from core.models import (
 )
 from django.db import transaction
 from iam.models import Folder
+
+import structlog
+
+logger = structlog.get_logger(__name__)
+
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$"
+
+
+def match_urn(urn_string):
+    match = re.match(URN_REGEX, urn_string)
+    if match:
+        return match.groups()  # Returns all captured groups from the regex match
+    else:
+        return None
 
 
 def get_available_library_files():
@@ -71,19 +89,66 @@ def get_library_names(libraries):
 
 def get_library(urn: str) -> dict | None:
     """
-    Returns a library by urn
+    Returns a library by urn, trying to minimize file I/O by directly accessing the specific YAML file.
 
     Args:
-        urn: urn of the library to return
+        urn: URN of the library to return.
 
     Returns:
-        library: library with the given urn
+        The library with the given urn, or None if not found.
     """
-    libraries = get_available_libraries()
-    for lib in libraries:
-        if lib["urn"] == urn:
-            return lib
-    return None
+    if match_urn(urn) is None:
+        logger.error("Invalid URN", urn=urn)
+        raise ValueError("Invalid URN")
+
+    # First, try to fetch the library from the database.dd
+    try:
+        lib = Library.objects.get(urn=urn)
+        return {
+            "id": lib.id,
+            "urn": lib.urn,
+            "name": lib.name,
+            "description": lib.description,
+            "provider": lib.provider,
+            "packager": lib.packager,
+            "copyright": lib.copyright,
+            "reference_count": lib.reference_count,
+            "objects": lib._objects,
+        }
+    except Library.DoesNotExist:
+        # Construct the path to the YAML file from the urn.
+        filename = urn.split(":")[-1]
+        libraries_path = settings.BASE_DIR / "library/libraries"
+        _path = libraries_path / f"{filename}.yaml"
+
+        # Ensure that the path is within the libraries directory to prevent directory traversal attacks.
+        path = Path(os.path.abspath(_path))
+
+        logger.info(
+            "Attempting to load library",
+            filename=filename,
+            path=path,
+        )
+        if not path.parent.samefile(libraries_path):
+            logger.error(
+                "Attempted to access file outside of libraries directory",
+                path=path,
+                libraries_path=libraries_path,
+            )
+            raise SuspiciousFileOperation(
+                "Attempted to access file outside of libraries directory"
+            )
+
+        # Attempt to directly load the library from its specific YAML file.
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as file:
+                library_data = yaml.safe_load(file)
+                if library_data and library_data.get("urn") == urn:
+                    return library_data
+        logger.error("File not found", path=path)
+
+    logger.error("Library not found", urn=urn)
+    raise Http404("Library not found")
 
 
 def get_library_items(library, type: str) -> list[dict]:
@@ -129,7 +194,7 @@ class RequirementNodeImporter:
             maturity=self.requirement_data.get("maturity"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
-            is_published=True
+            is_published=True,
         )
 
         for threat in self.requirement_data.get("threats", []):
@@ -155,7 +220,9 @@ class FrameworkImporter:
         requirement_node_importers = []
         import_errors = []
         for index, requirement_node_data in enumerate(requirement_nodes):
-            requirement_node_importer = RequirementNodeImporter(requirement_node_data, index)
+            requirement_node_importer = RequirementNodeImporter(
+                requirement_node_data, index
+            )
             requirement_node_importers.append(requirement_node_importer)
             if (
                 requirement_node_error := requirement_node_importer.is_valid()
@@ -219,7 +286,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
-            is_published=True
+            is_published=True,
         )
 
         for requirement_node in self._requirement_nodes:
@@ -326,7 +393,7 @@ class RiskMatrixImporter:
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
-            is_published=True
+            is_published=True,
         )
 
 
@@ -489,7 +556,7 @@ class LibraryImporter:
                 "provider": self._library_data.get("provider", None),
                 "packager": self._library_data.get("packager", None),
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable
-                "is_published": True
+                "is_published": True,
             },
             urn=_urn,
             locale=_locale,
