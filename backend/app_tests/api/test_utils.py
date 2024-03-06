@@ -28,14 +28,20 @@ class EndpointTestsUtils:
         return f"{reverse(LIBRARIES_ENDPOINT)}{urn}/" if resolved else eval(urn)
 
     @pytest.mark.django_db
-    def get_test_client_and_folder(authenticated_client, role: str):
+    def get_test_client_and_folder(authenticated_client, role: str, test_folder_name: str, assigned_folder_name: str = "test"):
         """Get an authenticated client with a specific role and the folder associated to the role"""
         from iam.models import Folder, User, UserGroup
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client, "Folders", Folder, {"name": "test"}
+            authenticated_client, "Folders", Folder, {"name": assigned_folder_name}
         )
-        folder = Folder.objects.get(name="test")
+        assigned_folder = test_folder = Folder.objects.get(name=assigned_folder_name)
+
+        if test_folder_name != assigned_folder_name:
+            EndpointTestsQueries.Auth.create_object(
+                authenticated_client, "Folders", Folder, {"name": test_folder_name}, base_count=1
+            )
+            test_folder = Folder.objects.get(name=test_folder_name)
 
         user = User.objects.create_user(TEST_USER_EMAIL)
         UserGroup.objects.get(
@@ -44,7 +50,7 @@ class EndpointTestsUtils:
         ).user_set.add(user)
         client = APIClient()
         client.force_login(user)
-        return client, folder
+        return client, test_folder, assigned_folder
 
     def expected_request_response(
         action: str, object: str, user_group, expected_status: int = status.HTTP_200_OK
