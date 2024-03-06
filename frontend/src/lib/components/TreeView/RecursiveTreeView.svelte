@@ -58,9 +58,9 @@
 
 	// Props (symbols)
 	/** Set the rotation of the item caret in the open state. */
-	export let caretOpen: CssClasses = 'rotate-180';
+	export let caretOpen: CssClasses = '';
 	/** Set the rotation of the item caret in the closed state. */
-	export let caretClosed: CssClasses = '';
+	export let caretClosed: CssClasses = '-rotate-90';
 	/* Set the hyphen symbol opacity for non-expandable rows. */
 	export let hyphenOpacity: CssClasses = 'opacity-10';
 
