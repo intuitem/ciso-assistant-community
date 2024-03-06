@@ -46,6 +46,7 @@
 		}
 	}
 	$: shape = schema.shape || schema._def.schema.shape;
+	let updated_fields = new Set();
 </script>
 
 <SuperForm
@@ -77,9 +78,14 @@
 						.then((r) => r.json())
 						.then((r) => {
 							form.form.update((currentData) => {
-								if (origin === "edit") {
+								if (
+									origin === "edit" &&
+									currentData['reference_control'] === initialData['reference_control'] &&
+									!updated_fields.has('reference_control')
+								) {
 									return currentData; // Keep the current values in the edit form.
 								}
+								updated_fields.add('reference_control');
 								return { ...currentData, category: r.category };
 							});
 						});
