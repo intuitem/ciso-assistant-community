@@ -87,12 +87,6 @@ class TestAppliedControlsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestAppliedControlsAuthenticated:
     """Perform tests on Applied Controls API endpoint with authentication"""
 
