@@ -34,7 +34,9 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
 	mailer: async ({ context }, use) => {
-		await use(new Mailer(await context.newPage()));
+		const mailer = new Mailer(await context.newPage());
+		await mailer.goto();
+		await use(mailer);
 	},
 	
 	sideBar: async ({ page }, use) => {
