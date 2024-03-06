@@ -334,7 +334,7 @@ export class TestContent {
 						`${vars.folderName} - ${vars.usergroups.analyst}`,
 						`${vars.folderName} - ${vars.usergroups.auditor}`,
 						`${vars.folderName} - ${vars.usergroups.domainManager}`,
-						`${vars.folderName} - ${vars.usergroups.validator}`
+						`${vars.folderName} - ${vars.usergroups.approver}`
 					],
 					is_active: false
 				}
