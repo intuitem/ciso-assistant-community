@@ -170,5 +170,11 @@ class TestLibrariesAuthenticated:
             test.client,
             "Risk matrices", 
             RiskMatrix, 
-            user_group=test.user_group
+            user_group=test.user_group,
+            **({
+                    "fails": True, 
+                    "expected_status": status.HTTP_403_FORBIDDEN
+                } 
+                if test.user_group == "BI-UG-DMA" else {} # Domain Manager can't delete Global risk matrices (i.e. imported matrices)
+            )
         )
