@@ -155,12 +155,6 @@ class TestRiskScenariosUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestRiskScenariosAuthenticated:
     """Perform tests on Risk Scenarios API endpoint with authentication"""
 

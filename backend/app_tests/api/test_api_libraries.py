@@ -44,12 +44,6 @@ class TestLibrariesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestLibrariesAuthenticated:
     """Perform tests on Libraries API endpoint with authentication"""
 
