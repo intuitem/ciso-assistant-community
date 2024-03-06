@@ -7,9 +7,9 @@
 	export let style: string;
 </script>
 
-<TreeView hover={style}>
+<TreeView hover={style} caretClosed="-rotate-90" caretOpen="">
 	{#if icon}
-		<TreeViewItem {open} caretClosed="-rotate-90" caretOpen="">
+		<TreeViewItem {open}>
 			<svelte:fragment slot="lead"><i class={icon} /></svelte:fragment>
 			<p class="font-medium">{header}</p>
 			<svelte:fragment slot="children">
@@ -17,7 +17,7 @@
 			</svelte:fragment>
 		</TreeViewItem>
 	{:else}
-		<TreeViewItem {open} caretClosed="-rotate-90" caretOpen="">
+		<TreeViewItem {open}>
 			<p class="font-medium">{header}</p>
 			<svelte:fragment slot="children">
 				<slot />
