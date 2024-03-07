@@ -28,7 +28,6 @@
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
 
-	import * as m from '$paraglide/messages';
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
@@ -236,10 +235,7 @@
 									options={getOptions({ objects: data.model.foreignKeys['applied_controls'] })}
 									field="applied_controls"
 								/>
-								<ModelTable
-									source={data.tables['applied-controls']}
-									URLModel="applied-controls"
-								/>
+								<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 							</div>
 						{/if}
 						{#if tabSet === 1}

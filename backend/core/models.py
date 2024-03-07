@@ -562,37 +562,6 @@ class Evidence(NameDescriptionMixin, FolderMixin):
     def filename(self):
         return os.path.basename(self.attachment.name)
 
-    def preview(self):
-        if self.attachment:
-            if self.filename().endswith((".png", ".jpg", ".jpeg")):
-                return (
-                    "image",
-                    mark_safe('<img src="{}">'.format(self.attachment.url)),
-                )
-            if self.filename().endswith(".txt"):
-                with open(self.attachment.path, "r") as text:
-                    return ("text", text.read())
-            if self.filename().endswith(".pdf"):
-                return (
-                    "pdf",
-                    mark_safe(
-                        '<embed class="h-full w-full" src="{}" type="application/pdf"/>'.format(
-                            self.attachment.url
-                        )
-                    ),
-                )
-            if self.filename().endswith(".docx"):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/word.png")),
-                )
-            if self.filename().endswith((".xls", ".xlsx", ".csv")):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/excel.png")),
-                )
-        return ""
-
 
 class AppliedControl(NameDescriptionMixin, FolderMixin):
     class Status(models.TextChoices):
