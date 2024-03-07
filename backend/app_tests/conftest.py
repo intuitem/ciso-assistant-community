@@ -35,7 +35,7 @@ def authenticated_client(app_config):
 
 
 @pytest.fixture(
-        params=[(role, folder) for role in GROUPS_PERMISSIONS.keys() for folder in ["test", "test2"]],
+        params=[(role, folder) for role in GROUPS_PERMISSIONS.keys() for folder in ["test", "test_outside_domain"]],
         ids=[GROUPS_PERMISSIONS[key]["name"]+folder_name for key in GROUPS_PERMISSIONS.keys() for folder_name in ["", "_outside_domain"]]
     )
 def test(authenticated_client, request) -> Test:
