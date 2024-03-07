@@ -1,13 +1,17 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
 
+import * as m from '$paraglide/messages';
+import { localItems, toCamelCase } from '$lib/utils/locales';
+import { languageTag } from '$paraglide/runtime';
+
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms/server';
 import { z } from 'zod';
 
 export const actions: Actions = {
-	create: async ({ request, fetch, params }) => {
+	create: async ({ request, fetch }) => {
 		const formData = await request.formData();
 
 		const schema = modelSchema(formData.get('urlmodel') as string);
@@ -38,7 +42,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(urlModel);
 			// TODO: reference newly created object
-			return message(createForm, `Successfully created ${model.toLowerCase()}.`);
+			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())]}));
 		}
 		return { createForm };
 	},
@@ -69,7 +73,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(params.model!);
 			// TODO: reference object by name instead of id
-			return message(deleteForm, `Successfully deleted ${model.toLowerCase()} with id ${id}`);
+			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
 		}
 		return { deleteForm };
 	}
