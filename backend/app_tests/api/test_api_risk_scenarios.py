@@ -155,12 +155,6 @@ class TestRiskScenariosUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestRiskScenariosAuthenticated:
     """Perform tests on Risk Scenarios API endpoint with authentication"""
 
@@ -213,6 +207,7 @@ class TestRiskScenariosAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_risk_scenarios(self, test):
@@ -274,6 +269,7 @@ class TestRiskScenariosAuthenticated:
                 ],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_risk_scenarios(self, test):
@@ -352,6 +348,7 @@ class TestRiskScenariosAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_delete_risk_scenarios(self, test):
@@ -376,6 +373,7 @@ class TestRiskScenariosAuthenticated:
                 "threats": [threat],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_get_treatment_choices(self, test):

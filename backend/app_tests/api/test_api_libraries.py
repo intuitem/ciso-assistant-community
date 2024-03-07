@@ -44,12 +44,6 @@ class TestLibrariesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestLibrariesAuthenticated:
     """Perform tests on Libraries API endpoint with authentication"""
 
@@ -73,7 +67,7 @@ class TestLibrariesAuthenticated:
             Framework.objects.all().count() == 0
         ), "libraries are already imported in the database"
         EndpointTestsQueries.Auth.get_object(
-            test.client, "Frameworks", user_group=test.user_group
+            test.client, "Frameworks", user_group=test.user_group,
         )
 
         EndpointTestsQueries.Auth.import_object(
@@ -82,7 +76,7 @@ class TestLibrariesAuthenticated:
 
         assert (
             Framework.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
-                    "add", "library", test.user_group
+                    "add", "library", str(test.folder), test.user_group
                 )[0] else 0)
         ), "Frameworks are not correctly imported in the database"
         
@@ -99,7 +93,7 @@ class TestLibrariesAuthenticated:
             base_count=1,
             user_group=test.user_group,
             fails=EndpointTestsUtils.expected_request_response(
-                    "add", "library", test.user_group
+                    "add", "library", str(test.folder), test.user_group
                 )[0]
         )
 
@@ -116,6 +110,7 @@ class TestLibrariesAuthenticated:
             "Frameworks",
             Framework,
             user_group=test.user_group,
+            scope="Published",
         )
 
     def test_import_risk_matrix(self, test):
@@ -140,7 +135,7 @@ class TestLibrariesAuthenticated:
 
         assert (
             RiskMatrix.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
-                    "add", "library", test.user_group
+                    "add", "library", str(test.folder), test.user_group
                 )[0] else 0)
         ), "Risk matrices are not correctly imported in the database"
 
@@ -158,7 +153,7 @@ class TestLibrariesAuthenticated:
             base_count=1,
             user_group=test.user_group,
             fails=EndpointTestsUtils.expected_request_response(
-                    "add", "library", test.user_group
+                    "add", "library", str(test.folder), test.user_group
                 )[0]
         )
 
@@ -171,6 +166,7 @@ class TestLibrariesAuthenticated:
             "Risk matrices", 
             RiskMatrix, 
             user_group=test.user_group,
+            scope="Published",
             **({
                     "fails": True, 
                     "expected_status": status.HTTP_403_FORBIDDEN
