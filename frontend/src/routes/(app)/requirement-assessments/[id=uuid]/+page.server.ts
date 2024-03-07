@@ -318,6 +318,8 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 
+		form.data.requirement_assessments = [event.params.id];
+
 		const requestInitOptions: RequestInit = {
 			method: 'POST',
 			body: JSON.stringify(form.data)
