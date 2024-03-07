@@ -125,6 +125,7 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_risk_assessments(self, test):
@@ -150,6 +151,7 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_risk_assessments(self, test):
@@ -187,6 +189,7 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_delete_risk_assessments(self, test):
@@ -206,6 +209,7 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": risk_matrix,
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     # TODO add option quality_check (endpoint /api/risk-assessments/quality_check/ not working)

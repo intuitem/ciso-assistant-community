@@ -153,7 +153,6 @@ class TestProjectsAuthenticated:
                 "lc_status": PROJECT_STATUS[1],
             },
             user_group=test.user_group,
-            scope=str(test.folder)
         )
 
     def test_delete_projects(self, test):
@@ -165,7 +164,6 @@ class TestProjectsAuthenticated:
             Project,
             {"name": PROJECT_NAME, "folder": test.folder},
             user_group=test.user_group,
-            scope=str(test.folder)
         )
 
     def test_get_status_choices(self, test):

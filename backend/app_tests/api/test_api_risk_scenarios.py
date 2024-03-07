@@ -207,6 +207,7 @@ class TestRiskScenariosAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_risk_scenarios(self, test):
@@ -268,6 +269,7 @@ class TestRiskScenariosAuthenticated:
                 ],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_risk_scenarios(self, test):
@@ -346,6 +348,7 @@ class TestRiskScenariosAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_delete_risk_scenarios(self, test):
@@ -370,6 +373,7 @@ class TestRiskScenariosAuthenticated:
                 "threats": [threat],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_get_treatment_choices(self, test):

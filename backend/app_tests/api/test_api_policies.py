@@ -135,6 +135,7 @@ class TestPolicysAuthenticated:
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_policies(self, test):
