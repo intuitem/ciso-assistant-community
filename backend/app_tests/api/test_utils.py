@@ -60,14 +60,14 @@ class EndpointTestsUtils:
 
         if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
             # User has permission to perform the action
-            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]):
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Published"):
                 # User has access to the domain
                 return False, expected_status, "ok"
             else:
                 return False, expected_status, "outside_scope"
         else:
             # User has not permission to perform the action
-            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]):
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Published"):
                 # User has access to the domain
                 return True, status.HTTP_403_FORBIDDEN, "permission_denied"
             else:
@@ -417,9 +417,10 @@ class EndpointTestsQueries:
 
                 if not (fails or user_perm_fails):
                     if user_perm_reason == "outside_scope":
-                        assert (
-                            response.json()["count"] == 0
-                        ), f"{verbose_name} are accessible outside the domain"
+                        if not base_count < 0:
+                            assert (
+                                response.json()["count"] == 0
+                            ), f"{verbose_name} are accessible outside the domain"
                     else:
                         if base_count < 0:
                             assert (
@@ -430,7 +431,7 @@ class EndpointTestsQueries:
                                 response.json()["count"] == base_count + 1
                             ), f"{verbose_name} are not accessible with authentication"
 
-            if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
+            if not (fails or user_perm_fails) and user_perm_reason != "outside_scope" and len(response.json()["results"]) != 0:
                 params = {**build_params, **test_params}
                 if len(response.json()["results"]) > 0 and item_search_field:
                     response_item = [
@@ -475,6 +476,7 @@ class EndpointTestsQueries:
                 (
                     user_perm_fails,
                     user_perm_expected_status,
+                    _
                 ) = EndpointTestsUtils.expected_request_response(
                     "view", verbose_name, scope, user_group, expected_status
                 )
@@ -890,7 +892,7 @@ class EndpointTestsQueries:
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
             user_group: str = None,
-            scope: str = None,
+            scope: str = "Published",
         ):
             """Imports object with the API with authentication
 
@@ -906,7 +908,7 @@ class EndpointTestsQueries:
                     user_perm_expected_status,
                     user_perm_reason
                 ) = EndpointTestsUtils.expected_request_response(
-                    "add", "library", user_group, expected_status
+                    "add", "library", scope, user_group, expected_status
                 )
 
             url = urn or EndpointTestsUtils.get_object_urn(verbose_name)

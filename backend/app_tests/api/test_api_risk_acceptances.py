@@ -165,6 +165,7 @@ class TestRiskAcceptanceAuthenticated:
                 # 'state': RISK_ACCEPTANCE_STATE[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_risk_acceptances(self, test):

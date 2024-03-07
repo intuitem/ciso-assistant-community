@@ -111,6 +111,7 @@ class TestReferenceControlsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             user_group=test.user_group,
+            scope="Published",
         )
 
     def test_create_reference_controls(self, test):
@@ -132,6 +133,7 @@ class TestReferenceControlsAuthenticated:
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_reference_control_with_urn(self, test):
@@ -158,10 +160,10 @@ class TestReferenceControlsAuthenticated:
             {
                 "folder": {"str": Folder.get_root_folder().name},
             },
-            fails=True,
-            #            expected_status=HTTP_403_FORBIDDEN, # Imported objects cannot be updated
-            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be updated
             user_group=test.user_group,
+            scope="Published",
+            fails=True,
+            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be updated
         )
 
     def test_update_reference_control(self, test):

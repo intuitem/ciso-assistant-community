@@ -145,6 +145,7 @@ class TestAppliedControlsAuthenticated:
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_applied_controls(self, test):

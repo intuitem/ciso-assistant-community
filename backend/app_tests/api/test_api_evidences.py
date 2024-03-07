@@ -155,6 +155,7 @@ class TestEvidencesAuthenticated:
                 },
                 query_format="multipart",
                 user_group=test.user_group,
+                scope=str(test.folder),
             )
 
     def test_update_evidences(self, test):

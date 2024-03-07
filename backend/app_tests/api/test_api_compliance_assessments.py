@@ -125,6 +125,7 @@ class TestComplianceAssessmentsAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_compliance_assessments(self, test):
@@ -152,6 +153,7 @@ class TestComplianceAssessmentsAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_compliance_assessments(self, test):
@@ -191,6 +193,7 @@ class TestComplianceAssessmentsAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_delete_compliance_assessments(self, test):
@@ -209,4 +212,5 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": Framework.objects.all()[0],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
