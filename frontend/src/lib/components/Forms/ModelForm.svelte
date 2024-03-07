@@ -31,12 +31,6 @@
 	export let schema = modelSchema(URLModel);
 	export let object: Record<string, any> = {};
 
-	for (const index in model.selectOptions) {
-		for (const item in model.selectOptions[index]) {
-			model.selectOptions[index][item]['label'] = localItems(languageTag())[toCamelCase(model.selectOptions[index][item]['label'])];
-		}
-	}
-
 	function cancel(): void {
 		if (browser) {
 			var currentUrl = window.location.href;

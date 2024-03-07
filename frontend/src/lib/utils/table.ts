@@ -66,7 +66,7 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['name'],
+		body: ['localization_dict'],
 		meta: ['id', 'builtin']
 	},
 	roles: {
