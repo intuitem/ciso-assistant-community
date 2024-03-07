@@ -667,7 +667,6 @@ class EndpointTestsQueries:
 
             if user_group:
                 scope = scope or str(build_params.get("folder", None)) # if the scope is not provided, try to get it from the build_params
-                print(scope)
                 (
                     user_perm_fails,
                     user_perm_expected_status,
@@ -675,7 +674,6 @@ class EndpointTestsQueries:
                 ) = EndpointTestsUtils.expected_request_response(
                     "change", verbose_name, scope, user_group, expected_status
                 )
-            print(user_perm_fails, user_perm_expected_status, user_perm_reason)
 
             # Creates a test object from the model
             m2m_fields = {}
@@ -805,7 +803,7 @@ class EndpointTestsQueries:
                     user_perm_expected_status,
                     user_perm_reason
                 ) = EndpointTestsUtils.expected_request_response(
-                    "delete", verbose_name, user_group, expected_status
+                    "delete", verbose_name, scope, user_group, expected_status
                 )
 
             if build_params:
@@ -836,11 +834,17 @@ class EndpointTestsQueries:
             # Asserts that the objects exists
             response = authenticated_client.get(url)
 
-            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
-                if (verbose_name is not "Users"): # Users don't have permission to view users details
+            view_perms = EndpointTestsUtils.expected_request_response("view", verbose_name, scope, user_group)
+            if not user_group or view_perms[:2] == (False, status.HTTP_200_OK):
+                if view_perms[2] == "outside_scope":
                     assert (
-                        response.status_code == status.HTTP_200_OK
-                    ), f"{verbose_name} object detail can not be accessed with permission"
+                        response.status_code == status.HTTP_404_NOT_FOUND
+                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                else:
+                    if (verbose_name is not "Users"): # Users don't have permission to view users details
+                        assert (
+                            response.status_code == status.HTTP_200_OK
+                        ), f"{verbose_name} object detail can not be accessed with permission"
             else:
                 assert (
                     response.status_code == status.HTTP_403_FORBIDDEN
@@ -849,30 +853,35 @@ class EndpointTestsQueries:
             # Asserts that the object was deleted successfully
             delete_response = authenticated_client.delete(url)
 
-            if (
-                not user_group
-                or user_perm_expected_status == status.HTTP_204_NO_CONTENT
-            ):
-                # User has permission to delete the object
-                assert delete_response.status_code == expected_status, (
-                    f"{verbose_name} can not be deleted with permission"
-                    if expected_status == status.HTTP_204_NO_CONTENT
-                    else f"{verbose_name} should not be deleted (expected status: {expected_status})"
-                )
-            else:
-                # User does not have permission to delete the object
-                assert delete_response.status_code == user_perm_expected_status, (
-                    f"{verbose_name} can be deleted without permission"
-                    if delete_response.status_code == status.HTTP_204_NO_CONTENT
-                    else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
-                )
-
-            if not (fails or user_perm_fails):
-                # Asserts that the objects does not exists anymore
-                response = authenticated_client.get(url)
+            if user_perm_reason == "outside_scope":
                 assert (
-                    response.status_code == status.HTTP_404_NOT_FOUND
-                ), f"{verbose_name} has not been properly deleted with authentication"
+                    delete_response.status_code == status.HTTP_404_NOT_FOUND
+                ), f"{verbose_name} can be accessed outside the domain"
+            else:
+                if (
+                    not user_group
+                    or user_perm_expected_status == status.HTTP_204_NO_CONTENT
+                ):
+                    # User has permission to delete the object
+                    assert delete_response.status_code == expected_status, (
+                        f"{verbose_name} can not be deleted with permission"
+                        if expected_status == status.HTTP_204_NO_CONTENT
+                        else f"{verbose_name} should not be deleted (expected status: {expected_status})"
+                    )
+                else:
+                    # User does not have permission to delete the object
+                    assert delete_response.status_code == user_perm_expected_status, (
+                        f"{verbose_name} can be deleted without permission"
+                        if delete_response.status_code == status.HTTP_204_NO_CONTENT
+                        else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    )
+
+                if not (fails or user_perm_fails):
+                    # Asserts that the objects does not exists anymore
+                    response = authenticated_client.get(url)
+                    assert (
+                        response.status_code == status.HTTP_404_NOT_FOUND
+                    ), f"{verbose_name} has not been properly deleted with authentication"
 
         def import_object(
             authenticated_client,
