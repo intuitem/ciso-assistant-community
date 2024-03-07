@@ -9,7 +9,7 @@ from django.db.models import Q
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
 from .utils import camel_case
-from iam.models import Folder, FolderMixin
+from iam.models import FolderMixin
 from django.core import serializers
 
 import os
@@ -552,19 +552,15 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("Evidences")
 
     def get_folder(self):
-        if self.applied_controls.exists():
+        if self.applied_controls:
             return self.applied_controls.first().folder
-        elif self.requirement_assessments.exists():
+        elif self.requirement_assessments:
             return self.requirement_assessments.first().folder
         else:
-            return Folder.get_root_folder()
+            return None
 
     def filename(self):
         return os.path.basename(self.attachment.name)
-
-    def save(self, *args, **kwargs):
-        self.folder = self.get_folder()
-        super(Evidence, self).save(*args, **kwargs)
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin):
