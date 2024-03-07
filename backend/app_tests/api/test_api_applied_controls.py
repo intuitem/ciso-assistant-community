@@ -87,12 +87,6 @@ class TestAppliedControlsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestAppliedControlsAuthenticated:
     """Perform tests on Applied Controls API endpoint with authentication"""
 
@@ -151,6 +145,7 @@ class TestAppliedControlsAuthenticated:
                 "effort": APPLIED_CONTROL_EFFORT[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_applied_controls(self, test):

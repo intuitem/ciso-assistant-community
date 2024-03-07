@@ -54,8 +54,6 @@ export class Mailer {
         this.url = "http://localhost:8025";
         this.emailContent = new MailContent(page);
         this.emails = this.page.locator('.msglist-message');
-
-        this.goto();
     }
 
     async goto() {

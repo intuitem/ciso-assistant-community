@@ -430,12 +430,15 @@
 	"accept": "Accepté",
 	"avoid": "Refusé",
 	"transfer": "Partagé",
+	"primary": "Primaire",
+	"support": "Support",
 	"toDo": "À faire",
 	"inProgress": "En cours",
 	"nonCompliant": "Non conforme",
 	"partiallyCompliant": "Partiellement conforme",
 	"compliant": "Conforme",
 	"notApplicable": "Non applicable",
-	"primary": "Primaire",
-	"support": "Support"
+	"administrator": "Administrateur",
+	"domainManager": "Gestionnaire de domaine",
+	"analyst": "Analyste"
 }

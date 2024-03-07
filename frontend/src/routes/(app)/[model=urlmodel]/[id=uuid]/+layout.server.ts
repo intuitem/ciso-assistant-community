@@ -10,8 +10,6 @@ import type { LayoutServerLoad } from './$types';
 import type { SuperValidated } from 'sveltekit-superforms';
 import type { urlModel } from '$lib/utils/types';
 
-import { languageTag } from '$paraglide/runtime';
-
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${params.model}/${params.id}/`;
 

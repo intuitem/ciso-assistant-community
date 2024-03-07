@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { formFieldProxy } from 'sveltekit-superforms/client';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -83,7 +85,11 @@
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
 				{:else}
-					{option.label}
+					{#if localItems(languageTag())[toCamelCase(option.label)]}
+						{localItems(languageTag())[toCamelCase(option.label)]}
+					{:else}
+						{option.label}
+					{/if}
 				{/if}
 			</MultiSelect>
 		{:else}

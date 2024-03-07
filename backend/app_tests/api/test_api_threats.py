@@ -91,12 +91,6 @@ class TestThreatsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestThreatsAuthenticated:
     """Perform tests on Threats API endpoint with authentication"""
 
@@ -119,6 +113,7 @@ class TestThreatsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             user_group=test.user_group,
+            scope="Published",
         )
 
     def test_create_threats(self, test):
@@ -140,6 +135,7 @@ class TestThreatsAuthenticated:
                 "urn": None,
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_threats_with_urn(self, test):
@@ -166,10 +162,10 @@ class TestThreatsAuthenticated:
                 "urn": THREAT_URN,
                 "folder": str(folder.id),
             },
-            fails=True,
-            #            expected_status=HTTP_403_FORBIDDEN,   # Imported objects cannot be modified
-            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be modified
             user_group=test.user_group,
+            scope="Published",
+            fails=True,
+            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be modified
         )
 
     def test_update_threats(self, test):
@@ -210,4 +206,5 @@ class TestThreatsAuthenticated:
             Threat,
             {"name": THREAT_NAME, "folder": test.folder},
             user_group=test.user_group,
+            scope=str(test.folder),
         )

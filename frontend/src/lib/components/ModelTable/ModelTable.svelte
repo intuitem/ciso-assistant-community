@@ -231,16 +231,11 @@
                   {/if}
                 {:else if value && value.hexcolor}
                   <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
-								{:else if ISO_8601_REGEX.test(value)}
-									{new Date(value).toLocaleString(languageTag())}
-					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str)]}
-				  		<p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{localItems(languageTag())[toCamelCase(value.name ?? value.str)]}</p>
-					{:else}
-                  		<p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
-					{/if}
+				{:else if ISO_8601_REGEX.test(value)}
+					{new Date(value).toLocaleString(languageTag())}
                 {:else}
-					{#if localItems(languageTag())[value]}
-						{localItems(languageTag())[value]}
+					{#if localItems(languageTag())[toCamelCase(value)]}
+						{localItems(languageTag())[toCamelCase(value)]}
 					{:else}
 						{value ?? '-'}
 					{/if}

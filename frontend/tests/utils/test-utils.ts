@@ -34,7 +34,9 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
 	mailer: async ({ context }, use) => {
-		await use(new Mailer(await context.newPage()));
+		const mailer = new Mailer(await context.newPage());
+		await mailer.goto();
+		await use(mailer);
 	},
 	
 	sideBar: async ({ page }, use) => {
@@ -332,7 +334,7 @@ export class TestContent {
 						`${vars.folderName} - ${vars.usergroups.analyst}`,
 						`${vars.folderName} - ${vars.usergroups.auditor}`,
 						`${vars.folderName} - ${vars.usergroups.domainManager}`,
-						`${vars.folderName} - ${vars.usergroups.validator}`
+						`${vars.folderName} - ${vars.usergroups.approver}`
 					],
 					is_active: false
 				}
