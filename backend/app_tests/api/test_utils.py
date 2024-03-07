@@ -55,7 +55,7 @@ class EndpointTestsUtils:
     def expected_request_response(
         action: str, object: str, scope: str, user_group: str, expected_status: int = status.HTTP_200_OK
     ):
-        """Get the expected request response"""
+        """Get the expected request response for a specific action on an object for a specific user group"""
         perm_name = f"{action}_{get_singular_name(object).lower().replace(' ', '')}"
 
         if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
@@ -696,14 +696,15 @@ class EndpointTestsQueries:
 
             response = authenticated_client.get(url)
 
-            # if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
-            #     assert (
-            #         response.status_code == status.HTTP_200_OK
-            #     ), f"{verbose_name} object detail can not be accessed with permission"
-            # else:
-            #     assert (
-            #         response.status_code == status.HTTP_403_FORBIDDEN
-            #     ), f"{verbose_name} object detail can be accessed without permission"
+            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
+                if (verbose_name is not "Users"): # Users don't have permission to view users details
+                    assert (
+                        response.status_code == status.HTTP_200_OK
+                    ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
 
             if not (fails or user_perm_fails):
                 for key, value in {**build_params, **test_build_params}.items():
@@ -804,7 +805,6 @@ class EndpointTestsQueries:
                     getattr(test_object, field).set(value)
             else:
                 id = str(object.objects.all()[0].id)
-                print("id=", id, object.objects.all())
 
             url = endpoint or (
                 EndpointTestsUtils.get_endpoint_url(verbose_name) + id + "/"
@@ -813,14 +813,15 @@ class EndpointTestsQueries:
             # Asserts that the objects exists
             response = authenticated_client.get(url)
 
-            # if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
-            #     assert (
-            #         response.status_code == status.HTTP_200_OK
-            #     ), f"{verbose_name} object detail can not be accessed with permission"
-            # else:
-            #     assert (
-            #         response.status_code == status.HTTP_403_FORBIDDEN
-            #     ), f"{verbose_name} object detail can be accessed without permission"
+            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
+                if (verbose_name is not "Users"): # Users don't have permission to view users details
+                    assert (
+                        response.status_code == status.HTTP_200_OK
+                    ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
 
             # Asserts that the object was deleted successfully
             delete_response = authenticated_client.delete(url)
@@ -831,7 +832,7 @@ class EndpointTestsQueries:
             ):
                 # User has permission to delete the object
                 assert delete_response.status_code == expected_status, (
-                    f"{verbose_name} can not be deleted with authentication"
+                    f"{verbose_name} can not be deleted with permission"
                     if expected_status == status.HTTP_204_NO_CONTENT
                     else f"{verbose_name} should not be deleted (expected status: {expected_status})"
                 )
