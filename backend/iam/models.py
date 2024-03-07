@@ -198,6 +198,12 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 
     def get_name_display(self) -> str:
         return self.name
+    
+    def get_localization_dict(self) -> dict:
+        return {
+            "folder": self.folder.name,
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+        }
 
     @staticmethod
     def get_user_groups(user):
