@@ -5,7 +5,6 @@ import { setError, superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';
-import { superValidate } from 'sveltekit-superforms/server'; // Import the missing 'superValidate' function
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, ResetPasswordSchema);
