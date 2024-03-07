@@ -123,7 +123,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "requirement": RequirementNode.objects.all()[0],
             },
             {
-                "folder": str(test.folder.id),
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
@@ -206,7 +206,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "applied_controls": [str(applied_control.id)],
             },
             {
-                "folder": str(test.folder.id),
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
