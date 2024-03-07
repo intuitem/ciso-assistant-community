@@ -61,12 +61,17 @@ class EndpointTestsUtils:
         if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
             # User has permission to perform the action
             if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]):
-                # User has permission to perform the action in the domain
+                # User has access to the domain
                 return False, expected_status, "ok"
             else:
                 return False, expected_status, "outside_scope"
         else:
-            return True, status.HTTP_403_FORBIDDEN, "permission_denied"
+            # User has not permission to perform the action
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]):
+                # User has access to the domain
+                return True, status.HTTP_403_FORBIDDEN, "permission_denied"
+            else:
+                return True, status.HTTP_403_FORBIDDEN, "outside_scope"
 
 
 class EndpointTestsQueries:
@@ -662,6 +667,7 @@ class EndpointTestsQueries:
 
             if user_group:
                 scope = scope or str(build_params.get("folder", None)) # if the scope is not provided, try to get it from the build_params
+                print(scope)
                 (
                     user_perm_fails,
                     user_perm_expected_status,
@@ -669,6 +675,7 @@ class EndpointTestsQueries:
                 ) = EndpointTestsUtils.expected_request_response(
                     "change", verbose_name, scope, user_group, expected_status
                 )
+            print(user_perm_fails, user_perm_expected_status, user_perm_reason)
 
             # Creates a test object from the model
             m2m_fields = {}
@@ -696,64 +703,80 @@ class EndpointTestsQueries:
 
             response = authenticated_client.get(url)
 
-            if not user_group or EndpointTestsUtils.expected_request_response("view", verbose_name, user_group) == (False, status.HTTP_200_OK):
-                if (verbose_name is not "Users"): # Users don't have permission to view users details
+            view_perms = EndpointTestsUtils.expected_request_response("view", verbose_name, scope, user_group)
+            if not user_group or view_perms[:2] == (False, status.HTTP_200_OK):
+                if view_perms[2] == "outside_scope":
                     assert (
-                        response.status_code == status.HTTP_200_OK
-                    ), f"{verbose_name} object detail can not be accessed with permission"
+                        response.status_code == status.HTTP_404_NOT_FOUND
+                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                else:
+                    if (verbose_name is not "Users"): # Users don't have permission to view users details
+                        assert (
+                            response.status_code == status.HTTP_200_OK
+                        ), f"{verbose_name} object detail can not be accessed with permission"
             else:
                 assert (
                     response.status_code == status.HTTP_403_FORBIDDEN
                 ), f"{verbose_name} object detail can be accessed without permission"
 
             if not (fails or user_perm_fails):
-                for key, value in {**build_params, **test_build_params}.items():
-                    if key == "attachment":
-                        # Asserts that the value file name is present in the JSON response
-                        assert (
-                            value.name.split("/")[-1].split(".")[0]
-                            in response.json()[key]
-                        ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
-                    else:
-                        assert (
-                            response.json()[key] == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                if view_perms[2] == "outside_scope":
+                    assert (
+                        response.json() == {'detail': 'Not found.'}
+                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                else:
+                    for key, value in {**build_params, **test_build_params}.items():
+                        if key == "attachment":
+                            # Asserts that the value file name is present in the JSON response
+                            assert (
+                                value.name.split("/")[-1].split(".")[0]
+                                in response.json()[key]
+                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                        else:
+                            assert (
+                                response.json()[key] == value
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
             update_response = authenticated_client.patch(
                 url, update_params, format=query_format
             )
 
-            if not user_group or user_perm_expected_status == status.HTTP_200_OK:
-                # User has permission to update the object
-                assert update_response.status_code == expected_status, (
-                    f"{verbose_name} can not be updated with authentication"
-                    if expected_status == status.HTTP_200_OK
-                    else f"{verbose_name} should not be updated (expected status: {expected_status})"
-                )
+            if user_perm_reason == "outside_scope":
+                assert (
+                    update_response.status_code == status.HTTP_404_NOT_FOUND
+                ), f"{verbose_name} can be accessed outside the domain"
             else:
-                # User does not have permission to update the object
-                assert update_response.status_code == user_perm_expected_status, (
-                    f"{verbose_name} can be updated without permission"
-                    if update_response.status_code == status.HTTP_200_OK
-                    else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
-                )
+                if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                    # User has permission to update the object
+                    assert update_response.status_code == expected_status, (
+                        f"{verbose_name} can not be updated with authentication"
+                        if expected_status == status.HTTP_200_OK
+                        else f"{verbose_name} should not be updated (expected status: {expected_status})"
+                    )
+                else:
+                    # User does not have permission to update the object
+                    assert update_response.status_code == user_perm_expected_status, (
+                        f"{verbose_name} can be updated without permission"
+                        if update_response.status_code == status.HTTP_200_OK
+                        else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    )
 
-            if not (fails or user_perm_fails):
-                for key, value in {
-                    **build_params,
-                    **update_params,
-                    **test_params,
-                }.items():
-                    if key == "attachment" and update_response.json()[key] != value:
-                        # Asserts that the value file name is present in the JSON response
-                        assert (
-                            value.split("/")[-1].split(".")[0]
-                            in update_response.json()[key]
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                    else:
-                        assert (
-                            update_response.json()[key] == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                if not (fails or user_perm_fails):
+                    for key, value in {
+                        **build_params,
+                        **update_params,
+                        **test_params,
+                    }.items():
+                        if key == "attachment" and update_response.json()[key] != value:
+                            # Asserts that the value file name is present in the JSON response
+                            assert (
+                                value.split("/")[-1].split(".")[0]
+                                in update_response.json()[key]
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        else:
+                            assert (
+                                update_response.json()[key] == value
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def delete_object(
             authenticated_client,
