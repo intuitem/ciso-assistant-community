@@ -179,7 +179,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 
 export const EvidenceSchema = baseNamedObject({
 	attachment: z.string().optional().nullable(),
-	folder: z.string().optional(),
+	folder: z.string(),
 	applied_controls: z.string().optional().array().optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	link: z.string().optional().nullable()

@@ -75,7 +75,7 @@ export const load = (async ({ fetch, params }) => {
 
 	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
-		folder: requirementAssessment.folder
+		folder: requirementAssessment.folder.id
 	};
 
 	const measureCreateForm = await superValidate(initialData, measureCreateSchema, {
@@ -129,6 +129,10 @@ export const load = (async ({ fetch, params }) => {
 
 	if (measureModel.foreignKeyFields) {
 		for (const keyField of measureModel.foreignKeyFields) {
+			if (keyField.field === 'folder') {
+				measureForeignKeys[keyField.field] = [requirementAssessment.folder];
+				continue;
+			}
 			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
 			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
 			const response = await fetch(url);
@@ -146,7 +150,7 @@ export const load = (async ({ fetch, params }) => {
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceInitialData = {
 		requirement_assessments: [params.id],
-		folder: requirementAssessment.folder
+		folder: requirementAssessment.folder.id
 	};
 	const evidenceCreateForm = await superValidate(evidenceInitialData, evidenceCreateSchema, {
 		errors: false
@@ -177,6 +181,10 @@ export const load = (async ({ fetch, params }) => {
 
 	if (evidenceModel.foreignKeyFields) {
 		for (const keyField of evidenceModel.foreignKeyFields) {
+			if (keyField.field === 'folder') {
+				evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
+				continue;
+			}
 			evidenceForeignKeys[keyField.field] = [];
 			// const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
 			// const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
