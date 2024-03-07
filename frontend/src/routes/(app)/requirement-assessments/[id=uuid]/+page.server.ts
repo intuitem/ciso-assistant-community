@@ -9,6 +9,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
+import * as m from '$paraglide/messages';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';
@@ -240,7 +241,7 @@ export const actions: Actions = {
 		}
 		const object = await res.json();
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: `${model} successfully saved` }, event);
+		setFlash({ type: 'success', message: m.successfullySavedObject({object: model}) }, event);
 		redirect(
 			302,
 			event.url.searchParams.get('next') ||
@@ -299,7 +300,7 @@ export const actions: Actions = {
 		}
 
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: `${model} successfully saved: ${form.data.name}` }, event);
+		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) }, event);
 		return { form };
 	},
 	createEvidence: async (event) => {
@@ -355,7 +356,7 @@ export const actions: Actions = {
 		}
 
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: `${model} successfully saved: ${form.data.name}` }, event);
+		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) }, event);
 		return { form };
 	}
 };

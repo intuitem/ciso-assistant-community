@@ -440,5 +440,27 @@
 	"notApplicable": "Not applicable",
 	"administrator": "Administrator",
 	"domainManager": "Domain manager",
-	"analyst": "Analyst"
+	"analyst": "Analyst",
+	"successfullyCreatedObject": "The {object} object has been successfully created",
+	"successfullyUpdatedObject": "The {object} object: {name} has been successfully updated",
+	"successfullySavedObject": "The {object} object has been successfully saved",
+	"successfullyDeletedObject": "The {object} object with id: {id} has been successfully deleted",
+	"successfullyCreatedUser": "User successfully created. An email was sent to set the password.",
+	"successfullyUpdatedUser": "The user: {email} has been successfully updated",
+	"successfullyAcceptedObject": "The {object} object with id: {id} has been successfully accepted",
+	"successfullyRejectedObject": "The {object} object with id: {id} has been successfully rejected",
+	"successfullyRevokedObject": "The {object} object with id: {id} has been successfully revoked",
+	"successfullyImportedObject": "The {object} object with id: {id} has been successfully imported",
+	"anErrorOccurred": "An error has occurred",
+	"attachmentDeleted": "The attachment has been successfully deleted",
+	"librarySuccessfullyImported": "The library has been successfully imported",
+	"noLibraryDetected": "No library detected",
+	"errorImportingLibrary": "Error importing library",
+	"passwordSuccessfullyChanged": "Your password has been successfully changed",
+	"passwordSuccessfullyReset": "Your password has been successfully reset",
+	"passwordSuccessfullySet": "Your password has been successfully set",
+	"passwordSuccessfullySetWelcome": "Your password has been successfully set. Welcome to CISO Assistant!",
+	"waitBeforeRequestingResetLink": "Please wait {timing}sec before requesting a new reset link",
+	"resetLinkSent": "The request has been received, you should receive a reset link at the following address: {email}"
+
 }

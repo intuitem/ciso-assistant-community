@@ -8,6 +8,9 @@ import {
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms/server';
+import { localItems, toCamelCase } from '$lib/utils/locales';
+import * as m from '$paraglide/messages';
+import { languageTag } from '$paraglide/runtime';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import type { ModelInfo } from '$lib/utils/types';
@@ -125,9 +128,9 @@ export const actions: Actions = {
 			const model: string = urlParamModelVerboseName(event.params.model!);
 			// TODO: reference newly created object
 			if (model === 'User') {
-				return message(createForm, `${model} successfully created.`);
+				return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[model]}));
 			}
-			return message(createForm, `Successfully created ${model.toLowerCase()}.`);
+			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())]}));
 		}
 		return { createForm };
 	},
@@ -159,7 +162,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(params.model!);
 			// TODO: reference object by name instead of id
-			return message(deleteForm, `Successfully deleted ${model.toLowerCase()} with id ${id}`);
+			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
 		}
 		return { deleteForm };
 	}

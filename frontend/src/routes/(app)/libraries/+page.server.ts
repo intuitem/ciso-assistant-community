@@ -5,11 +5,11 @@ import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
-import { urlParamModelVerboseName } from '$lib/utils/crud';
 import { z } from 'zod';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { Library, urlModel } from '$lib/utils/types';
+import * as m from '$paraglide/messages'
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/libraries/`;
@@ -97,9 +97,9 @@ export const actions: Actions = {
 				setFlash({ type: 'error', message: `Error: ${response.error}` }, event);
 				return fail(400, { form });
 			}
-			setFlash({ type: 'success', message: 'Library successfully imported !' }, event);
+			setFlash({ type: 'success', message: m.librarySuccessfullyImported() }, event);
 		} else {
-			setFlash({ type: 'error', message: 'No library detected !' }, event);
+			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });
 		}
 		return { form };
@@ -131,7 +131,7 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			setFlash({ type: 'success', message: `Successfully deleted library with id ${id}` }, event);
+			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: "library", id:id}) }, event);
 		}
 		return { deleteForm };
 	}

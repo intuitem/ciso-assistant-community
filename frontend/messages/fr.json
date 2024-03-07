@@ -440,5 +440,8 @@
 	"notApplicable": "Non applicable",
 	"administrator": "Administrateur",
 	"domainManager": "Gestionnaire de domaine",
-	"analyst": "Analyste"
+	"analyst": "Analyste",
+	"successfullyCreatedObject": "L'objet {object} a été créé avec succès",
+	"successfullyUpdatedObject": "L'objet {object}: {name} a été mis à jour avec succès",
+	"successfullyDeletedObject": "L'objet {object} avec l'id: {id} a été supprimé avec succès"
 }
