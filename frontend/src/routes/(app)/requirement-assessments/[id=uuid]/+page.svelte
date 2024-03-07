@@ -236,10 +236,7 @@
 									options={getOptions({ objects: data.model.foreignKeys['applied_controls'] })}
 									field="applied_controls"
 								/>
-								<ModelTable
-									source={data.tables['applied-controls']}
-									URLModel="applied-controls"
-								/>
+								<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 							</div>
 						{/if}
 						{#if tabSet === 1}
