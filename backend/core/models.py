@@ -9,7 +9,7 @@ from django.db.models import Q
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
 from .utils import camel_case
-from iam.models import FolderMixin
+from iam.models import Folder, FolderMixin
 from django.core import serializers
 
 import os
@@ -552,46 +552,19 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("Evidences")
 
     def get_folder(self):
-        if self.applied_controls:
+        if self.applied_controls.exists():
             return self.applied_controls.first().folder
-        elif self.requirement_assessments:
+        elif self.requirement_assessments.exists():
             return self.requirement_assessments.first().folder
         else:
-            return None
+            return Folder.get_root_folder()
 
     def filename(self):
         return os.path.basename(self.attachment.name)
 
-    def preview(self):
-        if self.attachment:
-            if self.filename().endswith((".png", ".jpg", ".jpeg")):
-                return (
-                    "image",
-                    mark_safe('<img src="{}">'.format(self.attachment.url)),
-                )
-            if self.filename().endswith(".txt"):
-                with open(self.attachment.path, "r") as text:
-                    return ("text", text.read())
-            if self.filename().endswith(".pdf"):
-                return (
-                    "pdf",
-                    mark_safe(
-                        '<embed class="h-full w-full" src="{}" type="application/pdf"/>'.format(
-                            self.attachment.url
-                        )
-                    ),
-                )
-            if self.filename().endswith(".docx"):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/word.png")),
-                )
-            if self.filename().endswith((".xls", ".xlsx", ".csv")):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/excel.png")),
-                )
-        return ""
+    def save(self, *args, **kwargs):
+        self.folder = self.get_folder()
+        super(Evidence, self).save(*args, **kwargs)
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin):
