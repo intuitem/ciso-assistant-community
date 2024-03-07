@@ -18,24 +18,19 @@ export const load = (async ({ fetch, params }) => {
 	const requirementAssessment = await res.json();
 
 	const compliance_assessment = await fetch(
-		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment}`
+		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/`
 	).then((res) => res.json());
 	const requirement = await fetch(
-		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}`
+		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
 	).then((res) => res.json());
 	const parentRequirementNodeEndpoint = `${BASE_API_URL}/requirement-nodes/?urn=${requirement.parent_urn}`;
-	let parent = await fetch(parentRequirementNodeEndpoint)
+	const parent = await fetch(parentRequirementNodeEndpoint)
 		.then((res) => res.json())
 		.then((res) => res.results[0]);
-	if (!parent) {
-		parent = await fetch(parentRequirementNodeEndpoint)
-			.then((res) => res.json())
-			.then((res) => res.results[0]);
-	}
 
 	const model = getModelInfo(URLModel);
 
-	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object`;
+	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 	const schema = modelSchema(URLModel);
 	const form = await superValidate(object, schema, { errors: true });
@@ -182,14 +177,15 @@ export const load = (async ({ fetch, params }) => {
 
 	if (evidenceModel.foreignKeyFields) {
 		for (const keyField of evidenceModel.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await fetch(url);
-			if (response.ok) {
-				evidenceForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
-			}
+			evidenceForeignKeys[keyField.field] = [];
+			// const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			// const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			// const response = await fetch(url);
+			// if (response.ok) {
+			// 	evidenceForeignKeys[keyField.field] = await response.json().then((data) => data.results);
+			// } else {
+			// 	console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			// }
 		}
 	}
 
