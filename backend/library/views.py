@@ -131,7 +131,7 @@ class LibraryViewSet(BaseModelViewSet):
     def upload_library(self, request):
         if not request.data:
             return HttpResponse(
-                json.dumps({"error": "No file detected !"}), status=HTTP_400_BAD_REQUEST
+                json.dumps({"error": "noFileDetected"}), status=HTTP_400_BAD_REQUEST
             )
 
         try:
