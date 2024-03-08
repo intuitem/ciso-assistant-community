@@ -162,7 +162,7 @@ export const actions: Actions = {
 		}
 		const model: string = urlParamModelVerboseName(params.model!);
 		// TODO: reference object by name instead of id
-		return message(acceptForm, m.successfullyAcceptedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
+		return message(acceptForm, m.successfullyValidatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
 	},
 	revoke: async ({ request, fetch, params }) => {
 		const formData = await request.formData();

@@ -448,7 +448,7 @@
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
 	"successfullyCreatedUser": "User successfully created. An email was sent to set the password.",
 	"successfullyUpdatedUser": "The user: {email} has been successfully updated",
-	"successfullyAcceptedObject": "The {object} object has been successfully accepted",
+	"successfullyValidatedObject": "The {object} object has been successfully validated",
 	"successfullyRejectedObject": "The {object} object has been successfully rejected",
 	"successfullyRevokedObject": "The {object} object has been successfully revoked",
 	"successfullyImportedObject": "The {object} object has been successfully imported",
