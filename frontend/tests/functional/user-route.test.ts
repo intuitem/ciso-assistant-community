@@ -95,7 +95,7 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the reference control data are displayed in the table
 	});
 
-	await test.step('user can create a applied control', async () => {
+	await test.step('user can create an applied control', async () => {
 		await sideBar.click('Context', pages.appliedControlsPage.url);
 		await pages.appliedControlsPage.hasUrl();
 		await pages.appliedControlsPage.hasTitle();
