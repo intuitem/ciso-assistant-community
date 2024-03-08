@@ -464,5 +464,9 @@
 	"waitBeforeRequestingResetLink": "Veuillez patienter {timing}sec avant de demander un nouveau lien de réinitialisation.",
 	"resetLinkSent": "La demande a été reçue, vous devriez recevoir un lien de réinitialisation à l'adresse suivante: {email}",
 	"riskAcceptanceStateDoesntAllowEdit": "L'état d'acceptation du risque: {riskAcceptance} ne permet pas de le modifier",
+	"associatedRequirements": "Exigences associées",
+	"isPublished": "Publié",
+	"suggestedReferenceControls": "Mesures de référence suggérées",
+	"threatsCovered": "Menaces couvertes",
 	"noFileDetected": "Erreur: aucun fichier détecté"
 }
