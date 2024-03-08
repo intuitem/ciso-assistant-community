@@ -65,7 +65,7 @@
 	"roleAssignments": "Role assignments",
 	"xRays": "X-rays",
 	"scoringAssistant": "Scoring assistant",
-	"scoringAssistantNoMatrixError": "Error: Your must import a risk matrix in order to access this page !",
+	"scoringAssistantNoMatrixError": "Please import a risk matrix from the library to get access to this page",
 	"libraries": "Libraries",
 	"backupRestore": "Backup & restore",
 	"myProfile": "My profile",
