@@ -5,6 +5,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
+import * as m from '$paraglide/messages';
 
 export const load: LayoutServerLoad = async (event) => {
 	const URLModel = event.params.model!;
@@ -27,7 +28,7 @@ export const load: LayoutServerLoad = async (event) => {
 			setFlash(
 				{
 					type: 'error',
-					message: `The state of risk acceptance: <strong>${riskAcceptance.name}</strong> doesn't allow it to be edited`
+					message: m.riskAcceptanceStateDoesntAllowEdit({riskAcceptance: riskAcceptance.name})
 				},
 				event
 			);
