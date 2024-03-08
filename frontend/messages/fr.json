@@ -442,5 +442,7 @@
 	"domainManager": "Gestionnaire de domaine",
 	"analyst": "Analyste",
 	"associatedRequirements": "Exigences associées",
-	"isPublished": "Publié"
+	"isPublished": "Publié",
+	"suggestedReferenceControls": "Mesures de référence suggérés",
+	"threatsCovered": "Menaces couvertes"
 }
