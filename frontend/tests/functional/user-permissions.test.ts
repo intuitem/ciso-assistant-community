@@ -30,7 +30,7 @@ test.beforeEach('create user', async ({ logedPage, usersPage, foldersPage, sideB
         ],
     });
     await usersPage.form.saveButton.click();
-    await usersPage.isToastVisible('.+ The user: ' + vars.user.email + ' has been successfully updated');
+    await usersPage.isToastVisible('The user: ' + vars.user.email + ' has been successfully updated.+');
 
     await sideBar.moreButton.click();
     await expect(sideBar.morePanel).not.toHaveAttribute('inert');
