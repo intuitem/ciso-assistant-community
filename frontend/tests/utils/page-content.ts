@@ -72,7 +72,7 @@ export class PageContent extends BasePage {
 			}
 		}
 		await this.importItemButton(ref, language).click();
-		await this.isToastVisible('The library object with id: ' + urn + ' has been successfully imported.+', undefined, {
+		await this.isToastVisible('The library object has been successfully imported.+', undefined, {
 			timeout: 15000
 		});
 		await this.tab('Imported libraries').click();
