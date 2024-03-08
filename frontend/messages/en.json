@@ -442,5 +442,7 @@
 	"domainManager": "Domain manager",
 	"analyst": "Analyst",
 	"associatedRequirements": "Associated requirements",
-	"isPublished": "Is published"
+	"isPublished": "Is published",
+	"suggestedReferenceControls": "Suggested reference controls",
+	"threatsCovered": "Threats covered"
 }
