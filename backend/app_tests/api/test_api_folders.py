@@ -65,6 +65,21 @@ class TestFoldersUnauthenticated:
 class TestFoldersAuthenticated:
     """Perform tests on Folders API endpoint with authentication"""
 
+    def test_get_assigned_folder(self, test):
+        """test to get the folder assigned to the user's user group"""
+
+        EndpointTestsQueries.Auth.get_object(
+            test.client,
+            "Folders",
+            test_params={
+                "name": test.assigned_folder.name,
+            },
+            item_search_field="name",
+            base_count=-1,
+            user_group=test.user_group,
+            scope=str(test.folder),
+        )
+
     def test_get_folders(self, test):
         """test to get folders from the API with authentication"""
 
