@@ -290,6 +290,7 @@ export function localItems(languageTag: string): LocalItems {
 		analyst: m.analyst({ languageTag: languageTag }),
 		auditor: m.auditor({ languageTag: languageTag }),
 		domainManager: m.domainManager({ languageTag: languageTag }),
+		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
 
 	};
 	return LOCAL_ITEMS;

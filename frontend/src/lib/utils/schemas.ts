@@ -54,7 +54,7 @@ export const RiskMatrixSchema = baseNamedObject({
 });
 
 export const LibraryUploadSchema = z.object({
-	file: z.string()
+	file: z.string().optional()
 });
 
 export const RiskAssessmentSchema = baseNamedObject({
