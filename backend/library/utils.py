@@ -523,23 +523,13 @@ class LibraryImporter:
 
         self.check_and_import_dependencies()
 
-        TIMEOUTS = [1,2,3,4,10,15,25] # Put this in settings.py later if we keep it.
-        # The total timeout is sum(TIMEOUTS) = 60s, the timeouts are progressive to not make the user wait too much but not spamming sqlite at the same time.
-        for timeout in TIMEOUTS :
+        for _ in range(10) :
             try:
                 self._import_library()
                 break
-                """with transaction.atomic():
-                    library_object = self.create_or_update_library()
-                    self.import_objects(library_object)
-                    library_object.dependencies.set(
-                        Library.objects.filter(
-                            urn__in=self._library_data.get("dependencies", [])
-                        )
-                    )"""
             except OperationalError as e :
                 if e.args and e.args[0] == 'database is locked' :
-                    time.sleep(timeout)
+                    time.sleep(1)
                 else :
                     raise e
             except Exception as e :
