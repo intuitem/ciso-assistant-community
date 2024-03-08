@@ -131,7 +131,7 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: "library", id:id}) }, event);
+			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: "library"}) }, event);
 		}
 		return { deleteForm };
 	}
