@@ -284,6 +284,7 @@ export function localItems(languageTag: string): LocalItems {
 		inProgress: m.inProgress({ languageTag: languageTag }),
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
 		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
+		requirementAssessments: m.requirementAssessments({ languageTag: languageTag }),
 		compliant: m.compliant({ languageTag: languageTag }),
 		notApplicable: m.notApplicable({ languageTag: languageTag }),
 		administrator: m.administrator({ languageTag: languageTag }),
