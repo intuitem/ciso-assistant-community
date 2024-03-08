@@ -10,6 +10,8 @@ import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { Library, urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages'
+import { localItems } from '$lib/utils/locales';
+import { languageTag } from '$paraglide/runtime';
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/libraries/`;
@@ -94,7 +96,7 @@ export const actions: Actions = {
 			if (!req.ok) {
 				const response = await req.json();
 				console.error(response);
-				setFlash({ type: 'error', message: `Error: ${response.error}` }, event);
+				setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
 				return fail(400, { form });
 			}
 			setFlash({ type: 'success', message: m.librarySuccessfullyImported() }, event);
