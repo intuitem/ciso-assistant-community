@@ -27,7 +27,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 					await expect(page).toHaveURL(item.href);
 					await logedPage.hasTitle(locals[item.name]);
 					await logedPage.hasBreadcrumbPath([locals[item.name]]);
-				}         
+				}
 			}
 		}
 	});
