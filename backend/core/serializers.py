@@ -42,7 +42,12 @@ class BaseModelSerializer(serializers.ModelSerializer):
                     "folder": "You do not have permission to create objects in this folder"
                 }
             )
-        return super().create(validated_data)
+        try:
+            object_created = super().create(validated_data)
+            return object_created
+        except Exception as e:
+            logger.error(e)
+            raise serializers.ValidationError(e.args[0])
 
     class Meta:
         model: models.Model
