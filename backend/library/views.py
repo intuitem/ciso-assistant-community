@@ -31,9 +31,9 @@ from rest_framework.response import Response
 from .serializers import LibrarySerializer, LibraryUploadSerializer
 from .utils import get_available_libraries, get_library, import_library_view
 
-
 class LibraryViewSet(BaseModelViewSet):
     serializer_class = LibrarySerializer
+    parser_classes = [FileUploadParser]
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
     lookup_value_regex = r"[\w.:-]+"
@@ -127,12 +127,8 @@ class LibraryViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-
-class UploadLibraryView(APIView):
-    parser_classes = (FileUploadParser,)
-    serializer_class = LibraryUploadSerializer
-
-    def post(self, request):
+    @action(detail=False, methods=["post"], url_path="upload")
+    def upload_library(self, request):
         if not request.data:
             return HttpResponse(
                 json.dumps({"error": "No file detected !"}), status=HTTP_400_BAD_REQUEST
