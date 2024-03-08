@@ -461,5 +461,6 @@
 	"passwordSuccessfullySet": "Votre mot de passe a été défini avec succès",
 	"passwordSuccessfullySetWelcome": "Votre mot de passe a été défini avec succès. Bienvenue sur CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Veuillez patienter {timing}sec avant de demander un nouveau lien de réinitialisation.",
-	"resetLinkSent": "La demande a été reçue, vous devriez recevoir un lien de réinitialisation à l'adresse suivante: {email}"
+	"resetLinkSent": "La demande a été reçue, vous devriez recevoir un lien de réinitialisation à l'adresse suivante: {email}",
+	"riskAcceptanceStateDoesntAllowEdit": "L'état d'acceptation du risque: {riskAcceptance} ne permet pas de le modifier"
 }
