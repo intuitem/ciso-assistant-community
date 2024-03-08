@@ -65,6 +65,7 @@
 	"roleAssignments": "Affectations de rôle",
 	"xRays": "X-rays",
 	"scoringAssistant": "Assistant d'évaluation",
+	"scoringAssistantNoMatrixError": "Erreur: Vous devez importer une matrice de risque pour pouvoir d'accéder à cette page !",
 	"libraries": "Bibliothèques",
 	"backupRestore": "Sauvegarde et restauration",
 	"myProfile": "Mon profil",
