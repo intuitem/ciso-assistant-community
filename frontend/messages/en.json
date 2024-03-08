@@ -461,5 +461,6 @@
 	"passwordSuccessfullySet": "Your password has been successfully set",
 	"passwordSuccessfullySetWelcome": "Your password has been successfully set. Welcome to CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Please wait {timing}sec before requesting a new reset link",
-	"resetLinkSent": "The request has been received, you should receive a reset link at the following address: {email}"
+	"resetLinkSent": "The request has been received, you should receive a reset link at the following address: {email}",
+	"riskAcceptanceStateDoesntAllowEdit": "The state of risk acceptance: {riskAcceptance} doesn't allow it to be edited"
 }
