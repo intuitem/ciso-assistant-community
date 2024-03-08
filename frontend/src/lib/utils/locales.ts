@@ -293,7 +293,8 @@ export function localItems(languageTag: string): LocalItems {
 		domainManager: m.domainManager({ languageTag: languageTag }),
 		authors: m.authors({ languageTag: languageTag }),
 		reviewers: m.reviewers({ languageTag: languageTag }),
-		isPublished: m.isPublished({ languageTag: languageTag })
+		isPublished: m.isPublished({ languageTag: languageTag }),
+		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
 
 	};
 	return LOCAL_ITEMS;
