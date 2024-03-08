@@ -55,13 +55,13 @@ export class PageContent extends BasePage {
 				await this.isToastVisible('User successfully created' + /\..+/.source);
 			} else {
 				await this.isToastVisible(
-					'Successfully created ' +
+					'The ' +
 						this.name.substring(0, this.name.length - 1).toLowerCase() +
 						/\..+/.source
 				);
 			}
 		} else {
-			await this.isToastVisible('Successfully created ' + this.name.source + /\..+/.source, 'i');
+			await this.isToastVisible('The ' + this.name.source + /\..+/.source, 'i');
 		}
 	}
 
@@ -75,7 +75,7 @@ export class PageContent extends BasePage {
 			}
 		}
 		await this.importItemButton(ref, language).click();
-		await this.isToastVisible('Successfully imported library ' + urn + '.+', undefined, {
+		await this.isToastVisible('The library object with id ' + urn + '.+', undefined, {
 			timeout: 15000
 		});
 		await this.tab('Imported libraries').click();
