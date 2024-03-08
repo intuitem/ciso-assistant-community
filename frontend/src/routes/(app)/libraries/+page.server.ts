@@ -41,7 +41,7 @@ export const load = (async ({ fetch }) => {
 			`Packager: ${row.packager}`,
 			...Object.entries(countObjects(row)).map(([key, value]) => `${key}: ${value}`)
 		];
-		row.preventDelete = row.reference_count && row.reference_count > 0 ? true : false;
+		row.allowDeleteLibrary = row.reference_count && row.reference_count > 0 ? false : true;
 	});
 
 	const headData: Record<string, string> = listViewFields['libraries' as urlModel].body.reduce(
