@@ -72,7 +72,7 @@ export const actions: Actions = {
 					m.successfullyCreatedUser()
 				);
 			}
-			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())]}));
+			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}));
 		}
 		return { createForm };
 	},
@@ -104,7 +104,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(params.model!);
 			// TODO: reference object by name instead of id
-			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
+			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
 		}
 		return { deleteForm };
 	},
@@ -134,7 +134,7 @@ export const actions: Actions = {
 		}
 		const model: string = urlParamModelVerboseName(params.model!);
 		// TODO: reference object by name instead of id
-		return message(rejectForm, m.successfullyRejectedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
+		return message(rejectForm, m.successfullyRejectedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
 	},
 	accept: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
@@ -162,7 +162,7 @@ export const actions: Actions = {
 		}
 		const model: string = urlParamModelVerboseName(params.model!);
 		// TODO: reference object by name instead of id
-		return message(acceptForm, m.successfullyAcceptedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
+		return message(acceptForm, m.successfullyAcceptedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
 	},
 	revoke: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
@@ -190,6 +190,6 @@ export const actions: Actions = {
 		}
 		const model: string = urlParamModelVerboseName(params.model!);
 		// TODO: reference object by name instead of id
-		return message(revokeForm, m.successfullyRevokedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
+		return message(revokeForm, m.successfullyRevokedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
 	}
 };

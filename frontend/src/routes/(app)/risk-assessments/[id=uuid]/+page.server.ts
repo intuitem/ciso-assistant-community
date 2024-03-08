@@ -42,7 +42,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(urlModel);
 			// TODO: reference newly created object
-			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())]}));
+			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}));
 		}
 		return { createForm };
 	},
@@ -73,7 +73,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(params.model!);
 			// TODO: reference object by name instead of id
-			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())], id: id}));
+			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
 		}
 		return { deleteForm };
 	}
