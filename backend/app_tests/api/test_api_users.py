@@ -72,12 +72,6 @@ class TestUsersUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestUsersAuthenticated:
     """Perform tests on Users API endpoint with authentication"""
 
@@ -92,6 +86,7 @@ class TestUsersAuthenticated:
             base_count=2,
             item_search_field="email",
             user_group=test.user_group,
+            scope="Published"
         )
 
     def test_create_users(self, test):
@@ -105,6 +100,7 @@ class TestUsersAuthenticated:
             base_count=2,
             item_search_field="email",
             user_group=test.user_group,
+            scope="Published"
         )
 
     def test_update_users(self, test):
@@ -121,6 +117,7 @@ class TestUsersAuthenticated:
                 "last_name": "new" + USER_NAME,
             },
             user_group=test.user_group,
+            scope="Published"
         )
 
     def test_delete_users(self, test):
@@ -132,6 +129,7 @@ class TestUsersAuthenticated:
             User,
             {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
             user_group=test.user_group,
+            scope="Published"
         )
 
     def test_uniqueness_emails(self, test):

@@ -464,6 +464,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     compliance_assessment = FieldsRelatedField()
+    folder = FieldsRelatedField()
 
     class Meta:
         model = RequirementAssessment

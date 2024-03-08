@@ -369,7 +369,7 @@ export const FIELD_COMPONENT_MAP = {
 		actions: LibraryActions
 	},
 	'user-groups': {
-		'localization_dict': UserGroupNameDisplay
+		localization_dict: UserGroupNameDisplay
 	}
 };
 
