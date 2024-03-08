@@ -453,6 +453,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         choices=PRJ_LC_STATUS,
         verbose_name=_("Status"),
     )
+    fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Project")
