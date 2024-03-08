@@ -290,6 +290,9 @@ export function localItems(languageTag: string): LocalItems {
 		analyst: m.analyst({ languageTag: languageTag }),
 		auditor: m.auditor({ languageTag: languageTag }),
 		domainManager: m.domainManager({ languageTag: languageTag }),
+		authors: m.authors({ languageTag: languageTag }),
+		reviewers: m.reviewers({ languageTag: languageTag }),
+		isPublished: m.isPublished({ languageTag: languageTag })
 
 	};
 	return LOCAL_ITEMS;
