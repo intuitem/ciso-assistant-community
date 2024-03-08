@@ -440,5 +440,7 @@
 	"notApplicable": "Non applicable",
 	"administrator": "Administrateur",
 	"domainManager": "Gestionnaire de domaine",
-	"analyst": "Analyste"
+	"analyst": "Analyste",
+	"associatedRequirements": "Exigences associées",
+	"isPublished": "Publié"
 }
