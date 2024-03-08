@@ -441,5 +441,6 @@
 	"notApplicable": "Not applicable",
 	"administrator": "Administrator",
 	"domainManager": "Domain manager",
-	"analyst": "Analyst"
+	"analyst": "Analyst",
+	"noFileDetected": "Error: no file detected"
 }
