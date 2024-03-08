@@ -32,7 +32,7 @@ export class PageDetail extends BasePage {
 		await this.form.saveButton.click();
 
 		await this.isToastVisible(
-			'.+ object: ' +
+			'The .+: ' +
 				({ ...buildParams, ...editedValues }.name || { ...buildParams, ...editedValues }.email) +
 				' has been successfully updated'
 		);
