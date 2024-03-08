@@ -72,7 +72,7 @@
 				<button
 					class="btn variant-filled-primary font-semibold w-full"
 					data-testid="save-button"
-					type="submit">{m.save()}</button
+					type="submit">{m.upload()}</button
 				>
 			</SuperForm>
 		{:catch err}
