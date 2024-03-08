@@ -14,35 +14,6 @@
 		href === $page.url.pathname
 			? 'bg-primary-100 text-primary-800'
 			: 'hover:bg-primary-50 text-gray-800 ';
-
-	async function onClickScoringAssistant(event) {
-		const req = await fetch(`/risk-matrices`);
-		const risk_matrices = await req.json();
-
-		if (risk_matrices.length === 0) {
-			const modal: ModalSettings = {
-				type: 'component',
-				component: 'displayJSONModal',
-				title: m.scoringAssistantNoMatrixError(),
-				body: JSON.stringify({})
-			};
-			modalStore.trigger(modal);
-		} else {
-			const clickEvent = new MouseEvent('click', {
-				bubbles: true,
-				cancelable: false
-			});
-			event.target.dispatchEvent(clickEvent);
-		}
-	}
-
-	function onClick(event,item) {
-		if (item.name === "scoringAssistant") {
-			if (!event.cancelable) { return; }
-			event.preventDefault();
-			return onClickScoringAssistant(event);
-		}
-	}
 </script>
 
 {#each item as item}
@@ -52,7 +23,6 @@
 			item.href ?? ''
 		)}"
 		data-testid={'accordion-item-' + item.href.substring(1)}
-		on:click={(event) => onClick(event,item)}
 	>
 		<span class="px-4 flex items-center w-full space-x-2 text-xs">
 			<i class="{item.fa_icon} w-1/12" />
