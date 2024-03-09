@@ -39,7 +39,7 @@
 						label="Confirm new password"
 					/>
 					<p class="pt-3">
-						<button class="btn variant-filled-primary font-semibold w-full" type="submit"
+						<button class="btn variant-filled-primary font-semibold w-full" type="submit" data-testid="set-password-btn"
 							>Reset Password</button
 						>
 					</p>

@@ -23,10 +23,10 @@ export const URL_MODEL = [
 	'risk-assessments',
 	'threats',
 	'risk-scenarios',
-	'security-measures',
+	'applied-controls',
 	'policies',
 	'risk-acceptances',
-	'security-functions',
+	'reference-controls',
 	'assets',
 	'users',
 	'user-groups',
@@ -74,7 +74,7 @@ export interface RiskMatrix {
 export type RiskScenario = z.infer<typeof RiskScenarioSchema>;
 
 interface LibraryObject {
-	type: 'risk_matrix' | 'security_function' | 'threat';
+	type: 'risk_matrix' | 'reference_control' | 'threat';
 	fields: Record<string, any>;
 }
 
@@ -97,6 +97,12 @@ export interface RiskLevel {
 	residual: string[];
 }
 
+export interface StrengthOfKnowledgeEntry {
+	name: string;
+	description: string;
+	symbol: string;
+}
+
 export interface AggregatedData {
 	names: string[];
 }
@@ -104,12 +110,12 @@ export interface AggregatedData {
 export interface Counter {
 	RiskAssessment: number;
 	RiskScenario: number;
-	SecurityMeasure: number;
+	AppliedControl: number;
 	RiskAcceptance: number;
 	Project: number;
 }
 
-export interface SecurityMeasureStatus {
+export interface AppliedControlStatus {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on

@@ -1,7 +1,11 @@
 import json
 import time
 import os
+from pathlib import Path
+import re
 from typing import List, Union
+from django.core.exceptions import SuspiciousFileOperation
+from django.http import Http404
 
 import yaml
 from ciso_assistant import settings
@@ -10,13 +14,27 @@ from core.models import (
     Library,
     RequirementNode,
     RiskMatrix,
-    SecurityFunction,
+    ReferenceControl,
     Threat,
 )
 from django.db import transaction
 from iam.models import Folder
 
 from django.db.utils import OperationalError
+import structlog
+
+logger = structlog.get_logger(__name__)
+
+URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$"
+
+
+def match_urn(urn_string):
+    match = re.match(URN_REGEX, urn_string)
+    if match:
+        return match.groups()  # Returns all captured groups from the regex match
+    else:
+        return None
+
 
 def get_available_library_files():
     """
@@ -73,19 +91,66 @@ def get_library_names(libraries):
 
 def get_library(urn: str) -> dict | None:
     """
-    Returns a library by urn
+    Returns a library by urn, trying to minimize file I/O by directly accessing the specific YAML file.
 
     Args:
-        urn: urn of the library to return
+        urn: URN of the library to return.
 
     Returns:
-        library: library with the given urn
+        The library with the given urn, or None if not found.
     """
-    libraries = get_available_libraries()
-    for lib in libraries:
-        if lib["urn"] == urn:
-            return lib
-    return None
+    if match_urn(urn) is None:
+        logger.error("Invalid URN", urn=urn)
+        raise ValueError("Invalid URN")
+
+    # First, try to fetch the library from the database.dd
+    try:
+        lib = Library.objects.get(urn=urn)
+        return {
+            "id": lib.id,
+            "urn": lib.urn,
+            "name": lib.name,
+            "description": lib.description,
+            "provider": lib.provider,
+            "packager": lib.packager,
+            "copyright": lib.copyright,
+            "reference_count": lib.reference_count,
+            "objects": lib._objects,
+        }
+    except Library.DoesNotExist:
+        # Construct the path to the YAML file from the urn.
+        filename = urn.split(":")[-1]
+        libraries_path = settings.BASE_DIR / "library/libraries"
+        _path = libraries_path / f"{filename}.yaml"
+
+        # Ensure that the path is within the libraries directory to prevent directory traversal attacks.
+        path = Path(os.path.abspath(_path))
+
+        logger.info(
+            "Attempting to load library",
+            filename=filename,
+            path=path,
+        )
+        if not path.parent.samefile(libraries_path):
+            logger.error(
+                "Attempted to access file outside of libraries directory",
+                path=path,
+                libraries_path=libraries_path,
+            )
+            raise SuspiciousFileOperation(
+                "Attempted to access file outside of libraries directory"
+            )
+
+        # Attempt to directly load the library from its specific YAML file.
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as file:
+                library_data = yaml.safe_load(file)
+                if library_data and library_data.get("urn") == urn:
+                    return library_data
+        logger.error("File not found", path=path)
+
+    logger.error("Library not found", urn=urn)
+    raise Http404("Library not found")
 
 
 def get_library_items(library, type: str) -> list[dict]:
@@ -105,8 +170,9 @@ def get_library_items(library, type: str) -> list[dict]:
 class RequirementNodeImporter:
     REQUIRED_FIELDS = {"urn"}
 
-    def __init__(self, requirement_data: dict):
+    def __init__(self, requirement_data: dict, index: int):
         self.requirement_data = requirement_data
+        self.index = index
 
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.requirement_data.keys()):
@@ -123,21 +189,22 @@ class RequirementNodeImporter:
             ref_id=self.requirement_data.get("ref_id"),
             annotation=self.requirement_data.get("annotation"),
             provider=framework_object.provider,
-            order_id=self.requirement_data.get("order_id"),
+            order_id=self.index,
             level=self.requirement_data.get("level"),
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             maturity=self.requirement_data.get("maturity"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
+            is_published=True,
         )
 
         for threat in self.requirement_data.get("threats", []):
             requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
 
-        for security_function in self.requirement_data.get("security_functions", []):
-            requirement_node.security_functions.add(
-                SecurityFunction.objects.get(urn=security_function.lower())
+        for reference_control in self.requirement_data.get("reference_controls", []):
+            requirement_node.reference_controls.add(
+                ReferenceControl.objects.get(urn=reference_control.lower())
             )
 
 # The couple (URN, locale) is unique. ===> Check it in the future
@@ -154,7 +221,9 @@ class FrameworkImporter:
         requirement_node_importers = []
         import_errors = []
         for index, requirement_node_data in enumerate(requirement_nodes):
-            requirement_node_importer = RequirementNodeImporter(requirement_node_data)
+            requirement_node_importer = RequirementNodeImporter(
+                requirement_node_data, index
+            )
             requirement_node_importers.append(requirement_node_importer)
             if (
                 requirement_node_error := requirement_node_importer.is_valid()
@@ -218,6 +287,7 @@ class FrameworkImporter:
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            is_published=True,
         )
 
         for requirement_node in self._requirement_nodes:
@@ -243,43 +313,43 @@ class ThreatImporter:
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
             provider=library_object.provider,
-            is_published=self.threat_data.get("is_published", True),
+            is_published=True,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
 
 
 # The couple (URN, locale) is unique. ===> Check it in the future
-class SecurityFunctionImporter:
+class ReferenceControlImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
-    CATEGORIES = set(_category[0] for _category in SecurityFunction.CATEGORY)
+    CATEGORIES = set(_category[0] for _category in ReferenceControl.CATEGORY)
 
-    def __init__(self, security_function_data: dict):
-        self.security_function_data = security_function_data
+    def __init__(self, reference_control_data: dict):
+        self.reference_control_data = reference_control_data
 
     def is_valid(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(
-            self.security_function_data.keys()
+            self.reference_control_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
-        if (category := self.security_function_data.get("category")) is not None:
-            if category not in SecurityFunctionImporter.CATEGORIES:
+        if (category := self.reference_control_data.get("category")) is not None:
+            if category not in ReferenceControlImporter.CATEGORIES:
                 return "Invalid category '{}', the category must be among the following list : {}".format(
-                    category, ", ".join(SecurityFunctionImporter.CATEGORIES)
+                    category, ", ".join(ReferenceControlImporter.CATEGORIES)
                 )
 
-    def import_security_function(self, library_object: Library):
-        SecurityFunction.objects.create(
+    def import_reference_control(self, library_object: Library):
+        ReferenceControl.objects.create(
             library=library_object,
-            urn=self.security_function_data.get("urn"),
-            ref_id=self.security_function_data["ref_id"],
-            name=self.security_function_data.get("name"),
-            description=self.security_function_data.get("description"),
+            urn=self.reference_control_data.get("urn"),
+            ref_id=self.reference_control_data["ref_id"],
+            name=self.reference_control_data.get("name"),
+            description=self.reference_control_data.get("description"),
             provider=library_object.provider,
-            typical_evidence=self.security_function_data.get("typical_evidence"),
-            category=self.security_function_data.get("category"),
-            is_published=self.security_function_data.get("is_published", True),
+            typical_evidence=self.reference_control_data.get("typical_evidence"),
+            category=self.reference_control_data.get("category"),
+            is_published=True,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
         )
@@ -288,7 +358,7 @@ class SecurityFunctionImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid"}
+    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
 
     def __init__(self, risk_matrix_data):
         self.risk_matrix_data = risk_matrix_data
@@ -324,18 +394,19 @@ class RiskMatrixImporter:
             is_enabled=self.risk_matrix_data.get("is_enabled", True),
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
+            is_published=True,
         )
 
 
 class LibraryImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
-    OBJECT_FIELDS = ["threats", "security_functions", "risk_matrix", "framework"]
+    OBJECT_FIELDS = ["threats", "reference_controls", "risk_matrix", "framework"]
 
     def __init__(self, data: dict):
         self._library_data = data
         self._framework_importer = None
         self._threats = []
-        self._security_functions = []
+        self._reference_controls = []
         self._risk_matrices = []
 
     def init_threats(self, threats: List[dict]) -> Union[str, None]:
@@ -360,34 +431,34 @@ class LibraryImporter:
                 invalid_threat_error,
             )
 
-    def init_security_functions(
-        self, security_functions: List[dict]
+    def init_reference_controls(
+        self, reference_controls: List[dict]
     ) -> Union[str, None]:
-        security_functions_importers = []
+        reference_controls_importers = []
         import_errors = []
-        for index, security_functions_data in enumerate(security_functions):
-            security_function_importer = SecurityFunctionImporter(
-                security_functions_data
+        for index, reference_controls_data in enumerate(reference_controls):
+            reference_control_importer = ReferenceControlImporter(
+                reference_controls_data
             )
-            security_functions_importers.append(security_function_importer)
+            reference_controls_importers.append(reference_control_importer)
             if (
-                security_function_error := security_function_importer.is_valid()
+                reference_control_error := reference_control_importer.is_valid()
             ) is not None:
-                import_errors.append((index, security_function_error))
+                import_errors.append((index, reference_control_error))
 
-        self._security_functions = security_functions_importers
+        self._reference_controls = reference_controls_importers
 
         if import_errors:
             (
-                invalid_security_function_index,
-                invalid_security_function_error,
+                invalid_reference_control_index,
+                invalid_reference_control_error,
             ) = import_errors[0]
-            return "[SECURITY_FUNCTION_ERROR] {} invalid security function{} detected, the {}{} security function has the following error : {}".format(
+            return "[REFERENCE_CONTROL_ERROR] {} invalid reference control{} detected, the {}{} reference control has the following error : {}".format(
                 len(import_errors),
                 "s" if len(import_errors) > 1 else "",
-                invalid_security_function_index + 1,
-                {1: "st", 2: "nd", 3: "rd"}.get(invalid_security_function_index, "th"),
-                invalid_security_function_error,
+                invalid_reference_control_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(invalid_reference_control_index, "th"),
+                invalid_reference_control_error,
             )
 
     def init_risk_matrices(self, risk_matrices: List[dict]) -> Union[str, None]:
@@ -452,14 +523,14 @@ class LibraryImporter:
             ) is not None:
                 return risk_matrix_import_error
 
-        if "security_functions" in library_objects:
-            security_function_data = library_objects["security_functions"]
+        if "reference_controls" in library_objects:
+            reference_control_data = library_objects["reference_controls"]
             if (
-                security_function_import_error := self.init_security_functions(
-                    security_function_data
+                reference_control_import_error := self.init_reference_controls(
+                    reference_control_data
                 )
             ) is not None:
-                return security_function_import_error
+                return reference_control_import_error
 
     def check_and_import_dependencies(self):
         """Check and import library dependencies."""
@@ -486,6 +557,7 @@ class LibraryImporter:
                 "provider": self._library_data.get("provider", None),
                 "packager": self._library_data.get("packager", None),
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable
+                "is_published": True,
             },
             urn=_urn,
             locale=_locale,
@@ -500,8 +572,8 @@ class LibraryImporter:
         for threat in self._threats:
             threat.import_threat(library_object)
 
-        for security_function in self._security_functions:
-            security_function.import_security_function(library_object)
+        for reference_control in self._reference_controls:
+            reference_control.import_reference_control(library_object)
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)

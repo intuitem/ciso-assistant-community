@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import * as m from '$paraglide/messages.js';
 
 	export let data;
 
@@ -21,27 +22,32 @@
 			'on hold': 'bg-red-200',
 			done: 'bg-success-200'
 		};
-		return map[treatment.toLowerCase()] ?? 'bg-gray-200';
+		if (treatment !== null){
+			return map[treatment.toLowerCase()];
+		} else {
+			return 'bg-gray-200';
+		}
+		
 	};
 </script>
 
 <div class="bg-white p-2 m-2 shadow rounded-lg space-x-2 flex flex-row justify-center">
 	<p class="font-semibold text-lg">
-		Domain: <a
+		{m.domain()}: <a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.str}</a
+			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.name}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		Project: <a
+		{m.project()}: <a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		Risk assessment: <a
+		{m.riskAssessment()}: <a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/risk-assessments/{data.risk_assessment.id}/"
 			>{data.risk_assessment.name} - {data.risk_assessment.version}</a
@@ -49,7 +55,7 @@
 	</p>
 </div>
 
-<p class="p-2 m-2 text-lg font-semibold">Associated risk scenarios:</p>
+<p class="p-2 m-2 text-lg font-semibold">{m.associatedRiskScenarios()}:</p>
 
 <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex">
 	<table class="w-full p-2 mt-2">
@@ -67,40 +73,40 @@
 						>
 					</td>
 				</tr>
-				{#if scenario.existing_measures}
+				{#if scenario.existing_controls}
 					<tr>
-						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> Existing measures: </td>
+						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.existingControls()}: </td>
 					</tr>
 					<tr>
-						<td class="text-sm pl-6 pb-3" colspan="9"> lorem ipsum </td>
+						<td class="text-sm pl-6 pb-3" colspan="9"> {scenario.existing_controls} </td>
 					</tr>
 				{/if}
 
-				{#if scenario.security_measures.length > 0}
+				{#if scenario.applied_controls.length > 0}
 					<tr>
-						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> Additional measures: </td>
+						<td class="text-md pl-6 pb-3 font-medium" colspan="9"> {m.additionalMeasures()}: </td>
 					</tr>
 					<tr class="text-sm uppercase">
 						<td class="px-2 text-center">#</td>
-						<td class="px-2 font-semibold">Name</td>
-						<td class="px-2 font-semibold">Description</td>
-						<td class="px-2 font-semibold">Type</td>
-						<td class="px-2 font-semibold">Security function</td>
-						<td class="px-2 font-semibold">ETA</td>
-						<td class="px-2 font-semibold">Effort</td>
-						<td class="px-2 font-semibold text-center">Link</td>
-						<td class="px-2 font-semibold text-center">Status</td>
+						<td class="px-2 font-semibold">{m.name()}</td>
+						<td class="px-2 font-semibold">{m.description()}</td>
+						<td class="px-2 font-semibold">{m.type()}</td>
+						<td class="px-2 font-semibold">{m.referenceControl()}</td>
+						<td class="px-2 font-semibold">{m.eta()}</td>
+						<td class="px-2 font-semibold">{m.effort()}</td>
+						<td class="px-2 font-semibold text-center">{m.link()}</td>
+						<td class="px-2 font-semibold text-center">{m.status()}</td>
 					</tr>
-					{#each scenario.security_measures as measure, index}
+					{#each scenario.applied_controls as measure, index}
 						<tr
 							class="hover:text-primary-500 border-b cursor-pointer hover:scale-[0.99] duration-200"
-							on:click={(_) => goto(`/security-measures/${measure.id}`)}
+							on:click={(_) => goto(`/applied-controls/${measure.id}`)}
 						>
 							<td class="px-2 py-3 text-center pl-4">M.{index + 1}</td>
 							<td class="px-2 py-3">{measure.name ?? '--'}</td>
 							<td class="px-2 py-3 max-w-md">{measure.description ?? '--'}</td>
 							<td class="px-2 py-3">{measure.type ?? '--'}</td>
-							<td class="px-2 py-3">{measure.security_function.str ?? '--'}</td>
+							<td class="px-2 py-3">{measure.reference_control.str ?? '--'}</td>
 							<td class="px-2 py-3">{measure.eta ?? '--'}</td>
 							<td class="px-2 py-3">{measure.effort ?? '--'}</td>
 							<td class="px-2 py-3 text-center">{measure.link ?? '--'} </td>
@@ -116,10 +122,10 @@
 					{/each}
 				{/if}
 
-				{#if !scenario.existing_measures && !(scenario.security_measures.length > 0)}
+				{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 					<tr>
 						<td colspan="9" class="p-2 text-left">
-							<i class="fas fa-exclamation-circle" /> No associated measure
+							<i class="fas fa-exclamation-circle" /> {m.noAppliedControlYet()}
 						</td>
 					</tr>
 				{/if}

@@ -30,7 +30,7 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - CMMC v2
 - PSPF
 
-Checkout the [library](/library/libraries/) for the Domain Specific Language used and how you can define your own.
+Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
@@ -56,6 +56,10 @@ Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact wit
 
 To run CISO Assistant locally in a straightforward way, you can use Docker compose.
 
+0. Update docker
+
+Make sure you have a recent version of docker (>= 25.0).
+
 1. Clone the repository
 
 ```sh
@@ -73,7 +77,13 @@ When asked for, enter your email and password for your superuser.
 
 You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
 
-For the following executions, use "docker-compose up" directly.
+For the following executions, use "docker compose up" directly.
+
+If you want to restart a fresh install, simply delete the db directory, where the database is stored.
+
+## Documentation
+
+Comprehensive documentation is coming soon. You can already have a look at our [data model](documentation/architecture/data-model.md).
 
 ## Setting up CISO Assistant for development
 
@@ -132,7 +142,7 @@ export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
 
-# You can define the email of the first superuser, useful for automation
+# You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initlization
 export CISO_SUPERUSER_EMAIL=<XXX>
 
 # By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test,
@@ -266,6 +276,25 @@ python manage.py migrate
 ```
 
 These migration files should be tracked by version control.
+
+## Test harness
+
+To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
+
+To run functional tests on the frontend, do the following actions:
+- in the backend folder, launch the following commands:
+```shell
+DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput
+CISO_ASSISTANT_URL=http://localhost:4173 python manage.py runserver
+```
+- in parallel, in the frontend folder, launch the following command:
+```shell
+PUBLIC_BACKEND_API_URL=http://localhost:8000/api npx playwright test
+```
+
+For tests requiring mail sending, it is necessary to launch mailhog in a separate terminal.
+
+The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful. This is achieved for API tests, and will be soon achieved for functional tests.
 
 ## Built With
 

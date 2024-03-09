@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize]
-    paths:
-      - 'frontend/tests/**'
   workflow_dispatch:
 
 env:
@@ -27,6 +25,12 @@ jobs:
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      mailhog:
+        image: mailhog/mailhog
+        ports: [
+          "1025:1025", 
+          "8025:8025"
+        ]
 
     strategy:
       max-parallel: 4
@@ -73,6 +77,11 @@ jobs:
           echo DB_HOST=localhost >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
+          echo DEFAULT_FROM_EMAIL='ciso-assistant@tests.net' >> .env
+          echo EMAIL_HOST=localhost >> .env
+          echo EMAIL_HOST_USER=user@tests.com >> .env
+          echo EMAIL_HOST_PASSWORD=password >> .env
+          echo EMAIL_PORT=1025 >> .env
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |

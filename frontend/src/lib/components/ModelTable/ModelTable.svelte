@@ -12,6 +12,9 @@
 	import type { AnyZodObject } from 'zod';
 	import type { TableSource } from './types';
 	import * as m from '$paraglide/messages';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	// Event Dispatcher
 	type TableEvent = {
 		selected: string[];
@@ -120,41 +123,6 @@
 
 	// tagged_keys tag_map[key][value]
 	$: source, handler.setRows(data);
-
-	const headTranslate: any = {
-		name: m.name(),
-		description: m.description(),
-		parentDomain: m.parentDomain(),
-		ref: m.ref(),
-		refId: m.refId(),
-		businessValue: m.businessValue(),
-		email: m.email(),
-		firstName: m.firstName(),
-		lastName: m.lastName(),
-		category: m.category(),
-		eta: m.eta(),
-		securityFunction: m.securityFunction(),
-		provider: m.provider(),
-		domain: m.domain(),
-		urn: m.urn(),
-		id: m.id(),
-		treatmentStatus: m.treatmentStatus(),
-		currentLevel: m.currentLevel(),
-		residualLevel: m.residualLevel(),
-		riskMatrix: m.riskMatrix(),
-		riskScenarios: m.riskScenarios(),
-		project: m.project(),
-		complianceAssessments: m.complianceAssessments(),
-		folder: m.folder(),
-		builtin: m.builtin(),
-		assets: m.assets(),
-		threat: m.threat(),
-		riskAssessment: m.riskAssessment(),
-		framework: m.framework(),
-		file: m.file(),
-		overview: m.overview(),
-		language: m.language()
-	}
 </script>
 
 <div class="table-container {classesBase}">
@@ -181,7 +149,7 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#each Object.entries(source.head) as [key, heading]}
-					<Th {handler} orderBy={key} class="{regionHeadCell}">{headTranslate[heading]}</Th>
+					<Th {handler} orderBy={key} class="{regionHeadCell}">{localItems(languageTag())[heading]}</Th>
 				{/each}
         {#if displayActions}
         <th class="{regionHeadCell} select-none text-end"></th>
@@ -226,7 +194,7 @@
 									{#if tagData}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
-											{text}
+											{localItems(languageTag())[text]}
 										</span>
 									{/if}
 								{/each}
@@ -262,9 +230,15 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-1/2 justify-center p-1 rounded-md ml-2" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+				{:else if ISO_8601_REGEX.test(value)}
+					{new Date(value).toLocaleString(languageTag())}
                 {:else}
-                  {value ?? '-'}
+					{#if localItems(languageTag())[toCamelCase(value)]}
+						{localItems(languageTag())[toCamelCase(value)]}
+					{:else}
+						{value ?? '-'}
+					{/if}
                 {/if}
                 </span>
 							{/if}

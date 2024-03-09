@@ -8,7 +8,7 @@ version: 1
 provider: intuitem
 packager: intuitem
 objects:
-  security_functions:
+  reference_controls:
   - urn: urn:intuitem:risk:function:doc-pol:doc.overview
     ref_id: DOC.OVERVIEW
     name: Organization overview document
@@ -147,7 +147,7 @@ objects:
 
       Treatment option
 
-      Mitigations - recommended security measures'
+      Mitigations - recommended controls'
     annotation: "6.1\n6.1.2.c.2 \n6.1.2.d.1 \n6.1.2.d.2\n6.1.2.d.3 \n6.1.2.e.1 \n\
       6.1.2.e.2 \n6.1.3.a \n6.1.3.b "
   - urn: urn:intuitem:risk:function:doc-pol:doc.so_register

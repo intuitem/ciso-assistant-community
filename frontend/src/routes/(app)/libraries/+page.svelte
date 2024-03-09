@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { LibraryUploadSchema } from '$lib/utils/schemas';
+	import * as m from '$paraglide/messages';
 
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
@@ -16,12 +17,12 @@
 <div class="card bg-white shadow">
 	<TabGroup>
 		{#if data.importedLibrariesTable.body.length > 0}
-			<Tab bind:group={tabSet} value={0}>Imported libraries</Tab>
-			<Tab bind:group={tabSet} value={1}>Libraries store</Tab>
+			<Tab bind:group={tabSet} value={0}>{m.importedLibraries()}</Tab>
+			<Tab bind:group={tabSet} value={1}>{m.librariesStore()}</Tab>
 		{:else}
 			<div class="card p-4 variant-soft-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2" />
-				You currently have no imported libraries.
+				{m.currentlyNoImportedLibraries()}.
 			</div>
 		{/if}
 		<svelte:fragment slot="panel">
@@ -48,7 +49,7 @@
 {#if tabSet === 1}
 	<div class="card bg-white p-4 mt-4 shadow">
 		{#await superValidate(LibraryUploadSchema)}
-			<h1>Loading the library upload button...</h1>
+			<h1>{m.loadingLibraryUploadButton()}...</h1>
 		{:then form}
 			<SuperForm
 				class="flex flex-col space-y-3"
@@ -62,20 +63,20 @@
 			>
 				<FileInput
 					{form}
-					helpText="Library file in YAML format"
+					helpText={m.libraryFileInYaml()}
 					mandatory={true}
 					field="file"
-					label="Upload your own library :"
+					label={m.uploadYourLibrary()}
 				/>
 
 				<button
 					class="btn variant-filled-primary font-semibold w-full"
 					data-testid="save-button"
-					type="submit">Save</button
+					type="submit">{m.upload()}</button
 				>
 			</SuperForm>
 		{:catch err}
-			<h1>The following error occured while loading the library form : {err}</h1>
+			<h1>{m.errorOccuredWhileLoadingLibrary()}: {err}</h1>
 		{/await}
 	</div>
 {/if}

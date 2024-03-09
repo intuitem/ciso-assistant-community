@@ -7,28 +7,14 @@ import uuid
 from ciso_assistant import settings
 
 
-class NameDescriptionMixin(models.Model):
-    """
-    Mixin for models that have a name and a description.
-    """
-
-    name = models.CharField(max_length=200, verbose_name=_("Name"), unique=False)
-    description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
-
-    class Meta:
-        abstract = True
-
-    def __str__(self) -> str:
-        return self.name
-
-
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("UpdatedÒ at"))
+    is_published = models.BooleanField(_("published"), default=False)
 
     class Meta:
         abstract = True
-        ordering = ["name"]
 
     def scoped_id(self, scope: models.QuerySet) -> int:
         """
@@ -121,54 +107,17 @@ class AbstractBaseModel(models.Model):
         super().save(*args, **kwargs)
 
 
-class ReferentialObjectMixin(AbstractBaseModel):
+class NameDescriptionMixin(AbstractBaseModel):
     """
     Mixin for models that have a name and a description.
     """
 
-    urn = models.CharField(
-        max_length=100, null=True, blank=True, unique=True, verbose_name=_("URN")
-    )
-    ref_id = models.CharField(
-        max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
-    )
-    locale = models.CharField(
-        max_length=100, null=False, blank=False, default="en", verbose_name=_("Locale")
-    )
-    default_locale = models.BooleanField(default=True, verbose_name=_("Default locale"))
-    provider = models.CharField(
-        max_length=200, blank=True, null=True, verbose_name=_("Provider")
-    )
-    name = models.CharField(
-        null=True, max_length=200, verbose_name=_("Name"), unique=False
-    )
+    name = models.CharField(max_length=200, verbose_name=_("Name"), unique=False)
     description = models.TextField(null=True, blank=True, verbose_name=_("Description"))
-    annotation = models.TextField(null=True, blank=True, verbose_name=_("Annotation"))
 
     class Meta:
         abstract = True
-
-    def display_short(self) -> str:
-        _name = (
-            self.ref_id
-            if not self.name
-            else self.name
-            if not self.ref_id
-            else f"{self.ref_id} - {self.name}"
-        )
-        _name = "" if not _name else _name
-        return _name
-
-    def display_long(self) -> str:
-        _name = self.display_short()
-        _display = (
-            _name
-            if not self.description
-            else self.description
-            if _name == ""
-            else f"{_name}: {self.description}"
-        )
-        return _display
+        ordering = ["name"]
 
     def __str__(self) -> str:
-        return self.display_short()
+        return self.name

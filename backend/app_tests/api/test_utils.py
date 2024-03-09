@@ -1,8 +1,10 @@
+import pytest
 import json
 import re
 from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APIClient
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from test_vars import *
@@ -24,6 +26,52 @@ class EndpointTestsUtils:
         urn_varname = format_urn(object_name)
         urn = get_var(urn_varname)
         return f"{reverse(LIBRARIES_ENDPOINT)}{urn}/" if resolved else eval(urn)
+
+    @pytest.mark.django_db
+    def get_test_client_and_folder(authenticated_client, role: str, test_folder_name: str, assigned_folder_name: str = "test"):
+        """Get an authenticated client with a specific role and the folder associated to the role"""
+        from iam.models import Folder, User, UserGroup
+
+        EndpointTestsQueries.Auth.create_object(
+            authenticated_client, "Folders", Folder, {"name": assigned_folder_name}
+        )
+        assigned_folder = test_folder = Folder.objects.get(name=assigned_folder_name)
+
+        if test_folder_name != assigned_folder_name:
+            EndpointTestsQueries.Auth.create_object(
+                authenticated_client, "Folders", Folder, {"name": test_folder_name}, base_count=1
+            )
+            test_folder = Folder.objects.get(name=test_folder_name)
+
+        user = User.objects.create_user(TEST_USER_EMAIL)
+        UserGroup.objects.get(
+            name=role,
+            folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
+        ).user_set.add(user)
+        client = APIClient()
+        client.force_login(user)
+        return client, test_folder, assigned_folder
+
+    def expected_request_response(
+        action: str, object: str, scope: str, user_group: str, expected_status: int = status.HTTP_200_OK
+    ):
+        """Get the expected request response for a specific action on an object for a specific user group"""
+        perm_name = f"{action}_{get_singular_name(object).lower().replace(' ', '')}"
+
+        if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
+            # User has permission to perform the action
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Published"):
+                # User has access to the domain
+                return False, expected_status, "ok"
+            else:
+                return False, expected_status, "outside_scope"
+        else:
+            # User has not permission to perform the action
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Published"):
+                # User has access to the domain
+                return True, status.HTTP_403_FORBIDDEN, "permission_denied"
+            else:
+                return True, status.HTTP_403_FORBIDDEN, "outside_scope"
 
 
 class EndpointTestsQueries:
@@ -259,9 +307,12 @@ class EndpointTestsQueries:
             build_params: dict = {},
             test_params: dict = {},
             base_count: int = 0,
+            item_search_field: str = None,
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
+            scope: str = None,
         ):
             """Test to get object from the API with authentication
 
@@ -274,26 +325,49 @@ class EndpointTestsQueries:
                 -1 means that the number of objects is unknown
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status, user_perm_reason = None, 0, None
+
+            if user_group:
+                scope = scope or str(build_params.get("folder", None)) # if the scope is not provided, try to get it from the build_params
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                    user_perm_reason
+                ) = EndpointTestsUtils.expected_request_response(
+                    "view", verbose_name, scope, user_group, expected_status
+                )
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
             # Uses the API endpoint to assert that objects are accessible
             response = authenticated_client.get(url)
 
-            assert (
-                response.status_code == expected_status
-            ), f"{verbose_name} are not accessible with authentication"
+            if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                # User has permission to view the object
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} are not accessible with permission"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} should not be accessible (expected status: {expected_status})"
+                )
+            else:
+                # User does not have permission to view the object
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} are accessible without permission"
+                    if response.status_code == status.HTTP_200_OK
+                    else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
+
             if (
                 base_count == 0
                 and not (object and build_params)
                 and test_params
-                and not fails
+                and not (fails or user_perm_fails)
             ):
                 # perfom a test with an externally created object
                 assert (
                     response.json()["count"] == base_count + 1
                 ), f"{verbose_name} are not accessible with authentication"
-            elif base_count > 0 and not fails:
+            elif base_count > 0 and not (fails or user_perm_fails):
                 assert (
                     response.json()["count"] == base_count
                 ), f"{verbose_name} are not accessible with authentication"
@@ -326,32 +400,55 @@ class EndpointTestsQueries:
                 # Uses the API endpoint to assert that the test object is accessible
                 response = authenticated_client.get(url)
 
-                assert (
-                    response.status_code == status.HTTP_200_OK
-                ), f"{verbose_name} are not accessible with authentication"
+                if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                    # User has permission to view the object
+                    assert response.status_code == expected_status, (
+                        f"{verbose_name} are not accessible with permission"
+                        if expected_status == status.HTTP_200_OK
+                        else f"{verbose_name} should not be accessible (expected status: {expected_status})"
+                    )
+                else:
+                    # User does not have permission to view the object
+                    assert response.status_code == user_perm_expected_status, (
+                        f"{verbose_name} are accessible without permission"
+                        if response.status_code == status.HTTP_200_OK
+                        else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    )
 
-                if not fails:
-                    if base_count < 0:
-                        assert (
-                            len(response.json()["results"]) != 0
-                        ), f"{verbose_name} are not accessible with authentication"
+                if not (fails or user_perm_fails):
+                    if user_perm_reason == "outside_scope":
+                        if not base_count < 0:
+                            assert (
+                                response.json()["count"] == 0
+                            ), f"{verbose_name} are accessible outside the domain"
                     else:
-                        assert (
-                            response.json()["count"] == base_count + 1
-                        ), f"{verbose_name} are not accessible with authentication"
+                        if base_count < 0:
+                            assert (
+                                len(response.json()["results"]) != 0
+                            ), f"{verbose_name} are not accessible with authentication"
+                        else:
+                            assert (
+                                response.json()["count"] == base_count + 1
+                            ), f"{verbose_name} are not accessible with authentication"
 
-            if not fails:
-                for key, value in {**build_params, **test_params}.items():
-                    if (
-                        type(value) == dict
-                        and type(response.json()["results"][-1][key]) == str
-                    ):
+            if not (fails or user_perm_fails) and user_perm_reason != "outside_scope" and len(response.json()["results"]) != 0:
+                params = {**build_params, **test_params}
+                if len(response.json()["results"]) > 0 and item_search_field:
+                    response_item = [
+                        res
+                        for res in response.json()["results"]
+                        if res[item_search_field] == params[item_search_field]
+                    ][0]
+                else:
+                    response_item = response.json()["results"][-1]
+                for key, value in params.items():
+                    if type(value) == dict and type(response_item[key]) == str:
                         assert (
-                            json.loads(response.json()["results"][-1][key]) == value
+                            json.loads(response_item[key]) == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                     else:
                         assert (
-                            response.json()["results"][-1][key] == value
+                            response_item[key] == value
                         ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def get_object_options(
@@ -362,6 +459,8 @@ class EndpointTestsQueries:
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
+            scope: str = None,
         ):
             """Test to get object options from the API with authentication
 
@@ -371,17 +470,38 @@ class EndpointTestsQueries:
             :param option: the option to test
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status = None, 0
+
+            if user_group and not fails:
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                    _
+                ) = EndpointTestsUtils.expected_request_response(
+                    "view", verbose_name, scope, user_group, expected_status
+                )
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
             # Uses the API endpoint to assert that the object options are accessible
             response = authenticated_client.get(url + option + "/")
 
-            assert (
-                response.status_code == expected_status
-            ), f"{verbose_name} {option} choices are not accessible with authentication"
+            if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                # User has permission to view the object
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} {option} choices are not accessible with permission"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} {option} should not be accessible (expected status: {expected_status})"
+                )
+            else:
+                # User does not have permission to view the object
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} {option} choices are accessible without permission"
+                    if response.status_code == status.HTTP_200_OK
+                    else f"Accessing {verbose_name.lower()} {option} should give a status {user_perm_expected_status}"
+                )
 
-            if not fails:
+            if not (fails or user_perm_fails):
                 for choice in choices:
                     assert (
                         choice[0] in response.json()
@@ -397,10 +517,13 @@ class EndpointTestsQueries:
             build_params: dict,
             test_params: dict = {},
             base_count: int = 0,
+            item_search_field: str = None,
             endpoint: str | None = None,
             query_format: str = "json",
             fails: bool = False,
             expected_status: int = status.HTTP_201_CREATED,
+            user_group: str = None,
+            scope: str = None,
         ):
             """Test to create object with the API with authentication
 
@@ -413,32 +536,76 @@ class EndpointTestsQueries:
                 -1 means that the number of objects is unknown
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status, user_perm_reason = None, 0, None
+
+            if user_group:
+                scope = scope or str(build_params.get("folder", None)) # if the scope is not provided, try to get it from the build_params
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                    user_perm_reason
+                ) = EndpointTestsUtils.expected_request_response(
+                    "add", verbose_name, scope, user_group, expected_status
+                )
 
             url = endpoint or EndpointTestsUtils.get_endpoint_url(verbose_name)
 
             # Uses the API endpoint to create an object with authentication
             response = authenticated_client.post(url, build_params, format=query_format)
+            print(response.json())
+
+            if fails:
+                # Asserts that the object was not created
+                assert (
+                    response.status_code == expected_status
+                ), f"{verbose_name} can not be created with authentication"
+                return
 
             # Asserts that the object was created successfully
-            assert (
-                response.status_code == expected_status
-            ), f"{verbose_name} can not be created with authentication"
-
-            for key, value in build_params.items():
-                if key == "attachment":
-                    # Asserts that the value file name is present in the JSON response
-                    assert (
-                        value.name.split("/")[-1].split(".")[0] in response.json()[key]
-                    ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+            if not user_group or user_perm_expected_status == status.HTTP_201_CREATED:
+                if user_perm_reason == "outside_scope":
+                    assert response.status_code == status.HTTP_403_FORBIDDEN, (
+                        f"{verbose_name} can be created outside the domain"
+                        if response.status_code == status.HTTP_201_CREATED
+                        else f"Creating {verbose_name.lower()} should give a status {status.HTTP_403_FORBIDDEN}"
+                    )
                 else:
-                    assert (
-                        response.json()[key] == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                    # User has permission to create the object
+                    assert response.status_code == expected_status, (
+                        f"{verbose_name} can not be created with authentication"
+                        if expected_status == status.HTTP_201_CREATED
+                        else f"{verbose_name} should not be created (expected status: {expected_status})"
+                    )
+            else:
+                # User does not have permission to create the object
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} can be created without permission"
+                    if response.status_code == status.HTTP_201_CREATED
+                    else f"Creating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
 
-            # Checks that the object was created in the database
-            assert (
-                object.objects.filter(id=response.json()["id"]).exists()
-            ), f"{verbose_name} created with the API are not saved in the database"
+            if not (fails or user_perm_fails):
+                if user_perm_reason == "outside_scope":
+                    assert (
+                        response.json()['folder'] == 'You do not have permission to create objects in this folder'
+                        ), f"{verbose_name} can be created outside the domain"
+                else:
+                    for key, value in build_params.items():
+                        if key == "attachment":
+                            # Asserts that the value file name is present in the JSON response
+                            assert (
+                                value.name.split("/")[-1].split(".")[0]
+                                in response.json()[key]
+                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                        else:
+                            assert (
+                                response.json()[key] == value
+                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+
+                    # Checks that the object was created in the database
+                    assert (
+                        object.objects.filter(id=response.json()["id"]).exists()
+                    ), f"{verbose_name} created with the API are not saved in the database"
 
             # Uses the API endpoint to assert that the created object is accessible
             response = authenticated_client.get(url)
@@ -447,24 +614,31 @@ class EndpointTestsQueries:
                 response.status_code == status.HTTP_200_OK
             ), f"{verbose_name} are not accessible with authentication"
 
-            for key, value in {**build_params, **test_params}.items():
-                if (
-                    key == "attachment"
-                    and response.json()["results"][base_count][key] != value
-                ):
-                    # Asserts that the value file name is present in the JSON response
-                    assert (
-                        re.sub(
-                            r"_([a-z]|[A-Z]|[0-9]){7}(?:\.)",
-                            ".",
-                            response.json()["results"][base_count][key],
-                        )
-                        == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+            if not (fails or user_perm_fails) and len(response.json()["results"]) != 0:
+                params = {**build_params, **test_params}
+                if response.json()["count"] > 0 and item_search_field:
+                    response_item = [
+                        res
+                        for res in response.json()["results"]
+                        if res[item_search_field] == params[item_search_field]
+                    ][0]
                 else:
-                    assert (
-                        response.json()["results"][base_count][key] == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                    response_item = response.json()["results"][base_count]
+                for key, value in params.items():
+                    if key == "attachment" and response_item[key] != value:
+                        # Asserts that the value file name is present in the JSON response
+                        assert (
+                            re.sub(
+                                r"_([a-z]|[A-Z]|[0-9]){7}(?:\.)",
+                                ".",
+                                response_item[key],
+                            )
+                            == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                    else:
+                        assert (
+                            response_item[key] == value
+                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def update_object(
             authenticated_client,
@@ -478,6 +652,8 @@ class EndpointTestsQueries:
             query_format: str = "json",
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
+            scope: str = None,
         ):
             """Test to update object with the API with authentication
 
@@ -489,6 +665,17 @@ class EndpointTestsQueries:
                 the test_params can ovveride the build_params
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status, user_perm_reason = None, 0, None
+
+            if user_group:
+                scope = scope or str(build_params.get("folder", None)) # if the scope is not provided, try to get it from the build_params
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                    user_perm_reason
+                ) = EndpointTestsUtils.expected_request_response(
+                    "change", verbose_name, scope, user_group, expected_status
+                )
 
             # Creates a test object from the model
             m2m_fields = {}
@@ -516,39 +703,80 @@ class EndpointTestsQueries:
 
             response = authenticated_client.get(url)
 
-            assert (
-                response.status_code == status.HTTP_200_OK
-            ), f"{verbose_name} can not be updated with authentication"
-            for key, value in {**build_params, **test_build_params}.items():
-                if key == "attachment":
-                    # Asserts that the value file name is present in the JSON response
+            view_perms = EndpointTestsUtils.expected_request_response("view", verbose_name, scope, user_group)
+            if not user_group or view_perms[:2] == (False, status.HTTP_200_OK):
+                if view_perms[2] == "outside_scope":
                     assert (
-                        value.name.split("/")[-1].split(".")[0] in response.json()[key]
-                    ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                        response.status_code == status.HTTP_404_NOT_FOUND
+                    ), f"{verbose_name} object detail can be accessed outside the domain"
                 else:
+                    if (verbose_name is not "Users"): # Users don't have permission to view users details
+                        assert (
+                            response.status_code == status.HTTP_200_OK
+                        ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
+
+            if not (fails or user_perm_fails):
+                if view_perms[2] == "outside_scope":
                     assert (
-                        response.json()[key] == value
-                    ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        response.json() == {'detail': 'Not found.'}
+                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                else:
+                    for key, value in {**build_params, **test_build_params}.items():
+                        if key == "attachment":
+                            # Asserts that the value file name is present in the JSON response
+                            assert (
+                                value.name.split("/")[-1].split(".")[0]
+                                in response.json()[key]
+                            ), f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
+                        else:
+                            assert (
+                                response.json()[key] == value
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
             update_response = authenticated_client.patch(
                 url, update_params, format=query_format
             )
 
-            assert (
-                update_response.status_code == expected_status
-            ), f"{verbose_name} can not be updated with authentication"
-            for key, value in {**build_params, **update_params, **test_params}.items():
-                if not fails:
-                    if key == "attachment" and update_response.json()[key] != value:
-                        # Asserts that the value file name is present in the JSON response
-                        assert (
-                            value.split("/")[-1].split(".")[0]
-                            in update_response.json()[key]
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
-                    else:
-                        assert (
-                            update_response.json()[key] == value
-                        ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+            if user_perm_reason == "outside_scope":
+                assert (
+                    update_response.status_code == status.HTTP_404_NOT_FOUND
+                ), f"{verbose_name} can be accessed outside the domain"
+            else:
+                if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                    # User has permission to update the object
+                    assert update_response.status_code == expected_status, (
+                        f"{verbose_name} can not be updated with authentication"
+                        if expected_status == status.HTTP_200_OK
+                        else f"{verbose_name} should not be updated (expected status: {expected_status})"
+                    )
+                else:
+                    # User does not have permission to update the object
+                    assert update_response.status_code == user_perm_expected_status, (
+                        f"{verbose_name} can be updated without permission"
+                        if update_response.status_code == status.HTTP_200_OK
+                        else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    )
+
+                if not (fails or user_perm_fails):
+                    for key, value in {
+                        **build_params,
+                        **update_params,
+                        **test_params,
+                    }.items():
+                        if key == "attachment" and update_response.json()[key] != value:
+                            # Asserts that the value file name is present in the JSON response
+                            assert (
+                                value.split("/")[-1].split(".")[0]
+                                in update_response.json()[key]
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
+                        else:
+                            assert (
+                                update_response.json()[key] == value
+                            ), f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
 
         def delete_object(
             authenticated_client,
@@ -558,6 +786,8 @@ class EndpointTestsQueries:
             endpoint: str = None,
             fails: bool = False,
             expected_status: int = status.HTTP_204_NO_CONTENT,
+            user_group: str = None,
+            scope: str = None,
         ):
             """Test to delete object with the API with authentication
 
@@ -566,6 +796,17 @@ class EndpointTestsQueries:
             :param build_params: the parameters to build the object
             :param endpoint: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status, user_perm_reason = None, 0, None
+
+            if user_group:
+                scope = scope or str(build_params.get("folder", None)) # if the scope is not provided, try to get it from the build_params
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                    user_perm_reason
+                ) = EndpointTestsUtils.expected_request_response(
+                    "delete", verbose_name, scope, user_group, expected_status
+                )
 
             if build_params:
                 # Creates a test object from the model
@@ -594,21 +835,55 @@ class EndpointTestsQueries:
 
             # Asserts that the objects exists
             response = authenticated_client.get(url)
-            assert (
-                response.status_code == status.HTTP_200_OK
-            ), f"{verbose_name} can not be deleted with authentication"
+
+            view_perms = EndpointTestsUtils.expected_request_response("view", verbose_name, scope, user_group)
+            if not user_group or view_perms[:2] == (False, status.HTTP_200_OK):
+                if view_perms[2] == "outside_scope":
+                    assert (
+                        response.status_code == status.HTTP_404_NOT_FOUND
+                    ), f"{verbose_name} object detail can be accessed outside the domain"
+                else:
+                    if (verbose_name is not "Users"): # Users don't have permission to view users details
+                        assert (
+                            response.status_code == status.HTTP_200_OK
+                        ), f"{verbose_name} object detail can not be accessed with permission"
+            else:
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), f"{verbose_name} object detail can be accessed without permission"
 
             # Asserts that the object was deleted successfully
             delete_response = authenticated_client.delete(url)
-            assert (
-                delete_response.status_code == expected_status
-            ), f"{verbose_name} can not be deleted with authentication"
 
-            # Asserts that the objects does not exists anymore
-            response = authenticated_client.get(url)
-            assert (
-                response.status_code == status.HTTP_404_NOT_FOUND
-            ), f"{verbose_name} has not been properly deleted with authentication"
+            if user_perm_reason == "outside_scope":
+                assert (
+                    delete_response.status_code == status.HTTP_404_NOT_FOUND
+                ), f"{verbose_name} can be accessed outside the domain"
+            else:
+                if (
+                    not user_group
+                    or user_perm_expected_status == status.HTTP_204_NO_CONTENT
+                ):
+                    # User has permission to delete the object
+                    assert delete_response.status_code == expected_status, (
+                        f"{verbose_name} can not be deleted with permission"
+                        if expected_status == status.HTTP_204_NO_CONTENT
+                        else f"{verbose_name} should not be deleted (expected status: {expected_status})"
+                    )
+                else:
+                    # User does not have permission to delete the object
+                    assert delete_response.status_code == user_perm_expected_status, (
+                        f"{verbose_name} can be deleted without permission"
+                        if delete_response.status_code == status.HTTP_204_NO_CONTENT
+                        else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    )
+
+                if not (fails or user_perm_fails):
+                    # Asserts that the objects does not exists anymore
+                    response = authenticated_client.get(url)
+                    assert (
+                        response.status_code == status.HTTP_404_NOT_FOUND
+                    ), f"{verbose_name} has not been properly deleted with authentication"
 
         def import_object(
             authenticated_client,
@@ -616,6 +891,8 @@ class EndpointTestsQueries:
             urn: str | None = None,
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
+            user_group: str = None,
+            scope: str = "Published",
         ):
             """Imports object with the API with authentication
 
@@ -623,6 +900,16 @@ class EndpointTestsQueries:
             :param verbose_name: the verbose name of the object to test
             :param urn: the endpoint URL of the object to test (optional)
             """
+            user_perm_fails, user_perm_expected_status, user_perm_reason = None, 0, None
+
+            if user_group:
+                (
+                    user_perm_fails,
+                    user_perm_expected_status,
+                    user_perm_reason
+                ) = EndpointTestsUtils.expected_request_response(
+                    "add", "library", scope, user_group, expected_status
+                )
 
             url = urn or EndpointTestsUtils.get_object_urn(verbose_name)
 
@@ -630,10 +917,22 @@ class EndpointTestsQueries:
             response = authenticated_client.get(url + "import/")
 
             # Asserts that the object was imported successfully
-            assert (
-                response.status_code == expected_status
-            ), f"{verbose_name} can not be imported with authentication"
-            if not fails:
+            if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                # User has permission to import the library
+                assert response.status_code == expected_status, (
+                    f"{verbose_name} can not be imported with authentication"
+                    if expected_status == status.HTTP_200_OK
+                    else f"{verbose_name} should not be imported (expected status: {expected_status})"
+                )
+            else:
+                # User does not have permission to import the library
+                assert response.status_code == user_perm_expected_status, (
+                    f"{verbose_name} can be imported without permission"
+                    if response.status_code == status.HTTP_200_OK
+                    else f"Importing {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                )
+
+            if not (fails or user_perm_fails):
                 assert response.json() == {
                     "status": "success"
                 }, f"{verbose_name} can not be imported with authentication"
@@ -663,13 +962,13 @@ class EndpointTestsQueries:
             reference = authenticated_client.get(reference_url)
             assert (
                 reference.status_code == status.HTTP_200_OK
-            ), f"reference endpoint is not accessible with authentication"
+            ), f"reference endpoint is not accessible"
 
             for object in reference.json()["objects"]["framework"][
                 object_name.lower().replace(" ", "_")
             ][:count]:
                 comparelist = authenticated_client.get(compare_url)
-                compare = None
+                compare = dict()
                 assert (
                     comparelist.status_code == expected_status
                 ), f"{object['name']} is not in {compare_url} results"

@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { breadcrumbObject } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
+	import * as m from '$paraglide/messages';
 
 	export let data;
 	let loading = false;
@@ -11,13 +13,17 @@
 		[key: string]: any;
 	}
 
+	const breadcrumb_library_data = {
+		...data.library,
+		id: data.library.urn
+	};
+	$: breadcrumbObject.set(breadcrumb_library_data);
+
 	const libraryObjects: LibraryObjects = data.library.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
-	const securityFunctions = libraryObjects['security_functions'] ?? [];
+	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
 	const framework = libraryObjects['framework'];
-
-	const tree = data.tree;
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
@@ -29,7 +35,6 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
 	import { ProgressRadial, tableSourceMapper, type TreeViewNode } from '@skeletonlabs/skeleton';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
@@ -37,17 +42,17 @@
 	import { enhance } from '$app/forms';
 
 	const riskMatricesTable: TableSource = {
-		head: ['Name', 'Description'],
+		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
-	const securityFunctionsTable: TableSource = {
-		head: { ref_id: 'Ref', name: 'Name', description: 'Description', category: 'Category' },
-		body: tableSourceMapper(securityFunctions, ['ref_id', 'name', 'description', 'category'])
+	const referenceControlsTable: TableSource = {
+		head: { ref_id: 'ref', name: 'name', description: 'description', category: 'category' },
+		body: tableSourceMapper(referenceControls, ['ref_id', 'name', 'description', 'category'])
 	};
 
 	const threatsTable: TableSource = {
-		head: { ref_id: 'Ref', name: 'Name', description: 'Description' },
+		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description'])
 	};
 
@@ -93,12 +98,12 @@
 			</div>
 		</span>
 		<div class="space-y-1">
-			<p class="text-md leading-5 text-gray-700">Description: {data.library.description}</p>
-			<p class="text-md leading-5 text-gray-700">Provider: {data.library.provider}</p>
-			<p class="text-md leading-5 text-gray-700">Packager: {data.library.packager}</p>
+			<p class="text-md leading-5 text-gray-700">{m.description()}: {data.library.description}</p>
+			<p class="text-md leading-5 text-gray-700">{m.provider()}: {data.library.provider}</p>
+			<p class="text-md leading-5 text-gray-700">{m.packager()}: {data.library.packager}</p>
 			{#if data.library.dependencies}
 				<p class="text-md leading-5 text-gray-700">
-					Dependendies:
+					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
 						<li>
 							<a href="/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a>
@@ -107,7 +112,7 @@
 				</p>
 			{/if}
 			{#if data.library.copyright}
-				<p class="text-sm leading-5 text-gray-500">Copyright: {data.library.copyright}</p>
+				<p class="text-sm leading-5 text-gray-500">{m.copyright()}: {data.library.copyright}</p>
 			{/if}
 		</div>
 	</div>
@@ -117,7 +122,7 @@
 			open={riskMatrices.length == 1}
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-table-cells-large"
-			header="{riskMatrices.length} Risk matrix"
+			header="{riskMatrices.length} {m.riskMatrices()}"
 		>
 			<ModelTable
 				source={riskMatricesTable}
@@ -134,13 +139,13 @@
 		</Dropdown>
 	{/if}
 
-	{#if securityFunctions.length > 0}
+	{#if referenceControls.length > 0}
 		<Dropdown
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-gears"
-			header="{securityFunctions.length} Security functions"
+			header="{referenceControls.length} {m.referenceControls()}"
 		>
-			<ModelTable source={securityFunctionsTable} displayActions={false} interactive={false} />
+			<ModelTable source={referenceControlsTable} displayActions={false} interactive={false} />
 		</Dropdown>
 	{/if}
 
@@ -148,14 +153,21 @@
 		<Dropdown
 			style="hover:text-indigo-700"
 			icon="fa-solid fa-biohazard"
-			header="{threats.length} Threats"
+			header="{threats.length} {m.threats()}"
 		>
 			<ModelTable source={threatsTable} displayActions={false} interactive={false} />
 		</Dropdown>
 	{/if}
 
 	{#if framework}
-		<h4 class="h4 font-medium">Framework</h4>
-		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
+		<h4 class="h4 font-medium">{m.framework()}</h4>
+		{#await data.tree}
+			{m.loading()}...
+		{:then tree}
+			<RecursiveTreeView
+				nodes={transformToTreeView(Object.entries(tree))}
+				hover="hover:bg-initial"
+			/>
+		{/await}
 	{/if}
 </div>

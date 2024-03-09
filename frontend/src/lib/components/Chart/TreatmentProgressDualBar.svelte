@@ -123,7 +123,7 @@
 					name: measure_open,
 					type: 'bar',
 					barWidth: 20,
-					stack: 'security_measures',
+					stack: 'applied_controls',
 					emphasis: {
 						focus: 'series'
 					},
@@ -133,7 +133,7 @@
 					name: measure_progress,
 					type: 'bar',
 					barWidth: 20,
-					stack: 'security_measures',
+					stack: 'applied_controls',
 					emphasis: {
 						focus: 'series'
 					},
@@ -143,7 +143,7 @@
 					name: measure_hold,
 					type: 'bar',
 					barWidth: 20,
-					stack: 'security_measures',
+					stack: 'applied_controls',
 					emphasis: {
 						focus: 'series'
 					},
@@ -153,7 +153,7 @@
 					name: measure_done,
 					type: 'bar',
 					barWidth: 20,
-					stack: 'security_measures',
+					stack: 'applied_controls',
 					emphasis: {
 						focus: 'series'
 					},

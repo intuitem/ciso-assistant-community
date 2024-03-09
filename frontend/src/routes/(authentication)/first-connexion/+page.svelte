@@ -6,6 +6,8 @@
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
 	import Typewriter from 'svelte-typewriter';
 
+	import * as m from '$paraglide/messages.js'
+
 	export let data: PageData;
 </script>
 
@@ -19,15 +21,15 @@
 		<div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-gray-900">
 			<Typewriter mode="loopOnce" cursor={false} interval={50}>
 				<div class="text-2xl unstyled text-center pb-4">
-					<span class="text-2xl text-center">Hello there 👋</span>
-					<span> This is CISO Assistant. </span>
+					<span class="text-2xl text-center">{m.helloThere()} 👋</span>
+					<span> {m.thisIsCisoAssistant()}. </span>
 				</div>
 			</Typewriter>
 			<Typewriter mode="cascade" cursor={false} interval={45} delay={5000}>
 				<div class="text-2xl unstyled text-center">
-					<span> Your streamlined </span>
-					<span class="font-black"> one-stop shop </span>
-					<span> for compliance and risk management. </span>
+					<span> {m.yourStreamlined()} </span>
+					<span class="font-black"> {m.oneStopShop()} </span>
+					<span> {m.forComplianceRiskManagement()}. </span>
 				</div>
 			</Typewriter>
 		</div>
@@ -36,7 +38,7 @@
 				<i class="fa-solid fa-key" />
 			</div>
 			<p class="text-gray-600 text-sm text-center">
-				You can set your password here.<br />
+				{m.youCanSetPAsswordHere()}.<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->
 			<div class="flex w-full">
@@ -55,8 +57,8 @@
 						label="Confirm new password"
 					/>
 					<p class="pt-3">
-						<button class="btn variant-filled-primary font-semibold w-full" type="submit"
-							>Set Password</button
+						<button class="btn variant-filled-primary font-semibold w-full" type="submit" data-testid="set-password-btn"
+							>{m.setPassword()}</button
 						>
 					</p>
 				</SuperForm>
