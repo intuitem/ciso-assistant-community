@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { SecurityMeasureSchema } from '$lib/utils/schemas';
+	import type { AppliedControlSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
 	import { formatStringToDate } from '$lib/utils/helpers';
+	import { languageTag } from '$paraglide/runtime';
 
 	let request_path: string | null;
 	$: request_path = $page.route.id;
 	// Shoud i handle the scenario where request_path === null ?
 
-	export let measures_to_review: (typeof SecurityMeasureSchema)[];
+	export let measures_to_review: (typeof AppliedControlSchema)[];
 	const today = new Date().setHours(0, 0, 0, 0); // Is this the correct way of handling this variable usage ? What is the type of measure.eta ?
 
 	function measureState(date: string) {
@@ -39,7 +40,7 @@
 				{#each measures_to_review as measure}
 					<tr
 						class="bg-white border-b text-ellipsis overflow-hidden hover:text-indigo-500 hover:bg-gray-200 cursor-pointer hover:scale-[0.99] duration-500"
-						onclick="window.location='{`/security-measures/${measure.id}`}?next={encodeURIComponent(
+						onclick="window.location='{`/applied-controls/${measure.id}`}?next={encodeURIComponent(
 							request_path
 						)}'"
 					>
@@ -60,7 +61,7 @@
 							{:else if measureState(measure.expiry_date) === 'today'}
 								<span class="rounded bg-yellow-500 text-white p-1 text-xs mr-1">{m.today()}</span>
 							{/if}
-							{formatStringToDate(measure.expiry_date)}
+							{formatStringToDate(measure.expiry_date,languageTag())}
 						</td>
 					</tr>
 				{/each}
@@ -68,7 +69,9 @@
 				<tr class="text-black p-4 text-center">
 					<td colspan="8" class="py-2">
 						<i class="inline fas fa-exclamation-triangle" />
-						<p class="inline test-gray-900">{m.noObjectYet({object: m.securityMeasure().toLowerCase(), e: 'e'})}.</p>
+						<p class="inline test-gray-900">
+							{m.noAppliedControlYet()}.
+						</p>
 					</td>
 				</tr>
 			{/if}

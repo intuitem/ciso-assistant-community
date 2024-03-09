@@ -6,55 +6,63 @@ from core.models import (
     RiskAssessment,
     RiskMatrix,
     RiskScenario,
-    SecurityMeasure,
+    AppliedControl,
     Threat,
 )
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
+from test_utils import EndpointTestsQueries
 
 # Generic project data for tests
 RISK_SCENARIO_NAME = "Test scenario"
 RISK_SCENARIO_DESCRIPTION = "Test Description"
-RISK_SCENARIO_EXISTING_MEASURES = "Test Existing Measures"
-RISK_SCENARIO_EXISTING_MEASURES2 = "Test New Existing Measures"
+RISK_SCENARIO_existing_controls = "Test Existing Controls"
+RISK_SCENARIO_existing_controls2 = "Test New Existing Controls"
 RISK_SCENARIO_CURRENT_PROBABILITIES = (2, "High")
 RISK_SCENARIO_CURRENT_PROBABILITIES2 = (1, "Medium")
 RISK_SCENARIO_CURRENT_IMPACT = (2, "High")
 RISK_SCENARIO_CURRENT_IMPACT2 = (1, "Medium")
-RISK_SCENARIO_CURRENT_LEVEL = (2,
-                               {
-                                    "abbreviation": "H",
-                                    "name": "High",
-                                    "description": "unacceptable risk",
-                                    "hexcolor": "#FF0000"
-                                }
-                                )
-RISK_SCENARIO_CURRENT_LEVEL2 = (1,
-                                {
-                                    "abbreviation": "M",
-                                    "name": "Medium",
-                                    "description": "risk requiring mitigation within 2 years",
-                                    "hexcolor": "#FFFF00"
-                                })
+RISK_SCENARIO_CURRENT_LEVEL = (
+    2,
+    {
+        "abbreviation": "H",
+        "name": "High",
+        "description": "unacceptable risk",
+        "hexcolor": "#FF0000",
+    },
+)
+RISK_SCENARIO_CURRENT_LEVEL2 = (
+    1,
+    {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "risk requiring mitigation within 2 years",
+        "hexcolor": "#FFFF00",
+    },
+)
 RISK_SCENARIO_RESIDUAL_PROBABILITIES = (1, "Medium")
 RISK_SCENARIO_RESIDUAL_PROBABILITIES2 = (0, "Low")
 RISK_SCENARIO_RESIDUAL_IMPACT = (1, "Medium")
 RISK_SCENARIO_RESIDUAL_IMPACT2 = (0, "Low")
-RISK_SCENARIO_RESIDUAL_LEVEL = (1,
-                                {
-                                    "abbreviation": "M",
-                                    "name": "Medium",
-                                    "description": "risk requiring mitigation within 2 years",
-                                    "hexcolor": "#FFFF00"
-                                })
-RISK_SCENARIO_RESIDUAL_LEVEL2 = (0,
-                                {
-                                    "abbreviation": "L",
-                                    "name": "Low",
-                                    "description": "acceptable risk",
-                                    "hexcolor": "#00FF00"
-                                })
+RISK_SCENARIO_RESIDUAL_LEVEL = (
+    1,
+    {
+        "abbreviation": "M",
+        "name": "Medium",
+        "description": "risk requiring mitigation within 2 years",
+        "hexcolor": "#FFFF00",
+    },
+)
+RISK_SCENARIO_RESIDUAL_LEVEL2 = (
+    0,
+    {
+        "abbreviation": "L",
+        "name": "Low",
+        "description": "acceptable risk",
+        "hexcolor": "#00FF00",
+    },
+)
 RISK_SCENARIO_TREATMENT_STATUS = ("accept", "Accept")
 RISK_SCENARIO_TREATMENT_STATUS2 = ("mitigate", "Mitigate")
 RISK_SCENARIO_JUSTIFICATION = "Test justification"
@@ -150,26 +158,25 @@ class TestRiskScenariosUnauthenticated:
 class TestRiskScenariosAuthenticated:
     """Perform tests on Risk Scenarios API endpoint with authentication"""
 
-    def test_get_risk_scenarios(self, authenticated_client):
+    def test_get_risk_scenarios(self, test):
         """test to get risk scenarios from the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
-        folder = Folder.objects.create(name="testFolder")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="testProject", folder=folder),
+            project=Project.objects.create(name="testProject", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
-        threat = Threat.objects.create(name="test", folder=folder)
+        threat = Threat.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Risk Scenarios",
             RiskScenario,
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -199,30 +206,33 @@ class TestRiskScenariosAuthenticated:
                     "str": risk_assessment.risk_matrix.name,
                 },
             },
+            user_group=test.user_group,
+            scope=str(test.folder),
         )
 
-    def test_create_risk_scenarios(self, authenticated_client):
+    def test_create_risk_scenarios(self, test):
         """test to create risk scenarios with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(name="test", folder=folder),
+            project=Project.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
-        threat = Threat.objects.create(name="test", folder=folder)
-        asset = Asset.objects.create(name="test", folder=folder)
-        security_measures = SecurityMeasure.objects.create(name="test", folder=folder)
+        threat = Threat.objects.create(name="test", folder=test.folder)
+        asset = Asset.objects.create(name="test", folder=test.folder)
+        applied_controls = AppliedControl.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client,
+            test.client,
             "Risk Scenarios",
             RiskScenario,
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -234,7 +244,7 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": str(risk_assessment.id),
                 "threats": [str(threat.id)],
                 "assets": [str(asset.id)],
-                "security_measures": [str(security_measures.id)],
+                "applied_controls": [str(applied_controls.id)],
             },
             {
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
@@ -254,23 +264,23 @@ class TestRiskScenariosAuthenticated:
                     "str": risk_assessment.risk_matrix.name,
                 },
                 "assets": [{"id": str(asset.id), "str": asset.name}],
-                "security_measures": [
-                    {"id": str(security_measures.id), "str": security_measures.name}
+                "applied_controls": [
+                    {"id": str(applied_controls.id), "str": applied_controls.name}
                 ],
             },
+            user_group=test.user_group,
+            scope=str(test.folder),
         )
 
-    def test_update_risk_scenarios(self, authenticated_client):
+    def test_update_risk_scenarios(self, test):
         """test to update risk scenarios with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix2")
-        folder = Folder.objects.create(name="test")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix2")
+        folder = Folder.objects.create(name="test2")
         risk_assessment = RiskAssessment.objects.create(
             name="test",
-            project=Project.objects.create(
-                name="test", folder=Folder.get_root_folder()
-            ),
+            project=Project.objects.create(name="test", folder=test.folder),
             risk_matrix=RiskMatrix.objects.all()[0],
         )
         risk_assessment2 = RiskAssessment.objects.create(
@@ -278,19 +288,19 @@ class TestRiskScenariosAuthenticated:
             project=Project.objects.create(name="test2", folder=folder),
             risk_matrix=RiskMatrix.objects.all()[1],
         )
-        threat = Threat.objects.create(name="test", folder=Folder.get_root_folder())
+        threat = Threat.objects.create(name="test", folder=test.folder)
         threat2 = Threat.objects.create(name="test2", folder=folder)
         asset = Asset.objects.create(name="test", folder=folder)
-        security_measures = SecurityMeasure.objects.create(name="test", folder=folder)
+        applied_controls = AppliedControl.objects.create(name="test", folder=folder)
 
         EndpointTestsQueries.Auth.update_object(
-            authenticated_client,
+            test.client,
             "Risk Scenarios",
             RiskScenario,
             {
                 "name": RISK_SCENARIO_NAME,
                 "description": RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES[0],
+                "existing_controls": RISK_SCENARIO_existing_controls[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL[0],
@@ -305,7 +315,7 @@ class TestRiskScenariosAuthenticated:
             {
                 "name": "new " + RISK_SCENARIO_NAME,
                 "description": "new " + RISK_SCENARIO_DESCRIPTION,
-                "existing_measures": RISK_SCENARIO_EXISTING_MEASURES2[0],
+                "existing_controls": RISK_SCENARIO_existing_controls2[0],
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES2[0],
                 "current_impact": RISK_SCENARIO_CURRENT_IMPACT2[0],
                 "current_level": RISK_SCENARIO_CURRENT_LEVEL2[0],
@@ -317,7 +327,7 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": str(risk_assessment2.id),
                 "threats": [str(threat2.id)],
                 "assets": [str(asset.id)],
-                "security_measures": [str(security_measures.id)],
+                "applied_controls": [str(applied_controls.id)],
             },
             {
                 "current_proba": RISK_SCENARIO_CURRENT_PROBABILITIES[1],
@@ -337,13 +347,15 @@ class TestRiskScenariosAuthenticated:
                     "str": risk_assessment.risk_matrix.name,
                 },
             },
+            user_group=test.user_group,
+            scope=str(test.folder),
         )
 
-    def test_delete_risk_scenarios(self, authenticated_client):
+    def test_delete_risk_scenarios(self, test):
         """test to delete risk scenarios with the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Risk matrix")
-        folder = Folder.objects.create(name="testFolder")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
+        folder = test.folder
         risk_assessment = RiskAssessment.objects.create(
             name="test",
             project=Project.objects.create(name="testProject", folder=folder),
@@ -352,7 +364,7 @@ class TestRiskScenariosAuthenticated:
         threat = Threat.objects.create(name="test", folder=folder)
 
         EndpointTestsQueries.Auth.delete_object(
-            authenticated_client,
+            test.client,
             "Risk Scenarios",
             RiskScenario,
             {
@@ -360,14 +372,17 @@ class TestRiskScenariosAuthenticated:
                 "risk_assessment": risk_assessment,
                 "threats": [threat],
             },
+            user_group=test.user_group,
+            scope=str(test.folder),
         )
 
-    def test_get_treatment_choices(self, authenticated_client):
+    def test_get_treatment_choices(self, test):
         """test to get risk scenarios treatment choices from the API with authentication"""
 
         EndpointTestsQueries.Auth.get_object_options(
-            authenticated_client,
+            test.client,
             "Risk Scenarios",
             "treatment",
             RiskScenario.TREATMENT_OPTIONS,
+            user_group=test.user_group,
         )

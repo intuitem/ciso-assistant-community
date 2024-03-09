@@ -54,10 +54,10 @@ export const RiskMatrixSchema = baseNamedObject({
 });
 
 export const LibraryUploadSchema = z.object({
-	file: z.string()
+	file: z.string().optional()
 });
 
-export const RiskRiskAssessmentSchema = baseNamedObject({
+export const RiskAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	risk_matrix: z.string(),
@@ -73,29 +73,30 @@ export const ThreatSchema = baseNamedObject({
 });
 
 export const RiskScenarioSchema = baseNamedObject({
-	existing_measures: z.string().optional(),
-	security_measures: z.string().uuid().optional().array(),
+	existing_controls: z.string().optional(),
+	applied_controls: z.string().uuid().optional().array(),
 	current_proba: z.number().optional(),
 	current_impact: z.number().optional(),
 	residual_proba: z.number().optional(),
 	residual_impact: z.number().optional(),
 	treatment: z.string().optional(),
+	strength_of_knowledge: z.number().default(-1).optional(),
 	justification: z.string().optional().nullable(),
 	risk_assessment: z.string(),
 	threats: z.string().uuid().optional().array(),
 	assets: z.string().uuid().optional().array()
 });
 
-export const SecurityMeasureSchema = baseNamedObject({
-	category: z.string().optional(),
-	status: z.string().optional(),
+export const AppliedControlSchema = baseNamedObject({
+	category: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
 	expiry_date: z.string().optional().nullable(),
 	link: z.string().url().optional().nullable(),
-	effort: z.string().optional(),
+	effort: z.string().optional().nullable(),
 	folder: z.string(),
-	security_function: z.string().optional()
+	reference_control: z.string().optional()
 });
 
 export const PolicySchema = baseNamedObject({
@@ -106,7 +107,7 @@ export const PolicySchema = baseNamedObject({
 	link: z.string().url().optional().nullable(),
 	effort: z.string().optional(),
 	folder: z.string(),
-	security_function: z.string().optional()
+	reference_control: z.string().optional()
 });
 
 export const RiskAcceptanceSchema = baseNamedObject({
@@ -117,9 +118,9 @@ export const RiskAcceptanceSchema = baseNamedObject({
 	risk_scenarios: z.array(z.string())
 });
 
-export const SecurityFunctionSchema = baseNamedObject({
+export const ReferenceControlSchema = baseNamedObject({
 	provider: z.string().optional().nullable(),
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	folder: z.string()
 });
 
@@ -137,7 +138,7 @@ export const RequirementAssessmentSchema = z.object({
 	requirement: z.string(),
 	evidences: z.string().uuid().optional().array(),
 	compliance_assessment: z.string(),
-	security_measures: z.string().uuid().optional().array()
+	applied_controls: z.string().uuid().optional().array()
 });
 
 export const UserEditSchema = z.object({
@@ -179,7 +180,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 export const EvidenceSchema = baseNamedObject({
 	attachment: z.string().optional().nullable(),
 	folder: z.string(),
-	security_measures: z.string().optional().array().optional(),
+	applied_controls: z.string().optional().array().optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	link: z.string().optional().nullable()
 });
@@ -188,13 +189,13 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
-	'risk-assessments': RiskRiskAssessmentSchema,
+	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
-	'security-measures': SecurityMeasureSchema,
+	'applied-controls': AppliedControlSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
-	'security-functions': SecurityFunctionSchema,
+	'reference-controls': ReferenceControlSchema,
 	assets: AssetSchema,
 	'requirement-assessments': RequirementAssessmentSchema,
 	'compliance-assessments': ComplianceAssessmentSchema,

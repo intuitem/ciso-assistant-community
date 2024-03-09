@@ -5,13 +5,14 @@ from core.models import *
 from iam.models import *
 
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
 import structlog
 
-logger = structlog.get_logger()
+logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
@@ -23,6 +24,25 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 {"urn": "Imported objects cannot be modified"}
             )
         return super().update(instance, validated_data)
+
+    def create(self, validated_data: Any):
+        logger.debug("validated data", **validated_data)
+        folder = Folder.get_folder(validated_data)
+        folder = folder if folder else Folder.get_root_folder()
+        can_create_in_folder = RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"add_{self.Meta.model._meta.model_name}"
+            ),
+            folder=folder,
+        )
+        if not can_create_in_folder:
+            raise PermissionDenied(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
+        return super().create(validated_data)
 
     class Meta:
         model: models.Model
@@ -123,13 +143,13 @@ class AssetReadSerializer(AssetWriteSerializer):
     type = serializers.CharField(source="get_type_display")
 
 
-class SecurityFunctionWriteSerializer(BaseModelSerializer):
+class ReferenceControlWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = SecurityFunction
+        model = ReferenceControl
         fields = "__all__"
 
 
-class SecurityFunctionReadSerializer(SecurityFunctionWriteSerializer):
+class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
     folder = FieldsRelatedField()
 
 
@@ -178,18 +198,21 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     residual_impact = serializers.CharField(source="get_residual_impact.name")
     residual_level = serializers.JSONField(source="get_residual_risk")
 
-    security_measures = FieldsRelatedField(many=True)
+    strength_of_knowledge = serializers.JSONField(source="get_strength_of_knowledge")
+
+    applied_controls = FieldsRelatedField(many=True)
+    rid = serializers.CharField()
 
 
-class SecurityMeasureWriteSerializer(BaseModelSerializer):
+class AppliedControlWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = SecurityMeasure
+        model = AppliedControl
         fields = "__all__"
 
 
-class SecurityMeasureReadSerializer(SecurityMeasureWriteSerializer):
+class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     folder = FieldsRelatedField()
-    security_function = FieldsRelatedField()
+    reference_control = FieldsRelatedField()
 
     category = serializers.CharField(
         source="get_category_display"
@@ -199,13 +222,13 @@ class SecurityMeasureReadSerializer(SecurityMeasureWriteSerializer):
     effort = serializers.CharField(source="get_effort_display")
 
 
-class PolicyWriteSerializer(SecurityMeasureWriteSerializer):
+class PolicyWriteSerializer(AppliedControlWriteSerializer):
     class Meta:
         model = Policy
         fields = "__all__"
 
 
-class PolicyReadSerializer(SecurityMeasureReadSerializer):
+class PolicyReadSerializer(AppliedControlReadSerializer):
     class Meta:
         model = Policy
         fields = "__all__"
@@ -246,6 +269,14 @@ class UserWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(codename=f"add_user"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied(
+                {"error": ["You do not have permission to create users"]}
+            )
         try:
             user = User.objects.create_user(**validated_data)
         except Exception as e:
@@ -287,7 +318,7 @@ class UserWriteSerializer(BaseModelSerializer):
 
 class UserGroupReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
-    label = serializers.CharField(source="get_name_display")
+    localization_dict = serializers.JSONField(source="get_localization_dict")
     folder = FieldsRelatedField()
 
     class Meta:
@@ -370,7 +401,7 @@ class RequirementLevelWriteSerializer(RequirementLevelReadSerializer):
 
 
 class RequirementNodeReadSerializer(BaseModelSerializer):
-    security_functions = FieldsRelatedField(many=True)
+    reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
     display_long = serializers.CharField()
@@ -387,7 +418,7 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
 class EvidenceReadSerializer(BaseModelSerializer):
     attachment = serializers.CharField(source="filename")
     folder = FieldsRelatedField()
-    security_measures = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
 
     class Meta:
@@ -396,8 +427,8 @@ class EvidenceReadSerializer(BaseModelSerializer):
 
 
 class EvidenceWriteSerializer(BaseModelSerializer):
-    security_measures = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=SecurityMeasure.objects.all()
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=AppliedControl.objects.all()
     )
     requirement_assessments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=RequirementAssessment.objects.all()
@@ -433,6 +464,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     compliance_assessment = FieldsRelatedField()
+    folder = FieldsRelatedField()
 
     class Meta:
         model = RequirementAssessment
@@ -442,4 +474,16 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssessment
+        fields = "__all__"
+
+
+class LibraryReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
+
+
+class LibraryWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
         fields = "__all__"

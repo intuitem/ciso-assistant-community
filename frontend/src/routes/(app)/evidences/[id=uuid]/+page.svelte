@@ -16,6 +16,10 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 
+	import * as m from '$paraglide/messages';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data: PageData;
 	breadcrumbObject.set(data.evidence);
 
@@ -44,8 +48,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'Confirm',
-			body: `Are you sure? This action will permanently affect the following object: ${name}?`
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -71,22 +75,25 @@
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
 			{#each Object.entries(data.evidence).filter( ([key, _]) => ['name', 'description', 'folder', 'attachment', 'link', 'comment'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800 capitalize-first"
-					data-testid={key.replace('_', '-') + "-field-title"}>
-						{#if key === 'urn'}
-							URN
-						{:else}
-							{key.replace('_', ' ')}
-						{/if}
+					<div
+						class="text-sm font-medium text-gray-800 capitalize-first"
+						data-testid={key.replace('_', '-') + '-field-title'}
+					>
+						{localItems(languageTag())[toCamelCase(key)]}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none" data-testid={!Array.isArray(value) || value.length <=0 ? key.replace('_', '-') + "-field-value" : null}>
+						<li
+							class="text-gray-600 list-none"
+							data-testid={!Array.isArray(value) || value.length <= 0
+								? key.replace('_', '-') + '-field-value'
+								: null}
+						>
 							{#if value}
 								{#if Array.isArray(value)}
 									<ul>
 										{#if value.length > 0}
 											{#each value as val}
-												<li data-testid={key.replace('_', '-') + "-field-value"}>
+												<li data-testid={key.replace('_', '-') + '-field-value'}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
@@ -128,22 +135,21 @@
 				<a
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
-					data-testid="edit-button"
-					><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
+					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
 				>
 			{/if}
 		</span>
 	</div>
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
 		<TabGroup>
-			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>Security measures</Tab>
-			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>Requirement assessments</Tab>
+			<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}>{m.appliedControls()}</Tab>
+			<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.requirementAssessments()}</Tab>
 			<svelte:fragment slot="panel">
 				{#if tabSet === 0}
 					<div
 						class="h-full flex flex-col space-y-2 variant-outline-surface rounded-container-token p-4"
 					>
-						<ModelTable source={data.tables['security-measures']} URLModel="security-measures" />
+						<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 					</div>
 				{/if}
 				{#if tabSet === 1}
@@ -162,11 +168,15 @@
 	{#if data.evidence.attachment}
 		<div class="card px-6 py-4 bg-white flex flex-col shadow-lg space-y-4">
 			<div class="flex flex-row justify-between">
-				<h4 class="h4 font-semibold" data-testid="attachment-name-title">{data.evidence.attachment}</h4>
+				<h4 class="h4 font-semibold" data-testid="attachment-name-title">
+					{data.evidence.attachment}
+				</h4>
 				<div class="space-x-2">
-					<a href={`./${data.evidence.id}/attachment`} class="btn variant-filled-primary h-fit"
-						data-testid="attachment-download-button"	
-					><i class="fa-solid fa-download mr-2" /> Download</a
+					<a
+						href={`./${data.evidence.id}/attachment`}
+						class="btn variant-filled-primary h-fit"
+						data-testid="attachment-download-button"
+						><i class="fa-solid fa-download mr-2" /> {m.download()}</a
 					>
 					<button
 						on:click={(_) => {
@@ -185,7 +195,7 @@
 					<embed src={attachment.url} type="application/pdf" width="100%" height="600px" />
 				{/if}
 			{:else}
-				loading...
+				{m.loading()}...
 			{/if}
 		</div>
 	{/if}

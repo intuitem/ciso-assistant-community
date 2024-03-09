@@ -17,12 +17,12 @@ Conventions:
         framework_ref_id            | <ref_id>
         framework_name              | <name>
         framework_description       | <description>
-        security_function_base_urn  | <base_urn>            | id
+        reference_control_base_urn  | <base_urn>            | id
         threat_base_urn             | <base_urn>            | id
         tab                         | <tab_name>            | levels
         tab                         | <tab_name>            | requirements       | <section_name>
         tab                         | <tab_name>            | threats            | <base_urn>
-        tab                         | <tab_name>            | security_functions | <base_urn>
+        tab                         | <tab_name>            | reference_controls | <base_urn>
 
 
     For levels:
@@ -44,12 +44,12 @@ Conventions:
             - level
             - maturity
             - threats
-            - security_functions
+            - reference_controls
             - annotation
         The normal tree order shall be respected
-        If multiple threats or security_function are given for a requirements, they shall be separated by blank or comma.
+        If multiple threats or reference_control are given for a requirements, they shall be separated by blank or comma.
         They shall be prefixed by the id of the corresponding base_urn and a semicolumn.
-    For security functions:
+    For reference controls:
         The first line is a header, with the following possible fields (* for required):
             - depth(*): 1/2/3/.. for requirement groups, empty for a requirement.
             - ref_id(*)
@@ -70,11 +70,12 @@ from collections import defaultdict
 
 LIBRARY_VARS = ('library_urn', 'library_version', 'library_locale', 'library_ref_id', 'library_name', 'library_description', 
                     'framework_urn', 'framework_ref_id', 'framework_name', 'framework_description', 'library_copyright',
-                    'library_provider', 'library_packager', 'security_function_base_urn', 'threat_base_urn', 'library_dependencies', 'tab')
+                    'library_provider', 'library_packager', 'reference_control_base_urn', 'threat_base_urn', 'library_dependencies', 'tab')
 library_vars = {}
 library_vars_dict = defaultdict(dict)
 library_vars_dict_reverse = defaultdict(dict)
 library_vars_dict_arg = defaultdict(dict)
+urn_unicity_checker = set()
 
 if len(sys.argv) <= 1:
     print("missing input file parameter")
@@ -89,7 +90,7 @@ print("parsing", input_file_name)
 dataframe = openpyxl.load_workbook(input_file_name)
 
 requirement_nodes = []
-security_functions = []
+reference_controls = []
 threats = []
 
 def error(message):
@@ -155,9 +156,12 @@ for tab in dataframe:
                 annotation = row[header['annotation']].value if 'annotation' in header else None
                 level = row[header['level']].value if 'level' in header else None
                 maturity = row[header['maturity']].value if 'maturity' in header else None
-                ref_id_urn = ref_id.lower().replace(' ', '-') if ref_id else \
-                    name.lower().replace(' ', '-') if name else f"node{counter}"
+                ref_id_urn = ref_id.lower().replace(' ', '-') if ref_id else f"node{counter}"
                 urn = f"{root_nodes_urn}:{ref_id_urn}"
+                if urn in urn_unicity_checker:
+                    print("URN duplicate:", urn)
+                    exit(1)
+                urn_unicity_checker.add(urn)
                 if depth == current_depth + 1:
                     parent_for_depth[depth]=current_node_urn
                     parent_urn = parent_for_depth[depth]
@@ -182,7 +186,7 @@ for tab in dataframe:
                 if maturity:
                     req_node["maturity"] = maturity
                 threats = row[header['threats']].value if 'threats' in header else None
-                security_functions = row[header['security_functions']].value if 'security_functions' in header else None
+                reference_controls = row[header['reference_controls']].value if 'reference_controls' in header else None
                 threat_urns = []
                 function_urns = []
                 if threats:
@@ -190,28 +194,28 @@ for tab in dataframe:
                         parts = re.split(r':', element)
                         prefix = parts.pop(0)
                         part_name = ':'.join(parts)
-                        urn_prefix = library_vars_dict_reverse['security_function_base_urn'][prefix]
+                        urn_prefix = library_vars_dict_reverse['reference_control_base_urn'][prefix]
                         threat_urns.append(f"{urn_prefix}{part_name}")
-                if security_functions:
-                    for element in re.split(r'[\s,]+', security_functions):
+                if reference_controls:
+                    for element in re.split(r'[\s,]+', reference_controls):
                         parts = re.split(r':', element)
                         prefix = parts.pop(0)
                         part_name = ':'.join(parts)
-                        urn_prefix = library_vars_dict_reverse['security_function_base_urn'][prefix]
+                        urn_prefix = library_vars_dict_reverse['reference_control_base_urn'][prefix]
                         function_urns.append(f"{urn_prefix}{part_name}")
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:
-                    req_node["security_functions"] = function_urns
+                    req_node["reference_controls"] = function_urns
                 requirement_nodes.append(req_node)
             else:
                 pass
                 #print("empty row")
-    elif library_vars_dict['tab'][title] == 'security_functions':
-        print("...processing security functions")
+    elif library_vars_dict['tab'][title] == 'reference_controls':
+        print("...processing reference controls")
         current_function = {}
         is_header = True
-        security_functions_base_urn = library_vars['security_function_base_urn']
+        reference_controls_base_urn = library_vars['reference_control_base_urn']
         for row in tab:
             if is_header:
                 header = read_header(row)
@@ -225,7 +229,7 @@ for tab in dataframe:
                 annotation = row[header['annotation']].value if 'annotation' in header else None
                 ref_id_urn = ref_id.lower().replace(' ', '-')
                 current_function = {}
-                current_function['urn'] = f"{security_functions_base_urn}:{ref_id_urn}"
+                current_function['urn'] = f"{reference_controls_base_urn}:{ref_id_urn}"
                 current_function['ref_id'] = ref_id
                 if name: 
                     current_function['name'] = name
@@ -235,7 +239,7 @@ for tab in dataframe:
                     current_function['description'] = description
                 if annotation:
                     current_function['annotation'] = annotation
-                security_functions.append(current_function)
+                reference_controls.append(current_function)
     elif library_vars_dict['tab'][title] == 'threats':
         print("...processing threats")
         current_threat = {}
@@ -267,11 +271,11 @@ for tab in dataframe:
 
 #pprint(requirement_groups)
 #pprint(requirements)
-##pprint(security_functions)
+##pprint(reference_controls)
 ##pprint(threats)
 
 has_framework = 'requirements' in [library_vars_dict['tab'][x] for x in library_vars_dict['tab']]
-has_security_functions = 'security_functions' in [library_vars_dict['tab'][x] for x in library_vars_dict['tab']]
+has_reference_controls = 'reference_controls' in [library_vars_dict['tab'][x] for x in library_vars_dict['tab']]
 has_threats = 'threats' in [library_vars_dict['tab'][x] for x in library_vars_dict['tab']]
 
 library = {
@@ -301,8 +305,8 @@ if has_framework:
                     'requirement_nodes': requirement_nodes
                 }
 
-if has_security_functions:
-    library['objects']['security_functions'] = security_functions
+if has_reference_controls:
+    library['objects']['reference_controls'] = reference_controls
 
 if has_threats:
     library['objects']['threats'] = threats

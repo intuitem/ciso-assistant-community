@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { buildRiskMatrix } from './utils';
 
+	import * as m from '../../../paraglide/messages';
+	import type { ComponentType } from 'svelte';
+
 	export let riskMatrix;
 	export let wrapperClass: string | undefined = '';
 
@@ -11,6 +14,7 @@
 
 	const displayedRiskMatrix = buildRiskMatrix(grid, risk);
 	export let data: Array<any> | undefined = undefined;
+	export let dataItemComponent: ComponentType | undefined = undefined;
 	// reverse data array to display it in the right order
 	let displayedData: typeof data;
 	if (data) {
@@ -23,7 +27,7 @@
 </script>
 
 <div class="flex flex-row items-center">
-	<div class="flex font-semibold text-xl -rotate-90">Probability</div>
+	<div class="flex font-semibold text-xl -rotate-90">{m.probability()}</div>
 	<div
 		class="{wrapperClass} grid gap-1 w-full"
 		style="grid-template-columns: repeat({displayedRiskMatrix.length + 1}, minmax(0, 1fr));"
@@ -45,14 +49,18 @@
 			</div>
 			{#each row as cell, j}
 				<div
-					class="flex items-center justify-center h-20 [&>*]:pointer-events-none"
+					class="flex flex-wrap items-center space-x-1 justify-center h-20 [&>*]:pointer-events-none whitespace-normal overflow-y-scroll hide-scrollbar"
 					style="background-color: {cell.level.hexcolor};"
 					data-testid="cell"
 				>
 					{#if displayedData}
-						<slot name="data">
+						{#if dataItemComponent}
+							{#each displayedData[i][j] as item}
+								<svelte:component this={dataItemComponent} data={item} />
+							{/each}
+						{:else}
 							<div class="mx-auto text-center">{displayedData[i][j]}</div>
-						</slot>
+						{/if}
 					{/if}
 				</div>
 			{/each}
@@ -69,10 +77,10 @@
 		{/each}
 	</div>
 </div>
-<div class="flex font-semibold text-xl items-center justify-center p-2 pl-60">Impact</div>
+<div class="flex font-semibold text-xl items-center justify-center p-2 pl-60">{m.impact()}</div>
 {#if showRisks}
 	<div class="w-full flex flex-col justify-start">
-		<h3 class="flex font-semibold p-2 m-2 text-md">Risk Levels</h3>
+		<h3 class="flex font-semibold p-2 m-2 text-md">{m.riskLevels()}</h3>
 		<div class="flex justify-start mx-2">
 			<table class="w-3/4 border-separate">
 				{#each parsedRiskMatrix.risk as risk}

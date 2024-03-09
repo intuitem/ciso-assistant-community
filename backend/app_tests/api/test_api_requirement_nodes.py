@@ -3,10 +3,11 @@ from rest_framework.test import APIClient
 from core.models import RequirementNode, Framework
 from iam.models import Folder
 
-from test_api import EndpointTestsQueries, EndpointTestsUtils
+from test_vars import GROUPS_PERMISSIONS
+from test_utils import EndpointTestsQueries, EndpointTestsUtils
 
 # Generic requirement data for tests
-REQUIREMENT_NODE_NAME = "Test Requiremen Node"
+REQUIREMENT_NODE_NAME = "Test Requirement Node"
 REQUIREMENT_NODE_DESCRIPTION = "Test Description"
 REQUIREMENT_NODE_URN = "urn:test:req_node.t:1"
 REQUIREMENT_NODE_PARENT_URN = "urn:test:req_node.t"
@@ -42,12 +43,12 @@ class TestRequirementNodesUnauthenticated:
 class TestRequirementNodesAuthenticated:
     """Perform tests on RequirementNodes API endpoint with authentication"""
 
-    def test_get_requirement_nodes(self, authenticated_client):
+    def test_get_requirement_nodes(self, test):
         """test to get requirement nodes from the API with authentication"""
 
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
+        EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         EndpointTestsQueries.Auth.get_object(
-            authenticated_client,
+            test.client,
             "Requirement nodes",
             RequirementNode,
             {
@@ -58,21 +59,24 @@ class TestRequirementNodesAuthenticated:
                 "order_id": REQUIREMENT_NODE_ORDER_ID,
                 "level": REQUIREMENT_NODE_LEVEL,
                 "assessable": True,
-                "folder": Folder.get_root_folder(),
+                "folder": test.folder,
                 "framework": Framework.objects.all()[0],
             },
             {
-                "folder": str(Folder.get_root_folder().id),
+                "folder": str(test.folder.id),
                 "framework": str(Framework.objects.all()[0].id),
             },
             base_count=-1,
+            user_group=test.user_group,
         )
 
-    def test_import_requirement_nodes(self, authenticated_client):
+    def test_import_requirement_nodes(self, test):
         """test that the requirements values imported from a library are correct"""
-        EndpointTestsQueries.Auth.import_object(authenticated_client, "Framework")
+        EndpointTestsQueries.Auth.import_object(
+            test.client, "Framework", user_group=test.user_group
+        )
         EndpointTestsQueries.Auth.compare_results(
-            authenticated_client,
+            test.client,
             "Requirement nodes",
             EndpointTestsUtils.get_endpoint_url("Requirement nodes"),
             EndpointTestsUtils.get_object_urn("Framework"),

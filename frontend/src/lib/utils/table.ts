@@ -26,7 +26,7 @@ export const listViewFields = {
 			'name',
 			'threats',
 			'riskAssessment',
-			'securityMeasures',
+			'appliedControls',
 			'currentLevel',
 			'residualLevel'
 		],
@@ -34,7 +34,7 @@ export const listViewFields = {
 			'name',
 			'threats',
 			'risk_assessment',
-			'security_measures',
+			'applied_controls',
 			'current_level',
 			'residual_level'
 		]
@@ -43,15 +43,15 @@ export const listViewFields = {
 		head: ['name', 'description', 'riskScenarios'],
 		body: ['name', 'description', 'risk_scenarios']
 	},
-	'security-measures': {
-		head: ['name', 'description', 'category', 'eta', 'domain', 'securityFunction'],
-		body: ['name', 'description', 'category', 'eta', 'folder', 'security_function']
+	'applied-controls': {
+		head: ['name', 'description', 'category', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'category', 'eta', 'folder', 'reference_control']
 	},
 	policies: {
-		head: ['Name', 'Description', 'ETA', 'Domain', 'Security function'],
-		body: ['name', 'description', 'eta', 'folder', 'security_function']
+		head: ['name', 'description', 'eta', 'domain', 'referenceControl'],
+		body: ['name', 'description', 'eta', 'folder', 'reference_control']
 	},
-	'security-functions': {
+	'reference-controls': {
 		head: ['ref', 'name', 'description', 'category', 'provider', 'domain'],
 		body: ['ref_id', 'name', 'description', 'category', 'provider', 'folder'],
 		meta: ['id', 'urn']
@@ -66,7 +66,7 @@ export const listViewFields = {
 	},
 	'user-groups': {
 		head: ['name'],
-		body: ['name'],
+		body: ['localization_dict'],
 		meta: ['id', 'builtin']
 	},
 	roles: {

@@ -18,24 +18,19 @@ export const load = (async ({ fetch, params }) => {
 	const requirementAssessment = await res.json();
 
 	const compliance_assessment = await fetch(
-		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment}`
+		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/`
 	).then((res) => res.json());
 	const requirement = await fetch(
-		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}`
+		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
 	).then((res) => res.json());
 	const parentRequirementNodeEndpoint = `${BASE_API_URL}/requirement-nodes/?urn=${requirement.parent_urn}`;
-	let parent = await fetch(parentRequirementNodeEndpoint)
+	const parent = await fetch(parentRequirementNodeEndpoint)
 		.then((res) => res.json())
 		.then((res) => res.results[0]);
-	if (!parent) {
-		parent = await fetch(parentRequirementNodeEndpoint)
-			.then((res) => res.json())
-			.then((res) => res.results[0]);
-	}
 
 	const model = getModelInfo(URLModel);
 
-	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object`;
+	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 	const schema = modelSchema(URLModel);
 	const form = await superValidate(object, schema, { errors: true });
@@ -78,21 +73,21 @@ export const load = (async ({ fetch, params }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const measureCreateSchema = modelSchema('security-measures');
+	const measureCreateSchema = modelSchema('applied-controls');
 	const initialData = {
-		folder: requirementAssessment.folder
+		folder: requirementAssessment.folder.id
 	};
 
 	const measureCreateForm = await superValidate(initialData, measureCreateSchema, {
 		errors: false
 	});
 
-	const measureModel = getModelInfo('security-measures');
+	const measureModel = getModelInfo('applied-controls');
 	const measureSelectOptions: Record<string, any> = {};
 
 	if (measureModel.selectFields) {
 		for (const selectField of measureModel.selectFields) {
-			const url = `${BASE_API_URL}/security-measures/${selectField.field}/`;
+			const url = `${BASE_API_URL}/applied-controls/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
 				measureSelectOptions[selectField.field] = await response.json().then((data) =>
@@ -111,7 +106,7 @@ export const load = (async ({ fetch, params }) => {
 
 	const tables: Record<string, any> = {};
 
-	for (const key of ['security-measures', 'evidences'] as urlModel[]) {
+	for (const key of ['applied-controls', 'evidences'] as urlModel[]) {
 		const keyEndpoint = `${BASE_API_URL}/${key}/?requirement_assessments=${params.id}`;
 		const response = await fetch(keyEndpoint);
 		if (response.ok) {
@@ -134,6 +129,10 @@ export const load = (async ({ fetch, params }) => {
 
 	if (measureModel.foreignKeyFields) {
 		for (const keyField of measureModel.foreignKeyFields) {
+			if (keyField.field === 'folder') {
+				measureForeignKeys[keyField.field] = [requirementAssessment.folder];
+				continue;
+			}
 			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
 			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
 			const response = await fetch(url);
@@ -151,7 +150,7 @@ export const load = (async ({ fetch, params }) => {
 	const evidenceCreateSchema = modelSchema('evidences');
 	const evidenceInitialData = {
 		requirement_assessments: [params.id],
-		folder: requirementAssessment.folder
+		folder: requirementAssessment.folder.id
 	};
 	const evidenceCreateForm = await superValidate(evidenceInitialData, evidenceCreateSchema, {
 		errors: false
@@ -182,14 +181,19 @@ export const load = (async ({ fetch, params }) => {
 
 	if (evidenceModel.foreignKeyFields) {
 		for (const keyField of evidenceModel.foreignKeyFields) {
-			const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
-			const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
-			const response = await fetch(url);
-			if (response.ok) {
-				evidenceForeignKeys[keyField.field] = await response.json().then((data) => data.results);
-			} else {
-				console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			if (keyField.field === 'folder') {
+				evidenceForeignKeys[keyField.field] = [requirementAssessment.folder];
+				continue;
 			}
+			evidenceForeignKeys[keyField.field] = [];
+			// const queryParams = keyField.urlParams ? `?${keyField.urlParams}` : '';
+			// const url = `${BASE_API_URL}/${keyField.urlModel}/${queryParams}`;
+			// const response = await fetch(url);
+			// if (response.ok) {
+			// 	evidenceForeignKeys[keyField.field] = await response.json().then((data) => data.results);
+			// } else {
+			// 	console.error(`Failed to fetch data for ${keyField.field}: ${response.statusText}`);
+			// }
 		}
 	}
 
@@ -247,8 +251,8 @@ export const actions: Actions = {
 				`/compliance-assessments/${object.compliance_assessment}/`
 		);
 	},
-	createSecurityMeasure: async (event) => {
-		const URLModel = 'security-measures';
+	createAppliedControl: async (event) => {
+		const URLModel = 'applied-controls';
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
 		const form = await superValidate(event.request, schema);
@@ -281,11 +285,11 @@ export const actions: Actions = {
 			.fetch(`${requirementAssessmentEndpoint}object`)
 			.then((res) => res.json());
 
-		const measures = [...requirementAssessment.security_measures, measure.id];
+		const measures = [...requirementAssessment.applied_controls, measure.id];
 
 		const patchRequestInitOptions: RequestInit = {
 			method: 'PATCH',
-			body: JSON.stringify({ security_measures: measures })
+			body: JSON.stringify({ applied_controls: measures })
 		};
 
 		const patchRes = await event.fetch(requirementAssessmentEndpoint, patchRequestInitOptions);
@@ -313,6 +317,8 @@ export const actions: Actions = {
 			console.error(form.errors);
 			return fail(400, { form: form });
 		}
+
+		form.data.requirement_assessments = [event.params.id];
 
 		const requestInitOptions: RequestInit = {
 			method: 'POST',

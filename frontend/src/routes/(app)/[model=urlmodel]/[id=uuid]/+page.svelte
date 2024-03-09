@@ -15,9 +15,10 @@
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
-	import { localItems, toCamelCase, getDeterminant } from '$lib/utils/locales.js';
+	import { localItems, toCamelCase, capitalizeFirstLetter } from '$lib/utils/locales.js';
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
+	import { ISO_8601_REGEX } from '$lib/utils/constants';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -62,7 +63,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${model.info.verboseName.toLowerCase()}`
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(model.info.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -82,8 +83,8 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: 'Confirm',
-			body: `Are you sure? This action will permanently affect the following object: ${name}?`
+			title: m.confirmModalTitle(),
+			body: `${m.confirmModalMessage()}: ${name}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -109,7 +110,7 @@
 		return (
 			canEditObject &&
 			!['Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn
+			!data.data.urn && !data.data.builtin
 		);
 	};
 	$: Object.entries(data.relatedModels).forEach(([key, value]) => {
@@ -123,8 +124,7 @@
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container-token shadow px-6 py-2 mb-2 justify-between"
 		>
 			<div class="text-yellow-900">
-				This risk acceptance is awaiting processing. Remember to <strong>review</strong> it before accepting
-				or rejecting it, you will not be able to go back.
+				{m.riskAcceptanceReviewMessage()}
 			</div>
 			<div class="flex space-x-2">
 				<button
@@ -134,7 +134,7 @@
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/accept')}
 					class="btn variant-filled-success"
 				>
-					<i class="fas fa-check mr-2" /> Accept</button
+					<i class="fas fa-check mr-2" /> {m.validate()}</button
 				>
 				<button
 					on:click={(_) => {
@@ -143,7 +143,7 @@
 					on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/reject')}
 					class="btn variant-filled-error"
 				>
-					<i class="fas fa-xmark mr-2" /> Reject</button
+					<i class="fas fa-xmark mr-2" /> {m.reject()}</button
 				>
 			</div>
 		</div>
@@ -152,9 +152,7 @@
 			class="flex flex-row items-center space-x-4 bg-green-100 rounded-container-token shadow-lg px-6 py-2 mt-2 justify-between"
 		>
 			<div class="text-green-900">
-				This risk acceptance is currently accepted. It can be revoked at any time, but this will be <strong
-					>irrevocable</strong
-				>. You will need to duplicate it with a different verison if necessary.
+				{m.riskAcceptanceValidatedMessage()}
 			</div>
 			{#if $page.data.user.id === data.data.approver.id}
 				<div class="ml-auto whitespace-nowrap">
@@ -165,7 +163,7 @@
 						on:keydown={(_) => modalConfirm(data.data.id, data.data.name, '?/revoke')}
 						class="btn variant-filled-error"
 					>
-						<i class="fas fa-xmark mr-2" /> Revoke</button
+						<i class="fas fa-xmark mr-2" /> {m.revoke()}</button
 					>
 				</div>
 			{/if}
@@ -173,19 +171,27 @@
 	{/if}
 	<div class="card px-6 py-4 bg-white flex flex-row space-y-2 justify-between shadow-lg">
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
-			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published'].includes(key)) as [key, value]}
+			{#each Object.entries(data.data).filter(([key, _]) => !['id', 'is_published', 'localization_dict'].includes(key)) as [key, value]}
 				<div class="flex flex-col">
-					<div class="text-sm font-medium text-gray-800" data-testid="{key.replace('_', '-')}-field-title">
-						{localItems(languageTag())[toCamelCase(key.toLowerCase())]}
+					<div
+						class="text-sm font-medium text-gray-800"
+						data-testid="{key.replace('_', '-')}-field-title"
+					>
+						{localItems(languageTag())[toCamelCase(key)]}
 					</div>
 					<ul class="text-sm">
-						<li class="text-gray-600 list-none" data-testid={!(value instanceof Array) ? key.replace('_', '-') + "-field-value" : null}>
+						<li
+							class="text-gray-600 list-none"
+							data-testid={!(value instanceof Array)
+								? key.replace('_', '-') + '-field-value'
+								: null}
+						>
 							{#if value}
 								{#if Array.isArray(value)}
 									{#if Object.keys(value).length > 0}
 										<ul>
 											{#each value as val}
-												<li data-testid={key.replace('_', '-') + "-field-value"}>
+												<li data-testid={key.replace('_', '-') + '-field-value'}>
 													{#if val.str && val.id}
 														{@const itemHref = `/${
 															URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
@@ -211,8 +217,14 @@
 									<a href={itemHref} class="anchor">{value.str}</a>
 								{:else if isURL(value)}
 									<a href={value} target="_blank" class="anchor">{value}</a>
+								{:else if ISO_8601_REGEX.test(value)}
+									{new Date(value).toLocaleString(languageTag())}
 								{:else}
-									{(value.str || value.name) ?? value}
+									{#if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+										{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+									{:else}
+										{(value.str || value.name) ?? value}
+									{/if}
 								{/if}
 							{:else}
 								--
@@ -226,7 +238,7 @@
 			<a
 				href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 				class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button"/>{m.edit()}</a
+				><i class="fa-solid fa-pen-to-square mr-2" data-testid="edit-button" />{m.edit()}</a
 			>
 		{/if}
 	</div>
@@ -248,16 +260,16 @@
 					{#if tabSet === index}
 						<div class="flex flex-row justify-between px-4 py-2">
 							<h4 class="font-semibold lowercase capitalize-first my-auto">
-								{#if model.info.localFrGender === 'f'}
-									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: 'e'})}
-								{:else}
-									{m.associatedObject({model: localItems(languageTag())[model.info.localNamePlural].toLowerCase(), e: ''})}
-								{/if}
+								{localItems(languageTag())[
+									'associated' + capitalizeFirstLetter(model.info.localNamePlural)
+								]}
 							</h4>
 							<button
 								class="btn variant-filled-primary self-end my-auto"
 								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />{m.addButton({determinant:getDeterminant(languageTag(), "undefined", model.info), model: localItems(languageTag())[model.info.localName].toLowerCase()})}</button
+								><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())[
+									'add' + capitalizeFirstLetter(model.info.localName)
+								]}</button
 							>
 						</div>
 						{#if model.table}

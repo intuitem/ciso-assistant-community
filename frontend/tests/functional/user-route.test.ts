@@ -6,21 +6,21 @@ const vars = TestContent.generateTestVars();
 test('user usual routine actions are working correctly', async ({
 	logedPage,
 	pages,
-	analyticsPage: overviewPage,
+	analyticsPage,
 	sideBar,
 	page
 }) => {
 	test.slow();
 
-	await test.step('proper redirection to the overview page after login', async () => {
-		await overviewPage.hasUrl();
-		await overviewPage.hasTitle();
+	await test.step('proper redirection to the analytics page after login', async () => {
+		await analyticsPage.hasUrl();
+		await analyticsPage.hasTitle();
 		setHttpResponsesListener(page);
 	});
 
 	await test.step('user can create a domain', async () => {
 		await sideBar.click('Organization', pages.foldersPage.url);
-		await expect(page).toHaveURL(pages.foldersPage.url);
+		await pages.foldersPage.hasUrl();
 		await pages.foldersPage.hasTitle();
 
 		await pages.foldersPage.createItem({
@@ -33,7 +33,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can create a project', async () => {
 		await sideBar.click('Organization', pages.projectsPage.url);
-		await expect(page).toHaveURL(pages.projectsPage.url);
+		await pages.projectsPage.hasUrl();
 		await pages.projectsPage.hasTitle();
 
 		await pages.projectsPage.createItem({
@@ -49,7 +49,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can create an asset', async () => {
 		await sideBar.click('Context', pages.assetsPage.url);
-		await expect(page).toHaveURL(pages.assetsPage.url);
+		await pages.assetsPage.hasUrl();
 		await pages.assetsPage.hasTitle();
 
 		await pages.assetsPage.createItem({
@@ -65,43 +65,43 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can import a framework', async () => {
 		await sideBar.click('Compliance', pages.frameworksPage.url);
-		await expect(page).toHaveURL(pages.frameworksPage.url);
+		await pages.frameworksPage.hasUrl();
 		await pages.frameworksPage.hasTitle();
 
 		await pages.frameworksPage.addButton.click();
-		await expect(page).toHaveURL(pages.librariesPage.url);
+		await pages.librariesPage.hasTitle();
 		await pages.librariesPage.hasTitle();
 
-		await pages.librariesPage.importLibrary(vars.framework.name, vars.framework.urn);
+		await pages.librariesPage.importLibrary(vars.framework.ref, vars.framework.urn);
 
 		await sideBar.click('Compliance', pages.frameworksPage.url);
-		await expect(page).toHaveURL(pages.frameworksPage.url);
+		await pages.frameworksPage.hasUrl();
 		await expect(page.getByRole('row', { name: vars.framework.name })).toBeVisible();
 	});
 
-	await test.step('user can create a security function', async () => {
-		await sideBar.click('Context', pages.securityFunctionsPage.url);
-		await expect(page).toHaveURL(pages.securityFunctionsPage.url);
-		await pages.securityFunctionsPage.hasTitle();
+	await test.step('user can create a reference control', async () => {
+		await sideBar.click('Context', pages.referenceControlsPage.url);
+		await pages.referenceControlsPage.hasUrl();
+		await pages.referenceControlsPage.hasTitle();
 
-		await pages.securityFunctionsPage.createItem({
-			name: vars.securityFunctionName,
+		await pages.referenceControlsPage.createItem({
+			name: vars.referenceControlName,
 			description: vars.description,
 			category: 'Physical',
 			provider: 'Test provider',
 			folder: vars.folderName
 		});
 
-		//TODO assert that the security function data are displayed in the table
+		//TODO assert that the reference control data are displayed in the table
 	});
 
-	await test.step('user can create a security measure', async () => {
-		await sideBar.click('Context', pages.securityMeasuresPage.url);
-		await expect(page).toHaveURL(pages.securityMeasuresPage.url);
-		await pages.securityMeasuresPage.hasTitle();
+	await test.step('user can create an applied control', async () => {
+		await sideBar.click('Context', pages.appliedControlsPage.url);
+		await pages.appliedControlsPage.hasUrl();
+		await pages.appliedControlsPage.hasTitle();
 
-		await pages.securityMeasuresPage.createItem({
-			name: vars.securityMeasureName,
+		await pages.appliedControlsPage.createItem({
+			name: vars.appliedControlName,
 			description: vars.description,
 			category: 'Technical',
 			status: 'Planned',
@@ -109,15 +109,15 @@ test('user usual routine actions are working correctly', async ({
 			link: 'https://intuitem.com/',
 			effort: 'Large',
 			folder: vars.folderName,
-			security_function: vars.securityFunctionName
+			reference_control: vars.referenceControlName
 		});
 
-		//TODO assert that the security measure data are displayed in the table
+		//TODO assert that the applied control data are displayed in the table
 	});
 
 	await test.step('user can create a compliance assessment', async () => {
 		await sideBar.click('Compliance', pages.complianceAssessmentsPage.url);
-		await expect(page).toHaveURL(pages.complianceAssessmentsPage.url);
+		await pages.complianceAssessmentsPage.hasUrl();
 		await pages.complianceAssessmentsPage.hasTitle();
 
 		await pages.complianceAssessmentsPage.createItem({
@@ -135,7 +135,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can create an evidence', async () => {
 		await sideBar.click('Compliance', pages.evidencesPage.url);
-		await expect(page).toHaveURL(pages.evidencesPage.url);
+		await pages.evidencesPage.hasUrl();
 		await pages.evidencesPage.hasTitle();
 
 		await pages.evidencesPage.createItem({
@@ -155,23 +155,23 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can import a risk matrix', async () => {
 		await sideBar.click('Governance', pages.riskMatricesPage.url);
-		await expect(page).toHaveURL(pages.riskMatricesPage.url);
+		await pages.riskMatricesPage.hasUrl();
 		await pages.riskMatricesPage.hasTitle();
 
 		await pages.riskMatricesPage.addButton.click();
-		await expect(page).toHaveURL(pages.librariesPage.url);
+		await pages.librariesPage.hasUrl();
 		await pages.librariesPage.hasTitle();
 
 		await pages.librariesPage.importLibrary(vars.matrix.name, vars.matrix.urn);
 
 		await sideBar.click('Governance', pages.riskMatricesPage.url);
-		await expect(page).toHaveURL(pages.riskMatricesPage.url);
+		await pages.riskMatricesPage.hasUrl();
 		await expect(page.getByRole('row', { name: vars.matrix.displayName })).toBeVisible();
 	});
 
 	await test.step('user can create a risk assessment', async () => {
 		await sideBar.click('Risk', pages.riskAssessmentsPage.url);
-		await expect(page).toHaveURL(pages.riskAssessmentsPage.url);
+		await pages.riskAssessmentsPage.hasUrl();
 		await pages.riskAssessmentsPage.hasTitle();
 
 		await pages.riskAssessmentsPage.createItem({
@@ -189,7 +189,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can create a threat', async () => {
 		await sideBar.click('Context', pages.threatsPage.url);
-		await expect(page).toHaveURL(pages.threatsPage.url);
+		await pages.threatsPage.hasUrl();
 		await pages.threatsPage.hasTitle();
 
 		await pages.threatsPage.createItem({
@@ -204,7 +204,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can create a risk scenario', async () => {
 		await sideBar.click('Risk', pages.riskScenariosPage.url);
-		await expect(page).toHaveURL(pages.riskScenariosPage.url);
+		await pages.riskScenariosPage.hasUrl();
 		await pages.riskScenariosPage.hasTitle();
 
 		await pages.riskScenariosPage.createItem({
@@ -219,7 +219,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can create a risk acceptance', async () => {
 		await sideBar.click('Risk', pages.riskAcceptancesPage.url);
-		await expect(page).toHaveURL(pages.riskAcceptancesPage.url);
+		await pages.riskAcceptancesPage.hasUrl();
 		await pages.riskAcceptancesPage.hasTitle();
 
 		await pages.riskAcceptancesPage.createItem({
@@ -236,7 +236,7 @@ test('user usual routine actions are working correctly', async ({
 
 	await test.step('user can add another user', async () => {
 		await sideBar.click('Organization', pages.usersPage.url);
-		await expect(page).toHaveURL(pages.usersPage.url);
+		await pages.usersPage.hasUrl();
 		await pages.usersPage.hasTitle();
 
 		await pages.usersPage.createItem({
@@ -249,15 +249,12 @@ test('user usual routine actions are working correctly', async ({
 
 test.afterEach('cleanup', async ({ foldersPage, usersPage, page }) => {
 	await foldersPage.goto();
-	await page.waitForURL(foldersPage.url);
 	await foldersPage.deleteItemButton(vars.folderName).click();
 	await foldersPage.deleteModalConfirmButton.click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
 
 	await usersPage.goto();
-	await page.waitForURL(usersPage.url);
 	await usersPage.deleteItemButton(vars.user.email).click();
 	await usersPage.deleteModalConfirmButton.click();
 	await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
 });
-

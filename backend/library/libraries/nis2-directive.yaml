@@ -46,7 +46,7 @@ objects:
         relevant European and international standards, as well as the cost of implementation,
         the measures referred to in the first subparagraph shall ensure a level of
         security of network and information systems appropriate to the risks posed.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2
       assessable: true
@@ -57,7 +57,7 @@ objects:
         approach that aims to protect network and information systems and the physical
         environment of those systems from incidents, and shall include at least the
         following:'
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.MAIN
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.a
       assessable: true
@@ -65,7 +65,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
       ref_id: 21.2.a
       description: policies on risk analysis and information system security;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.RISK
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.b
       assessable: true
@@ -73,7 +73,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
       ref_id: 21.2.b
       description: incident handling;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.INCIDENT
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.c
       assessable: true
@@ -82,7 +82,7 @@ objects:
       ref_id: 21.2.c
       description: business continuity, such as backup management and disaster recovery,
         and crisis management;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.BCP
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.d
       assessable: true
@@ -92,7 +92,7 @@ objects:
       description: supply chain security, including security-related aspects concerning
         the relationships between each entity and its direct suppliers or service
         providers;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.SUPPLIER
       - urn:intuitem:risk:function:doc-pol:DOC.SUPPLIER_REGISTER
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.e
@@ -109,7 +109,7 @@ objects:
       ref_id: 21.2.f
       description: policies and procedures to assess the effectiveness of cybersecurity
         risk-management measures;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.AUDIT
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.g
       assessable: true
@@ -117,7 +117,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:nis2-directive:21.2
       ref_id: 21.2.g
       description: basic cyber hygiene practices and cybersecurity training;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.EDUC
       - urn:intuitem:risk:function:doc-pol:DOC.EDUC_REGISTER
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.h
@@ -127,7 +127,7 @@ objects:
       ref_id: 21.2.h
       description: policies and procedures regarding the use of cryptography and,
         where appropriate, encryption;
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:doc-pol:POL.CRYPTO
       - urn:intuitem:risk:function:mitre-attack:M1041
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.2.i
@@ -144,7 +144,7 @@ objects:
       description: the use of multi-factor authentication or continuous authentication
         solutions, secured voice, video and text communications and secured emergency
         communication systems within the entity, where appropriate.
-      security_functions:
+      reference_controls:
       - urn:intuitem:risk:function:mitre-attack:M1032
     - urn: urn:intuitem:risk:req_node:nis2-directive:21.3
       assessable: false

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
+	import * as m from '$paraglide/messages';
 
 	export let data: PageData;
 
@@ -10,7 +11,7 @@
 
 		types.forEach((type) => {
 			result[type] = Object.entries(item.objects).reduce((acc, [key, value]) => {
-				if (key !== 'object') {
+				if (key !== 'object') { // if key === 'quality_check'
 					acc = [...acc, ...value.quality_check[type]];
 				}
 				return acc;
@@ -47,7 +48,7 @@
 			</h1>
 			<TabGroup>
 				<Tab bind:group={project.tabSet} name="compliance_assessments_tab" value={0}
-					>Compliance assessments
+					>{m.complianceAssessments()}
 					{#if project.compliance_assessments.errors.length > 0}
 						<span class="badge variant-soft-error"
 							>{project.compliance_assessments.errors.length}</span
@@ -65,7 +66,7 @@
 					{/if}
 				</Tab>
 				<Tab bind:group={project.tabSet} name="risk_assessments_tab" value={1}
-					>Risk assessments
+					>{m.riskAssessments()}
 					{#if project.risk_assessments.errors.length > 0}
 						<span class="badge variant-soft-error">{project.risk_assessments.errors.length}</span>
 					{/if}
@@ -83,7 +84,7 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									{compliance_assessment.object.name}
+									<a href="/compliance-assessments/{compliance_assessment.object.id}" class="hover:underline text-blue-600">{compliance_assessment.object.name}</a>
 								</li>
 								{@const quality_check = compliance_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -91,7 +92,13 @@
 										<div class="space-y-2">
 											<div class="variant-soft-error rounded-token px-2 py-1">
 												<i class="fa-solid fa-bug mr-1" />
-												{quality_check.errors.length} <span class="font-bold">errors</span> found
+												{#if quality_check.errors.length === 1}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
+												{:else}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
@@ -104,7 +111,13 @@
 										<div class="space-y-2">
 											<div class="variant-soft-warning rounded-token px-2 py-1">
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
-												{quality_check.warnings.length} <span class="font-bold">warnings</span> found
+												{#if quality_check.warnings.length === 1}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: ''})}
+												{:else}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: 's'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
@@ -117,7 +130,13 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{quality_check.info.length} <span class="font-bold">infos</span> found
+												{#if quality_check.info.length === 1}
+													<span class="font-bold">{quality_check.info.length}</span>
+													{m.infosFound({ s: ''})}
+												{:else}
+													<span class="font-bold">{quality_check.info.length}</span>
+													{m.infosFound({ s: 's'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}
@@ -137,7 +156,7 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									{risk_assessment.object.name}
+									<a href="/risk-assessments/{risk_assessment.object.id}" class="hover:underline text-blue-600">{risk_assessment.object.name}</a>
 								</li>
 								{@const quality_check = risk_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -145,7 +164,13 @@
 										<div class="space-y-2">
 											<div class="variant-soft-error rounded-token px-2 py-1">
 												<i class="fa-solid fa-bug mr-1" />
-												{quality_check.errors.length} <span class="font-bold">errors</span> found
+												{#if quality_check.errors.length === 1}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
+												{:else}
+													<span class="font-bold">{quality_check.errors.length}</span>
+													{m.errorsFound({ s: ''})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.errors as error}
@@ -158,7 +183,13 @@
 										<div class="space-y-2">
 											<div class="variant-soft-warning rounded-token px-2 py-1">
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
-												{quality_check.warnings.length} <span class="font-bold">warnings</span> found
+												{#if quality_check.warnings.length === 1}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: ''})}
+												{:else}
+													<span class="font-bold">{quality_check.warnings.length}</span>
+													{m.warningsFound({ s: 's'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.warnings as warning}
@@ -171,7 +202,13 @@
 										<div class="space-y-2">
 											<div class="variant-soft-secondary rounded-token px-2 py-1">
 												<i class="fa-solid fa-circle-info mr-1" />
-												{quality_check.info.length} <span class="font-bold">infos</span> found
+												{#if quality_check.info.length === 1}
+													<span class="font-bold">{quality_check.info.length}</span>
+													{m.infosFound({ s: ''})}
+												{:else}
+													<span class="font-bold">{quality_check.info.length}</span>
+													{m.infosFound({ s: 's'})}
+												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
 												{#each quality_check.info as info}

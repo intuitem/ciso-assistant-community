@@ -45,58 +45,6 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class UserGroup(models.Model):
-    """UserGroup objects contain users and can be used as principals in role assignments"""
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    folder = models.ForeignKey(
-        "Folder", verbose_name=_("Domain"), on_delete=models.CASCADE, default=None
-    )
-    name = models.CharField(_("name"), max_length=150, unique=False)
-    builtin = models.BooleanField(default=False)
-
-    class Meta:
-        """for Model"""
-
-        verbose_name = _("user group")
-        verbose_name_plural = _("user groups")
-
-    def __str__(self) -> str:
-        if self.builtin:
-            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return self.name
-
-    def get_name_display(self) -> str:
-        return self.name
-
-    @staticmethod
-    def get_user_groups(user):
-        # pragma pylint: disable=no-member
-        """get the list of user groups containing the user given in parameter"""
-        user_group_list = []
-        for user_group in UserGroup.objects.all():
-            if user in user_group.user_set.all():
-                user_group_list.append(user_group)
-        return user_group_list
-
-
-class Role(models.Model):
-    """A role is a list of permissions"""
-
-    permissions = models.ManyToManyField(
-        Permission,
-        verbose_name=_("permissions"),
-        blank=True,
-    )
-    name = models.CharField(_("name"), max_length=150, unique=False)
-    builtin = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        if self.builtin:
-            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
-        return self.name
-
-
 def _get_root_folder():
     """helper function outside of class to facilitate serialization
     to be used only in Folder class"""
@@ -106,7 +54,7 @@ def _get_root_folder():
         return None
 
 
-class Folder(AbstractBaseModel, NameDescriptionMixin):
+class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
     Folders are organized in a tree structure, with a single root folder
     Folders are the base perimeter for role assignments
@@ -166,37 +114,57 @@ class Folder(AbstractBaseModel, NameDescriptionMixin):
         )
 
     @staticmethod
-    def get_folder(obj: Any) -> Self:
-        """Return the folder of an object"""
-        # todo: add a folder attribute to all objects to avoid introspection
-        if hasattr(obj, "folder"):
-            return obj.folder
-        if hasattr(obj, "parent_folder"):
-            return obj.parent_folder
-        if hasattr(obj, "project"):
-            return obj.project.folder
-        if hasattr(obj, "risk_assessment"):
-            return obj.risk_assessment.project.folder
-        if hasattr(obj, "risk_scenario"):
-            return obj.risk_scenario.risk_assessment.project.folder
+    def _navigate_structure(start, path):
+        """
+        Navigate through a mixed structure of objects and dictionaries.
+
+        :param start: The initial object or dictionary from which to start navigating.
+        :param path: A list of strings representing the path to navigate, with each element
+                     being an attribute name (for objects) or a key (for dictionaries).
+        :return: The value found at the end of the path, or None if any part of the path is invalid.
+        """
+        current = start
+        for p in path:
+            if isinstance(current, dict):
+                # For dictionaries
+                current = current.get(p, None)
+            else:
+                # For objects
+                try:
+                    current = getattr(current, p, None)
+                except AttributeError:
+                    # If the attribute doesn't exist and current is not a dictionary
+                    return None
+            if current is None:
+                return None
+        return current
+
+    @staticmethod
+    def get_folder(obj: Any):
+        """
+        Return the folder of an object using navigation through mixed structures.
+        """
+        # Define paths to try in order. Each path is a list representing the traversal path.
+        # NOTE: There are probably better ways to represent these, but it works.
+        paths = [
+            ["folder"],
+            ["parent_folder"],
+            ["project", "folder"],
+            ["risk_assessment", "project", "folder"],
+            ["risk_scenario", "risk_assessment", "project", "folder"],
+        ]
+
+        # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
+        for path in paths:
+            folder = Folder._navigate_structure(obj, path)
+            if folder is not None:
+                return folder
+
+        # If no folder is found after trying all paths, handle this case (e.g., return None or raise an error).
+        return None
 
 
 class FolderMixin(models.Model):
-    """
-    Add foreign key to Folder
-    """
-
-    folder = models.ForeignKey(
-        Folder,
-        on_delete=models.CASCADE,
-        related_name="%(class)s_folder",
-    )
-
-    class Meta:
-        abstract = True
-
-
-class RootFolderMixin(FolderMixin):
     """
     Add foreign key to Folder, defaults to root folder
     """
@@ -210,6 +178,42 @@ class RootFolderMixin(FolderMixin):
 
     class Meta:
         abstract = True
+
+
+class UserGroup(NameDescriptionMixin, FolderMixin):
+    """UserGroup objects contain users and can be used as principals in role assignments"""
+
+    builtin = models.BooleanField(default=False)
+
+    class Meta:
+        """for Model"""
+
+        verbose_name = _("user group")
+        verbose_name_plural = _("user groups")
+
+    def __str__(self) -> str:
+        if self.builtin:
+            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
+        return self.name
+
+    def get_name_display(self) -> str:
+        return self.name
+    
+    def get_localization_dict(self) -> dict:
+        return {
+            "folder": self.folder.name,
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+        }
+
+    @staticmethod
+    def get_user_groups(user):
+        # pragma pylint: disable=no-member
+        """get the list of user groups containing the user given in parameter"""
+        user_group_list = []
+        for user_group in UserGroup.objects.all():
+            if user in user_group.user_set.all():
+                user_group_list.append(user_group)
+        return user_group_list
 
 
 class UserManager(BaseUserManager):
@@ -228,6 +232,7 @@ class UserManager(BaseUserManager):
             last_name=extra_fields.get("last_name", ""),
             is_superuser=extra_fields.get("is_superuser", False),
             is_active=extra_fields.get("is_active", True),
+            folder=_get_root_folder(),
         )
         user.user_groups.set(extra_fields.get("user_groups", []))
         user.password = make_password(password if password else str(uuid.uuid4()))
@@ -258,53 +263,47 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        extra_fields.setdefault("mailing", not(password) and (EMAIL_HOST or EMAIL_HOST_RESCUE))
+        extra_fields.setdefault(
+            "mailing", not (password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)
+        )
         superuser = self._create_user(email, password, **extra_fields)
-        # when possible, add superuser to admin group
-        try:
-            UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
-        except ObjectDoesNotExist:
-            print("cannot add superuser to admin group - will be done on next startup")
+        UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     """a user is a principal corresponding to a human"""
 
-    try:
-        id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-        last_name = models.CharField(_("last name"), max_length=150, blank=True)
-        first_name = models.CharField(_("first name"), max_length=150, blank=True)
-        email = models.CharField(max_length=100, unique=True)
-        first_login = models.BooleanField(default=True)
-        is_active = models.BooleanField(
-            _("active"),
-            default=True,
-            help_text=_(
-                "Designates whether this user should be treated as active. "
-                "Unselect this instead of deleting accounts."
-            ),
-        )
-        date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
-        is_superuser = models.BooleanField(
-            _("superuser status"),
-            default=False,
-            help_text=_(
-                "Designates that this user has all permissions without explicitly assigning them."
-            ),
-        )
-        user_groups = models.ManyToManyField(
-            UserGroup,
-            verbose_name=_("user groups"),
-            blank=True,
-            help_text=_(
-                "The user groups this user belongs to. A user will get all permissions "
-                "granted to each of their user groups."
-            ),
-        )
-        objects = UserManager()
-    except:
-        logger.debug("Exception kludge")
+    last_name = models.CharField(_("last name"), max_length=150, blank=True)
+    first_name = models.CharField(_("first name"), max_length=150, blank=True)
+    email = models.CharField(max_length=100, unique=True)
+    first_login = models.BooleanField(default=True)
+    is_active = models.BooleanField(
+        _("active"),
+        default=True,
+        help_text=_(
+            "Designates whether this user should be treated as active. "
+            "Unselect this instead of deleting accounts."
+        ),
+    )
+    date_joined = models.DateTimeField(_("date joined"), default=timezone.now)
+    is_superuser = models.BooleanField(
+        _("superuser status"),
+        default=False,
+        help_text=_(
+            "Designates that this user has all permissions without explicitly assigning them."
+        ),
+    )
+    user_groups = models.ManyToManyField(
+        UserGroup,
+        verbose_name=_("user groups"),
+        blank=True,
+        help_text=_(
+            "The user groups this user belongs to. A user will get all permissions "
+            "granted to each of their user groups."
+        ),
+    )
+    objects = UserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
     # and is required by Django to be set to a non-empty value.
@@ -428,7 +427,11 @@ class User(AbstractBaseUser):
 
     @property
     def has_backup_permission(self) -> bool:
-        return RoleAssignment.has_permission(self, "backup")
+        return RoleAssignment.is_access_allowed(
+            user=self,
+            perm=Permission.objects.get(codename="backup"),
+            folder=Folder.get_root_folder(),
+        )
 
     @property
     def edit_url(self) -> str:
@@ -448,10 +451,25 @@ class User(AbstractBaseUser):
         self.email = username
 
 
-class RoleAssignment(models.Model):
+class Role(NameDescriptionMixin, FolderMixin):
+    """A role is a list of permissions"""
+
+    permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=_("permissions"),
+        blank=True,
+    )
+    builtin = models.BooleanField(default=False)
+
+    def __str__(self) -> str:
+        if self.builtin:
+            return f"{BUILTIN_ROLE_CODENAMES.get(self.name)}"
+        return self.name
+
+
+class RoleAssignment(NameDescriptionMixin, FolderMixin):
     """fundamental class for CISO Assistant RBAC model, similar to Azure IAM model"""
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     perimeter_folders = models.ManyToManyField(
         "Folder", verbose_name=_("Domain"), related_name="perimeter_folders"
     )
@@ -462,9 +480,6 @@ class RoleAssignment(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name=_("Role"))
     is_recursive = models.BooleanField(_("sub folders are visible"), default=False)
     builtin = models.BooleanField(default=False)
-    folder = models.ForeignKey(
-        Folder, on_delete=models.CASCADE, verbose_name=_("Folder")
-    )
 
     def __str__(self) -> str:
         # pragma pylint: disable=no-member
@@ -593,9 +608,7 @@ class RoleAssignment(models.Model):
             for my_folder in folders_with_local_view:
                 target_folders = []
                 my_folder2 = my_folder
-                while my_folder2 and not getattr(
-                    my_folder2, f"block_published_{class_name}", False
-                ):
+                while my_folder2:
                     if my_folder2 != my_folder:
                         target_folders.append(my_folder2)
                     my_folder2 = my_folder2.parent_folder
@@ -648,15 +661,6 @@ class RoleAssignment(models.Model):
                 permissions.update(permission_dict)
 
         return permissions
-
-    @staticmethod
-    def has_permission(user: AbstractBaseUser | AnonymousUser, codename: str):
-        """Determines if a user has a specific permission. To be used cautiously with proper commenting"""
-        for ra in RoleAssignment.get_role_assignments(user):
-            for perm in ra.role.permissions.all():
-                if perm.codename == codename:
-                    return True
-        return False
 
     @staticmethod
     def has_role(user: AbstractBaseUser | AnonymousUser, role: Role):

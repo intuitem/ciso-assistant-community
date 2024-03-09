@@ -12,7 +12,7 @@ export const navData = {
 		// 	]
 		// },
 		{
-			name: "overview",
+			name: 'overview',
 			items: [
 				{
 					name: 'analytics',
@@ -21,7 +21,7 @@ export const navData = {
 					permissions: [
 						'view_project',
 						'view_riskscenario',
-						'view_securityfunction',
+						'view_referencecontrol',
 						'view_assessment',
 						'view_riskassessment'
 					]
@@ -30,7 +30,12 @@ export const navData = {
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
-					permissions: ['view_event']
+					permissions: [
+						'view_appliedcontrol',
+						'view_riskacceptance',
+						'view_riskassessment',
+						'view_complianceassessment'
+					]
 				}
 			]
 		},
@@ -43,14 +48,14 @@ export const navData = {
 					href: '/threats'
 				},
 				{
-					name: 'securityFunctions',
+					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
-					href: '/security-functions'
+					href: '/reference-controls'
 				},
 				{
-					name: 'securityMeasures',
+					name: 'appliedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
-					href: '/security-measures'
+					href: '/applied-controls'
 				},
 				{
 					name: 'assets',
@@ -65,7 +70,8 @@ export const navData = {
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-user',
-					href: '/policies'
+					href: '/policies',
+					permissions: ['view_appliedcontrol']
 				},
 				{
 					name: 'riskMatrices',
@@ -165,7 +171,7 @@ export const navData = {
 					name: 'libraries',
 					fa_icon: 'fa-solid fa-folder-plus',
 					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_securityfunction', 'add_framework']
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				},
 				{
 					name: 'backupRestore',

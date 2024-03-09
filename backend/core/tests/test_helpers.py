@@ -8,9 +8,6 @@ import pytest
 
 @pytest.fixture
 def risk_matrix_fixture():
-    Folder.objects.create(
-        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-    )
     import_library_view(
         get_library("urn:intuitem:risk:library:critical_risk_matrix_5x5")
     )
@@ -18,9 +15,6 @@ def risk_matrix_fixture():
 
 @pytest.mark.django_db
 def test_get_rating_options_no_matrix():
-    root_folder = Folder.objects.create(
-        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-    )
     user = User.objects.create(email="test@test.com", password="test")
     assert get_rating_options(user) == []
 
@@ -54,12 +48,12 @@ def test_get_rating_options_perm_to_view_matrix():
         codename__in=[
             "view_project",
             "view_riskassessment",
-            "view_securitymeasure",
+            "view_appliedcontrol",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_securityfunction",
+            "view_referencecontrol",
             "view_folder",
             "view_usergroup",
         ]
@@ -85,9 +79,6 @@ def test_get_rating_options_perm_to_view_matrix():
 
 @pytest.mark.django_db
 def test_get_rating_options_abbr_no_matrix():
-    root_folder = Folder.objects.create(
-        name="Global", content_type=Folder.ContentType.ROOT, builtin=True
-    )
     user = User.objects.create(email="test@test.com", password="test")
     assert get_rating_options_abbr(user) == []
 
@@ -121,12 +112,12 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
         codename__in=[
             "view_project",
             "view_riskassessment",
-            "view_securitymeasure",
+            "view_appliedcontrol",
             "view_riskscenario",
             "view_riskacceptance",
             "view_asset",
             "view_threat",
-            "view_securityfunction",
+            "view_referencecontrol",
             "view_folder",
             "view_usergroup",
         ]

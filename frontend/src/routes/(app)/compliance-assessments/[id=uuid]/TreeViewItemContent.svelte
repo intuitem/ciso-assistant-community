@@ -2,14 +2,14 @@
 	import { complianceColorMap } from './utils';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
-	import type { SecurityFunctionSchema, ThreatSchema } from '$lib/utils/schemas';
+	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 
 	export let name: string;
 	export let description: string;
 	export let ra_id: string | undefined = undefined;
 	export let leaf_content: string;
 	export let threats: z.infer<typeof ThreatSchema>[] | undefined = undefined;
-	export let security_functions: z.infer<typeof SecurityFunctionSchema>[] | undefined = undefined;
+	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
 	export let canEditRequirementAssessment: boolean;
 	export let status: string | undefined = undefined;
@@ -22,7 +22,7 @@
 		ra_id,
 		leaf_content,
 		threats,
-		security_functions,
+		reference_controls,
 		children,
 		canEditRequirementAssessment,
 		status,
@@ -107,7 +107,7 @@
 				</p>
 			{/if}
 		</span>
-		{#if (threats && threats.length > 0) || (security_functions && security_functions.length > 0)}
+		{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 			<div
 				role="button"
 				tabindex="0"
@@ -133,18 +133,18 @@
 				<div class="flex-1">
 					<p class="font-medium">
 						<i class="fa-solid fa-gears" />
-						Suggested security functions
+						Suggested reference controls
 					</p>
-					{#if security_functions?.length === 0}
+					{#if reference_controls?.length === 0}
 						<p>--</p>
-					{:else if security_functions}
+					{:else if reference_controls}
 						<ul class="list-disc ml-4">
-							{#each security_functions as func}
+							{#each reference_controls as func}
 								<li>
 									{#if func.id}
 										<a
 											class="anchor"
-											href="/security-functions/{func.id}?next={$page.url.pathname}"
+											href="/reference-controls/{func.id}?next={$page.url.pathname}"
 										>
 											{func.name}
 										</a>

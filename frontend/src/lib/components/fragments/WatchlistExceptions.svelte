@@ -3,6 +3,7 @@
 	import * as m from '$paraglide/messages';
 	import type { User } from '$lib/utils/types';
 	import { formatStringToDate } from '$lib/utils/helpers';
+	import { languageTag } from '$paraglide/runtime';
 
 	let request_path: string | null;
 	$: request_path = $page.route.id;
@@ -66,7 +67,7 @@
 							{:else if acceptanceState(acceptance.expiry_date) === 'today'}
 								<span class="rounded bg-yellow-500 text-white p-1 text-xs mr-1">{m.today()}</span>
 							{/if}
-							{formatStringToDate(acceptance.expiry_date)}
+							{formatStringToDate(acceptance.expiry_date,languageTag())}
 						</th>
 					</tr>
 				{/each}
@@ -74,7 +75,9 @@
 				<tr class="text-black p-4 text-center">
 					<td colspan="8" class="py-2">
 						<i class="inline fas fa-exclamation-triangle" />
-						<p class="inline test-gray-900">{m.noObjectYet({object: m.riskAcceptance().toLowerCase(), e: 'e'})}.</p>
+						<p class="inline test-gray-900">
+							{m.noRiskAcceptanceYet()}.
+						</p>
 					</td>
 				</tr>
 			{/if}

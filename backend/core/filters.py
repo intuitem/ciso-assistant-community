@@ -15,7 +15,7 @@ from django.db.models import Q
 from core.models import *
 from core.forms import SearchableSelect, SearchableCheckboxSelectMultiple
 from iam.models import User, UserGroup, RoleAssignment, Folder
-from core.models import Project, Threat, SecurityFunction, SecurityMeasure
+from core.models import Project, Threat, ReferenceControl, AppliedControl
 from django.utils.translation import gettext_lazy as _
 
 
@@ -115,39 +115,39 @@ def viewable_folders(request):
     return Folder.objects.filter(id__in=accessible_folders)
 
 
-class SecurityMeasureFilter(GenericFilterSet):
+class AppliedControlFilter(GenericFilterSet):
     name = GenericCharFilter(
         widget=TextInput(
             attrs={
                 "class": "h-10 rounded-r-lg border-none focus:ring-0",
-                "placeholder": _("Search security measure..."),
+                "placeholder": _("Search applied control..."),
             }
         )
     )
     folder = GenericModelMultipleChoiceFilter(queryset=viewable_folders)
-    security_function = GenericModelMultipleChoiceFilter(
-        queryset=SecurityFunction.objects.all()
+    reference_control = GenericModelMultipleChoiceFilter(
+        queryset=ReferenceControl.objects.all()
     )
 
     orderby = GenericOrderingFilter(
         fields=(
             ("name", "name"),
             ("folder", "folder"),
-            ("security_function", "security_function"),
+            ("reference_control", "reference_control"),
         ),
         field_labels={
             "name": _("name".capitalize()),
             "-name": _("Name (descending)"),
             "folder": _("Domain"),
             "-folder": _("Domain (descending)"),
-            "security_function": _("security function".capitalize()),
-            "-security_function": _("Security function (descending)"),
+            "reference_control": _("reference control".capitalize()),
+            "-reference_control": _("Reference control (descending)"),
         },
     )
 
     class Meta:
-        model = SecurityMeasure
-        fields = ["name", "folder", "security_function"]
+        model = AppliedControl
+        fields = ["name", "folder", "reference_control"]
 
 
 class ProjectsDomainFilter(GenericFilterSet):
@@ -228,9 +228,9 @@ class ThreatFilter(GenericFilterSet):
         fields = ["name"]
 
 
-class SecurityFunctionFilter(GenericFilterSet):
+class ReferenceControlFilter(GenericFilterSet):
     PROVIDER_CHOICES = (
-        SecurityFunction.objects.exclude(provider__isnull=True)
+        ReferenceControl.objects.exclude(provider__isnull=True)
         .values_list("provider", "provider")
         .distinct()
     )
@@ -258,7 +258,7 @@ class SecurityFunctionFilter(GenericFilterSet):
     )
 
     class Meta:
-        model = SecurityFunction
+        model = ReferenceControl
         fields = ["provider"]
 
 

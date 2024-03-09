@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MONTH_LIST } from '$lib/utils/constants';
-	import type { SecurityMeasureSchema } from '$lib/utils/schemas';
-	import type { AggregatedData, Counter, SecurityMeasureStatus, User } from '$lib/utils/types';
+	import type { AppliedControlSchema } from '$lib/utils/schemas';
+	import type { AggregatedData, Counter, AppliedControlStatus, User } from '$lib/utils/types';
 	import { beforeUpdate, onMount } from 'svelte';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
@@ -18,7 +18,7 @@
 	export let data;
 
 	let user: User = data.user;
-	let security_measure_status: SecurityMeasureStatus = data.security_measure_status;
+	let applied_control_status: AppliedControlStatus = data.applied_control_status;
 	let measures = data.measures;
 	let counters: Counter = data.get_counters;
 
@@ -28,8 +28,8 @@
 	let agg_data: AggregatedData = data.agg_data;
 	let risk_assessments = data.risk_assessments;
 
-	let viewable_measures: (typeof SecurityMeasureSchema)[] = data.viewable_measures;
-	let updatable_measures: (typeof SecurityMeasureSchema)[] = data.updatable_measures;
+	let viewable_measures: (typeof AppliedControlSchema)[] = data.viewable_measures;
+	let updatable_measures: (typeof AppliedControlSchema)[] = data.updatable_measures;
 
 	let openTab = 1;
 
@@ -38,20 +38,22 @@
 
 	let dropdown_selected_values: any;
 
-	for (const item in security_measure_status.labels) {
-		security_measure_status.labels[item] = localItems(languageTag())[security_measure_status.localLables[item]];
+	for (const item in applied_control_status.labels) {
+		applied_control_status.labels[item] = localItems(languageTag())[
+			applied_control_status.localLables[item]
+		];
 	}
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let echart_element = document.getElementById('security_measures_status_div');
+		let echart_element = document.getElementById('applied_controls_status_div');
 
-		let security_measures_status_div_ch = echarts.init(echart_element, null, { renderer: 'svg' });
+		let applied_controls_status_div_ch = echarts.init(echart_element, null, { renderer: 'svg' });
 
 		let option = {
 			xAxis: {
 				type: 'category',
-				data: security_measure_status.labels
+				data: applied_control_status.labels
 			},
 			yAxis: {
 				type: 'value',
@@ -60,16 +62,16 @@
 			},
 			series: [
 				{
-					data: security_measure_status.values,
+					data: applied_control_status.values,
 					type: 'bar'
 				}
 			]
 		};
 
-		security_measures_status_div_ch.setOption(option);
+		applied_controls_status_div_ch.setOption(option);
 
 		let echart_resize_handler = () => {
-			security_measures_status_div_ch.resize();
+			applied_controls_status_div_ch.resize();
 		};
 
 		window.addEventListener('resize', echart_resize_handler); // Why this event listener can't be cleared by onDestroy ?
@@ -85,14 +87,14 @@
 		openTab = _openTab;
 	}
 
-	function get_measure_style(security_measure: SecurityMeasureSchema): string {
-		if (security_measure.status === 'open') {
+	function get_measure_style(applied_control: AppliedControlSchema): string {
+		if (applied_control.status === 'open') {
 			return 'bg-blue-300 text-black';
 		}
-		if (security_measure.status === 'in_progress') {
+		if (applied_control.status === 'in_progress') {
 			return 'bg-orange-300 text-black';
 		}
-		if (security_measure.status === 'on_hold') {
+		if (applied_control.status === 'on_hold') {
 			return 'bg-red-400 text-black';
 		}
 		return '';
@@ -274,8 +276,8 @@
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
 					<div class="text-5xl text-red-500 mr-2"><i class="fas fa-fire-extinguisher" /></div>
 					<div class=" text-left">
-						<div class="text-4xl font-bold">{counters.SecurityMeasure}</div>
-						<div class="font-semibold text-slate-500 text-sm">{m.securityMeasures()}</div>
+						<div class="text-4xl font-bold">{counters.AppliedControl}</div>
+						<div class="font-semibold text-slate-500 text-sm">{m.appliedControls()}</div>
 					</div>
 				</div>
 				<div class="w-1/4 p-2 m-2 flex content-center bg-white">
@@ -293,9 +295,9 @@
 				<div class="text-2xl font-extrabold text-slate-700">{m.myProjects()}</div>
 				<div class="text-sm text-slate-500 font-semibold">
 					{#if counters.Project > 1}
-						{m.assignedObjects({number: counters.Project, object: m.projects()})}
+						{m.assignedProjects({ number: counters.Project, s: 's' })}
 					{:else}
-						{m.assignedObjects({number: counters.Project, object: m.project()})}
+						{m.assignedProjects({ number: counters.Project, s: '' })}
 					{/if}
 				</div>
 			</div>
@@ -304,26 +306,28 @@
 					<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 					<DonutChart
+						name="current_risk"
 						s_label={cur_rsk_label}
 						values={risk_level.current}
-						colors={RISK_COLOR_PALETTE}
+						colors={risk_level.current.map(object => object.color)}
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
 					<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 					<DonutChart
+					name="residual_risk"
 						s_label={rsd_rsk_label}
 						values={risk_level.residual}
-						colors={RISK_COLOR_PALETTE}
+						colors={risk_level.residual.map(object => object.color)}
 					/>
 				</div>
 				<div class="h-96 p-2 m-2 w-1/3">
-					<span class="text-sm font-semibold">{m.securityMeasuresStatus()}</span>
+					<span class="text-sm font-semibold">{m.appliedControlsStatus()}</span>
 
 					<!-- -----------MEASURE STATUS------------ -->
 
-					<div id="security_measures_status_div" class="bg-white w-auto h-full" />
+					<div id="applied_controls_status_div" class="bg-white w-auto h-full" />
 
 					<!-- -----------MEASURE STATUS------------ -->
 				</div>
@@ -385,7 +389,7 @@
 							<button
 								id="process"
 								class="text-md text-white p-2 rounded w-full"
-								on:click|stopPropagation={handle_composer_submit_click}>{m.process()}</button
+								on:click|stopPropagation={handle_composer_submit_click}>{m.processButton()}</button
 							>
 							<div class="flex flex-col items-center relative">
 								<button
@@ -517,34 +521,34 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 								<table class="p-2 m-2 w-full">
 									<tr class="bg-gray-100">
 										<th class="text-left py-2 px-4">{m.domain()}</th>
-										<th class="text-left py-2 px-4">{m.securityMeasure()}</th>
+										<th class="text-left py-2 px-4">{m.appliedControl()}</th>
 										<th>{m.rankingScore()}</th>
 										<th>{m.status()}</th>
 										<th>{m.eta()}</th>
 										<th class="py-2 px-4">{m.actions()}</th>
 									</tr>
 
-									{#if measures}
+									{#if measures.length > 0}
 										{#each measures as mtg}
 											<tr class="border-b">
 												<td class="text-left py-2 px-4">{mtg.folder.str}</td>
 												<td class="text-left py-2 px-4">{mtg.name}</td>
 												<td class="text-center py-2 px-4">{mtg.ranking_score}</td>
-												<td class="text-center py-2 px-4 {get_measure_style(mtg)}">{mtg.status}</td>
+												<td class="text-center py-2 px-4 {get_measure_style(mtg)}">{localItems(languageTag())[mtg.status]}</td>
 												<td class="text-center py-2 px-4"
 													>{#if mtg.meta} {formatDate(mtg.meta)} {:else} -- {/if}</td
 												>
 												<td class="text-center py-2 px-4">
 													{#if mtg.id in viewable_measures}
 														<a
-															href="/security-measures/{mtg.id}"
+															href="/applied-controls/{mtg.id}"
 															class="text-indigo-500 hover:text-indigo-300"
 															><i class="fas fa-eye" /></a
 														>
 													{/if}
 													{#if mtg.id in updatable_measures}
 														<a
-															href="/security-measures/{mtg.id}/edit"
+															href="/applied-controls/{mtg.id}/edit"
 															class="text-indigo-500 hover:text-indigo-300"
 															><i class="fas fa-pen-square" /></a
 														>
@@ -555,14 +559,17 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 										<tr class="text-black p-4 text-center">
 											<td colspan="8" class="py-2">
 												<i class="inline fas fa-exclamation-triangle" />
-												<p class="inline test-gray-900">{m.noPendingObject({object:m.securityMeasure().toLowerCase(), e:'e'})}.</p>
+												<p class="inline test-gray-900">
+													{m.noPendingAppliedControl()}.
+												</p>
 											</td>
 										</tr>
 									{/if}
 								</table>
 							</div>
 							<div class="text-sm p-2 m-2">
-								<i class="fas fa-info-circle" /> {m.rankingScoreDefintion()}.
+								<i class="fas fa-info-circle" />
+								{m.rankingScoreDefintion()}.
 							</div>
 						</div>
 					{:else}
@@ -615,6 +622,7 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 											name="compliance_assessments"
 											s_label={m.complianceAssessments()}
 											values={compliance_assessment.donut.values}
+											colors={compliance_assessment.donut.values.map(object => object.itemStyle.color)}
 										/>
 									</div>
 									<div class="absolute top-0 right-0 mt-2 space-x-1">

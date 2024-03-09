@@ -17,6 +17,7 @@
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
+	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
 	import RiskLevel from './RiskLevel.svelte';
 
 	import { browser } from '$app/environment';
@@ -24,11 +25,24 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import { page } from '$app/stores';
 
+	import * as m from '$paraglide/messages';
+	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data: PageData;
 
 	breadcrumbObject.set(data.scenario);
 
 	const schema = modelSchema(data.model.urlModel!);
+
+	const strengthOfKnowledgeFormChoices: { label: string; value: number }[] = (
+		Object.entries(data.strengthOfKnowledgeChoices) as StrengthOfKnowledgeEntry[]
+	)
+		.map(([key, value]) => ({
+			label: value.name,
+			value: parseInt(key)
+		}))
+		.sort((a, b) => a.value - b.value);
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -47,7 +61,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.measureCreateForm,
-				formAction: 'createSecurityMeasure',
+				formAction: 'createAppliedControl',
 				model: data.measureModel,
 				debug: false
 			}
@@ -56,7 +70,7 @@
 			type: 'component',
 			component: modalComponent,
 			// Data
-			title: `New ${data.measureModel.verboseName.toLowerCase()}`
+			title: localItems(languageTag())['add' + capitalizeFirstLetter(data.measureModel.localName)]
 		};
 		modalStore.trigger(modal);
 	}
@@ -80,6 +94,10 @@
 			};
 			toastStore.trigger(toast);
 		}
+	}
+
+	for (const index in data.treatmentChoices) {
+		data.treatmentChoices[index]['label'] = localItems(languageTag())[data.treatmentChoices[index]['value']];
 	}
 
 	let { form: measureCreateForm, message: measureCreateMessage } = {
@@ -121,10 +139,10 @@
 	>
 		<div class="flex flex-row space-x-2">
 			<div class="card px-4 py-2 bg-white shadow-lg w-3/4">
-				<h4 class="h4 font-semibold">Scope</h4>
+				<h4 class="h4 font-semibold">{m.scope()}</h4>
 				<div class="flex flex-row justify-between">
 					<span>
-						<p class="text-sm font-semibold text-gray-400">Project</p>
+						<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
 						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
 							>{data.scenario.project.str}</a
 						>
@@ -133,36 +151,28 @@
 						{form}
 						options={getOptions({ objects: data.foreignKeys['risk_assessment'] })}
 						field="risk_assessment"
-						label="RiskAssessment"
+						label={m.riskAssessment()}
 					/>
 					<span>
-						<p class="text-sm font-semibold text-gray-400">Auditor</p>
-						{#if data.scenario.auditor}
-							<a class="anchor text-sm font-semibold" href="/users/{data.scenario.auditor.id}"
-								>{data.scenario.auditor.str}</a
-							>
-						{/if}
-					</span>
-					<span>
-						<p class="text-sm font-semibold text-gray-400">Version</p>
+						<p class="text-sm font-semibold text-gray-400">{m.version()}</p>
 						<p class="text-sm font-semibold">{data.scenario.version}</p>
 					</span>
 				</div>
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/4">
-				<h4 class="h4 font-semibold">Status</h4>
+				<h4 class="h4 font-semibold">{m.status()}</h4>
 				<div class="flex flex-row justify-between">
 					<span>
-						<p class="text-sm font-semibold text-gray-400">Last update</p>
+						<p class="text-sm font-semibold text-gray-400">{m.lastUpdate()}</p>
 						<p class="text-sm font-semibold">
-							{new Date(data.scenario.updated_at).toLocaleString()}
+							{new Date(data.scenario.updated_at).toLocaleString(languageTag())}
 						</p>
 					</span>
 					<Select
 						{form}
 						options={data.treatmentChoices}
 						field="treatment"
-						label="Treatment status"
+						label={m.treatmentStatus()}
 					/>
 				</div>
 			</div>
@@ -175,10 +185,10 @@
 					multiple
 					options={getOptions({ objects: data.foreignKeys['threats'] })}
 					field="threats"
-					label="Threats"
+					label={m.threats()}
 				/>
-				<TextField {form} field="name" label="Name" />
-				<TextArea {form} field="description" label="Description" />
+				<TextField {form} field="name" label={m.name()} />
+				<TextArea {form} field="description" label={m.description()} />
 			</div>
 			<div class="card px-4 py-2 bg-white shadow-lg w-1/2 max-h-96 overflow-y-scroll">
 				<AutocompleteSelect
@@ -186,8 +196,8 @@
 					{form}
 					options={getOptions({ objects: data.foreignKeys['assets'] })}
 					field="assets"
-					label="Assets"
-					helpText="Assets impacted by this risk scenario"
+					label={m.assets()}
+					helpText={m.riskScenarioAssetHelpText()}
 				/>
 				<ModelTable source={data.tables['assets']} URLModel="assets" />
 			</div>
@@ -195,24 +205,24 @@
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-semibold">Current risk</h4>
+			<h4 class="h4 font-semibold">{m.currentRisk()}</h4>
 			<div class="flex flex-row space-x-4 justify-between">
 				<TextArea
 					{form}
-					field="existing_measures"
-					label="Existing measures"
-					helpText="The existing security measures to manage this risk"
+					field="existing_controls"
+					label={m.existingControls()}
+					helpText={m.riskScenarioMeasureHelpText()}
 					regionContainer="w-1/2"
 				/>
 				<div class="flex flex-col">
-					<h5 class="h5 font-medium">Current assessment</h5>
+					<h5 class="h5 font-medium">{m.currentAssessment()}</h5>
 					<div class="flex flex-row space-x-4 my-auto">
 						<Select
 							{form}
 							options={data.probabilityChoices}
 							color_map={riskColorMap()}
 							field="current_proba"
-							label="Current probability"
+							label={m.currentProba()}
 						/>
 						<i class="fa-solid fa-xmark my-auto" />
 						<Select
@@ -220,17 +230,17 @@
 							options={data.impactChoices}
 							color_map={riskColorMap()}
 							field="current_impact"
-							label="Current impact"
+							label={m.currentImpact()}
 						/>
 						<i class="fa-solid fa-equals my-auto" />
 						<RiskLevel
 							{form}
 							field="current_risk_level"
-							label="Current risk level"
+							label={m.currentRiskLevel()}
 							riskMatrix={data.riskMatrix}
 							probabilityField="current_proba"
 							impactField="current_impact"
-							helpText="The risk level given the current measures"
+							helpText={m.currentRiskLevelHelpText()}
 						/>
 					</div>
 				</div>
@@ -238,35 +248,35 @@
 		</div>
 
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<h4 class="h4 font-semibold">Residual risk</h4>
+			<h4 class="h4 font-semibold">{m.residualRisk()}</h4>
 			<div class="flex flex-row space-x-4 justify-between">
-				<div class="flex flex-col w-1/2">
+				<div class="flex flex-col space-y-4 w-1/2">
 					<span class="flex flex-row justify-between items-center">
-						<h5 class="h5 font-medium">Associated security measures</h5>
+						<h5 class="h5 font-medium">{m.associatedAppliedControls()}</h5>
 						<button
 							class="btn variant-filled-primary self-end"
 							on:click={modalMeasureCreateForm}
-							type="button"><i class="fa-solid fa-plus mr-2" />New security measure</button
+							type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
 						>
 					</span>
 					<AutocompleteSelect
 						multiple
 						{form}
-						options={getOptions({ objects: data.foreignKeys['security_measures'] })}
-						field="security_measures"
-						label="Security measures"
+						options={getOptions({ objects: data.foreignKeys['applied_controls'] })}
+						field="applied_controls"
+						label={m.appliedControls()}
 					/>
-					<ModelTable source={data.tables['security-measures']} URLModel="security-measures" />
+					<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 				</div>
 				<div class="flex flex-col">
-					<h5 class="h5 font-medium">Target assessment</h5>
+					<h5 class="h5 font-medium">{m.targetAssessment()}</h5>
 					<div class="flex flex-row space-x-4 my-auto">
 						<Select
 							{form}
 							options={data.probabilityChoices}
 							color_map={riskColorMap()}
 							field="residual_proba"
-							label="Residual probability"
+							label={m.residualProba()}
 						/>
 						<i class="fa-solid fa-xmark my-auto" />
 						<Select
@@ -274,34 +284,40 @@
 							options={data.impactChoices}
 							color_map={riskColorMap()}
 							field="residual_impact"
-							label="Residual impact"
+							label={m.residualImpact()}
 						/>
 						<i class="fa-solid fa-equals my-auto" />
 						<RiskLevel
 							{form}
 							field="current_risk_level"
-							label="Current risk level"
+							label={m.residualRiskLevel()}
 							riskMatrix={data.riskMatrix}
 							probabilityField="residual_proba"
 							impactField="residual_impact"
-							helpText="The risk level when all the extra measures are done"
+							helpText={m.residualRiskLevelHelpText()}
 						/>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="card px-4 py-2 bg-white shadow-lg">
-			<TextArea {form} field="justification" label="Justification" />
+			<Select
+				{form}
+				options={strengthOfKnowledgeFormChoices}
+				field="strength_of_knowledge"
+				label={m.strengthOfKnowledge()}
+			/>
+			<TextArea {form} field="justification" label={m.justification()} />
 		</div>
 		<div class="flex flex-row justify-between space-x-4">
 			<button
 				class="btn bg-gray-400 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
-				on:click={cancel}>Cancel</button
+				on:click={cancel}>{m.cancel()}</button
 			>
 			<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button"
-				>Save</button
+				>{m.save()}</button
 			>
 		</div>
 	</SuperForm>
