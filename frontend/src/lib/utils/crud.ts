@@ -429,18 +429,6 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
 				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
 			}
-			/* { // These values seem to not exist anymore
-				key: 'is_draft',
-				values: {
-					true: { text: 'draft', cssClasses: 'badge bg-blue-200' }
-				}
-			},
-			{
-				key: 'is_obsolete',
-				values: {
-					true: { text: 'obsolete', cssClasses: 'badge bg-red-300' }
-				}
-			} */
 		}
 	},
 	assets: {
