@@ -507,12 +507,12 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Determines if a user has specified permission on a specified folder
         """
         for ra in RoleAssignment.get_role_assignments(user):
-            # TODO: Add recursive call when we allow picking a parent folder other than ROOT
-            if (
-                folder in ra.perimeter_folders.all()
-                or folder.parent_folder in ra.perimeter_folders.all()
-            ) and perm in ra.role.permissions.all():
-                return True
+            f = folder
+            while f is not None:
+                print("f=", f)
+                if f in ra.perimeter_folders.all() and perm in ra.role.permissions.all():
+                    return True
+                f = f.parent_folder
         return False
 
     @staticmethod
