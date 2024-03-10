@@ -363,14 +363,6 @@ class ComplianceAssessmentFilter(GenericFilterSet):
     )
     project = GenericModelMultipleChoiceFilter(queryset=Project.objects.all())
     framework = GenericModelMultipleChoiceFilter(queryset=Framework.objects.all())
-    is_obsolete = GenericChoiceFilter(
-        choices=((True, _("Yes")), (False, _("No"))),
-        widget=Select(
-            attrs={
-                "class": "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50"
-            }
-        ),
-    )
     orderby = GenericOrderingFilter(
         fields=(
             ("name", "name"),
