@@ -1,3 +1,7 @@
+from core.models import Library
+from core.serializers import (
+    BaseModelSerializer,
+)
 from rest_framework import serializers
 
 
@@ -20,6 +24,12 @@ class LibrarySerializer(serializers.Serializer):
     objects = LibraryObjectSerializer(many=True)
     format_version = serializers.CharField()
     copyright = serializers.CharField()
+
+
+class LibraryModelSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
 
 
 class LibraryUploadSerializer(serializers.Serializer):

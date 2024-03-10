@@ -47,9 +47,9 @@ GROUPS_PERMISSIONS = {
         "name": "Global_auditor",
         "perms": AUDITOR_PERMISSIONS_LIST,
     },
-    "BI-UG-GVA": {
+    "BI-UG-GAP": {
         "folder": "Global",
-        "name": "Global_validator",
+        "name": "Global_approver",
         "perms": APPROVER_PERMISSIONS_LIST,
     },
     "BI-UG-AUD": {
@@ -57,9 +57,9 @@ GROUPS_PERMISSIONS = {
         "name": "Auditor",
         "perms": AUDITOR_PERMISSIONS_LIST,
     },
-    "BI-UG-VAL": {
+    "BI-UG-APP": {
         "folder": "test",
-        "name": "Validator",
+        "name": "Approver",
         "perms": APPROVER_PERMISSIONS_LIST,
     },
     "BI-UG-ANA": {

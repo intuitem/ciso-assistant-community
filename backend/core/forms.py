@@ -63,9 +63,7 @@ class SearchableCheckboxSelectMultiple(CheckboxSelectMultiple):
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         if self.recommended_applied_controls:
-            context[
-                "recommended_applied_controls"
-            ] = self.recommended_applied_controls
+            context["recommended_applied_controls"] = self.recommended_applied_controls
         return context
 
 

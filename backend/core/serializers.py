@@ -318,7 +318,7 @@ class UserWriteSerializer(BaseModelSerializer):
 
 class UserGroupReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
-    label = serializers.CharField(source="get_name_display")
+    localization_dict = serializers.JSONField(source="get_localization_dict")
     folder = FieldsRelatedField()
 
     class Meta:
@@ -464,6 +464,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     name = serializers.CharField(source="__str__")
     compliance_assessment = FieldsRelatedField()
+    folder = FieldsRelatedField()
 
     class Meta:
         model = RequirementAssessment

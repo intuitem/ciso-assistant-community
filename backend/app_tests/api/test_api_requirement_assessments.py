@@ -92,12 +92,6 @@ class TestRequirementAssessmentsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestRequirementAssessmentsAuthenticated:
     """Perform tests on Requirement Assessments API endpoint with authentication"""
 
@@ -123,7 +117,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "requirement": RequirementNode.objects.all()[0],
             },
             {
-                "folder": str(test.folder.id),
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,
@@ -144,9 +138,7 @@ class TestRequirementAssessmentsAuthenticated:
             project=Project.objects.create(name="test", folder=test.folder),
             framework=Framework.objects.all()[0],
         )
-        applied_control = AppliedControl.objects.create(
-            name="test", folder=test.folder
-        )
+        applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.create_object(
             test.client,
@@ -208,7 +200,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "applied_controls": [str(applied_control.id)],
             },
             {
-                "folder": str(test.folder.id),
+                "folder": {"id": str(test.folder.id), "str": test.folder.name},
                 "compliance_assessment": {
                     "id": str(compliance_assessment.id),
                     "str": compliance_assessment.name,

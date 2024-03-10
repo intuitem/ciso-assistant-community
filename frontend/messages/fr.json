@@ -65,6 +65,7 @@
 	"roleAssignments": "Affectations de rôle",
 	"xRays": "X-rays",
 	"scoringAssistant": "Assistant d'évaluation",
+	"scoringAssistantNoMatrixError": "Veuillez importer une matrice de risque depuis le magasin de bibliothèques pour pouvoir accéder à cette page",
 	"libraries": "Bibliothèques",
 	"backupRestore": "Sauvegarde et restauration",
 	"myProfile": "Mon profil",
@@ -430,6 +431,8 @@
 	"accept": "Accepté",
 	"avoid": "Refusé",
 	"transfer": "Partagé",
+	"primary": "Primaire",
+	"support": "Support",
 	"toDo": "À faire",
 	"inProgress": "En cours",
 	"inReview": "En révision",
@@ -439,6 +442,12 @@
 	"partiallyCompliant": "Partiellement conforme",
 	"compliant": "Conforme",
 	"notApplicable": "Non applicable",
-	"primary": "Primaire",
-	"support": "Support"
+	"administrator": "Administrateur",
+	"domainManager": "Gestionnaire de domaine",
+	"analyst": "Analyste",
+	"associatedRequirements": "Exigences associées",
+	"isPublished": "Publié",
+	"suggestedReferenceControls": "Mesures de référence suggérées",
+	"threatsCovered": "Menaces couvertes",
+	"noFileDetected": "Erreur: aucun fichier détecté"
 }
