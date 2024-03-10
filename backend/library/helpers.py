@@ -10,9 +10,9 @@ def preview_library(library) -> dict[str, list]:
     preview = {}
     requirement_nodes_list = []
     if library["objects"]["framework"].get("requirement_nodes"):
-        index=0
+        index = 0
         for requirement_node in library["objects"]["framework"]["requirement_nodes"]:
-            index+=1
+            index += 1
             requirement_nodes_list.append(
                 RequirementNode(
                     description=requirement_node.get("description"),

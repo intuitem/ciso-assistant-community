@@ -4,20 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_complianceassessment_is_published_and_more'),
+        ("core", "0004_complianceassessment_is_published_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='lc_status',
-            field=models.CharField(choices=[('undefined', 'Undefined'), ('in_design', 'Design'), ('in_dev', 'Development'), ('in_prod', 'Production'), ('eol', 'EndOfLife'), ('dropped', 'Dropped')], default='in_design', max_length=20, verbose_name='Status'),
+            model_name="project",
+            name="lc_status",
+            field=models.CharField(
+                choices=[
+                    ("undefined", "Undefined"),
+                    ("in_design", "Design"),
+                    ("in_dev", "Development"),
+                    ("in_prod", "Production"),
+                    ("eol", "EndOfLife"),
+                    ("dropped", "Dropped"),
+                ],
+                default="in_design",
+                max_length=20,
+                verbose_name="Status",
+            ),
         ),
         migrations.AlterField(
-            model_name='securitymeasure',
-            name='effort',
-            field=models.CharField(blank=True, choices=[('S', 'Small'), ('M', 'Medium'), ('L', 'Large'), ('XL', 'Extra Large')], help_text='Relative effort of the measure (using T-Shirt sizing)', max_length=2, null=True, verbose_name='Effort'),
+            model_name="securitymeasure",
+            name="effort",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("S", "Small"),
+                    ("M", "Medium"),
+                    ("L", "Large"),
+                    ("XL", "Extra Large"),
+                ],
+                help_text="Relative effort of the measure (using T-Shirt sizing)",
+                max_length=2,
+                null=True,
+                verbose_name="Effort",
+            ),
         ),
     ]

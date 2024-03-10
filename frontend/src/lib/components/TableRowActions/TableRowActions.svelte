@@ -3,8 +3,8 @@
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 
@@ -19,7 +19,7 @@
 	export let editURL: string | undefined;
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined;
 	export let URLModel: urlModel | string | undefined;
-	export let identifierField: string = 'id';
+	export let identifierField = 'id';
 	export let preventDelete = false;
 
 	export let hasBody = false;
@@ -49,14 +49,14 @@
 	}
 
 	const user = $page.data.user;
-	const canDeleteObject: boolean =
-		Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
-	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_${model?.name}`);
+	$: canDeleteObject =
+		Object.hasOwn(user.permissions, `delete_${model?.name}`) && preventDelete === false;
+	$: canEditObject = Object.hasOwn(user.permissions, `change_${model?.name}`);
 
 	$: displayDetail = detailURL;
 	$: displayEdit =
 		canEditObject && URLModel && !['frameworks', 'risk-matrices'].includes(URLModel) && editURL;
-	$: displayDelete = canDeleteObject && deleteForm;
+	$: displayDelete = canDeleteObject && deleteForm !== undefined;
 </script>
 
 <span

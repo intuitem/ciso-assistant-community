@@ -97,12 +97,6 @@ class TestComplianceAssessmentsUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestComplianceAssessmentsAuthenticated:
     """Perform tests on ComplianceAssessments API endpoint with authentication"""
 
@@ -131,6 +125,7 @@ class TestComplianceAssessmentsAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_compliance_assessments(self, test):
@@ -158,6 +153,7 @@ class TestComplianceAssessmentsAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_compliance_assessments(self, test):
@@ -197,6 +193,7 @@ class TestComplianceAssessmentsAuthenticated:
                 },
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_delete_compliance_assessments(self, test):
@@ -215,4 +212,5 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": Framework.objects.all()[0],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )

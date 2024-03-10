@@ -13,6 +13,10 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import type { Node } from './types';
 
+	import * as m from '$paraglide/messages';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let data: PageData;
 	breadcrumbObject.set(data.compliance_assessment);
 	const tree = data.tree;
@@ -91,9 +95,9 @@
 						data-testid={key.replaceAll('_', '-') + '-field-title'}
 					>
 						{#if key === 'urn'}
-							URN
+							{m.urn()}
 						{:else}
-							{key.replace('_', ' ')}
+						{localItems(languageTag())[toCamelCase(key)]}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -139,28 +143,27 @@
 		</div>
 		<div class="w-full">
 			<DonutChart
-				name="compliance_assessments"
-				s_label="compliance_assessments"
+				s_label={m.complianceAssessments()}
 				values={compliance_assessment_donut_values.values}
 				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
 			/>
 		</div>
 		<div class="flex flex-row space-x-2 ml-4">
 			<a href={`${$page.url.pathname}/export`} class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-download mr-2" /> Export</a
+				><i class="fa-solid fa-download mr-2" /> {m.exportButton()}</a
 			>
 			{#if canEditObject}
 				<a
 					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
 					class="btn variant-filled-primary h-fit"
-					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> Edit</a
+					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
 				>
 			{/if}
 		</div>
 	</div>
 
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<h4 class="h4 font-semibold">Associated requirements</h4>
+		<h4 class="h4 font-semibold">{m.associatedRequirements()}</h4>
 		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 	</div>
 </div>

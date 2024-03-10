@@ -10,12 +10,6 @@ from test_utils import EndpointTestsQueries
 class TestUserGroups:
     """Perform tests on User Groups API endpoint with authentication"""
 
-    @pytest.mark.parametrize(
-        "test",
-        GROUPS_PERMISSIONS.keys(),
-        ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-        indirect=True,
-    )
     def test_group_permissions(self, test):
         """test that a user with a specific role has the correct permissions"""
 

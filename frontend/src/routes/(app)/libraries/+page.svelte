@@ -63,7 +63,7 @@
 			>
 				<FileInput
 					{form}
-					helpText= {m.libraryFileInYaml()}
+					helpText={m.libraryFileInYaml()}
 					mandatory={true}
 					field="file"
 					label={m.uploadYourLibrary()}
@@ -72,7 +72,7 @@
 				<button
 					class="btn variant-filled-primary font-semibold w-full"
 					data-testid="save-button"
-					type="submit">{m.save()}</button
+					type="submit">{m.upload()}</button
 				>
 			</SuperForm>
 		{:catch err}
