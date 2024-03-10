@@ -143,7 +143,10 @@ class Folder(NameDescriptionMixin):
     def get_folder(obj: Any):
         """
         Return the folder of an object using navigation through mixed structures.
+        For a folder, it is the object itself
         """
+        if isinstance(obj, Folder):
+            return obj
         # Define paths to try in order. Each path is a list representing the traversal path.
         # NOTE: There are probably better ways to represent these, but it works.
         paths = [
