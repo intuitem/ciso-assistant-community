@@ -66,7 +66,8 @@ class LibraryViewSet(BaseModelViewSet):
         if library is None:
             return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
-        if library["reference_count"] != 0:
+        # "reference_count" is not always defined (is this normal ?)
+        if library.get("reference_count",0) != 0 :
             return Response(
                 data="Library cannot be deleted because it has references.",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -119,7 +120,6 @@ class LibraryViewSet(BaseModelViewSet):
             import_library_view(library)
             return Response({"status": "success"})
         except Exception as e:
-            print(e)
             return Response(
                 {
                     "error": "Failed to load library, please check if it has dependencies"

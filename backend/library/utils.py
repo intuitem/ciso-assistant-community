@@ -1,4 +1,5 @@
 import json
+import time
 import os
 from pathlib import Path
 import re
@@ -19,6 +20,7 @@ from core.models import (
 from django.db import transaction
 from iam.models import Folder
 
+from django.db.utils import OperationalError
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -204,7 +206,6 @@ class RequirementNodeImporter:
             requirement_node.reference_controls.add(
                 ReferenceControl.objects.get(urn=reference_control.lower())
             )
-
 
 # The couple (URN, locale) is unique. ===> Check it in the future
 class FrameworkImporter:
@@ -577,6 +578,16 @@ class LibraryImporter:
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
 
+    @transaction.atomic
+    def _import_library(self) :
+        library_object = self.create_or_update_library()
+        self.import_objects(library_object)
+        library_object.dependencies.set(
+            Library.objects.filter(
+                urn__in=self._library_data.get("dependencies", [])
+            )
+        )
+
     def import_library(self):
         """Main method to import a library."""
         if (error_message := self.init()) is not None:
@@ -584,20 +595,19 @@ class LibraryImporter:
 
         self.check_and_import_dependencies()
 
-        try:
-            with transaction.atomic():
-                library_object = self.create_or_update_library()
-                self.import_objects(library_object)
-                library_object.dependencies.set(
-                    Library.objects.filter(
-                        urn__in=self._library_data.get("dependencies", [])
-                    )
-                )
-        except Exception as e:
-            # TODO: Switch to proper logging
-            print(f"Library import exception: {e}")
-            raise
-
+        for _ in range(10) :
+            try:
+                self._import_library()
+                break
+            except OperationalError as e :
+                if e.args and e.args[0] == 'database is locked' :
+                    time.sleep(1)
+                else :
+                    raise e
+            except Exception as e :
+                # TODO: Switch to proper logging
+                print(f"Library import exception: {e}")
+                raise e
 
 def import_library_view(library: dict) -> Union[str, None]:
     """
