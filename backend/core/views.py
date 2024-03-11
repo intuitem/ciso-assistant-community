@@ -254,7 +254,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
 
