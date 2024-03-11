@@ -3,6 +3,7 @@ import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
+import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -369,6 +370,9 @@ export const FIELD_COMPONENT_MAP = {
 	libraries: {
 		locale: LanguageDisplay,
 		actions: LibraryActions
+	},
+	'user-groups': {
+		localization_dict: UserGroupNameDisplay
 	}
 };
 
@@ -425,18 +429,6 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
 				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
 			}
-			/* { // These values seem to not exist anymore
-				key: 'is_draft',
-				values: {
-					true: { text: 'draft', cssClasses: 'badge bg-blue-200' }
-				}
-			},
-			{
-				key: 'is_obsolete',
-				values: {
-					true: { text: 'obsolete', cssClasses: 'badge bg-red-300' }
-				}
-			} */
 		}
 	},
 	assets: {

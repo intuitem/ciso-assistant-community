@@ -92,12 +92,6 @@ class TestEvidencesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestEvidencesAuthenticated:
     """Perform tests on Evidences API endpoint with authentication"""
 
@@ -161,6 +155,7 @@ class TestEvidencesAuthenticated:
                 },
                 query_format="multipart",
                 user_group=test.user_group,
+                scope=str(test.folder),
             )
 
     def test_update_evidences(self, test):

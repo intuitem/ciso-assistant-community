@@ -33,13 +33,13 @@ export class SideBar {
 		this.toggleButton = this.page.getByTestId('sidebar-toggle-btn');
 	}
 
-	async click(parent: string, tab: string) {
+	async click(parent: string, tab: string, waitForURL: boolean = true) {
 		if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
 			await this.page.locator('#' + parent.toLowerCase().replace(' ', '-')).click();
 		}
 		await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible();
 		await this.page.getByTestId('accordion-item-' + tab.substring(1)).click();
-		await this.page.waitForURL(tab);
+		waitForURL ? await this.page.waitForURL(tab) : null;
 	}
 
 	async goto(page: PageContent) {
