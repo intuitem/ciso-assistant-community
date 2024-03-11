@@ -16,7 +16,7 @@
 <div class="relative h-screen w-screen bg-slate-200">
 	<div class="absolute top-5 left-5">
 		<div class="flex flex-row w-full space-x-4 pb-3">
-			<img class="c" height="200" width="200" src={CisoLogo} alt="Ciso-assitant icon" />
+			<img class="c" height="200" width="200" src={CisoLogo} alt="Ciso-assistant icon" />
 		</div>
 	</div>
 	<div class="absolute top-1/2 left-1/2 w-full transform -translate-x-1/2 -translate-y-1/2">
