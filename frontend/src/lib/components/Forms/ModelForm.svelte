@@ -66,6 +66,7 @@
 			})}
 			field="reference_control"
 			label={m.referenceControl()}
+			nullable={true}
 			on:change={async (e) => {
 				if (e.detail) {
 					await fetch(`/reference-controls/${e.detail}`)
