@@ -11,6 +11,7 @@ import testData from './test-data.js';
 type Fixtures = {
 	mailer: Mailer;
 	sideBar: SideBar;
+	isolatedPage: Page;
 	pages: { [page: string]: PageContent };
 	analyticsPage: AnalyticsPage;
 	assetsPage: PageContent;
@@ -41,6 +42,10 @@ export const test = base.extend<Fixtures>({
 	
 	sideBar: async ({ page }, use) => {
 		await use(new SideBar(page));
+	},
+
+	isolatedPage: async ({ context }, use) => {
+		await use(await context.newPage());
 	},
 
 	pages: async (
