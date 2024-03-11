@@ -16,11 +16,18 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
     	for await (const [key, value] of sideBar.items) {            
 			for await (const item of value) {
 				if (item.href !== '/role-assignments') {
-					await sideBar.click(key, item.href);
+					await sideBar.click(key, item.href, false);
+					if (item.href === '/scoring-assistant' && await logedPage.modalTitle.isVisible()) {
+						await expect(logedPage.modalTitle).toBeVisible();
+						await expect(logedPage.modalTitle).toHaveText('Please import a risk matrix from the library to get access to this page');
+						await page.mouse.click(20, 20); // click outside the modal to close it
+						await expect(logedPage.modalTitle).not.toBeVisible();
+						continue;
+					}
 					await expect(page).toHaveURL(item.href);
 					await logedPage.hasTitle(locals[item.name]);
 					await logedPage.hasBreadcrumbPath([locals[item.name]]);
-				}         
+				}
 			}
 		}
 	});

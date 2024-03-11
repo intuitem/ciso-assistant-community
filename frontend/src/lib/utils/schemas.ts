@@ -54,7 +54,7 @@ export const RiskMatrixSchema = baseNamedObject({
 });
 
 export const LibraryUploadSchema = z.object({
-	file: z.string()
+	file: z.string().optional()
 });
 
 export const RiskAssessmentSchema = baseNamedObject({
@@ -89,7 +89,7 @@ export const RiskScenarioSchema = baseNamedObject({
 });
 
 export const AppliedControlSchema = baseNamedObject({
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
@@ -121,7 +121,7 @@ export const RiskAcceptanceSchema = baseNamedObject({
 
 export const ReferenceControlSchema = baseNamedObject({
 	provider: z.string().optional().nullable(),
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	folder: z.string()
 });
 

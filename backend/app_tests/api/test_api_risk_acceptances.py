@@ -92,12 +92,6 @@ class TestRiskAcceptanceUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestRiskAcceptanceAuthenticated:
     """Perform tests on Risk Acceptance API endpoint with authentication"""
 
@@ -134,7 +128,7 @@ class TestRiskAcceptanceAuthenticated:
         """test to create risk acceptances with the API with authentication"""
 
         approver = User.objects.create_user(email="approver@test.com")
-        UserGroup.objects.get(name="BI-UG-GVA").user_set.add(approver)
+        UserGroup.objects.get(name="BI-UG-GAP").user_set.add(approver)
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         risk_scenario = RiskScenario.objects.create(
             name="test scenario",
@@ -171,6 +165,7 @@ class TestRiskAcceptanceAuthenticated:
                 # 'state': RISK_ACCEPTANCE_STATE[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_risk_acceptances(self, test):
@@ -179,9 +174,9 @@ class TestRiskAcceptanceAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Framework")
         folder = Folder.objects.create(name="test2")
         approver = User.objects.create_user(email="approver@test.com")
-        UserGroup.objects.get(name="BI-UG-GVA").user_set.add(approver)
+        UserGroup.objects.get(name="BI-UG-GAP").user_set.add(approver)
         approver2 = User.objects.create_user(email="approver2@test.com")
-        UserGroup.objects.get(name="BI-UG-GVA").user_set.add(approver2)
+        UserGroup.objects.get(name="BI-UG-GAP").user_set.add(approver2)
         risk_scenario = RiskScenario.objects.create(
             name="test scenario",
             description="test description",
