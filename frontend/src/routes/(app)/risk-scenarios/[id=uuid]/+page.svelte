@@ -9,7 +9,6 @@
     import { localItems, toCamelCase } from '$lib/utils/locales';
 
     import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { color } from 'echarts';
 
     export let data: PageData;
 
@@ -213,7 +212,13 @@
                 {#if data.scenario.strength_of_knowledge.symbol}
                     {data.scenario.strength_of_knowledge.symbol}
                 {/if}
-                <span class="font-semibold">{localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}</span> : 
+                <span class="font-semibold">
+                    {#if localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}
+                        {localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name)]}
+                    {:else}
+                        {localItems(languageTag())["undefined"]}
+                    {/if}
+                </span> : 
                 {localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name) + 'SOK']}
             </p>
         </div>
