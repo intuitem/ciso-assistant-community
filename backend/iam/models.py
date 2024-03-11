@@ -509,7 +509,6 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in RoleAssignment.get_role_assignments(user):
             f = folder
             while f is not None:
-                print("f=", f)
                 if f in ra.perimeter_folders.all() and perm in ra.role.permissions.all():
                     return True
                 f = f.parent_folder
