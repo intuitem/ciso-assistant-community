@@ -118,6 +118,12 @@
 			hide={initialData.project}
 		/>
 		<TextField {form} field="version" label={m.version()} />
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
@@ -315,6 +321,12 @@
 			hide={initialData.project}
 		/>
 		<TextField {form} field="version" label={m.version()} />
+		<Select
+			{form}
+			options={model.selectOptions['status']}
+			field="status"
+			label={m.status()}
+		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
