@@ -96,7 +96,7 @@ export const AppliedControlSchema = baseNamedObject({
 	link: z.string().url().optional().nullable(),
 	effort: z.string().optional().nullable(),
 	folder: z.string(),
-	reference_control: z.string().optional()
+	reference_control: z.string().optional().nullable()
 });
 
 export const PolicySchema = baseNamedObject({
