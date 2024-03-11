@@ -33,13 +33,15 @@ class EndpointTestsUtils:
         from iam.models import Folder, User, UserGroup
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client, "Folders", Folder, {"name": assigned_folder_name}
+            authenticated_client, "Folders", Folder, {"name": assigned_folder_name},
+            item_search_field="name"
         )
         assigned_folder = test_folder = Folder.objects.get(name=assigned_folder_name)
 
         if test_folder_name != assigned_folder_name:
             EndpointTestsQueries.Auth.create_object(
-                authenticated_client, "Folders", Folder, {"name": test_folder_name}, base_count=1
+                authenticated_client, "Folders", Folder, {"name": test_folder_name}, base_count=1,
+                item_search_field="name"
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 

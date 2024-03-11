@@ -14,10 +14,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		})
 	);
 
-	if (!risk_matrices.length) {
-		error(400, 'You must import at least one risk matrix to access this page !');
-	}
-
 	return {
 		risk_matrices
 	};

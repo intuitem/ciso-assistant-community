@@ -1,6 +1,6 @@
 # Library workbench
 
-The convert-framework.py script can be used to transform an Excel file to a CISO Assitant library.
+The convert-framework.py script can be used to transform an Excel file to a CISO Assistant library.
 
 Have a look to the given examples.
 

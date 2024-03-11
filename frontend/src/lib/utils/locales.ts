@@ -284,12 +284,17 @@ export function localItems(languageTag: string): LocalItems {
 		inProgress: m.inProgress({ languageTag: languageTag }),
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
 		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
+		requirementAssessments: m.requirementAssessments({ languageTag: languageTag }),
 		compliant: m.compliant({ languageTag: languageTag }),
 		notApplicable: m.notApplicable({ languageTag: languageTag }),
 		administrator: m.administrator({ languageTag: languageTag }),
 		analyst: m.analyst({ languageTag: languageTag }),
 		auditor: m.auditor({ languageTag: languageTag }),
 		domainManager: m.domainManager({ languageTag: languageTag }),
+		authors: m.authors({ languageTag: languageTag }),
+		reviewers: m.reviewers({ languageTag: languageTag }),
+		isPublished: m.isPublished({ languageTag: languageTag }),
+		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
 
 	};
 	return LOCAL_ITEMS;
