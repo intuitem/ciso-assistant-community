@@ -81,6 +81,10 @@ For the following executions, use "docker compose up" directly.
 
 If you want to restart a fresh install, simply delete the db directory, where the database is stored.
 
+## Documentation
+
+Comprehensive documentation is coming soon. You can already have a look at our [data model](documentation/architecture/data-model.md).
+
 ## Setting up CISO Assistant for development
 
 ### Requirements
