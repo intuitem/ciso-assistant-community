@@ -6,6 +6,10 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
 import { redirect } from '@sveltejs/kit';
 
+import { localItems, toCamelCase } from '$lib/utils/locales';
+import * as m from '$paraglide/messages';
+import { languageTag } from '$paraglide/runtime';
+
 export const actions: Actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
@@ -60,7 +64,7 @@ export const actions: Actions = {
 		}
 
 		const model: string = urlParamModelVerboseName(event.params.model!);
-		setFlash({ type: 'success', message: `${model} successfully saved: ${form.data.name}` }, event);
+		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), name: form.data.name}) }, event);
 		redirect(
 			302,
 			event.url.searchParams.get('next') ?? `/${event.params.model}/${event.params.id}`
