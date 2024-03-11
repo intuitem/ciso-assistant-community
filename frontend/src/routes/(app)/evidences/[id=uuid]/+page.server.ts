@@ -7,6 +7,7 @@ import type { PageServerLoad } from './$types';
 import type { urlModel } from '$lib/utils/types';
 import { listViewFields } from '$lib/utils/table';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
 	const URLModel = 'evidences';
@@ -63,10 +64,10 @@ export const actions: Actions = {
 			if (response.non_field_errors) {
 				setError(deleteAttachmentForm, 'non_field_errors', response.non_field_errors);
 			}
-			setFlash({ type: 'error', message: 'An error has occured' }, event);
+			setFlash({ type: 'error', message: m.anErrorOccurred() }, event);
 			return fail(400, { form: deleteAttachmentForm });
 		}
-		setFlash({ type: 'success', message: 'Attachment successfully deleted' }, event);
+		setFlash({ type: 'success', message: m.attachmentDeleted() }, event);
 		throw redirect(302, `/${urlmodel}/${id}`);
 	}
 };
