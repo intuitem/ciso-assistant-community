@@ -64,6 +64,7 @@ def test_get_rating_options_perm_to_view_matrix():
         user=user,
         role=role,
         folder=folder,
+        is_recursive=True,
     )
     role_assignment.perimeter_folders.add(folder)
     role_assignment.save()
@@ -128,6 +129,7 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
         user=user,
         role=role,
         folder=folder,
+        is_recursive=True,
     )
     role_assignment.perimeter_folders.add(folder)
     role_assignment.save()
