@@ -354,6 +354,10 @@
 	"technical": "Technical",
 	"physical": "Physical",
 	"process": "Process",
+	"veryLow": "Very low",
+	"low": "Low",
+	"high": "High",
+	"veryHigh": "Very high",
 	"small": "Small",
 	"medium": "Medium",
 	"large": "Large",
@@ -471,5 +475,12 @@
 	"isPublished": "Is published",
 	"suggestedReferenceControls": "Suggested reference controls",
 	"threatsCovered": "Threats covered",
-	"noFileDetected": "Error: no file detected"
+	"noFileDetected": "Error: no file detected",
+	"noDescription": "No description",
+	"noExistingControls": "No existing controls",
+	"noJustification": "No justification",
+	"undefinedSOK": "The strength of the knowledge supporting the assessment is not defined",
+	"lowSOK": "The strength of the knowledge supporting the assessment is low",
+	"mediumSOK": "The strength of the knowledge supporting the assessment is medium",
+	"highSOK": "The strength of the knowledge supporting the assessment is high"
 }
