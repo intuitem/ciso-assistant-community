@@ -105,34 +105,54 @@
             <h4 class="h4 font-semibold">{m.currentRisk()}</h4>
             <p class="text-sm font-semibold text-gray-400">{m.existingControls()}</p>
             {#if data.scenario.existing_controls}
-                <p>{data.scenario.existing_controls}</p>
+                <p>
+                    {data.scenario.existing_controls}
+                </p>
             {:else}
                 <p class="text-gray-400 italic text-sm">{m.noExistingControls()}</p>
             {/if}
         </div>
         <div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2 h-full">
-            <p class="flex flex-col items-center">
+            <p class="flex flex-col">
                 <span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
                 <span 
                 class="text-sm text-center font-semibold p-2 rounded-md w-20"
                 style="background-color: {color_map[data.scenario.current_proba]}"
-                >{data.scenario.current_proba}</span>
+                >
+                {#if localItems(languageTag())[toCamelCase(data.scenario.current_proba)]}
+                    {localItems(languageTag())[toCamelCase(data.scenario.current_proba)]}
+                {:else}
+                    {data.scenario.current_proba}
+                {/if}
+                </span>
             </p>
             <i class="fa-solid fa-xmark mt-5" />
-            <p class="flex flex-col items-center">
+            <p class="flex flex-col">
                 <span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
                 <span 
                 class="text-sm text-center font-semibold p-2 rounded-md w-20"
                 style="background-color: {color_map[data.scenario.current_impact]}"
-                >{data.scenario.current_impact}</span>
+                >
+                {#if localItems(languageTag())[toCamelCase(data.scenario.current_impact)]}
+                    {localItems(languageTag())[toCamelCase(data.scenario.current_impact)]}
+                {:else}
+                    {data.scenario.current_impact}
+                {/if}
+            </span>
             </p>
             <i class="fa-solid fa-equals mt-5" />
-            <p class="flex flex-col items-center">
+            <p class="flex flex-col">
                 <span class="text-sm font-semibold text-gray-400">{m.currentRiskLevel()}</span>
                 <span 
                 class="text-sm text-center font-semibold p-2 rounded-md w-20"
                 style="background-color: {data.scenario.current_level.hexcolor}"
-                >{data.scenario.current_level.name}</span>
+                >
+                {#if localItems(languageTag())[toCamelCase(data.scenario.current_level.name)]}
+                    {localItems(languageTag())[toCamelCase(data.scenario.current_level.name)]}
+                {:else}
+                    {data.scenario.current_level.name}
+                {/if}
+                </span>
             </p>
         </div>
     </div>
@@ -143,28 +163,46 @@
             <ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
         </div>
         <div class="flex flex-row space-x-4 my-auto items-center justify-center w-1/2">
-            <p class="flex flex-col items-center">
+            <p class="flex flex-col">
                 <span class="text-sm font-semibold text-gray-400">{m.probability()}</span>
                 <span 
                 class="text-sm text-center font-semibold p-2 rounded-md w-20"
                 style="background-color: {color_map[data.scenario.residual_proba]}"
-                >{data.scenario.residual_proba}</span>
+                >
+                {#if localItems(languageTag())[toCamelCase(data.scenario.residual_proba)]}
+                    {localItems(languageTag())[toCamelCase(data.scenario.residual_proba)]}
+                {:else}
+                    {data.scenario.residual_proba}
+                {/if}
+                </span>
             </p>
             <i class="fa-solid fa-xmark mt-5" />
-            <p class="flex flex-col items-center">
+            <p class="flex flex-col">
                 <span class="text-sm font-semibold text-gray-400">{m.impact()}</span>
                 <span 
                 class="text-sm text-center font-semibold p-2 rounded-md w-20"
                 style="background-color: {color_map[data.scenario.residual_impact]}"
-                >{data.scenario.residual_impact}</span>
+                >
+                {#if localItems(languageTag())[toCamelCase(data.scenario.residual_impact)]}
+                    {localItems(languageTag())[toCamelCase(data.scenario.residual_impact)]}
+                {:else}
+                    {data.scenario.residual_impact}
+                {/if}
+                </span>
             </p>
             <i class="fa-solid fa-equals mt-5" />
-            <p class="flex flex-col items-center">
+            <p class="flex flex-col">
                 <span class="text-sm font-semibold text-gray-400">{m.residualRiskLevel()}</span>
                 <span 
                 class="text-sm text-center font-semibold p-2 rounded-md w-20"
                 style="background-color: {data.scenario.residual_level.hexcolor}"
-                >{data.scenario.residual_level.name}</span>
+                >
+                {#if localItems(languageTag())[toCamelCase(data.scenario.residual_level.name)]}
+                    {localItems(languageTag())[toCamelCase(data.scenario.residual_level.name)]}
+                {:else}
+                    {data.scenario.residual_level.name}
+                {/if}
+                </span>
             </p>
         </div>
     </div>

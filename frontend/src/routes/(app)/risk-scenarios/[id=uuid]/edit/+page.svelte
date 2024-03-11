@@ -96,10 +96,6 @@
 		}
 	}
 
-	for (const index in data.treatmentChoices) {
-		data.treatmentChoices[index]['label'] = localItems(languageTag())[data.treatmentChoices[index]['value']];
-	}
-
 	let { form: measureCreateForm, message: measureCreateMessage } = {
 		form: {},
 		message: {}
@@ -224,7 +220,7 @@
 							field="current_proba"
 							label={m.currentProba()}
 						/>
-						<i class="fa-solid fa-xmark my-auto" />
+						<i class="fa-solid fa-xmark mt-8" />
 						<Select
 							{form}
 							options={data.impactChoices}
@@ -232,7 +228,7 @@
 							field="current_impact"
 							label={m.currentImpact()}
 						/>
-						<i class="fa-solid fa-equals my-auto" />
+						<i class="fa-solid fa-equals mt-8" />
 						<RiskLevel
 							{form}
 							field="current_risk_level"
@@ -278,7 +274,7 @@
 							field="residual_proba"
 							label={m.residualProba()}
 						/>
-						<i class="fa-solid fa-xmark my-auto" />
+						<i class="fa-solid fa-xmark mt-8" />
 						<Select
 							{form}
 							options={data.impactChoices}
@@ -286,7 +282,7 @@
 							field="residual_impact"
 							label={m.residualImpact()}
 						/>
-						<i class="fa-solid fa-equals my-auto" />
+						<i class="fa-solid fa-equals mt-8" />
 						<RiskLevel
 							{form}
 							field="current_risk_level"
