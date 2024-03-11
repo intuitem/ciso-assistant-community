@@ -4,6 +4,7 @@ import { SetPasswordSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, SetPasswordSchema);
@@ -39,7 +40,7 @@ export const actions: Actions = {
 			return fail(res.status, { form });
 		}
 
-		setFlash({ type: 'success', message: `The password was successfully set` }, event);
+		setFlash({ type: 'success', message: m.passwordSuccessfullySet() }, event);
 		redirect(302, '/users');
 	}
 };
