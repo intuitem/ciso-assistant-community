@@ -7,6 +7,9 @@
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import * as m from '$paraglide/messages';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.framework);
@@ -33,9 +36,9 @@
 				<div class="flex flex-col">
 					<div class="text-sm font-medium text-gray-800 capitalize-first">
 						{#if key === 'urn'}
-							URN
+							{m.urn()}
 						{:else}
-							{key.replace('_', ' ')}
+						{localItems(languageTag())[toCamelCase(key)]}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -79,7 +82,7 @@
 	</div>
 
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<h4 class="h4 font-semibold">Associated requirements</h4>
+		<h4 class="h4 font-semibold">{m.associatedRequirements()}</h4>
 		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
 	</div>
 </div>
