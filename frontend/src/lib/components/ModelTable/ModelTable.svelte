@@ -262,7 +262,7 @@
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
-                preventDelete={(row.meta.builtin || row.meta.urn !== null) && !(row.meta.allowDeleteLibrary ?? false)}
+                preventDelete={(row.meta.builtin || (row.allowDeleteLibrary ? row.allowDeleteLibrary : (row.meta.urn ?? false)))}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}
