@@ -80,6 +80,7 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	
 	await lastMail.open();
 	const pagePromise = page.context().waitForEvent('page');
+	await expect(mailer.emailContent.resetPasswordButton).toBeVisible();
 	await mailer.emailContent.resetPasswordButton.click();
 	const resetPasswordPage = await pagePromise;
 	await resetPasswordPage.waitForLoadState();
