@@ -23,7 +23,12 @@ class BaseModelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"urn": "Imported objects cannot be modified"}
             )
-        return super().update(instance, validated_data)
+        try:
+            object_updated = super().update(instance, validated_data)
+            return object_updated
+        except Exception as e:
+            logger.error(e)
+            raise serializers.ValidationError(e.args[0])
 
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
