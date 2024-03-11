@@ -457,7 +457,7 @@
 	"noDescription": "No description",
 	"noExistingControls": "No existing controls",
 	"noJustification": "No justification",
-	"undefinedSOK": "The strength of the knowledge supporting the assessment is undefined",
+	"undefinedSOK": "The strength of the knowledge supporting the assessment is not defined",
 	"lowSOK": "The strength of the knowledge supporting the assessment is low",
 	"mediumSOK": "The strength of the knowledge supporting the assessment is medium",
 	"highSOK": "The strength of the knowledge supporting the assessment is high"
