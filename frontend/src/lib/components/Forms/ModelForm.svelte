@@ -103,7 +103,7 @@
 			hide={initialData.folder}
 		/>
 		<TextField {form} field="internal_reference" label={m.internalReference()} />
-		<AutocompleteSelect
+		<Select
 			{form}
 			options={model.selectOptions['lc_status']}
 			field="lc_status"
