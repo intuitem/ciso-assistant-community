@@ -164,6 +164,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'description', type: type.TEXT },
 			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'eta', type: type.DATE },
 			{ name: 'due_date', type: type.DATE }
@@ -493,6 +494,7 @@ export class TestContent {
 					description: vars.description,
 					project: vars.projectName,
 					version: '1.4.2',
+					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
 					// eta: "2025-01-01",
 					// due_date: "2025-05-01"
