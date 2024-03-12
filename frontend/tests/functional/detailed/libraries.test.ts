@@ -60,7 +60,7 @@ test('every libraries can be deleted', async ({
         if (await librariesPage.deleteItemButton(nextRemainingLibrary).isVisible()) {
             await librariesPage.deleteItemButton(nextRemainingLibrary).click();
             await librariesPage.deleteModalConfirmButton.click();
-		    await librariesPage.isToastVisible('Successfully deleted.+', undefined, {
+		    await librariesPage.isToastVisible('The library object has been successfully deleted.+', undefined, {
                 timeout: 15000
             });
             if (await page.getByText(' You currently have no imported libraries.').isHidden()) {
