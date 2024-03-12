@@ -20,6 +20,10 @@ from datetime import date, datetime
 from typing import Self
 from django.utils.html import format_html
 
+from structlog import get_logger
+
+logger = get_logger(__name__)
+
 User = get_user_model()
 
 ########################### Referential objects #########################
@@ -674,16 +678,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
         return f"[{self.status}] {self.name}" if self.status else self.name
 
     def get_ranking_score(self):
-        if self.effort:
-            value = 0
-            for risk_scenario in self.risk_scenarios.all():
-                current = risk_scenario.current_level
-                residual = risk_scenario.residual_level
-                if current >= 0 and residual >= 0:
-                    value += (1 + current - residual) * (current + 1)
-            return round(value / self.MAP_EFFORT[self.effort], 4)
-        else:
-            return 0
+        value = 0
+        for risk_scenario in self.risk_scenarios.all():
+            current = risk_scenario.current_level
+            residual = risk_scenario.residual_level
+            if current >= 0 and residual >= 0:
+                value += (1 + current - residual) * (current + 1)
+        return abs(round(value / self.MAP_EFFORT[self.effort], 4))
 
     @property
     def get_html_url(self):
