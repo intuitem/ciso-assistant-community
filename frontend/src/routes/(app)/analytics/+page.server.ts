@@ -11,6 +11,13 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
 	const counters = await req_get_counters.json();
 
+	const usedRiskMatrices = await fetch(`${BASE_API_URL}/risk-matrices/used/`)
+		.then((res) => res.json())
+		.then((res) => res.results);
+	const usedFrameworks = await fetch(`${BASE_API_URL}/frameworks/used/`)
+		.then((res) => res.json())
+		.then((res) => res.results);
+
 	const req_get_risks_count_per_level = await fetch(
 		`${BASE_API_URL}/risk-scenarios/count_per_level/`
 	);
@@ -80,46 +87,50 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		})
 		.catch((error) => console.error('Error:', error));
 
-	projects.forEach((project) => {
-		// Initialize an object to hold the aggregated donut data
-		const aggregatedDonutData = {
-			values: [],
-			total: 0
-		};
+	if (projects) {
+		projects.forEach((project) => {
+			// Initialize an object to hold the aggregated donut data
+			const aggregatedDonutData = {
+				values: [],
+				total: 0
+			};
 
-		// Iterate through each compliance assessment of the project
-		project.compliance_assessments.forEach((compliance_assessment) => {
-			// Process the donut data of each assessment
-			compliance_assessment.donut.values.forEach((donutItem) => {
-				// Find the corresponding item in the aggregated data
-				const aggregatedItem = aggregatedDonutData.values.find(
-					(item) => item.name === donutItem.name
-				);
+			// Iterate through each compliance assessment of the project
+			project.compliance_assessments.forEach((compliance_assessment) => {
+				// Process the donut data of each assessment
+				compliance_assessment.donut.values.forEach((donutItem) => {
+					// Find the corresponding item in the aggregated data
+					const aggregatedItem = aggregatedDonutData.values.find(
+						(item) => item.name === donutItem.name
+					);
 
-				if (aggregatedItem) {
-					// If the item already exists, increment its value
-					aggregatedItem.value += donutItem.value;
-				} else {
-					// If it's a new item, add it to the aggregated data
-					aggregatedDonutData.values.push({ ...donutItem });
-				}
+					if (aggregatedItem) {
+						// If the item already exists, increment its value
+						aggregatedItem.value += donutItem.value;
+					} else {
+						// If it's a new item, add it to the aggregated data
+						aggregatedDonutData.values.push({ ...donutItem });
+					}
+				});
 			});
+
+			// Calculate the total sum of all values
+			const totalValue = aggregatedDonutData.values.reduce((sum, item) => sum + item.value, 0);
+
+			// Calculate and store the percentage for each item
+			aggregatedDonutData.values = aggregatedDonutData.values.map((item) => ({
+				...item,
+				percentage: totalValue > 0 ? parseFloat((item.value / totalValue) * 100).toFixed(1) : 0
+			}));
+
+			// Assign the aggregated donut data to the project
+			project.overallCompliance = aggregatedDonutData;
 		});
-
-		// Calculate the total sum of all values
-		const totalValue = aggregatedDonutData.values.reduce((sum, item) => sum + item.value, 0);
-
-		// Calculate and store the percentage for each item
-		aggregatedDonutData.values = aggregatedDonutData.values.map((item) => ({
-			...item,
-			percentage: totalValue > 0 ? parseFloat((item.value / totalValue) * 100).toFixed(1) : 0
-		}));
-
-		// Assign the aggregated donut data to the project
-		project.overallCompliance = aggregatedDonutData;
-	});
+	}
 
 	return {
+		usedRiskMatrices,
+		usedFrameworks,
 		risks_level: risks_count_per_level.results,
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
