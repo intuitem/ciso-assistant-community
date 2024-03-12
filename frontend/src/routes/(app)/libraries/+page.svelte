@@ -59,6 +59,11 @@
 				let:form
 				validators={LibraryUploadSchema}
 				action="?/upload"
+				onSubmit={() => {
+					const fileInput = document.querySelector(`input[type="file"]`);
+					console.log(fileInput);
+					fileInput.value = "";
+				}}
 				{...$$restProps}
 			>
 				<FileInput
