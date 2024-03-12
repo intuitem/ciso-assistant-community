@@ -4,7 +4,7 @@ import { ResetPasswordSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
-import { page } from '$app/stores';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, ResetPasswordSchema);
@@ -48,7 +48,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: `Your password was successfully set. Welcome to CISO Assistant.`
+				message: m.passwordSuccessfullySetWelcome()
 			},
 			event
 		);
