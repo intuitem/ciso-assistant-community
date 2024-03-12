@@ -440,10 +440,10 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		name: {
 			key: 'status',
 			values: {
-				Open: { text: 'open', cssClasses: 'badge bg-blue-200' },
-				'In progress': { text: 'in progress', cssClasses: 'badge bg-green-200' },
-				'On hold': { text: 'on hold', cssClasses: 'badge bg-yellow-300' },
-				Done: { text: 'done', cssClasses: 'badge bg-red-200' }
+				Planned: { text: 'planned', cssClasses: 'badge bg-blue-200' },
+				Active: { text: 'active', cssClasses: 'badge bg-green-200' },
+				Inactive: { text: 'inactive', cssClasses: 'badge bg-red-300' },
+				null: { text: 'undefined', cssClasses: 'badge bg-gray-300' }
 			}
 		}
 	},

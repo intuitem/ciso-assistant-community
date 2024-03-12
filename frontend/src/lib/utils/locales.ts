@@ -12,9 +12,9 @@ export const LOCALE_MAP = {
 };
 
 export function toCamelCase(str: string) {
-	if ( typeof str !== 'string' ) return str;
+	if (typeof str !== 'string') return str;
 	str = str.charAt(0).toLowerCase() + str.slice(1);
-	return str.replace(/[_-\s]\w/g, match => match.charAt(1).toUpperCase());
+	return str.replace(/[_-\s]\w/g, (match) => match.charAt(1).toUpperCase());
 }
 
 export function capitalizeFirstLetter(str: string) {
@@ -295,7 +295,7 @@ export function localItems(languageTag: string): LocalItems {
 		reviewers: m.reviewers({ languageTag: languageTag }),
 		isPublished: m.isPublished({ languageTag: languageTag }),
 		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
-
+		rankingScore: m.rankingScore({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
