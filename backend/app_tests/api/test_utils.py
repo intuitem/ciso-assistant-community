@@ -33,13 +33,15 @@ class EndpointTestsUtils:
         from iam.models import Folder, User, UserGroup
 
         EndpointTestsQueries.Auth.create_object(
-            authenticated_client, "Folders", Folder, {"name": assigned_folder_name}
+            authenticated_client, "Folders", Folder, {"name": assigned_folder_name},
+            item_search_field="name"
         )
         assigned_folder = test_folder = Folder.objects.get(name=assigned_folder_name)
 
         if test_folder_name != assigned_folder_name:
             EndpointTestsQueries.Auth.create_object(
-                authenticated_client, "Folders", Folder, {"name": test_folder_name}, base_count=1
+                authenticated_client, "Folders", Folder, {"name": test_folder_name}, base_count=1,
+                item_search_field="name"
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
@@ -357,20 +359,21 @@ class EndpointTestsQueries:
                     else f"Accessing {verbose_name.lower()} should give a status {user_perm_expected_status}"
                 )
 
-            if (
-                base_count == 0
-                and not (object and build_params)
-                and test_params
-                and not (fails or user_perm_fails)
-            ):
-                # perfom a test with an externally created object
-                assert (
-                    response.json()["count"] == base_count + 1
-                ), f"{verbose_name} are not accessible with authentication"
-            elif base_count > 0 and not (fails or user_perm_fails):
-                assert (
-                    response.json()["count"] == base_count
-                ), f"{verbose_name} are not accessible with authentication"
+            if not (fails or user_perm_fails):
+                if not (object and build_params) and test_params:
+                    if base_count == 0:
+                        # perfom a test with an externally created object
+                        assert (
+                            response.json()["count"] == base_count + 1
+                        ), f"{verbose_name} are not accessible with authentication"
+                    elif base_count < 0:
+                        assert (
+                            len(response.json()["results"]) != 0
+                        ), f"{verbose_name} are not accessible with authentication"
+                elif base_count > 0:
+                    assert (
+                        response.json()["count"] == base_count
+                    ), f"{verbose_name} are not accessible with authentication"
 
             # Creates a test object from the model
             if build_params and object:
@@ -552,7 +555,6 @@ class EndpointTestsQueries:
 
             # Uses the API endpoint to create an object with authentication
             response = authenticated_client.post(url, build_params, format=query_format)
-            print(response.json())
 
             if fails:
                 # Asserts that the object was not created

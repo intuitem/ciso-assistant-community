@@ -40,7 +40,7 @@ def authenticated_client(app_config):
     )
 def test(authenticated_client, request) -> Test:
     """Get the elements used by the tests such as client and associated folder"""
-    client, folder, _ = EndpointTestsUtils.get_test_client_and_folder(
+    client, folder, assigned_folder = EndpointTestsUtils.get_test_client_and_folder(
         authenticated_client, request.param[0], request.param[1]
     )
     return Test(
@@ -48,6 +48,7 @@ def test(authenticated_client, request) -> Test:
             "client": client,
             "admin_client": authenticated_client,
             "folder": folder,
+            "assigned_folder": assigned_folder,
             "user_group": request.param[0],
         }
     )

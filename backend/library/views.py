@@ -31,9 +31,9 @@ from rest_framework.response import Response
 from .serializers import LibrarySerializer, LibraryUploadSerializer
 from .utils import get_available_libraries, get_library, import_library_view
 
-
 class LibraryViewSet(BaseModelViewSet):
     serializer_class = LibrarySerializer
+    parser_classes = [FileUploadParser]
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
     lookup_value_regex = r"[\w.:-]+"
@@ -66,7 +66,8 @@ class LibraryViewSet(BaseModelViewSet):
         if library is None:
             return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
-        if library["reference_count"] != 0:
+        # "reference_count" is not always defined (is this normal ?)
+        if library.get("reference_count",0) != 0 :
             return Response(
                 data="Library cannot be deleted because it has references.",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -119,7 +120,6 @@ class LibraryViewSet(BaseModelViewSet):
             import_library_view(library)
             return Response({"status": "success"})
         except Exception as e:
-            print(e)
             return Response(
                 {
                     "error": "Failed to load library, please check if it has dependencies"
@@ -127,15 +127,11 @@ class LibraryViewSet(BaseModelViewSet):
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
-
-class UploadLibraryView(APIView):
-    parser_classes = (FileUploadParser,)
-    serializer_class = LibraryUploadSerializer
-
-    def post(self, request):
+    @action(detail=False, methods=["post"], url_path="upload")
+    def upload_library(self, request):
         if not request.data:
             return HttpResponse(
-                json.dumps({"error": "No file detected !"}), status=HTTP_400_BAD_REQUEST
+                json.dumps({"error": "noFileDetected"}), status=HTTP_400_BAD_REQUEST
             )
 
         try:

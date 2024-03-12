@@ -51,7 +51,7 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 		confirm_new_password: testData.user.password
 	});
 	await usersPage.form.saveButton.click();
-	await usersPage.isToastVisible('The password was successfully set');
+	await usersPage.isToastVisible('Your password has been successfully set');
 
 	await sideBar.moreButton.click();
 	await expect(sideBar.morePanel).not.toHaveAttribute('inert');
@@ -80,6 +80,7 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	
 	await lastMail.open();
 	const pagePromise = page.context().waitForEvent('page');
+	await expect(mailer.emailContent.resetPasswordButton).toBeVisible();
 	await mailer.emailContent.resetPasswordButton.click();
 	const resetPasswordPage = await pagePromise;
 	await resetPasswordPage.waitForLoadState();
@@ -90,7 +91,7 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	await resetLoginPage.confirmPasswordInput.fill("new" + testData.user.password);
 	await resetLoginPage.setPasswordButton.click();
 
-	await resetLoginPage.isToastVisible('Your password was successfully reset');
+	await resetLoginPage.isToastVisible('Your password has been successfully reset');
 	await resetLoginPage.hasUrl(0);
 	await resetPasswordPage.close();
 

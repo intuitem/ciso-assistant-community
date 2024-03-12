@@ -95,7 +95,7 @@ test('user usual routine actions are working correctly', async ({
 		//TODO assert that the reference control data are displayed in the table
 	});
 
-	await test.step('user can create a applied control', async () => {
+	await test.step('user can create an applied control', async () => {
 		await sideBar.click('Context', pages.appliedControlsPage.url);
 		await pages.appliedControlsPage.hasUrl();
 		await pages.appliedControlsPage.hasTitle();
@@ -125,6 +125,7 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			project: vars.projectName,
 			version: '1.4.2',
+			status: 'Done',
 			framework: vars.framework.name,
 			eta: '2025-01-01',
 			due_date: '2025-05-01'
@@ -179,6 +180,7 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			project: vars.projectName,
 			version: '1.4.2',
+			status: 'Done',
 			risk_matrix: vars.matrix.displayName,
 			eta: '2025-01-01',
 			due_date: '2025-05-01'
