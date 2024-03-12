@@ -9,10 +9,9 @@
 	export let values: any[]; // Set the types for these variables later on
 	export let colors: string[] = [];
 
-	for (const index in values){
-		if (values[index].localName)
-		{
-			values[index].name = localItems(languageTag())[values[index].localName]
+	for (const index in values) {
+		if (values[index].localName) {
+			values[index].name = localItems(languageTag())[values[index].localName];
 		}
 	}
 
@@ -79,5 +78,4 @@
 	});
 </script>
 
-<div class="bg-white w-auto h-full" bind:this={chart_element} />
-
+<div class="w-auto h-full" bind:this={chart_element} />
