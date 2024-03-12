@@ -446,5 +446,7 @@
 	"isPublished": "Is published",
 	"suggestedReferenceControls": "Suggested reference controls",
 	"threatsCovered": "Threats covered",
-	"noFileDetected": "Error: no file detected"
+	"noFileDetected": "Error: no file detected",
+	"usedRiskMatrices": "Used risk matrices",
+	"usedFrameworks": "Used frameworks"
 }

@@ -446,5 +446,7 @@
 	"isPublished": "Publié",
 	"suggestedReferenceControls": "Mesures de référence suggérées",
 	"threatsCovered": "Menaces couvertes",
-	"noFileDetected": "Erreur: aucun fichier détecté"
+	"noFileDetected": "Erreur: aucun fichier détecté",
+	"usedRiskMatrices": "Matrices de risque utilisées",
+	"usedFrameworks": "Cadres utilisés"
 }
