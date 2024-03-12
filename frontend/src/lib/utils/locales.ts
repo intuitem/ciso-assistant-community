@@ -306,7 +306,9 @@ export function localItems(languageTag: string): LocalItems {
 		lowSOK: m.lowSOK({ languageTag: languageTag }),
 		mediumSOK: m.mediumSOK({ languageTag: languageTag }),
 		highSOK: m.highSOK({ languageTag: languageTag }),
-
+		libraryImportError: m.libraryImportError({ languageTag: languageTag }),
+		libraryAlreadyExistsError: m.libraryAlreadyImportedError({ languageTag: languageTag }),
+		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
