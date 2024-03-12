@@ -78,7 +78,7 @@ test('user can set his password', async ({
     await passwordPageSideBar.logoutButton.click();
     await setLoginPage.hasUrl(0);
 
-    await setPasswordPage.close(); 
+    // await setPasswordPage.close(); 
 });
 
 test('user can view his folder', async ({loginPage, foldersPage, page}) => {
@@ -89,8 +89,16 @@ test('user can view his folder', async ({loginPage, foldersPage, page}) => {
     await expect(foldersPage.getRow(vars.folderName)).toBeVisible();
 });
 
-test.afterEach('cleanup', async ({ loginPage, foldersPage, usersPage, page }, testInfo) => {
-    if (testInfo.testId.includes('user can view his folder')) {
+test.afterEach('cleanup', async ({sideBar, loginPage, foldersPage, usersPage, page}, testInfo) => {
+    if (testInfo.title.includes('user can view his folder')) {      
+        if (await sideBar.userEmailDisplay.innerText() === vars.user.email) {
+            await sideBar.moreButton.click();
+            await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+            await expect(sideBar.logoutButton).toBeVisible();
+            await sideBar.logoutButton.click();
+            await loginPage.hasUrl(0);
+        }
+
         await loginPage.login();
         await foldersPage.goto();
         await foldersPage.deleteItemButton(vars.folderName).click();

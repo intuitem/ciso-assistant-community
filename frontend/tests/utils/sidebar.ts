@@ -10,6 +10,8 @@ type TabContent = {
 export class SideBar {
 	readonly items: Map<string, TabContent[]>;
 	readonly page: Page;
+	readonly userEmailDisplay: Locator;
+	readonly userNameDisplay: Locator;
 	readonly moreButton: Locator;
 	readonly morePanel: Locator;
 	readonly profileButton: Locator;
@@ -25,6 +27,8 @@ export class SideBar {
 				item.items.flatMap((item: TabContent) => ({ name: item.name, href: item.href }))
 			])
 		);
+		this.userEmailDisplay = this.page.getByTestId('sidebar-user-email-display');
+		this.userNameDisplay = this.page.getByTestId('sidebar-user-name-display');
 		this.moreButton = this.page.getByTestId('sidebar-more-btn');
 		this.morePanel = this.page.getByTestId('sidebar-more-panel');
 		this.profileButton = this.page.getByTestId('profile-button');
