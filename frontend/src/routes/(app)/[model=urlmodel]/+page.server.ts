@@ -128,19 +128,19 @@ export const actions: Actions = {
 			const model: string = urlParamModelVerboseName(event.params.model!);
 			// TODO: reference newly created object
 			if (model === 'User') {
-				return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[model.toLowerCase()].toLowerCase()}));
+				setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[model.toLowerCase()].toLowerCase()}) }, event);
 			}
-			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}));
+			setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[model.toLowerCase()].toLowerCase()}) }, event);
 		}
 		return { createForm };
 	},
-	delete: async ({ request, fetch, params }) => {
-		const formData = await request.formData();
+	delete: async (event) => {
+		const formData = await event.request.formData();
 		const schema = z.object({ id: z.string().uuid() });
 		const deleteForm = await superValidate(formData, schema);
 
 		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/${params.model}/${id}/`;
+		const endpoint = `${BASE_API_URL}/${event.params.model}/${id}/`;
 
 		if (!deleteForm.valid) {
 			console.log(deleteForm.errors);
@@ -151,7 +151,7 @@ export const actions: Actions = {
 			const requestInitOptions: RequestInit = {
 				method: 'DELETE'
 			};
-			const res = await fetch(endpoint, requestInitOptions);
+			const res = await event.fetch(endpoint, requestInitOptions);
 			if (!res.ok) {
 				const response = await res.json();
 				console.log(response);
@@ -160,9 +160,9 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			const model: string = urlParamModelVerboseName(params.model!);
+			const model: string = urlParamModelVerboseName(event.params.model!);
 			// TODO: reference object by name instead of id
-			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), id: id}));
+			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}) }, event);
 		}
 		return { deleteForm };
 	}
