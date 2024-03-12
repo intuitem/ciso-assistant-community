@@ -33,7 +33,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 
 	await test.step('user email is showing properly', async () => {
-		await expect(page.getByTestId('sidebar-user-account-display')).toHaveText(logedPage.email);
+		await expect(sideBar.userEmailDisplay).toHaveText(logedPage.email);
 		//TODO test also that user name and first name are displayed instead of the email when sets
 	});
 
