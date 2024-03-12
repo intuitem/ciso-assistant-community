@@ -424,13 +424,13 @@ def risk_per_status(user: User):
 
 def applied_control_per_status(user: User):
     values = list()
-    labels = list()
-    local_lables = list()
+    labels = ["undefined"]
+    local_lables = ["undefined"]
     color_map = {
-        "--": "#93c5fd",
-        "planned": "#fdba74",
-        "active": "#f87171",
-        "inactive": "#86efac",
+        "undefined": "#CCC",
+        "planned": "#5470c6",
+        "active": "#46D39A",
+        "inactive": "#E55759",
     }
     (
         object_ids_view,
@@ -439,12 +439,13 @@ def applied_control_per_status(user: User):
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
     )
+    viewable_applied_controls = AppliedControl.objects.filter(id__in=object_ids_view)
+    undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
+    values.append(
+        {"value": undefined_count, "itemStyle": {"color": color_map["undefined"]}}
+    )
     for st in AppliedControl.Status.choices:
-        count = (
-            AppliedControl.objects.filter(id__in=object_ids_view)
-            .filter(status=st[0])
-            .count()
-        )
+        count = viewable_applied_controls.filter(status=st[0]).count()
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
