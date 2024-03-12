@@ -16,6 +16,7 @@
 	import { languageTag } from '$paraglide/runtime';
 	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
 	import CounterCard from './CounterCard.svelte';
+	import BarChart from '$lib/components/Chart/BarChart.svelte';
 
 	interface Counters {
 		domains: number;
@@ -56,47 +57,12 @@
 	}
 
 	onMount(async () => {
-		const echarts = await import('echarts');
-		let echart_element = document.getElementById('applied_controls_status_div');
-
-		let applied_controls_status_div_ch = echarts.init(echart_element, null, { renderer: 'svg' });
-
-		let option = {
-			xAxis: {
-				type: 'category',
-				data: applied_control_status.labels
-			},
-			yAxis: {
-				type: 'value',
-				allowDecimals: false,
-				minInterval: 1
-			},
-			series: [
-				{
-					data: applied_control_status.values,
-					type: 'bar'
-				}
-			]
-		};
-
-		applied_controls_status_div_ch.setOption(option);
-
-		let echart_resize_handler = () => {
-			applied_controls_status_div_ch.resize();
-		};
-
-		window.addEventListener('resize', echart_resize_handler); // Why this event listener can't be cleared by onDestroy ?
-
 		dropdown.loadOptions(document);
 	});
 
 	beforeUpdate(() => {
 		dropdown_selected_values = dropdown.selectedValues(document);
 	});
-
-	function setOpenTab(_openTab: number) {
-		openTab = _openTab;
-	}
 
 	function get_measure_style(applied_control: AppliedControlSchema): string {
 		if (applied_control.status === 'open') {
@@ -254,23 +220,32 @@
 					</div>
 				</section>
 				<section>
-					<div class="flex flex-row">
-						<div class="h-96 flex-1">
-							<span class="text-sm font-semibold">{m.appliedControlsStatus()}</span>
-							<div id="applied_controls_status_div" class="bg-white w-auto h-full" />
+					<div class="flex flex-row [&>*]:w-1/2">
+						<div class="h-96">
+							<BarChart
+								name="mtg"
+								title={m.appliedControlsStatus()}
+								labels={applied_control_status.labels}
+								values={applied_control_status.values}
+							/>
 						</div>
-						<div class="flex flex-col text-sm whitespace-nowrap">
-							<div class="flex flex-col">
-								<ol class="list">
-									<p>Used matrices</p>
-									{#each data.usedRiskMatrices as matrix, index}
-										<li>
-											<span>{index + 1}.</span>
-											<span class="flex-auto">{matrix.name}</span>
-										</li>
-									{/each}
-								</ol>
-							</div>
+						<div class="flex flex-col space-y-4 h-96 text-sm whitespace-nowrap">
+							<BarChart
+								horizontal
+								name="usedMatrices"
+								title={m.usedRiskMatrices()}
+								labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
+								values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+							/>
+							<BarChart
+								horizontal
+								name="usedFrameworks"
+								title={m.usedFrameworks()}
+								labels={data.usedFrameworks.map((framework) => framework.name)}
+								values={data.usedFrameworks.map(
+									(framework) => framework.compliance_assessments_count
+								)}
+							/>
 						</div>
 					</div>
 				</section>
