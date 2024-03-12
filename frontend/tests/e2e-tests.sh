@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DB_DIR=$APP_DIR/backend/db
-DATABASE_BACKUP_NAME=ciso-assistant-backup.sqlite3
+DB_NAME=test-database.sqlite3
 
 SCRIPT_LONG_ARGS=()
 SCRIPT_SHORT_ARGS=()
@@ -75,12 +75,10 @@ cleanup() {
         kill $BACKEND_PID > /dev/null 2>&1
         echo "| backend server stopped"
     fi
-    if [ -f $DB_DIR/$DATABASE_BACKUP_NAME ] ; then
-        mv $DB_DIR/$DATABASE_BACKUP_NAME $DB_DIR/ciso-assistant.sqlite3
-    else 
-        rm $DB_DIR/ciso-assistant.sqlite3
+    if [ -f $DB_DIR/$DB_NAME ] ; then
+        rm $DB_DIR/$DB_NAME
+        echo "| test database deleted"
     fi
-    echo "| database restored"
     if [ -d $APP_DIR/frontend/tests/utils/.testhistory ] ; then
         rm -rf $APP_DIR/frontend/tests/utils/.testhistory
         echo "| test data history removed"
@@ -98,14 +96,6 @@ finish() {
 trap cleanup SIGINT SIGTERM
 trap finish EXIT
 
-if [ -f $DB_DIR/ciso-assistant.sqlite3 ] ; then
-    echo "an existing database is already created"
-    echo "backup of the existing database..."
-
-    mv $DB_DIR/ciso-assistant.sqlite3 $DB_DIR/$DATABASE_BACKUP_NAME
-    echo "backup completed"
-fi
-
 echo "starting backend server..."
 unset POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
 export CISO_ASSISTANT_URL=http://localhost:4173
@@ -113,6 +103,7 @@ export ALLOWED_HOSTS=localhost
 export DJANGO_DEBUG=True
 export DJANGO_SUPERUSER_EMAIL=admin@tests.com
 export DJANGO_SUPERUSER_PASSWORD=1234
+export SQLITE_FILE=db/$DB_NAME
 
 cd $APP_DIR/backend/
 python manage.py makemigrations
