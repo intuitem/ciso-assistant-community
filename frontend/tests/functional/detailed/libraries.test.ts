@@ -49,6 +49,7 @@ test('every libraries can be deleted', async ({
     let count = 0;
     do {
         if (await librariesPage.tab('Imported libraries').isVisible()) {
+            await page.reload(); // this is a workaround to fix the issue with delete button not being visible with dependencies in CI
             previousRemainingLibrary = nextRemainingLibrary;
             nextRemainingLibrary = await page.locator('tbody tr td:nth-child(1)').nth(count)?.innerText();
             expect(previousRemainingLibrary, "An error occured while deleting library: " + previousRemainingLibrary).not.toEqual(nextRemainingLibrary);
