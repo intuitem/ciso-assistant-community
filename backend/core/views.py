@@ -298,6 +298,18 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
 
+    @action(detail=False, name="Get used risk matrices")
+    def used(self, request):
+        _used_matrices = RiskMatrix.objects.filter(
+            riskassessment__isnull=False
+        ).distinct()
+        used_matrices = _used_matrices.values("id", "name")
+        for i in range(len(used_matrices)):
+            used_matrices[i]["risk_assessments_count"] = _used_matrices.get(
+                id=used_matrices[i]["id"]
+            ).riskassessment_set.count()
+        return Response({"results": used_matrices})
+
 
 class RiskAssessmentViewSet(BaseModelViewSet):
     """
@@ -883,7 +895,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.AUDITOR),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra1.perimeter_folders.add(folder)
             ra2 = RoleAssignment.objects.create(
@@ -891,7 +903,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.APPROVER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra2.perimeter_folders.add(folder)
             ra3 = RoleAssignment.objects.create(
@@ -899,7 +911,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.ANALYST),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra3.perimeter_folders.add(folder)
             ra4 = RoleAssignment.objects.create(
@@ -907,7 +919,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
 
@@ -1022,6 +1034,18 @@ class FrameworkViewSet(BaseModelViewSet):
                 RequirementNode.objects.filter(framework=_framework).all(), None
             )
         )
+
+    @action(detail=False, name="Get used frameworks")
+    def used(self, request):
+        _used_frameworks = Framework.objects.filter(
+            complianceassessment__isnull=False
+        ).distinct()
+        used_frameworks = _used_frameworks.values("id", "name")
+        for i in range(len(used_frameworks)):
+            used_frameworks[i]["compliance_assessments_count"] = _used_frameworks.get(
+                id=used_frameworks[i]["id"]
+            ).complianceassessment_set.count()
+        return Response({"results": used_frameworks})
 
 
 class RequirementNodeViewSet(BaseModelViewSet):

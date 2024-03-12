@@ -632,35 +632,16 @@ def risks_per_project_groups(user: User):
 
 
 def get_counters(user: User):
-    output = {}
-    objects_dict = {
-        "RiskScenario": RiskScenario,
-        "AppliedControl": AppliedControl,
-        "RiskAssessment": RiskAssessment,
-        "Project": Project,
-        "Reference Control": ReferenceControl,
-        "RiskAcceptance": RiskAcceptance,
-        "Threat": Threat,
-        "Compliance Assessment": ComplianceAssessment,
-        "Evidence": Evidence,
+    return {
+        "domains": Folder.objects.filter(
+            content_type=Folder.ContentType.DOMAIN
+        ).count(),
+        "projects": Project.objects.all().count(),
+        "applied_controls": AppliedControl.objects.all().count(),
+        "risk_assessments": RiskAssessment.objects.all().count(),
+        "compliance_assessments": ComplianceAssessment.objects.all().count(),
+        "policies": Policy.objects.all().count(),
     }
-    for name, type in objects_dict.items():
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, type
-        )
-        if type == RiskScenario:
-            output["ShowStopper"] = (
-                type.objects.filter(id__in=object_ids_view)
-                .filter(treatment="blocker")
-                .count()
-            )
-        output[name] = type.objects.filter(id__in=object_ids_view).count()
-
-    return output
 
 
 def risk_status(user: User, risk_assessment_list):
