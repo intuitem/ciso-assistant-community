@@ -167,6 +167,8 @@ class Threat(ReferentialObjectMixin):
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
 
+    fields_to_check = ["ref_id", "name"]
+
     class Meta:
         verbose_name = _("Threat")
         verbose_name_plural = _("Threats")
