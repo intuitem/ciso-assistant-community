@@ -9,14 +9,14 @@
 	import WatchlistMeasures from '$lib/components/fragments/WatchlistMeasures.svelte';
 	import TreatmentProgressDualBar from '$lib/components/Chart/TreatmentProgressDualBar.svelte';
 
-	import { RISK_COLOR_PALETTE } from '$lib/utils/constants';
-
 	import * as m from '$paraglide/messages';
 	import { localItems } from '$lib/utils/locales.js';
 	import { languageTag } from '$paraglide/runtime';
-	import { Tab, TabGroup } from '@skeletonlabs/skeleton';
+	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import CounterCard from './CounterCard.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '$lib/components/ModelTable/types';
 
 	interface Counters {
 		domains: number;
@@ -163,6 +163,52 @@
 		}
 	}
 
+	const appliedControlTodoTable: TableSource = {
+		head: {
+			name: 'name',
+			category: 'category',
+			folder: 'domain',
+			ranking_score: 'rankingScore',
+			status: 'status',
+			eta: 'eta'
+		},
+		body: tableSourceMapper(data.measures, [
+			'name',
+			'category',
+			'folder',
+			'ranking_score',
+			'status',
+			'eta'
+		]),
+		meta: data.measures
+	};
+
+	const appliedControlWatchlistTable: TableSource = {
+		head: {
+			name: 'name',
+			category: 'category',
+			folder: 'domain',
+			eta: 'eta',
+			expiry_date: 'expiryDate'
+		},
+		body: tableSourceMapper(data.measures_to_review, [
+			'name',
+			'category',
+			'folder',
+			'eta',
+			'expiry_date'
+		])
+	};
+
+	const riskAcceptanceWatchlistTable: TableSource = {
+		head: {
+			name: 'name',
+			risk_scenarios: 'riskScenarios',
+			expiry_date: 'expiryDate'
+		},
+		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date'])
+	};
+
 	let dropdown = new Dropdown();
 
 	let tabSet = 0;
@@ -220,52 +266,70 @@
 					</div>
 				</section>
 				<section>
-					<div class="flex flex-row [&>*]:w-1/2">
-						<div class="h-96">
-							<BarChart
-								name="mtg"
-								title={m.appliedControlsStatus()}
-								labels={applied_control_status.labels}
-								values={applied_control_status.values}
-							/>
-						</div>
-						<div class="flex flex-col space-y-4 h-96 text-sm whitespace-nowrap">
-							<BarChart
-								horizontal
-								name="usedMatrices"
-								title={m.usedRiskMatrices()}
-								labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
-								values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
-							/>
-							<BarChart
-								horizontal
-								name="usedFrameworks"
-								title={m.usedFrameworks()}
-								labels={data.usedFrameworks.map((framework) => framework.name)}
-								values={data.usedFrameworks.map(
-									(framework) => framework.compliance_assessments_count
-								)}
-							/>
-						</div>
+					<div class="flex flex-row space-x-4 h-96 text-sm whitespace-nowrap [&>*]:w-full">
+						<BarChart
+							name="usedMatrices"
+							title={m.usedRiskMatrices()}
+							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
+							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+						/>
+						<BarChart
+							name="usedFrameworks"
+							title={m.usedFrameworks()}
+							labels={data.usedFrameworks.map((framework) => framework.name)}
+							values={data.usedFrameworks.map(
+								(framework) => framework.compliance_assessments_count
+							)}
+						/>
+					</div>
+					<div>
+						{#if agg_data.names.length}
+							<div class="m-2 p-2">
+								<div>
+									<!-- <div>{m.treatmentProgressOverview()}</div> -->
+									<!-- <div class="rounded items-center justify-center"> -->
+									<!-- <TreatmentProgressDualBar {agg_data} /> -->
+									<!-- </div> -->
+								</div>
+							</div>
+							<div>
+								<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
+								<div class="text-sm text-gray-500">
+									{m.orderdByRankingScore()}
+								</div>
+								<ModelTable
+									URLModel="applied-controls"
+									source={appliedControlTodoTable}
+									search={false}
+									pagination={false}
+								/>
+								<div class="text-sm">
+									<i class="fas fa-info-circle" />
+									{m.rankingScoreDefintion()}.
+								</div>
+							</div>
+						{:else}
+							<div class="bg-white shadow-md rounded-lg px-4 py-2 m-8">
+								<div>{m.projectsSummaryEmpty()}.</div>
+							</div>
+						{/if}
 					</div>
 				</section>
 				<section>
-					<div class="p-2 m-2">
-						<div class="text-2xl font-extrabold text-slate-700">{m.watchlist()}</div>
-						<div class="text-sm text-slate-500 font-semibold">
+					<div>
+						<div class="text-xl font-extrabold">{m.watchlist()}</div>
+						<div class="text-sm text-gray-500">
 							{m.watchlistDescription()}
 						</div>
 					</div>
-					<div class="p-2 m-2 flex flex-col space-y-5 items-center content-center">
+					<div class="flex flex-col space-y-5 items-center content-center">
 						<div class="w-full">
 							<span class="text-md font-semibold">{m.measuresToReview()}</span>
-
-							<WatchlistMeasures {measures_to_review} />
+							<ModelTable source={appliedControlWatchlistTable} search={false} pagination={false} />
 						</div>
 						<div class="w-full">
 							<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
-
-							<WatchlistExceptions {acceptances_to_review} {user} />
+							<ModelTable source={riskAcceptanceWatchlistTable} search={false} pagination={false} />
 						</div>
 					</div>
 				</section>
@@ -292,6 +356,14 @@
 								colors={risk_level.residual.map((object) => object.color)}
 							/>
 						</div>
+					</div>
+					<div class="h-96">
+						<BarChart
+							name="mtg"
+							title={m.appliedControlsStatus()}
+							labels={applied_control_status.labels}
+							values={applied_control_status.values}
+						/>
 					</div>
 				</section>
 			{:else if tabSet === 2}
@@ -508,93 +580,6 @@ c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,
 		</div>
 	</svelte:fragment>
 </TabGroup>
-
-<div class:hide={openTab !== 4}>
-	<main class="p-2 bg-white rounded-lg shadow-lg mb-6" />
-</div>
-{#if openTab === 3}
-	<div class="h-full">
-		<main class="p-2 bg-white rounded-lg shadow-lg mb-6">
-			<div class="">
-				{#if agg_data.names.length}
-					<div class="m-2 p-2">
-						<div>
-							<div>{m.treatmentProgressOverview()}</div>
-							<div class="rounded items-center justify-center">
-								<TreatmentProgressDualBar {agg_data} />
-							</div>
-						</div>
-					</div>
-					<div class="p-4 m-2">
-						<div class="text-lg font-semibold">{m.pendingMeasures()}</div>
-						<div class="text-sm pb-4">{m.orderdByRankingScore()}</div>
-						<div class="flex items-center justify-center">
-							<table class="p-2 m-2 w-full">
-								<tr class="bg-gray-100">
-									<th class="text-left py-2 px-4">{m.domain()}</th>
-									<th class="text-left py-2 px-4">{m.appliedControl()}</th>
-									<th>{m.rankingScore()}</th>
-									<th>{m.status()}</th>
-									<th>{m.eta()}</th>
-									<th class="py-2 px-4">{m.actions()}</th>
-								</tr>
-
-								{#if measures.length > 0}
-									{#each measures as mtg}
-										<tr class="border-b">
-											<td class="text-left py-2 px-4">{mtg.folder.str}</td>
-											<td class="text-left py-2 px-4">{mtg.name}</td>
-											<td class="text-center py-2 px-4">{mtg.ranking_score}</td>
-											<td class="text-center py-2 px-4 {get_measure_style(mtg)}"
-												>{localItems(languageTag())[mtg.status]}</td
-											>
-											<td class="text-center py-2 px-4"
-												>{#if mtg.meta} {formatDate(mtg.meta)} {:else} -- {/if}</td
-											>
-											<td class="text-center py-2 px-4">
-												{#if mtg.id in viewable_measures}
-													<a
-														href="/applied-controls/{mtg.id}"
-														class="text-indigo-500 hover:text-indigo-300"
-														><i class="fas fa-eye" /></a
-													>
-												{/if}
-												{#if mtg.id in updatable_measures}
-													<a
-														href="/applied-controls/{mtg.id}/edit"
-														class="text-indigo-500 hover:text-indigo-300"
-														><i class="fas fa-pen-square" /></a
-													>
-												{/if}
-											</td>
-										</tr>{/each}
-								{:else}
-									<tr class="text-black p-4 text-center">
-										<td colspan="8" class="py-2">
-											<i class="inline fas fa-exclamation-triangle" />
-											<p class="inline test-gray-900">
-												{m.noPendingAppliedControl()}.
-											</p>
-										</td>
-									</tr>
-								{/if}
-							</table>
-						</div>
-						<div class="text-sm p-2 m-2">
-							<i class="fas fa-info-circle" />
-							{m.rankingScoreDefintion()}.
-						</div>
-					</div>
-				{:else}
-					<div class="bg-white shadow-md rounded-lg px-4 py-2 m-8">
-						<div>{m.projectsSummaryEmpty()}.</div>
-					</div>
-				{/if}
-			</div>
-		</main>
-	</div>
-	<div class="p-2 m-2" />
-{/if}
 
 <style>
 	.hide {
