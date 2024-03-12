@@ -7,7 +7,7 @@ import {
 } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
-import { message, setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms/server';
 import { localItems, toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
 import { languageTag } from '$paraglide/runtime';
@@ -125,12 +125,12 @@ export const actions: Actions = {
 				}
 			}
 
-			const model: string = urlParamModelVerboseName(event.params.model!);
+			const model: string = event.params.model ? urlParamModelVerboseName(event.params.model) : '';
 			// TODO: reference newly created object
 			if (model === 'User') {
-				setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[model.toLowerCase()].toLowerCase()}) }, event);
+				setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model)].toLowerCase()}) }, event);
 			}
-			setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[model.toLowerCase()].toLowerCase()}) }, event);
+			setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model)].toLowerCase()}) }, event);
 		}
 		return { createForm };
 	},
@@ -162,7 +162,7 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(event.params.model!);
 			// TODO: reference object by name instead of id
-			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}) }, event);
+			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(toCamelCase(model))].toLowerCase()}) }, event);
 		}
 		return { deleteForm };
 	}
