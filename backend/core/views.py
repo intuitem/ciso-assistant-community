@@ -325,6 +325,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "status",
     ]
 
+    @action(detail=False, name="Risk assessments per status")
+    def per_status(self, request):
+        data = assessment_per_status(request.user, RiskAssessment)
+        return Response({"results": data})
+
     @action(detail=False, name="Get quality check")
     def quality_check(self, request):
         """
@@ -1170,6 +1175,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
             )
+
+    @action(detail=False, name="Compliance assessments per status")
+    def per_status(self, request):
+        data = assessment_per_status(request.user, ComplianceAssessment)
+        return Response({"results": data})
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):

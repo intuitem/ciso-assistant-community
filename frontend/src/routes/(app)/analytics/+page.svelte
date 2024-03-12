@@ -281,6 +281,18 @@
 								(framework) => framework.compliance_assessments_count
 							)}
 						/>
+						<BarChart
+							name="riskAssessmentsPerStatus"
+							title={m.appliedControlsStatus()}
+							labels={data.riskAssessmentsPerStatus.labels}
+							values={data.riskAssessmentsPerStatus.values}
+						/>
+						<BarChart
+							name="complianceAssessmentsPerStatus"
+							title={m.appliedControlsStatus()}
+							labels={data.complianceAssessmentsPerStatus.labels}
+							values={data.complianceAssessmentsPerStatus.values}
+						/>
 					</div>
 					<div>
 						{#if agg_data.names.length}

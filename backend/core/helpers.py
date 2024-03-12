@@ -449,7 +449,38 @@ def applied_control_per_status(user: User):
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
-    local_lables = [camel_case(str(l)) for l in labels]
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
+
+
+def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
+    values = list()
+    labels = ["undefined"]
+    local_lables = ["undefined"]
+    color_map = {
+        "undefined": "#CCC",
+        "planned": "#5470c6",
+        "in_progress": "#5470c6",
+        "in_review": "#ffffff",
+        "done": "#46D39A",
+        "deprecated": "#E55759",
+    }
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, model)
+    viewable_applied_controls = model.objects.filter(id__in=object_ids_view)
+    undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
+    values.append(
+        {"value": undefined_count, "itemStyle": {"color": color_map["undefined"]}}
+    )
+    for st in model.Status.choices:
+        count = viewable_applied_controls.filter(status=st[0]).count()
+        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        values.append(v)
+        labels.append(st[1])
+    local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
