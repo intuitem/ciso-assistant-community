@@ -77,8 +77,6 @@ Object.entries(testData.usergroups).forEach(([userGroup, userGroupName], index) 
             await expect(passwordPageSideBar.logoutButton).toBeVisible();
             await passwordPageSideBar.logoutButton.click();
             await setLoginPage.hasUrl(0);
-        
-            // await setPasswordPage.close(); 
         });
         
         test('user can view his folder', async ({loginPage, foldersPage, page}) => {
@@ -90,7 +88,9 @@ Object.entries(testData.usergroups).forEach(([userGroup, userGroupName], index) 
         });
         
         test.afterEach('cleanup', async ({sideBar, loginPage, foldersPage, usersPage, page}, testInfo) => {
-            if (testInfo.title.includes('user can view his folder')) {      
+            // make sure to execute the cleanup only after the last test      
+            if (testInfo.title.includes('user can view his folder')) {
+                // logout if the user is still logged in
                 if (await sideBar.userEmailDisplay.innerText() === vars.user.email) {
                     await sideBar.moreButton.click();
                     await expect(sideBar.morePanel).not.toHaveAttribute('inert');
