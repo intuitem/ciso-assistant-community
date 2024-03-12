@@ -3,6 +3,7 @@ import { BASE_API_URL } from './constants';
 import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
 import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
 import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
+import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
 
 type GetOptionsParams = {
 	objects: any[];
@@ -138,7 +139,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
-		filters: [{ field: 'project' }, { field: 'auditor' }]
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'project' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	threats: {
 		ref_id: 'ref_id',
@@ -324,7 +326,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'framework', urlModel: 'frameworks' },
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users' }
-		]
+		],
+		selectFields: [{ field: 'status' }],
+		filters: [{ field: 'status' }]
 	},
 	requirements: {
 		ref_id: 'ref_id',
@@ -366,6 +370,9 @@ export const FIELD_COMPONENT_MAP = {
 	libraries: {
 		locale: LanguageDisplay,
 		actions: LibraryActions
+	},
+	'user-groups': {
+		localization_dict: UserGroupNameDisplay
 	}
 };
 
@@ -390,10 +397,14 @@ interface FieldColoredTagMap {
 export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 	'risk-assessments': {
 		name: {
-			key: 'is_draft',
+			key: 'status',
 			values: {
-				true: { text: 'draft', cssClasses: 'badge bg-blue-200' }
-			} // badge bg-blue-200 | bg-blue-500
+				planned: {text: 'planned', cssClasses: 'badge bg-indigo-300'},
+				in_progress: {text: 'inProgress', cssClasses: 'badge bg-yellow-300'},
+				in_review: {text: 'inReview', cssClasses: 'badge bg-cyan-300'},
+				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
+				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
+			}
 		}
 	},
 	'risk-scenarios': {
@@ -409,20 +420,16 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 		}
 	},
 	'compliance-assessments': {
-		name: [
-			{
-				key: 'is_draft',
-				values: {
-					true: { text: 'draft', cssClasses: 'badge bg-blue-200' }
-				}
-			},
-			{
-				key: 'is_obsolete',
-				values: {
-					true: { text: 'obsolete', cssClasses: 'badge bg-red-300' }
-				}
+		name: {
+			key: 'status',
+			values: {
+				planned: {text: 'planned', cssClasses: 'badge bg-indigo-300'},
+				in_progress: {text: 'inProgress', cssClasses: 'badge bg-yellow-300'},
+				in_review: {text: 'inReview', cssClasses: 'badge bg-cyan-300'},
+				done: {text: 'done', cssClasses: 'badge bg-lime-300'},
+				deprecated: {text: 'deprecated', cssClasses: 'badge bg-orange-300'}
 			}
-		]
+		}
 	},
 	assets: {
 		name: {

@@ -4,10 +4,12 @@ import { LoginPage } from './login-page.js';
 import { AnalyticsPage } from './analytics-page.js';
 import { PageContent } from './page-content.js';
 import { FormFieldType as type } from './form-content.js';
+import { Mailer } from './mailer.js';
 import { randomBytes } from 'crypto';
 import testData from './test-data.js';
 
 type Fixtures = {
+	mailer: Mailer;
 	sideBar: SideBar;
 	pages: { [page: string]: PageContent };
 	analyticsPage: AnalyticsPage;
@@ -31,6 +33,12 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
+	mailer: async ({ context }, use) => {
+		const mailer = new Mailer(await context.newPage());
+		await mailer.goto();
+		await use(mailer);
+	},
+	
 	sideBar: async ({ page }, use) => {
 		await use(new SideBar(page));
 	},
@@ -81,6 +89,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'description', type: type.TEXT },
 			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
 			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'eta', type: type.DATE },
 			{ name: 'due_date', type: type.DATE }
@@ -155,6 +164,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'description', type: type.TEXT },
 			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
+			{ name: 'status', type: type.SELECT },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'eta', type: type.DATE },
 			{ name: 'due_date', type: type.DATE }
@@ -326,7 +336,7 @@ export class TestContent {
 						`${vars.folderName} - ${vars.usergroups.analyst}`,
 						`${vars.folderName} - ${vars.usergroups.auditor}`,
 						`${vars.folderName} - ${vars.usergroups.domainManager}`,
-						`${vars.folderName} - ${vars.usergroups.validator}`
+						`${vars.folderName} - ${vars.usergroups.approver}`
 					],
 					is_active: false
 				}
@@ -440,6 +450,7 @@ export class TestContent {
 					name: vars.assessmentName,
 					description: vars.description,
 					project: vars.projectName,
+					status: 'Planned',
 					// version: "1.4.2",
 					framework: vars.framework.name
 					// eta: "2025-01-01",
@@ -483,6 +494,7 @@ export class TestContent {
 					description: vars.description,
 					project: vars.projectName,
 					version: '1.4.2',
+					status: 'Planned',
 					risk_matrix: vars.matrix.displayName
 					// eta: "2025-01-01",
 					// due_date: "2025-05-01"
@@ -540,14 +552,15 @@ export class TestContent {
 		};
 	}
 
-	static generateTestVars() {
-		const vars = structuredClone(testData);
-		for (const key in testData) {
-			if (key === 'user') {
-				const email = testData[key].email.split('@');
-				vars[key].email = getUniqueValue(email[0]) + '@' + email[1];
-			} else if (key.match(/.*Name/)) {
-				vars[key] = getUniqueValue(testData[key]);
+	static generateTestVars(data = testData) {
+		const vars = structuredClone(data);
+		for (const key in data) {
+			if (typeof data[key] === 'object') {
+				if ('email' in data[key]) {
+					vars[key] = this.generateTestVars(data[key]);
+				}
+			} else if (key.match(/.*Name/) || vars[key].match(/.+@.+/)) {
+				vars[key] = getUniqueValue(data[key]);
 			}
 		}
 		return vars;
@@ -565,7 +578,11 @@ export function setHttpResponsesListener(page: Page) {
 	// });
 }
 
-export function getUniqueValue(value: string) {
+export function getUniqueValue(value: string): string {
+	if (value.match(/.+@.+/)) {
+		const email = value.split('@');
+		return getUniqueValue(email[0]) + '@' + email[1];
+	}
 	return process.env.TEST_WORKER_INDEX + '-' + value + '-' + randomBytes(2).toString('hex');
 }
 

@@ -62,14 +62,23 @@ class TestFoldersUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestFoldersAuthenticated:
     """Perform tests on Folders API endpoint with authentication"""
+
+    def test_get_assigned_folder(self, test):
+        """test to get the folder assigned to the user's user group"""
+
+        EndpointTestsQueries.Auth.get_object(
+            test.client,
+            "Folders",
+            test_params={
+                "name": test.assigned_folder.name,
+            },
+            item_search_field="name",
+            base_count=-1,
+            user_group=test.user_group,
+            scope=str(test.folder),
+        )
 
     def test_get_folders(self, test):
         """test to get folders from the API with authentication"""
@@ -89,6 +98,7 @@ class TestFoldersAuthenticated:
             },
             base_count=-1,
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_folders(self, test):
@@ -109,6 +119,7 @@ class TestFoldersAuthenticated:
             },
             base_count=-1,
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_folders(self, test):
@@ -132,6 +143,7 @@ class TestFoldersAuthenticated:
                 "parent_folder": {"id": str(test.folder.id), "str": test.folder.name},
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_delete_folders(self, test):
@@ -146,4 +158,5 @@ class TestFoldersAuthenticated:
                 "parent_folder": test.folder,
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )

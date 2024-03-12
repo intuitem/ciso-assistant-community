@@ -92,21 +92,13 @@ class TestEvidencesUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestEvidencesAuthenticated:
     """Perform tests on Evidences API endpoint with authentication"""
 
     def test_get_evidences(self, test):
         """test to get evidences from the API with authentication"""
 
-        applied_control = AppliedControl.objects.create(
-            name="test", folder=test.folder
-        )
+        applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
 
         EndpointTestsQueries.Auth.get_object(
             test.client,
@@ -134,9 +126,7 @@ class TestEvidencesAuthenticated:
     def test_create_evidences(self, test):
         """test to create evidences with the API with authentication"""
 
-        applied_control = AppliedControl.objects.create(
-            name="test", folder=test.folder
-        )
+        applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
 
         with open(
             path.join(path.dirname(path.dirname(__file__)), EVIDENCE_ATTACHMENT), "rb"
@@ -165,15 +155,14 @@ class TestEvidencesAuthenticated:
                 },
                 query_format="multipart",
                 user_group=test.user_group,
+                scope=str(test.folder),
             )
 
     def test_update_evidences(self, test):
         """test to update evidences with the API with authentication"""
 
         folder = Folder.objects.create(name="test2")
-        applied_control = AppliedControl.objects.create(
-            name="test", folder=test.folder
-        )
+        applied_control = AppliedControl.objects.create(name="test", folder=test.folder)
         applied_control2 = AppliedControl.objects.create(name="test2", folder=folder)
 
         with open(

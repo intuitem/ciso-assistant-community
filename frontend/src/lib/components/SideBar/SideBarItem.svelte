@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
+
 	export let item: any; // TODO: type this
+
+	const modalStore = getModalStore();
 
 	$: classesActive = (href: string) =>
 		href === $page.url.pathname

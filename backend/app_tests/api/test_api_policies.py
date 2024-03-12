@@ -85,12 +85,6 @@ class TestPolicysUnauthenticated:
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "test",
-    GROUPS_PERMISSIONS.keys(),
-    ids=[GROUPS_PERMISSIONS[key]["name"] for key in GROUPS_PERMISSIONS.keys()],
-    indirect=True,
-)
 class TestPolicysAuthenticated:
     """Perform tests on policies API endpoint with authentication"""
 
@@ -141,6 +135,7 @@ class TestPolicysAuthenticated:
                 "effort": POLICY_EFFORT[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_policies(self, test):

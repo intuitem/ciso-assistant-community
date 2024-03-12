@@ -1,6 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
 
 export const actions: Actions = {
 	default: async (event) => {
@@ -10,10 +11,10 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.error('server response:', response);
 			setFlash({ type: 'error', message: response.error }, event);
-			return fail(400, { error: 'Error importing library' });
+			return fail(400, { error: m.errorImportingLibrary() });
 		}
 		setFlash(
-			{ type: 'success', message: `Successfully imported library ${event.params.id}` },
+			{ type: 'success', message: m.successfullyImportedObject({object: "library", id: event.params.id?.toString() ?? ''}) },
 			event
 		);
 	}

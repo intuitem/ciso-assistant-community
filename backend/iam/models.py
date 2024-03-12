@@ -143,7 +143,10 @@ class Folder(NameDescriptionMixin):
     def get_folder(obj: Any):
         """
         Return the folder of an object using navigation through mixed structures.
+        For a folder, it is the object itself
         """
+        if isinstance(obj, Folder):
+            return obj
         # Define paths to try in order. Each path is a list representing the traversal path.
         # NOTE: There are probably better ways to represent these, but it works.
         paths = [
@@ -198,6 +201,12 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 
     def get_name_display(self) -> str:
         return self.name
+    
+    def get_localization_dict(self) -> dict:
+        return {
+            "folder": self.folder.name,
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name),
+        }
 
     @staticmethod
     def get_user_groups(user):
@@ -498,12 +507,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         Determines if a user has specified permission on a specified folder
         """
         for ra in RoleAssignment.get_role_assignments(user):
-            # TODO: Add recursive call when we allow picking a parent folder other than ROOT
-            if (
-                folder in ra.perimeter_folders.all()
-                or folder.parent_folder in ra.perimeter_folders.all()
-            ) and perm in ra.role.permissions.all():
-                return True
+            f = folder
+            while f is not None:
+                if f in ra.perimeter_folders.all() and perm in ra.role.permissions.all():
+                    return True
+                f = f.parent_folder
         return False
 
     @staticmethod

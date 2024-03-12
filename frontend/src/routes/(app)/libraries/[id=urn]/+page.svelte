@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { breadcrumbObject } from '$lib/utils/stores';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
@@ -12,13 +13,17 @@
 		[key: string]: any;
 	}
 
+	const breadcrumb_library_data = {
+		...data.library,
+		id: data.library.urn
+	};
+	$: breadcrumbObject.set(breadcrumb_library_data);
+
 	const libraryObjects: LibraryObjects = data.library.objects ?? [];
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
 	const framework = libraryObjects['framework'];
-
-	const tree = data.tree;
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
@@ -30,7 +35,6 @@
 			};
 		});
 	}
-	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
 	import { ProgressRadial, tableSourceMapper, type TreeViewNode } from '@skeletonlabs/skeleton';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
@@ -38,7 +42,7 @@
 	import { enhance } from '$app/forms';
 
 	const riskMatricesTable: TableSource = {
-		head: ['name', 'description'],
+		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description'])
 	};
 
@@ -157,6 +161,13 @@
 
 	{#if framework}
 		<h4 class="h4 font-medium">{m.framework()}</h4>
-		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
+		{#await data.tree}
+			{m.loading()}...
+		{:then tree}
+			<RecursiveTreeView
+				nodes={transformToTreeView(Object.entries(tree))}
+				hover="hover:bg-initial"
+			/>
+		{/await}
 	{/if}
 </div>

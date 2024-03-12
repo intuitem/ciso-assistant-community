@@ -28,9 +28,9 @@
 	} from '@skeletonlabs/skeleton';
 	import { superForm } from 'sveltekit-superforms/client';
 
-	import * as m from '$paraglide/messages';
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import * as m from '$paraglide/messages';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -157,7 +157,7 @@
 			<div class="flex-1">
 				<p class="font-medium">
 					<i class="fa-solid fa-gears" />
-					Suggested reference controls
+					{m.suggestedReferenceControls()}
 				</p>
 				{#if reference_controls.length === 0}
 					<p>--</p>
@@ -180,7 +180,7 @@
 			<div class="flex-1">
 				<p class="font-medium">
 					<i class="fa-solid fa-gears" />
-					Threats covered
+					{m.threatsCovered()}
 				</p>
 				{#if threats.length === 0}
 					<p>--</p>
@@ -215,9 +215,9 @@
 			<div class="card shadow-lg bg-white">
 				<TabGroup>
 					<Tab bind:group={tabSet} name="compliance_assessments_tab" value={0}
-						>Applied controls
+						>{m.appliedControls()}
 					</Tab>
-					<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>Evidences</Tab>
+					<Tab bind:group={tabSet} name="risk_assessments_tab" value={1}>{m.evidences()}</Tab>
 					<svelte:fragment slot="panel">
 						{#if tabSet === 0}
 							<div
@@ -227,7 +227,7 @@
 									<button
 										class="btn variant-filled-primary self-end"
 										on:click={modalMeasureCreateForm}
-										type="button"><i class="fa-solid fa-plus mr-2" />New applied control</button
+										type="button"><i class="fa-solid fa-plus mr-2" />{m.addAppliedControl()}</button
 									>
 								</span>
 								<AutocompleteSelect
@@ -236,10 +236,7 @@
 									options={getOptions({ objects: data.model.foreignKeys['applied_controls'] })}
 									field="applied_controls"
 								/>
-								<ModelTable
-									source={data.tables['applied-controls']}
-									URLModel="applied-controls"
-								/>
+								<ModelTable source={data.tables['applied-controls']} URLModel="applied-controls" />
 							</div>
 						{/if}
 						{#if tabSet === 1}
@@ -250,7 +247,7 @@
 									<button
 										class="btn variant-filled-primary self-end"
 										on:click={modalEvidenceCreateForm}
-										type="button"><i class="fa-solid fa-plus mr-2" />New evidence</button
+										type="button"><i class="fa-solid fa-plus mr-2" />{m.addEvidence()}</button
 									>
 								</span>
 								<AutocompleteSelect
@@ -276,9 +273,9 @@
 					<button
 						class="btn bg-gray-400 text-white font-semibold w-full"
 						type="button"
-						on:click={cancel}>Cancel</button
+						on:click={cancel}>{m.cancel()}</button
 					>
-					<button class="btn variant-filled-primary font-semibold w-full" type="submit">Save</button
+					<button class="btn variant-filled-primary font-semibold w-full" type="submit">{m.save()}</button
 					>
 				</div>
 			</div>
