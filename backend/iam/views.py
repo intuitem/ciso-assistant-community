@@ -59,7 +59,7 @@ class LoginView(views.APIView):
                     status=HTTP_401_UNAUTHORIZED,
                 )
 
-        user.first_login=False
+        user.first_login = False
         user.save()
         return Response(None, status=HTTP_202_ACCEPTED)
 

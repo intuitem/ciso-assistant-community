@@ -54,12 +54,13 @@ export const RiskMatrixSchema = baseNamedObject({
 });
 
 export const LibraryUploadSchema = z.object({
-	file: z.string()
+	file: z.string().optional()
 });
 
-export const RiskRiskAssessmentSchema = baseNamedObject({
+export const RiskAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
+	status: z.string().optional(),
 	risk_matrix: z.string(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
@@ -88,7 +89,7 @@ export const RiskScenarioSchema = baseNamedObject({
 });
 
 export const AppliedControlSchema = baseNamedObject({
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	evidences: z.string().optional().array().optional(),
 	eta: z.string().optional().nullable(),
@@ -120,7 +121,7 @@ export const RiskAcceptanceSchema = baseNamedObject({
 
 export const ReferenceControlSchema = baseNamedObject({
 	provider: z.string().optional().nullable(),
-	category: z.string().optional(),
+	category: z.string().optional().nullable(),
 	folder: z.string()
 });
 
@@ -170,6 +171,7 @@ export const SetPasswordSchema = z.object({
 export const ComplianceAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
+	status: z.string().optional(),
 	framework: z.string(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
@@ -189,7 +191,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	projects: ProjectSchema,
 	'risk-matrices': RiskMatrixSchema,
-	'risk-assessments': RiskRiskAssessmentSchema,
+	'risk-assessments': RiskAssessmentSchema,
 	threats: ThreatSchema,
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,

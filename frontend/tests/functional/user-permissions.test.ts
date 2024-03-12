@@ -1,3 +1,5 @@
+import { LoginPage } from '../utils/login-page.js';
+import { SideBar } from '../utils/sidebar.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
 
 const vars = TestContent.generateTestVars();
@@ -24,23 +26,11 @@ test.beforeEach('create user', async ({ logedPage, usersPage, foldersPage, sideB
             `${vars.folderName} - ${vars.usergroups.analyst}`,
             `${vars.folderName} - ${vars.usergroups.auditor}`,
             `${vars.folderName} - ${vars.usergroups.domainManager}`,
-            `${vars.folderName} - ${vars.usergroups.validator}`,
+            `${vars.folderName} - ${vars.usergroups.approver}`,
         ],
     });
     await usersPage.form.saveButton.click();
-    await usersPage.isToastVisible('.+ successfully saved: ' + vars.user.email);
-    
-    page.on('dialog', dialog => dialog.accept()); // Accept the alert dialog
-
-    await usersPage.editItemButton(vars.user.email).click();
-    await page.getByTestId('set-password-btn').click();
-    await expect(page).toHaveURL(/.*\/users\/.+\/edit\/set-password/);
-    await usersPage.form.fill({
-        new_password: vars.user.password,
-        confirm_new_password: vars.user.password
-    });
-    await usersPage.form.saveButton.click();
-    await usersPage.isToastVisible('The password was successfully set');
+    await usersPage.isToastVisible('The user: ' + vars.user.email + ' has been successfully updated.+');
 
     await sideBar.moreButton.click();
     await expect(sideBar.morePanel).not.toHaveAttribute('inert');
@@ -50,27 +40,48 @@ test.beforeEach('create user', async ({ logedPage, usersPage, foldersPage, sideB
 });
 
 test('created user can log to his account', async ({
-	loginPage,
+	mailer,
 	page
 }) => {
-	await loginPage.login(vars.user.email, vars.user.password);
-    await expect(page).toHaveURL(/.*\/analytics/);
+    await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
+    const lastMail = await mailer.getLastEmail();
+	await lastMail.hasWelcomeEmailDetails();
+	await lastMail.hasEmailRecipient(vars.user.email);
+	
+	await lastMail.open();
+	const pagePromise = page.context().waitForEvent('page');
+	await mailer.emailContent.setPasswordButton.click();
+	const setPasswordPage = await pagePromise;
+	await setPasswordPage.waitForLoadState();
+	await expect(setPasswordPage).toHaveURL(await mailer.emailContent.setPasswordButton.getAttribute('href') || 'Set password link could not be found');
+
+	const setLoginPage = new LoginPage(setPasswordPage);
+	await setLoginPage.newPasswordInput.fill(vars.user.password);
+	await setLoginPage.confirmPasswordInput.fill(vars.user.password);
+	await setLoginPage.setPasswordButton.click();
+    
+	await setLoginPage.isToastVisible('Your password has been successfully set. Welcome to CISO Assistant!');
+
+    await setLoginPage.login(vars.user.email, vars.user.password);
+    await expect(setLoginPage.page).toHaveURL('/analytics');
+
+    // logout to prevent sessions conflicts
+    const sideBar = new SideBar(setPasswordPage);
+    await sideBar.moreButton.click();
+    await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+    await expect(sideBar.logoutButton).toBeVisible();
+    await sideBar.logoutButton.click();
+    await setLoginPage.hasUrl(0);
+
+    await setPasswordPage.close();
 });
 
-test.afterEach('cleanup', async ({ loginPage, sideBar, foldersPage, usersPage, page }) => {
-    if (loginPage.email === vars.user.email) {
-        await sideBar.moreButton.click();
-        await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-        await expect(sideBar.logoutButton).toBeVisible();
-        await sideBar.logoutButton.click();
-        await loginPage.hasUrl(0);
-        await loginPage.login();
-    }
+test.afterEach('cleanup', async ({ loginPage, foldersPage, usersPage, page }) => {
+    await loginPage.login();
 	await foldersPage.goto();
 	await foldersPage.deleteItemButton(vars.folderName).click();
 	await foldersPage.deleteModalConfirmButton.click();
 	await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
-
 	await usersPage.goto();
 	await usersPage.deleteItemButton(vars.user.email).click();
 	await usersPage.deleteModalConfirmButton.click();

@@ -13,8 +13,8 @@ export const LOCALE_MAP = {
 
 export function toCamelCase(str: string) {
 	if ( typeof str !== 'string' ) return str;
-	str = str.charAt(0).toLowerCase() + str.slice(1).replace(' ', '');
-	return str.replace(/[_-]\w/g, match => match.charAt(1).toUpperCase());
+	str = str.charAt(0).toLowerCase() + str.slice(1);
+	return str.replace(/[_-\s]\w/g, match => match.charAt(1).toUpperCase());
 }
 
 export function capitalizeFirstLetter(str: string) {
@@ -265,6 +265,10 @@ export function localItems(languageTag: string): LocalItems {
 		dropped: m.dropped({ languageTag: languageTag }),
 		technical: m.technical({ languageTag: languageTag }),
 		physical: m.physical({ languageTag: languageTag }),
+		veryLow: m.veryLow({ languageTag: languageTag }),
+		low: m.low({ languageTag: languageTag }),
+		high: m.high({ languageTag: languageTag }),
+		veryHigh: m.veryHigh({ languageTag: languageTag }),
 		small: m.small({ languageTag: languageTag }),
 		medium: m.medium({ languageTag: languageTag }),
 		large: m.large({ languageTag: languageTag }),
@@ -282,10 +286,27 @@ export function localItems(languageTag: string): LocalItems {
 		support: m.support({ languageTag: languageTag }),
 		toDo: m.toDo({ languageTag: languageTag }),
 		inProgress: m.inProgress({ languageTag: languageTag }),
+		inReview: m.inReview({ languageTag: languageTag }),
+		deprecated: m.deprecated({ languageTag: languageTag }),
+		done: m.done({ languageTag: languageTag }),
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
 		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
+		requirementAssessments: m.requirementAssessments({ languageTag: languageTag }),
 		compliant: m.compliant({ languageTag: languageTag }),
-		notApplicable: m.notApplicable({ languageTag: languageTag })
+		notApplicable: m.notApplicable({ languageTag: languageTag }),
+		administrator: m.administrator({ languageTag: languageTag }),
+		analyst: m.analyst({ languageTag: languageTag }),
+		auditor: m.auditor({ languageTag: languageTag }),
+		domainManager: m.domainManager({ languageTag: languageTag }),
+		authors: m.authors({ languageTag: languageTag }),
+		reviewers: m.reviewers({ languageTag: languageTag }),
+		isPublished: m.isPublished({ languageTag: languageTag }),
+		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
+		"--SOK": m.undefinedSOK({ languageTag: languageTag }),
+		lowSOK: m.lowSOK({ languageTag: languageTag }),
+		mediumSOK: m.mediumSOK({ languageTag: languageTag }),
+		highSOK: m.highSOK({ languageTag: languageTag }),
+
 	};
 	return LOCAL_ITEMS;
 }

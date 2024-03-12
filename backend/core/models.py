@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -99,6 +100,30 @@ class Library(ReferentialObjectMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
+
+    @property
+    def _objects(self):
+        res = {}
+        if self.frameworks.count() > 0:
+            res["framework"] = model_to_dict(self.frameworks.first())
+            res["framework"].update(self.frameworks.first().library_entry)
+        if self.threats.count() > 0:
+            res["threats"] = [model_to_dict(threat) for threat in self.threats.all()]
+        if self.reference_controls.count() > 0:
+            res["reference_controls"] = [
+                model_to_dict(reference_control)
+                for reference_control in self.reference_controls.all()
+            ]
+        if self.risk_matrices.count() > 0:
+            matrix = self.risk_matrices.first()
+            res["risk_matrix"] = model_to_dict(matrix)
+            res["risk_matrix"]["probability"] = matrix.probability
+            res["risk_matrix"]["impact"] = matrix.impact
+            res["risk_matrix"]["risk"] = matrix.risk
+            res["risk_matrix"]["grid"] = matrix.grid
+            res["strength_of_knowledge"] = matrix.strength_of_knowledge
+            res["risk_matrix"] = [res["risk_matrix"]]
+        return res
 
     @property
     def reference_count(self) -> int:
@@ -253,12 +278,33 @@ class RiskMatrix(ReferentialObjectMixin):
     def parse_json(self) -> dict:
         return json.loads(self.json_definition)
 
-    def get_detailed_grid(self) -> list:
+    @property
+    def grid(self) -> list:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:
             grid.append([item for item in row])
         return grid
+
+    @property
+    def probability(self) -> list:
+        risk_matrix = self.parse_json()
+        return risk_matrix["probability"]
+
+    @property
+    def impact(self) -> list:
+        risk_matrix = self.parse_json()
+        return risk_matrix["impact"]
+
+    @property
+    def risk(self) -> list:
+        risk_matrix = self.parse_json()
+        return risk_matrix["risk"]
+
+    @property
+    def strength_of_knowledge(self):
+        risk_matrix = self.parse_json()
+        return risk_matrix.get("strength_of_knowledge")
 
     def render_grid_as_colors(self):
         risk_matrix = self.parse_json()
@@ -284,7 +330,6 @@ class Framework(ReferentialObjectMixin):
         verbose_name = _("Framework")
         verbose_name_plural = _("Frameworks")
 
-
     def is_deletable(self) -> bool:
         """
         Returns True if the framework can be deleted
@@ -292,6 +337,49 @@ class Framework(ReferentialObjectMixin):
         if self.compliance_assessment_set.count() > 0:
             return False
         return True
+
+    @property
+    def library_entry(self):
+        res = {}
+        requirement_nodes = self.get_requirement_nodes()
+        if requirement_nodes:
+            res["requirement_nodes"] = requirement_nodes
+
+        requirement_levels = self.get_requirement_levels()
+        if requirement_levels:
+            res["requirement_levels"] = requirement_levels
+
+        return res
+
+    def get_requirement_nodes(self):
+        # Prefetch related objects if they exist to reduce database queries.
+        # Adjust prefetch_related paths according to your model relationships.
+        nodes_queryset = self.requirement_nodes.prefetch_related(
+            "threats", "reference_controls"
+        )
+        if nodes_queryset.exists():
+            return [self.process_node(node) for node in nodes_queryset]
+        return []
+
+    def process_node(self, node):
+        # Convert the node to dict and process threats and security functions.
+        node_dict = model_to_dict(node)
+        if node.threats.exists():
+            node_dict["threats"] = [
+                model_to_dict(threat) for threat in node.threats.all()
+            ]
+        if node.reference_controls.exists():
+            node_dict["reference_controls"] = [
+                model_to_dict(reference_control)
+                for reference_control in node.reference_controls.all()
+            ]
+        return node_dict
+
+    def get_requirement_levels(self):
+        levels_queryset = self.requirement_levels.all()
+        if levels_queryset.exists():
+            return [model_to_dict(level) for level in levels_queryset]
+        return []
 
 
 class RequirementLevel(ReferentialObjectMixin):
@@ -301,6 +389,7 @@ class RequirementLevel(ReferentialObjectMixin):
         null=True,
         blank=True,
         verbose_name=_("Framework"),
+        related_name="requirement_levels",
     )
     level = models.IntegerField(null=False, blank=False, verbose_name=_("Level"))
 
@@ -328,6 +417,7 @@ class RequirementNode(ReferentialObjectMixin):
         null=True,
         blank=True,
         verbose_name=_("Framework"),
+        related_name="requirement_nodes",
     )
     parent_urn = models.CharField(
         max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
@@ -363,6 +453,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         choices=PRJ_LC_STATUS,
         verbose_name=_("Status"),
     )
+    fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Project")
@@ -471,37 +562,6 @@ class Evidence(NameDescriptionMixin, FolderMixin):
 
     def filename(self):
         return os.path.basename(self.attachment.name)
-
-    def preview(self):
-        if self.attachment:
-            if self.filename().endswith((".png", ".jpg", ".jpeg")):
-                return (
-                    "image",
-                    mark_safe('<img src="{}">'.format(self.attachment.url)),
-                )
-            if self.filename().endswith(".txt"):
-                with open(self.attachment.path, "r") as text:
-                    return ("text", text.read())
-            if self.filename().endswith(".pdf"):
-                return (
-                    "pdf",
-                    mark_safe(
-                        '<embed class="h-full w-full" src="{}" type="application/pdf"/>'.format(
-                            self.attachment.url
-                        )
-                    ),
-                )
-            if self.filename().endswith(".docx"):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/word.png")),
-                )
-            if self.filename().endswith((".xls", ".xlsx", ".csv")):
-                return (
-                    "icon",
-                    mark_safe('<img src="{}">'.format("/static/icons/excel.png")),
-                )
-        return ""
 
 
 class AppliedControl(NameDescriptionMixin, FolderMixin):

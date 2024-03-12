@@ -48,6 +48,7 @@
 	}
 
 	function update_scores(risk_score: number, risk_matrix: RiskMatrixJsonDefinition) {
+		if (!risk_matrix) return;
 		const probabilityPartitionSize = 10 / risk_matrix['probability'].length;
 		const impactPartitionSize = 10 / risk_matrix['impact'].length;
 		const riskPartitionSize = 10 / risk_matrix['risk'].length;
@@ -67,6 +68,7 @@
 </script>
 
 <main class="text-sm h-full flex flex-col">
+{#if risk_matrix}
 	<div class="mx-auto">
 		<div class="flex flex-col">
 			<p class="text-sm">{m.riskMatrix()}</p>
@@ -242,4 +244,9 @@
 			</div>
 		</div>
 	</div>
+{:else}
+	<div class="mx-auto w-full font-bold text-2xl text-center">
+		{m.scoringAssistantNoMatrixError()}
+	</div>
+{/if}
 </main>

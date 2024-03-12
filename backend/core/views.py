@@ -254,7 +254,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
 
@@ -312,6 +312,10 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "risk_matrix",
         "status",
     ]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(RiskAssessment.Status.choices))
 
     @action(detail=False, name="Get quality check")
     def quality_check(self, request):
@@ -870,7 +874,7 @@ class FolderViewSet(BaseModelViewSet):
                 name=UserGroupCodename.AUDITOR, folder=folder, builtin=True
             )
             approvers = UserGroup.objects.create(
-                name=UserGroupCodename.VALIDATOR, folder=folder, builtin=True
+                name=UserGroupCodename.APPROVER, folder=folder, builtin=True
             )
             analysts = UserGroup.objects.create(
                 name=UserGroupCodename.ANALYST, folder=folder, builtin=True
@@ -883,13 +887,15 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.AUDITOR),
                 builtin=True,
                 folder=Folder.get_root_folder(),
+                is_recursive=True
             )
             ra1.perimeter_folders.add(folder)
             ra2 = RoleAssignment.objects.create(
                 user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.VALIDATOR),
+                role=Role.objects.get(name=RoleCodename.APPROVER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
+                is_recursive=True
             )
             ra2.perimeter_folders.add(folder)
             ra3 = RoleAssignment.objects.create(
@@ -897,6 +903,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.ANALYST),
                 builtin=True,
                 folder=Folder.get_root_folder(),
+                is_recursive=True
             )
             ra3.perimeter_folders.add(folder)
             ra4 = RoleAssignment.objects.create(
@@ -904,6 +911,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
+                is_recursive=True
             )
             ra4.perimeter_folders.add(folder)
 
@@ -1125,9 +1133,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project"]
+    filterset_fields = ["framework", "project", "status"]
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(ComplianceAssessment.Status.choices))
 
     def perform_create(self, serializer):
         """
