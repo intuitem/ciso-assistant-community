@@ -60,7 +60,7 @@ export const LibraryUploadSchema = z.object({
 export const RiskAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
-	status: z.string().optional(),
+	status: z.string(),
 	risk_matrix: z.string(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),

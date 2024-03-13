@@ -10,6 +10,7 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
+	export let origin: string = "default";
 
 	export let color_map = {};
 
@@ -26,6 +27,11 @@
 
 	$: classesTextField = (errors: string[] | undefined) =>
 		errors && errors.length > 0 ? 'input-error' : '';
+
+	const hasBlankField = !$constraints?.required && !options.find((o) => o.label === '--');
+	let defaultOption: Element | null = null;
+
+	$: if (defaultOption && origin === "default") { defaultOption.setAttribute("selected","true"); }
 </script>
 
 <div>
@@ -57,19 +63,36 @@
 			{...$constraints}
 			{...$$restProps}
 		>
-			{#if !$constraints?.required && !options.find((o) => o.label === '--')}
+			{#if hasBlankField}
 				<option value={null} selected>--</option>
 			{/if}
-			{#each options as option}
-				<option value={option.value} style="background-color: {color_map[option.value]}"
+
+			{#each options as option, index}
+				<!-- The legend has it that one day Svelte 5 snippets will clean this horrible code repetition. -->
+				{#if index === 0 && !hasBlankField}
+					<option
+						value={option.value}
+						style="background-color: {color_map[option.value]}"
+						bind:this={defaultOption}
 					>
-					{#if localItems(languageTag())[toCamelCase(option.label)]}
-						{localItems(languageTag())[toCamelCase(option.label)]}
-					{:else}
-						{option.label}
-					{/if}
-					</option
-				>
+						{#if localItems(languageTag())[toCamelCase(option.label)]}
+							{localItems(languageTag())[toCamelCase(option.label)]}
+						{:else}
+							{option.label}
+						{/if}
+					</option>
+				{:else}
+					<option
+						value={option.value}
+						style="background-color: {color_map[option.value]}"
+					>
+						{#if localItems(languageTag())[toCamelCase(option.label)]}
+							{localItems(languageTag())[toCamelCase(option.label)]}
+						{:else}
+							{option.label}
+						{/if}
+					</option>
+				{/if}
 			{/each}
 		</select>
 	</div>
