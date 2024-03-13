@@ -428,7 +428,7 @@ def applied_control_per_status(user: User):
     local_lables = ["undefined"]
     color_map = {
         "undefined": "#CCC",
-        "planned": "#5470c6",
+        "planned": "#BFDBFE",
         "active": "#46D39A",
         "inactive": "#E55759",
     }
@@ -459,9 +459,9 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
     local_lables = ["undefined"]
     color_map = {
         "undefined": "#CCC",
-        "planned": "#5470c6",
+        "planned": "#BFDBFE",
         "in_progress": "#5470c6",
-        "in_review": "#ffffff",
+        "in_review": "#BBF7D0",
         "done": "#46D39A",
         "deprecated": "#E55759",
     }
