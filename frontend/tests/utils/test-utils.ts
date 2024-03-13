@@ -570,13 +570,18 @@ export class TestContent {
 
 export function setHttpResponsesListener(page: Page) {
 	page.on('response', (response) => {
-		// expect.soft(response.ok()).toBeTruthy();
 		expect.soft(response.status()).toBeOneofValues([100, 399]);
-		// expect.soft(response.ok(), 'An error with status code ' + response.status() + ' occured when trying to achieve operation').toBeTruthy();
 	});
-	// page.on('console', (message) => {
-	// 	expect.soft(message.type()).not.toBe('error');
-	// });
+}
+
+export function getSingularName(pluralName: string) {
+    const exceptions: any = {
+		"Domains": "Folder",
+        "Libraries": "Library",
+        "Risk matrices": "Risk matrix",
+        "Policies": "Policy",
+    }
+    return exceptions[pluralName] ?? (pluralName.endsWith("s") ? pluralName.substring(0, pluralName.length - 1) : pluralName)
 }
 
 export function getUniqueValue(value: string): string {
@@ -595,6 +600,11 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 			obj[key] = obj[key].replace(searchValue, replaceValue);
 		}
 	}
+}
+
+export function userFromUserGroupHasPermission(userGroup: string, permission: string, object: string) {
+	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;	
+	return (userGroup in testData.usergroups) && (testData.usergroups[userGroup].perms.includes(perm));
 }
 
 export { test as baseTest, type Page, type Locator } from '@playwright/test';
