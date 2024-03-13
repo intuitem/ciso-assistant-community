@@ -295,7 +295,10 @@ export function localItems(languageTag: string): LocalItems {
 		reviewers: m.reviewers({ languageTag: languageTag }),
 		isPublished: m.isPublished({ languageTag: languageTag }),
 		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
-		rankingScore: m.rankingScore({ languageTag: languageTag })
+		rankingScore: m.rankingScore({ languageTag: languageTag }),
+		inReview: m.inReview({ languageTag: languageTag }),
+		done: m.done({ languageTag: languageTag }),
+		deprecated: m.deprecated({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
