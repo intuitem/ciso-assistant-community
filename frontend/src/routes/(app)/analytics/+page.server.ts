@@ -1,5 +1,8 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { z } from 'zod';
 import type { PageServerLoad } from './$types';
+import { superValidate } from 'sveltekit-superforms/server';
+import { composerSchema } from '$lib/utils/schemas';
 
 export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
@@ -137,7 +140,10 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		});
 	}
 
+	const composerForm = await superValidate(composerSchema);
+
 	return {
+		composerForm,
 		usedRiskMatrices,
 		usedFrameworks,
 		riskAssessmentsPerStatus,
