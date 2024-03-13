@@ -17,8 +17,6 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
