@@ -336,10 +336,10 @@ export class TestContent {
 					first_name: vars.user.firstName,
 					last_name: vars.user.lastName,
 					user_groups: [
-						`${vars.folderName} - ${vars.usergroups.analyst}`,
-						`${vars.folderName} - ${vars.usergroups.auditor}`,
-						`${vars.folderName} - ${vars.usergroups.domainManager}`,
-						`${vars.folderName} - ${vars.usergroups.approver}`
+						`${vars.folderName} - ${vars.usergroups.analyst.name}`,
+						`${vars.folderName} - ${vars.usergroups.auditor.name}`,
+						`${vars.folderName} - ${vars.usergroups.domainManager.name}`,
+						`${vars.folderName} - ${vars.usergroups.approver.name}`
 					],
 					is_active: false
 				}

@@ -3,12 +3,17 @@ import { SideBar } from '../utils/sidebar.js';
 import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
 import testData from '../utils/test-data.js';
 
-Object.entries(testData.usergroups).forEach(([userGroup, userGroupName], index) => {
-    test.describe(`${userGroupName} user has the right permissions`, async () => {
+const userGroups: {string: any} = testData.usergroups;
+
+Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
+    let doCleanup = false;
+    test.describe(`${userGroupData.name} user has the right permissions`, async () => {
         test.describe.configure({mode: 'serial'});
-        let vars = TestContent.generateTestVars();
         
-        test.beforeEach('create user', async ({page}) => {
+        let vars = TestContent.generateTestVars();
+        let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
+        
+        test.beforeEach(async ({page}) => {
             setHttpResponsesListener(page);
         });
         
@@ -36,7 +41,7 @@ Object.entries(testData.usergroups).forEach(([userGroup, userGroupName], index) 
                 first_name: vars.user.firstName,
                 last_name: vars.user.lastName, 
                 user_groups: [
-                    `${vars.folderName} - ${userGroupName}`
+                    `${vars.folderName} - ${userGroupData.name}`
                 ],
             });
             await usersPage.form.saveButton.click();
@@ -78,18 +83,37 @@ Object.entries(testData.usergroups).forEach(([userGroup, userGroupName], index) 
             await passwordPageSideBar.logoutButton.click();
             await setLoginPage.hasUrl(0);
         });
-        
-        test('user can view his folder', async ({loginPage, foldersPage, page}) => {
-            await loginPage.goto();
-            await loginPage.login(vars.user.email, vars.user.password);
-            await expect(page).toHaveURL('/analytics');
-            await foldersPage.goto();
-            await expect(foldersPage.getRow(vars.folderName)).toBeVisible();
+
+        test.describe(() => {
+            test.beforeEach(async ({loginPage, page}) => {
+                await loginPage.goto();
+                await loginPage.login(vars.user.email, vars.user.password);
+                await expect(page).toHaveURL('/analytics');
+            });
+
+            test('user can view his folder', async ({foldersPage, page}) => {
+                await foldersPage.goto();
+                await expect(foldersPage.getRow(vars.folderName)).toBeVisible();
+            });
+    
+            Object.entries(testObjectsData).forEach(([objectPage, objectData], index) => {
+                test(`user can view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    await pages[objectPage].goto();
+                    await page.waitForTimeout(100);
+                    // ...
+
+                    if (index === Object.keys(testObjectsData).length - 1) {
+                        doCleanup = true;
+                    }
+                });
+            });
         });
         
-        test.afterEach('cleanup', async ({sideBar, loginPage, foldersPage, usersPage, page}, testInfo) => {
-            // make sure to execute the cleanup only after the last test      
-            if (testInfo.title.includes('user can view his folder')) {
+        test.afterEach('cleanup', async ({sideBar, loginPage, foldersPage, usersPage, page}) => {
+            // make sure to execute the cleanup only after the last test
+            if (doCleanup) {
+                console.log('Cleanup');
+                
                 // logout if the user is still logged in
                 if (await sideBar.userEmailDisplay.innerText() === vars.user.email) {
                     await sideBar.moreButton.click();
