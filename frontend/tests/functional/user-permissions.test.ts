@@ -10,32 +10,39 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
     test.describe(`${userGroupData.name} user has the right permissions`, async () => {
         test.describe.configure({mode: 'serial'});
         
+        let init = true;
         let vars = TestContent.generateTestVars();
         let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
         
-        test.beforeEach(async ({page}) => {
+        test.beforeEach(async ({loginPage, sideBar, pages, page}) => {
+            test.slow();
             setHttpResponsesListener(page);
+
+            if (init) {
+                await loginPage.goto();
+                await loginPage.login();
+                for (const [page, data] of Object.entries(testObjectsData)) {
+                    await pages[page].goto();
+                    await pages[page].waitUntilLoaded();
+                    await pages[page].createItem(
+                        data.build,
+                        'dependency' in data ? data.dependency : null
+                    );
+                }
+                await sideBar.logout();
+                
+                init = false;
+            }
         });
         
         test('user can set his password', async ({
             logedPage,
             usersPage,
-            foldersPage,
             sideBar,
             mailer,
             page
-        }) => {
-            await foldersPage.goto();
-            await foldersPage.createItem({
-                name: vars.folderName,
-                description: vars.description
-            });
-        
+        }) => {          
             await usersPage.goto();
-            await usersPage.createItem({
-                email: vars.user.email
-            });
-        
             await usersPage.editItemButton(vars.user.email).click();
             await usersPage.form.fill({
                 first_name: vars.user.firstName,
@@ -46,7 +53,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
             });
             await usersPage.form.saveButton.click();
             await usersPage.isToastVisible('.+ successfully saved: ' + vars.user.email);
-        
+            
             await sideBar.logout();
         
             await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
@@ -83,21 +90,40 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                 await expect(page).toHaveURL('/analytics');
             });
 
-            test('user can view his folder', async ({foldersPage, page}) => {
-                await foldersPage.goto();
-                await expect(foldersPage.getRow(vars.folderName)).toBeVisible();
-            });
-    
             Object.entries(testObjectsData).forEach(([objectPage, objectData], index) => {
                 test(`user can view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
                     await pages[objectPage].goto();
-                    await page.waitForTimeout(100);
-                    // ...
+                    await expect(pages[objectPage].getRow(objectData.build.name)).toBeVisible();
+                });
+
+                test(`user can create ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    await pages[objectPage].goto();
+                    await expect(pages[objectPage].addButton).toBeVisible();
 
                     if (index === Object.keys(testObjectsData).length - 1) {
                         doCleanup = true;
                     }
                 });
+
+                // test(`user can update ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                //     await pages[objectPage].goto();
+                //     await page.waitForTimeout(100);
+                //     // ...
+
+                //     if (index === Object.keys(testObjectsData).length - 1) {
+                //         doCleanup = true;
+                //     }
+                // });
+
+                // test(`user can delete ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                //     await pages[objectPage].goto();
+                //     await page.waitForTimeout(100);
+                //     // ...
+
+                //     if (index === Object.keys(testObjectsData).length - 1) {
+                //         doCleanup = true;
+                //     }
+                // });
             });
         });
         
