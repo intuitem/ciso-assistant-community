@@ -69,8 +69,8 @@ export const RiskAssessmentSchema = baseNamedObject({
 });
 
 export const ThreatSchema = baseNamedObject({
-  folder: z.string(),
-  provider: z.string().optional()
+	folder: z.string(),
+	provider: z.string().optional().nullable()
 });
 
 export const RiskScenarioSchema = baseNamedObject({
