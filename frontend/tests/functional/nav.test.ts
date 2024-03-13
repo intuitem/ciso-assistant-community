@@ -60,11 +60,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await page.mouse.click(20, 20); // click outside the modal to close it
 		await expect(logedPage.modalTitle).not.toBeVisible();
 
-		await sideBar.moreButton.click();
-		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await expect(sideBar.logoutButton).toBeVisible();
-		await sideBar.logoutButton.click();
-		await logedPage.hasUrl(0);
+		await sideBar.logout();
 	});
 });
 

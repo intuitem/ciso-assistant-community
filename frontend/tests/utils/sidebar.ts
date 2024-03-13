@@ -1,6 +1,5 @@
 import { expect, type Locator, type Page } from './test-utils.js';
 import { navData } from '../../src/lib/components/SideBar/navData.js';
-import type { PageContent } from './page-content.js';
 
 type TabContent = {
 	name: string;
@@ -37,6 +36,14 @@ export class SideBar {
 		this.toggleButton = this.page.getByTestId('sidebar-toggle-btn');
 	}
 
+	async logout() {
+		await this.moreButton.click();
+		await expect(this.morePanel).not.toHaveAttribute('inert');
+		await expect(this.logoutButton).toBeVisible();
+		await this.logoutButton.click();
+		await expect(this.page).toHaveURL(/^.*\/login$/)
+	}
+
 	async click(parent: string, tab: string, waitForURL: boolean = true) {
 		if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
 			await this.page.locator('#' + parent.toLowerCase().replace(' ', '-')).click();
@@ -44,9 +51,5 @@ export class SideBar {
 		await expect(this.page.getByTestId('accordion-item-' + tab.substring(1))).toBeVisible();
 		await this.page.getByTestId('accordion-item-' + tab.substring(1)).click();
 		waitForURL ? await this.page.waitForURL(tab) : null;
-	}
-
-	async goto(page: PageContent) {
-		await this.page.goto(page.url);
 	}
 }
