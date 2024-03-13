@@ -10,13 +10,26 @@ type GetOptionsParams = {
 	suggestions?: any[];
 	label?: string;
 	value?: string;
+	extra_fields: (string[] | string)[];
 };
+
+function getValue(object: {[key: string]: any},keys: string[]) {
+	if (typeof keys === "string") {
+		return object[keys];
+	}
+	let finalValue = object;
+	for (const key of keys) {
+		finalValue = finalValue[key];
+	}
+	return finalValue;
+}
 
 export const getOptions = ({
 	objects,
 	suggestions,
 	label = 'name',
 	value = 'id',
+	extra_fields = [],
 	self = undefined,
 	selfSelect = false
 }: GetOptionsParams): {
@@ -29,7 +42,7 @@ export const getOptions = ({
 	const options = objects
 		.map((object) => {
 			return {
-				label: object[label],
+				label: extra_fields.map(fields => getValue(object,fields)).map(string => `[${string}]`).join("") + " " + object[label],
 				value: object[value],
 				suggested: false
 			};
