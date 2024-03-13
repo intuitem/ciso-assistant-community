@@ -2,8 +2,8 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
 	import * as m from '$paraglide/messages';
-	import {localItems} from '$lib/utils/locales';
-	import {languageTag} from '$paraglide/runtime';
+	import { localItems } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 	import type { AppliedControlStatus } from '$lib/utils/types';
 	import { RISK_COLOR_PALETTE } from '$lib/utils/constants.js';
 
@@ -31,7 +31,7 @@
 		<div class="p-2 font-semibold text-lg">
 			{data.risk_assessment_objects.length <= 1
 				? m.composerTitle()
-				: m.composerTitlePlural({ number: data.risk_assessment_objects.length})}:
+				: m.composerTitlePlural({ number: data.risk_assessment_objects.length })}:
 		</div>
 		<div class="flex space-x-2">
 			<div class="w-1/3">
@@ -43,7 +43,7 @@
 							name="current_risk_level"
 							s_label={m.currentRiskLevelPerScenario()}
 							values={data.current_level}
-							colors={data.current_level.map(object => object.color)}
+							colors={data.current_level.map((object) => object.color)}
 						/>
 					</div>
 				</div>
@@ -67,7 +67,7 @@
 						name="residual_risk_level"
 						s_label={m.residualRiskLevelPerScenario()}
 						values={data.residual_level}
-						colors={data.residual_level.map(object => object.color)}
+						colors={data.residual_level.map((object) => object.color)}
 					/>
 				</div>
 			</div>
@@ -130,7 +130,9 @@
 						</button>
 						<div>
 							{#if item.risk_assessment.quality_check.count > 0}
-								<span class="text-xs px-2 py-1 rounded bg-orange-200 shadow">{m.reviewNeeded()}</span>
+								<span class="text-xs px-2 py-1 rounded bg-orange-200 shadow"
+									>{m.reviewNeeded()}</span
+								>
 							{:else}
 								<span class="text-xs px-2 py-1 rounded bg-green-200 shadow">{m.ok()}</span>
 							{/if}

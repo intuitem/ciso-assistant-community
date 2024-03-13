@@ -206,3 +206,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 export const modelSchema = (model: string) => {
 	return SCHEMA_MAP[model] || z.object({});
 };
+
+export const composerSchema = z.object({
+	risk_assessments: z.array(z.string().uuid())
+});
