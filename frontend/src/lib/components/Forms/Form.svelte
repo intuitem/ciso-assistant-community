@@ -15,6 +15,7 @@
 	export let validators: AnyZodObject;
 	export let applyAction = true;
 	export let resetForm = false;
+	export let onSubmit = (submit_data: any) => {};
 
 	export let debug = false; // set to true to enable SuperDebug component
 
@@ -36,8 +37,8 @@
 		applyAction: applyAction,
 		resetForm: resetForm,
 		validators: validators,
-		onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true })
-		
+		onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
+		onSubmit: onSubmit
 	});
 
 	const { form, message /*, tainted*/, delayed, errors, allErrors, enhance } = _form;
