@@ -413,9 +413,6 @@
 												name="compliance_assessments"
 												s_label={m.complianceAssessments()}
 												values={compliance_assessment.donut.values}
-												colors={compliance_assessment.donut.values.map(
-													(object) => object.itemStyle.color
-												)}
 											/>
 										</div>
 										<div class="absolute top-0 right-0 mt-2 space-x-1">
