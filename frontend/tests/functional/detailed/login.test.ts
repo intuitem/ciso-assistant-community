@@ -16,9 +16,7 @@ test('login / logout process is working properly', async ({ loginPage, analytics
 	await loginPage.checkForUndefinedText();
 	await loginPage.login();
 	await analyticsPage.hasUrl();
-	sideBar.moreButton.click();
-	sideBar.logoutButton.click();
-	await loginPage.hasUrl(0);
+	sideBar.logout();
 });
 
 test('redirect to the right page after login', async ({ loginPage, page }) => {
@@ -53,20 +51,12 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	await usersPage.form.saveButton.click();
 	await usersPage.isToastVisible('The password was successfully set');
 
-	await sideBar.moreButton.click();
-	await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-	await expect(sideBar.logoutButton).toBeVisible();
-	await sideBar.logoutButton.click();
-	await logedPage.hasUrl(0);
+	await sideBar.logout();
 	
 	await logedPage.login(email, testData.user.password);
 	await expect(page).toHaveURL(/.*\/analytics/);
 
-	await sideBar.moreButton.click();
-	await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-	await expect(sideBar.logoutButton).toBeVisible();
-	await sideBar.logoutButton.click();
-	await logedPage.hasUrl(0); 
+	await sideBar.logout();
 
 	await logedPage.forgotPasswordButton.click();
 	await expect(page).toHaveURL('/password-reset');

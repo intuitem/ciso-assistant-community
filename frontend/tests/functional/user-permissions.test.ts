@@ -47,11 +47,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
             await usersPage.form.saveButton.click();
             await usersPage.isToastVisible('.+ successfully saved: ' + vars.user.email);
         
-            await sideBar.moreButton.click();
-            await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-            await expect(sideBar.logoutButton).toBeVisible();
-            await sideBar.logoutButton.click();
-            await logedPage.hasUrl(0);
+            await sideBar.logout();
         
             await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
             const lastMail = await mailer.getLastEmail();
@@ -77,11 +73,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
         
             // logout to prevent sessions conflicts
             const passwordPageSideBar = new SideBar(setPasswordPage);
-            await passwordPageSideBar.moreButton.click();
-            await expect(passwordPageSideBar.morePanel).not.toHaveAttribute('inert');
-            await expect(passwordPageSideBar.logoutButton).toBeVisible();
-            await passwordPageSideBar.logoutButton.click();
-            await setLoginPage.hasUrl(0);
+            await passwordPageSideBar.logout();
         });
 
         test.describe(() => {
@@ -116,11 +108,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                 
                 // logout if the user is still logged in
                 if (await sideBar.userEmailDisplay.innerText() === vars.user.email) {
-                    await sideBar.moreButton.click();
-                    await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-                    await expect(sideBar.logoutButton).toBeVisible();
-                    await sideBar.logoutButton.click();
-                    await loginPage.hasUrl(0);
+                    await sideBar.logout();
                 }
         
                 await loginPage.login();
