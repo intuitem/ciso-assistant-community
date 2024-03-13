@@ -1283,7 +1283,6 @@ class ComplianceAssessment(Assessment):
         choices=Result.choices,
         verbose_name=_("Result"),
     )
-    fields_to_check = ["name"]
 
 
     class Meta:
