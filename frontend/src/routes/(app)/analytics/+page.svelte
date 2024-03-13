@@ -30,7 +30,6 @@
 	export let data;
 
 	let user: User = data.user;
-	let applied_control_status: AppliedControlStatus = data.applied_control_status;
 	let measures = data.measures;
 	let counters: Counters = data.get_counters;
 
@@ -50,10 +49,8 @@
 
 	let dropdown_selected_values: any;
 
-	for (const item in applied_control_status.labels) {
-		applied_control_status.labels[item] = localItems(languageTag())[
-			applied_control_status.localLables[item]
-		];
+	function localizeChartLabels(labels: string[]): string[] {
+		return labels.map((label) => localItems(languageTag())[label]);
 	}
 
 	onMount(async () => {
@@ -267,30 +264,30 @@
 				</section>
 				<section>
 					<div class="flex flex-row space-x-4 h-96 text-sm whitespace-nowrap [&>*]:w-full">
-						<BarChart
-							name="usedMatrices"
-							title={m.usedRiskMatrices()}
-							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
-							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
-						/>
-						<BarChart
-							name="usedFrameworks"
-							title={m.usedFrameworks()}
-							labels={data.usedFrameworks.map((framework) => framework.name)}
-							values={data.usedFrameworks.map(
-								(framework) => framework.compliance_assessments_count
-							)}
-						/>
+						<!-- <BarChart -->
+						<!-- 	name="usedMatrices" -->
+						<!-- 	title={m.usedRiskMatrices()} -->
+						<!-- 	labels={data.usedRiskMatrices.map((matrix) => matrix.name)} -->
+						<!-- 	values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)} -->
+						<!-- /> -->
+						<!-- <BarChart -->
+						<!-- 	name="usedFrameworks" -->
+						<!-- 	title={m.usedFrameworks()} -->
+						<!-- 	labels={data.usedFrameworks.map((framework) => framework.name)} -->
+						<!-- 	values={data.usedFrameworks.map( -->
+						<!-- 		(framework) => framework.compliance_assessments_count -->
+						<!-- 	)} -->
+						<!-- /> -->
 						<BarChart
 							name="riskAssessmentsPerStatus"
 							title={m.appliedControlsStatus()}
-							labels={data.riskAssessmentsPerStatus.labels}
+							labels={localizeChartLabels(data.riskAssessmentsPerStatus.localLables)}
 							values={data.riskAssessmentsPerStatus.values}
 						/>
 						<BarChart
 							name="complianceAssessmentsPerStatus"
 							title={m.appliedControlsStatus()}
-							labels={data.complianceAssessmentsPerStatus.labels}
+							labels={localizeChartLabels(data.complianceAssessmentsPerStatus.localLables)}
 							values={data.complianceAssessmentsPerStatus.values}
 						/>
 					</div>
@@ -373,8 +370,8 @@
 						<BarChart
 							name="mtg"
 							title={m.appliedControlsStatus()}
-							labels={applied_control_status.labels}
-							values={applied_control_status.values}
+							labels={localizeChartLabels(data.applied_control_status.localLables)}
+							values={data.applied_control_status.values}
 						/>
 					</div>
 				</section>
