@@ -17,8 +17,6 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -62,6 +60,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['reference_control'],
+				extra_fields: [["folder","str"]],
 				suggestions: suggestions['reference_control']
 			})}
 			field="reference_control"
@@ -171,7 +170,10 @@
 	{:else if URLModel === 'risk-scenarios'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['risk_assessment'] })}
+			options={getOptions({
+				objects: model.foreignKeys['risk_assessment'],
+				extra_fields: [["project","str"]]
+			})}
 			field="risk_assessment"
 			label={m.riskAssessment()}
 			hide={initialData.risk_assessment}
@@ -179,7 +181,10 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			options={getOptions({ objects: model.foreignKeys['threats'] })}
+			options={getOptions({
+				objects: model.foreignKeys['threats'],
+				extra_fields: [["folder","str"]]
+			})}
 			field="threats"
 			label={m.threats()}
 		/>
@@ -196,7 +201,10 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			options={getOptions({ objects: model.foreignKeys['evidences'] })}
+			options={getOptions({
+				objects: model.foreignKeys['evidences'],
+				extra_fields: [["folder","str"]]
+			})}
 			field="evidences"
 			label={m.evidences()}
 		/>
@@ -267,7 +275,10 @@
 		/>
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['risk_scenarios'] })}
+			options={getOptions({
+				objects: model.foreignKeys['risk_scenarios'],
+				extra_fields: [["project","str"]]
+			})}
 			field="risk_scenarios"
 			label={m.riskScenarios()}
 			helpText={m.riskAcceptanceRiskScenariosHelpText()}
