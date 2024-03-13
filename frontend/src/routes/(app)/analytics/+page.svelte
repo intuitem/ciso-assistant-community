@@ -166,17 +166,9 @@
 			category: 'category',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
-			status: 'status',
 			eta: 'eta'
 		},
-		body: tableSourceMapper(data.measures, [
-			'name',
-			'category',
-			'folder',
-			'ranking_score',
-			'status',
-			'eta'
-		]),
+		body: tableSourceMapper(data.measures, ['name', 'category', 'folder', 'ranking_score', 'eta']),
 		meta: data.measures
 	};
 
@@ -224,69 +216,79 @@
 />
 
 <TabGroup>
-	<Tab bind:group={tabSet} name="governance" value={0}>Governance</Tab>
-	<Tab bind:group={tabSet} name="risk" value={1}>Risk</Tab>
-	<Tab bind:group={tabSet} name="compliance" value={2}>Compliance</Tab>
-	<Tab bind:group={tabSet} name="composer" value={3}>Composer</Tab>
+	<Tab bind:group={tabSet} name="governance" value={0}>{m.governance()}</Tab>
+	<Tab bind:group={tabSet} name="risk" value={1}>{m.risk()}</Tab>
+	<Tab bind:group={tabSet} name="compliance" value={2}>{m.compliance()}</Tab>
+	<Tab bind:group={tabSet} name="composer" value={3}>{m.composer()}</Tab>
 	<svelte:fragment slot="panel">
-		<div class="px-4">
+		<div class="px-4 space-y-4">
 			{#if tabSet === 0}
 				<section id="stats">
 					<span class="text-xl font-extrabold">{m.statistics()}</span>
-					<div class="flex justify-between">
+					<div class="flex justify-between space-x-4">
 						<CounterCard
 							count={counters.domains}
 							label={m.domains()}
 							faIcon="fa-solid fa-diagram-project"
+							href="/folders"
 						/>
 						<CounterCard
 							count={counters.projects}
 							label={m.projects()}
 							faIcon="fa-solid fa-cubes"
+							href="/projects"
 						/>
 						<CounterCard
 							count={counters.applied_controls}
 							label={m.appliedControls()}
 							faIcon="fa-solid fa-fire-extinguisher"
+							href="/applied-controls"
 						/>
 						<CounterCard
 							count={counters.risk_assessments}
 							label={m.riskAssessments()}
 							faIcon="fa-solid fa-magnifying-glass-chart"
+							href="/risk-assessments"
 						/>
 						<CounterCard
 							count={counters.compliance_assessments}
 							label={m.complianceAssessments()}
 							faIcon="fa-solid fa-arrows-to-eye"
+							href="/compliance-assessments"
 						/>
-						<CounterCard count={counters.policies} label={m.policies()} faIcon="fas fa-file-alt" />
+						<CounterCard
+							count={counters.policies}
+							label={m.policies()}
+							faIcon="fas fa-file-alt"
+							href="/policies"
+						/>
 					</div>
 				</section>
 				<section>
 					<div class="flex flex-row space-x-4 h-96 text-sm whitespace-nowrap [&>*]:w-full">
-						<!-- <BarChart -->
-						<!-- 	name="usedMatrices" -->
-						<!-- 	title={m.usedRiskMatrices()} -->
-						<!-- 	labels={data.usedRiskMatrices.map((matrix) => matrix.name)} -->
-						<!-- 	values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)} -->
-						<!-- /> -->
-						<!-- <BarChart -->
-						<!-- 	name="usedFrameworks" -->
-						<!-- 	title={m.usedFrameworks()} -->
-						<!-- 	labels={data.usedFrameworks.map((framework) => framework.name)} -->
-						<!-- 	values={data.usedFrameworks.map( -->
-						<!-- 		(framework) => framework.compliance_assessments_count -->
-						<!-- 	)} -->
-						<!-- /> -->
+						<BarChart
+							name="usedMatrices"
+							title={m.usedRiskMatrices()}
+							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
+							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+						/>
+						<BarChart
+							name="usedFrameworks"
+							title={m.usedFrameworks()}
+							labels={data.usedFrameworks.map((framework) => framework.name)}
+							values={data.usedFrameworks.map(
+								(framework) => framework.compliance_assessments_count
+							)}
+						/>
 						<BarChart
 							name="riskAssessmentsPerStatus"
-							title={m.appliedControlsStatus()}
+							title={m.riskAssessmentsStatus()}
 							labels={localizeChartLabels(data.riskAssessmentsPerStatus.localLables)}
 							values={data.riskAssessmentsPerStatus.values}
 						/>
 						<BarChart
 							name="complianceAssessmentsPerStatus"
-							title={m.appliedControlsStatus()}
+							title={m.complianceAssessmentsStatus()}
 							labels={localizeChartLabels(data.complianceAssessmentsPerStatus.localLables)}
 							values={data.complianceAssessmentsPerStatus.values}
 						/>
@@ -398,14 +400,14 @@
 								{/if}
 
 								{#each project.compliance_assessments as compliance_assessment}
-									<div class="card w-full bg-white flex flex-row shadow mx-8 p-4 relative">
+									<div class="card w-full bg-white flex flex-row mx-8 p-4 relative">
 										<div class="w-1/5 flex flex-col space-y-2">
 											<div>
-												<p class="font-medium">{m.name()}</p>
+												<p class="text-sm font-semibold">{m.name()}</p>
 												<p>{compliance_assessment.name}</p>
 											</div>
 											<div>
-												<p class="font-medium">{m.framework()}</p>
+												<p class="text-sm font-semibold">{m.framework()}</p>
 												<p>{compliance_assessment.framework.str}</p>
 											</div>
 										</div>
