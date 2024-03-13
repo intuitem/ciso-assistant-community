@@ -451,5 +451,7 @@
 	"usedFrameworks": "Used frameworks",
 	"inReview": "In review",
 	"done": "Done",
-	"deprecated": "Deprecated"
+	"deprecated": "Deprecated",
+	"riskAssessmentsStatus": "Risk assessments status",
+	"complianceAssessmentsStatus": "Compliance assessments status"
 }

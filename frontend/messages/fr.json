@@ -451,5 +451,7 @@
 	"usedFrameworks": "Cadres utilisés",
 	"inReview": "En révision",
 	"done": "Terminé",
-	"deprecated": "Obsolète"
+	"deprecated": "Obsolète",
+	"riskAssessmentsStatus": "Statut des évaluations de risque",
+	"complianceAssessmentsStatus": "Statut des évaluations de conformité"
 }
