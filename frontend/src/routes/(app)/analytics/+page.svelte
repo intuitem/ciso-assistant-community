@@ -7,7 +7,6 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import WatchlistExceptions from '$lib/components/fragments/WatchlistExceptions.svelte';
 	import WatchlistMeasures from '$lib/components/fragments/WatchlistMeasures.svelte';
-	import TreatmentProgressDualBar from '$lib/components/Chart/TreatmentProgressDualBar.svelte';
 
 	import * as m from '$paraglide/messages';
 	import { localItems } from '$lib/utils/locales.js';
@@ -17,6 +16,9 @@
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 
 	interface Counters {
 		domains: number;
@@ -200,7 +202,11 @@
 
 	let dropdown = new Dropdown();
 
-	let tabSet = 0;
+	let tabSet = $page.url.searchParams.get('tab') ? parseInt($page.url.searchParams.get('tab')) : 0;
+	$: if (browser) {
+		$page.url.searchParams.set('tab', tabSet.toString());
+		goto($page.url);
+	}
 </script>
 
 <svelte:head>
@@ -295,14 +301,7 @@
 					</div>
 					<div>
 						{#if agg_data.names.length}
-							<div class="m-2 p-2">
-								<div>
-									<!-- <div>{m.treatmentProgressOverview()}</div> -->
-									<!-- <div class="rounded items-center justify-center"> -->
-									<!-- <TreatmentProgressDualBar {agg_data} /> -->
-									<!-- </div> -->
-								</div>
-							</div>
+							<div class="m-2 p-2" />
 							<div>
 								<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
 								<div class="text-sm text-gray-500">
