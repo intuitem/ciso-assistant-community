@@ -171,7 +171,7 @@ export const SetPasswordSchema = z.object({
 export const ComplianceAssessmentSchema = baseNamedObject({
   version: z.string().optional().default('0.1'),
   project: z.string(),
-  status: z.string().optional(),
+  status: z.string().optional().nullable(),
   framework: z.string(),
   eta: z.string().optional().nullable(),
   due_date: z.string().optional().nullable(),
