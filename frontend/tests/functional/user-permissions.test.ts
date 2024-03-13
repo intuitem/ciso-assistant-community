@@ -1,6 +1,6 @@
 import { LoginPage } from '../utils/login-page.js';
 import { SideBar } from '../utils/sidebar.js';
-import { test, expect, setHttpResponsesListener, TestContent } from '../utils/test-utils.js';
+import { test, expect, setHttpResponsesListener, userFromUserGroupHasPermission, TestContent } from '../utils/test-utils.js';
 import testData from '../utils/test-data.js';
 
 const userGroups: {string: any} = testData.usergroups;
@@ -15,10 +15,10 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
         let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
         
         test.beforeEach(async ({loginPage, sideBar, pages, page}) => {
-            test.slow();
             setHttpResponsesListener(page);
-
+            
             if (init) {
+                test.slow();
                 await loginPage.goto();
                 await loginPage.login();
                 for (const [page, data] of Object.entries(testObjectsData)) {
@@ -84,46 +84,76 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
         });
 
         test.describe(() => {
-            test.beforeEach(async ({loginPage, page}) => {
+            test.beforeEach("Login with the test user account", async ({loginPage, page}) => {
                 await loginPage.goto();
                 await loginPage.login(vars.user.email, vars.user.password);
                 await expect(page).toHaveURL('/analytics');
             });
 
             Object.entries(testObjectsData).forEach(([objectPage, objectData], index) => {
-                test(`user can view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
-                    await pages[objectPage].goto();
-                    await expect(pages[objectPage].getRow(objectData.build.name)).toBeVisible();
+                test.describe(`${objectData.displayName.toLowerCase()} permissions`, () => {
+                    const userCanView = userFromUserGroupHasPermission(userGroup, 'view', objectData.displayName);
+                    const userCanCreate = userFromUserGroupHasPermission(userGroup, 'add', objectData.displayName);
+                    const userCanUpdate = userFromUserGroupHasPermission(userGroup, 'change', objectData.displayName);
+                    const userCanDelete = userFromUserGroupHasPermission(userGroup, 'delete', objectData.displayName);
+                    
+                    test.beforeEach(async ({pages, page}) => {
+                        await pages[objectPage].goto();
+                        await pages[objectPage].waitUntilLoaded();
+                    });
+    
+                    test(`user can${!userCanView ? " not" : ""} view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                        if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
+                            await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
+                        }
+
+                        if (userCanView) {
+                            await expect(pages[objectPage].getRow(objectData.build.name || objectData.build.email)).toBeVisible();
+                        }
+                        else {
+                            await expect(pages[objectPage].getRow(objectData.build.name || objectData.build.email)).toBeHidden();
+                        }
+                    });
+    
+                    test(`user can${!userCanCreate ? " not" : ""} create ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                        if (userCanCreate) {
+                            await expect(pages[objectPage].addButton).toBeVisible();
+                        }
+                        else {
+                            await expect(pages[objectPage].addButton).toBeHidden();
+                        }
+                    });
+    
+                    test(`user can${!userCanUpdate ? " not" : ""} update ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                        if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
+                            await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
+                        }
+
+                        if (userCanUpdate) {
+                            await expect(pages[objectPage].editItemButton(objectData.build.name || objectData.build.email)).toBeVisible();
+                        }
+                        else {
+                            await expect(pages[objectPage].editItemButton(objectData.build.name || objectData.build.email)).toBeHidden();
+                        }
+                    });
+
+                    test(`user can${!userCanDelete ? " not" : ""} delete ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                        if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
+                            await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
+                        }
+
+                        if (userCanDelete) {
+                            await expect(pages[objectPage].deleteItemButton(objectData.build.name || objectData.build.email)).toBeVisible();
+                        }
+                        else {
+                            await expect(pages[objectPage].deleteItemButton(objectData.build.name || objectData.build.email)).toBeHidden();
+                        }
+
+                        if (index === Object.keys(testObjectsData).length - 1) {
+                            doCleanup = true;
+                        }
+                    });
                 });
-
-                test(`user can create ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
-                    await pages[objectPage].goto();
-                    await expect(pages[objectPage].addButton).toBeVisible();
-
-                    if (index === Object.keys(testObjectsData).length - 1) {
-                        doCleanup = true;
-                    }
-                });
-
-                // test(`user can update ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
-                //     await pages[objectPage].goto();
-                //     await page.waitForTimeout(100);
-                //     // ...
-
-                //     if (index === Object.keys(testObjectsData).length - 1) {
-                //         doCleanup = true;
-                //     }
-                // });
-
-                // test(`user can delete ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
-                //     await pages[objectPage].goto();
-                //     await page.waitForTimeout(100);
-                //     // ...
-
-                //     if (index === Object.keys(testObjectsData).length - 1) {
-                //         doCleanup = true;
-                //     }
-                // });
             });
         });
         
