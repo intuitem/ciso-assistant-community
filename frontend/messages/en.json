@@ -448,5 +448,8 @@
 	"threatsCovered": "Threats covered",
 	"noFileDetected": "Error: no file detected",
 	"usedRiskMatrices": "Used risk matrices",
-	"usedFrameworks": "Used frameworks"
+	"usedFrameworks": "Used frameworks",
+	"inReview": "In review",
+	"done": "Done",
+	"deprecated": "Deprecated"
 }

@@ -448,5 +448,8 @@
 	"threatsCovered": "Menaces couvertes",
 	"noFileDetected": "Erreur: aucun fichier détecté",
 	"usedRiskMatrices": "Matrices de risque utilisées",
-	"usedFrameworks": "Cadres utilisés"
+	"usedFrameworks": "Cadres utilisés",
+	"inReview": "En révision",
+	"done": "Terminé",
+	"deprecated": "Obsolète"
 }
