@@ -5,8 +5,6 @@
 	import { beforeUpdate, onMount } from 'svelte';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import WatchlistExceptions from '$lib/components/fragments/WatchlistExceptions.svelte';
-	import WatchlistMeasures from '$lib/components/fragments/WatchlistMeasures.svelte';
 
 	import * as m from '$paraglide/messages';
 	import { localItems } from '$lib/utils/locales.js';
