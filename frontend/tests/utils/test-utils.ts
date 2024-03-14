@@ -9,9 +9,10 @@ import { randomBytes } from 'crypto';
 import testData from './test-data.js';
 
 type Fixtures = {
+	data: { [key: string]: any };
+	isolatedPage: Page;
 	mailer: Mailer;
 	sideBar: SideBar;
-	isolatedPage: Page;
 	pages: { [page: string]: PageContent };
 	analyticsPage: AnalyticsPage;
 	assetsPage: PageContent;
@@ -31,6 +32,7 @@ type Fixtures = {
 	usersPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
+	populateDatabase: void;
 };
 
 export const test = base.extend<Fixtures>({
@@ -86,6 +88,10 @@ export const test = base.extend<Fixtures>({
 			threatsPage,
 			usersPage
 		});
+	},
+
+	analyticsPage: async ({ page }, use) => {
+		await use(new AnalyticsPage(page));
 	},
 
 	complianceAssessmentsPage: async ({ page }, use) => {
@@ -262,8 +268,22 @@ export const test = base.extend<Fixtures>({
 		await use(new LoginPage(page));
 	},
 
-	analyticsPage: async ({ page }, use) => {
-		await use(new AnalyticsPage(page));
+	data: { ...testData},
+
+	populateDatabase: async ({ pages, loginPage, sideBar, data }, use) => {
+		test.slow();
+		await loginPage.goto();
+		await loginPage.login();
+		for (const [page, pageData] of Object.entries(data)) {
+			await pages[page].goto();
+			await pages[page].waitUntilLoaded();
+			await pages[page].createItem(
+				pageData.build,
+				'dependency' in pageData ? pageData.dependency : null
+			);
+		}
+		await sideBar.logout();
+		await use();
 	}
 });
 
