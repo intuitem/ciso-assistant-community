@@ -51,22 +51,19 @@ export class PageContent extends BasePage {
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
 		if (typeof this.name == 'string') {
-			if (this.name === 'Users') {
-				await this.isToastVisible('User successfully created' + /\..+/.source);
-			} else {
-				await this.isToastVisible(
-					'Successfully created ' +
-						this.name.substring(0, this.name.length - 1).toLowerCase() +
-						/\..+/.source
-				);
-			}
+			await this.isToastVisible(
+				'The ' +
+					this.name.substring(0, this.name.length - 1).toLowerCase() +
+					' object has been successfully created' + 
+					/.+/.source
+			);
 		} else {
-			await this.isToastVisible('Successfully created ' + this.name.source + /\..+/.source, 'i');
+			await this.isToastVisible('The ' + this.name.source + ' object has been successfully created' + /.+/.source, 'i');
 		}
 	}
 
-	async importLibrary(ref: string, urn: string, language: string = 'English') {
-		if (await this.tab('Imported libraries').isVisible()) {
+	async importLibrary(ref: string, urn?: string, language: string = 'English') {
+		if (await this.tab('Imported libraries').isVisible() && await this.tab('Imported libraries').getAttribute('aria-selected') === 'true') {
 			if (await this.getRow(ref).isHidden()) {
 				await this.tab('Libraries store').click();
 				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
@@ -74,8 +71,8 @@ export class PageContent extends BasePage {
 				return;
 			}
 		}
-		await this.importItemButton(ref, language).click();
-		await this.isToastVisible('Successfully imported library ' + urn + '.+', undefined, {
+		await this.importItemButton(ref, language === 'any' ? undefined : language).click();
+		await this.isToastVisible(`The library object has been successfully imported.+`, undefined, {
 			timeout: 15000
 		});
 		await this.tab('Imported libraries').click();

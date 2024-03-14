@@ -52,7 +52,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                 ],
             });
             await usersPage.form.saveButton.click();
-            await usersPage.isToastVisible('.+ successfully saved: ' + vars.user.email);
+            await usersPage.isToastVisible('The user: ' + vars.user.email + ' has been successfully updated.+');
             
             await sideBar.logout();
         
@@ -73,7 +73,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
             await setLoginPage.confirmPasswordInput.fill(vars.user.password);
             await setLoginPage.setPasswordButton.click();
             
-            await setLoginPage.isToastVisible('Your password was successfully set. Welcome to CISO Assistant.');
+            await setLoginPage.isToastVisible('Your password has been successfully set. Welcome to CISO Assistant!');
         
             await setLoginPage.login(vars.user.email, vars.user.password);
             await expect(setLoginPage.page).toHaveURL('/analytics');

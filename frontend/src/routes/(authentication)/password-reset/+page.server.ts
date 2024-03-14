@@ -6,6 +6,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	// redirect user if already logged in
@@ -50,7 +51,7 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'error',
-					message: `Please wait ${status.retryAfter.toString()}sec before requesting another reset link for ${email}`
+					message: m.waitBeforeRequestingResetLink({timing: status.retryAfter.toString()})
 				},
 				event
 			);
@@ -81,7 +82,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: `The request has been received, you should receive a reset link at the following address: ${email}`
+				message: m.resetLinkSent({email: email})
 			},
 			event
 		);

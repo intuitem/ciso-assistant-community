@@ -269,6 +269,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# SQLIte file can be changed, useful for tests
+SQLITE_FILE = os.environ.get('SQLITE_FILE', BASE_DIR / "db/ciso-assistant.sqlite3")
+
 
 if "POSTGRES_NAME" in os.environ:
     DATABASES = {
@@ -285,12 +288,14 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db/ciso-assistant.sqlite3",
+            "NAME": SQLITE_FILE,
             "OPTIONS": {
                 'timeout': 120,
             },
         }
     }
+    logger.info("SQLITE_FILE: %s", SQLITE_FILE)
+
 logger.info("DATABASE ENGINE: %s", DATABASES["default"]["ENGINE"])
 
 PASSWORD_HASHERS = [

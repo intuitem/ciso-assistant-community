@@ -2,6 +2,9 @@
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
 	import { formFieldProxy } from 'sveltekit-superforms/client';
 
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
+
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
@@ -51,7 +54,11 @@
 			class="flex font-medium w-32 justify-center p-2 rounded-token"
 			style="background-color: {riskLevel.hexcolor}"
 		>
-			{riskLevel.name}
+			{#if localItems(languageTag())[toCamelCase(riskLevel.name)]}
+				{localItems(languageTag())[toCamelCase(riskLevel.name)]}
+			{:else}
+				{riskLevel.name}
+			{/if}
 		</div>
 	{:else}
 		<div class="flex font-medium w-32 justify-center p-2 rounded-token bg-gray-300">--</div>

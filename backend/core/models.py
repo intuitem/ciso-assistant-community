@@ -167,6 +167,8 @@ class Threat(ReferentialObjectMixin):
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
 
+    fields_to_check = ["ref_id", "name"]
+
     class Meta:
         verbose_name = _("Threat")
         verbose_name_plural = _("Threats")
@@ -214,6 +216,8 @@ class ReferenceControl(ReferentialObjectMixin):
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
+
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Reference control")
@@ -548,6 +552,8 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Link"),
     )
 
+    fields_to_check = ["name"]
+
     class Meta:
         verbose_name = _("Evidence")
         verbose_name_plural = _("Evidences")
@@ -636,7 +642,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Effort"),
     )
 
-    fields_to_check = ["name", "category"]
+    fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Applied control")
@@ -750,6 +756,8 @@ class Assessment(NameDescriptionMixin):
         choices=Status.choices,
         default=Status.PLANNED,
         verbose_name=_("Status"),
+        blank=True,
+        null=True
     )
     authors = models.ManyToManyField(
         User,
@@ -1155,6 +1163,8 @@ class RiskScenario(NameDescriptionMixin):
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
     )
 
+    fields_to_check = ["name"]
+
     class Meta:
         verbose_name = _("Risk scenario")
         verbose_name_plural = _("Risk scenarios")
@@ -1273,6 +1283,7 @@ class ComplianceAssessment(Assessment):
         choices=Result.choices,
         verbose_name=_("Result"),
     )
+
 
     class Meta:
         verbose_name = _("Compliance assessment")
