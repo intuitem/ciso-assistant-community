@@ -9,6 +9,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	import * as m from '$paraglide/messages';
+
 	export let data: SuperValidated<AnyZodObject>;
 	export let dataType: 'form' | 'json';
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
@@ -16,8 +18,7 @@
 	export let applyAction = true;
 	export let resetForm = false;
 	export let onSubmit = (submit_data: any) => {};
-	export let taintedMessage: string | null =
-		'This form has unsaved changes. Are you sure you want to leave?';
+	export let taintedMessage: string | null = m.taintedFormMessage();
 
 	export let debug = false; // set to true to enable SuperDebug component
 
