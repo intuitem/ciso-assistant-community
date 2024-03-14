@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import * as m from '$paraglide/messages';
 
 	export let cell: any;
 	export let meta: any;
@@ -29,6 +30,6 @@
 			<embed src={attachment.url} type="application/pdf" class="h-24" />
 		{/if}
 	{:else}
-		loading...
+			{m.loading()}...
 	{/if}
 {/if}
