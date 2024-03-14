@@ -329,6 +329,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def per_status(self, request):
         data = assessment_per_status(request.user, RiskAssessment)
         return Response({"results": data})
+
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RiskAssessment.Status.choices))

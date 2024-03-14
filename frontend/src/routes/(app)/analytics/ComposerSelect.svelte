@@ -18,12 +18,20 @@
 	});
 </script>
 
-<p>{m.selectTargets()}</p>
 <SuperForm dataType="json" data={composerForm} let:form validators={composerSchema} let:data>
-	{#if options}
-		<AutocompleteSelect multiple={true} {form} field="risk_assessment" {options} />
-	{/if}
-	<a href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`} class="btn btn-primary"
-		>{m.submit()}</a
-	>
+	<div class="flex flex-row space-x-2 items-center card p-4 variant-ghost">
+		{#if options}
+			<AutocompleteSelect
+				multiple={true}
+				{form}
+				field="risk_assessment"
+				label={m.selectTargets()}
+				{options}
+			/>
+		{/if}
+		<a
+			href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
+			class="btn variant-filled-primary">{m.submit()}</a
+		>
+	</div>
 </SuperForm>
