@@ -30,6 +30,8 @@
 			<embed src={attachment.url} type="application/pdf" class="h-24" />
 		{/if}
 	{:else}
+		<span data-testid="loading-field">
 			{m.loading()}...
+		</span>
 	{/if}
 {/if}
