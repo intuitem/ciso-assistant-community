@@ -135,32 +135,46 @@
 					</div>
 				</section>
 				<section>
-					<div class="flex flex-row space-x-4 h-96 text-sm whitespace-nowrap [&>*]:w-full">
+					<div class="flex flex-row space-x-4 h-48 text-sm whitespace-nowrap">
 						<BarChart
-							name="usedMatrices"
-							title={m.usedRiskMatrices()}
-							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
-							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
+							classesContainer="flex-1"
+							name="complianceAssessmentsPerStatus"
+							title={m.complianceAssessmentsStatus()}
+							labels={localizeChartLabels(data.complianceAssessmentsPerStatus.localLables)}
+							values={data.complianceAssessmentsPerStatus.values}
 						/>
 						<BarChart
+							classesContainer="basis-1/3"
 							name="usedFrameworks"
+							horizontal
 							title={m.usedFrameworks()}
 							labels={data.usedFrameworks.map((framework) => framework.name)}
 							values={data.usedFrameworks.map(
 								(framework) => framework.compliance_assessments_count
 							)}
 						/>
+					</div>
+					<div class="flex flex-row space-x-4 h-48 text-sm whitespace-nowrap">
 						<BarChart
+							classesContainer="flex-1"
 							name="riskAssessmentsPerStatus"
 							title={m.riskAssessmentsStatus()}
 							labels={localizeChartLabels(data.riskAssessmentsPerStatus.localLables)}
 							values={data.riskAssessmentsPerStatus.values}
 						/>
 						<BarChart
-							name="complianceAssessmentsPerStatus"
-							title={m.complianceAssessmentsStatus()}
-							labels={localizeChartLabels(data.complianceAssessmentsPerStatus.localLables)}
-							values={data.complianceAssessmentsPerStatus.values}
+							classesContainer="flex-1"
+							name="riskScenariosPerStatus"
+							title={m.riskScenariosStatus()}
+							labels={localizeChartLabels(data.riskScenariosPerStatus.localLables)}
+							values={data.riskScenariosPerStatus.values}
+						/>
+						<BarChart
+							classesContainer="basis-1/3"
+							name="usedMatrices"
+							title={m.usedRiskMatrices()}
+							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
+							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
 						/>
 					</div>
 					<div>
@@ -175,6 +189,7 @@
 								source={appliedControlTodoTable}
 								search={false}
 								pagination={false}
+								orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
 							/>
 							<div class="text-sm">
 								<i class="fas fa-info-circle" />
