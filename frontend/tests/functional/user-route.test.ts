@@ -125,6 +125,7 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			project: vars.projectName,
 			version: '1.4.2',
+			status: 'Done',
 			framework: vars.framework.name,
 			eta: '2025-01-01',
 			due_date: '2025-05-01'
@@ -179,6 +180,7 @@ test('user usual routine actions are working correctly', async ({
 			description: vars.description,
 			project: vars.projectName,
 			version: '1.4.2',
+			status: 'Done',
 			risk_matrix: vars.matrix.displayName,
 			eta: '2025-01-01',
 			due_date: '2025-05-01'

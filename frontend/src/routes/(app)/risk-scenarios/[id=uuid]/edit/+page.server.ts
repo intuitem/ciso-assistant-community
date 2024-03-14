@@ -9,6 +9,7 @@ import type { StrengthOfKnowledgeEntry, urlModel } from '$lib/utils/types';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'risk-scenarios';
@@ -211,10 +212,13 @@ export const actions: Actions = {
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
+			Object.entries(response).forEach(([key, value]) => {
+				setError(form, key, value);
+			});
 			return fail(400, { form: form });
 		}
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: `${model} successfully saved: ${form.data.name}` }, event);
+		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) }, event);
 		redirect(
 			302,
 			event.url.searchParams.get('/updateRiskScenario') ?? `/risk-scenarios/${event.params.id}`
@@ -269,7 +273,7 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 		setFlash(
-			{ type: 'success', message: `${URLModel} successfully saved: ${form.data.name}` },
+			{ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) },
 			event
 		);
 		return { form };

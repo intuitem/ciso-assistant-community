@@ -265,6 +265,10 @@ export function localItems(languageTag: string): LocalItems {
 		dropped: m.dropped({ languageTag: languageTag }),
 		technical: m.technical({ languageTag: languageTag }),
 		physical: m.physical({ languageTag: languageTag }),
+		veryLow: m.veryLow({ languageTag: languageTag }),
+		low: m.low({ languageTag: languageTag }),
+		high: m.high({ languageTag: languageTag }),
+		veryHigh: m.veryHigh({ languageTag: languageTag }),
 		small: m.small({ languageTag: languageTag }),
 		medium: m.medium({ languageTag: languageTag }),
 		large: m.large({ languageTag: languageTag }),
@@ -282,6 +286,9 @@ export function localItems(languageTag: string): LocalItems {
 		support: m.support({ languageTag: languageTag }),
 		toDo: m.toDo({ languageTag: languageTag }),
 		inProgress: m.inProgress({ languageTag: languageTag }),
+		inReview: m.inReview({ languageTag: languageTag }),
+		deprecated: m.deprecated({ languageTag: languageTag }),
+		done: m.done({ languageTag: languageTag }),
 		nonCompliant: m.nonCompliant({ languageTag: languageTag }),
 		partiallyCompliant: m.partiallyCompliant({ languageTag: languageTag }),
 		requirementAssessments: m.requirementAssessments({ languageTag: languageTag }),
@@ -296,9 +303,13 @@ export function localItems(languageTag: string): LocalItems {
 		isPublished: m.isPublished({ languageTag: languageTag }),
 		noFileDetected: m.noFileDetected({ languageTag: languageTag }),
 		rankingScore: m.rankingScore({ languageTag: languageTag }),
-		inReview: m.inReview({ languageTag: languageTag }),
-		done: m.done({ languageTag: languageTag }),
-		deprecated: m.deprecated({ languageTag: languageTag })
+		'--SOK': m.undefinedSOK({ languageTag: languageTag }),
+		lowSOK: m.lowSOK({ languageTag: languageTag }),
+		mediumSOK: m.mediumSOK({ languageTag: languageTag }),
+		highSOK: m.highSOK({ languageTag: languageTag }),
+		libraryImportError: m.libraryImportError({ languageTag: languageTag }),
+		libraryAlreadyExistsError: m.libraryAlreadyImportedError({ languageTag: languageTag }),
+		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
