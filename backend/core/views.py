@@ -864,7 +864,10 @@ class FolderViewSet(BaseModelViewSet):
     filterset_fields = ["parent_folder", "content_type"]
 
     def get_queryset(self):
-        return Folder.objects.filter(content_type=Folder.ContentType.DOMAIN)
+        queryset = super().get_queryset()
+        if not queryset:
+            return queryset
+        return queryset.filter(content_type=Folder.ContentType.DOMAIN)
 
     def perform_create(self, serializer):
         """
