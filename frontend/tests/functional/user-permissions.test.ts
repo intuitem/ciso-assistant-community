@@ -1,47 +1,31 @@
 import { LoginPage } from '../utils/login-page.js';
 import { SideBar } from '../utils/sidebar.js';
-import { test, expect, setHttpResponsesListener, userFromUserGroupHasPermission, TestContent } from '../utils/test-utils.js';
+import { test, expect, setHttpResponsesListener, userFromUserGroupHasPermission, TestContent, type Page } from '../utils/test-utils.js';
 import testData from '../utils/test-data.js';
+import { PageContent } from '../utils/page-content.js';
 
 const userGroups: {string: any} = testData.usergroups;
 
 Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
-    let doCleanup = false;
     test.describe(`${userGroupData.name} user has the right permissions`, async () => {
         test.describe.configure({mode: 'serial'});
         
-        let init = true;
         let vars = TestContent.generateTestVars();
         let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
         
-        test.beforeEach(async ({loginPage, sideBar, pages, page}) => {
+        test.beforeEach(async ({ page }) => {
             setHttpResponsesListener(page);
-            
-            if (init) {
-                test.slow();
-                await loginPage.goto();
-                await loginPage.login();
-                for (const [page, data] of Object.entries(testObjectsData)) {
-                    await pages[page].goto();
-                    await pages[page].waitUntilLoaded();
-                    await pages[page].createItem(
-                        data.build,
-                        'dependency' in data ? data.dependency : null
-                    );
-                }
-                await sideBar.logout();
-                
-                init = false;
-            }
         });
         
+        test.use({ data: testObjectsData });
         test('user can set his password', async ({
+            populateDatabase,
             logedPage,
             usersPage,
             sideBar,
             mailer,
             page
-        }) => {          
+        }) => {
             await usersPage.goto();
             await usersPage.editItemButton(vars.user.email).click();
             await usersPage.form.fill({
@@ -84,10 +68,21 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
         });
 
         test.describe(() => {
-            test.beforeEach("Login with the test user account", async ({loginPage, page}) => {
+            let page: Page;
+
+            test.beforeAll(async ({ browser }) => {
+                // Create a unique page to use for all the tests on this user group and login
+                page = await browser.newPage();
+                const loginPage = new LoginPage(page);
                 await loginPage.goto();
                 await loginPage.login(vars.user.email, vars.user.password);
                 await expect(page).toHaveURL('/analytics');
+            });
+
+            test.use({ 
+                page: async ({  }, use) => {
+                    await use(page);
+                } 
             });
 
             Object.entries(testObjectsData).forEach(([objectPage, objectData], index) => {
@@ -97,12 +92,12 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                     const userCanUpdate = userFromUserGroupHasPermission(userGroup, 'change', objectData.displayName);
                     const userCanDelete = userFromUserGroupHasPermission(userGroup, 'delete', objectData.displayName);
                     
-                    test.beforeEach(async ({pages, page}) => {
+                    test.beforeAll(async ({pages}) => {
                         await pages[objectPage].goto();
                         await pages[objectPage].waitUntilLoaded();
                     });
     
-                    test(`${userGroupData.name} user can${!userCanView ? " not" : ""} view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanView ? " not" : ""} view ${objectData.displayName.toLowerCase()}`, async ({pages}) => {
                         if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
                             await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
                         }
@@ -115,7 +110,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         }
                     });
     
-                    test(`${userGroupData.name} user can${!userCanCreate ? " not" : ""} create ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanCreate ? " not" : ""} create ${objectData.displayName.toLowerCase()}`, async ({pages}) => {
                         if (userCanCreate) {
                             await expect(pages[objectPage].addButton).toBeVisible();
                         }
@@ -124,7 +119,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         }
                     });
     
-                    test(`${userGroupData.name} user can${!userCanUpdate ? " not" : ""} update ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanUpdate ? " not" : ""} update ${objectData.displayName.toLowerCase()}`, async ({pages}) => {
                         if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
                             await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
                         }
@@ -137,7 +132,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         }
                     });
 
-                    test(`${userGroupData.name} user can${!userCanDelete ? " not" : ""} delete ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanDelete ? " not" : ""} delete ${objectData.displayName.toLowerCase()}`, async ({pages}) => {
                         if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
                             await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
                         }
@@ -148,33 +143,27 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         else {
                             await expect(pages[objectPage].deleteItemButton(objectData.build.name || objectData.build.email)).toBeHidden();
                         }
-
-                        if (index === Object.keys(testObjectsData).length - 1) {
-                            doCleanup = true;
-                        }
                     });
                 });
             });
         });
         
-        test.afterEach('cleanup', async ({sideBar, loginPage, foldersPage, usersPage, page}) => {
-            // make sure to execute the cleanup only after the last test
-            if (doCleanup) {              
-                // logout if the user is still logged in
-                if (await sideBar.userEmailDisplay.innerText() === vars.user.email) {
-                    await sideBar.logout();
-                }
-        
-                await loginPage.login();
-                await foldersPage.goto();
-                await foldersPage.deleteItemButton(vars.folderName).click();
-                await foldersPage.deleteModalConfirmButton.click();
-                await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
-                await usersPage.goto();
-                await usersPage.deleteItemButton(vars.user.email).click();
-                await usersPage.deleteModalConfirmButton.click();
-                await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
-            }
+        test.afterAll('cleanup', async ({ browser }) => {
+            const page = await browser.newPage();
+            const loginPage = new LoginPage(page);
+            const usersPage = new PageContent(page, '/users', 'Users');
+            const foldersPage = new PageContent(page, '/folders', 'Domains');
+
+            await loginPage.goto();
+            await loginPage.login();
+            await foldersPage.goto();
+            await foldersPage.deleteItemButton(vars.folderName).click();
+            await foldersPage.deleteModalConfirmButton.click();
+            await expect(foldersPage.getRow(vars.folderName)).not.toBeVisible();
+            await usersPage.goto();
+            await usersPage.deleteItemButton(vars.user.email).click();
+            await usersPage.deleteModalConfirmButton.click();
+            await expect(usersPage.getRow(vars.user.email)).not.toBeVisible();
         });
     });
 });
