@@ -1,15 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import type {
 		ModalComponent,
 		ModalSettings,
 		ModalStore,
-		ToastStore
 	} from '@skeletonlabs/skeleton';
-	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
@@ -18,52 +15,7 @@
 	export let data: PageData;
 
 	const modalStore: ModalStore = getModalStore();
-	const toastStore: ToastStore = getToastStore();
-
-	function handleFormUpdated({
-		form,
-		pageStatus,
-		closeModal
-	}: {
-		form: any;
-		pageStatus: number;
-		closeModal: boolean;
-	}) {
-		if (closeModal && form.valid) {
-			$modalStore[0] ? modalStore.close() : null;
-		}
-		if (form.message) {
-			const toast: { message: string; background: string } = {
-				message: form.message,
-				background: pageStatus === 200 ? 'variant-filled-success' : 'variant-filled-error'
-			};
-			toastStore.trigger(toast);
-		}
-	}
-
-	let { form: deleteForm, message: deleteMessage } = {
-		form: {},
-		message: {}
-	};
-
-	let { form: createForm, message: createMessage } = {
-		form: {},
-		message: {}
-	};
-
-	// NOTE: This is a workaround for an issue we had with getting the return value from the form actions after switching pages in route /[model=urlmodel]/ without a full page reload.
-	// invalidateAll() did not work.
-	$: {
-		({ form: createForm, message: createMessage } = superForm(data.createForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-		({ form: deleteForm, message: deleteMessage } = superForm(data.deleteForm, {
-			onUpdated: ({ form }) =>
-				handleFormUpdated({ form, pageStatus: $page.status, closeModal: true })
-		}));
-	}
-
+	
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,

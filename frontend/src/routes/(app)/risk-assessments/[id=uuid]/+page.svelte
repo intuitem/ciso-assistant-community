@@ -19,6 +19,7 @@
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { localItems, toCamelCase } from '$lib/utils/locales.js';
 
 	export let data;
 	const showRisks = true;
@@ -204,14 +205,15 @@
 			</div>
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{#if risk_assessment.is_draft}
-						<span class="badge bg-blue-200">{m.draft()}</span>
-					{/if}
 					{risk_assessment.project.str}/{risk_assessment.name} - {risk_assessment.version}
 				</div>
 				<br />
 				<div class="text-sm">
 					<ul>
+						<li class="pb-1">
+							<span class="font-semibold">{m.status()}:</span>
+							{localItems(languageTag())[risk_assessment.status]}
+						</li>
 						<li class="pb-1">
 							<span class="font-semibold">{m.authors()}:</span>
 							<ul>

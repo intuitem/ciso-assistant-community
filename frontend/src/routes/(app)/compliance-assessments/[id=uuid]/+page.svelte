@@ -88,7 +88,7 @@
 <div class="flex flex-col space-y-4 whitespace-pre-line">
 	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
 		<div class="flex flex-col space-y-2 whitespace-pre-line">
-			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers'].includes(key) ) as [key, value]}
+			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers', 'status'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
 						class="text-sm font-medium text-gray-800 capitalize-first"
@@ -131,7 +131,11 @@
 									}/${value.id}`}
 									<a href={itemHref} class="anchor">{value.str}</a>
 								{:else}
-									{value.str ?? value}
+									{#if localItems(languageTag())[toCamelCase(value.str ?? value)]}
+										{localItems(languageTag())[toCamelCase(value.str ?? value)]}
+									{:else}
+										{value.str ?? value}
+									{/if}
 								{/if}
 							{:else}
 								--

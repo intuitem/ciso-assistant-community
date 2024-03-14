@@ -4,6 +4,7 @@ import { ChangePasswordSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
+import * as m from '$paraglide/messages';
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, ChangePasswordSchema);
@@ -42,7 +43,7 @@ export const actions: Actions = {
 			return fail(res.status, { form });
 		}
 
-		setFlash({ type: 'success', message: `Your password was successfully changed` }, event);
+		setFlash({ type: 'success', message: m.passwordSuccessfullyChanged() }, event);
 		redirect(302, '/my-profile');
 	}
 };
