@@ -1,10 +1,9 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { z } from 'zod';
-import type { PageServerLoad } from './$types';
-import { superValidate } from 'sveltekit-superforms/server';
 import { composerSchema } from '$lib/utils/schemas';
+import { superValidate } from 'sveltekit-superforms/server';
+import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, fetch, params }) => {
+export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
 	const applied_control_status = await req_applied_control_status.json();
 
@@ -41,20 +40,8 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	const req_get_acceptances_to_review = await fetch(`${BASE_API_URL}/risk-acceptances/to_review/`);
 	const acceptances_to_review = await req_get_acceptances_to_review.json();
 
-	const req_get_risk_color_ordered_list = await fetch(`${BASE_API_URL}/risk-matrices/colors/`);
-	const risk_color_ordered_list = await req_get_risk_color_ordered_list.json();
-
-	const req_get_agg_data = await fetch(`${BASE_API_URL}/agg_data/`);
-	const agg_data = await req_get_agg_data.json();
-
 	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
 	const risk_assessments = await req_risk_assessments.json();
-
-	const req_viewable_measures = await fetch(`${BASE_API_URL}/applied-controls/`);
-	const viewable_measures = await req_viewable_measures.json();
-
-	const req_updatable_measures = await fetch(`${BASE_API_URL}/applied-controls/updatables/`);
-	const updatable_measures = await req_updatable_measures.json();
 
 	const projects = await fetch(`${BASE_API_URL}/projects/`)
 		.then((res) => res.json())
@@ -151,11 +138,7 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		risks_level: risks_count_per_level.results,
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
-		colors: risk_color_ordered_list.results,
 		risk_assessments: risk_assessments.results,
-		viewable_measures: viewable_measures.results,
-		updatable_measures: updatable_measures.results,
-		agg_data: agg_data.results,
 		get_counters: counters.results,
 		measures: ord_applied_controls.results,
 		applied_control_status: applied_control_status.results,

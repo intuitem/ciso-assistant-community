@@ -30,7 +30,6 @@
 	let counters: Counters = data.get_counters;
 
 	let risk_level = data.risks_level;
-	let agg_data: AggregatedData = data.agg_data;
 	let risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
@@ -165,29 +164,23 @@
 						/>
 					</div>
 					<div>
-						{#if agg_data.names.length}
-							<div class="m-2 p-2" />
-							<div>
-								<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
-								<div class="text-sm text-gray-500">
-									{m.orderdByRankingScore()}
-								</div>
-								<ModelTable
-									URLModel="applied-controls"
-									source={appliedControlTodoTable}
-									search={false}
-									pagination={false}
-								/>
-								<div class="text-sm">
-									<i class="fas fa-info-circle" />
-									{m.rankingScoreDefintion()}.
-								</div>
+						<div class="m-2 p-2" />
+						<div>
+							<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
+							<div class="text-sm text-gray-500">
+								{m.orderdByRankingScore()}
 							</div>
-						{:else}
-							<div class="bg-white shadow-md rounded-lg px-4 py-2 m-8">
-								<div>{m.projectsSummaryEmpty()}.</div>
+							<ModelTable
+								URLModel="applied-controls"
+								source={appliedControlTodoTable}
+								search={false}
+								pagination={false}
+							/>
+							<div class="text-sm">
+								<i class="fas fa-info-circle" />
+								{m.rankingScoreDefintion()}.
 							</div>
-						{/if}
+						</div>
 					</div>
 				</section>
 				<section>
