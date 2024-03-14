@@ -16,16 +16,12 @@
 	export let applyAction = true;
 	export let resetForm = false;
 	export let onSubmit = (submit_data: any) => {};
+	export let taintedMessage: string | null =
+		'This form has unsaved changes. Are you sure you want to leave?';
 
 	export let debug = false; // set to true to enable SuperDebug component
 
-	function handleFormUpdated({
-		form,
-		closeModal
-	}: {
-		form: any;
-		closeModal: boolean;
-	}) {
+	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
 		if (closeModal && form.valid) {
 			$modalStore[0] ? modalStore.close() : null;
 		}
@@ -38,7 +34,8 @@
 		resetForm: resetForm,
 		validators: validators,
 		onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
-		onSubmit: onSubmit
+		onSubmit: onSubmit,
+		taintedMessage: taintedMessage
 	});
 
 	const { form, message /*, tainted*/, delayed, errors, allErrors, enhance } = _form;
