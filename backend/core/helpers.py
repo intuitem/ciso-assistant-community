@@ -10,17 +10,19 @@ from .models import *
 from .utils import camel_case
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
-    "--": "#fac858",
-    "planned": "#5470c6",
-    "active": "#ee6666",
-    "inactive": "#91cc75",
+    "undefined": "#CCC",
+    "planned": "#BFDBFE",
+    "active": "#46D39A",
+    "inactive": "#E55759",
+    "in_progress": "#5470c6",
+    "in_review": "#BBF7D0",
+    "done": "#46D39A",
+    "deprecated": "#E55759",
     "open": "#fac858",
     "mitigate": "#91cc75",
     "accept": "#73c0de",
     "avoid": "#ee6666",
-    "in_progress": "#5470c6",
     "on_hold": "#ee6666",
-    "done": "#91cc75",
     "transfer": "#91cc75",
 }
 
