@@ -15,6 +15,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	)
 		.then((res) => res.json())
 		.then((res) => res.results);
+	const riskScenariosPerStatus = await fetch(`${BASE_API_URL}/risk-scenarios/per_status/`)
+		.then((res) => res.json())
+		.then((res) => res.results);
 
 	const req_ord_applied_controls = await fetch(`${BASE_API_URL}/applied-controls/todo/`);
 	const ord_applied_controls = await req_ord_applied_controls.json();
@@ -135,6 +138,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		usedFrameworks,
 		riskAssessmentsPerStatus,
 		complianceAssessmentsPerStatus,
+		riskScenariosPerStatus,
 		risks_level: risks_count_per_level.results,
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
