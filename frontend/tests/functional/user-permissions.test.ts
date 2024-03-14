@@ -47,6 +47,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
             
             await lastMail.open();
             const pagePromise = page.context().waitForEvent('page');
+            await expect(mailer.emailContent.setPasswordButton).toBeVisible();
             await mailer.emailContent.setPasswordButton.click();
             const setPasswordPage = await pagePromise;
             await setPasswordPage.waitForLoadState();
