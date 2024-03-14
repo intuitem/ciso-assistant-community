@@ -42,6 +42,13 @@ export abstract class BasePage {
 		await expect.soft(this.page.getByText('undefined'), "An undefined text is visible on the page").toHaveCount(0);
 	}
 
+	async waitUntilLoaded() {
+		const loadingFields = this.page.getByTestId('loading-field');
+		if (await loadingFields.count() > 0) {
+			await Promise.all((await loadingFields.all()).map(async field => await expect(field).toBeHidden()));
+		}
+	}
+
 	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
 		await expect(toast).toBeVisible(options);

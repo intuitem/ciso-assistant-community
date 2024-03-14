@@ -102,7 +102,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         await pages[objectPage].waitUntilLoaded();
                     });
     
-                    test(`user can${!userCanView ? " not" : ""} view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanView ? " not" : ""} view ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
                         if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
                             await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
                         }
@@ -115,7 +115,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         }
                     });
     
-                    test(`user can${!userCanCreate ? " not" : ""} create ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanCreate ? " not" : ""} create ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
                         if (userCanCreate) {
                             await expect(pages[objectPage].addButton).toBeVisible();
                         }
@@ -124,7 +124,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         }
                     });
     
-                    test(`user can${!userCanUpdate ? " not" : ""} update ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanUpdate ? " not" : ""} update ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
                         if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
                             await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
                         }
@@ -137,7 +137,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
                         }
                     });
 
-                    test(`user can${!userCanDelete ? " not" : ""} delete ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
+                    test(`${userGroupData.name} user can${!userCanDelete ? " not" : ""} delete ${objectData.displayName.toLowerCase()}`, async ({pages, page}) => {
                         if (await pages[objectPage].getRow(objectData.build.name || objectData.build.email).isHidden()) {
                             await pages[objectPage].searchInput.fill(objectData.build.name || objectData.build.email);
                         }
@@ -159,9 +159,7 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
         
         test.afterEach('cleanup', async ({sideBar, loginPage, foldersPage, usersPage, page}) => {
             // make sure to execute the cleanup only after the last test
-            if (doCleanup) {
-                console.log('Cleanup');
-                
+            if (doCleanup) {              
                 // logout if the user is still logged in
                 if (await sideBar.userEmailDisplay.innerText() === vars.user.email) {
                     await sideBar.logout();

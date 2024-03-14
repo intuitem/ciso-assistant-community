@@ -94,12 +94,6 @@ export class PageContent extends BasePage {
 		await this.page.waitForURL(new RegExp('^.*\\' + this.url + '/.+'));
 	}
 
-	async waitUntilLoaded() {
-		if (await this.getRow('loading').first().isVisible()) {
-			await this.getRow('loading').first().waitFor({ state: 'hidden' });
-		}
-	}
-
 	getRow(value?: string, additional?: any) {
 		return value
 			? additional
