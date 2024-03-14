@@ -91,7 +91,7 @@
 	<Tab bind:group={tabSet} name="compliance" value={2}>{m.compliance()}</Tab>
 	<Tab bind:group={tabSet} name="composer" value={3}>{m.composer()}</Tab>
 	<svelte:fragment slot="panel">
-		<div class="px-4 pb-4 space-y-4">
+		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
 				<section id="stats">
 					<span class="text-xl font-extrabold">{m.statistics()}</span>
@@ -134,17 +134,17 @@
 						/>
 					</div>
 				</section>
-				<section>
+				<section class="space-y-4">
 					<div class="flex flex-row space-x-4 h-48 text-sm whitespace-nowrap">
 						<BarChart
-							classesContainer="flex-1"
+							classesContainer="flex-1 card p-4 bg-white"
 							name="complianceAssessmentsPerStatus"
 							title={m.complianceAssessmentsStatus()}
 							labels={localizeChartLabels(data.complianceAssessmentsPerStatus.localLables)}
 							values={data.complianceAssessmentsPerStatus.values}
 						/>
 						<BarChart
-							classesContainer="basis-1/3"
+							classesContainer="basis-1/3 card p-4 bg-white"
 							name="usedFrameworks"
 							horizontal
 							title={m.usedFrameworks()}
@@ -156,49 +156,47 @@
 					</div>
 					<div class="flex flex-row space-x-4 h-48 text-sm whitespace-nowrap">
 						<BarChart
-							classesContainer="flex-1"
+							classesContainer="flex-1 card p-4 bg-white"
 							name="riskAssessmentsPerStatus"
 							title={m.riskAssessmentsStatus()}
 							labels={localizeChartLabels(data.riskAssessmentsPerStatus.localLables)}
 							values={data.riskAssessmentsPerStatus.values}
 						/>
-						<BarChart
-							classesContainer="flex-1"
+						<DonutChart
+							classesContainer="flex-1 card p-4 bg-white"
 							name="riskScenariosPerStatus"
 							title={m.riskScenariosStatus()}
-							labels={localizeChartLabels(data.riskScenariosPerStatus.localLables)}
 							values={data.riskScenariosPerStatus.values}
 						/>
 						<BarChart
-							classesContainer="basis-1/3"
+							classesContainer="basis-1/3 card p-4 bg-white"
 							name="usedMatrices"
 							title={m.usedRiskMatrices()}
 							labels={data.usedRiskMatrices.map((matrix) => matrix.name)}
 							values={data.usedRiskMatrices.map((matrix) => matrix.risk_assessments_count)}
 						/>
 					</div>
+				</section>
+				<section class="card p-4 bg-white">
 					<div>
-						<div class="m-2 p-2" />
-						<div>
-							<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
-							<div class="text-sm text-gray-500">
-								{m.orderdByRankingScore()}
-							</div>
-							<ModelTable
-								URLModel="applied-controls"
-								source={appliedControlTodoTable}
-								search={false}
-								pagination={false}
-								orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
-							/>
-							<div class="text-sm">
-								<i class="fas fa-info-circle" />
-								{m.rankingScoreDefintion()}.
-							</div>
+						<div class="text-xl font-extrabold">{m.pendingMeasures()}</div>
+						<div class="text-sm text-gray-500">
+							{m.orderdByRankingScore()}
+						</div>
+						<ModelTable
+							URLModel="applied-controls"
+							source={appliedControlTodoTable}
+							search={false}
+							rowsPerPage={false}
+							orderBy={{ identifier: 'ranking_score', direction: 'desc' }}
+						/>
+						<div class="text-sm">
+							<i class="fa-solid fa-info-circle" />
+							{m.rankingScoreDefintion()}.
 						</div>
 					</div>
 				</section>
-				<section>
+				<section class="space-y-2 card p-4 bg-white">
 					<div>
 						<div class="text-xl font-extrabold">{m.watchlist()}</div>
 						<div class="text-sm text-gray-500">
@@ -208,11 +206,19 @@
 					<div class="flex flex-col space-y-5 items-center content-center">
 						<div class="w-full">
 							<span class="text-md font-semibold">{m.measuresToReview()}</span>
-							<ModelTable source={appliedControlWatchlistTable} search={false} pagination={false} />
+							<ModelTable
+								source={appliedControlWatchlistTable}
+								search={false}
+								rowsPerPage={false}
+							/>
 						</div>
 						<div class="w-full">
 							<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
-							<ModelTable source={riskAcceptanceWatchlistTable} search={false} pagination={false} />
+							<ModelTable
+								source={riskAcceptanceWatchlistTable}
+								search={false}
+								rowsPerPage={false}
+							/>
 						</div>
 					</div>
 				</section>
