@@ -421,13 +421,14 @@ def risk_per_status(user: User):
         values.append(v)
         labels.append(st[1])
 
-    return {"labels": labels, "values": values}
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
 
 
 def applied_control_per_status(user: User):
     values = list()
-    labels = ["undefined"]
-    local_lables = ["undefined"]
+    labels = list()
+    local_lables = list()
     color_map = {
         "undefined": "#CCC",
         "planned": "#BFDBFE",
@@ -457,8 +458,8 @@ def applied_control_per_status(user: User):
 
 def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
     values = list()
-    labels = ["undefined"]
-    local_lables = ["undefined"]
+    labels = list()
+    local_lables = list()
     color_map = {
         "undefined": "#CCC",
         "planned": "#BFDBFE",
