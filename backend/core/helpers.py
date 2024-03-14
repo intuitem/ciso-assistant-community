@@ -401,7 +401,7 @@ def risk_per_status(user: User):
         "mitigate": "#91cc75",
         "accept": "#73c0de",
         "avoid": "#ee6666",
-        "transfer": "#91cc75",
+        "transfer": "#3ba272",
     }
 
     (
@@ -417,7 +417,11 @@ def risk_per_status(user: User):
             .filter(treatment=st[0])
             .count()
         )
-        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        v = {
+            "value": count,
+            "localName": st[0],
+            "itemStyle": {"color": color_map[st[0]]},
+        }
         values.append(v)
         labels.append(st[1])
 
