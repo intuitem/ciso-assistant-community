@@ -16,7 +16,7 @@ test('login / logout process is working properly', async ({ loginPage, analytics
 	await loginPage.checkForUndefinedText();
 	await loginPage.login();
 	await analyticsPage.hasUrl();
-	sideBar.logout();
+	await sideBar.logout();
 });
 
 test('redirect to the right page after login', async ({ loginPage, page }) => {
