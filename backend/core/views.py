@@ -254,7 +254,7 @@ class ThreatViewSet(BaseModelViewSet):
     """
 
     model = Threat
-    filterset_fields = ["folder"]
+    filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
 
@@ -329,6 +329,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
     def per_status(self, request):
         data = assessment_per_status(request.user, RiskAssessment)
         return Response({"results": data})
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(RiskAssessment.Status.choices))
 
     @action(detail=False, name="Get quality check")
     def quality_check(self, request):
@@ -1158,9 +1161,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
 
     model = ComplianceAssessment
-    filterset_fields = ["framework", "project"]
+    filterset_fields = ["framework", "project", "status"]
     search_fields = ["name", "description"]
     ordering_fields = ["name", "description"]
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(ComplianceAssessment.Status.choices))
 
     def perform_create(self, serializer):
         """
