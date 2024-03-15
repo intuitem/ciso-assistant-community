@@ -152,7 +152,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'description', type: type.TEXT },
 			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'internal_reference', type: type.TEXT },
-			{ name: 'lc_status', type: type.SELECT_AUTOCOMPLETE }
+			{ name: 'lc_status', type: type.SELECT }
 		]);
 		await use(pPage);
 	},
