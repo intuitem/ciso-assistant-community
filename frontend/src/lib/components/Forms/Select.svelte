@@ -57,7 +57,7 @@
 			{...$constraints}
 			{...$$restProps}
 		>
-			{#if !$constraints?.required && !options.find((o) => o.label === '--')}
+			{#if !$constraints?.required && !options.find((o) => new Set(["--","undefined"]).has(o.label.toLowerCase()))}
 				<option value={null} selected>--</option>
 			{/if}
 			{#each options as option}
