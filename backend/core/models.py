@@ -9,7 +9,7 @@ from django.db.models import Q
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
 from .utils import camel_case
-from iam.models import FolderMixin
+from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 
 import os
@@ -162,7 +162,7 @@ class Library(ReferentialObjectMixin):
         super(Library, self).delete(*args, **kwargs)
 
 
-class Threat(ReferentialObjectMixin):
+class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
@@ -484,7 +484,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         return self.name
 
 
-class Asset(NameDescriptionMixin, FolderMixin):
+class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -535,7 +535,7 @@ class Asset(NameDescriptionMixin, FolderMixin):
         return list(result)
 
 
-class Evidence(NameDescriptionMixin, FolderMixin):
+class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
         #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
@@ -570,7 +570,7 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         return os.path.basename(self.attachment.name)
 
 
-class AppliedControl(NameDescriptionMixin, FolderMixin):
+class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         ACTIVE = "active", _("Active")
@@ -757,7 +757,7 @@ class Assessment(NameDescriptionMixin):
         default=Status.PLANNED,
         verbose_name=_("Status"),
         blank=True,
-        null=True
+        null=True,
     )
     authors = models.ManyToManyField(
         User,
@@ -1284,7 +1284,6 @@ class ComplianceAssessment(Assessment):
         verbose_name=_("Result"),
     )
 
-
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
@@ -1513,7 +1512,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin):
+class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     ACCEPTANCE_STATE = [
         ("created", _("Created")),
         ("submitted", _("Submitted")),
