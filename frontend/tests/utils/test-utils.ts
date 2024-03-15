@@ -9,6 +9,8 @@ import { randomBytes } from 'crypto';
 import testData from './test-data.js';
 
 type Fixtures = {
+	data: { [key: string]: any };
+	isolatedPage: Page;
 	mailer: Mailer;
 	sideBar: SideBar;
 	pages: { [page: string]: PageContent };
@@ -30,6 +32,7 @@ type Fixtures = {
 	usersPage: PageContent;
 	logedPage: LoginPage;
 	loginPage: LoginPage;
+	populateDatabase: void;
 };
 
 export const test = base.extend<Fixtures>({
@@ -41,6 +44,10 @@ export const test = base.extend<Fixtures>({
 	
 	sideBar: async ({ page }, use) => {
 		await use(new SideBar(page));
+	},
+
+	isolatedPage: async ({ context }, use) => {
+		await use(await context.newPage());
 	},
 
 	pages: async (
@@ -81,6 +88,10 @@ export const test = base.extend<Fixtures>({
 			threatsPage,
 			usersPage
 		});
+	},
+
+	analyticsPage: async ({ page }, use) => {
+		await use(new AnalyticsPage(page));
 	},
 
 	complianceAssessmentsPage: async ({ page }, use) => {
@@ -257,8 +268,22 @@ export const test = base.extend<Fixtures>({
 		await use(new LoginPage(page));
 	},
 
-	analyticsPage: async ({ page }, use) => {
-		await use(new AnalyticsPage(page));
+	data: { ...testData},
+
+	populateDatabase: async ({ pages, loginPage, sideBar, data }, use) => {
+		test.slow();
+		await loginPage.goto();
+		await loginPage.login();
+		for (const [page, pageData] of Object.entries(data)) {
+			await pages[page].goto();
+			await pages[page].waitUntilLoaded();
+			await pages[page].createItem(
+				pageData.build,
+				'dependency' in pageData ? pageData.dependency : null
+			);
+		}
+		await sideBar.logout();
+		await use();
 	}
 });
 
@@ -333,10 +358,10 @@ export class TestContent {
 					first_name: vars.user.firstName,
 					last_name: vars.user.lastName,
 					user_groups: [
-						`${vars.folderName} - ${vars.usergroups.analyst}`,
-						`${vars.folderName} - ${vars.usergroups.auditor}`,
-						`${vars.folderName} - ${vars.usergroups.domainManager}`,
-						`${vars.folderName} - ${vars.usergroups.approver}`
+						`${vars.folderName} - ${vars.usergroups.analyst.name}`,
+						`${vars.folderName} - ${vars.usergroups.auditor.name}`,
+						`${vars.folderName} - ${vars.usergroups.domainManager.name}`,
+						`${vars.folderName} - ${vars.usergroups.approver.name}`
 					],
 					is_active: false
 				}
@@ -569,13 +594,18 @@ export class TestContent {
 
 export function setHttpResponsesListener(page: Page) {
 	page.on('response', (response) => {
-		// expect.soft(response.ok()).toBeTruthy();
 		expect.soft(response.status()).toBeOneofValues([100, 399]);
-		// expect.soft(response.ok(), 'An error with status code ' + response.status() + ' occured when trying to achieve operation').toBeTruthy();
 	});
-	// page.on('console', (message) => {
-	// 	expect.soft(message.type()).not.toBe('error');
-	// });
+}
+
+export function getSingularName(pluralName: string) {
+    const exceptions: any = {
+		"Domains": "Folder",
+        "Libraries": "Library",
+        "Risk matrices": "Risk matrix",
+        "Policies": "Policy",
+    }
+    return exceptions[pluralName] ?? (pluralName.endsWith("s") ? pluralName.substring(0, pluralName.length - 1) : pluralName)
 }
 
 export function getUniqueValue(value: string): string {
@@ -594,6 +624,11 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 			obj[key] = obj[key].replace(searchValue, replaceValue);
 		}
 	}
+}
+
+export function userFromUserGroupHasPermission(userGroup: string, permission: string, object: string) {
+	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;	
+	return (userGroup in testData.usergroups) && (testData.usergroups[userGroup].perms.includes(perm));
 }
 
 export { test as baseTest, type Page, type Locator } from '@playwright/test';
