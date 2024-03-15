@@ -51,7 +51,7 @@ export class Mailer {
     private readonly emails: Locator;
 
     constructor(public readonly page: Page) {
-        this.url = "http://localhost:8025";
+        this.url = "http://localhost:" + (process.env.MAILER_WEB_SERVER_PORT || 8025);
         this.emailContent = new MailContent(page);
         this.emails = this.page.locator('.msglist-message');
     }
