@@ -96,7 +96,12 @@ export const actions: Actions = {
 			if (!req.ok) {
 				const response = await req.json();
 				console.error(response);
-				setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
+
+				const error_string = response.error;
+				const translate_error = localItems(languageTag())[response.error];
+				const toast_error_message = translate_error ?? m.libraryImportError();
+
+				setFlash({ type: 'error', message: toast_error_message }, event);
 				return fail(400, { form });
 			}
 			setFlash({ type: 'success', message: m.librarySuccessfullyImported() }, event);
