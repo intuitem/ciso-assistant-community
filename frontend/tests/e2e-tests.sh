@@ -44,31 +44,10 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     exit 0
 fi
 
-if command -v ss >/dev/null 2>&1; then
-    # Use ss if it's available
-    if ss -tuln | grep -q :$BACKEND_PORT ; then
-        echo "The port $BACKEND_PORT is already in use!"
-        echo "Please stop the running process using the port or change the backend test server port using --port=PORT and try again."
-        exit 1
-    fi
-elif command -v netstat >/dev/null 2>&1; then
-    # Use netstat if it's available
-    if netstat -tuln | grep -q :$BACKEND_PORT ; then
-        echo "The port $BACKEND_PORT is already in use!"
-        echo "Please stop the running process using the port or change the backend test server port using --port=PORT and try again."
-        exit 1
-    fi
-else
-    if [[ $EUID > 0 ]] ; then
-        echo "WARNING: Running the script without root permissions may prevent the tests from running properly." 
-        echo "Consider to install either ss or netstat on this system to perform the port check without root privileges."
-        read -n 1 -s -r -p "Press any key to continue anyway..."
-        echo ""
-    elif lsof -Pi :$BACKEND_PORT -sTCP:LISTEN -t > /dev/null ; then
-        echo "The port $BACKEND_PORT is already in use!"
-        echo "Please stop the running process using the port or change the backend test server port using --port=PORT and try again."
-        exit 1
-    fi
+if python -c "import socket;exit(0 if 0 == socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('127.0.0.1',$BACKEND_PORT)) else 1)" ; then
+    echo "The port $BACKEND_PORT is already in use!"
+    echo "Please stop the running process using the port or change the backend test server port using --port=PORT and try again."
+    exit 1
 fi
 
 cleanup() {
