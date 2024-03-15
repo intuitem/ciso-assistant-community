@@ -31,11 +31,8 @@ erDiagram
 
     ROOT_FOLDER           ||--o{ DOMAIN                      : contains
     DOMAIN                ||--o{ PROJECT                     : contains
-    DOMAIN                ||--o{ APPLIED_CONTROL             : contains  
-    DOMAIN                ||--o{ RISK_ACCEPTANCE             : contains
     DOMAIN                ||--o{ RISK_ASSESSMENT_REVIEW      : contains
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
-    DOMAIN                ||--o{ EVIDENCE                    : contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
     ROOT_FOLDER           ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER           ||--o{ LIBRARY                     : contains
@@ -43,6 +40,9 @@ erDiagram
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
+    ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains  
+    ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
 
