@@ -44,6 +44,8 @@ Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain 
 
 Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file.
 
+You will also find some specific converters in the tools directory (e.g. for CIS Controls).
+
 ## Community
 
 Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.
