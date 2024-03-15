@@ -277,7 +277,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_scenarios'],
-				extra_fields: [["project","str"]]
+				extra_fields: [["project","folder","str"],["project","str"]]
 			})}
 			field="risk_scenarios"
 			label={m.riskScenarios()}
