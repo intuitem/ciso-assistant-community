@@ -89,15 +89,15 @@ export const RiskScenarioSchema = baseNamedObject({
 });
 
 export const AppliedControlSchema = baseNamedObject({
-  category: z.string().optional().nullable(),
-  status: z.string().optional().nullable(),
-  evidences: z.string().optional().array().optional(),
-  eta: z.string().optional().nullable(),
-  expiry_date: z.string().optional().nullable(),
-  link: z.string().url().optional().nullable(),
-  effort: z.string().optional().nullable(),
-  folder: z.string(),
-  reference_control: z.string().optional()
+	category: z.string().optional().nullable(),
+	status: z.string().optional().nullable(),
+	evidences: z.string().optional().array().optional(),
+	eta: z.string().optional().nullable(),
+	expiry_date: z.string().optional().nullable(),
+	link: z.string().url().optional().nullable(),
+	effort: z.string().optional().nullable(),
+	folder: z.string(),
+	reference_control: z.string().optional().nullable()
 });
 
 export const PolicySchema = baseNamedObject({

@@ -76,6 +76,7 @@
 			})}
 			field="reference_control"
 			label={m.referenceControl()}
+			nullable={true}
 			on:change={async (e) => {
 				if (e.detail) {
 					await fetch(`/reference-controls/${e.detail}`)
@@ -112,7 +113,7 @@
 			hide={initialData.folder}
 		/>
 		<TextField {form} field="internal_reference" label={m.internalReference()} />
-		<AutocompleteSelect
+		<Select
 			{form}
 			options={model.selectOptions['lc_status']}
 			field="lc_status"
