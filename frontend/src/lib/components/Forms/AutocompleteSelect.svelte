@@ -9,6 +9,7 @@
 
 	export let form;
 	export let multiple = false;
+	export let nullable = false;
 
 	export let hide = false;
 
@@ -27,7 +28,9 @@
 
 	$: selectedValues = selected.map((item) => item.value);
 
-	$: ($value = multiple ? selectedValues : selectedValues[0]), handleSelectChange();
+	const default_value = nullable ? null : selectedValues[0];
+
+	$: ($value = multiple ? selectedValues : selectedValues[0] ?? default_value), handleSelectChange();
 
 	$: disabled = selected.length && options.length === 1 && $constraints?.required;
 
