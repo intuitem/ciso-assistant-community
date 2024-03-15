@@ -195,7 +195,9 @@
 					<embed src={attachment.url} type="application/pdf" width="100%" height="600px" />
 				{/if}
 			{:else}
-				{m.loading()}...
+				<span data-testid="loading-field">
+					{m.loading()}...
+				</span>
 			{/if}
 		</div>
 	{/if}
