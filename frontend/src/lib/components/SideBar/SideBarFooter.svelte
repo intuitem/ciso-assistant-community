@@ -46,14 +46,15 @@
 
 <div class="border-t pt-2.5">
 	<div class="flex flex-row items-center justify-between">
-		<div class="flex flex-col" data-testid="sidebar-user-account-display">
+		<div class="flex flex-col">
 			{#if $page.data.user}
-				<span class="text-gray-900 text-sm whitespace-nowrap overflow-hidden truncate">
+				<span class="text-gray-900 text-sm whitespace-nowrap overflow-hidden truncate" data-testid="sidebar-user-name-display">
 					{$page.data.user.first_name}
 					{$page.data.user.last_name}
 				</span>
 				<span
 					class="font-normal text-xs text-gray-600 mr-2 whitespace-nowrap overflow-hidden truncate w-full"
+					data-testid="sidebar-user-email-display"
 				>
 					{$page.data.user.email}
 				</span>

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
@@ -17,8 +19,6 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -41,6 +41,15 @@
 	}
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
+
+	const modelFormId = `${Math.floor(Math.random()*Math.pow(10,16))}`;
+
+	onMount(() => {
+		const form = document.querySelector(`form[model-form-id="${modelFormId}"]`);
+		const first_input = form?.querySelector(`input:not([type]), input[type="password"], input[type="tel"], input[type="email"]`);
+		console.log(first_input);
+		first_input?.focus();
+	})
 </script>
 
 <SuperForm
@@ -51,6 +60,7 @@
 	let:form
 	let:data
 	let:initialData
+	model-form-id={modelFormId}
 	validators={schema}
 	{...$$restProps}
 >

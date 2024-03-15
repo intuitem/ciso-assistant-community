@@ -23,7 +23,12 @@ class BaseModelSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"urn": "Imported objects cannot be modified"}
             )
-        return super().update(instance, validated_data)
+        try:
+            object_updated = super().update(instance, validated_data)
+            return object_updated
+        except Exception as e:
+            logger.error(e)
+            raise serializers.ValidationError(e.args[0])
 
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
@@ -42,7 +47,12 @@ class BaseModelSerializer(serializers.ModelSerializer):
                     "folder": "You do not have permission to create objects in this folder"
                 }
             )
-        return super().create(validated_data)
+        try:
+            object_created = super().create(validated_data)
+            return object_created
+        except Exception as e:
+            logger.error(e)
+            raise serializers.ValidationError(e.args[0])
 
     class Meta:
         model: models.Model

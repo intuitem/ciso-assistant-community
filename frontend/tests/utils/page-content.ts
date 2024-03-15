@@ -62,8 +62,8 @@ export class PageContent extends BasePage {
 		}
 	}
 
-	async importLibrary(ref: string, urn: string, language: string = 'English') {
-		if (await this.tab('Imported libraries').isVisible()) {
+	async importLibrary(ref: string, urn?: string, language: string = 'English') {
+		if (await this.tab('Imported libraries').isVisible() && await this.tab('Imported libraries').getAttribute('aria-selected') === 'true') {
 			if (await this.getRow(ref).isHidden()) {
 				await this.tab('Libraries store').click();
 				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
@@ -71,8 +71,8 @@ export class PageContent extends BasePage {
 				return;
 			}
 		}
-		await this.importItemButton(ref, language).click();
-		await this.isToastVisible('The library object has been successfully imported.+', undefined, {
+		await this.importItemButton(ref, language === 'any' ? undefined : language).click();
+		await this.isToastVisible(`The library object has been successfully imported.+`, undefined, {
 			timeout: 15000
 		});
 		await this.tab('Imported libraries').click();
@@ -89,12 +89,6 @@ export class PageContent extends BasePage {
 			this.itemDetail.setItem(await this.getRow().innerText());
 		}
 		await this.page.waitForURL(new RegExp('^.*\\' + this.url + '/.+'));
-	}
-
-	async waitUntilLoaded() {
-		if (await this.getRow('loading').first().isVisible()) {
-			await this.getRow('loading').first().waitFor({ state: 'hidden' });
-		}
 	}
 
 	getRow(value?: string, additional?: any) {
