@@ -183,6 +183,24 @@ class FolderMixin(models.Model):
         abstract = True
 
 
+class PublishInRootFolderMixin(models.Model):
+    """
+    Set is_published to True if object is attached to the root folder
+    """
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if (
+            getattr(self, "folder") == Folder.get_root_folder()
+            and hasattr(self, "is_published")
+            and not self.is_published
+        ):
+            self.is_published = True
+        super().save(*args, **kwargs)
+
+
 class UserGroup(NameDescriptionMixin, FolderMixin):
     """UserGroup objects contain users and can be used as principals in role assignments"""
 
@@ -201,7 +219,7 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
 
     def get_name_display(self) -> str:
         return self.name
-    
+
     def get_localization_dict(self) -> dict:
         return {
             "folder": self.folder.name,
@@ -509,7 +527,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         for ra in RoleAssignment.get_role_assignments(user):
             f = folder
             while f is not None:
-                if f in ra.perimeter_folders.all() and perm in ra.role.permissions.all():
+                if (
+                    f in ra.perimeter_folders.all()
+                    and perm in ra.role.permissions.all()
+                ):
                     return True
                 f = f.parent_folder
         return False

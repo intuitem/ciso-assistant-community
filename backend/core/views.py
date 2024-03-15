@@ -887,7 +887,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.AUDITOR),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra1.perimeter_folders.add(folder)
             ra2 = RoleAssignment.objects.create(
@@ -895,7 +895,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.APPROVER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra2.perimeter_folders.add(folder)
             ra3 = RoleAssignment.objects.create(
@@ -903,7 +903,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.ANALYST),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra3.perimeter_folders.add(folder)
             ra4 = RoleAssignment.objects.create(
@@ -911,7 +911,7 @@ class FolderViewSet(BaseModelViewSet):
                 role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
-                is_recursive=True
+                is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
 
