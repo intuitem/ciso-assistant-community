@@ -65,7 +65,8 @@
 			'folder',
 			'eta',
 			'expiry_date'
-		])
+		]),
+		meta: data.measures
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
@@ -74,13 +75,14 @@
 			risk_scenarios: 'riskScenarios',
 			expiry_date: 'expiryDate'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date'])
+		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date']),
+		meta: data.acceptances_to_review
 	};
 
 	let tabSet = $page.url.searchParams.get('tab') ? parseInt($page.url.searchParams.get('tab')) : 0;
 
 	$: if (browser) {
-		$page.url.searchParams.set('tab', tabSet.toString());
+		tabSet !== 0 ? $page.url.searchParams.set('tab', tabSet.toString()) : null;
 		goto($page.url);
 	}
 </script>
@@ -208,6 +210,7 @@
 							<span class="text-md font-semibold">{m.measuresToReview()}</span>
 							<ModelTable
 								source={appliedControlWatchlistTable}
+								URLModel="applied-controls"
 								search={false}
 								rowsPerPage={false}
 							/>
@@ -216,6 +219,7 @@
 							<span class="text-md font-semibold">{m.exceptionsToReview()}</span>
 							<ModelTable
 								source={riskAcceptanceWatchlistTable}
+								URLModel="risk-acceptances"
 								search={false}
 								rowsPerPage={false}
 							/>
