@@ -16,7 +16,7 @@ const sidebars: SidebarsConfig = {
 
   // But you can create a sidebar manually
   /*
-  guideSidebar: [
+  tutorialSidebar: [
     'intro',
     'hello',
     {
