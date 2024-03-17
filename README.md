@@ -31,6 +31,7 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - CMMC v2
 - PSPF
 - GDPR checklist from GDPR.EU
+- Essential Eight
 
 Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
