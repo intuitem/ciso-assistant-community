@@ -81,17 +81,25 @@
 
 	let tabSet = $page.url.searchParams.get('tab') ? parseInt($page.url.searchParams.get('tab')) : 0;
 
-	$: if (browser) {
-		tabSet !== 0 ? $page.url.searchParams.set('tab', tabSet.toString()) : null;
+	function handleTabChange(index: number) {
+		$page.url.searchParams.set('tab', index.toString());
 		goto($page.url);
 	}
 </script>
 
 <TabGroup>
-	<Tab bind:group={tabSet} name="governance" value={0}>{m.governance()}</Tab>
-	<Tab bind:group={tabSet} name="risk" value={1}>{m.risk()}</Tab>
-	<Tab bind:group={tabSet} name="compliance" value={2}>{m.compliance()}</Tab>
-	<Tab bind:group={tabSet} name="composer" value={3}>{m.composer()}</Tab>
+	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(0)} name="governance" value={0}
+		>{m.governance()}</Tab
+	>
+	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(1)} name="risk" value={1}
+		>{m.risk()}</Tab
+	>
+	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(2)} name="compliance" value={2}
+		>{m.compliance()}</Tab
+	>
+	<Tab bind:group={tabSet} on:click={(_) => handleTabChange(3)} name="composer" value={3}
+		>{m.composer()}</Tab
+	>
 	<svelte:fragment slot="panel">
 		<div class="px-4 pb-4 space-y-8">
 			{#if tabSet === 0}
