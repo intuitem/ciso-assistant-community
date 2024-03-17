@@ -32,14 +32,14 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 - PSPF
 - GDPR checklist from GDPR.EU
 - Essential Eight
+- DFS 500 with 2023-11 amendments
+- DORA
 
 Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
 - ANSSI CyberScore
-- DFS 500
-- DORA
 - and much more!
 
 ### Add your own framework

@@ -112,7 +112,7 @@
 				</p>
 			{/if}
 			{#if data.library.copyright}
-				<p class="text-sm leading-5 text-gray-500">{m.copyright()}: {data.library.copyright}</p>
+				<p class="text-md leading-5 text-gray-700">{m.copyright()}: {data.library.copyright}</p>
 			{/if}
 		</div>
 	</div>
