@@ -24,17 +24,18 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 
 - ISO 27001:2022
 - NIST Cyber Security Framework (CSF) v1.1
+- NIST Cyber Security Framework (CSF) v2.0
 - NIS2
 - SOC2
 - PCI DSS 4.0
 - CMMC v2
 - PSPF
+- GDPR checklist from GDPR.EU
 
 Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- GDPR checklist
 - ANSSI CyberScore
 - DFS 500
 - DORA
