@@ -1,10 +1,12 @@
 name: API Tests
 
-on:      
-    pull_request:
-        paths:
-            - "backend/**"
-            - ".github/workflows/backend-api-tests.yml"
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize]
+    paths:
+        - "backend/**"
+        - ".github/workflows/backend-api-tests.yml"
     workflow_dispatch:
 
 env:
