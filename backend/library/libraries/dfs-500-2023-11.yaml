@@ -1,0 +1,2054 @@
+urn: urn:intuitem:risk:library:dfs-500-2023-11
+locale: en
+ref_id: DFS-500-2023-11
+name: NY DFS 500 with 2023-11 amendments
+description: 'NEW YORK STATE
+
+  DEPARTMENT OF FINANCIAL SERVICES
+
+  SECOND AMENDMENT TO 23 NYCRR 500
+
+  CYBERSECURITY REQUIREMENTS FOR FINANCIAL SERVICES COMPANIES
+
+  On November 1, 2023, DFS announced amendments to Cybersecurity Regulation, 23 NYCRR
+  Part 500.'
+copyright: "\nGeneral Disclaimer\n\nThe New York State Department of Financial Services\
+  \ takes reasonable measures to ensure that the data and information on this website\
+  \ is accurate and current. However, the Department makes no express or implied warranty\
+  \ regarding such information or data, and hereby expressly disclaims all legal liability\
+  \ and responsibility based on reliance on any information or data that is available\
+  \ through this website. While every effort is made to provide useful information,\
+  \ the Department does not warrant this information to be authoritative, complete,\
+  \ factual, timely or accurate. The Department shall not be liable for any damages,\
+  \ including the loss of data resulting from delays, non-deliveries or service interruptions\
+  \ caused by negligence, errors or omissions.\n\nThe information available on this\
+  \ website is not intended to constitute and should not be considered legal advice,\
+  \ nor is it intended as a substitute for obtaining legal advice from competent,\
+  \ independent legal counsel in the relevant jurisdiction. Transmission and receipt\
+  \ of this information is not intended to create and does not create an attorney-client\
+  \ relationship. Any information or inquiries that the Department receives from a\
+  \ user over our information systems is not considered to be, nor will be treated\
+  \ as, confidential.\n\nThis website provides links to other websites for convenience\
+  \ and informational purposes only. The Department is not responsible for the content\
+  \ of external websites linked to or referenced on this website, and makes no endorsement\
+  \ of, nor makes any warranty, express or implied, regarding the content of these\
+  \ external websites. The Department does not endorse or warranty, and is not responsible\
+  \ for, the privacy and security practices of any other website, including those\
+  \ of any third party service providers to these sites. Users should be aware that\
+  \ when they select a link on this website, they may be leaving the Department\u2019\
+  s website.\n\nThe Department provides access to resources and other information\
+  \ on this website as a public service, on an \"as is\" and \"as available\" basis.\
+  \ The information is subject to change on a regular basis, without notice. Unless\
+  \ otherwise noted on an individual document, file, webpage or other website item,\
+  \ the Department grants users permission to reproduce and distribute all information\
+  \ available on this website for non-commercial purposes, as long as the contents\
+  \ remain unaltered and as long as it is noted that the contents have been made available\
+  \ by the Department.\n\nThe user\u2019s access to and use of this website shall\
+  \ be governed by the laws of the State of New York.\n\nThe Department reserves the\
+  \ right to change its policies and rules at any time."
+version: 1
+provider: NEW YORK STATE
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:dfs-500-2023-11
+    ref_id: DFS-500-2023-11
+    name: NY DFS 500 with 2023-11 amendments
+    description: 'NEW YORK STATE
+
+      DEPARTMENT OF FINANCIAL SERVICES
+
+      SECOND AMENDMENT TO 23 NYCRR 500
+
+      CYBERSECURITY REQUIREMENTS FOR FINANCIAL SERVICES COMPANIES
+
+      On November 1, 2023, DFS announced amendments to Cybersecurity Regulation, 23
+      NYCRR Part 500.'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.0
+      assessable: false
+      depth: 1
+      ref_id: '500.0'
+      name: Introduction
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.0
+      description: The New York State Department of Financial Services (DFS) has been
+        closely monitoring the ever-growing threat posed to information and financial
+        systems by nation-states, terrorist organizations and independent criminal
+        actors. Recently, cybercriminals have sought to exploit technological vulnerabilities
+        to gain access to sensitive electronic data. Cybercriminals can cause significant
+        financial losses for DFS regulated entities as well as for New York consumers
+        whose private information may be revealed and/or stolen for illicit purposes.
+        The financial servicesindustry is a significant target of cybersecurity threats.
+        DFS appreciates that many firms have proactively increased their cybersecurity
+        programs with great success.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.0
+      description: "Given the seriousness of the issue and the risk to all regulated\
+        \ entities, certain regulatory minimum standards are warranted, while not\
+        \ being overly prescriptive so that cybersecurity programs can match the relevant\
+        \ risks and keep pace with technological advances. Accordingly, this regulation\
+        \ is designed to promote the protection of customer information as well as\
+        \ the information technology systems of regulated entities. This regulation\
+        \ requires each company to assess its specific risk profile and design a program\
+        \ that addresses its risks in a robust fashion. Senior management must take\
+        \ this issue seriously and be responsible for the organization\u2019s cybersecurity\
+        \ program and file an annual certification confirming compliance with these\
+        \ regulations. A regulated entity\u2019s cybersecurity program must ensure\
+        \ the safety and soundness of the institution and protect its customers."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.0
+      description: It is critical for all regulated institutions that have not yet
+        done so to move swiftly and urgently to adopt a cybersecurity program and
+        for all regulated entities to be subject to minimum standards with respect
+        to their programs. The number of cyber events has been steadily increasing
+        and estimates of potential risk to our financial services industry are stark.
+        Adoption of the program outlined in these regulations is a priority for New
+        York State.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      assessable: false
+      depth: 1
+      ref_id: '500.1'
+      name: Definitions
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.a
+      name: Affiliate
+      description: Affiliate means any person that controls, is controlled by or is
+        under common control with another person. For purposes of this subdivision,
+        control means the possession, direct or indirect, of the power to direct or
+        cause the direction of the management and policies of a person, whether through
+        the ownership of stock of such person or otherwise.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.b
+      name: Authorized user
+      description: Authorized user means any employee, contractor, agent or other
+        person that participates in the business operations of a covered entity and
+        is authorized to access and use any information systems and data of the covered
+        entity.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.c
+      name: CISO
+      description: "Chief Information Security Officer or CISO means a qualified individual\
+        \ responsible for overseeing and implementing a covered entity\u2019s cybersecurity\
+        \ program and enforcing its cybersecurity policy."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.d
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.d
+      name: Class A company
+      description: "Class A company means a covered entity with at least $20,000,000\
+        \ in gross annual revenue in each of the last two fiscal years from all business\
+        \ operations of the covered entity and the business operations in this State\
+        \ of the covered entity\u2019s affiliates and:\n(1) over 2,000 employees averaged\
+        \ over the last two fiscal years, including employees of both the covered\
+        \ entity and all of its affiliates no matter where located; or\n(2) over $1,000,000,000\
+        \ in gross annual revenue in each of the last two fiscal years from all business\
+        \ operations of the covered entity and all of its affiliates no matter where\
+        \ located.\nFor purposes of this subdivision, when calculating the number\
+        \ of employees and gross annual revenue, affiliates shall include only those\
+        \ that share information systems, cybersecurity resources or all or any part\
+        \ of a cybersecurity program with the covered entity."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.e
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.e
+      name: Covered entity
+      description: Covered entity means any person operating under or required to
+        operate under a license, registration, charter, certificate, permit, accreditation
+        or similar authorization under the Banking Law, the Insurance Law or the Financial
+        Services Law, regardless of whether the covered entity is also regulated by
+        other government agencies.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.f
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.f
+      name: Cybersecurity event
+      description: Cybersecurity event means any act or attempt, successful or unsuccessful,
+        to gain unauthorized access to, disrupt or misuse an information system or
+        information stored on such information system.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.g
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.g
+      name: Cybersecurity incident
+      description: "Cybersecurity incident means a cybersecurity event that has occurred\
+        \ at the covered entity, its affiliates, or a third-party service provider\
+        \ that:\n(1) impacts the covered entity and requires the covered entity to\
+        \ notify any government body, self-regulatory agency or any other supervisory\
+        \ body;\n(2) has a reasonable likelihood of materially harming any material\
+        \ part of the normal operation(s) of the covered entity; or\n(3) results in\
+        \ the deployment of ransomware within a material part of the covered entity\u2019\
+        s information systems."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.h
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.h
+      name: Independent audit
+      description: Independent audit means an audit conducted by internal or external
+        auditors free to make decisions not influenced by the covered entity being
+        audited or by its owners, managers or employees.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.i
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.i
+      name: Information system
+      description: Information system means a discrete set of electronic information
+        resources organized for the collection, processing, maintenance, use, sharing,
+        dissemination or disposition of electronic information, as well as any specialized
+        system such as industrial/process controls systems, telephone switching and
+        private branch exchange systems, and environmental control systems.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.j
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.j
+      name: Multi-factor authentication
+      description: 'Multi-factor authentication means authentication through verification
+        of at least two of the following types of authentication factors:
+
+        (1) knowledge factors, such as a password;
+
+        (2) possession factors, such as a token; or
+
+        (3) inherence factors, such as a biometric characteristic.'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.k
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.k
+      name: Nonpublic information
+      description: "Nonpublic information means all electronic information that is\
+        \ not publicly available information and is:\n(1) business related information\
+        \ of a covered entity the tampering with which, or unauthorized disclosure,\
+        \ access or use of which, would cause a material adverse impact to the business,\
+        \ operations or security of the covered entity;\n(2) any information concerning\
+        \ an individual which because of name, number, personal mark, or other identifier\
+        \ can be used to identify such individual, in combination with any one or\
+        \ more of the following data elements:\n(i) social security number;\n(ii)\
+        \ drivers\u2019 license number or non-driver identification card number;\n\
+        (iii) account number, credit or debit card number;\n(iv) any security code,\
+        \ access code or password that would permit access to an\nindividual\u2019\
+        s financial account; or\n(v) biometric records;\n(3) any information or data,\
+        \ except age or gender, in any form or medium created by or derived from a\
+        \ health care provider or an individual and that relates to:\n(i) the past,\
+        \ present or future physical, mental or behavioral health or condition of\
+        \ any individual or a member of the individual's family;\n(ii) the provision\
+        \ of health care to any individual; or\n(iii) payment for the provision of\
+        \ health care to any individual."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.l
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.l
+      name: Penetration testing
+      description: "Penetration testing means testing the security of information\
+        \ systems by attempting to circumvent or defeat the security features of an\
+        \ information system by authorizing attempted penetration of databases or\
+        \ controls from outside or inside the covered entity\u2019s information systems."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.m
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.m
+      name: Person
+      description: Person means any individual or entity, including but not limited
+        to any partnership, corporation, branch, agency or association.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.n
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.n
+      name: Privileged account
+      description: Privileged account means any authorized user account or service
+        account that can be used to perform security-relevant functions that ordinary
+        users are not authorized to perform, including but not limited to the ability
+        to add, change or remove other accounts, or make configuration changes to
+        information systems.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.o
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.o
+      name: Publicly available information
+      description: 'Publicly available information means any information that a covered
+        entity has a reasonable basis to believe is lawfully made available to the
+        general public from: Federal, State or local government records; widely distributed
+        media; or disclosures to the general public that are required to be made by
+        Federal, State or local law. A covered entity has a reasonable basis to believe
+        that information is lawfully made available to the general public if the covered
+        entity has taken steps to determine:
+
+        (1) that the information is of the type that is available to the general public;
+        and
+
+        (2) whether an individual can direct that the information not be made available
+        to the general public and, if so, that such individual has not done so.'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.p
+      name: Risk assessment
+      description: Risk assessment means the process of identifying, estimating and
+        prioritizing cybersecurity risks to organizational operations (including mission,
+        functions, image and reputation), organizational assets, individuals, customers,
+        consumers, other organizations and critical infrastructure resulting from
+        the operation of an information system. Risk assessments incorporate threat
+        and vulnerability analyses and consider mitigations provided by security controls
+        planned or in place.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.q
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.q
+      name: Senior governing body
+      description: "Senior governing body means the board of directors (or an appropriate\
+        \ committee thereof) or equivalent governing body or, if neither of those\
+        \ exist, the senior officer or officers of a covered entity responsible for\
+        \ the covered entity\u2019s cybersecurity program. For any cybersecurity program\
+        \ or part of a cybersecurity program adopted from an affiliate under section\
+        \ 500.2(d) of this Part, the senior governing body may be that of the affiliate."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.r
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.r
+      name: Senior officer(s)
+      description: Senior officer(s) means the senior individual or individuals (acting
+        collectively or as a committee) responsible for the management, operations,
+        security, information systems, compliance and/or risk of a covered entity,
+        including a branch or agency of a foreign banking organization subject to
+        this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1.s
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.1
+      ref_id: 500.1.s
+      name: Third-party service provider(s)
+      description: 'Third-party service provider(s) means a person that:
+
+        (1) is not an affiliate of the covered entity;
+
+        (2) is not a governmental entity;
+
+        (3) provides services to the covered entity; and
+
+        (4) maintains, processes or otherwise is permitted access to nonpublic information
+        through its provision of services to the covered entity.'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2
+      assessable: false
+      depth: 1
+      ref_id: '500.2'
+      name: Cybersecurity program
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2
+      ref_id: 500.2.a
+      description: "Each covered entity shall maintain a cybersecurity program designed\
+        \ to protect the confidentiality, integrity and availability of the covered\
+        \ entity\u2019s information systems and nonpublic information stored on those\
+        \ information systems."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2
+      ref_id: 500.2.b
+      description: "The cybersecurity program shall be based on the covered entity\u2019\
+        s risk assessment and designed to perform the following core cybersecurity\
+        \ functions:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      ref_id: 500.2.b.1
+      description: "identify and assess internal and external cybersecurity risks\
+        \ that may threaten the security or integrity of nonpublic information stored\
+        \ on the covered entity\u2019s information systems;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      ref_id: 500.2.b.2
+      description: "use defensive infrastructure and the implementation of policies\
+        \ and procedures to protect the covered entity\u2019s information systems,\
+        \ and the nonpublic information stored on those information systems, from\
+        \ unauthorized access, use or other malicious acts;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      ref_id: 500.2.b.3
+      description: detect cybersecurity events;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      ref_id: 500.2.b.4
+      description: respond to identified or detected cybersecurity events to mitigate
+        any negative effects;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      ref_id: 500.2.b.5
+      description: recover from cybersecurity events and restore normal operations
+        and services; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.b
+      ref_id: 500.2.b.6
+      description: fulfill applicable regulatory reporting obligations.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2
+      ref_id: 500.2.c
+      description: Each class A company shall design and conduct independent audits
+        of its cybersecurity program based on its risk assessment.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2
+      ref_id: 500.2.d
+      description: A covered entity may meet the requirement(s) of this Part by adopting
+        the relevant and applicable provisions of a cybersecurity program maintained
+        by an affiliate, provided that such provisions satisfy the requirements of
+        this Part, as applicable to the covered entity.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.2
+      ref_id: 500.2.e
+      description: "All documentation and information relevant to the covered entity\u2019\
+        s cybersecurity program, including the relevant and applicable provisions\
+        \ of a cybersecurity program maintained by an affiliate and adopted by the\
+        \ covered entity, shall be made available to the superintendent upon request."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3
+      assessable: false
+      depth: 1
+      ref_id: '500.3'
+      name: Cybersecurity policy
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node39
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3
+      name: Policies
+      description: "Each covered entity shall implement and maintain a written policy\
+        \ or policies, approved at least annually by a senior officer or the covered\
+        \ entity\u2019s senior governing body for the protection of its information\
+        \ systems and nonpublic information stored on those information systems."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3
+      name: Procedures
+      description: "Procedures shall be developed, documented and implemented in accordance\
+        \ with the written policy or policies. The cybersecurity policy or policies\
+        \ and procedures shall be based on the covered entity\u2019s risk assessment\
+        \ and address, at a minimum, the following areas to the extent applicable\
+        \ to the covered entity\u2019s operations:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.a
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.a
+      description: information security;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.b
+      description: data governance, classification and retention;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.c
+      description: asset inventory, device management and end of life management;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.d
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.d
+      description: access controls, including remote access and identity management;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.e
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.e
+      description: business continuity and disaster recovery planning and resources;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.f
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.f
+      description: systems operations and availability concerns;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.g
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.g
+      description: systems and network security and monitoring;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.h
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.h
+      description: security awareness and training;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.i
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.i
+      description: systems and application security and development and quality assurance;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.j
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.j
+      description: physical security and environmental controls;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.k
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.k
+      description: customer data privacy;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.l
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.l
+      description: vendor and third-party service provider management;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.m
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.m
+      description: risk assessment;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.n
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.n
+      description: incident response and notification; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.3.o
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node40
+      ref_id: 500.3.o
+      description: vulnerability management.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4
+      assessable: false
+      depth: 1
+      ref_id: '500.4'
+      name: Cybersecurity governance
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4
+      ref_id: 500.4.a
+      name: Chief information security officer
+      description: 'Each covered entity shall designate a CISO. The CISO may be employed
+        by the covered entity, one of its affiliates or a third-party service provider.
+        If the CISO is employed by a third-party service provider or an affiliate,
+        the covered entity shall:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a
+      ref_id: 500.4.a.1
+      description: retain responsibility for compliance with this Part;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a
+      ref_id: 500.4.a.2
+      description: "designate a senior member of the covered entity\u2019s personnel\
+        \ responsible for direction and oversight of the third-party service provider;\
+        \ and"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.a
+      ref_id: 500.4.a.3
+      description: require the third-party service provider or affiliate to maintain
+        a cybersecurity program that protects the covered entity in accordance with
+        the requirements of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4
+      ref_id: 500.4.b
+      name: Report
+      description: "The CISO of each covered entity shall report in writing at least\
+        \ annually to the senior governing body on the covered entity\u2019s cybersecurity\
+        \ program, including to the extent applicable:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      ref_id: 500.4.b.1
+      description: "the confidentiality of nonpublic information and the integrity\
+        \ and security of the covered entity\u2019s information systems;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      ref_id: 500.4.b.2
+      description: "the covered entity\u2019s cybersecurity policies and procedures;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      ref_id: 500.4.b.3
+      description: material cybersecurity risks to the covered entity;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      ref_id: 500.4.b.4
+      description: "overall effectiveness of the covered entity\u2019s cybersecurity\
+        \ program;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      ref_id: 500.4.b.5
+      description: material cybersecurity events involving the covered entity during
+        the time period addressed by the report; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.b
+      ref_id: 500.4.b.6
+      description: plans for remediating material inadequacies.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4
+      ref_id: 500.4.c
+      description: "The CISO shall timely report to the senior governing body or senior\
+        \ officer(s) on material cybersecurity issues, such as significant cybersecurity\
+        \ events and significant changes to the covered entity\u2019s cybersecurity\
+        \ program."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4
+      ref_id: 500.4.d
+      description: "The senior governing body of the covered entity shall exercise\
+        \ oversight of the covered entity\u2019s cybersecurity risk management, including\
+        \ by:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d
+      ref_id: 500.4.d.1
+      description: having sufficient understanding of cybersecurity-related matters
+        to exercise such oversight, which may include the use of advisors;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d
+      ref_id: 500.4.d.2
+      description: "requiring the covered entity\u2019s executive management or its\
+        \ designees to develop, implement and maintain the covered entity\u2019s cybersecurity\
+        \ program;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d
+      ref_id: 500.4.d.3
+      description: regularly receiving and reviewing management reports about cybersecurity
+        matters; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.4.d
+      ref_id: 500.4.d.4
+      description: "confirming that the covered entity\u2019s management has allocated\
+        \ sufficient resources to implement and maintain an effective cybersecurity\
+        \ program."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5
+      assessable: false
+      depth: 1
+      ref_id: '500.5'
+      name: Vulnerability management
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node75
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5
+      description: 'Each covered entity shall, in accordance with its risk assessment,
+        develop and implement written policies and procedures for vulnerability management
+        that are designed to assess and maintain the effectiveness of its cybersecurity
+        program. '
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node76
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5
+      description: 'These policies and procedures shall be designed to ensure that
+        covered entities:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.a
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node76
+      ref_id: 500.5.a
+      description: 'conduct, at a minimum:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.a.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.a
+      ref_id: 500.5.a.1
+      description: "penetration testing of their information systems from both inside\
+        \ and outside the information systems\u2019 boundaries by a qualified internal\
+        \ or external party at least annually; and"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.a.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.a
+      ref_id: 500.5.a.2
+      description: automated scans of information systems, and a manual review of
+        systems not covered by such scans, for the purpose of discovering, analyzing
+        and reporting vulnerabilities at a frequency determined by the risk assessment,
+        and promptly after any material system changes;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.b
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node76
+      ref_id: 500.5.b
+      description: are promptly informed of new security vulnerabilities by having
+        a monitoring process in place; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.5.c
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node76
+      ref_id: 500.5.c
+      description: timely remediate vulnerabilities, giving priority to vulnerabilities
+        based on the risk they pose to the covered entity.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6
+      assessable: false
+      depth: 1
+      ref_id: '500.6'
+      name: Audit trail
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6
+      ref_id: 500.6.a
+      description: 'Each covered entity shall securely maintain systems that, to the
+        extent applicable and based on its risk assessment:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6.a
+      ref_id: 500.6.a.1
+      description: are designed to reconstruct material financial transactions sufficient
+        to support normal operations and obligations of the covered entity; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6.a
+      ref_id: 500.6.a.2
+      description: include audit trails designed to detect and respond to cybersecurity
+        events that have a reasonable likelihood of materially harming any material
+        part of the normal operations of the covered entity.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.6
+      ref_id: 500.6.b
+      description: Each covered entity shall maintain records required by paragraph
+        (a)(1) of this section for not fewer than five years and shall maintain records
+        required by paragraph (a)(2) of this section for not fewer than three years.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7
+      assessable: false
+      depth: 1
+      ref_id: '500.7'
+      name: Access privileges and management
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7
+      ref_id: 500.7.a
+      description: "As part of its cybersecurity program, based on the covered entity\u2019\
+        s risk assessment each covered entity shall:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      ref_id: 500.7.a.1
+      description: "limit user access privileges to information systems that provide\
+        \ access to nonpublic information to only those necessary to perform the user\u2019\
+        s job;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      ref_id: 500.7.a.2
+      description: "limit the number of privileged accounts and limit the access functions\
+        \ of privileged accounts to only those necessary to perform the user\u2019\
+        s job;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      ref_id: 500.7.a.3
+      description: limit the use of privileged accounts to only when performing functions
+        requiring the use of such access;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      ref_id: 500.7.a.4
+      description: periodically, but at a minimum annually, review all user access
+        privileges and remove or disable accounts and access that are no longer necessary;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      ref_id: 500.7.a.5
+      description: disable or securely configure all protocols that permit remote
+        control of devices; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.a
+      ref_id: 500.7.a.6
+      description: promptly terminate access following departures.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7
+      ref_id: 500.7.b
+      description: To the extent passwords are employed as a method of authentication,
+        the covered entity shall implement a written password policy that meets industry
+        standards.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7
+      ref_id: 500.7.c
+      description: 'Each class A company shall monitor privileged access activity
+        and shall implement:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.c.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.c
+      ref_id: 500.7.c.1
+      description: a privileged access management solution; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.c.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.7.c
+      ref_id: 500.7.c.2
+      description: "an automated method of blocking commonly used passwords for all\
+        \ accounts on information systems owned or controlled by the class A company\
+        \ and wherever feasible for all other accounts. To the extent the class A\
+        \ company determines that blocking commonly used passwords is infeasible,\
+        \ the covered entity\u2019s CISO may instead approve in writing at least annually\
+        \ the infeasibility and the use of reasonably equivalent or more secure compensating\
+        \ controls."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.8
+      assessable: false
+      depth: 1
+      ref_id: '500.8'
+      name: Application security
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.8.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.8
+      ref_id: 500.8.a
+      description: "Each covered entity\u2019s cybersecurity program shall include\
+        \ written procedures, guidelines and standards designed to ensure the use\
+        \ of secure development practices for in-house developed applications utilized\
+        \ by the covered entity, and procedures for evaluating, assessing or testing\
+        \ the security of externally developed applications utilized by the covered\
+        \ entity within the context of the covered entity\u2019s technology environment."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.8.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.8
+      ref_id: 500.8.b
+      description: All such procedures, guidelines and standards shall be reviewed,
+        assessed and updated as necessary by the CISO (or a qualified designee) of
+        the covered entity at least annually.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9
+      assessable: false
+      depth: 1
+      ref_id: '500.9'
+      name: Risk assessment
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9
+      ref_id: 500.9.a
+      description: "Each covered entity shall conduct a periodic risk assessment of\
+        \ the covered entity\u2019s information systems sufficient to inform the design\
+        \ of the cybersecurity program as required by this Part. Such risk assessment\
+        \ shall be reviewed and updated as reasonably necessary, but at a minimum\
+        \ annually, and whenever a change in the business or technology causes a material\
+        \ change to the covered entity\u2019s cyber risk. The covered entity\u2019\
+        s risk assessment shall allow for revision of controls to respond to technological\
+        \ developments and evolving threats and shall consider the particular risks\
+        \ of the covered entity\u2019s business operations related to cybersecurity,\
+        \ nonpublic information collected or stored, information systems utilized\
+        \ and the availability and effectiveness of controls to protect nonpublic\
+        \ information and information systems."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9
+      ref_id: 500.9.b
+      description: 'The risk assessment shall be carried out in accordance with written
+        policies and procedures and shall be documented. Such policies and procedures
+        shall include:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b
+      ref_id: 500.9.b.1
+      description: criteria for the evaluation and categorization of identified cybersecurity
+        risks or threats facing the covered entity;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b
+      ref_id: 500.9.b.2
+      description: "criteria for the assessment of the confidentiality, integrity,\
+        \ security and availability of the covered entity\u2019s information systems\
+        \ and nonpublic information, including the adequacy of existing controls in\
+        \ the context of identified risks; and"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.9.b
+      ref_id: 500.9.b.3
+      description: requirements describing how identified risks will be mitigated
+        or accepted based on the risk assessment and how the cybersecurity program
+        will address the risks.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10
+      assessable: false
+      depth: 1
+      ref_id: '500.10'
+      name: Cybersecurity personnel and intelligence
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10
+      ref_id: 500.10.a
+      description: 'In addition to the requirements set forth in section 500.4(a)
+        of this Part, each covered entity shall:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a
+      ref_id: 500.10.a.1
+      description: "utilize qualified cybersecurity personnel of the covered entity,\
+        \ an affiliate or a third- party service provider sufficient to manage the\
+        \ covered entity\u2019s cybersecurity risks and to perform or oversee the\
+        \ performance of the core cybersecurity functions specified in section 500.2(b)(1)\u2013\
+        (6) of this Part;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a
+      ref_id: 500.10.a.2
+      description: provide cybersecurity personnel with cybersecurity updates and
+        training sufficient to address relevant cybersecurity risks; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.a
+      ref_id: 500.10.a.3
+      description: verify that key cybersecurity personnel take steps to maintain
+        current knowledge of changing cybersecurity threats and countermeasures.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.10
+      ref_id: 500.10.b
+      description: A covered entity may choose to utilize an affiliate or qualified
+        third-party service provider to assist in complying with the requirements
+        set forth in this Part, subject to the requirements set forth in sections
+        500.4 and 500.11 of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11
+      assessable: false
+      depth: 1
+      ref_id: '500.11'
+      name: Third-party service provider security policy
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11
+      ref_id: 500.11.a
+      description: 'Each covered entity shall implement written policies and procedures
+        designed to ensure the security of information systems and nonpublic information
+        that are accessible to, or held by, third-party service providers. Such policies
+        and procedures shall be based on the risk assessment of the covered entity
+        and shall address to the extent applicable:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a
+      ref_id: 500.11.a.1
+      description: the identification and risk assessment of third-party service providers;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a
+      ref_id: 500.11.a.2
+      description: minimum cybersecurity practices required to be met by such third-party
+        service providers in order for them to do business with the covered entity;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a
+      ref_id: 500.11.a.3
+      description: due diligence processes used to evaluate the adequacy of cybersecurity
+        practices of such third-party service providers; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.a
+      ref_id: 500.11.a.4
+      description: periodic assessment of such third-party service providers based
+        on the risk they present and the continued adequacy of their cybersecurity
+        practices.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11
+      ref_id: 500.11.b
+      description: 'Such policies and procedures shall include relevant guidelines
+        for due diligence and/or contractual protections relating to third-party service
+        providers including to the extent applicable guidelines addressing:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b
+      ref_id: 500.11.b.1
+      description: "the third-party service provider\u2019s policies and procedures\
+        \ for access controls, including its use of multi-factor authentication as\
+        \ required by section 500.12 of this Part, to limit access to relevant information\
+        \ systems and nonpublic information;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b
+      ref_id: 500.11.b.2
+      description: "the third-party service provider\u2019s policies and procedures\
+        \ for use of encryption as required by section 500.15 of this Part to protect\
+        \ nonpublic information in transit and at rest;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b
+      ref_id: 500.11.b.3
+      description: "notice to be provided to the covered entity in the event of a\
+        \ cybersecurity event directly impacting the covered entity\u2019s information\
+        \ systems or the covered entity\u2019s nonpublic information being held by\
+        \ the third-party service provider; and"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.11.b
+      ref_id: 500.11.b.4
+      description: "representations and warranties addressing the third-party service\
+        \ provider\u2019s cybersecurity policies and procedures that relate to the\
+        \ security of the covered entity\u2019s information systems or nonpublic information."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12
+      assessable: false
+      depth: 1
+      ref_id: '500.12'
+      name: Multi-factor authentication
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12
+      ref_id: 500.12.a
+      description: 'Multi-factor authentication shall be utilized for any individual
+        accessing any information systems of a covered entity, unless the covered
+        entity qualifies for a limited exemption pursuant to section 500.19(a) of
+        this Part in which case multi-factor authentication shall be utilized for:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a
+      ref_id: 500.12.a.1
+      description: "remote access to the covered entity\u2019s information systems;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a
+      ref_id: 500.12.a.2
+      description: remote access to third-party applications, including but not limited
+        to those that are cloud based, from which nonpublic information is accessible;
+        and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.a
+      ref_id: 500.12.a.3
+      description: all privileged accounts other than service accounts that prohibit
+        interactive login.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.12
+      ref_id: 500.12.b
+      description: If the covered entity has a CISO, the CISO may approve in writing
+        the use of reasonably equivalent or more secure compensating controls. Such
+        controls shall be reviewed periodically, but at a minimum annually.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13
+      assessable: false
+      depth: 1
+      ref_id: '500.13'
+      name: Asset management and data retention requirements
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13
+      ref_id: 500.13.a
+      description: "As part of its cybersecurity program, each covered entity shall\
+        \ implement written policies and procedures designed to produce and maintain\
+        \ a complete, accurate and documented asset inventory of the covered entity\u2019\
+        s information systems. The asset inventory shall be maintained in accordance\
+        \ with written policies and procedures. At a minimum, such policies and procedures\
+        \ shall include:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a
+      ref_id: 500.13.a.1
+      description: 'a method to track key information for each asset, including, as
+        applicable, the following:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1
+      ref_id: 500.13.a.1.i
+      description: owner;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1
+      ref_id: 500.13.a.1.ii
+      description: location;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1.iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1
+      ref_id: 500.13.a.1.iii
+      description: classification or sensitivity;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1.iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1
+      ref_id: 500.13.a.1.iv
+      description: support expiration date; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1.v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.1
+      ref_id: 500.13.a.1.v
+      description: recovery time objectives; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.a
+      ref_id: 500.13.a.2
+      description: "the frequency required to update and validate the covered entity\u2019\
+        s asset inventory."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.13
+      ref_id: 500.13.b
+      description: "As part of its cybersecurity program, each covered entity shall\
+        \ include policies and procedures for the secure disposal on a periodic basis\
+        \ of any nonpublic information identified in section 500.1(k)(2)\u2013(3)\
+        \ of this Part that is no longer necessary for business operations or for\
+        \ other legitimate business purposes of the covered entity, except where such\
+        \ information is otherwise required to be retained by law or regulation, or\
+        \ where targeted disposal is not reasonably feasible due to the manner in\
+        \ which the information is maintained."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14
+      assessable: false
+      depth: 1
+      ref_id: '500.14'
+      name: Monitoring and training
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14
+      ref_id: 500.14.a
+      description: 'As part of its cybersecurity program, each covered entity shall:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a
+      ref_id: 500.14.a.1
+      description: implement risk-based policies, procedures and controls designed
+        to monitor the activity of authorized users and detect unauthorized access
+        or use of, or tampering with, nonpublic information by such authorized users;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a
+      ref_id: 500.14.a.2
+      description: implement risk-based controls designed to protect against malicious
+        code, including those that monitor and filter web traffic and electronic mail
+        to block malicious content; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.a
+      ref_id: 500.14.a.3
+      description: provide periodic, but at a minimum annual, cybersecurity awareness
+        training that includes social engineering for all personnel that is updated
+        to reflect risks identified by the covered entity in its risk assessment.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14
+      ref_id: 500.14.b
+      description: 'Each class A company shall implement, unless the CISO has approved
+        in writing the use of reasonably equivalent or more secure compensating controls:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.b
+      ref_id: 500.14.b.1
+      description: an endpoint detection and response solution to monitor anomalous
+        activity, including but not limited to lateral movement; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.14.b
+      ref_id: 500.14.b.2
+      description: a solution that centralizes logging and security event alerting.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.15
+      assessable: false
+      depth: 1
+      ref_id: '500.15'
+      name: Encryption of nonpublic information
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.15.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.15
+      ref_id: 500.15.a
+      description: As part of its cybersecurity program, each covered entity shall
+        implement a written policy requiring encryption that meets industry standards,
+        to protect nonpublic information held or transmitted by the covered entity
+        both in transit over external networks and at rest.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.15.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.15
+      ref_id: 500.15.b
+      description: "To the extent a covered entity determines that encryption of nonpublic\
+        \ information at rest is infeasible, the covered entity may instead secure\
+        \ such nonpublic information using effective alternative compensating controls\
+        \ that have been reviewed and approved by the covered entity\u2019s CISO in\
+        \ writing. The feasibility of encryption and effectiveness of the compensating\
+        \ controls shall be reviewed by the CISO at least annually."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16
+      assessable: false
+      depth: 1
+      ref_id: '500.16'
+      name: Incident response and business continuity management
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16
+      ref_id: 500.16.a
+      description: As part of its cybersecurity program, each covered entity shall
+        establish written plans that contain proactive measures to investigate and
+        mitigate cybersecurity events and to ensure operational resilience, including
+        but not limited to incident response, business continuity and disaster recovery
+        plans.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a
+      ref_id: 500.16.a.1
+      name: ' Incident response plan'
+      description: "Incident response plans shall be reasonably designed to enable\
+        \ prompt response to, and recovery from, any cybersecurity event materially\
+        \ affecting the confidentiality, integrity or availability of the covered\
+        \ entity\u2019s information systems or the continuing functionality of any\
+        \ aspect of the covered entity\u2019s business or operations. Such plans shall\
+        \ address the following areas with respect to different types of cybersecurity\
+        \ events, including disruptive events such as ransomware incidents:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.i
+      description: the goals of the incident response plan;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.ii
+      description: the internal processes for responding to a cybersecurity event;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.iii
+      description: the definition of clear roles, responsibilities and levels of decision-making
+        authority;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.iv
+      description: external and internal communications and information sharing;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.v
+      description: identification of requirements for the remediation of any identified
+        weaknesses in information systems and associated controls;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.vi
+      description: documentation and reporting regarding cybersecurity events and
+        related incident response activities;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.vii
+      description: recovery from backups;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.viii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.viii
+      description: preparation of root cause analysis that describes how and why the
+        event occurred, what business impact it had, and what will be done to prevent
+        reoccurrence; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1.ix
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.1
+      ref_id: 500.16.a.1.ix
+      description: updating of incident response plans as necessary.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a
+      ref_id: 500.16.a.2
+      name: Business continuity and disaster recovery (BCDR) plan
+      description: "BCDR plans shall be reasonably designed to ensure the availability\
+        \ and functionality of the covered entity\u2019s information systems and material\
+        \ services and protect the covered entity\u2019s personnel, assets and nonpublic\
+        \ information in the event of a cybersecurity-related disruption to its normal\
+        \ business activities. Such plans shall, at minimum:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      ref_id: 500.16.a.2.i
+      description: "identify documents, data, facilities, infrastructure, services,\
+        \ personnel and competencies essential to the continued operations of the\
+        \ covered entity\u2019s business;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      ref_id: 500.16.a.2.ii
+      description: identify the supervisory personnel responsible for implementing
+        each aspect of the BCDR plan;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2.iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      ref_id: 500.16.a.2.iii
+      description: include a plan to communicate with essential persons in the event
+        of a cybersecurity-related disruption to the operations of the covered entity,
+        including employees, counterparties, regulatory authorities, third-party service
+        providers, disaster recovery specialists, the senior governing body and any
+        other persons essential to the recovery of documentation and data and the
+        resumption of operations;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2.iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      ref_id: 500.16.a.2.iv
+      description: include procedures for the timely recovery of critical data and
+        information systems and to resume operations as soon as reasonably possible
+        following a cybersecurity-related disruption to normal business activities;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2.v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      ref_id: 500.16.a.2.v
+      description: include procedures for backing up or copying, with sufficient frequency,
+        information essential to the operations of the covered entity and storing
+        such information offsite; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2.vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.a.2
+      ref_id: 500.16.a.2.vi
+      description: "identify third parties that are necessary to the continued operations\
+        \ of the covered entity\u2019s information systems."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16
+      ref_id: 500.16.b
+      description: Each covered entity shall ensure that current copies of the plans
+        or relevant portions therein are distributed or are otherwise accessible,
+        including during a cybersecurity event, to all employees necessary to implement
+        such plans.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16
+      ref_id: 500.16.c
+      description: Each covered entity shall provide relevant training to all employees
+        responsible for implementing the plans regarding their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16
+      ref_id: 500.16.d
+      description: 'Each covered entity shall periodically, but at a minimum annually,
+        test its:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.d.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.d
+      ref_id: 500.16.d.1
+      description: incident response and BCDR plans with all staff and management
+        critical to the response, and shall revise the plan as necessary; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.d.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.d
+      ref_id: 500.16.d.2
+      description: ability to restore its critical data and information systems from
+        backups.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.16
+      ref_id: 500.16.e
+      description: Each covered entity shall maintain backups necessary to restore
+        material operations. The backups shall be adequately protected from unauthorized
+        alterations or destruction.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17
+      assessable: false
+      depth: 1
+      ref_id: '500.17'
+      name: Notices to superintendent
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17
+      ref_id: 500.17.a
+      name: Notice of cybersecurity incident
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.a.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.a
+      ref_id: 500.17.a.1
+      description: "Each covered entity shall notify the superintendent electronically\
+        \ in the form set forth on the department\u2019s website as promptly as possible\
+        \ but in no event later than 72 hours after determining that a cybersecurity\
+        \ incident has occurred at the covered entity, its affiliates, or a third-party\
+        \ service provider."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.a.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.a
+      ref_id: 500.17.a.2
+      description: Each covered entity shall promptly provide to the superintendent
+        any information requested regarding such incident. Covered entities shall
+        have a continuing obligation to update the superintendent with material changes
+        or new information previously unavailable.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17
+      ref_id: 500.17.b
+      name: Notice of compliance
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b
+      ref_id: 500.17.b.1
+      description: 'Annually each covered entity shall submit to the superintendent
+        electronically by April 15 either:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1
+      ref_id: 500.17.b.1.i
+      description: 'a written certification that:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.i.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.i
+      ref_id: 500.17.b.1.i.a
+      description: certifies that the covered entity materially complied with the
+        requirements set forth in this Part during the prior calendar year; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.i.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.i
+      ref_id: 500.17.b.1.i.b
+      description: shall be based upon data and documentation sufficient to accurately
+        determine and demonstrate such material compliance, including, to the extent
+        necessary, documentation of officers, employees, representatives, outside
+        vendors and other individuals or entities, as well as other documentation,
+        whether in the form of reports, certifications, schedules or otherwise; or
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1
+      ref_id: 500.17.b.1.ii
+      description: 'a written acknowledgment that:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii
+      ref_id: 500.17.b.1.ii.a
+      description: acknowledges that, for the prior calendar year, the covered entity
+        did not materially comply with all the requirements of this Part;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii
+      ref_id: 500.17.b.1.ii.b
+      description: identifies all sections of this Part that the entity has not materially
+        complied with and describes the nature and extent of such noncompliance; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.1.ii
+      ref_id: 500.17.b.1.ii.c
+      description: provides a remediation timeline or confirmation that remediation
+        has been completed.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b
+      ref_id: 500.17.b.2
+      description: "Such certification or acknowledgment shall be submitted electronically\
+        \ in the form set forth on the department\u2019s website and shall be signed\
+        \ by the covered entity\u2019s highest-ranking executive and its CISO. If\
+        \ the covered entity does not have a CISO, the certification or acknowledgment\
+        \ shall be signed by the highest-ranking executive and by the senior officer\
+        \ responsible for the cybersecurity program of the covered entity."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.b
+      ref_id: 500.17.b.3
+      description: Each covered entity shall maintain for examination and inspection
+        by the department upon request all records, schedules and other documentation
+        and data supporting the certification or acknowledgment for a period of five
+        years, including the identification of all areas, systems and processes that
+        require or required material improvement, updating or redesign, all remedial
+        efforts undertaken to address such areas, systems and processes, and remediation
+        plans and timelines for their implementation.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17
+      ref_id: 500.17.c
+      name: Notice and explanation of extortion payment
+      description: "Each covered entity, in the event of an extortion payment made\
+        \ in connection with a cybersecurity event involving the covered entity, shall\
+        \ provide the superintendent electronically, in the form set forth on the\
+        \ department\u2019s website, with the following:"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.c.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.c
+      ref_id: 500.17.c.1
+      description: within 24 hours of the extortion payment, notice of the payment;
+        and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.c.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.17.c
+      ref_id: 500.17.c.2
+      description: within 30 days of the extortion payment, a written description
+        of the reasons payment was necessary, a description of alternatives to payment
+        considered, all diligence performed to find alternatives to payment and all
+        diligence performed to ensure compliance with applicable rules and regulations
+        including those of the Office of Foreign Assets Control.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.18
+      assessable: false
+      depth: 1
+      ref_id: '500.18'
+      name: Confidentiality
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node196
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.18
+      description: Information provided by a covered entity pursuant to this Part
+        is subject to exemptions from disclosure under the Banking Law, Insurance
+        Law, Financial Services Law, Public Officers Law or any other applicable State
+        or Federal law.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      assessable: false
+      depth: 1
+      ref_id: '500.19'
+      name: Exemptions
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.a
+      name: Limited exemption
+      description: "Each covered entity with:\n(1) fewer than 20 employees and independent\
+        \ contractors of the covered entity and its affiliates;\n(2) less than $7,500,000\
+        \ in gross annual revenue in each of the last three fiscal years from all\
+        \ business operations of the covered entity and the business operations in\
+        \ this State of the covered entity\u2019s affiliates; or\n(3) less than $15,000,000\
+        \ in year-end total assets, calculated in accordance with generally accepted\
+        \ accounting principles, including assets of all affiliates,\nshall be exempt\
+        \ from the requirements of sections 500.4, 500.5, 500.6, 500.8, 500.10, 500.14(a)(1),\
+        \ (a)(2), and (b), 500.15 and 500.16 of this Part."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.b
+      description: An employee, agent, wholly owned subsidiary, representative or
+        designee of a covered entity, who is itself a covered entity, is exempt from
+        this Part and need not develop its own cybersecurity program to the extent
+        that the employee, agent, wholly owned subsidiary, representative or designee
+        is covered by the cybersecurity program of the covered entity.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.c
+      description: A covered entity that does not directly or indirectly operate,
+        maintain, utilize or control any information systems, and that does not, and
+        is not required to, directly or indirectly control, own, access, generate,
+        receive or possess nonpublic information shall be exempt from the requirements
+        of sections 500.2, 500.3, 500.4, 500.5, 500.6, 500.7, 500.8, 500.10, 500.12,
+        500.14, 500.15 and 500.16 of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.d
+      description: A covered entity under article 70 of the Insurance Law that does
+        not and is not required to directly or indirectly control, own, access, generate,
+        receive or possess nonpublic information other than information relating to
+        its corporate parent company (or affiliates) shall be exempt from the requirements
+        of sections 500.2, 500.3, 500.4, 500.5, 500.6, 500.7, 500.8, 500.10, 500.12,
+        500.14, 500.15 and 500.16 of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.e
+      description: An individual insurance broker subject to Insurance Law section
+        2104 who qualifies for the exemption pursuant to subdivision 500.19(c) of
+        this Part and has not, for any compensation, commission or other thing of
+        value, acted or aided in any manner in soliciting, negotiating or selling
+        any policy or contract or in placing risks or taking out insurance on behalf
+        of another person for at least one year shall be exempt from the requirements
+        of this Part, provided such individuals do not otherwise qualify as a covered
+        entity for purposes of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.f
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.f
+      description: "A covered entity that qualifies for any of the above exemptions\
+        \ pursuant to this section shall file electronically a Notice of Exemption\
+        \ in the form set forth on the department\u2019s website within 30 days of\
+        \ the determination that the covered entity is exempt."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.g
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.g
+      description: 'The following persons are exempt from the requirements of this
+        Part, provided such persons do not otherwise qualify as a covered entity for
+        purposes of this Part: persons subject to Insurance Law section 1110; persons
+        subject to Insurance Law section 5904; any accredited reinsurer, certified
+        reinsurer or reciprocal jurisdiction reinsurer that has been so recognized
+        pursuant to 11 NYCRR Part 125; individual insurance agents who are placed
+        in inactive status under Insurance Law section 2103; and individual licensees
+        placed in inactive status under Banking Law section 599-i.'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19.h
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.19
+      ref_id: 500.19.h
+      description: In the event that a covered entity ceases to qualify for an exemption,
+        such covered entity shall have 180 days from the date that it ceases to so
+        qualify to comply with all applicable requirements of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20
+      assessable: false
+      depth: 1
+      ref_id: '500.20'
+      name: Enforcement
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20
+      ref_id: 500.20.a
+      description: "This regulation will be enforced by the superintendent pursuant\
+        \ to, and is not intended to limit, the superintendent\u2019s authority under\
+        \ any applicable laws."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20
+      ref_id: 500.20.b
+      description: 'The commission of a single act prohibited by this Part or the
+        failure to act to satisfy an obligation required by this Part shall constitute
+        a violation hereof. Such acts or failures include, without limitation:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.b.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.b
+      ref_id: 500.20.b.1
+      description: "the failure to secure or prevent unauthorized access to an individual\u2019\
+        s or an entity\u2019s nonpublic information due to noncompliance with any\
+        \ section of this Part; or"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.b.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.b
+      ref_id: 500.20.b.2
+      description: the material failure to comply for any 24-hour period with any
+        section of this Part.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20
+      ref_id: 500.20.c
+      description: 'In assessing any penalty for a violation of this Part pursuant
+        to the Banking Law, Insurance Law or Financial Services Law, the superintendent
+        shall take into account, without limitation, factors including:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.1
+      description: the extent to which the covered entity has cooperated with the
+        superintendent in the investigation of such acts;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.2
+      description: the good faith of the entity;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.3
+      description: whether the violations resulted from conduct that was unintentional
+        or inadvertent, reckless or intentional and deliberate;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.4
+      description: whether the violation was a result of failure to remedy previous
+        examination matters requiring attention, or failing to adhere to any disciplinary
+        letter, letter of instructions or similar;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.5
+      description: any history of prior violations;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.6
+      description: whether the violation involved an isolated incident, repeat violations,
+        systemic violations or a pattern of violations;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.7
+      description: whether the covered entity provided false or misleading information;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.8
+      description: the extent of harm to consumers;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.9
+      description: whether required, accurate and timely disclosures were made to
+        affected consumers;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.10
+      description: the gravity of the violations;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.11
+      description: the number of violations and the length of time over which they
+        occurred;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.12
+      description: the extent, if any, to which the senior governing body participated
+        therein;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.13
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.13
+      description: any penalty or sanction imposed by any other regulatory agency;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.14
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.14
+      description: the financial resources, net worth and annual business volume of
+        the covered entity and its affiliates;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.15
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.15
+      description: the extent to which the relevant policies and procedures of the
+        company are consistent with nationally recognized cybersecurity frameworks,
+        such as NIST; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c.16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.20.c
+      ref_id: 500.20.c.16
+      description: such other matters as justice and the public interest require.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.21
+      assessable: false
+      depth: 1
+      ref_id: '500.21'
+      name: Effective date
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.21.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.21
+      ref_id: 500.21.a
+      description: This Part will be effective March 1, 2017. Covered entities will
+        be required to annually prepare and submit to the superintendent a certification
+        of compliance with New York State Department of Financial Services Cybersecurity
+        Regulations under section 500.17(b) of this Part commencing February 15, 2018.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.21.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.21
+      ref_id: 500.21.b
+      description: The second amendment to this Part shall become effective November
+        1, 2023.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22
+      assessable: false
+      depth: 1
+      ref_id: '500.22'
+      name: Transitional periods
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22.a
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22
+      ref_id: 500.22.a
+      name: Transitional period
+      description: Covered entities shall have 180 days from the effective date of
+        this Part to comply with the requirements set forth in this Part, except as
+        otherwise specified.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22
+      ref_id: 500.22.b
+      description: 'The following provisions shall include additional transitional
+        periods. Covered entities shall have:
+
+        (1) one year from the effective date of this Part to comply with the requirements
+        of sections 500.4(b), 500.5, 500.9, 500.12 and 500.14(b) of this Part;
+
+        (2) eighteen months from the effective date of this Part to comply with the
+        requirements of sections 500.6, 500.8, 500.13, 500.14(a) and 500.15 of this
+        Part;
+
+        (3) two years from the effective date of this Part to comply with the requirements
+        of section 500.11 of this Part.'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22.c
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22
+      ref_id: 500.22.c
+      description: Covered entities shall have 180 days from the effective date of
+        the second amendment to this Part to comply with the new requirements set
+        forth in the second amendment to this Part, except as otherwise specified
+        in subdivisions (d) and (e) below.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22.d
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22
+      ref_id: 500.22.d
+      description: 'The following provisions shall include different transitional
+        periods. Covered entities shall have:
+
+        (1) 30 days from the effective date of the second amendment to this Part to
+        comply with the new requirements specified in section 500.17 of this Part;
+
+        (2) one year from the effective date of the second amendment to this Part
+        to comply with the new requirements specified in sections 500.4, 500.15, 500.16
+        and 500.19(a) of this Part;
+
+        (3) 18 months from the effective date of the second amendment to this Part
+        to comply with the new requirements specified in sections 500.5(a)(2), 500.7,
+        500.14(a)(2) and 500.14(b) of this Part; and
+
+        (4) two years from the effective date of the second amendment to this Part
+        to comply with the new requirements specified in sections 500.12 and 500.13(a)
+        of this Part.'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22.e
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.22
+      ref_id: 500.22.e
+      description: The new requirements specified in sections 500.19(e)-(h), 500.20,
+        500.21, 500.22 and 500.24 of this Part shall become effective November 1,
+        2023.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.23
+      assessable: false
+      depth: 1
+      ref_id: '500.23'
+      name: Severability
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:node238
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.23
+      description: If any provision of this Part or the application thereof to any
+        person or circumstance is adjudged invalid by a court of competent jurisdiction,
+        such judgment shall not affect or impair the validity of the other provisions
+        of this Part or the application thereof to other persons or circumstances.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24
+      assessable: false
+      depth: 1
+      ref_id: '500.24'
+      name: Exemptions from electronic filing and submission requirements
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24
+      ref_id: 500.24.a
+      description: A filer required to make an electronic filing or a submission pursuant
+        to this Part may apply to the superintendent for an exemption from the requirement
+        that the filing or submission be electronic by submitting a written request
+        to the superintendent for approval at least 30 days before the filer shall
+        submit to the superintendent the particular filing or submission that is the
+        subject of the request.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24
+      ref_id: 500.24.b
+      description: 'The request for an exemption shall:'
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b
+      ref_id: 500.24.b.1
+      description: "set forth the filer\u2019s DFS license number, NAIC number, Nationwide\
+        \ Multistate Licensing System number or institution number;"
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b
+      ref_id: 500.24.b.2
+      description: identify the specific filing or submission for which the filer
+        is applying for the exemption;
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b
+      ref_id: 500.24.b.3
+      description: specify whether the filer is making the request for an exemption
+        based upon undue hardship, impracticability or good cause, and set forth a
+        detailed explanation as to the reason that the superintendent should approve
+        the request; and
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.b
+      ref_id: 500.24.b.4
+      description: specify whether the request for an exemption extends to future
+        filings or submissions, in addition to the specific filing or submission identified
+        in paragraph (2) of this subdivision.
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24
+      ref_id: 500.24.c
+      description: "The filer requesting an exemption shall submit, upon the superintendent\u2019\
+        s request, any additional information necessary for the superintendent to\
+        \ evaluate the filer\u2019s request for an exemption."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24
+      ref_id: 500.24.d
+      description: "The filer shall be exempt from the electronic filing or submission\
+        \ requirement upon the superintendent\u2019s written determination so exempting\
+        \ the filer, where the determination specifies the basis upon which the superintendent\
+        \ is granting the request and to which filings or submissions the exemption\
+        \ applies."
+    - urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24.e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dfs-500-2023-11:500.24
+      ref_id: 500.24.e
+      description: "If the superintendent approves a filer\u2019s request for an exemption\
+        \ from the electronic filing or submission requirement, then the filer shall\
+        \ make a filing or submission in a form and manner acceptable to the superintendent."
