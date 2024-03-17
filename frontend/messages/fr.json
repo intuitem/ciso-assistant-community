@@ -476,6 +476,10 @@
 	"suggestedReferenceControls": "Mesures de référence suggérées",
 	"threatsCovered": "Menaces couvertes",
 	"noFileDetected": "Erreur: aucun fichier détecté",
+	"usedRiskMatrices": "Matrices de risque utilisées",
+	"usedFrameworks": "Cadres utilisés",
+	"riskAssessmentsStatus": "Statut des évaluations de risque",
+	"complianceAssessmentsStatus": "Statut des évaluations de conformité",
 	"noDescription": "Pas de description",
 	"noExistingControls": "Aucune mesure existante",
 	"noJustification": "Aucune justification",
@@ -485,5 +489,7 @@
 	"highSOK": "La force des connaissances à l’appui de l’évaluation est élevée",
 	"libraryImportError": "Une erreur a été détectée durant l'importation de votre librairie.",
 	"libraryAlreadyImportedError": "Cette libairie a été déjà été importée !",
-	"invalidLibraryFileError": "Fichier de librairie invalide !"
+	"invalidLibraryFileError": "Fichier de librairie invalide !",
+	"taintedFormMessage": "Voulez-vous vraiment quitter cette page ? Toutes les données non enregistrées seront perdues.",
+	"riskScenariosStatus": "Statut des scénarios de risque"
 }

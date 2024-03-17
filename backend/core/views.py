@@ -298,6 +298,18 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def colors(self, request):
         return Response({"results": get_risk_color_ordered_list(request.user)})
 
+    @action(detail=False, name="Get used risk matrices")
+    def used(self, request):
+        _used_matrices = RiskMatrix.objects.filter(
+            riskassessment__isnull=False
+        ).distinct()
+        used_matrices = _used_matrices.values("id", "name")
+        for i in range(len(used_matrices)):
+            used_matrices[i]["risk_assessments_count"] = _used_matrices.get(
+                id=used_matrices[i]["id"]
+            ).riskassessment_set.count()
+        return Response({"results": used_matrices})
+
 
 class RiskAssessmentViewSet(BaseModelViewSet):
     """
@@ -312,6 +324,11 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         "risk_matrix",
         "status",
     ]
+
+    @action(detail=False, name="Risk assessments per status")
+    def per_status(self, request):
+        data = assessment_per_status(request.user, RiskAssessment)
+        return Response({"results": data})
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -712,6 +729,10 @@ class RiskScenarioViewSet(BaseModelViewSet):
     def count_per_level(self, request):
         return Response({"results": risks_count_per_level(request.user)})
 
+    @action(detail=False, name="Get risk scenarios count per status")
+    def per_status(self, request):
+        return Response({"results": risk_per_status(request.user)})
+
 
 class RiskAcceptanceViewSet(BaseModelViewSet):
     """
@@ -1027,6 +1048,18 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
 
+    @action(detail=False, name="Get used frameworks")
+    def used(self, request):
+        _used_frameworks = Framework.objects.filter(
+            complianceassessment__isnull=False
+        ).distinct()
+        used_frameworks = _used_frameworks.values("id", "name")
+        for i in range(len(used_frameworks)):
+            used_frameworks[i]["compliance_assessments_count"] = _used_frameworks.get(
+                id=used_frameworks[i]["id"]
+            ).complianceassessment_set.count()
+        return Response({"results": used_frameworks})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
@@ -1154,6 +1187,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirement=requirement,
                 folder=Folder.objects.get(id=instance.project.folder.id),
             )
+
+    @action(detail=False, name="Compliance assessments per status")
+    def per_status(self, request):
+        data = assessment_per_status(request.user, ComplianceAssessment)
+        return Response({"results": data})
 
     @action(detail=False, methods=["get"])
     def quality_check(self, request):

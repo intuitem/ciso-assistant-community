@@ -231,6 +231,8 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
     evidences = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
 
+    ranking_score = serializers.IntegerField(source="get_ranking_score")
+
 
 class PolicyWriteSerializer(AppliedControlWriteSerializer):
     class Meta:
