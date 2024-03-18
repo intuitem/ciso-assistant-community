@@ -62,14 +62,14 @@ class EndpointTestsUtils:
 
         if perm_name in GROUPS_PERMISSIONS[user_group]["perms"]:
             # User has permission to perform the action
-            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Published"):
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Global"):
                 # User has access to the domain
                 return False, expected_status, "ok"
             else:
                 return False, expected_status, "outside_scope"
         else:
             # User has not permission to perform the action
-            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Published"):
+            if (GROUPS_PERMISSIONS[user_group]["folder"] == "Global") or (scope == GROUPS_PERMISSIONS[user_group]["folder"]) or (scope == "Global"):
                 # User has access to the domain
                 return True, status.HTTP_403_FORBIDDEN, "permission_denied"
             else:
@@ -894,7 +894,7 @@ class EndpointTestsQueries:
             fails: bool = False,
             expected_status: int = status.HTTP_200_OK,
             user_group: str = None,
-            scope: str = "Published",
+            scope: str = "Global",
         ):
             """Imports object with the API with authentication
 

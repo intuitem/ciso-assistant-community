@@ -11,6 +11,7 @@ from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
 import structlog
+from rest_framework.status import HTTP_403_FORBIDDEN
 
 logger = structlog.get_logger(__name__)
 
@@ -21,7 +22,8 @@ class BaseModelSerializer(serializers.ModelSerializer):
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise serializers.ValidationError(
-                {"urn": "Imported objects cannot be modified"}
+                {"urn": "Imported objects cannot be modified"},
+                code=HTTP_403_FORBIDDEN,
             )
         try:
             object_updated = super().update(instance, validated_data)
