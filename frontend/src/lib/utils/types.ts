@@ -107,14 +107,6 @@ export interface AggregatedData {
 	names: string[];
 }
 
-export interface Counter {
-	RiskAssessment: number;
-	RiskScenario: number;
-	AppliedControl: number;
-	RiskAcceptance: number;
-	Project: number;
-}
-
 export interface AppliedControlStatus {
 	localLables: string[];
 	labels: any[];

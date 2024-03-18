@@ -19,6 +19,7 @@
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { localItems, toCamelCase } from '$lib/utils/locales.js';
 
 	export let data;
 	const showRisks = true;
@@ -211,7 +212,7 @@
 					<ul>
 						<li class="pb-1">
 							<span class="font-semibold">{m.status()}:</span>
-							{risk_assessment.status}
+							{localItems(languageTag())[risk_assessment.status]}
 						</li>
 						<li class="pb-1">
 							<span class="font-semibold">{m.authors()}:</span>

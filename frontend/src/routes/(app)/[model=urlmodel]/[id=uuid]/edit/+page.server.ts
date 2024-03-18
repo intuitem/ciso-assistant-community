@@ -38,6 +38,9 @@ export const actions: Actions = {
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
+			Object.entries(response).forEach(([key, value]) => {
+				setError(form, key, value);
+			});
 			return fail(400, { form: form });
 		}
 		const createdObject = await res.json();
