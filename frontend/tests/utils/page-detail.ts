@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from './test-utils.js';
+import { getObjectNameWithoutScope, expect, type Locator, type Page } from './test-utils.js';
 import { FormContent, FormFieldType } from './form-content.js';
 import { BasePage } from './base-page.js';
 
@@ -121,9 +121,13 @@ export class PageDetail extends BasePage {
 							await expect
 								.soft(value)
 								.toContainText(
-									typeof values[key] === 'object' && !Array.isArray(values[key])
-										? values[key].value
-										: values[key],
+									getObjectNameWithoutScope(
+										typeof values[key] === 'object'
+											? !Array.isArray(values[key])
+												? values[key].value
+												: values[key][0]
+											: values[key]
+										),
 									{ ignoreCase: true }
 								);
 						}
