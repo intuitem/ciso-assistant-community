@@ -20,6 +20,9 @@
 
 		return filtered;
 	}
+
+	const user = $page.data.user;
+	const canEditObject: boolean = Object.hasOwn(user.permissions, `change_user`);
 </script>
 
 <div class="flex flex-col bg-white rounded-lg shadow-lg px-2 pb-4">
@@ -29,9 +32,11 @@
 			<a href="my-profile/change-password" class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</a
 			>
-			<a href="/users/{$page.data.user.id}/edit?next=/my-profile" class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
-			>
+			{#if canEditObject}
+				<a href="/users/{$page.data.user.id}/edit?next=/my-profile" class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
+				>
+			{/if}
 		</div>
 	</div>
 	<div class="flex flex-row w-full space-x-2">
