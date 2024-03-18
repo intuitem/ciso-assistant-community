@@ -321,7 +321,7 @@ class EndpointTestsQueries:
             :param authenticated_client: the client (authenticated) to use for the test
             :param verbose_name: the verbose name of the object to test
             :param object: the object to test (optional)
-            :param build_params: the parameters to build the object (optional)
+            :param build_params: the parameters to build the object (optional). The objects used to build the object should be provided as instances of the object model
             :param test_params: the parameters of the object to test in addition to the build params (optional)
             :param base_count: the number of objects in the database before the test (optional)
                 -1 means that the number of objects is unknown
@@ -532,7 +532,7 @@ class EndpointTestsQueries:
 
             :param authenticated_client: the client (authenticated) to use for the test
             :param verbose_name: the verbose name of the object to test
-            :param build_params: the parameters to build the object
+            :param build_params: the parameters to build the object. Objects references to create the object should be provided as stringified UUIDs
             :param test_params: the parameters of the object to test in addition to the build params (optional)
                 the test_params can ovveride the build_params
             :param base_count: the number of objects in the database before the test (optional)
@@ -661,8 +661,8 @@ class EndpointTestsQueries:
 
             :param authenticated_client: the client (authenticated) to use for the test
             :param verbose_name: the verbose name of the object to test
-            :param build_params: the parameters to build the object
-            :param update_params: the parameters to update the object
+            :param build_params: the parameters to build the object. The objects used to build the object should be provided as instances of the object model
+            :param update_params: the parameters to update the object. Objects references to update the object should be provided as stringified UUIDs
             :param test_params: the parameters of the modified object to test (optional)
                 the test_params can ovveride the build_params
             :param endpoint: the endpoint URL of the object to test (optional)
@@ -795,7 +795,7 @@ class EndpointTestsQueries:
 
             :param authenticated_client: the client (authenticated) to use for the test
             :param verbose_name: the verbose name of the object to test
-            :param build_params: the parameters to build the object
+            :param build_params: the parameters to build the object. The objects used to build the object should be provided as instances of the object model
             :param endpoint: the endpoint URL of the object to test (optional)
             """
             user_perm_fails, user_perm_expected_status, user_perm_reason = None, 0, None
