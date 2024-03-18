@@ -111,7 +111,7 @@ class TestReferenceControlsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             user_group=test.user_group,
-            scope="Published",
+            scope="Global",
         )
 
     def test_create_reference_controls(self, test):
@@ -161,7 +161,7 @@ class TestReferenceControlsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             user_group=test.user_group,
-            scope="Published",
+            scope="Global",
             fails=True,
             expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be updated
         )
