@@ -844,7 +844,7 @@ class UserViewSet(BaseModelViewSet):
         return User.objects.all()
 
 
-class UserGroupViewSet(AdminModelViewSet):
+class UserGroupViewSet(BaseModelViewSet):
     """
     API endpoint that allows user groups to be viewed or edited
     """
