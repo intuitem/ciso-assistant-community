@@ -151,13 +151,11 @@ class LibraryViewSet(BaseModelViewSet):
                 )
 
             return HttpResponse(json.dumps({}), status=HTTP_200_OK)
-        except ValidationError as e:
-            messages.error(
-                request,
-                _("Failed to import file: {}. {}").format(
-                    str(request.FILES["file"]), e.message % e.params
-                ),
+        except IntegrityError:
+            return HttpResponse(
+                json.dumps({"error" : "libraryAlreadyImportedError"}), status=HTTP_400_BAD_REQUEST
             )
-        return HttpResponse(
-            json.dumps({"error": "Invalid library file !"}), status=HTTP_400_BAD_REQUEST
-        )
+        except :
+            return HttpResponse(
+                json.dumps({"error": "invalidLibraryFileError"}), status=HTTP_400_BAD_REQUEST
+            )

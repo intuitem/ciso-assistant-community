@@ -4,12 +4,36 @@
 	export let name: string;
 	export let values: any[]; // Set this type later
 	export let labels: string[];
+	export let horizontal = false;
+	export let title = '';
 
-	$: chart_id = `${name}_div`;
+	export let width = 'w-auto';
+	export let height = 'h-full';
+	export let classesContainer = '';
+
+	const chart_id = `${name}_div`;
 
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let bar_ch = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+
+		const category = {
+			type: 'category',
+			data: labels,
+			axisTick: {
+				alignWithLabel: true
+			},
+			axisLabel: {
+				interval: 0
+			},
+			position: 'right'
+		};
+
+		const value = {
+			type: 'value',
+			allowDecimals: false,
+			minInterval: 1
+		};
 
 		// specify chart configuration item and data
 		let option = {
@@ -18,22 +42,21 @@
 				feature: {
 					mark: { show: true },
 					dataView: { show: false, readOnly: true },
-					saveAsImage: { show: true }
+					saveAsImage: { show: false }
 				}
 			},
 			tooltip: {},
-			xAxis: {
-				type: 'category',
-				data: labels,
-				axisTick: {
-					alignWithLabel: true
+			title: {
+				text: title,
+				textStyle: {
+					fontWeight: 'bold',
+					fontSize: 14
 				}
+				// show: false
 			},
-			yAxis: {
-				type: 'value',
-				allowDecimals: false,
-				minInterval: 1
-			},
+			grid: { left: 0, top: 40, right: 0, bottom: 10, containLabel: true },
+			xAxis: horizontal ? value : category,
+			yAxis: horizontal ? category : value,
 			series: [
 				{
 					data: values,
@@ -56,4 +79,4 @@
 	});
 </script>
 
-<div id={chart_id} class="bg-white w-auto h-full" />
+<div id={chart_id} class="{width} {height} {classesContainer}" />

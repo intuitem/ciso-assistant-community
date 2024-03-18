@@ -1,0 +1,2555 @@
+urn: urn:intuitem:risk:library:dora
+locale: en
+ref_id: DORA
+name: Digital Operational Resilience Act
+description: REGULATION (EU) 2022/2554 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL
+  of 14 December 2022 on digital operational resilience for the financial sector and
+  amending Regulations (EC) No 1060/2009, (EU) No 648/2012, (EU) No 600/2014, (EU)
+  No 909/2014 and (EU) 2016/1011
+copyright: European Union law
+version: 1
+provider: EU
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:dora
+    ref_id: DORA
+    name: Digital Operational Resilience Act
+    description: REGULATION (EU) 2022/2554 OF THE EUROPEAN PARLIAMENT AND OF THE COUNCIL
+      of 14 December 2022 on digital operational resilience for the financial sector
+      and amending Regulations (EC) No 1060/2009, (EU) No 648/2012, (EU) No 600/2014,
+      (EU) No 909/2014 and (EU) 2016/1011
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:dora:node2
+      assessable: false
+      depth: 1
+      name: Chapter II
+      description: ' ICT risk management'
+    - urn: urn:intuitem:risk:req_node:dora:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node2
+      name: Section I
+    - urn: urn:intuitem:risk:req_node:dora:5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node3
+      ref_id: '5'
+      name: Article 5
+      description: Governance and organisation
+    - urn: urn:intuitem:risk:req_node:dora:5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:5
+      ref_id: '5.1'
+      description: Financial entities shall have in place an internal governance and
+        control framework that ensures an effective and prudent management of ICT
+        risk, in accordance with Article 6(4), in order to achieve a high level of
+        digital operational resilience.
+    - urn: urn:intuitem:risk:req_node:dora:5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:5
+      ref_id: '5.2'
+      description: The management body of the financial entity shall define, approve,
+        oversee and be responsible for the implementation of all arrangements related
+        to the ICT risk management framework referred to in Article 6(1).
+    - urn: urn:intuitem:risk:req_node:dora:node7
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:5
+      description: 'For the purposes of the first subparagraph, the management body
+        shall:'
+    - urn: urn:intuitem:risk:req_node:dora:5.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.a
+      description: "bear the ultimate responsibility for managing the financial entity\u2019\
+        s ICT risk;"
+    - urn: urn:intuitem:risk:req_node:dora:5.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.b
+      description: put in place policies that aim to ensure the maintenance of high
+        standards of availability, authenticity, integrity and confidentiality, of
+        data;
+    - urn: urn:intuitem:risk:req_node:dora:5.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.c
+      description: set clear roles and responsibilities for all ICT-related functions
+        and establish appropriate governance arrangements to ensure effective and
+        timely communication, cooperation and coordination among those functions;
+    - urn: urn:intuitem:risk:req_node:dora:5.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.d
+      description: bear the overall responsibility for setting and approving the digital
+        operational resilience strategy as referred to in Article 6(8), including
+        the determination of the appropriate risk tolerance level of ICT risk of the
+        financial entity, as referred to in Article 6(8), point (b);
+    - urn: urn:intuitem:risk:req_node:dora:5.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.e
+      description: "approve, oversee and periodically review the implementation of\
+        \ the financial entity\u2019s ICT business continuity policy and ICT response\
+        \ and recovery plans, referred to, respectively, in Article 11(1) and (3),\
+        \ which may be adopted as a dedicated specific policy forming an integral\
+        \ part of the financial entity\u2019s overall business continuity policy and\
+        \ response and recovery plan;"
+    - urn: urn:intuitem:risk:req_node:dora:5.2.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.f
+      description: "approve and periodically review the financial entity\u2019s ICT\
+        \ internal audit plans, ICT audits and material modifications to them;"
+    - urn: urn:intuitem:risk:req_node:dora:5.2.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.g
+      description: "allocate and periodically review the appropriate budget to fulfil\
+        \ the financial entity\u2019s digital operational resilience needs in respect\
+        \ of all types of resources, including relevant ICT security awareness programmes\
+        \ and digital operational resilience training referred to in Article 13(6),\
+        \ and ICT skills for all staff;"
+    - urn: urn:intuitem:risk:req_node:dora:5.2.h
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.h
+      description: "approve and periodically review the financial entity\u2019s policy\
+        \ on arrangements regarding the use of ICT services provided by ICT third-party\
+        \ service providers;"
+    - urn: urn:intuitem:risk:req_node:dora:5.2.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node7
+      ref_id: 5.2.i
+      description: 'put in place, at corporate level, reporting channels enabling
+        it to be duly informed of the following:'
+    - urn: urn:intuitem:risk:req_node:dora:5.2.i.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:5.2.i
+      ref_id: 5.2.i.i
+      description: arrangements concluded with ICT third-party service providers on
+        the use of ICT services,
+    - urn: urn:intuitem:risk:req_node:dora:5.2.i.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:5.2.i
+      ref_id: 5.2.i.ii
+      description: any relevant planned material changes regarding the ICT third-party
+        service providers,
+    - urn: urn:intuitem:risk:req_node:dora:5.2.i.iii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:5.2.i
+      ref_id: 5.2.i.iii
+      description: the potential impact of such changes on the critical or important
+        functions subject to those arrangements, including a risk analysis summary
+        to assess the impact of those changes, and at least major ICT-related incidents
+        and their impact, as well as response, recovery and corrective measures.
+    - urn: urn:intuitem:risk:req_node:dora:5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:5
+      ref_id: '5.3'
+      description: Financial entities, other than microenterprises, shall establish
+        a role in order to monitor the arrangements concluded with ICT third-party
+        service providers on the use of ICT services, or shall designate a member
+        of senior management as responsible for overseeing the related risk exposure
+        and relevant documentation.
+    - urn: urn:intuitem:risk:req_node:dora:5.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:5
+      ref_id: '5.4'
+      description: Members of the management body of the financial entity shall actively
+        keep up to date with sufficient knowledge and skills to understand and assess
+        ICT risk and its impact on the operations of the financial entity, including
+        by following specific training on a regular basis, commensurate to the ICT
+        risk being managed.
+    - urn: urn:intuitem:risk:req_node:dora:node22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node2
+      name: Section II
+    - urn: urn:intuitem:risk:req_node:dora:6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '6'
+      name: Article 6
+      description: ICT risk management framework
+    - urn: urn:intuitem:risk:req_node:dora:6.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.1'
+      description: Financial entities shall have a sound, comprehensive and well-documented
+        ICT risk management framework as part of their overall risk management system,
+        which enables them to address ICT risk quickly, efficiently and comprehensively
+        and to ensure a high level of digital operational resilience.
+    - urn: urn:intuitem:risk:req_node:dora:6.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.2'
+      description: The ICT risk management framework shall include at least strategies,
+        policies, procedures, ICT protocols and tools that are necessary to duly and
+        adequately protect all information assets and ICT assets, including computer
+        software, hardware, servers, as well as to protect all relevant physical components
+        and infrastructures, such as premises, data centres and sensitive designated
+        areas, to ensure that all information assets and ICT assets are adequately
+        protected from risks including damage and unauthorised access or usage.
+    - urn: urn:intuitem:risk:req_node:dora:6.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.3'
+      description: In accordance with their ICT risk management framework, financial
+        entities shall minimise the impact of ICT risk by deploying appropriate strategies,
+        policies, procedures, ICT protocols and tools. They shall provide complete
+        and updated information on ICT risk and on their ICT risk management framework
+        to the competent authorities upon their request.
+    - urn: urn:intuitem:risk:req_node:dora:6.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.4'
+      description: Financial entities, other than microenterprises, shall assign the
+        responsibility for managing and overseeing ICT risk to a control function
+        and ensure an appropriate level of independence of such control function in
+        order to avoid conflicts of interest. Financial entities shall ensure appropriate
+        segregation and independence of ICT risk management functions, control functions,
+        and internal audit functions, according to the three lines of defence model,
+        or an internal risk management and control model.
+    - urn: urn:intuitem:risk:req_node:dora:6.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.5'
+      description: The ICT risk management framework shall be documented and reviewed
+        at least once a year, or periodically in the case of microenterprises, as
+        well as upon the occurrence of major ICT-related incidents, and following
+        supervisory instructions or conclusions derived from relevant digital operational
+        resilience testing or audit processes. It shall be continuously improved on
+        the basis of lessons derived from implementation and monitoring. A report
+        on the review of the ICT risk management framework shall be submitted to the
+        competent authority upon its request.
+    - urn: urn:intuitem:risk:req_node:dora:6.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.6'
+      description: "The ICT risk management framework of financial entities, other\
+        \ than microenterprises, shall be subject to internal audit by auditors on\
+        \ a regular basis in line with the financial entities\u2019 audit plan. Those\
+        \ auditors shall possess sufficient knowledge, skills and expertise in ICT\
+        \ risk, as well as appropriate independence. The frequency and focus of ICT\
+        \ audits shall be commensurate to the ICT risk of the financial entity."
+    - urn: urn:intuitem:risk:req_node:dora:6.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.7'
+      description: Based on the conclusions from the internal audit review, financial
+        entities shall establish a formal follow-up process, including rules for the
+        timely verification and remediation of critical ICT audit findings.
+    - urn: urn:intuitem:risk:req_node:dora:6.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.8'
+      description: 'The ICT risk management framework shall include a digital operational
+        resilience strategy setting out how the framework shall be implemented. To
+        that end, the digital operational resilience strategy shall include methods
+        to address ICT risk and attain specific ICT objectives, by:'
+    - urn: urn:intuitem:risk:req_node:dora:6.8.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.a
+      description: "explaining how the ICT risk management framework supports the\
+        \ financial entity\u2019s business strategy and objectives;"
+    - urn: urn:intuitem:risk:req_node:dora:6.8.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.b
+      description: establishing the risk tolerance level for ICT risk, in accordance
+        with the risk appetite of the financial entity, and analysing the impact tolerance
+        for ICT disruptions;
+    - urn: urn:intuitem:risk:req_node:dora:6.8.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.c
+      description: setting out clear information security objectives, including key
+        performance indicators and key risk metrics;
+    - urn: urn:intuitem:risk:req_node:dora:6.8.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.d
+      description: explaining the ICT reference architecture and any changes needed
+        to reach specific business objectives;
+    - urn: urn:intuitem:risk:req_node:dora:6.8.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.e
+      description: outlining the different mechanisms put in place to detect ICT-related
+        incidents, prevent their impact and provide protection from it;
+    - urn: urn:intuitem:risk:req_node:dora:6.8.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.f
+      description: evidencing the current digital operational resilience situation
+        on the basis of the number of major ICT-related incidents reported and the
+        effectiveness of preventive measures;
+    - urn: urn:intuitem:risk:req_node:dora:6.8.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.g
+      description: implementing digital operational resilience testing, in accordance
+        with Chapter IV of this Regulation;
+    - urn: urn:intuitem:risk:req_node:dora:6.8.h
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:6.8
+      ref_id: 6.8.h
+      description: outlining a communication strategy in the event of ICT-related
+        incidents the disclosure of which is required in accordance with Article 14.
+    - urn: urn:intuitem:risk:req_node:dora:6.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.9'
+      description: Financial entities may, in the context of the digital operational
+        resilience strategy referred to in paragraph 8, define a holistic ICT multi-vendor
+        strategy, at group or entity level, showing key dependencies on ICT third-party
+        service providers and explaining the rationale behind the procurement mix
+        of ICT third-party service providers.
+    - urn: urn:intuitem:risk:req_node:dora:6.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:6
+      ref_id: '6.10'
+      description: Financial entities may, in accordance with Union and national sectoral
+        law, outsource the tasks of verifying compliance with ICT risk management
+        requirements to intra-group or external undertakings. In case of such outsourcing,
+        the financial entity remains fully responsible for the verification of compliance
+        with the ICT risk management requirements.
+    - urn: urn:intuitem:risk:req_node:dora:7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '7'
+      name: Article 7
+      description: ICT systems, protocols and tools
+    - urn: urn:intuitem:risk:req_node:dora:node43
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:7
+      description: 'In order to address and manage ICT risk, financial entities shall
+        use and maintain updated ICT systems, protocols and tools that are:'
+    - urn: urn:intuitem:risk:req_node:dora:7.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node43
+      ref_id: 7.a
+      description: appropriate to the magnitude of operations supporting the conduct
+        of their activities, in accordance with the proportionality principle as referred
+        to in Article 4;
+    - urn: urn:intuitem:risk:req_node:dora:7.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node43
+      ref_id: 7.b
+      description: reliable;
+    - urn: urn:intuitem:risk:req_node:dora:7.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node43
+      ref_id: 7.c
+      description: equipped with sufficient capacity to accurately process the data
+        necessary for the performance of activities and the timely provision of services,
+        and to deal with peak orders, message or transaction volumes, as needed, including
+        where new technology is introduced;
+    - urn: urn:intuitem:risk:req_node:dora:7.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node43
+      ref_id: 7.d
+      description: technologically resilient in order to adequately deal with additional
+        information processing needs as required under stressed market conditions
+        or other adverse situations.
+    - urn: urn:intuitem:risk:req_node:dora:8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '8'
+      name: Article 8
+      description: Identification
+    - urn: urn:intuitem:risk:req_node:dora:8.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.1'
+      description: As part of the ICT risk management framework referred to in Article
+        6(1), financial entities shall identify, classify and adequately document
+        all ICT supported business functions, roles and responsibilities, the information
+        assets and ICT assets supporting those functions, and their roles and dependencies
+        in relation to ICT risk. Financial entities shall review as needed, and at
+        least yearly, the adequacy of this classification and of any relevant documentation.
+    - urn: urn:intuitem:risk:req_node:dora:8.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.2'
+      description: Financial entities shall, on a continuous basis, identify all sources
+        of ICT risk, in particular the risk exposure to and from other financial entities,
+        and assess cyber threats and ICT vulnerabilities relevant to their ICT supported
+        business functions, information assets and ICT assets. Financial entities
+        shall review on a regular basis, and at least yearly, the risk scenarios impacting
+        them.
+    - urn: urn:intuitem:risk:req_node:dora:8.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.3'
+      description: Financial entities, other than microenterprises, shall perform
+        a risk assessment upon each major change in the network and information system
+        infrastructure, in the processes or procedures affecting their ICT supported
+        business functions, information assets or ICT assets.
+    - urn: urn:intuitem:risk:req_node:dora:8.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.4'
+      description: Financial entities shall identify all information assets and ICT
+        assets, including those on remote sites, network resources and hardware equipment,
+        and shall map those considered critical. They shall map the configuration
+        of the information assets and ICT assets and the links and interdependencies
+        between the different information assets and ICT assets.
+    - urn: urn:intuitem:risk:req_node:dora:8.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.5'
+      description: Financial entities shall identify and document all processes that
+        are dependent on ICT third-party service providers, and shall identify interconnections
+        with ICT third-party service providers that provide services that support
+        critical or important functions.
+    - urn: urn:intuitem:risk:req_node:dora:8.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.6'
+      description: For the purposes of paragraphs 1, 4 and 5, financial entities shall
+        maintain relevant inventories and update them periodically and every time
+        any major change as referred to in paragraph 3 occurs.
+    - urn: urn:intuitem:risk:req_node:dora:8.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:8
+      ref_id: '8.7'
+      description: Financial entities, other than microenterprises, shall on a regular
+        basis, and at least yearly, conduct a specific ICT risk assessment on all
+        legacy ICT systems and, in any case before and after connecting technologies,
+        applications or systems.
+    - urn: urn:intuitem:risk:req_node:dora:9
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '9'
+      name: Article 9
+      description: Protection and prevention
+    - urn: urn:intuitem:risk:req_node:dora:9.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:9
+      ref_id: '9.1'
+      description: For the purposes of adequately protecting ICT systems and with
+        a view to organising response measures, financial entities shall continuously
+        monitor and control the security and functioning of ICT systems and tools
+        and shall minimise the impact of ICT risk on ICT systems through the deployment
+        of appropriate ICT security tools, policies and procedures.
+    - urn: urn:intuitem:risk:req_node:dora:9.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:9
+      ref_id: '9.2'
+      description: Financial entities shall design, procure and implement ICT security
+        policies, procedures, protocols and tools that aim to ensure the resilience,
+        continuity and availability of ICT systems, in particular for those supporting
+        critical or important functions, and to maintain high standards of availability,
+        authenticity, integrity and confidentiality of data, whether at rest, in use
+        or in transit.
+    - urn: urn:intuitem:risk:req_node:dora:9.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:9
+      ref_id: '9.3'
+      description: 'In order to achieve the objectives referred to in paragraph 2,
+        financial entities shall use ICT solutions and processes that are appropriate
+        in accordance with Article 4. Those ICT solutions and processes shall:'
+    - urn: urn:intuitem:risk:req_node:dora:9.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.3
+      ref_id: 9.3.a
+      description: ensure the security of the means of transfer of data;
+    - urn: urn:intuitem:risk:req_node:dora:9.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.3
+      ref_id: 9.3.b
+      description: minimise the risk of corruption or loss of data, unauthorised access
+        and technical flaws that may hinder business activity;
+    - urn: urn:intuitem:risk:req_node:dora:9.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.3
+      ref_id: 9.3.c
+      description: prevent the lack of availability, the impairment of the authenticity
+        and integrity, the breaches of confidentiality and the loss of data;
+    - urn: urn:intuitem:risk:req_node:dora:9.3.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.3
+      ref_id: 9.3.d
+      description: ensure that data is protected from risks arising from data management,
+        including poor administration, processing- related risks and human error.
+    - urn: urn:intuitem:risk:req_node:dora:9.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:9
+      ref_id: '9.4'
+      description: 'As part of the ICT risk management framework referred to in Article
+        6(1), financial entities shall:'
+    - urn: urn:intuitem:risk:req_node:dora:9.4.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.4
+      ref_id: 9.4.a
+      description: develop and document an information security policy defining rules
+        to protect the availability, authenticity, integrity and confidentiality of
+        data, information assets and ICT assets, including those of their customers,
+        where applicable;
+    - urn: urn:intuitem:risk:req_node:dora:9.4.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.4
+      ref_id: 9.4.b
+      description: following a risk-based approach, establish a sound network and
+        infrastructure management structure using appropriate techniques, methods
+        and protocols that may include implementing automated mechanisms to isolate
+        affected information assets in the event of cyber-attacks;
+    - urn: urn:intuitem:risk:req_node:dora:9.4.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.4
+      ref_id: 9.4.c
+      description: implement policies that limit the physical or logical access to
+        information assets and ICT assets to what is required for legitimate and approved
+        functions and activities only, and establish to that end a set of policies,
+        procedures and controls that address access rights and ensure a sound administration
+        thereof;
+    - urn: urn:intuitem:risk:req_node:dora:9.4.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.4
+      ref_id: 9.4.d
+      description: implement policies and protocols for strong authentication mechanisms,
+        based on relevant standards and dedicated control systems, and protection
+        measures of cryptographic keys whereby data is encrypted based on results
+        of approved data classification and ICT risk assessment processes;
+    - urn: urn:intuitem:risk:req_node:dora:9.4.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.4
+      ref_id: 9.4.e
+      description: "implement documented policies, procedures and controls for ICT\
+        \ change management, including changes to software, hardware, firmware components,\
+        \ systems or security parameters, that are based on a risk assessment approach\
+        \ and are an integral part of the financial entity\u2019s overall change management\
+        \ process, in order to ensure that all changes to ICT systems are recorded,\
+        \ tested, assessed, approved, implemented and verified in a controlled manner;"
+    - urn: urn:intuitem:risk:req_node:dora:9.4.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:9.4
+      ref_id: 9.4.f
+      description: have appropriate and comprehensive documented policies for patches
+        and updates.
+    - urn: urn:intuitem:risk:req_node:dora:node71
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:9
+      description: For the purposes of the first subparagraph, point (b), financial
+        entities shall design the network connection infrastructure in a way that
+        allows it to be instantaneously severed or segmented in order to minimise
+        and prevent contagion, especially for interconnected financial processes.
+    - urn: urn:intuitem:risk:req_node:dora:node72
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:9
+      description: For the purposes of the first subparagraph, point (e), the ICT
+        change management process shall be approved by appropriate lines of management
+        and shall have specific protocols in place.
+    - urn: urn:intuitem:risk:req_node:dora:10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '10'
+      name: Article 10
+      description: Detection
+    - urn: urn:intuitem:risk:req_node:dora:10.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:10
+      ref_id: '10.1'
+      description: Financial entities shall have in place mechanisms to promptly detect
+        anomalous activities, in accordance with Article 17, including ICT network
+        performance issues and ICT-related incidents, and to identify potential material
+        single points of failure.
+    - urn: urn:intuitem:risk:req_node:dora:node75
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:10
+      description: All detection mechanisms referred to in the first subparagraph
+        shall be regularly tested in accordance with Article 25.
+    - urn: urn:intuitem:risk:req_node:dora:10.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:10
+      ref_id: '10.2'
+      description: The detection mechanisms referred to in paragraph 1 shall enable
+        multiple layers of control, define alert thresholds and criteria to trigger
+        and initiate ICT-related incident response processes, including automatic
+        alert mechanisms for relevant staff in charge of ICT-related incident response.
+    - urn: urn:intuitem:risk:req_node:dora:10.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:10
+      ref_id: '10.3'
+      description: Financial entities shall devote sufficient resources and capabilities
+        to monitor user activity, the occurrence of ICT anomalies and ICT-related
+        incidents, in particular cyber-attacks.
+    - urn: urn:intuitem:risk:req_node:dora:10.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:10
+      ref_id: '10.4'
+      description: Data reporting service providers shall, in addition, have in place
+        systems that can effectively check trade reports for completeness, identify
+        omissions and obvious errors, and request re-transmission of those reports.
+    - urn: urn:intuitem:risk:req_node:dora:11
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '11'
+      name: Article 11
+      description: Response and recovery
+    - urn: urn:intuitem:risk:req_node:dora:11.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.1'
+      description: As part of the ICT risk management framework referred to in Article
+        6(1) and based on the identification requirements set out in Article 8, financial
+        entities shall put in place a comprehensive ICT business continuity policy,
+        which may be adopted as a dedicated specific policy, forming an integral part
+        of the overall business continuity policy of the financial entity.
+    - urn: urn:intuitem:risk:req_node:dora:11.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.2'
+      description: 'Financial entities shall implement the ICT business continuity
+        policy through dedicated, appropriate and documented arrangements, plans,
+        procedures and mechanisms aiming to:'
+    - urn: urn:intuitem:risk:req_node:dora:11.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.2
+      ref_id: 11.2.a
+      description: "ensure the continuity of the financial entity\u2019s critical\
+        \ or important functions;"
+    - urn: urn:intuitem:risk:req_node:dora:11.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.2
+      ref_id: 11.2.b
+      description: quickly, appropriately and effectively respond to, and resolve,
+        all ICT-related incidents in a way that limits damage and prioritises the
+        resumption of activities and recovery actions;
+    - urn: urn:intuitem:risk:req_node:dora:11.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.2
+      ref_id: 11.2.c
+      description: activate, without delay, dedicated plans that enable containment
+        measures, processes and technologies suited to each type of ICT-related incident
+        and prevent further damage, as well as tailored response and recovery procedures
+        established in accordance with Article 12;
+    - urn: urn:intuitem:risk:req_node:dora:11.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.2
+      ref_id: 11.2.d
+      description: estimate preliminary impacts, damages and losses;
+    - urn: urn:intuitem:risk:req_node:dora:11.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.2
+      ref_id: 11.2.e
+      description: set out communication and crisis management actions that ensure
+        that updated information is transmitted to all relevant internal staff and
+        external stakeholders in accordance with Article 14, and report to the competent
+        authorities in accordance with Article 19.
+    - urn: urn:intuitem:risk:req_node:dora:11.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.3'
+      description: As part of the ICT risk management framework referred to in Article
+        6(1), financial entities shall implement associated ICT response and recovery
+        plans which, in the case of financial entities other than microenterprises,
+        shall be subject to independent internal audit reviews.
+    - urn: urn:intuitem:risk:req_node:dora:11.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.4'
+      description: Financial entities shall put in place, maintain and periodically
+        test appropriate ICT business continuity plans, notably with regard to critical
+        or important functions outsourced or contracted through arrangements with
+        ICT third-party service providers.
+    - urn: urn:intuitem:risk:req_node:dora:11.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.5'
+      description: As part of the overall business continuity policy, financial entities
+        shall conduct a business impact analysis (BIA) of their exposures to severe
+        business disruptions. Under the BIA, financial entities shall assess the potential
+        impact of severe business disruptions by means of quantitative and qualitative
+        criteria, using internal and external data and scenario analysis, as appropriate.
+        The BIA shall consider the criticality of identified and mapped business functions,
+        support processes, third-party dependencies and information assets, and their
+        interdependencies. Financial entities shall ensure that ICT assets and ICT
+        services are designed and used in full alignment with the BIA, in particular
+        with regard to adequately ensuring the redundancy of all critical components.
+    - urn: urn:intuitem:risk:req_node:dora:11.6
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.6'
+      description: 'As part of their comprehensive ICT risk management, financial
+        entities shall:'
+    - urn: urn:intuitem:risk:req_node:dora:11.6.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.6
+      ref_id: 11.6.a
+      description: test the ICT business continuity plans and the ICT response and
+        recovery plans in relation to ICT systems supporting all functions at least
+        yearly, as well as in the event of any substantive changes to ICT systems
+        supporting critical or important functions;
+    - urn: urn:intuitem:risk:req_node:dora:11.6.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:11.6
+      ref_id: 11.6.b
+      description: test the crisis communication plans established in accordance with
+        Article 14.
+    - urn: urn:intuitem:risk:req_node:dora:node93
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      description: For the purposes of the first subparagraph, point (a), financial
+        entities, other than microenterprises, shall include in the testing plans
+        scenarios of cyber-attacks and switchovers between the primary ICT infrastructure
+        and the redundant capacity, backups and redundant facilities necessary to
+        meet the obligations set out in Article 12.
+    - urn: urn:intuitem:risk:req_node:dora:node94
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      description: Financial entities shall regularly review their ICT business continuity
+        policy and ICT response and recovery plans, taking into account the results
+        of tests carried out in accordance with the first subparagraph and recommendations
+        stemming from audit checks or supervisory reviews.
+    - urn: urn:intuitem:risk:req_node:dora:11.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.7'
+      description: Financial entities, other than microenterprises, shall have a crisis
+        management function, which, in the event of activation of their ICT business
+        continuity plans or ICT response and recovery plans, shall, inter alia, set
+        out clear procedures to manage internal and external crisis communications
+        in accordance with Article 14.
+    - urn: urn:intuitem:risk:req_node:dora:11.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.8'
+      description: Financial entities shall keep readily accessible records of activities
+        before and during disruption events when their ICT business continuity plans
+        and ICT response and recovery plans are activated.
+    - urn: urn:intuitem:risk:req_node:dora:11.9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.9'
+      description: Central securities depositories shall provide the competent authorities
+        with copies of the results of the ICT business continuity tests, or of similar
+        exercises.
+    - urn: urn:intuitem:risk:req_node:dora:11.10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:11
+      ref_id: '11.10'
+      description: Financial entities, other than microenterprises, shall report to
+        the competent authorities, upon their request, an estimation of aggregated
+        annual costs and losses caused by major ICT-related incidents.
+    - urn: urn:intuitem:risk:req_node:dora:12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '12'
+      name: Article 12
+      description: Backup policies and procedures, restoration and recovery procedures
+        and methods
+    - urn: urn:intuitem:risk:req_node:dora:12.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.1'
+      description: 'For the purpose of ensuring the restoration of ICT systems and
+        data with minimum downtime, limited disruption and loss, as part of their
+        ICT risk management framework, financial entities shall develop and document:'
+    - urn: urn:intuitem:risk:req_node:dora:12.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:12.1
+      ref_id: 12.1.a
+      description: backup policies and procedures specifying the scope of the data
+        that is subject to the backup and the minimum frequency of the backup, based
+        on the criticality of information or the confidentiality level of the data;
+    - urn: urn:intuitem:risk:req_node:dora:12.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:12.1
+      ref_id: 12.1.b
+      description: restoration and recovery procedures and methods.
+    - urn: urn:intuitem:risk:req_node:dora:12.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.2'
+      description: Financial entities shall set up backup systems that can be activated
+        in accordance with the backup policies and procedures, as well as restoration
+        and recovery procedures and methods. The activation of backup systems shall
+        not jeopardise the security of the network and information systems or the
+        availability, authenticity, integrity or confidentiality of data. Testing
+        of the backup procedures and restoration and recovery procedures and methods
+        shall be undertaken periodically.
+    - urn: urn:intuitem:risk:req_node:dora:12.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.3'
+      description: When restoring backup data using own systems, financial entities
+        shall use ICT systems that are physically and logically segregated from the
+        source ICT system. The ICT systems shall be securely protected from any unauthorised
+        access or ICT corruption and allow for the timely restoration of services
+        making use of data and system backups as necessary.
+    - urn: urn:intuitem:risk:req_node:dora:node105
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      description: For central counterparties, the recovery plans shall enable the
+        recovery of all transactions at the time of disruption to allow the central
+        counterparty to continue to operate with certainty and to complete settlement
+        on the scheduled date.
+    - urn: urn:intuitem:risk:req_node:dora:node106
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      description: Data reporting service providers shall additionally maintain adequate
+        resources and have back-up and restoration facilities in place in order to
+        offer and maintain their services at all times.
+    - urn: urn:intuitem:risk:req_node:dora:12.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.4'
+      description: Financial entities, other than microenterprises, shall maintain
+        redundant ICT capacities equipped with resources, capabilities and functions
+        that are adequate to ensure business needs. Microenterprises shall assess
+        the need to maintain such redundant ICT capacities based on their risk profile.
+    - urn: urn:intuitem:risk:req_node:dora:12.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.5'
+      description: Central securities depositories shall maintain at least one secondary
+        processing site endowed with adequate resources, capabilities, functions and
+        staffing arrangements to ensure business needs.
+    - urn: urn:intuitem:risk:req_node:dora:node109
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      description: 'The secondary processing site shall be:'
+    - urn: urn:intuitem:risk:req_node:dora:12.5.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node109
+      ref_id: 12.5.a
+      description: located at a geographical distance from the primary processing
+        site to ensure that it bears a distinct risk profile and to prevent it from
+        being affected by the event which has affected the primary site;
+    - urn: urn:intuitem:risk:req_node:dora:12.5.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node109
+      ref_id: 12.5.b
+      description: capable of ensuring the continuity of critical or important functions
+        identically to the primary site, or providing the level of services necessary
+        to ensure that the financial entity performs its critical operations within
+        the recovery objectives;
+    - urn: urn:intuitem:risk:req_node:dora:12.5.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node109
+      ref_id: 12.5.c
+      description: "immediately accessible to the financial entity\u2019s staff to\
+        \ ensure continuity of critical or important functions in the event that the\
+        \ primary processing site has become unavailable."
+    - urn: urn:intuitem:risk:req_node:dora:12.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.6'
+      description: In determining the recovery time and recovery point objectives
+        for each function, financial entities shall take into account whether it is
+        a critical or important function and the potential overall impact on market
+        efficiency. Such time objectives shall ensure that, in extreme scenarios,
+        the agreed service levels are met.
+    - urn: urn:intuitem:risk:req_node:dora:12.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:12
+      ref_id: '12.7'
+      description: When recovering from an ICT-related incident, financial entities
+        shall perform necessary checks, including any multiple checks and reconciliations,
+        in order to ensure that the highest level of data integrity is maintained.
+        These checks shall also be performed when reconstructing data from external
+        stakeholders, in order to ensure that all data is consistent between systems.
+    - urn: urn:intuitem:risk:req_node:dora:13
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '13'
+      name: Article 13
+      description: Learning and evolving
+    - urn: urn:intuitem:risk:req_node:dora:13.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.1'
+      description: Financial entities shall have in place capabilities and staff to
+        gather information on vulnerabilities and cyber threats, ICT-related incidents,
+        in particular cyber-attacks, and analyse the impact they are likely to have
+        on their digital operational resilience.
+    - urn: urn:intuitem:risk:req_node:dora:13.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.2'
+      description: Financial entities shall put in place post ICT-related incident
+        reviews after a major ICT-related incident disrupts their core activities,
+        analysing the causes of disruption and identifying required improvements to
+        the ICT operations or within the ICT business continuity policy referred to
+        in Article 11.
+    - urn: urn:intuitem:risk:req_node:dora:node118
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      description: Financial entities, other than microenterprises, shall, upon request,
+        communicate to the competent authorities, the changes that were implemented
+        following post ICT-related incident reviews as referred to in the first subparagraph.
+    - urn: urn:intuitem:risk:req_node:dora:node119
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      description: 'The post ICT-related incident reviews referred to in the first
+        subparagraph shall determine whether the established procedures were followed
+        and the actions taken were effective, including in relation to the following:'
+    - urn: urn:intuitem:risk:req_node:dora:13.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node119
+      ref_id: 13.2.a
+      description: the promptness in responding to security alerts and determining
+        the impact of ICT-related incidents and their severity;
+    - urn: urn:intuitem:risk:req_node:dora:13.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node119
+      ref_id: 13.2.b
+      description: the quality and speed of performing a forensic analysis, where
+        deemed appropriate;
+    - urn: urn:intuitem:risk:req_node:dora:13.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node119
+      ref_id: 13.2.c
+      description: the effectiveness of incident escalation within the financial entity;
+        (d) the effectiveness of internal and external communication.
+    - urn: urn:intuitem:risk:req_node:dora:13.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.3'
+      description: Lessons derived from the digital operational resilience testing
+        carried out in accordance with Articles 26 and 27 and from real life ICT-related
+        incidents, in particular cyber-attacks, along with challenges faced upon the
+        activation of ICT business continuity plans and ICT response and recovery
+        plans, together with relevant information exchanged with counterparts and
+        assessed during supervisory reviews, shall be duly incorporated on a continuous
+        basis into the ICT risk assessment process. Those findings shall form the
+        basis for appropriate reviews of relevant components of the ICT risk management
+        framework referred to in Article 6(1).
+    - urn: urn:intuitem:risk:req_node:dora:13.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.4'
+      description: Financial entities shall monitor the effectiveness of the implementation
+        of their digital operational resilience strategy set out in Article 6(8).
+        They shall map the evolution of ICT risk over time, analyse the frequency,
+        types, magnitude and evolution of ICT-related incidents, in particular cyber-attacks
+        and their patterns, with a view to understanding the level of ICT risk exposure,
+        in particular in relation to critical or important functions, and enhance
+        the cyber maturity and preparedness of the financial entity.
+    - urn: urn:intuitem:risk:req_node:dora:13.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.5'
+      description: Senior ICT staff shall report at least yearly to the management
+        body on the findings referred to in paragraph 3 and put forward recommendations.
+    - urn: urn:intuitem:risk:req_node:dora:13.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.6'
+      description: Financial entities shall develop ICT security awareness programmes
+        and digital operational resilience training as compulsory modules in their
+        staff training schemes. Those programmes and training shall be applicable
+        to all employees and to senior management staff, and shall have a level of
+        complexity commensurate to the remit of their functions. Where appropriate,
+        financial entities shall also include ICT third-party service providers in
+        their relevant training schemes in accordance with Article 30(2), point (i).
+    - urn: urn:intuitem:risk:req_node:dora:13.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:13
+      ref_id: '13.7'
+      description: Financial entities, other than microenterprises, shall monitor
+        relevant technological developments on a continuous basis, also with a view
+        to understanding the possible impact of the deployment of such new technologies
+        on ICT security requirements and digital operational resilience. They shall
+        keep up-to-date with the latest ICT risk management processes, in order to
+        effectively combat current or new forms of cyber-attacks.
+    - urn: urn:intuitem:risk:req_node:dora:14
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '14'
+      name: Article 14
+      description: Communication
+    - urn: urn:intuitem:risk:req_node:dora:14.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:14
+      ref_id: '14.1'
+      description: As part of the ICT risk management framework referred to in Article
+        6(1), financial entities shall have in place crisis communication plans enabling
+        a responsible disclosure of, at least, major ICT-related incidents or vulnerabilities
+        to clients and counterparts as well as to the public, as appropriate.
+    - urn: urn:intuitem:risk:req_node:dora:14.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:14
+      ref_id: '14.2'
+      description: As part of the ICT risk management framework, financial entities
+        shall implement communication policies for internal staff and for external
+        stakeholders. Communication policies for staff shall take into account the
+        need to differentiate between staff involved in ICT risk management, in particular
+        the staff responsible for response and recovery, and staff that needs to be
+        informed.
+    - urn: urn:intuitem:risk:req_node:dora:14.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:14
+      ref_id: '14.3'
+      description: At least one person in the financial entity shall be tasked with
+        implementing the communication strategy for ICT- related incidents and fulfil
+        the public and media function for that purpose.
+    - urn: urn:intuitem:risk:req_node:dora:16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node22
+      ref_id: '16'
+      name: Article 16
+      description: Simplified ICT risk management framework
+    - urn: urn:intuitem:risk:req_node:dora:16.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:16
+      ref_id: '16.1'
+      description: Articles 5 to 15 of this Regulation shall not apply to small and
+        non-interconnected investment firms, payment institutions exempted pursuant
+        to Directive (EU) 2015/2366; institutions exempted pursuant to Directive 2013/36/EU
+        in respect of which Member States have decided not to apply the option referred
+        to in Article 2(4) of this Regulation; electronic money institutions exempted
+        pursuant to Directive 2009/110/EC; and small institutions for occupational
+        retirement provision.
+    - urn: urn:intuitem:risk:req_node:dora:node134
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:16
+      description: 'Without prejudice to the first subparagraph, the entities listed
+        in the first subparagraph shall:'
+    - urn: urn:intuitem:risk:req_node:dora:16.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.a
+      description: put in place and maintain a sound and documented ICT risk management
+        framework that details the mechanisms and measures aimed at a quick, efficient
+        and comprehensive management of ICT risk, including for the protection of
+        relevant physical components and infrastructures;
+    - urn: urn:intuitem:risk:req_node:dora:16.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.b
+      description: continuously monitor the security and functioning of all ICT systems;
+    - urn: urn:intuitem:risk:req_node:dora:16.1.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.c
+      description: minimise the impact of ICT risk through the use of sound, resilient
+        and updated ICT systems, protocols and tools which are appropriate to support
+        the performance of their activities and the provision of services and adequately
+        protect availability, authenticity, integrity and confidentiality of data
+        in the network and information systems;
+    - urn: urn:intuitem:risk:req_node:dora:16.1.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.d
+      description: allow sources of ICT risk and anomalies in the network and information
+        systems to be promptly identified and detected and ICT-related incidents to
+        be swiftly handled;
+    - urn: urn:intuitem:risk:req_node:dora:16.1.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.e
+      description: identify key dependencies on ICT third-party service providers;
+    - urn: urn:intuitem:risk:req_node:dora:16.1.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.f
+      description: ensure the continuity of critical or important functions, through
+        business continuity plans and response and recovery measures, which include,
+        at least, back-up and restoration measures;
+    - urn: urn:intuitem:risk:req_node:dora:16.1.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.g
+      description: test, on a regular basis, the plans and measures referred to in
+        point (f), as well as the effectiveness of the controls implemented in accordance
+        with points (a) and (c);
+    - urn: urn:intuitem:risk:req_node:dora:16.1.h
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node134
+      ref_id: 16.1.h
+      description: implement, as appropriate, relevant operational conclusions resulting
+        from the tests referred to in point (g) and from post-incident analysis into
+        the ICT risk assessment process and develop, according to needs and ICT risk
+        profile, ICT security awareness programmes and digital operational resilience
+        training for staff and management.
+    - urn: urn:intuitem:risk:req_node:dora:16.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:16
+      ref_id: '16.2'
+      description: The ICT risk management framework referred to in paragraph 1, second
+        subparagraph, point (a), shall be documented and reviewed periodically and
+        upon the occurrence of major ICT-related incidents in compliance with supervisory
+        instructions. It shall be continuously improved on the basis of lessons derived
+        from implementation and monitoring. A report on the review of the ICT risk
+        management framework shall be submitted to the competent authority upon its
+        request.
+    - urn: urn:intuitem:risk:req_node:dora:node144
+      assessable: false
+      depth: 1
+      name: CHAPTER III
+      description: ICT-related incident management, classification and reporting
+    - urn: urn:intuitem:risk:req_node:dora:17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node144
+      ref_id: '17'
+      name: Article 17
+      description: ICT-related incident management process
+    - urn: urn:intuitem:risk:req_node:dora:17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:17
+      ref_id: '17.1'
+      description: Financial entities shall define, establish and implement an ICT-related
+        incident management process to detect, manage and notify ICT-related incidents.
+    - urn: urn:intuitem:risk:req_node:dora:17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:17
+      ref_id: '17.2'
+      description: Financial entities shall record all ICT-related incidents and significant
+        cyber threats. Financial entities shall establish appropriate procedures and
+        processes to ensure a consistent and integrated monitoring, handling and follow-up
+        of ICT- related incidents, to ensure that root causes are identified, documented
+        and addressed in order to prevent the occurrence of such incidents.
+    - urn: urn:intuitem:risk:req_node:dora:17.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:17
+      ref_id: '17.3'
+      description: 'The ICT-related incident management process referred to in paragraph
+        1 shall:'
+    - urn: urn:intuitem:risk:req_node:dora:17.3.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:17.3
+      ref_id: 17.3.a
+      description: put in place early warning indicators;
+    - urn: urn:intuitem:risk:req_node:dora:17.3.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:17.3
+      ref_id: 17.3.b
+      description: establish procedures to identify, track, log, categorise and classify
+        ICT-related incidents according to their priority and severity and according
+        to the criticality of the services impacted, in accordance with the criteria
+        set out in Article 18(1);
+    - urn: urn:intuitem:risk:req_node:dora:17.3.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:17.3
+      ref_id: 17.3.c
+      description: assign roles and responsibilities that need to be activated for
+        different ICT-related incident types and scenarios;
+    - urn: urn:intuitem:risk:req_node:dora:17.3.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:17.3
+      ref_id: 17.3.d
+      description: set out plans for communication to staff, external stakeholders
+        and media in accordance with Article 14 and for notification to clients, for
+        internal escalation procedures, including ICT-related customer complaints,
+        as well as for the provision of information to financial entities that act
+        as counterparts, as appropriate;
+    - urn: urn:intuitem:risk:req_node:dora:17.3.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:17.3
+      ref_id: 17.3.e
+      description: ensure that at least major ICT-related incidents are reported to
+        relevant senior management and inform the management body of at least major
+        ICT-related incidents, explaining the impact, response and additional controls
+        to be established as a result of such ICT-related incidents;
+    - urn: urn:intuitem:risk:req_node:dora:17.3.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:17.3
+      ref_id: 17.3.f
+      description: establish ICT-related incident response procedures to mitigate
+        impacts and ensure that services become operational and secure in a timely
+        manner.
+    - urn: urn:intuitem:risk:req_node:dora:18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node144
+      ref_id: '18'
+      name: Article 18
+      description: Classification of ICT-related incidents and cyber threats
+    - urn: urn:intuitem:risk:req_node:dora:18.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:18
+      ref_id: '18.1'
+      description: 'Financial entities shall classify ICT-related incidents and shall
+        determine their impact based on the following criteria:'
+    - urn: urn:intuitem:risk:req_node:dora:18.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:18.1
+      ref_id: 18.1.a
+      description: the number and/or relevance of clients or financial counterparts
+        affected and, where applicable, the amount or number of transactions affected
+        by the ICT-related incident, and whether the ICT-related incident has caused
+        reputational impact;
+    - urn: urn:intuitem:risk:req_node:dora:18.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:18.1
+      ref_id: 18.1.b
+      description: the duration of the ICT-related incident, including the service
+        downtime;
+    - urn: urn:intuitem:risk:req_node:dora:18.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:18.1
+      ref_id: 18.1.c
+      description: the geographical spread with regard to the areas affected by the
+        ICT-related incident, particularly if it affects more than two Member States;
+    - urn: urn:intuitem:risk:req_node:dora:18.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:18.1
+      ref_id: 18.1.d
+      description: the data losses that the ICT-related incident entails, in relation
+        to availability, authenticity, integrity or confidentiality of data;
+    - urn: urn:intuitem:risk:req_node:dora:18.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:18.1
+      ref_id: 18.1.e
+      description: "the criticality of the services affected, including the financial\
+        \ entity\u2019s transactions and operations;"
+    - urn: urn:intuitem:risk:req_node:dora:18.1.f
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:18.1
+      ref_id: 18.1.f
+      description: the economic impact, in particular direct and indirect costs and
+        losses, of the ICT-related incident in both absolute and relative terms.
+    - urn: urn:intuitem:risk:req_node:dora:18.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:18
+      ref_id: '18.2'
+      description: "Financial entities shall classify cyber threats as significant\
+        \ based on the criticality of the services at risk, including the financial\
+        \ entity\u2019s transactions and operations, number and/or relevance of clients\
+        \ or financial counterparts targeted and the geographical spread of the areas\
+        \ at risk."
+    - urn: urn:intuitem:risk:req_node:dora:19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node144
+      ref_id: '19'
+      name: Article 19
+      description: Reporting of major ICT-related incidents and voluntary notification
+        of significant cyber threats
+    - urn: urn:intuitem:risk:req_node:dora:19.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      ref_id: '19.1'
+      description: Financial entities shall report major ICT-related incidents to
+        the relevant competent authority as referred to in Article 46 in accordance
+        with paragraph 4 of this Article.
+    - urn: urn:intuitem:risk:req_node:dora:node167
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: Where a financial entity is subject to supervision by more than
+        one national competent authority referred to in Article 46, Member States
+        shall designate a single competent authority as the relevant competent authority
+        responsible for carrying out the functions and duties provided for in this
+        Article.
+    - urn: urn:intuitem:risk:req_node:dora:node168
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: Credit institutions classified as significant, in accordance with
+        Article 6(4) of Regulation (EU) No 1024/2013, shall report major ICT-related
+        incidents to the relevant national competent authority designated in accordance
+        with Article 4 of Directive 2013/36/EU, which shall immediately transmit that
+        report to the ECB.
+    - urn: urn:intuitem:risk:req_node:dora:node169
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: For the purpose of the first subparagraph, financial entities shall
+        produce, after collecting and analysing all relevant information, the initial
+        notification and reports referred to in paragraph 4 of this Article using
+        the templates referred to in Article 20 and submit them to the competent authority.
+        In the event that a technical impossibility prevents the submission of the
+        initial notification using the template, financial entities shall notify the
+        competent authority about it via alternative means.
+    - urn: urn:intuitem:risk:req_node:dora:node170
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: The initial notification and reports referred to in paragraph 4
+        shall include all information necessary for the competent authority to determine
+        the significance of the major ICT-related incident and assess possible cross-border
+        impacts.
+    - urn: urn:intuitem:risk:req_node:dora:node171
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: Without prejudice to the reporting pursuant to the first subparagraph
+        by the financial entity to the relevant competent authority, Member States
+        may additionally determine that some or all financial entities shall also
+        provide the initial notification and each report referred to in paragraph
+        4 of this Article using the templates referred to in Article 20 to the competent
+        authorities or the computer security incident response teams (CSIRTs) designated
+        or established in accordance with Directive (EU) 2022/2555.
+    - urn: urn:intuitem:risk:req_node:dora:19.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      ref_id: '19.2'
+      description: Financial entities may, on a voluntary basis, notify significant
+        cyber threats to the relevant competent authority when they deem the threat
+        to be of relevance to the financial system, service users or clients. The
+        relevant competent authority may provide such information to other relevant
+        authorities referred to in paragraph 6.
+    - urn: urn:intuitem:risk:req_node:dora:node173
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: Credit institutions classified as significant, in accordance with
+        Article 6(4) of Regulation (EU) No 1024/2013, may, on a voluntary basis, notify
+        significant cyber threats to relevant national competent authority, designated
+        in accordance with Article 4 of Directive 2013/36/EU, which shall immediately
+        transmit the notification to the ECB.
+    - urn: urn:intuitem:risk:req_node:dora:node174
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: Member States may determine that those financial entities that
+        on a voluntary basis notify in accordance with the first subparagraph may
+        also transmit that notification to the CSIRTs designated or established in
+        accordance with Directive (EU) 2022/2555.
+    - urn: urn:intuitem:risk:req_node:dora:19.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      ref_id: '19.3'
+      description: Where a major ICT-related incident occurs and has an impact on
+        the financial interests of clients, financial entities shall, without undue
+        delay as soon as they become aware of it, inform their clients about the major
+        ICT-related incident and about the measures that have been taken to mitigate
+        the adverse effects of such incident.
+    - urn: urn:intuitem:risk:req_node:dora:node176
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      description: In the case of a significant cyber threat, financial entities shall,
+        where applicable, inform their clients that are potentially affected of any
+        appropriate protection measures which the latter may consider taking.
+    - urn: urn:intuitem:risk:req_node:dora:19.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      ref_id: '19.4'
+      description: 'Financial entities shall, within the time limits to be laid down
+        in accordance with Article 20, first paragraph, point (a), point (ii), submit
+        the following to the relevant competent authority:'
+    - urn: urn:intuitem:risk:req_node:dora:19.4.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:19.4
+      ref_id: 19.4.a
+      description: an initial notification;
+    - urn: urn:intuitem:risk:req_node:dora:19.4.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:19.4
+      ref_id: 19.4.b
+      description: an intermediate report after the initial notification referred
+        to in point (a), as soon as the status of the original incident has changed
+        significantly or the handling of the major ICT-related incident has changed
+        based on new information available, followed, as appropriate, by updated notifications
+        every time a relevant status update is available, as well as upon a specific
+        request of the competent authority;
+    - urn: urn:intuitem:risk:req_node:dora:19.4.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:19.4
+      ref_id: 19.4.c
+      description: a final report, when the root cause analysis has been completed,
+        regardless of whether mitigation measures have already been implemented, and
+        when the actual impact figures are available to replace estimates.
+    - urn: urn:intuitem:risk:req_node:dora:19.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:19
+      ref_id: '19.5'
+      description: Financial entities may outsource, in accordance with Union and
+        national sectoral law, the reporting obligations under this Article to a third-party
+        service provider. In case of such outsourcing, the financial entity remains
+        fully responsible for the fulfilment of the incident reporting requirements.
+    - urn: urn:intuitem:risk:req_node:dora:23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node144
+      ref_id: '23'
+      name: Article 23
+      description: Operational or security payment-related incidents concerning credit
+        institutions, payment institutions, account information service providers,
+        and electronic money institutions
+    - urn: urn:intuitem:risk:req_node:dora:node183
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:23
+      description: The requirements laid down in this Chapter shall also apply to
+        operational or security payment-related incidents and to major operational
+        or security payment-related incidents, where they concern credit institutions,
+        payment institutions, account information service providers, and electronic
+        money institutions.
+    - urn: urn:intuitem:risk:req_node:dora:node184
+      assessable: false
+      depth: 1
+      name: Chapter IV
+      description: Digital operational resilience testing
+    - urn: urn:intuitem:risk:req_node:dora:24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node184
+      ref_id: '24'
+      name: Article 24
+      description: General requirements for the performance of digital operational
+        resilience testing
+    - urn: urn:intuitem:risk:req_node:dora:24.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:24
+      ref_id: '24.1'
+      description: For the purpose of assessing preparedness for handling ICT-related
+        incidents, of identifying weaknesses, deficiencies and gaps in digital operational
+        resilience, and of promptly implementing corrective measures, financial entities,
+        other than microenterprises, shall, taking into account the criteria set out
+        in Article 4(2), establish, maintain and review a sound and comprehensive
+        digital operational resilience testing programme as an integral part of the
+        ICT risk-management framework referred to in Article 6.
+    - urn: urn:intuitem:risk:req_node:dora:24.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:24
+      ref_id: '24.2'
+      description: The digital operational resilience testing programme shall include
+        a range of assessments, tests, methodologies, practices and tools to be applied
+        in accordance with Articles 25 and 26.
+    - urn: urn:intuitem:risk:req_node:dora:24.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:24
+      ref_id: '24.3'
+      description: When conducting the digital operational resilience testing programme
+        referred to in paragraph 1 of this Article, financial entities, other than
+        microenterprises, shall follow a risk-based approach taking into account the
+        criteria set out in Article 4(2) duly considering the evolving landscape of
+        ICT risk, any specific risks to which the financial entity concerned is or
+        might be exposed, the criticality of information assets and of services provided,
+        as well as any other factor the financial entity deems appropriate.
+    - urn: urn:intuitem:risk:req_node:dora:24.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:24
+      ref_id: '24.4'
+      description: Financial entities, other than microenterprises, shall ensure that
+        tests are undertaken by independent parties, whether internal or external.
+        Where tests are undertaken by an internal tester, financial entities shall
+        dedicate sufficient resources and ensure that conflicts of interest are avoided
+        throughout the design and execution phases of the test.
+    - urn: urn:intuitem:risk:req_node:dora:24.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:24
+      ref_id: '24.5'
+      description: Financial entities, other than microenterprises, shall establish
+        procedures and policies to prioritise, classify and remedy all issues revealed
+        throughout the performance of the tests and shall establish internal validation
+        methodologies to ascertain that all identified weaknesses, deficiencies or
+        gaps are fully addressed.
+    - urn: urn:intuitem:risk:req_node:dora:24.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:24
+      ref_id: '24.6'
+      description: Financial entities, other than microenterprises, shall ensure,
+        at least yearly, that appropriate tests are conducted on all ICT systems and
+        applications supporting critical or important functions.
+    - urn: urn:intuitem:risk:req_node:dora:25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node184
+      ref_id: '25'
+      name: Article 25
+      description: Testing of ICT tools and systems
+    - urn: urn:intuitem:risk:req_node:dora:25.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:25
+      ref_id: '25.1'
+      description: The digital operational resilience testing programme referred to
+        in Article 24 shall provide, in accordance with the criteria set out in Article
+        4(2), for the execution of appropriate tests, such as vulnerability assessments
+        and scans, open source analyses, network security assessments, gap analyses,
+        physical security reviews, questionnaires and scanning software solutions,
+        source code reviews where feasible, scenario-based tests, compatibility testing,
+        performance testing, end-to-end testing and penetration testing.
+    - urn: urn:intuitem:risk:req_node:dora:25.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:25
+      ref_id: '25.2'
+      description: Central securities depositories and central counterparties shall
+        perform vulnerability assessments before any deployment or redeployment of
+        new or existing applications and infrastructure components, and ICT services
+        supporting critical or important functions of the financial entity.
+    - urn: urn:intuitem:risk:req_node:dora:25.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:25
+      ref_id: '25.3'
+      description: "Microenterprises shall perform the tests referred to in paragraph\
+        \ 1 by combining a risk-based approach with a strategic planning of ICT testing,\
+        \ by duly considering the need to maintain a balanced approach between the\
+        \ scale of resources and the time to be allocated to the ICT testing provided\
+        \ for in this Article, on the one hand, and the urgency, type of risk, criticality\
+        \ of information assets and of services provided, as well as any other relevant\
+        \ factor, including the financial entity\u2019s ability to take calculated\
+        \ risks, on the other hand."
+    - urn: urn:intuitem:risk:req_node:dora:26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node184
+      ref_id: '26'
+      name: Article 26
+      description: Advanced testing of ICT tools, systems and processes based on TLPT
+    - urn: urn:intuitem:risk:req_node:dora:26.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.1'
+      description: Financial entities, other than entities referred to in Article
+        16(1), first subparagraph, and other than microenterprises, which are identified
+        in accordance with paragraph 8, third subparagraph, of this Article, shall
+        carry out at least every 3 years advanced testing by means of TLPT. Based
+        on the risk profile of the financial entity and taking into account operational
+        circumstances, the competent authority may, where necessary, request the financial
+        entity to reduce or increase this frequency.
+    - urn: urn:intuitem:risk:req_node:dora:26.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.2'
+      description: Each threat-led penetration test shall cover several or all critical
+        or important functions of a financial entity, and shall be performed on live
+        production systems supporting such functions.
+    - urn: urn:intuitem:risk:req_node:dora:node199
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      description: Financial entities shall identify all relevant underlying ICT systems,
+        processes and technologies supporting critical or important functions and
+        ICT services, including those supporting the critical or important functions
+        which have been outsourced or contracted to ICT third-party service providers.
+    - urn: urn:intuitem:risk:req_node:dora:node200
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      description: Financial entities shall assess which critical or important functions
+        need to be covered by the TLPT. The result of this assessment shall determine
+        the precise scope of TLPT and shall be validated by the competent authorities.
+    - urn: urn:intuitem:risk:req_node:dora:26.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.3'
+      description: Where ICT third-party service providers are included in the scope
+        of TLPT, the financial entity shall take the necessary measures and safeguards
+        to ensure the participation of such ICT third-party service providers in the
+        TLPT and shall retain at all times full responsibility for ensuring compliance
+        with this Regulation.
+    - urn: urn:intuitem:risk:req_node:dora:26.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.4'
+      description: Without prejudice to paragraph 2, first and second subparagraphs,
+        where the participation of an ICT third-party service provider in the TLPT,
+        referred to in paragraph 3, is reasonably expected to have an adverse impact
+        on the quality or security of services delivered by the ICT third-party service
+        provider to customers that are entities falling outside the scope of this
+        Regulation, or on the confidentiality of the data related to such services,
+        the financial entity and the ICT third-party service provider may agree in
+        writing that the ICT third-party service provider directly enters into contractual
+        arrangements with an external tester, for the purpose of conducting, under
+        the direction of one designated financial entity, a pooled TLPT involving
+        several financial entities (pooled testing) to which the ICT third-party service
+        provider provides ICT services.
+    - urn: urn:intuitem:risk:req_node:dora:node203
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      description: That pooled testing shall cover the relevant range of ICT services
+        supporting critical or important functions contracted to the respective ICT
+        third-party service provider by the financial entities. The pooled testing
+        shall be considered TLPT carried out by the financial entities participating
+        in the pooled testing.
+    - urn: urn:intuitem:risk:req_node:dora:node204
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      description: The number of financial entities participating in the pooled testing
+        shall be duly calibrated taking into account the complexity and types of services
+        involved.
+    - urn: urn:intuitem:risk:req_node:dora:26.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.5'
+      description: Financial entities shall, with the cooperation of ICT third-party
+        service providers and other parties involved, including the testers but excluding
+        the competent authorities, apply effective risk management controls to mitigate
+        the risks of any potential impact on data, damage to assets, and disruption
+        to critical or important functions, services or operations at the financial
+        entity itself, its counterparts or to the financial sector.
+    - urn: urn:intuitem:risk:req_node:dora:26.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.6'
+      description: At the end of the testing, after reports and remediation plans
+        have been agreed, the financial entity and, where applicable, the external
+        testers shall provide to the authority, designated in accordance with paragraph
+        9 or 10, a summary of the relevant findings, the remediation plans and the
+        documentation demonstrating that the TLPT has been conducted in accordance
+        with the requirements.
+    - urn: urn:intuitem:risk:req_node:dora:26.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.7'
+      description: Authorities shall provide financial entities with an attestation
+        confirming that the test was performed in accordance with the requirements
+        as evidenced in the documentation in order to allow for mutual recognition
+        of threat led penetration tests between competent authorities. The financial
+        entity shall notify the relevant competent authority of the attestation, the
+        summary of the relevant findings and the remediation plans.
+    - urn: urn:intuitem:risk:req_node:dora:node208
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      description: Without prejudice to such attestation, financial entities shall
+        remain at all times fully responsible for the impact of the tests referred
+        to in paragraph 4.
+    - urn: urn:intuitem:risk:req_node:dora:26.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      ref_id: '26.8'
+      description: Financial entities shall contract testers for the purposes of undertaking
+        TLPT in accordance with Article 27. When financial entities use internal testers
+        for the purposes of undertaking TLPT, they shall contract external testers
+        every three tests.
+    - urn: urn:intuitem:risk:req_node:dora:node210
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:26
+      description: Credit institutions that are classified as significant in accordance
+        with Article 6(4) of Regulation (EU) No 1024/2013, shall only use external
+        testers in accordance with Article 27(1), points (a) to (e).
+    - urn: urn:intuitem:risk:req_node:dora:27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node184
+      ref_id: '27'
+      name: Article 27
+      description: Requirements for testers for the carrying out of TLPT
+    - urn: urn:intuitem:risk:req_node:dora:27.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:27
+      ref_id: '27.1'
+      description: 'Financial entities shall only use testers for the carrying out
+        of TLPT, that:'
+    - urn: urn:intuitem:risk:req_node:dora:27.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.1
+      ref_id: 27.1.a
+      description: are of the highest suitability and reputability;
+    - urn: urn:intuitem:risk:req_node:dora:27.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.1
+      ref_id: 27.1.b
+      description: possess technical and organisational capabilities and demonstrate
+        specific expertise in threat intelligence, penetration testing and red team
+        testing;
+    - urn: urn:intuitem:risk:req_node:dora:27.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.1
+      ref_id: 27.1.c
+      description: are certified by an accreditation body in a Member State or adhere
+        to formal codes of conduct or ethical frameworks;
+    - urn: urn:intuitem:risk:req_node:dora:27.1.d
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.1
+      ref_id: 27.1.d
+      description: "provide an independent assurance, or an audit report, in relation\
+        \ to the sound management of risks associated with the carrying out of TLPT,\
+        \ including the due protection of the financial entity\u2019s confidential\
+        \ information and redress for the business risks of the financial entity;"
+    - urn: urn:intuitem:risk:req_node:dora:27.1.e
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.1
+      ref_id: 27.1.e
+      description: are duly and fully covered by relevant professional indemnity insurances,
+        including against risks of misconduct and negligence.
+    - urn: urn:intuitem:risk:req_node:dora:27.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:27
+      ref_id: '27.2'
+      description: 'When using internal testers, financial entities shall ensure that,
+        in addition to the requirements in paragraph 1, the following conditions are
+        met:'
+    - urn: urn:intuitem:risk:req_node:dora:27.2.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.2
+      ref_id: 27.2.a
+      description: such use has been approved by the relevant competent authority
+        or by the single public authority designated in accordance with Article 26(9)
+        and (10);
+    - urn: urn:intuitem:risk:req_node:dora:27.2.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.2
+      ref_id: 27.2.b
+      description: the relevant competent authority has verified that the financial
+        entity has sufficient dedicated resources and ensured that conflicts of interest
+        are avoided throughout the design and execution phases of the test; and
+    - urn: urn:intuitem:risk:req_node:dora:27.2.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:27.2
+      ref_id: 27.2.c
+      description: the threat intelligence provider is external to the financial entity.
+    - urn: urn:intuitem:risk:req_node:dora:27.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:27
+      ref_id: '27.3'
+      description: Financial entities shall ensure that contracts concluded with external
+        testers require a sound management of the TLPT results and that any data processing
+        thereof, including any generation, store, aggregation, draft, report, communication
+        or destruction, do not create risks to the financial entity.
+    - urn: urn:intuitem:risk:req_node:dora:node223
+      assessable: false
+      depth: 1
+      name: Chapter V
+      description: Managing of ICT third-party risk
+    - urn: urn:intuitem:risk:req_node:dora:node224
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node223
+      name: Section I
+      description: Key principles for a sound management of ICT third-party risk
+    - urn: urn:intuitem:risk:req_node:dora:28
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node224
+      ref_id: '28'
+      name: Article 28
+      description: General principles
+    - urn: urn:intuitem:risk:req_node:dora:28.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.1'
+      description: 'Financial entities shall manage ICT third-party risk as an integral
+        component of ICT risk within their ICT risk management framework as referred
+        to in Article 6(1), and in accordance with the following principles:'
+    - urn: urn:intuitem:risk:req_node:dora:28.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.1
+      ref_id: 28.1.a
+      description: financial entities that have in place contractual arrangements
+        for the use of ICT services to run their business operations shall, at all
+        times, remain fully responsible for compliance with, and the discharge of,
+        all obligations under this Regulation and applicable financial services law;
+    - urn: urn:intuitem:risk:req_node:dora:28.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.1
+      ref_id: 28.1.b
+      description: "financial entities\u2019 management of ICT third-party risk shall\
+        \ be implemented in light of the principle of proportionality, taking into\
+        \ account:"
+    - urn: urn:intuitem:risk:req_node:dora:28.1.b.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:28.1.b
+      ref_id: 28.1.b.i
+      description: the nature, scale, complexity and importance of ICT-related dependencies,
+    - urn: urn:intuitem:risk:req_node:dora:28.1.b.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:28.1.b
+      ref_id: 28.1.b.ii
+      description: the risks arising from contractual arrangements on the use of ICT
+        services concluded with ICT third-party service providers, taking into account
+        the criticality or importance of the respective service, process or function,
+        and the potential impact on the continuity and availability of financial services
+        and activities, at individual and at group level.
+    - urn: urn:intuitem:risk:req_node:dora:28.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.2'
+      description: As part of their ICT risk management framework, financial entities,
+        other than entities referred to in Article 16(1), first subparagraph, and
+        other than microenterprises, shall adopt, and regularly review, a strategy
+        on ICT third-party risk, taking into account the multi-vendor strategy referred
+        to in Article 6(9), where applicable. The strategy on ICT third-party risk
+        shall include a policy on the use of ICT services supporting critical or important
+        functions provided by ICT third-party service providers and shall apply on
+        an individual basis and, where relevant, on a sub-consolidated and consolidated
+        basis. The management body shall, on the basis of an assessment of the overall
+        risk profile of the financial entity and the scale and complexity of the business
+        services, regularly review the risks identified in respect to contractual
+        arrangements on the use of ICT services supporting critical or important functions.
+    - urn: urn:intuitem:risk:req_node:dora:28.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.3'
+      description: As part of their ICT risk management framework, financial entities
+        shall maintain and update at entity level, and at sub-consolidated and consolidated
+        levels, a register of information in relation to all contractual arrangements
+        on the use of ICT services provided by ICT third-party service providers.
+    - urn: urn:intuitem:risk:req_node:dora:node233
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: The contractual arrangements referred to in the first subparagraph
+        shall be appropriately documented, distinguishing between those that cover
+        ICT services supporting critical or important functions and those that do
+        not.
+    - urn: urn:intuitem:risk:req_node:dora:node234
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Financial entities shall report at least yearly to the competent
+        authorities on the number of new arrangements on the use of ICT services,
+        the categories of ICT third-party service providers, the type of contractual
+        arrangements and the ICT services and functions which are being provided.
+    - urn: urn:intuitem:risk:req_node:dora:node235
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Financial entities shall make available to the competent authority,
+        upon its request, the full register of information or, as requested, specified
+        sections thereof, along with any information deemed necessary to enable the
+        effective supervision of the financial entity.
+    - urn: urn:intuitem:risk:req_node:dora:node236
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Financial entities shall inform the competent authority in a timely
+        manner about any planned contractual arrangement on the use of ICT services
+        supporting critical or important functions as well as when a function has
+        become critical or important.
+    - urn: urn:intuitem:risk:req_node:dora:28.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.4'
+      description: 'Before entering into a contractual arrangement on the use of ICT
+        services, financial entities shall:'
+    - urn: urn:intuitem:risk:req_node:dora:28.4.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.4
+      ref_id: 28.4.a
+      description: assess whether the contractual arrangement covers the use of ICT
+        services supporting a critical or important function;
+    - urn: urn:intuitem:risk:req_node:dora:28.4.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.4
+      ref_id: 28.4.b
+      description: assess if supervisory conditions for contracting are met;
+    - urn: urn:intuitem:risk:req_node:dora:28.4.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.4
+      ref_id: 28.4.c
+      description: identify and assess all relevant risks in relation to the contractual
+        arrangement, including the possibility that such contractual arrangement may
+        contribute to reinforcing ICT concentration risk as referred to in Article
+        29;
+    - urn: urn:intuitem:risk:req_node:dora:28.4.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.4
+      ref_id: 28.4.d
+      description: undertake all due diligence on prospective ICT third-party service
+        providers and ensure throughout the selection and assessment processes that
+        the ICT third-party service provider is suitable;
+    - urn: urn:intuitem:risk:req_node:dora:28.4.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.4
+      ref_id: 28.4.e
+      description: identify and assess conflicts of interest that the contractual
+        arrangement may cause.
+    - urn: urn:intuitem:risk:req_node:dora:28.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.5'
+      description: Financial entities may only enter into contractual arrangements
+        with ICT third-party service providers that comply with appropriate information
+        security standards. When those contractual arrangements concern critical or
+        important functions, financial entities shall, prior to concluding the arrangements,
+        take due consideration of the use, by ICT third- party service providers,
+        of the most up-to-date and highest quality information security standards.
+    - urn: urn:intuitem:risk:req_node:dora:28.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.6'
+      description: In exercising access, inspection and audit rights over the ICT
+        third-party service provider, financial entities shall, on the basis of a
+        risk-based approach, pre-determine the frequency of audits and inspections
+        as well as the areas to be audited through adhering to commonly accepted audit
+        standards in line with any supervisory instruction on the use and incorporation
+        of such audit standards.
+    - urn: urn:intuitem:risk:req_node:dora:node245
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Where contractual arrangements concluded with ICT third-party service
+        providers on the use of ICT services entail high technical complexity, the
+        financial entity shall verify that auditors, whether internal or external,
+        or a pool of auditors, possess appropriate skills and knowledge to effectively
+        perform the relevant audits and assessments.
+    - urn: urn:intuitem:risk:req_node:dora:28.7
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.7'
+      description: 'Financial entities shall ensure that contractual arrangements
+        on the use of ICT services may be terminated in any of the following circumstances:'
+    - urn: urn:intuitem:risk:req_node:dora:28.7.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.7
+      ref_id: 28.7.a
+      description: significant breach by the ICT third-party service provider of applicable
+        laws, regulations or contractual terms;
+    - urn: urn:intuitem:risk:req_node:dora:28.7.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.7
+      ref_id: 28.7.b
+      description: circumstances identified throughout the monitoring of ICT third-party
+        risk that are deemed capable of altering the performance of the functions
+        provided through the contractual arrangement, including material changes that
+        affect the arrangement or the situation of the ICT third-party service provider;
+    - urn: urn:intuitem:risk:req_node:dora:28.7.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.7
+      ref_id: 28.7.c
+      description: "ICT third-party service provider\u2019s evidenced weaknesses pertaining\
+        \ to its overall ICT risk management and in particular in the way it ensures\
+        \ the availability, authenticity, integrity and, confidentiality, of data,\
+        \ whether personal or otherwise sensitive data, or non-personal data;"
+    - urn: urn:intuitem:risk:req_node:dora:28.7.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:28.7
+      ref_id: 28.7.d
+      description: where the competent authority can no longer effectively supervise
+        the financial entity as a result of the conditions of, or circumstances related
+        to, the respective contractual arrangement.
+    - urn: urn:intuitem:risk:req_node:dora:28.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      ref_id: '28.8'
+      description: For ICT services supporting critical or important functions, financial
+        entities shall put in place exit strategies. The exit strategies shall take
+        into account risks that may emerge at the level of ICT third-party service
+        providers, in particular a possible failure on their part, a deterioration
+        of the quality of the ICT services provided, any business disruption due to
+        inappropriate or failed provision of ICT services or any material risk arising
+        in relation to the appropriate and continuous deployment of the respective
+        ICT service, or the termination of contractual arrangements with ICT third-party
+        service providers under any of the circumstances listed in paragraph 7.
+    - urn: urn:intuitem:risk:req_node:dora:node252
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: 'Financial entities shall ensure that they are able to exit contractual
+        arrangements without:'
+    - urn: urn:intuitem:risk:req_node:dora:28.8.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node252
+      ref_id: 28.8.a
+      description: disruption to their business activities,
+    - urn: urn:intuitem:risk:req_node:dora:28.8.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node252
+      ref_id: 28.8.b
+      description: limiting compliance with regulatory requirements,
+    - urn: urn:intuitem:risk:req_node:dora:28.8.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:node252
+      ref_id: 28.8.c
+      description: detriment to the continuity and quality of services provided to
+        clients.
+    - urn: urn:intuitem:risk:req_node:dora:node256
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Exit plans shall be comprehensive, documented and, in accordance
+        with the criteria set out in Article 4(2), shall be sufficiently tested and
+        reviewed periodically.
+    - urn: urn:intuitem:risk:req_node:dora:node257
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Financial entities shall identify alternative solutions and develop
+        transition plans enabling them to remove the contracted ICT services and the
+        relevant data from the ICT third-party service provider and to securely and
+        integrally transfer them to alternative providers or reincorporate them in-house.
+    - urn: urn:intuitem:risk:req_node:dora:node258
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:28
+      description: Financial entities shall have appropriate contingency measures
+        in place to maintain business continuity in the event of the circumstances
+        referred to in the first subparagraph.
+    - urn: urn:intuitem:risk:req_node:dora:29
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node224
+      ref_id: '29'
+      name: Article 29
+      description: Preliminary assessment of ICT concentration risk at entity level
+    - urn: urn:intuitem:risk:req_node:dora:29.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:29
+      ref_id: '29.1'
+      description: 'When performing the identification and assessment of risks referred
+        to in Article 28(4), point (c), financial entities shall also take into account
+        whether the envisaged conclusion of a contractual arrangement in relation
+        to ICT services supporting critical or important functions would lead to any
+        of the following:'
+    - urn: urn:intuitem:risk:req_node:dora:29.1.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:29.1
+      ref_id: 29.1.a
+      description: contracting an ICT third-party service provider that is not easily
+        substitutable; or
+    - urn: urn:intuitem:risk:req_node:dora:29.1.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:29.1
+      ref_id: 29.1.b
+      description: having in place multiple contractual arrangements in relation to
+        the provision of ICT services supporting critical or important functions with
+        the same ICT third-party service provider or with closely connected ICT third-party
+        service providers.
+    - urn: urn:intuitem:risk:req_node:dora:node264
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:29
+      description: Financial entities shall weigh the benefits and costs of alternative
+        solutions, such as the use of different ICT third-party service providers,
+        taking into account if and how envisaged solutions match the business needs
+        and objectives set out in their digital resilience strategy.
+    - urn: urn:intuitem:risk:req_node:dora:29.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:29
+      ref_id: '29.2'
+      description: Where the contractual arrangements on the use of ICT services supporting
+        critical or important functions include the possibility that an ICT third-party
+        service provider further subcontracts ICT services supporting a critical or
+        important function to other ICT third-party service providers, financial entities
+        shall weigh benefits and risks that may arise in connection with such subcontracting,
+        in particular in the case of an ICT subcontractor established in a third-country.
+    - urn: urn:intuitem:risk:req_node:dora:node266
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:29
+      description: "Where contractual arrangements concern ICT services supporting\
+        \ critical or important functions, financial entities shall duly consider\
+        \ the insolvency law provisions that would apply in the event of the ICT third-party\
+        \ service provider\u2019s bankruptcy as well as any constraint that may arise\
+        \ in respect to the urgent recovery of the financial entity\u2019s data."
+    - urn: urn:intuitem:risk:req_node:dora:node267
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:29
+      description: Where contractual arrangements on the use of ICT services supporting
+        critical or important functions are concluded with an ICT third-party service
+        provider established in a third country, financial entities shall, in addition
+        to the considerations referred to in the second subparagraph, also consider
+        the compliance with Union data protection rules and the effective enforcement
+        of the law in that third country.
+    - urn: urn:intuitem:risk:req_node:dora:node268
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:29
+      description: Where the contractual arrangements on the use of ICT services supporting
+        critical or important functions provide for subcontracting, financial entities
+        shall assess whether and how potentially long or complex chains of subcontracting
+        may impact their ability to fully monitor the contracted functions and the
+        ability of the competent authority to effectively supervise the financial
+        entity in that respect.
+    - urn: urn:intuitem:risk:req_node:dora:30
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:node224
+      ref_id: '30'
+      name: Article 30
+      description: Key contractual provision
+    - urn: urn:intuitem:risk:req_node:dora:30.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:30
+      ref_id: '30.1'
+      description: The rights and obligations of the financial entity and of the ICT
+        third-party service provider shall be clearly allocated and set out in writing.
+        The full contract shall include the service level agreements and be documented
+        in one written document which shall be available to the parties on paper,
+        or in a document with another downloadable, durable and accessible format.
+    - urn: urn:intuitem:risk:req_node:dora:30.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:30
+      ref_id: '30.2'
+      description: 'The contractual arrangements on the use of ICT services shall
+        include at least the following elements:'
+    - urn: urn:intuitem:risk:req_node:dora:30.2.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.a
+      description: a clear and complete description of all functions and ICT services
+        to be provided by the ICT third-party service provider, indicating whether
+        subcontracting of an ICT service supporting a critical or important function,
+        or material parts thereof, is permitted and, when that is the case, the conditions
+        applying to such subcontracting;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.b
+      description: the locations, namely the regions or countries, where the contracted
+        or subcontracted functions and ICT services are to be provided and where data
+        is to be processed, including the storage location, and the requirement for
+        the ICT third- party service provider to notify the financial entity in advance
+        if it envisages changing such locations;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.c
+      description: provisions on availability, authenticity, integrity and confidentiality
+        in relation to the protection of data, including personal data;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.d
+      description: provisions on ensuring access, recovery and return in an easily
+        accessible format of personal and non-personal data processed by the financial
+        entity in the event of the insolvency, resolution or discontinuation of the
+        business operations of the ICT third-party service provider, or in the event
+        of the termination of the contractual arrangements;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.e
+      description: service level descriptions, including updates and revisions thereof;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.f
+      description: the obligation of the ICT third-party service provider to provide
+        assistance to the financial entity at no additional cost, or at a cost that
+        is determined ex-ante, when an ICT incident that is related to the ICT service
+        provided to the financial entity occurs;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.g
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.g
+      description: the obligation of the ICT third-party service provider to fully
+        cooperate with the competent authorities and the resolution authorities of
+        the financial entity, including persons appointed by them;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.h
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.h
+      description: termination rights and related minimum notice periods for the termination
+        of the contractual arrangements, in accordance with the expectations of competent
+        authorities and resolution authorities;
+    - urn: urn:intuitem:risk:req_node:dora:30.2.i
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.2
+      ref_id: 30.2.i
+      description: "the conditions for the participation of ICT third-party service\
+        \ providers in the financial entities\u2019 ICT security awareness programmes\
+        \ and digital operational resilience training in accordance with Article 13(6)."
+    - urn: urn:intuitem:risk:req_node:dora:30.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:30
+      ref_id: '30.3'
+      description: 'The contractual arrangements on the use of ICT services supporting
+        critical or important functions shall include, in addition to the elements
+        referred to in paragraph 2, at least the following:'
+    - urn: urn:intuitem:risk:req_node:dora:30.3.a
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3
+      ref_id: 30.3.a
+      description: full service level descriptions, including updates and revisions
+        thereof with precise quantitative and qualitative performance targets within
+        the agreed service levels to allow effective monitoring by the financial entity
+        of ICT services and enable appropriate corrective actions to be taken, without
+        undue delay, when agreed service levels are not met;
+    - urn: urn:intuitem:risk:req_node:dora:30.3.b
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3
+      ref_id: 30.3.b
+      description: "notice periods and reporting obligations of the ICT third-party\
+        \ service provider to the financial entity, including notification of any\
+        \ development that might have a material impact on the ICT third-party service\
+        \ provider\u2019s ability to effectively provide the ICT services supporting\
+        \ critical or important functions in line with agreed service levels;"
+    - urn: urn:intuitem:risk:req_node:dora:30.3.c
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3
+      ref_id: 30.3.c
+      description: requirements for the ICT third-party service provider to implement
+        and test business contingency plans and to have in place ICT security measures,
+        tools and policies that provide an appropriate level of security for the provision
+        of services by the financial entity in line with its regulatory framework;
+    - urn: urn:intuitem:risk:req_node:dora:30.3.d
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3
+      ref_id: 30.3.d
+      description: "the obligation of the ICT third-party service provider to participate\
+        \ and fully cooperate in the financial entity\u2019s TLPT as referred to in\
+        \ Articles 26 and 27;"
+    - urn: urn:intuitem:risk:req_node:dora:30.3.e
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3
+      ref_id: 30.3.e
+      description: "the right to monitor, on an ongoing basis, the ICT third-party\
+        \ service provider\u2019s performance, which entails the following:"
+    - urn: urn:intuitem:risk:req_node:dora:30.3.e.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3.e
+      ref_id: 30.3.e.i
+      description: unrestricted rights of access, inspection and audit by the financial
+        entity, or an appointed third party, and by the competent authority, and the
+        right to take copies of relevant documentation on-site if they are critical
+        to the operations of the ICT third-party service provider, the effective exercise
+        of which is not impeded or limited by other contractual arrangements or implementation
+        policies;
+    - urn: urn:intuitem:risk:req_node:dora:30.3.e.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3.e
+      ref_id: 30.3.e.ii
+      description: "the right to agree on alternative assurance levels if other clients\u2019\
+        \ rights are affected;"
+    - urn: urn:intuitem:risk:req_node:dora:30.3.e.iii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3.e
+      ref_id: 30.3.e.iii
+      description: the obligation of the ICT third-party service provider to fully
+        cooperate during the onsite inspections and audits performed by the competent
+        authorities, the Lead Overseer, financial entity or an appointed third party;
+        and
+    - urn: urn:intuitem:risk:req_node:dora:30.3.e.iv
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3.e
+      ref_id: 30.3.e.iv
+      description: the obligation to provide details on the scope, procedures to be
+        followed and frequency of such inspections and audits;
+    - urn: urn:intuitem:risk:req_node:dora:30.3.f
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3
+      ref_id: 30.3.f
+      description: 'exit strategies, in particular the establishment of a mandatory
+        adequate transition period:'
+    - urn: urn:intuitem:risk:req_node:dora:30.3.f.i
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3.f
+      ref_id: 30.3.f.i
+      description: during which the ICT third-party service provider will continue
+        providing the respective functions, or ICT services, with a view to reducing
+        the risk of disruption at the financial entity or to ensure its effective
+        resolution and restructuring;
+    - urn: urn:intuitem:risk:req_node:dora:30.3.f.ii
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:dora:30.3.f
+      ref_id: 30.3.f.ii
+      description: allowing the financial entity to migrate to another ICT third-party
+        service provider or change to in-house solutions consistent with the complexity
+        of the service provided.
+    - urn: urn:intuitem:risk:req_node:dora:node294
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:30
+      description: "By way of derogation from point (e), the ICT third-party service\
+        \ provider and the financial entity that is a microenterprise may agree that\
+        \ the financial entity\u2019s rights of access, inspection and audit can be\
+        \ delegated to an independent third party, appointed by the ICT third-party\
+        \ service provider, and that the financial entity is able to request information\
+        \ and assurance on the ICT third-party service provider\u2019s performance\
+        \ from the third party at any time."
+    - urn: urn:intuitem:risk:req_node:dora:30.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:30
+      ref_id: '30.4'
+      description: When negotiating contractual arrangements, financial entities and
+        ICT third-party service providers shall consider the use of standard contractual
+        clauses developed by public authorities for specific services.
+    - urn: urn:intuitem:risk:req_node:dora:node296
+      assessable: false
+      depth: 1
+      name: CHAPTER VI
+      description: Information-sharing arrangements
+    - urn: urn:intuitem:risk:req_node:dora:45
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:dora:node296
+      ref_id: '45'
+      name: Article 45
+      description: Information-sharing arrangements on cyber threat information and
+        intelligence
+    - urn: urn:intuitem:risk:req_node:dora:45.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:45
+      ref_id: '45.1'
+      description: 'Financial entities may exchange amongst themselves cyber threat
+        information and intelligence, including indicators of compromise, tactics,
+        techniques, and procedures, cyber security alerts and configuration tools,
+        to the extent that such information and intelligence sharing:'
+    - urn: urn:intuitem:risk:req_node:dora:45.1.a
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:45.1
+      ref_id: 45.1.a
+      description: "aims to enhance the digital operational resilience of financial\
+        \ entities, in particular through raising awareness in relation to cyber threats,\
+        \ limiting or impeding the cyber threats\u2019 ability to spread, supporting\
+        \ defence capabilities, threat detection techniques, mitigation strategies\
+        \ or response and recovery stages;"
+    - urn: urn:intuitem:risk:req_node:dora:45.1.b
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:45.1
+      ref_id: 45.1.b
+      description: takes places within trusted communities of financial entities;
+    - urn: urn:intuitem:risk:req_node:dora:45.1.c
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:dora:45.1
+      ref_id: 45.1.c
+      description: is implemented through information-sharing arrangements that protect
+        the potentially sensitive nature of the information shared, and that are governed
+        by rules of conduct in full respect of business confidentiality, protection
+        of personal data in accordance with Regulation (EU) 2016/679 and guidelines
+        on competition policy.
+    - urn: urn:intuitem:risk:req_node:dora:45.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:45
+      ref_id: '45.2'
+      description: For the purpose of paragraph 1, point (c), the information-sharing
+        arrangements shall define the conditions for participation and, where appropriate,
+        shall set out the details on the involvement of public authorities and the
+        capacity in which they may be associated to the information-sharing arrangements,
+        on the involvement of ICT third-party service providers, and on operational
+        elements, including the use of dedicated IT platforms.
+    - urn: urn:intuitem:risk:req_node:dora:45.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:dora:45
+      ref_id: '45.3'
+      description: Financial entities shall notify competent authorities of their
+        participation in the information-sharing arrangements referred to in paragraph
+        1, upon validation of their membership, or, as applicable, of the cessation
+        of their membership, once it takes effect.

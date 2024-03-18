@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
 	import { FIELD_COLORED_TAG_MAP, FIELD_COMPONENT_MAP } from '$lib/utils/crud';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 
 	import { tableA11y } from './actions';
 	// Types
@@ -36,6 +36,8 @@
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
+
+	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
 	// Props (styles)
 	/** Override the Tailwind Element class. Replace this for a headless UI. */
@@ -114,6 +116,14 @@
 		rowsPerPage: pagination ? numberRowsPerPage : undefined
 	});
 	const rows = handler.getRows();
+
+	onMount(() => {
+		if (orderBy) {
+			orderBy.direction === 'asc'
+				? handler.sortAsc(orderBy.identifier)
+				: handler.sortDesc(orderBy.identifier);
+		}
+	});
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
 	// const field_component_map = FIELD_MAP;

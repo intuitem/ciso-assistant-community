@@ -9,7 +9,7 @@ from django.db.models import Q
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
 from .utils import camel_case
-from iam.models import FolderMixin
+from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 
 import os
@@ -19,6 +19,10 @@ from django.urls import reverse
 from datetime import date, datetime
 from typing import Self
 from django.utils.html import format_html
+
+from structlog import get_logger
+
+logger = get_logger(__name__)
 
 User = get_user_model()
 
@@ -162,10 +166,12 @@ class Library(ReferentialObjectMixin):
         super(Library, self).delete(*args, **kwargs)
 
 
-class Threat(ReferentialObjectMixin):
+class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
         Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
+
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Threat")
@@ -214,6 +220,8 @@ class ReferenceControl(ReferentialObjectMixin):
     typical_evidence = models.JSONField(
         verbose_name=_("Typical evidence"), null=True, blank=True
     )
+
+    fields_to_check = ["ref_id", "name"]
 
     class Meta:
         verbose_name = _("Reference control")
@@ -480,7 +488,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         return self.name
 
 
-class Asset(NameDescriptionMixin, FolderMixin):
+class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Type(models.TextChoices):
         """
         The type of the asset.
@@ -531,7 +539,7 @@ class Asset(NameDescriptionMixin, FolderMixin):
         return list(result)
 
 
-class Evidence(NameDescriptionMixin, FolderMixin):
+class Evidence(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     # TODO: Manage file upload to S3/MiniO
     attachment = models.FileField(
         #        upload_to=settings.LOCAL_STORAGE_DIRECTORY,
@@ -547,6 +555,8 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         help_text=_("Link to the evidence (eg. Jira ticket, etc.)"),
         verbose_name=_("Link"),
     )
+
+    fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Evidence")
@@ -564,7 +574,7 @@ class Evidence(NameDescriptionMixin, FolderMixin):
         return os.path.basename(self.attachment.name)
 
 
-class AppliedControl(NameDescriptionMixin, FolderMixin):
+class AppliedControl(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         ACTIVE = "active", _("Active")
@@ -636,7 +646,7 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
         verbose_name=_("Effort"),
     )
 
-    fields_to_check = ["name", "category"]
+    fields_to_check = ["name"]
 
     class Meta:
         verbose_name = _("Applied control")
@@ -674,16 +684,13 @@ class AppliedControl(NameDescriptionMixin, FolderMixin):
         return f"[{self.status}] {self.name}" if self.status else self.name
 
     def get_ranking_score(self):
-        if self.effort:
-            value = 0
-            for risk_scenario in self.risk_scenarios.all():
-                current = risk_scenario.current_level
-                residual = risk_scenario.residual_level
-                if current >= 0 and residual >= 0:
-                    value += (1 + current - residual) * (current + 1)
-            return round(value / self.MAP_EFFORT[self.effort], 4)
-        else:
-            return 0
+        value = 0
+        for risk_scenario in self.risk_scenarios.all():
+            current = risk_scenario.current_level
+            residual = risk_scenario.residual_level
+            if current >= 0 and residual >= 0:
+                value += (1 + current - residual) * (current + 1)
+        return abs(round(value / self.MAP_EFFORT[self.effort], 4))
 
     @property
     def get_html_url(self):
@@ -750,6 +757,8 @@ class Assessment(NameDescriptionMixin):
         choices=Status.choices,
         default=Status.PLANNED,
         verbose_name=_("Status"),
+        blank=True,
+        null=True,
     )
     authors = models.ManyToManyField(
         User,
@@ -1155,6 +1164,8 @@ class RiskScenario(NameDescriptionMixin):
         max_length=500, blank=True, null=True, verbose_name=_("Justification")
     )
 
+    fields_to_check = ["name"]
+
     class Meta:
         verbose_name = _("Risk scenario")
         verbose_name_plural = _("Risk scenarios")
@@ -1502,7 +1513,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
 ########################### RiskAcesptance is a domain object relying on secondary objects #########################
 
 
-class RiskAcceptance(NameDescriptionMixin, FolderMixin):
+class RiskAcceptance(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
     ACCEPTANCE_STATE = [
         ("created", _("Created")),
         ("submitted", _("Submitted")),

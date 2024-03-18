@@ -24,25 +24,29 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 
 - ISO 27001:2022
 - NIST Cyber Security Framework (CSF) v1.1
+- NIST Cyber Security Framework (CSF) v2.0
 - NIS2
 - SOC2
 - PCI DSS 4.0
 - CMMC v2
 - PSPF
+- GDPR checklist from GDPR.EU
+- Essential Eight
+- DFS 500 with 2023-11 amendments
+- DORA
 
 Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- GDPR checklist
 - ANSSI CyberScore
-- DFS 500
-- DORA
 - and much more!
 
 ### Add your own framework
 
 Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file.
+
+You will also find some specific converters in the tools directory (e.g. for CIS Controls).
 
 ## Community
 
@@ -282,19 +286,12 @@ These migration files should be tracked by version control.
 To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
-- in the backend folder, launch the following commands:
+- in the frontend folder, launch the following command:
 ```shell
-DJANGO_SUPERUSER_EMAIL=admin@tests.com DJANGO_SUPERUSER_PASSWORD=1234 python manage.py createsuperuser --noinput
-CISO_ASSISTANT_URL=http://localhost:4173 python manage.py runserver
-```
-- in parallel, in the frontend folder, launch the following command:
-```shell
-PUBLIC_BACKEND_API_URL=http://localhost:8000/api npx playwright test
+tests/e2e-tests.sh
 ```
 
-For tests requiring mail sending, it is necessary to launch mailhog in a separate terminal.
-
-The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful. This is achieved for API tests, and will be soon achieved for functional tests.
+The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
 
 ## Built With
 

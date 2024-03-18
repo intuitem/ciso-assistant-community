@@ -6,13 +6,18 @@
 	// export let name: string;
 	export let s_label: string;
 
+	export let width = 'w-auto';
+	export let height = 'h-full';
+	export let classesContainer = '';
+	export let title = '';
+
 	export let values: any[]; // Set the types for these variables later on
+	export let labels: string[];
 	export let colors: string[] = [];
 
-	for (const index in values){
-		if (values[index].localName)
-		{
-			values[index].name = localItems(languageTag())[values[index].localName]
+	for (const index in values) {
+		if (values[index].localName) {
+			values[index].name = localItems(languageTag())[values[index].localName];
 		}
 	}
 
@@ -26,6 +31,14 @@
 			tooltip: {
 				trigger: 'item'
 			},
+			title: {
+				text: title,
+				textStyle: {
+					fontWeight: 'bold',
+					fontSize: 14
+				}
+				// show: false
+			},
 			toolbox: {
 				show: true,
 				feature: {
@@ -35,8 +48,10 @@
 				}
 			},
 			legend: {
-				top: '5%',
-				left: 'center'
+				top: 20,
+				// left: 'center',
+				right: 10,
+				orient: 'vertical'
 			},
 			series: [
 				{
@@ -79,5 +94,4 @@
 	});
 </script>
 
-<div class="bg-white w-auto h-full" bind:this={chart_element} />
-
+<div class="{width} {height} {classesContainer}" bind:this={chart_element} />
