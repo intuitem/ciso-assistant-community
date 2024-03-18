@@ -514,7 +514,7 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: vars.riskAssessmentName,
+					risk_assessment: `[${vars.projectName}] ${vars.riskAssessmentName}`,
 					threats: [
 						'[Global] ' + vars.threat.name, 
 						'[Global] ' + vars.threat2.name
@@ -543,7 +543,7 @@ export class TestContent {
 					expiry_date: '2025-01-01',
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
-					risk_scenarios: [`[${vars.projectName}] ${vars.riskScenarioName}`]
+					risk_scenarios: [`[${vars.folderName}][${vars.projectName}] ${vars.riskScenarioName}`]
 				},
 				editParams: {
 					name: '',
@@ -597,6 +597,11 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 			obj[key] = obj[key].replace(searchValue, replaceValue);
 		}
 	}
+}
+
+export function getObjectNameWithoutScope(name: string) {
+	const matches = name.match(/(?:\[[^\[\]]+\])+ (.+)/);	
+	return matches ? matches[1] : name;
 }
 
 export { test as baseTest, type Page, type Locator } from '@playwright/test';

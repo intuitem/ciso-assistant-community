@@ -212,7 +212,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskScenariosPage.createItem({
 			name: vars.riskScenarioName,
 			description: vars.description,
-			risk_assessment: vars.riskAssessmentName,
+			risk_assessment: `[${vars.projectName}] ${vars.riskAssessmentName}`,
 			threats: [`[${vars.folderName}] ${vars.threatName}`]
 		});
 
@@ -230,7 +230,7 @@ test('user usual routine actions are working correctly', async ({
 			expiry_date: '2025-01-01',
 			folder: vars.folderName,
 			approver: LoginPage.defaultEmail,
-			risk_scenarios: [`[${vars.projectName}] ${vars.riskScenarioName}`]
+			risk_scenarios: [`[${vars.folderName}][${vars.projectName}] ${vars.riskScenarioName}`]
 		});
 
 		//TODO assert that the risk acceptance data are displayed in the table
