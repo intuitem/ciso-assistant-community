@@ -1,29 +1,29 @@
 <script lang="ts">
+	export let ref_id: string;
 	export let name: string;
 	export let description: string;
-	export let leaf_content: string;
 	export let threats: Record<string, unknown>[];
 	export let reference_controls: Record<string, unknown>[];
 	export let children: Record<string, unknown>[];
 
-	const content: string = leaf_content
-		? leaf_content
-		: description
-		? `${name} ${description}`
-		: name;
+	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0)
+	const title: string = 
+		pattern == 3 ? `${ref_id} - ${name}` :
+		pattern == 2 ? ref_id :
+		pattern == 1 ? name : '';
 
 	let showInfo = false;
 
 	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
 
-	$: hasChildren = children && Object.keys(children).length > 0;
 </script>
 
 <div>
-	<span class="whitespace-pre-line" style="font-weight: {hasChildren ? 600 : 300};">
+	<span class="whitespace-pre-line" style="font-weight: 300};">
 		<p class="max-w-[65ch]">
-			{content}
+			{#if title} <span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;{/if}
+			{#if description}{description}{/if}
 		</p>
 	</span>
 	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
