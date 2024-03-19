@@ -92,7 +92,7 @@
 </script>
 
 <div class="flex flex-row justify-between space-x-8">
-	<div class="flex flex-1 max-w-[100ch] flex-col">
+	<div class="flex flex-1 max-w-[80ch] flex-col">
 		<span style="font-weight: 300;">
 			{#if assessable && canEditRequirementAssessment}
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">
@@ -102,7 +102,7 @@
 					</a>
 				</span>
 			{:else}
-				<p class="max-w-[100ch] whitespace-pre-line">
+				<p class="max-w-[80ch] whitespace-pre-line">
 					{#if title} <span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;{/if}
 					{#if description}{description}{/if}
 	</p>
