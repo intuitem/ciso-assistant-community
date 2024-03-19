@@ -9,7 +9,7 @@
 	for (let i = 0; i < applied_controls.length; i++) {
 		let date = new Date(applied_controls[i].eta);
 		info.push({
-			label: 'SM: ' + applied_controls[i].name,
+			label: 'AC: ' + applied_controls[i].name,
 			date: date,
 			link: `/applied-controls/${applied_controls[i].id}`
 		});
