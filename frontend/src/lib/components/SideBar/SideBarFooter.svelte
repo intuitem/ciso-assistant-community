@@ -77,6 +77,7 @@
 				{value}
 				on:change={handleLocaleChange}
 				class="border-y-white border-x-gray-100 focus:border-y-white focus:border-x-gray-100 w-full cursor-pointer block text-sm text-gray-800 bg-white focus:ring-0"
+				data-testid="language-select"
 			>
 				{#each availableLanguageTags as lang}
 					<option value={lang} selected={lang === languageTag()}

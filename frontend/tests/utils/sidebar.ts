@@ -14,6 +14,7 @@ export class SideBar {
 	readonly moreButton: Locator;
 	readonly morePanel: Locator;
 	readonly profileButton: Locator;
+	readonly languageSelect: Locator;
 	readonly aboutButton: Locator;
 	readonly logoutButton: Locator;
 	readonly toggleButton: Locator;
@@ -31,6 +32,7 @@ export class SideBar {
 		this.moreButton = this.page.getByTestId('sidebar-more-btn');
 		this.morePanel = this.page.getByTestId('sidebar-more-panel');
 		this.profileButton = this.page.getByTestId('profile-button');
+		this.languageSelect = this.page.getByTestId('language-select');
 		this.aboutButton = this.page.getByTestId('about-button');
 		this.logoutButton = this.page.getByTestId('logout-button');
 		this.toggleButton = this.page.getByTestId('sidebar-toggle-btn');

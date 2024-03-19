@@ -1,5 +1,5 @@
 import { localItems } from '../../src/lib/utils/locales.js';
-import { languageTag } from '../../src/paraglide/runtime.js';
+import { languageTag, setLanguageTag, availableLanguageTags } from '../../src/paraglide/runtime.js';
 import { test, expect, setHttpResponsesListener } from '../utils/test-utils.js';
 
 test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, page }) => {
@@ -37,7 +37,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		//TODO test also that user name and first name are displayed instead of the email when sets
 	});
 
-	await test.step('more panel links are working properly', async () => {
+	await test.step('user profile panel is working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 		await logedPage.checkForUndefinedText();
@@ -47,7 +47,25 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await expect(page).toHaveURL('/my-profile');
 		await expect.soft(logedPage.pageTitle).toHaveText('My profile');
 		await logedPage.checkForUndefinedText();
-		
+	});
+
+	await test.step('translation panel is working properly', async () => {
+		await analyticsPage.goto();
+		for await (const languageTag of availableLanguageTags.toSorted((a, b) => {
+			// English is always tested at last to ensure a clean state at the end
+			return (a === 'en' ? 1 : (b === 'en' ? -1 : a.localeCompare(b)));
+		})) {
+			await sideBar.moreButton.click();
+			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
+			await expect(sideBar.languageSelect).toBeVisible();
+			setLanguageTag(languageTag);
+			const locales = localItems(languageTag);
+			await sideBar.languageSelect.selectOption(languageTag);
+			await logedPage.hasTitle(locales['analytics']);
+		}
+	});
+
+	await test.step('about panel is working properly', async () => {
 		await sideBar.moreButton.click();
 		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 		await logedPage.checkForUndefinedText();
