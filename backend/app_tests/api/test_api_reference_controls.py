@@ -163,7 +163,7 @@ class TestReferenceControlsAuthenticated:
             user_group=test.user_group,
             scope="Global",
             fails=True,
-            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be updated
+            expected_status=HTTP_403_FORBIDDEN,  # Imported objects cannot be updated
         )
 
     def test_update_reference_control(self, test):
