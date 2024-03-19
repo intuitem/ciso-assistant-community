@@ -218,8 +218,7 @@
                     {:else}
                         {localItems(languageTag())["undefined"]}
                     {/if}
-                </span> : 
-                {localItems(languageTag())[toCamelCase(data.scenario.strength_of_knowledge.name) + 'SOK']}
+                </span>
             </p>
         </div>
         <div>
