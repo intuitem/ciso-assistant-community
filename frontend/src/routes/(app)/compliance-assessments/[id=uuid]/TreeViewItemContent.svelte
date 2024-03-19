@@ -90,7 +90,6 @@
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
 	$: classesPercentText = (statusColor: string) => (statusColor === '#000000' ? 'text-white' : '');
 </script>
-
 <div class="flex flex-row justify-between space-x-8">
 	<div class="flex flex-1 max-w-[80ch] flex-col">
 		<span style="font-weight: 300;">
@@ -98,7 +97,7 @@
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">
 					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
 						{#if title} 
-							<span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;
+							<span style="font-weight: 600;">{title}</span>
 						{/if}
 						{#if description}
 							<p>{description}</p>
@@ -108,8 +107,9 @@
 			{:else}
 				<p class="max-w-[80ch] whitespace-pre-line">
 					{#if title} 
-						<span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;
-					{/if}
+						<span style="font-weight: 600;">{title}</span>
+						<span class="w-full h-full bg-blue-300 m-2 pr-2 pl-2 text-white">{assessableNodes.length}</span>
+						{/if}
 					{#if description}
 						<p>{description}</p>
 					{/if}
