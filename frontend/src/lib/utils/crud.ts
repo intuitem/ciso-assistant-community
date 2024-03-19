@@ -42,7 +42,7 @@ export const getOptions = ({
 	const options = objects
 		.map((object) => {
 			return {
-				label: extra_fields.map(fields => getValue(object,fields)).map(string => `${string}`).join("/") + ": " + object[label],
+				label: extra_fields.map(fields => getValue(object,fields)).map(string => `${string}`).join("/") + "/" + object[label],
 				value: object[value],
 				suggested: false
 			};
