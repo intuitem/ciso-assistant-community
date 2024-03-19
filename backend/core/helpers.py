@@ -232,7 +232,8 @@ def get_sorted_requirement_nodes(
             result[str(node.id)] = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
-                "name": node.display_short(),
+                "ref_id": node.ref_id,
+                "name": node.name,
                 "node_content": node.display_long(),
                 "style": "node",
                 "assessable": node.assessable,
@@ -254,10 +255,10 @@ def get_sorted_requirement_nodes(
                     result[str(node.id)]["children"][str(req.id)].update(
                         {
                             "urn": req.urn,
-                            "name": req.display_short(),
+                            "ref_id": req.ref_id,
+                            "name": req.name,
                             "description": req.description,
                             "ra_id": str(req_as.id),
-                            "leaf_content": req.display_long(),
                             "status": req_as.status,
                             "status_display": req_as.get_status_display(),
                             "status_i18n": camel_case(req_as.status),
@@ -274,8 +275,8 @@ def get_sorted_requirement_nodes(
                     result[str(node.id)]["children"][str(req.id)].update(
                         {
                             "urn": req.urn,
-                            "name": req.display_short(),
-                            "leaf_content": req.display_long(),
+                            "ref_id": req.ref_id,
+                            "name": req.name,
                             "description": req.description,
                             "style": "leaf",
                             "threats": ThreatReadSerializer(

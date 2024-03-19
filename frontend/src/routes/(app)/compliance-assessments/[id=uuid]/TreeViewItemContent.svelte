@@ -4,10 +4,10 @@
 	import type { z } from 'zod';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 
+	export let ref_id: string;
 	export let name: string;
 	export let description: string;
 	export let ra_id: string | undefined = undefined;
-	export let leaf_content: string;
 	export let threats: z.infer<typeof ThreatSchema>[] | undefined = undefined;
 	export let reference_controls: z.infer<typeof ReferenceControlSchema>[] | undefined = undefined;
 	export let children: Record<string, Record<string, unknown>> | undefined = undefined;
@@ -17,10 +17,10 @@
 	export let assessable: boolean;
 
 	const node = {
+		ref_id,
 		name,
 		description,
 		ra_id,
-		leaf_content,
 		threats,
 		reference_controls,
 		children,
@@ -32,13 +32,11 @@
 
 	type TreeViewItemNode = typeof node;
 
-	$: hasChildren = children && Object.keys(children).length > 0;
-
-	const content: string = leaf_content
-		? leaf_content
-		: description
-		? `${name} ${description}`
-		: name;
+	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0)
+	const title: string = 
+		pattern == 3 ? `${ref_id} - ${name}` :
+		pattern == 2 ? ref_id :
+		pattern == 1 ? name : '';
 
 	let showInfo = false;
 
@@ -56,6 +54,7 @@
 	};
 
 	const assessableNodes = getAssessableNodes(node);
+	const hasAssessableChildren = children && Object.keys(children).length > 0 && assessableNodes.length > 0;
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -93,17 +92,27 @@
 </script>
 
 <div class="flex flex-row justify-between space-x-8">
-	<div class="flex flex-1 max-w-[65ch] flex-col">
-		<span style="font-weight: {hasChildren ? 600 : 300};">
+	<div class="flex flex-1 max-w-[80ch] flex-col">
+		<span style="font-weight: 300;">
 			{#if assessable && canEditRequirementAssessment}
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">
 					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
-						{content}
+						{#if title} 
+							<span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;
+						{/if}
+						{#if description}
+							<p>{description}</p>
+						{/if}
 					</a>
 				</span>
 			{:else}
-				<p class="max-w-[65ch] whitespace-pre-line">
-					{content}
+				<p class="max-w-[80ch] whitespace-pre-line">
+					{#if title} 
+						<span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;
+					{/if}
+					{#if description}
+						<p>{description}</p>
+					{/if}
 				</p>
 			{/if}
 		</span>
@@ -182,7 +191,7 @@
 			</div>
 		{/if}
 	</div>
-	{#if hasChildren}
+	{#if hasAssessableChildren}
 		<div class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center">
 			{#each orderedStatusPercentages as sp}
 				<div
