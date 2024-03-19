@@ -21,7 +21,7 @@
 
 <div>
 	<span class="whitespace-pre-line" style="font-weight: 300};">
-		<p class="max-w-[120ch]">
+		<p class="max-w-[100ch]">
 			{#if title} <span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;{/if}
 			{#if description}{description}{/if}
 		</p>
