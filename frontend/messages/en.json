@@ -476,11 +476,20 @@
 	"suggestedReferenceControls": "Suggested reference controls",
 	"threatsCovered": "Threats covered",
 	"noFileDetected": "Error: no file detected",
+	"usedRiskMatrices": "Used risk matrices",
+	"usedFrameworks": "Used frameworks",
+	"riskAssessmentsStatus": "Risk assessments status",
+	"complianceAssessmentsStatus": "Compliance assessments status",
 	"noDescription": "No description",
 	"noExistingControls": "No existing controls",
 	"noJustification": "No justification",
 	"undefinedSOK": "The strength of the knowledge supporting the assessment is not defined",
 	"lowSOK": "The strength of the knowledge supporting the assessment is low",
 	"mediumSOK": "The strength of the knowledge supporting the assessment is medium",
-	"highSOK": "The strength of the knowledge supporting the assessment is high"
+	"highSOK": "The strength of the knowledge supporting the assessment is high",
+	"libraryImportError": "An error occured during the importation of your library.",
+	"libraryAlreadyImportedError": "This library has already been imported !",
+	"invalidLibraryFileError": "Invalid library file !",
+	"taintedFormMessage": "Do you want to leave this page? Changes you made may not be saved.",
+	"riskScenariosStatus": "Risk scenarios status"
 }

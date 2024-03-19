@@ -10,17 +10,19 @@ from .models import *
 from .utils import camel_case
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
-    "--": "#fac858",
-    "planned": "#5470c6",
-    "active": "#ee6666",
-    "inactive": "#91cc75",
+    "undefined": "#CCC",
+    "planned": "#BFDBFE",
+    "active": "#46D39A",
+    "inactive": "#E55759",
+    "in_progress": "#5470c6",
+    "in_review": "#BBF7D0",
+    "done": "#46D39A",
+    "deprecated": "#E55759",
     "open": "#fac858",
     "mitigate": "#91cc75",
     "accept": "#73c0de",
     "avoid": "#ee6666",
-    "in_progress": "#5470c6",
     "on_hold": "#ee6666",
-    "done": "#91cc75",
     "transfer": "#91cc75",
 }
 
@@ -399,7 +401,7 @@ def risk_per_status(user: User):
         "mitigate": "#91cc75",
         "accept": "#73c0de",
         "avoid": "#ee6666",
-        "transfer": "#91cc75",
+        "transfer": "#3ba272",
     }
 
     (
@@ -415,11 +417,16 @@ def risk_per_status(user: User):
             .filter(treatment=st[0])
             .count()
         )
-        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        v = {
+            "value": count,
+            "localName": st[0],
+            "itemStyle": {"color": color_map[st[0]]},
+        }
         values.append(v)
         labels.append(st[1])
 
-    return {"labels": labels, "values": values}
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
 
 
 def applied_control_per_status(user: User):
@@ -427,10 +434,10 @@ def applied_control_per_status(user: User):
     labels = list()
     local_lables = list()
     color_map = {
-        "--": "#93c5fd",
-        "planned": "#fdba74",
-        "active": "#f87171",
-        "inactive": "#86efac",
+        "undefined": "#CCC",
+        "planned": "#BFDBFE",
+        "active": "#46D39A",
+        "inactive": "#E55759",
     }
     (
         object_ids_view,
@@ -439,16 +446,48 @@ def applied_control_per_status(user: User):
     ) = RoleAssignment.get_accessible_object_ids(
         Folder.get_root_folder(), user, AppliedControl
     )
+    viewable_applied_controls = AppliedControl.objects.filter(id__in=object_ids_view)
+    undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
+    values.append(
+        {"value": undefined_count, "itemStyle": {"color": color_map["undefined"]}}
+    )
     for st in AppliedControl.Status.choices:
-        count = (
-            AppliedControl.objects.filter(id__in=object_ids_view)
-            .filter(status=st[0])
-            .count()
-        )
+        count = viewable_applied_controls.filter(status=st[0]).count()
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
-    local_lables = [camel_case(str(l)) for l in labels]
+    local_lables = [camel_case(str(label)) for label in labels]
+    return {"localLables": local_lables, "labels": labels, "values": values}
+
+
+def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
+    values = list()
+    labels = list()
+    local_lables = list()
+    color_map = {
+        "undefined": "#CCC",
+        "planned": "#BFDBFE",
+        "in_progress": "#5470c6",
+        "in_review": "#BBF7D0",
+        "done": "#46D39A",
+        "deprecated": "#E55759",
+    }
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, model)
+    viewable_applied_controls = model.objects.filter(id__in=object_ids_view)
+    undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
+    values.append(
+        {"value": undefined_count, "itemStyle": {"color": color_map["undefined"]}}
+    )
+    for st in model.Status.choices:
+        count = viewable_applied_controls.filter(status=st[0]).count()
+        v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
+        values.append(v)
+        labels.append(st[1])
+    local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
 
 
@@ -632,35 +671,16 @@ def risks_per_project_groups(user: User):
 
 
 def get_counters(user: User):
-    output = {}
-    objects_dict = {
-        "RiskScenario": RiskScenario,
-        "AppliedControl": AppliedControl,
-        "RiskAssessment": RiskAssessment,
-        "Project": Project,
-        "Reference Control": ReferenceControl,
-        "RiskAcceptance": RiskAcceptance,
-        "Threat": Threat,
-        "Compliance Assessment": ComplianceAssessment,
-        "Evidence": Evidence,
+    return {
+        "domains": Folder.objects.filter(
+            content_type=Folder.ContentType.DOMAIN
+        ).count(),
+        "projects": Project.objects.all().count(),
+        "applied_controls": AppliedControl.objects.all().count(),
+        "risk_assessments": RiskAssessment.objects.all().count(),
+        "compliance_assessments": ComplianceAssessment.objects.all().count(),
+        "policies": Policy.objects.all().count(),
     }
-    for name, type in objects_dict.items():
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, type
-        )
-        if type == RiskScenario:
-            output["ShowStopper"] = (
-                type.objects.filter(id__in=object_ids_view)
-                .filter(treatment="blocker")
-                .count()
-            )
-        output[name] = type.objects.filter(id__in=object_ids_view).count()
-
-    return output
 
 
 def risk_status(user: User, risk_assessment_list):
