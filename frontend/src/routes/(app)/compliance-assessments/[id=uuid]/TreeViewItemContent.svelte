@@ -108,8 +108,10 @@
 				<p class="max-w-[80ch] whitespace-pre-line">
 					{#if title} 
 						<span style="font-weight: 600;">{title}</span>
+						{#if assessableNodes.length > 0} 
 						<span class="w-full h-full bg-blue-300 m-2 pr-2 pl-2 text-white">{assessableNodes.length}</span>
 						{/if}
+					{/if}
 					{#if description}
 						<p>{description}</p>
 					{/if}
