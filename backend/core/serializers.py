@@ -21,9 +21,8 @@ User = get_user_model()
 class BaseModelSerializer(serializers.ModelSerializer):
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
         if hasattr(instance, "urn") and getattr(instance, "urn"):
-            raise serializers.ValidationError(
-                {"urn": "Imported objects cannot be modified"},
-                code=HTTP_403_FORBIDDEN,
+            raise PermissionDenied(
+                {"urn": "Imported objects cannot be modified"}
             )
         try:
             object_updated = super().update(instance, validated_data)
