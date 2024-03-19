@@ -97,15 +97,23 @@
 			{#if assessable && canEditRequirementAssessment}
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">
 					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
-						{#if title} <span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;{/if}
-						{#if description}{description}{/if}
+						{#if title} 
+							<span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;
+						{/if}
+						{#if description}
+							<p>{description}</p>
+						{/if}
 					</a>
 				</span>
 			{:else}
 				<p class="max-w-[80ch] whitespace-pre-line">
-					{#if title} <span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;{/if}
-					{#if description}{description}{/if}
-	</p>
+					{#if title} 
+						<span style="font-weight: 600;">{title}</span>&nbsp;&nbsp;
+					{/if}
+					{#if description}
+						<p>{description}</p>
+					{/if}
+				</p>
 			{/if}
 		</span>
 		{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
