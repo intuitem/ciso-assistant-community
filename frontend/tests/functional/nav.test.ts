@@ -33,7 +33,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 	});
 
 	await test.step('user email is showing properly', async () => {
-		await expect(page.getByTestId('sidebar-user-account-display')).toHaveText(logedPage.email);
+		await expect(sideBar.userEmailDisplay).toHaveText(logedPage.email);
 		//TODO test also that user name and first name are displayed instead of the email when sets
 	});
 
@@ -60,11 +60,7 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 		await page.mouse.click(20, 20); // click outside the modal to close it
 		await expect(logedPage.modalTitle).not.toBeVisible();
 
-		await sideBar.moreButton.click();
-		await expect(sideBar.morePanel).not.toHaveAttribute('inert');
-		await expect(sideBar.logoutButton).toBeVisible();
-		await sideBar.logoutButton.click();
-		await logedPage.hasUrl(0);
+		await sideBar.logout();
 	});
 });
 

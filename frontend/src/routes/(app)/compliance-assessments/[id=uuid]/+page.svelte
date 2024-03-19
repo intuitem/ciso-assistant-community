@@ -131,7 +131,11 @@
 									}/${value.id}`}
 									<a href={itemHref} class="anchor">{value.str}</a>
 								{:else}
-									{value.str ?? value}
+									{#if localItems(languageTag())[toCamelCase(value.str ?? value)]}
+										{localItems(languageTag())[toCamelCase(value.str ?? value)]}
+									{:else}
+										{value.str ?? value}
+									{/if}
 								{/if}
 							{:else}
 								--

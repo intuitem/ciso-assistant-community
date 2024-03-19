@@ -4,21 +4,39 @@
 	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	import type { AnyZodObject } from 'zod';
 
+	import type { ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+
+	const modalStore: ModalStore = getModalStore();
+
+	import * as m from '$paraglide/messages';
+
 	export let data: SuperValidated<AnyZodObject>;
 	export let dataType: 'form' | 'json';
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let validators: AnyZodObject;
 	export let applyAction = true;
 	export let resetForm = false;
+	export let onSubmit = (submit_data: any) => {};
+	export let taintedMessage: string | null = m.taintedFormMessage();
 
 	export let debug = false; // set to true to enable SuperDebug component
+
+	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
+		if (closeModal && form.valid) {
+			$modalStore[0] ? modalStore.close() : null;
+		}
+	}
 
 	export const _form = superForm(data, {
 		dataType: dataType,
 		invalidateAll: invalidateAll,
 		applyAction: applyAction,
 		resetForm: resetForm,
-		validators: validators
+		validators: validators,
+		onUpdated: ({ form }) => handleFormUpdated({ form, closeModal: true }),
+		onSubmit: onSubmit,
+		taintedMessage: taintedMessage
 	});
 
 	const { form, message /*, tainted*/, delayed, errors, allErrors, enhance } = _form;
