@@ -144,14 +144,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return Response(serializer_class(super().get_object()).data)
 
 
-class AdminModelViewSet(BaseModelViewSet):
-    """
-    ModelViewSet for models whose CRUD operations can only be carried out by users with administrator role
-    """
-
-    permission_classes = [IsAdministrator]
-
-
 # Risk Assessment
 
 
@@ -855,7 +847,7 @@ class UserGroupViewSet(BaseModelViewSet):
     filterset_fields = ["folder"]
 
 
-class RoleViewSet(AdminModelViewSet):
+class RoleViewSet(BaseModelViewSet):
     """
     API endpoint that allows roles to be viewed or edited
     """
@@ -865,7 +857,7 @@ class RoleViewSet(AdminModelViewSet):
     ordering_fields = ordering
 
 
-class RoleAssignmentViewSet(AdminModelViewSet):
+class RoleAssignmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows role assignments to be viewed or edited.
     """
