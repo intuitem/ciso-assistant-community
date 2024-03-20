@@ -123,6 +123,7 @@ class TestAssetsAuthenticated:
                 "type": ASSET_TYPE[1],
             },
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_create_assets_with_parent(self, test):
@@ -154,6 +155,7 @@ class TestAssetsAuthenticated:
             },
             base_count=1,
             user_group=test.user_group,
+            scope=str(test.folder),
         )
 
     def test_update_assets(self, test):

@@ -20,6 +20,7 @@ export default {
 		lastName: 'User'
 	},
 	usergroups: {
+		// this lists needs to be updated when updating permissions in apps.py in order to avoid test failures
 		analyst: {
 			name: 'Analyst',
 			perms: [
@@ -57,8 +58,14 @@ export default {
 				"view_evidence",
 				"change_evidence",
 				"delete_evidence",
+				"add_asset",
 				"view_asset",
+				"change_asset",
+				"delete_asset",
+				"add_threat",
 				"view_threat",
+				"change_threat",
+				"delete_threat",
 				"view_referencecontrol",
 				"view_folder",
 				"view_usergroup",
@@ -122,8 +129,14 @@ export default {
 				"view_riskacceptance",
 				"change_riskacceptance",
 				"delete_riskacceptance",
+				"add_asset",
 				"view_asset",
+				"change_asset",
+				"delete_asset",
+				"add_threat",
 				"view_threat",
+				"change_threat",
+				"delete_threat",
 				"view_referencecontrol",
 				"view_folder",
 				"change_folder",
