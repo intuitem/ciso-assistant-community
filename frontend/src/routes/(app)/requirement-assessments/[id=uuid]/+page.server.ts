@@ -31,8 +31,13 @@ export const load = (async ({ fetch, params }) => {
 
 	const model = getModelInfo(URLModel);
 
-	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
-	const object = await fetch(objectEndpoint).then((res) => res.json());
+	const object = { ...requirementAssessment };
+	for (const key in object) {
+		if (object[key] instanceof Object && 'id' in object[key]) {
+			object[key] = object[key].id;
+		}
+	}
+
 	const schema = modelSchema(URLModel);
 	const form = await superValidate(object, schema, { errors: true });
 
@@ -245,7 +250,7 @@ export const actions: Actions = {
 		}
 		const object = await res.json();
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: m.successfullySavedObject({object: model}) }, event);
+		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		redirect(
 			302,
 			event.url.searchParams.get('next') ||
@@ -304,7 +309,13 @@ export const actions: Actions = {
 		}
 
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+			},
+			event
+		);
 		return { form };
 	},
 	createEvidence: async (event) => {
@@ -362,7 +373,13 @@ export const actions: Actions = {
 		}
 
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+			},
+			event
+		);
 		return { form };
 	}
 };

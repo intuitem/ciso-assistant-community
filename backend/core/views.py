@@ -1486,7 +1486,7 @@ def generate_html(
             req for req in requirement_nodes if req.parent_urn == requirement_node.urn
         ]
         if not requirement_node.assessable:
-            _display = requirement_node.display_long()
+            _display = requirement_node.display_long
             table += f'<p class="font-semibold">{_display}  </p>'
             if children_nodes:
                 table += bar_graph(requirement_node)
