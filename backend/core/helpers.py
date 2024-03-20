@@ -234,7 +234,7 @@ def get_sorted_requirement_nodes(
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
-                "node_content": node.display_long(),
+                "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
                 "description": node.description,

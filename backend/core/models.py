@@ -56,6 +56,7 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     class Meta:
         abstract = True
 
+    @property
     def display_short(self) -> str:
         _name = (
             self.ref_id
@@ -67,8 +68,9 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
         _name = "" if not _name else _name
         return _name
 
+    @property
     def display_long(self) -> str:
-        _name = self.display_short()
+        _name = self.display_short
         _display = (
             _name
             if not self.description
@@ -79,7 +81,7 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
         return _display
 
     def __str__(self) -> str:
-        return self.display_short()
+        return self.display_short
 
 
 class Library(ReferentialObjectMixin):
@@ -1503,7 +1505,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
     )
 
     def __str__(self) -> str:
-        return self.requirement.display_short()
+        return self.requirement.display_short
 
     class Meta:
         verbose_name = _("Requirement assessment")
