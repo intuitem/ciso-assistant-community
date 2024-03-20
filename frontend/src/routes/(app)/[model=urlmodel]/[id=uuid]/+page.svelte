@@ -110,7 +110,8 @@
 		return (
 			canEditObject &&
 			!['Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
-			!data.data.urn && !data.data.builtin
+			!data.data.urn &&
+			!data.data.builtin
 		);
 	};
 	$: Object.entries(data.relatedModels).forEach(([key, value]) => {
@@ -215,16 +216,14 @@
 										)?.urlModel
 									}/${value.id}`}
 									<a href={itemHref} class="anchor">{value.str}</a>
-								{:else if isURL(value)}
+								{:else if isURL(value) && !value.startsWith('urn')}
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else if ISO_8601_REGEX.test(value)}
 									{new Date(value).toLocaleString(languageTag())}
+								{:else if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
+									{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
 								{:else}
-									{#if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
-										{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
-									{:else}
-										{(value.str || value.name) ?? value}
-									{/if}
+									{(value.str || value.name) ?? value}
 								{/if}
 							{:else}
 								--
