@@ -12,7 +12,6 @@
 	export let title = '';
 
 	export let values: any[]; // Set the types for these variables later on
-	export let labels: string[];
 	export let colors: string[] = [];
 
 	for (const index in values) {
