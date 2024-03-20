@@ -14,7 +14,7 @@
 		open
 	)}"
 >
-	<nav class="flex-1 flex flex-col overflow-y-auto bg-gray-50 py-4 px-3">
+	<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
 		<SideBarHeader />
 		<SideBarNavigation />
 		<SideBarFooter />
