@@ -113,7 +113,7 @@ class TestThreatsAuthenticated:
                 "folder": {"str": Folder.get_root_folder().name},
             },
             user_group=test.user_group,
-            scope="Published",
+            scope="Global",
         )
 
     def test_create_threats(self, test):
@@ -163,9 +163,9 @@ class TestThreatsAuthenticated:
                 "folder": str(folder.id),
             },
             user_group=test.user_group,
-            scope="Published",
+            scope="Global",
             fails=True,
-            expected_status=HTTP_400_BAD_REQUEST,  # Imported objects cannot be modified
+            expected_status=HTTP_403_FORBIDDEN,  # Imported objects cannot be modified
         )
 
     def test_update_threats(self, test):

@@ -110,7 +110,7 @@ class TestLibrariesAuthenticated:
             "Frameworks",
             Framework,
             user_group=test.user_group,
-            scope="Published",
+            scope="Global",
         )
 
     def test_import_risk_matrix(self, test):
@@ -166,7 +166,7 @@ class TestLibrariesAuthenticated:
             "Risk matrices", 
             RiskMatrix, 
             user_group=test.user_group,
-            scope="Published",
+            scope="Global",
             **({
                     "fails": True, 
                     "expected_status": status.HTTP_403_FORBIDDEN
