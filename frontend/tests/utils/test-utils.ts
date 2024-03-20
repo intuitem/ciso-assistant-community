@@ -434,7 +434,7 @@ export class TestContent {
 				dependency: vars.referenceControl.library,
 				build: {
 					reference_control: {
-						value: '[Global] ' + vars.referenceControl.name,
+						value: 'Global/' + vars.referenceControl.name,
 						category: vars.referenceControl.category,
 						request: {
 							url: 'reference-controls'
@@ -452,7 +452,7 @@ export class TestContent {
 				},
 				editParams: {
 					reference_control: {
-						value: '[Global] ' + vars.referenceControl2.name,
+						value: 'Global/' + vars.referenceControl2.name,
 						category: vars.referenceControl2.category,
 						request: {
 							url: 'reference-controls'
@@ -539,10 +539,10 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `[${vars.projectName}] ${vars.riskAssessmentName}`,
+					risk_assessment: `${vars.projectName}/${vars.riskAssessmentName}`,
 					threats: [
-						'[Global] ' + vars.threat.name, 
-						'[Global] ' + vars.threat2.name
+						'Global/' + vars.threat.name, 
+						'Global/' + vars.threat2.name
 					]
 				},
 				editParams: {
@@ -568,7 +568,7 @@ export class TestContent {
 					expiry_date: '2025-01-01',
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
-					risk_scenarios: [`[${vars.folderName}][${vars.projectName}] ${vars.riskScenarioName}`]
+					risk_scenarios: [`${vars.folderName}/${vars.projectName}/${vars.riskScenarioName}`]
 				},
 				editParams: {
 					name: '',
