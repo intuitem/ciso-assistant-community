@@ -20,6 +20,7 @@ export default {
 		lastName: 'User'
 	},
 	usergroups: {
+		// this lists needs to be updated when updating permissions in apps.py in order to avoid test failures
 		analyst: {
 			name: 'Analyst',
 			perms: [
