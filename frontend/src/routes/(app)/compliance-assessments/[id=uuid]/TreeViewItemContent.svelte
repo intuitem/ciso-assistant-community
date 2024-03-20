@@ -2,7 +2,6 @@
 	import { complianceColorMap } from './utils';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
-	import { COMPLIANCE_COLOR_MAP  } from '$lib/utils/constants';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 
 	export let ref_id: string;

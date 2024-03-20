@@ -71,6 +71,19 @@
 	}
 	let treeViewNodes: TreeViewNode[] = transformToTreeView(Object.entries(tree));
 
+	function assessableNodesCount(nodes: TreeViewNode[]): number {
+		let count = 0;
+		for (const node of nodes) {
+			if (node.contentProps.assessable) {
+				count++;
+			}
+			if (node.children) {
+				count += assessableNodesCount(node.children);
+			}
+		}
+		return count;
+	}
+
 	let expandedNodes: TreeViewNode[] = [];
 
 	import { localStorageStore } from '@skeletonlabs/skeleton';
@@ -166,7 +179,12 @@
 	</div>
 
 	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
-		<h4 class="h4 font-semibold">{m.associatedRequirements()}</h4>
+		<h4 class="h4 flex items-center font-semibold">
+			{m.associatedRequirements()}
+			<span class="badge variant-soft-primary ml-1">
+				{assessableNodesCount(treeViewNodes)}
+			</span>
+		</h4>
 		<RecursiveTreeView nodes={treeViewNodes} bind:expandedNodes hover="hover:bg-initial" />
 	</div>
 </div>
