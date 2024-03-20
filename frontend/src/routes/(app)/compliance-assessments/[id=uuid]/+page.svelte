@@ -60,7 +60,6 @@
 				contentProps: { ...node, canEditRequirementAssessment },
 				lead: node.status ? TreeViewItemLead : '',
 				leadProps: {
-					status: node.status,
 					statusI18n: node.status_i18n,
 					assessable: node.assessable,
 					statusDisplay: node.status_display,

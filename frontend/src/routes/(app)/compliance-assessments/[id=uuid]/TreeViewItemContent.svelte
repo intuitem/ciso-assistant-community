@@ -2,6 +2,7 @@
 	import { complianceColorMap } from './utils';
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
+	import { COMPLIANCE_COLOR_MAP  } from '$lib/utils/constants';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 
 	export let ref_id: string;
@@ -27,7 +28,8 @@
 		canEditRequirementAssessment,
 		status,
 		statusCounts,
-		assessable
+		assessable,
+		...$$restProps
 	} as const;
 
 	type TreeViewItemNode = typeof node;
@@ -109,7 +111,7 @@
 					{#if title} 
 						<span style="font-weight: 600;">{title}</span>
 						{#if assessableNodes.length > 0} 
-						<span class="w-full h-full bg-blue-300 m-2 pr-2 pl-2 text-white">{assessableNodes.length}</span>
+							<span class="w-full h-full bg-blue-300 m-2 pr-2 pl-2 text-white">{assessableNodes.length}</span>
 						{/if}
 					{/if}
 					{#if description}
