@@ -20,6 +20,10 @@ This decoupling allows you to save considerable amount of time:
 
 Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) about the community editions on our blog.
 
+## Documentation
+
+Check the online documentation at https://intuitem.gitbook.io/ciso-assistant
+
 ## Supported frameworks
 
 - ISO 27001:2022
