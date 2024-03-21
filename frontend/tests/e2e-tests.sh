@@ -2,6 +2,7 @@
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DB_DIR=$APP_DIR/backend/db
 DB_NAME=test-database.sqlite3
+VENV_PATH=$APP_DIR
 
 SCRIPT_LONG_ARGS=()
 SCRIPT_SHORT_ARGS=()
@@ -18,6 +19,13 @@ do
             BACKEND_PORT="${arg#*=}"
         else
             echo "Invalid format for --port argument. Please use --port=PORT"
+            exit 1
+        fi
+    elif [[ $arg == --env* ]]; then
+        if [[ "${arg#*=}" =~ ^(.+)\/([^\/.]+)$ ]]; then
+            VENV_PATH="${arg#*=}"
+        else
+            echo "Invalid format for --env argument. Please use --env=PATH"
             exit 1
         fi
     elif [[ $arg == --mailer* ]]; then
@@ -45,6 +53,7 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     echo "Run the end-to-end tests for the CISO Assistant application."
     echo "Options:"
     echo "  --browser=NAME          Run the tests in the specified browser (chromium, firefox, webkit)"
+    echo "  --env=PATH              Path to the virtual environment to use for the tests (default: first one found in $VENV_PATH)"
     echo "  --global-timeout=MS     Maximum time this test suite can run in milliseconds (default: unlimited)"
     echo "  --grep=SEARCH           Only run tests matching this regular expression (default: \".*\")"
     echo "  --headed                Run the tests in headful mode"
@@ -61,6 +70,15 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     echo -e "  --workers=COUNT         Number of concurrent workers or percentage of logical CPU cores, use 1 to run in a single worker (default: 1)"
     echo "                          Be aware that increasing the number of workers may reduce tests accuracy and stability"
     exit 0
+fi
+
+ENV_CFG=$(find $VENV_PATH -name "pyvenv.cfg" -print -quit)
+if [[ ! -z $ENV_CFG ]]; then
+    VENV_PATH=$(dirname $ENV_CFG)
+    source $VENV_PATH/bin/activate
+    echo "Using virtual environment at $VENV_PATH"
+else
+    echo "No virtual environment found at $VENV_PATH, using standard python environment instead."
 fi
 
 if python -c "import socket;exit(0 if 0 == socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('localhost',$BACKEND_PORT)) else 1)" ; then
