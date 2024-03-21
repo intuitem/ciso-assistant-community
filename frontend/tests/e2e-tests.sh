@@ -108,6 +108,9 @@ done
 
 cleanup() {
     echo -e "\nCleaning up..."
+    if type deactivate >/dev/null 2>&1; then
+        deactivate
+    fi
     if [ -n "$BACKEND_PID" ] ; then
         kill $BACKEND_PID > /dev/null 2>&1
         echo "| backend server stopped"
@@ -138,7 +141,7 @@ finish() {
 trap cleanup SIGINT SIGTERM
 trap finish EXIT
 
-echo "starting backend server..."
+echo "Starting backend server..."
 unset POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
 export CISO_ASSISTANT_URL=http://localhost:4173
 export ALLOWED_HOSTS=localhost
@@ -187,15 +190,16 @@ export MAILER_WEB_SERVER_PORT=$MAILER_WEB_SERVER_PORT
 cd $APP_DIR/frontend/
 
 if (( ${#TEST_PATHS[@]} == 0 )); then
-    echo "running every functional test"
+    echo "| running every functional test"
 else
-    echo "running tests: ${TEST_PATHS[@]}"
+    echo "| running tests: ${TEST_PATHS[@]}"
 fi
 if (( ${#SCRIPT_LONG_ARGS[@]} == 0 )); then
-    echo "without args"
+    echo "| without args"
 else
-    echo "with args: ${SCRIPT_LONG_ARGS[@]}"
+    echo "| with args: ${SCRIPT_LONG_ARGS[@]}"
 fi
+echo "=========================================================================================="
 
 if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -q " ]] ; then
     npx playwright test ./tests/functional/"${TEST_PATHS[@]}" -x --project=chromium "${SCRIPT_LONG_ARGS[@]}"
