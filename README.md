@@ -22,7 +22,9 @@ Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) abo
 
 ## Documentation
 
-Check the online documentation at https://intuitem.gitbook.io/ciso-assistant
+Check the online documentation at https://intuitem.gitbook.io/ciso-assistant.
+
+You can also have a look at our [data model](documentation/architecture/data-model.md).
 
 ## Supported frameworks
 
@@ -89,9 +91,6 @@ For the following executions, use "docker compose up" directly.
 
 If you want to restart a fresh install, simply delete the db directory, where the database is stored.
 
-## Documentation
-
-Comprehensive documentation is coming soon. You can already have a look at our [data model](documentation/architecture/data-model.md).
 
 ## Setting up CISO Assistant for development
 
