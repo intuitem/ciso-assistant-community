@@ -72,10 +72,14 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     exit 0
 fi
 
-ENV_CFG=$(find $VENV_PATH -name "pyvenv.cfg" -print -quit)
+ENV_CFG=$(find "$VENV_PATH" -name "pyvenv.cfg" -print -quit)
 if [[ ! -z $ENV_CFG ]]; then
     VENV_PATH=$(dirname $ENV_CFG)
-    source $VENV_PATH/bin/activate
+    if [ -d "$VENV_PATH/bin" ] ; then
+        source "$VENV_PATH/bin/activate"
+    else
+        source "$VENV_PATH/Scripts/activate"
+    fi
     echo "Using virtual environment at $VENV_PATH"
 else
     echo "No virtual environment found at $VENV_PATH, using standard python environment instead."
@@ -113,12 +117,12 @@ cleanup() {
         docker rm $MAILER_PID > /dev/null 2>&1
         echo "| mailer service stopped"
     fi
-    if [ -f $DB_DIR/$DB_NAME ] ; then
-        rm $DB_DIR/$DB_NAME
+    if [ -f "$DB_DIR/$DB_NAME" ] ; then
+        rm "$DB_DIR/$DB_NAME"
         echo "| test database deleted"
     fi
-    if [ -d $APP_DIR/frontend/tests/utils/.testhistory ] ; then
-        rm -rf $APP_DIR/frontend/tests/utils/.testhistory
+    if [ -d "$APP_DIR/frontend/tests/utils/.testhistory" ] ; then
+        rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
         echo "| test data history removed"
     fi
     trap - SIGINT SIGTERM EXIT
