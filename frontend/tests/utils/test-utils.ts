@@ -434,7 +434,7 @@ export class TestContent {
 				dependency: vars.referenceControl.library,
 				build: {
 					reference_control: {
-						value: vars.referenceControl.name,
+						value: 'Global/' + vars.referenceControl.name,
 						category: vars.referenceControl.category,
 						request: {
 							url: 'reference-controls'
@@ -452,7 +452,7 @@ export class TestContent {
 				},
 				editParams: {
 					reference_control: {
-						value: vars.referenceControl2.name,
+						value: 'Global/' + vars.referenceControl2.name,
 						category: vars.referenceControl2.category,
 						request: {
 							url: 'reference-controls'
@@ -541,8 +541,8 @@ export class TestContent {
 					description: vars.description,
 					risk_assessment: `${vars.projectName}/${vars.riskAssessmentName}`,
 					threats: [
-						vars.threat.name, 
-						vars.threat2.name
+						'Global/' + vars.threat.name, 
+						'Global/' + vars.threat2.name
 					]
 				},
 				editParams: {
@@ -635,8 +635,8 @@ export function userFromUserGroupHasPermission(userGroup: string, permission: st
 }
 
 export function getObjectNameWithoutScope(name: string) {
-	const matches = name.match(/(?:\[[^\[\]]+\])+ (.+)/);	
-	return matches ? matches[1] : name;
+	const scopeList = name.split('/');	
+	return scopeList[scopeList.length - 1];
 }
 
 export { test as baseTest, type Page, type Locator } from '@playwright/test';
