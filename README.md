@@ -52,7 +52,7 @@ Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain 
 
 Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file.
 
-You will also find some specific converters in the tools directory (e.g. for CIS Controls).
+You will also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
 ## Community
 
