@@ -40,12 +40,12 @@ You can also have a look at our [data model](documentation/architecture/data-mod
 - DFS 500 with 2023-11 amendments
 - DORA
 - NIST AI Risk Management Framework
+- NIST SP 800-53 rev5
 
 Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- NIST 800-53
 - ANSSI CyberScore
 - and much more!
 
