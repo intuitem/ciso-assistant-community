@@ -21,6 +21,7 @@ objects:
       assessable: false
       depth: 1
       ref_id: GOVERN
+      description: A culture of risk management is cultivated and present.
     - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node3
       assessable: false
       depth: 2
@@ -272,6 +273,7 @@ objects:
       assessable: false
       depth: 1
       ref_id: MAP
+      description: Context is recognized and risks related to context are identified.
     - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node34
       assessable: false
       depth: 2
@@ -530,6 +532,7 @@ objects:
       assessable: false
       depth: 1
       ref_id: MEASURE
+      description: Identified risks are assessed, analyzed, or tracked.
     - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node63
       assessable: false
       depth: 2
@@ -789,6 +792,7 @@ objects:
       assessable: false
       depth: 1
       ref_id: MANAGE
+      description: Risks are prioritized and acted upon based on a projected impact.
     - urn: urn:intuitem:risk:req_node:nist-ai-rmf-1.0:node95
       assessable: false
       depth: 2
