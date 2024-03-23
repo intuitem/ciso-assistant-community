@@ -18,7 +18,6 @@ This decoupling allows you to save considerable amount of time:
 - assess a scope against multiple frameworks at the same time,
 - leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
 
-Read the [full article](https://intuitem.com/blog/we-are-going-open-source/) about the community editions on our blog.
 
 ## Documentation
 
@@ -301,11 +300,11 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 ## Built With
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
+- [SvelteKit](https://kit.svelte.dev/) - Frontend framework
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
-
+- [Gitbook](https://www.gitbook.com) - Documentation platform
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
-- [SvelteKit](https://kit.svelte.dev/) - Frontend framework
 - [Docker](https://www.docker.com/) - Container Engine
 
 ## Security
