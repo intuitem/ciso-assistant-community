@@ -1,14 +1,14 @@
-import { BASE_API_URL, ISO_8601_REGEX } from '$lib/utils/constants';
-import { getModelInfo, processObject, type ModelMapEntry, URL_MODEL_MAP } from '$lib/utils/crud';
+import { BASE_API_URL } from '$lib/utils/constants';
+import { URL_MODEL_MAP, getModelInfo, type ModelMapEntry } from '$lib/utils/crud';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
+import type { urlModel } from '$lib/utils/types';
+import type { SuperValidated } from 'sveltekit-superforms';
 import { superValidate } from 'sveltekit-superforms/server';
 import { z, type AnyZodObject } from 'zod';
 import type { LayoutServerLoad } from './$types';
-import type { SuperValidated } from 'sveltekit-superforms';
-import type { urlModel } from '$lib/utils/types';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${params.model}/${params.id}/`;
@@ -33,7 +33,10 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const model = getModelInfo(params.model);
 	const relatedModels = {} as RelatedModels;
 
-	if (model.reverseForeignKeyFields) {
+	if (
+		model.reverseForeignKeyFields &&
+		!(model.urlModel === 'folders' && data.content_type === 'GLOBAL')
+	) {
 		const initialData = {};
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
