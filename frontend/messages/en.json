@@ -491,5 +491,6 @@
 	"libraryAlreadyImportedError": "This library has already been imported !",
 	"invalidLibraryFileError": "Invalid library file !",
 	"taintedFormMessage": "Do you want to leave this page? Changes you made may not be saved.",
-	"riskScenariosStatus": "Risk scenarios status"
+	"riskScenariosStatus": "Risk scenarios status",
+	"onlineDocs": "Online documentation"
 }

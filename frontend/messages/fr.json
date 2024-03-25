@@ -491,5 +491,6 @@
 	"libraryAlreadyImportedError": "Cette libairie a été déjà été importée !",
 	"invalidLibraryFileError": "Fichier de librairie invalide !",
 	"taintedFormMessage": "Voulez-vous vraiment quitter cette page ? Toutes les données non enregistrées seront perdues.",
-	"riskScenariosStatus": "Statut des scénarios de risque"
+	"riskScenariosStatus": "Statut des scénarios de risque",
+	"onlineDocs": "Documentation en ligne"
 }
