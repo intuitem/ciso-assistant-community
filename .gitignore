@@ -2,7 +2,6 @@
 *~$*
 .env
 **/node_modules/
-.vscode
 *.sqlite3
 django_secret_key
 temp/
