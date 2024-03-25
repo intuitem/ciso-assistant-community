@@ -127,9 +127,9 @@ export const ReferenceControlSchema = baseNamedObject({
 
 export const AssetSchema = baseNamedObject({
 	business_value: z.string().optional(),
-	type: z.string(),
+	type: z.string().default('PR'),
 	folder: z.string(),
-	parent_assets: z.array(z.string()).optional()
+	parent_assets: z.string().optional().array().optional()
 });
 
 export const RequirementAssessmentSchema = z.object({
