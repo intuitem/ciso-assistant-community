@@ -434,7 +434,7 @@ export class TestContent {
 				dependency: vars.referenceControl.library,
 				build: {
 					reference_control: {
-						value: vars.referenceControl.name,
+						value: 'Global/' + vars.referenceControl.name,
 						category: vars.referenceControl.category,
 						request: {
 							url: 'reference-controls'
@@ -452,7 +452,7 @@ export class TestContent {
 				},
 				editParams: {
 					reference_control: {
-						value: vars.referenceControl2.name,
+						value: 'Global/' + vars.referenceControl2.name,
 						category: vars.referenceControl2.category,
 						request: {
 							url: 'reference-controls'
@@ -539,8 +539,11 @@ export class TestContent {
 				build: {
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: vars.riskAssessmentName,
-					threats: [vars.threat.name, vars.threat2.name]
+					risk_assessment: `${vars.projectName}/${vars.riskAssessmentName}`,
+					threats: [
+						'Global/' + vars.threat.name, 
+						'Global/' + vars.threat2.name
+					]
 				},
 				editParams: {
 					name: '',
@@ -565,7 +568,7 @@ export class TestContent {
 					expiry_date: '2025-01-01',
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
-					risk_scenarios: [vars.riskScenarioName]
+					risk_scenarios: [`${vars.folderName}/${vars.projectName}/${vars.riskScenarioName}`]
 				},
 				editParams: {
 					name: '',
@@ -629,6 +632,11 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 export function userFromUserGroupHasPermission(userGroup: string, permission: string, object: string) {
 	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;	
 	return (userGroup in testData.usergroups) && (testData.usergroups[userGroup].perms.includes(perm));
+}
+
+export function getObjectNameWithoutScope(name: string) {
+	const scopeList = name.split('/');	
+	return scopeList[scopeList.length - 1];
 }
 
 export { test as baseTest, type Page, type Locator } from '@playwright/test';
