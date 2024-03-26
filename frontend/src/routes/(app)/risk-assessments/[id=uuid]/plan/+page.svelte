@@ -22,32 +22,34 @@
 			'on hold': 'bg-red-200',
 			done: 'bg-success-200'
 		};
-		if (treatment !== null){
+		if (treatment !== null) {
 			return map[treatment.toLowerCase()];
 		} else {
 			return 'bg-gray-200';
 		}
-		
 	};
 </script>
 
 <div class="bg-white p-2 m-2 shadow rounded-lg space-x-2 flex flex-row justify-center">
 	<p class="font-semibold text-lg">
-		{m.domain()}: <a
+		{m.domain()}:
+		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.name}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		{m.project()}: <a
+		{m.project()}:
+		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
 		>
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
-		{m.riskAssessment()}: <a
+		{m.riskAssessment()}:
+		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
 			href="/risk-assessments/{data.risk_assessment.id}/"
 			>{data.risk_assessment.name} - {data.risk_assessment.version}</a
@@ -106,7 +108,9 @@
 							<td class="px-2 py-3">{measure.name ?? '--'}</td>
 							<td class="px-2 py-3 max-w-md">{measure.description ?? '--'}</td>
 							<td class="px-2 py-3">{measure.type ?? '--'}</td>
-							<td class="px-2 py-3">{measure.reference_control.str ?? '--'}</td>
+							<td class="px-2 py-3"
+								>{measure.reference_control ? measure.reference_control.str : '--'}</td
+							>
 							<td class="px-2 py-3">{measure.eta ?? '--'}</td>
 							<td class="px-2 py-3">{measure.effort ?? '--'}</td>
 							<td class="px-2 py-3 text-center">{measure.link ?? '--'} </td>
@@ -125,7 +129,8 @@
 				{#if !scenario.existing_controls && !(scenario.applied_controls.length > 0)}
 					<tr>
 						<td colspan="9" class="p-2 text-left">
-							<i class="fas fa-exclamation-circle" /> {m.noAppliedControlYet()}
+							<i class="fas fa-exclamation-circle" />
+							{m.noAppliedControlYet()}
 						</td>
 					</tr>
 				{/if}
