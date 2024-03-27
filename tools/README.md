@@ -77,6 +77,11 @@ Conventions:
             - category (policy/process/techncial/physical).
             - annotation
     A library has a single locale. Translated libraries have the same urns, they are merged during import.
-    Dependencies are given as a comma or blank separated list of urns.
-''' 
+    Dependencies are given as a comma or blank separated list of urns. 
 ```
+
+## Caveats
+
+Currently, the name of the Excel file shall be consistent with the library URN. For example, if the URN is urn:intuitem:risk:library:dfs-500-2023-11, then the filename shall be dfs-500-2023-11.xlsx.
+
+If this rule is not followed, then importing a library will fail with no clear message, and displaying the library will fail with a "undefined" error. This will be fixed in a future version.
