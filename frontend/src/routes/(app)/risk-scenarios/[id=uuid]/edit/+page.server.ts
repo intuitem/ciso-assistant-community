@@ -218,7 +218,13 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 		const model: string = urlParamModelVerboseName(URLModel);
-		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+			},
+			event
+		);
 		redirect(
 			302,
 			event.url.searchParams.get('/updateRiskScenario') ?? `/risk-scenarios/${event.params.id}`
@@ -227,6 +233,7 @@ export const actions: Actions = {
 	createAppliedControl: async (event) => {
 		const URLModel = 'applied-controls';
 		const schema = modelSchema(URLModel);
+		const model = getModelInfo(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
 		const form = await superValidate(event.request, schema);
 
@@ -273,7 +280,10 @@ export const actions: Actions = {
 			return fail(400, { form: form });
 		}
 		setFlash(
-			{ type: 'success', message: m.successfullyUpdatedObject({object: model, name:form.data.name}) },
+			{
+				type: 'success',
+				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+			},
 			event
 		);
 		return { form };
