@@ -263,16 +263,18 @@
 									'associated' + capitalizeFirstLetter(model.info.localNamePlural)
 								]}
 							</h4>
-							<button
-								class="btn variant-filled-primary self-end my-auto"
-								on:click={(_) => modalCreateForm(model)}
-								><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())[
-									'add' + capitalizeFirstLetter(model.info.localName)
-								]}</button
-							>
 						</div>
 						{#if model.table}
-							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel} />
+							<ModelTable source={model.table} deleteForm={model.deleteForm} URLModel={urlmodel}>
+								<button
+									slot="addButton"
+									class="btn variant-filled-primary self-end my-auto"
+									on:click={(_) => modalCreateForm(model)}
+									><i class="fa-solid fa-plus mr-2 lowercase" />{localItems(languageTag())[
+										'add' + capitalizeFirstLetter(model.info.localName)
+									]}</button
+								>
+							</ModelTable>
 						{/if}
 					{/if}
 				{/each}
