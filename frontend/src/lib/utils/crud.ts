@@ -183,6 +183,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
+		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },

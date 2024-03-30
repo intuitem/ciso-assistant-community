@@ -1,5 +1,22 @@
 import { z, type AnyZodObject } from 'zod';
 
+const toArrayPreprocessor = (value: unknown) => {
+	if (Array.isArray(value)) {
+		return value;
+	}
+
+	switch (typeof value) {
+		case 'string':
+		case 'number':
+		case 'bigint':
+		case 'boolean':
+			return [value];
+
+		default:
+			return value; // could not coerce, return the original and face the consequences during validation
+	}
+};
+
 export const loginSchema = z
 	.object({
 		username: z
@@ -182,7 +199,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 export const EvidenceSchema = baseNamedObject({
 	attachment: z.string().optional().nullable(),
 	folder: z.string(),
-	applied_controls: z.string().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string())).optional(),
 	requirement_assessments: z.string().optional().array().optional(),
 	link: z.string().optional().nullable()
 });
