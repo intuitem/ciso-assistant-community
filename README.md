@@ -2,22 +2,34 @@
 
 ![](gh_banner.png)
 
-CISO Assistant brings a different take on Cyber Security Posture Management:
+CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
-- by explicitly decoupling compliance from cybersecurity practices implementation
+- by explicitly decoupling compliance from cybersecurity controls implementation
 - providing simplified tools for decision making
-- while providing capabilities for a program, product or an organization assessment against standard frameworks.
-- you can bring your own framework as well using a simplified DSL
-- aim to be a one stop shop for cyber security management and cover the layers of GRC (Governance, Risk and Compliance)
+- while providing capabilities for a program, product or an organization assessment against standard frameworks
+- has built-in standards, security controls and threats
+- allows to manage a catalog for security controls and threats
+- you can bring your own framework as well using a simple syntax
+- manage audit, evidences collection and report generation
+- aims to be a one stop shop for cyber security management and cover the layers of GRC (Governance, Risk and Compliance)
 
 ![](posture.png)
 
-This decoupling allows you to save considerable amount of time:
+The decoupling allows you to save a considerable amount of time:
 
 - reuse previous assessments,
 - assess a scope against multiple frameworks at the same time,
 - leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
+- balance controls implementation and compliance follow-up
 
+## Quick Start 🚀
+
+> The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
+
+Alternatively, clone the repo and run:
+```sh
+./docker-compose.sh
+```
 
 ## Documentation
 
@@ -50,7 +62,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - ANSSI hygiene guide
 - CCB CyberFundamentals Framework
 - CRA
-- and much more: just ask us, if it's an open standard, we'll do it for you free of charge 😉
+- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, free of charge 😉
 
 ### Add your own framework
 
@@ -62,11 +74,11 @@ You will also find some specific converters in the tools directory (e.g. for CIS
 
 Join our [open Discord community](https://discord.gg/qvkaMdQ8da) to interact with the team and other GRC experts.
 
-## Testing in the cloud
+## Testing the cloud version
 
 > The fastest and easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
-## Testing locally - Quick start 🚀
+## Testing locally 🚀
 
 To run CISO Assistant locally in a straightforward way, you can use Docker compose.
 
