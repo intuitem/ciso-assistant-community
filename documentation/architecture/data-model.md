@@ -853,8 +853,8 @@ Libraries have a URN to uniquely identify them.
 Libraries have a locale that describes the locale for the whole content of the library.
 
 Libraries have an integer version that completes the URN. The highest version for a given URN shall always be privileged. So:
-    - a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn and locale.
-    - if a breaking change is necessary, the URN should be changed.
+- a library loading is performed if and only if there is no greater or equal version already loaded, for the same urn and locale.
+- if a breaking change is necessary, the URN should be changed.
 
 
 Libraries have a provider (which entity produced the original content), and a packager (which entity did the library). Objects in the library inherit their provider from the library's.
