@@ -87,7 +87,7 @@ const riskScenarios = [
 			symbol: '◆'
 		}
 	}
-};
+];
 
 const sampleData = [
 	[['R.1'], ['R.5'], ['R.8']],
@@ -96,9 +96,9 @@ const sampleData = [
 ];
 
 const sampleDataItems = [
-	[[riskScenario], [], []],
-	[[], [], [riskScenario, riskScenario]],
-	[[], [riskScenario], []]
+	[[riskScenarios], [], []],
+	[[], [], [riskScenarios, riskScenarios]],
+	[[], [riskScenarios], []]
 ];
 
 export default meta;
