@@ -306,6 +306,7 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
 - [Docker](https://www.docker.com/) - Container Engine
+- [inlang](https://inlang.com/) - The ecosystem to globalize your software
 
 ## Security
 
