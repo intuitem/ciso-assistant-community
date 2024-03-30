@@ -183,9 +183,10 @@ def get_compliance_assessment_stats(
                 ]
             )
             total = len(requirement_id_list)
-            requirement_nodes_statistics[requirement_node.id].append(
-                (st, st.label, round(count * 100 / total))
-            )
+            if total > 0:
+                requirement_nodes_statistics[requirement_node.id].append(
+                    (st, st.label, round(count * 100 / total))
+                )
     return requirement_nodes_statistics
 
 

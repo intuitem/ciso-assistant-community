@@ -1413,9 +1413,10 @@ def generate_html(
             if not (node) or c == node or node in ancestors[c]
         ]
         total = len(candidates)
-        for st in RequirementAssessment.Status:
-            count = len([c for c in candidates if c.status == st])
-            compliance_assessments_status.append((st, round(count * 100 / total)))
+        if total > 0:
+            for st in RequirementAssessment.Status:
+                count = len([c for c in candidates if c.status == st])
+                compliance_assessments_status.append((st, round(count * 100 / total)))
         content += (
             '<div class="flex bg-gray-300 rounded-full overflow-hidden h-4 w-2/3">'
         )

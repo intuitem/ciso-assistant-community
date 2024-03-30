@@ -41,17 +41,20 @@ You can also have a look at our [data model](documentation/architecture/data-mod
 - DORA
 - NIST AI Risk Management Framework
 - NIST SP 800-53 rev5
+- France LPM/OIV rules
 
-Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
+Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- ANSSI CyberScore
-- and much more!
+- ANSSI hygiene guide
+- CCB CyberFundamentals Framework
+- CRA
+- and much more: just ask us, if it's an open standard, we'll do it for you free of charge 😉
 
 ### Add your own framework
 
-Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file.
+Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
 
 You will also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
@@ -306,6 +309,7 @@ The goal of the test harness is to prevent any regression, i.e. all the tests sh
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
 - [Docker](https://www.docker.com/) - Container Engine
+- [inlang](https://inlang.com/) - The ecosystem to globalize your software
 
 ## Security
 
