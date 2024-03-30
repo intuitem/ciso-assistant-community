@@ -43,7 +43,7 @@ You can also have a look at our [data model](documentation/architecture/data-mod
 - NIST SP 800-53 rev5
 - France LPM/OIV rules
 
-Checkout the [library](/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
+Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
