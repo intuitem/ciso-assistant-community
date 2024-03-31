@@ -19,11 +19,22 @@
 	import { languageTag } from '$paraglide/runtime.js';
 	import * as m from '$paraglide/messages.js';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
 
 	export let data;
+
+	if (data.model.detailViewFields) {
+		data.data = Object.fromEntries(
+			Object.entries(data.data).filter(
+				([key, _]) => data.model.detailViewFields.filter((field) => field.field === key).length > 0
+			)
+		);
+	}
+
+	console.log(data.data);
 
 	$: breadcrumbObject.set(data.data);
 
@@ -219,7 +230,7 @@
 								{:else if isURL(value) && !value.startsWith('urn')}
 									<a href={value} target="_blank" class="anchor">{value}</a>
 								{:else if ISO_8601_REGEX.test(value)}
-									{new Date(value).toLocaleString(languageTag())}
+									{formatDateOrDateTime(value, languageTag())}
 								{:else if localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
 									{localItems(languageTag())[toCamelCase((value.str || value.name) ?? value)]}
 								{:else}
