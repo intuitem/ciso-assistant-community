@@ -61,7 +61,7 @@
 								<TextField type="password" {form} field="password" label={m.password()} />
 								<div class="flex flex-row justify-end">
 									<a
-										href="/password-reset"
+										href="password-reset"
 										class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 										data-testid="forgot-password-btn"
 									>

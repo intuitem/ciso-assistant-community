@@ -35,7 +35,7 @@
 		{m.domain()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.name}</a
+			href="folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.name}</a
 		>
 	</p>
 	<p>/</p>
@@ -43,7 +43,7 @@
 		{m.project()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
+			href="projects/{data.risk_assessment.project.id}/">{data.risk_assessment.project.str}</a
 		>
 	</p>
 	<p>/</p>
@@ -51,7 +51,7 @@
 		{m.riskAssessment()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/risk-assessments/{data.risk_assessment.id}/"
+			href="risk-assessments/{data.risk_assessment.id}/"
 			>{data.risk_assessment.name} - {data.risk_assessment.version}</a
 		>
 	</p>
@@ -68,7 +68,7 @@
 					<td class="text-lg p-3" colspan="9">
 						<a
 							class="unstyled text-primary-500 hover:text-primary-700"
-							href="/risk-scenarios/{scenario.id}">{scenario.name}</a
+							href="risk-scenarios/{scenario.id}">{scenario.name}</a
 						>
 						<span class="badge {scenarioTreatmentColorMap(scenario.treatment)}"
 							>{scenario.treatment}</span

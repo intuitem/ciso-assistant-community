@@ -101,7 +101,7 @@
 						{#each reference_controls as func}
 							<li>
 								{#if func.id}
-									<a class="anchor" href="/reference-controls/{func.id}">
+									<a class="anchor" href="reference-controls/{func.id}">
 										{func.name}
 									</a>
 								{:else}
@@ -124,7 +124,7 @@
 						{#each threats as threat}
 							<li>
 								{#if threat.id}
-									<a class="anchor" href="/threats/{threat.id}">
+									<a class="anchor" href="threats/{threat.id}">
 										{threat.name}
 									</a>
 								{:else}

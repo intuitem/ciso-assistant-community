@@ -84,7 +84,7 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									<a href="/compliance-assessments/{compliance_assessment.object.id}" class="hover:underline text-blue-600">{compliance_assessment.object.name}</a>
+									<a href="compliance-assessments/{compliance_assessment.object.id}" class="hover:underline text-blue-600">{compliance_assessment.object.name}</a>
 								</li>
 								{@const quality_check = compliance_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -156,7 +156,7 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									<a href="/risk-assessments/{risk_assessment.object.id}" class="hover:underline text-blue-600">{risk_assessment.object.name}</a>
+									<a href="risk-assessments/{risk_assessment.object.id}" class="hover:underline text-blue-600">{risk_assessment.object.name}</a>
 								</li>
 								{@const quality_check = risk_assessment.quality_check}
 								<div class="flex flex-col space-y-3">

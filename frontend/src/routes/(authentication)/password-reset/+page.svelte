@@ -46,7 +46,7 @@
 					</SuperForm>
 				</div>
 				<a
-					href="/login"
+					href="login"
 					class="flex items-center space-x-2 text-primary-800 hover:text-primary-600"
 				>
 					<i class="fa-solid fa-arrow-left" />

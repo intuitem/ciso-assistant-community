@@ -36,7 +36,7 @@
 				<div class="flex flex-row space-x-2 pt-3">
 					<a
 						class="btn bg-gray-400 text-white font-semibold w-full"
-						href="/my-profile"
+						href="my-profile"
 						data-testid="cancel-button"
 						type="button">
 						{m.cancel()}

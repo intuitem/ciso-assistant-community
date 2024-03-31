@@ -1,23 +1,12 @@
 export const navData = {
 	items: [
-		// {
-		// 	name: 'Home',
-		// 	items: [
-		// 		{
-		// 			name: 'Home',
-		// 			fa_icon: 'fa-solid fa-house',
-		// 			href: '/'
-		// 		},
-		// 		{ name: 'Quick start', fa_icon: 'fa-solid fa-plane', href: '/quick-start' }
-		// 	]
-		// },
 		{
 			name: 'overview',
 			items: [
 				{
 					name: 'analytics',
 					fa_icon: 'fa-solid fa-gauge',
-					href: '/analytics',
+					href: 'analytics',
 					permissions: [
 						'view_project',
 						'view_riskscenario',
@@ -29,7 +18,7 @@ export const navData = {
 				{
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
-					href: '/calendar',
+					href: 'calendar',
 					permissions: [
 						'view_appliedcontrol',
 						'view_riskacceptance',
@@ -45,22 +34,22 @@ export const navData = {
 				{
 					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
-					href: '/threats'
+					href: 'threats'
 				},
 				{
 					name: 'referenceControls',
 					fa_icon: 'fa-solid fa-gears',
-					href: '/reference-controls'
+					href: 'reference-controls'
 				},
 				{
 					name: 'appliedControls',
 					fa_icon: 'fa-solid fa-fire-extinguisher',
-					href: '/applied-controls'
+					href: 'applied-controls'
 				},
 				{
 					name: 'assets',
 					fa_icon: 'fa-solid fa-gem',
-					href: '/assets'
+					href: 'assets'
 				}
 			]
 		},
@@ -70,13 +59,13 @@ export const navData = {
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-user',
-					href: '/policies',
+					href: 'policies',
 					permissions: ['view_appliedcontrol']
 				},
 				{
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
-					href: '/risk-matrices'
+					href: 'risk-matrices'
 				}
 			]
 		},
@@ -86,17 +75,17 @@ export const navData = {
 				{
 					name: 'riskAssessments',
 					fa_icon: 'fa-solid fa-magnifying-glass-chart',
-					href: '/risk-assessments'
+					href: 'risk-assessments'
 				},
 				{
 					name: 'riskScenarios',
 					fa_icon: 'fa-solid fa-clone',
-					href: '/risk-scenarios'
+					href: 'risk-scenarios'
 				},
 				{
 					name: 'riskAcceptances',
 					fa_icon: 'fa-solid fa-user-tie',
-					href: '/risk-acceptances'
+					href: 'risk-acceptances'
 				}
 			]
 		},
@@ -107,17 +96,17 @@ export const navData = {
 				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-arrows-to-eye',
-					href: '/compliance-assessments'
+					href: 'compliance-assessments'
 				},
 				{
 					name: 'evidences',
 					fa_icon: 'fa-solid fa-file',
-					href: '/evidences'
+					href: 'evidences'
 				},
 				{
 					name: 'frameworks',
 					fa_icon: 'fa-solid fa-folder',
-					href: '/frameworks'
+					href: 'frameworks'
 				}
 			]
 		},
@@ -127,27 +116,27 @@ export const navData = {
 				{
 					name: 'domains',
 					fa_icon: 'fa-solid fa-diagram-project',
-					href: '/folders'
+					href: 'folders'
 				},
 				{
 					name: 'projects',
 					fa_icon: 'fa-solid fa-cubes',
-					href: '/projects'
+					href: 'projects'
 				},
 				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
-					href: '/users'
+					href: 'users'
 				},
 				{
 					name: 'userGroups',
 					fa_icon: 'fa-solid fa-users',
-					href: '/user-groups'
+					href: 'user-groups'
 				},
 				{
 					name: 'roleAssignments',
 					fa_icon: 'fa-solid fa-user-tag',
-					href: '/role-assignments'
+					href: 'role-assignments'
 				}
 			]
 		},
@@ -158,31 +147,31 @@ export const navData = {
 				{
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
-					href: '/x-rays',
+					href: 'x-rays',
 					permissions: ['view_riskassessment', 'view_assessment']
 				},
 				{
 					name: 'scoringAssistant',
 					fa_icon: 'fa-solid fa-star-half-stroke',
-					href: '/scoring-assistant',
+					href: 'scoring-assistant',
 					permissions: ['view_riskmatrix']
 				},
 				{
 					name: 'libraries',
 					fa_icon: 'fa-solid fa-folder-plus',
-					href: '/libraries',
+					href: 'libraries',
 					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				},
 				{
 					name: 'backupRestore',
 					fa_icon: 'fa-solid fa-floppy-disk',
-					href: '/backup-restore',
+					href: 'backup-restore',
 					permissions: ['backup']
 				}
 				// {
 				// 	name: 'License management',
 				// 	fa_icon: 'fa-solid fa-file-invoice',
-				// 	href: '/license-management'
+				// 	href: 'license-management'
 				// }
 			]
 		}

@@ -96,7 +96,7 @@
 		<span style="font-weight: 300;">
 			{#if assessable && canEditRequirementAssessment}
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">
-					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
+					<a href="requirement-assessments/{ra_id}?next={$page.url.pathname}">
 						{#if title} 
 							<span style="font-weight: 600;">{title}</span>
 						{/if}
@@ -158,7 +158,7 @@
 									{#if func.id}
 										<a
 											class="anchor"
-											href="/reference-controls/{func.id}?next={$page.url.pathname}"
+											href="reference-controls/{func.id}?next={$page.url.pathname}"
 										>
 											{func.name}
 										</a>
@@ -182,7 +182,7 @@
 							{#each threats as threat}
 								<li>
 									{#if threat.id}
-										<a class="anchor" href="/threats/{threat.id}?next={$page.url.pathname}">
+										<a class="anchor" href="threats/{threat.id}?next={$page.url.pathname}">
 											{threat.name}
 										</a>
 									{:else}

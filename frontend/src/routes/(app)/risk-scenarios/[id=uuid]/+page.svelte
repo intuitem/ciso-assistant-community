@@ -55,13 +55,13 @@
             <div class="flex flex-row justify-between">
                 <span>
                     <p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-                    <a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+                    <a class="anchor text-sm font-semibold" href="projects/{data.scenario.project.id}"
                         >{data.scenario.project.str}</a
                     >
                 </span>
                 <span>
                     <p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
-                    <a class="anchor text-sm font-semibold" href="/risk-assessments/{data.scenario.risk_assessment.id}"
+                    <a class="anchor text-sm font-semibold" href="risk-assessments/{data.scenario.risk_assessment.id}"
                         >{data.scenario.risk_assessment.str}</a
                     >
                 </span>

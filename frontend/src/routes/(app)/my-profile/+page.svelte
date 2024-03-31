@@ -33,7 +33,7 @@
 				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</a
 			>
 			{#if canEditObject}
-				<a href="/users/{$page.data.user.id}/edit?next=/my-profile" class="btn variant-filled-primary h-fit"
+				<a href="users/{$page.data.user.id}/edit?next=/my-profile" class="btn variant-filled-primary h-fit"
 					><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
 				>
 			{/if}
