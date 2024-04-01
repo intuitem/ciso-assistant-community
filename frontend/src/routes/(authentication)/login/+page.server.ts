@@ -86,6 +86,6 @@ export const actions: Actions = {
 				});
 			}
 		}
-		redirect(302, url.searchParams.get('next') || '/analytics');
+		redirect(302, url.searchParams.get('next') || 'analytics');
 	}
 };

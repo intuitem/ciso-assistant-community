@@ -227,7 +227,7 @@ export const actions: Actions = {
 		);
 		redirect(
 			302,
-			event.url.searchParams.get('/updateRiskScenario') ?? `/risk-scenarios/${event.params.id}`
+			event.url.searchParams.get('/updateRiskScenario') ?? `risk-scenarios/${event.params.id}`
 		);
 	},
 	createAppliedControl: async (event) => {
