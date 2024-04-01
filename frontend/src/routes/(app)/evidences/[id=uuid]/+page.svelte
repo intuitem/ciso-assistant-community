@@ -19,6 +19,7 @@
 	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.evidence);
@@ -100,7 +101,7 @@
 																(item) => item.field === key
 															)?.urlModel
 														}/${val.id}`}
-														<a href={itemHref} class="anchor">{val.str}</a>
+														<a href="{base}{itemHref}" class="anchor">{val.str}</a>
 													{:else}
 														{value}
 													{/if}
@@ -116,9 +117,10 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<a href="{base}{itemHref}" class="anchor">{value.str}</a>
 								{:else if isURL(value)}
-									<a href={value} target="_blank" class="anchor">{value}</a>
+									coucou
+									<a href="{base}{value}" target="_blank" class="anchor">{value}</a>
 								{:else}
 									{value.str ?? value}
 								{/if}
@@ -133,7 +135,7 @@
 		<span>
 			{#if canEditObject}
 				<a
-					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+					href="{`${base}${$page.url.pathname}/edit?next=${base}${$page.url.pathname}`}"		
 					class="btn variant-filled-primary h-fit"
 					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
 				>

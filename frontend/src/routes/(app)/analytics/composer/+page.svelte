@@ -6,6 +6,7 @@
 	import { languageTag } from '$paraglide/runtime';
 	import type { AppliedControlStatus } from '$lib/utils/types';
 	import { RISK_COLOR_PALETTE } from '$lib/utils/constants.js';
+	import { base } from '$app/paths';
 
 	export let data;
 	data.risk_assessment_objects.forEach((risk_assessment: Record<string, any>) => {
@@ -148,7 +149,7 @@
 												s: item.risk_assessment.quality_check.count > 1 ? 's' : '',
 												plural: item.risk_assessment.quality_check.count > 1 ? 'ies' : 'y'
 											})}
-											<a class="simple-link hover:underline visited:text-indigo-600" href="/x-rays"
+											<a class="simple-link hover:underline visited:text-indigo-600" href="{base}/x-rays"
 												>x-rays</a
 											></span
 										>.
@@ -174,7 +175,7 @@
 								<div>
 									<a
 										class="text-indigo-800 hover:text-indigo-600 py-2 my-2"
-										href="/risk-assessments/{item.risk_assessment.id}/"
+										href="{base}/risk-assessments/{item.risk_assessment.id}/"
 										><i class="fas fa-external-link-square-alt" /> {m.jumpToRiskAssessment()}</a
 									>
 								</div>

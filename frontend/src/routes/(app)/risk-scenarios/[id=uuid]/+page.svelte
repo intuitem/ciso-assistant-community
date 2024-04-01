@@ -9,6 +9,7 @@
     import { localItems, toCamelCase } from '$lib/utils/locales';
 
     import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { base } from '$app/paths';
 
     export let data: PageData;
 
@@ -43,7 +44,7 @@
         </div>
         {#if canEditObject}
             <a
-                href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+                href="{`${base}${$page.url.pathname}/edit?next=${base}${$page.url.pathname}`}"
                 class="btn variant-filled-primary h-fit mt-1"
                 data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
             >
@@ -55,13 +56,13 @@
             <div class="flex flex-row justify-between">
                 <span>
                     <p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-                    <a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+                    <a class="anchor text-sm font-semibold" href="{base}/projects/{data.scenario.project.id}"
                         >{data.scenario.project.str}</a
                     >
                 </span>
                 <span>
                     <p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
-                    <a class="anchor text-sm font-semibold" href="/risk-assessments/{data.scenario.risk_assessment.id}"
+                    <a class="anchor text-sm font-semibold" href="{base}/risk-assessments/{data.scenario.risk_assessment.id}"
                         >{data.scenario.risk_assessment.str}</a
                     >
                 </span>

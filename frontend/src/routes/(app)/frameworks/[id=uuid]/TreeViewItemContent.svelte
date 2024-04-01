@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	export let ref_id: string;
 	export let name: string;
 	export let description: string;
@@ -101,7 +102,7 @@
 						{#each reference_controls as func}
 							<li>
 								{#if func.id}
-									<a class="anchor" href="/reference-controls/{func.id}">
+									<a class="anchor" href="{base}/reference-controls/{func.id}">
 										{func.name}
 									</a>
 								{:else}
@@ -124,7 +125,7 @@
 						{#each threats as threat}
 							<li>
 								{#if threat.id}
-									<a class="anchor" href="/threats/{threat.id}">
+									<a class="anchor" href="{base}/threats/{threat.id}">
 										{threat.name}
 									</a>
 								{:else}

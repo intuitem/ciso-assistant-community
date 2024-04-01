@@ -1,11 +1,13 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { base } from '$app/paths';
 
 export const GET = async ({ locals }) => {
 	if (!locals.user) {
-		redirect(302, `/login?next=/home`);
+		redirect(302, `${base}/login?next=/home`);
+		// TODO: why /home?
 	}
-	redirect(302, '/analytics');
+	redirect(302, `${base}/analytics`);
 };
 
 export const POST = async ({ fetch, cookies }) => {

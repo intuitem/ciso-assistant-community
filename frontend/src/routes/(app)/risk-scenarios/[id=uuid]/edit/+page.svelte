@@ -28,6 +28,7 @@
 	import * as m from '$paraglide/messages';
 	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 
@@ -139,7 +140,7 @@
 				<div class="flex flex-row justify-between">
 					<span>
 						<p class="text-sm font-semibold text-gray-400">{m.project()}</p>
-						<a class="anchor text-sm font-semibold" href="/projects/{data.scenario.project.id}"
+						<a class="anchor text-sm font-semibold" href="{base}/projects/{data.scenario.project.id}"
 							>{data.scenario.project.str}</a
 						>
 					</span>

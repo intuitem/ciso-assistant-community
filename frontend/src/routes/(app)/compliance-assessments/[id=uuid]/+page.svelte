@@ -16,6 +16,7 @@
 	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.compliance_assessment);
@@ -128,7 +129,7 @@
 															(item) => item.field === key
 														)?.urlModel
 													}/${val.id}`}
-													<a href={itemHref} class="anchor">{val.str}</a>
+													<a href="{base}{itemHref}" class="anchor">{val.str}</a>
 												{:else}
 													{value}
 												{/if}
@@ -141,7 +142,7 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<a href="{base}{itemHref}" class="anchor">{value.str}</a>
 								{:else}
 									{#if localItems(languageTag())[toCamelCase(value.str ?? value)]}
 										{localItems(languageTag())[toCamelCase(value.str ?? value)]}
@@ -165,12 +166,12 @@
 			/>
 		</div>
 		<div class="flex flex-row space-x-2 ml-4">
-			<a href={`${$page.url.pathname}/export`} class="btn variant-filled-primary h-fit"
+			<a href="{`${base}${$page.url.pathname}/export`}" class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-download mr-2" /> {m.exportButton()}</a
 			>
 			{#if canEditObject}
 				<a
-					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+					href="{`${base}${$page.url.pathname}/edit?next=${base}${$page.url.pathname}`}"
 					class="btn variant-filled-primary h-fit"
 					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
 				>

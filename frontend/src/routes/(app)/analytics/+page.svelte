@@ -15,6 +15,7 @@
 	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
+	import { base } from '$app/paths';
 
 	interface Counters {
 		domains: number;
@@ -110,37 +111,37 @@
 							count={counters.domains}
 							label={m.domains()}
 							faIcon="fa-solid fa-diagram-project"
-							href="/folders"
+							href="{base}/folders"
 						/>
 						<CounterCard
 							count={counters.projects}
 							label={m.projects()}
 							faIcon="fa-solid fa-cubes"
-							href="/projects"
+							href="{base}/projects"
 						/>
 						<CounterCard
 							count={counters.applied_controls}
 							label={m.appliedControls()}
 							faIcon="fa-solid fa-fire-extinguisher"
-							href="/applied-controls"
+							href="{base}/applied-controls"
 						/>
 						<CounterCard
 							count={counters.risk_assessments}
 							label={m.riskAssessments()}
 							faIcon="fa-solid fa-magnifying-glass-chart"
-							href="/risk-assessments"
+							href="{base}/risk-assessments"
 						/>
 						<CounterCard
 							count={counters.compliance_assessments}
 							label={m.complianceAssessments()}
 							faIcon="fa-solid fa-arrows-to-eye"
-							href="/compliance-assessments"
+							href="{base}/compliance-assessments"
 						/>
 						<CounterCard
 							count={counters.policies}
 							label={m.policies()}
 							faIcon="fas fa-file-alt"
-							href="/policies"
+							href="{base}/policies"
 						/>
 					</div>
 				</section>
@@ -308,12 +309,12 @@
 									</div>
 									<div class="absolute top-0 right-0 mt-2 space-x-1">
 										<a
-											href="/compliance-assessments/{compliance_assessment.id}/export"
+											href="{base}/compliance-assessments/{compliance_assessment.id}/export"
 											class="btn variant-filled-primary"
 											><i class="fa-solid fa-download mr-2" /> {m.exportButton()}
 										</a>
 										<a
-											href="/compliance-assessments/{compliance_assessment.id}/edit"
+											href="{base}/compliance-assessments/{compliance_assessment.id}/edit"
 											class="btn variant-filled-primary"
 											><i class="fa-solid fa-edit mr-2" /> {m.edit()}
 										</a>

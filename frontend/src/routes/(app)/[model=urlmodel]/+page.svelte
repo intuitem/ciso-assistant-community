@@ -11,6 +11,7 @@
 	import * as m from '$paraglide/messages';
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 
@@ -50,11 +51,11 @@
 						{localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)]}
 					</button>
 				{:else if data.URLModel === 'risk-matrices'}
-					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+					<a href="{base}/libraries" class="btn variant-filled-primary" data-testid="add-button"
 						><i class="fa-solid fa-file-import mr-2" />{m.importMatrices()}</a
 					>
 				{:else if data.URLModel === 'frameworks'}
-					<a href="/libraries" class="btn variant-filled-primary" data-testid="add-button"
+					<a href="{base}/libraries" class="btn variant-filled-primary" data-testid="add-button"
 						><i class="fa-solid fa-file-import mr-2" />{m.importFrameworks()}</a
 					>
 				{/if}

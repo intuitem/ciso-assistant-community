@@ -31,6 +31,7 @@
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
+	import { base } from '$app/paths';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -166,7 +167,7 @@
 						{#each reference_controls as func}
 							<li>
 								{#if func.id}
-									<a class="anchor" href="/reference-controls/{func.id}">
+									<a class="anchor" href="{base}/reference-controls/{func.id}">
 										{func.str}
 									</a>
 								{:else}
@@ -189,7 +190,7 @@
 						{#each threats as threat}
 							<li>
 								{#if threat.id}
-									<a class="anchor" href="/threats/{threat.id}">
+									<a class="anchor" href="{base}/threats/{threat.id}">
 										{threat.str}
 									</a>
 								{:else}

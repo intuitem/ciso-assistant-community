@@ -6,6 +6,7 @@
 
 	import type { PopupSettings } from '@skeletonlabs/skeleton';
 	import { popup } from '@skeletonlabs/skeleton';
+	import { base } from '$app/paths';
 
 	function stopPropagation(event: Event): void {
 		event.stopPropagation();
@@ -23,7 +24,7 @@
 		<ModelTable source={data.table} URLModel={data.URLModel}>
 			<span slot="actions" let:meta class="space-x-2 whitespace-nowrap">
 				<a
-					href="/risk-assessments/{meta.id}/plan"
+					href="{base}/risk-assessments/{meta.id}/plan"
 					class="unstyled cursor-pointer text-xl text-slate-500 hover:text-indigo-700"
 					on:click={stopPropagation}><i class="fa-solid fa-heart-pulse" /></a
 				>
@@ -38,23 +39,23 @@
 				>
 					<p class="block px-4 py-2 text-sm text-gray-800">Risk risk_assessment</p>
 					<a
-						href="/risk-assessments/{meta.id}/export/pdf"
+						href="{base}/risk-assessments/{meta.id}/export/pdf"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 						on:click={stopPropagation}>... as PDF</a
 					>
 					<a
-						href="/risk-assessments/{meta.id}/export/csv"
+						href="{base}/risk-assessments/{meta.id}/export/csv"
 						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 						on:click={stopPropagation}>... as csv</a
 					>
 					<p class="block px-4 py-2 text-sm text-gray-800">Treatment plan</p>
 					<a
-						href="/risk-assessments/{meta.id}/plan/export/pdf"
+						href="{base}/risk-assessments/{meta.id}/plan/export/pdf"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 						on:click={stopPropagation}>... as PDF</a
 					>
 					<a
-						href="/risk-assessments/{meta.id}/plan/export/csv"
+						href="{base}/risk-assessments/{meta.id}/plan/export/csv"
 						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 						on:click={stopPropagation}>... as csv</a
 					>

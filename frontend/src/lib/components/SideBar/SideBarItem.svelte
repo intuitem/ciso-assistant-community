@@ -5,6 +5,7 @@
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
+	import { base } from '$app/paths';
 
 	export let item: any; // TODO: type this
 
@@ -18,7 +19,7 @@
 
 {#each item as item}
 	<a
-		href={item.href}
+		href={base}{item.href}
 		class="unstyled flex whitespace-nowrap items-center py-2 text-sm font-normal rounded-token {classesActive(
 			item.href ?? ''
 		)}"

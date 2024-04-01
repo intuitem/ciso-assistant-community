@@ -5,6 +5,7 @@
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import * as m from '$paraglide/messages';
+	import { base } from '$app/paths';
 
 	export let data;
 	let loading = false;
@@ -106,7 +107,7 @@
 					{m.dependencies()}:
 					{#each data.library.dependencies as dependency}
 						<li>
-							<a href="/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a>
+							<a href="{base}/libraries/{dependency}" target="_parent" class="anchor">{dependency}</a>
 						</li>
 					{/each}
 				</p>

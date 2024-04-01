@@ -72,7 +72,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
+		goto(`${base}/${URLModel}/${rowMetaData[identifierField]}`);
 	}
 
 	// Row Keydown Handler
@@ -108,6 +108,7 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
+	import { base } from '$app/paths';
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
@@ -195,7 +196,7 @@
 						<td
 							class="{regionCell}"
 							role="gridcell"
-						>
+						>coucou2
 							{#if taggedKeys.has(key)}
 								{@const _tagList = tagMap[key]}
 								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
@@ -223,7 +224,8 @@
                               (item) => item.field === key
                             )?.urlModel
                           }/${val.id}`}
-                          <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
+						  coucou
+                          <a href={base}{itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
                         {:else}
                           {val}
                         {/if}
@@ -235,7 +237,7 @@
                     {@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find(
                       (item) => item.field === key
                     )?.urlModel}/${value.id}`}
-                    <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{value.str ?? '-'}</a>
+                    <a href={base}{itemHref} class="anchor" on:click={e => e.stopPropagation()}>{value.str ?? '-'}</a>
                   {:else}
                     {value.str ?? '-'}
                   {/if}
@@ -268,7 +270,7 @@
                 model={URL_MODEL_MAP[URLModel]}
                 {URLModel}
                 detailURL={`/${URLModel}/${row.meta[identifierField]}`}
-                editURL={!(row.meta.builtin || row.meta.urn) ? `/${URLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
+                editURL={!(row.meta.builtin || row.meta.urn) ? `${base}/${URLModel}/${row.meta[identifierField]}/edit?next=${base}${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}

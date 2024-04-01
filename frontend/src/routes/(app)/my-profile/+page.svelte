@@ -4,6 +4,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	function filterUserData() {
 		const filtered = {};
@@ -29,11 +30,11 @@
 	<div class="flex flex-row items-center justify-between p-2">
 		<h1 class="text-xl font-semibold">{$page.data.user.first_name} {$page.data.user.last_name}</h1>
 		<div>
-			<a href="my-profile/change-password" class="btn variant-filled-primary h-fit"
+			<a href="{base}/my-profile/change-password" class="btn variant-filled-primary h-fit"
 				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</a
 			>
 			{#if canEditObject}
-				<a href="/users/{$page.data.user.id}/edit?next=/my-profile" class="btn variant-filled-primary h-fit"
+				<a href="{base}/users/{$page.data.user.id}/edit?next={base}/my-profile" class="btn variant-filled-primary h-fit"
 					><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
 				>
 			{/if}

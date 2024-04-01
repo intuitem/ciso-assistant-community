@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { breadcrumbObject } from '$lib/utils/stores';
-
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { URL_MODEL_MAP } from '$lib/utils/crud.js';
+	import { base } from '$app/paths';
+
 	const showRisks = true;
 	export let data;
 	const riskMatrix = data.data;
@@ -30,7 +31,7 @@
 														(item) => item.field === key
 													)?.urlModel
 												}/${val.id}`}
-												<a href={itemHref} class="anchor">{val.str}</a>
+												<a href="{base}{itemHref}" class="anchor">{val.str}</a>
 											{:else}
 												{value}
 											{/if}
@@ -43,7 +44,7 @@
 										(item) => item.field === key
 									)?.urlModel
 								}/${value.id}`}
-								<a href={itemHref} class="anchor">{value.str}</a>
+								<a href="{base}{itemHref}" class="anchor">{value.str}</a>
 							{:else}
 								{value.str ?? value}
 							{/if}

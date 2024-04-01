@@ -9,6 +9,7 @@
 	import type { AnyZodObject } from 'zod';
 
 	import * as m from '$paraglide/messages';
+	import { base } from '$app/paths';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -66,15 +67,17 @@
 	<slot name="body" />
 	{#if !hasBody}
 		{#if displayDetail}
+			coucou5
 			<a
-				href={detailURL}
+				href={base}{detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-detail-button"><i class="fa-solid fa-eye" /></a
 			>
 		{/if}
 		{#if displayEdit}
+			coucou6
 			<a
-				href={editURL}
+				href={base}{editURL}
 				on:click={stopPropagation}
 				class="unstyled cursor-pointer hover:text-primary-500"
 				data-testid="tablerow-edit-button"><i class="fa-solid fa-pen-to-square" /></a

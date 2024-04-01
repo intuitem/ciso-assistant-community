@@ -10,6 +10,7 @@
 	import * as m from '$paraglide/messages';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 	breadcrumbObject.set(data.framework);
@@ -67,7 +68,7 @@
 															(item) => item.field === key
 														)?.urlModel
 													}/${val.id}`}
-													<a href={itemHref} class="anchor">{val.str}</a>
+													<a href="{base}{itemHref}" class="anchor">{val.str}</a>
 												{:else}
 													{value}
 												{/if}
@@ -80,7 +81,7 @@
 											(item) => item.field === key
 										)?.urlModel
 									}/${value.id}`}
-									<a href={itemHref} class="anchor">{value.str}</a>
+									<a href="{base}{itemHref}" class="anchor">{value.str}</a>
 								{:else}
 									{value.str ?? value}
 								{/if}

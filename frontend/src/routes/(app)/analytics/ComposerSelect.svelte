@@ -7,6 +7,7 @@
 	import { onMount } from 'svelte';
 	import { getOptions } from '$lib/utils/crud';
 	import * as m from '$paraglide/messages';
+	import { base } from '$app/paths';
 
 	export let composerForm: SuperValidated<AnyZodObject>;
 
@@ -37,7 +38,7 @@
 			/>
 			{#if data.risk_assessment && data.risk_assessment.length > 0}
 				<a
-					href={`/analytics/composer/?risk_assessment=${data.risk_assessment}`}
+					href={`${base}/analytics/composer/?risk_assessment=${data.risk_assessment}`}
 					class="btn variant-filled-primary">{m.processButton()}</a
 				>
 			{:else}

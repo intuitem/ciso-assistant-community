@@ -1,6 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { User } from '$lib/utils/types';
 import { redirect, type Handle, type RequestEvent, type HandleFetch } from '@sveltejs/kit';
+import { base } from '$app/paths';
 
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
@@ -37,7 +38,7 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 		event.cookies.delete('sessionid', {
 			path: '/'
 		});
-		redirect(302, `/login?next=${event.url.pathname}`);
+		redirect(302, `${base}/login?next=${base}${event.url.pathname}`);
 	}
 	return res.json();
 }

@@ -4,6 +4,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ChangePasswordSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 </script>
@@ -36,7 +37,7 @@
 				<div class="flex flex-row space-x-2 pt-3">
 					<a
 						class="btn bg-gray-400 text-white font-semibold w-full"
-						href="/my-profile"
+						href="{base}/my-profile"
 						data-testid="cancel-button"
 						type="button">
 						{m.cancel()}
