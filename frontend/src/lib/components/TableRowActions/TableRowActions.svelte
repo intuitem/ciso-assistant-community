@@ -67,7 +67,6 @@
 	<slot name="body" />
 	{#if !hasBody}
 		{#if displayDetail}
-			coucou5
 			<a
 				href={base}{detailURL}
 				class="unstyled cursor-pointer hover:text-primary-500"
@@ -75,7 +74,6 @@
 			>
 		{/if}
 		{#if displayEdit}
-			coucou6
 			<a
 				href={base}{editURL}
 				on:click={stopPropagation}

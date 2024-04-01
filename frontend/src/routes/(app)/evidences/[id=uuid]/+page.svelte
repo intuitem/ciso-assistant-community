@@ -119,7 +119,6 @@
 									}/${value.id}`}
 									<a href="{base}{itemHref}" class="anchor">{value.str}</a>
 								{:else if isURL(value)}
-									coucou
 									<a href="{base}{value}" target="_blank" class="anchor">{value}</a>
 								{:else}
 									{value.str ?? value}

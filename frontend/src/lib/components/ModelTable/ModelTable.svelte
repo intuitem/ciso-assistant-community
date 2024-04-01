@@ -196,7 +196,7 @@
 						<td
 							class="{regionCell}"
 							role="gridcell"
-						>coucou2
+						>
 							{#if taggedKeys.has(key)}
 								{@const _tagList = tagMap[key]}
 								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
@@ -224,7 +224,6 @@
                               (item) => item.field === key
                             )?.urlModel
                           }/${val.id}`}
-						  coucou
                           <a href={base}{itemHref} class="anchor" on:click={e => e.stopPropagation()}>{val.str}</a>
                         {:else}
                           {val}

@@ -17,7 +17,7 @@ const config = {
 			$paraglide: './src/paraglide/'
 		},
 		paths: {
-			base: '',
+			base: process.env.hasOwnProperty('BASE_NAME') ? '/' + process.env.BASE_NAME : '',
 			relative: false
 		}
 	}
