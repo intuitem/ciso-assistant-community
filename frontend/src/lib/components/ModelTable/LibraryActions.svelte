@@ -47,7 +47,7 @@
 		<span class="hover:text-primary-500">
 			<form
 				method="post"
-				action="/libraries/{library.urn}"
+				action="libraries/{library.urn}"
 				use:enhance={() => {
 					loading.form = true;
 					loading.library = library.urn;
