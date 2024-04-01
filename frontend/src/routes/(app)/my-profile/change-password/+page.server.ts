@@ -44,6 +44,6 @@ export const actions: Actions = {
 		}
 
 		setFlash({ type: 'success', message: m.passwordSuccessfullyChanged() }, event);
-		redirect(302, '/my-profile');
+		redirect(302, 'my-profile');
 	}
 };

@@ -11,7 +11,7 @@ import * as m from '$paraglide/messages';
 export const load: PageServerLoad = async (event) => {
 	// redirect user if already logged in
 	if (event.locals.user) {
-		redirect(302, '/');
+		redirect(302, '');
 	}
 
 	const form = await superValidate(event.request, emailSchema);
@@ -55,7 +55,7 @@ export const actions: Actions = {
 				},
 				event
 			);
-			redirect(302, '/login');
+			redirect(302, 'login');
 		}
 
 		const endpoint = `${BASE_API_URL}/iam/password-reset/`;
@@ -76,7 +76,7 @@ export const actions: Actions = {
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
 			}
-			redirect(302, '/login');
+			redirect(302, 'login');
 		}
 
 		setFlash(
@@ -87,6 +87,6 @@ export const actions: Actions = {
 			event
 		);
 
-		redirect(302, '/login');
+		redirect(302, 'login');
 	}
 };

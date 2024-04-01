@@ -9,7 +9,7 @@ import { setError, superValidate } from 'sveltekit-superforms/server';
 export const load: PageServerLoad = async ({ request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
-		redirect(302, '/analytics');
+		redirect(302, 'analytics');
 	}
 
 	const form = await superValidate(request, loginSchema);

@@ -40,7 +40,7 @@ export const actions: Actions = {
 			}
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
-				redirect(302, '/login');
+				redirect(302, 'login');
 			}
 			return fail(400, { form });
 		}
@@ -52,6 +52,6 @@ export const actions: Actions = {
 			},
 			event
 		);
-		redirect(302, '/login');
+		redirect(302, 'login');
 	}
 };

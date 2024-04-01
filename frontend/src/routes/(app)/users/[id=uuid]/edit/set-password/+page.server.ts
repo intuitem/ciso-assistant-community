@@ -41,6 +41,6 @@ export const actions: Actions = {
 		}
 
 		setFlash({ type: 'success', message: m.passwordSuccessfullySet() }, event);
-		redirect(302, '/users');
+		redirect(302, 'users');
 	}
 };

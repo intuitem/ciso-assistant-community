@@ -40,12 +40,12 @@ export const actions: Actions = {
 			}
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
-				redirect(302, '/login');
+				redirect(302, 'login');
 			}
 			return fail(400, { form });
 		}
 
 		setFlash({ type: 'success', message: m.passwordSuccessfullyReset() }, event);
-		redirect(302, '/login');
+		redirect(302, 'login');
 	}
 };

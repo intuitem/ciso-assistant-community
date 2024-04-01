@@ -5,7 +5,7 @@ export const GET = async ({ locals }) => {
 	if (!locals.user) {
 		redirect(302, `/login?next=/home`);
 	}
-	redirect(302, '/analytics');
+	redirect(302, 'analytics');
 };
 
 export const POST = async ({ fetch, cookies }) => {
@@ -24,5 +24,5 @@ export const POST = async ({ fetch, cookies }) => {
 
 	cookies.delete('sessionid', { path: '/' });
 
-	redirect(302, '/login');
+	redirect(302, 'login');
 };
