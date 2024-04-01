@@ -68,6 +68,6 @@ export const actions: Actions = {
 			return fail(400, { form: deleteAttachmentForm });
 		}
 		setFlash({ type: 'success', message: m.attachmentDeleted() }, event);
-		throw redirect(302, `/${urlmodel}/${id}`);
+		throw redirect(302, `${urlmodel}/${id}`);
 	}
 };

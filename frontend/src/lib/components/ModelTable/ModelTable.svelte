@@ -232,7 +232,7 @@
                   </ul>
                 {:else if value && value.str}
                   {#if value.id}
-                    {@const itemHref = `/${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find(
+                    {@const itemHref = `${URL_MODEL_MAP[URLModel]['foreignKeyFields']?.find(
                       (item) => item.field === key
                     )?.urlModel}/${value.id}`}
                     <a href={itemHref} class="anchor" on:click={e => e.stopPropagation()}>{value.str ?? '-'}</a>

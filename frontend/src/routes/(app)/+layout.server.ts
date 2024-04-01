@@ -5,8 +5,8 @@ import { setLanguageTag, sourceLanguageTag } from '$paraglide/runtime';
 
 // get `locals.user` and pass it to the `page` store
 export const load = loadFlash(async ({ locals, url, cookies }) => {
-	if (!locals.user && !url.pathname.includes('/login')) {
-		redirect(302, `/login?next=${url.pathname}`);
+	if (!locals.user && !url.pathname.includes('login')) {
+		redirect(302, `login?next=${url.pathname}`);
 	}
 	setLanguageTag(cookies.get('lang') || sourceLanguageTag)
 	return { user: locals.user };

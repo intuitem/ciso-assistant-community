@@ -25,7 +25,7 @@
 									{#each value as val}
 										<li>
 											{#if val.str && val.id}
-												{@const itemHref = `/${
+												{@const itemHref = `${
 													URL_MODEL_MAP[data.urlModel]['foreignKeyFields']?.find(
 														(item) => item.field === key
 													)?.urlModel
@@ -38,7 +38,7 @@
 									{/each}
 								</ul>
 							{:else if value.id}
-								{@const itemHref = `/${
+								{@const itemHref = `${
 									URL_MODEL_MAP['risk-matrices']['foreignKeyFields']?.find(
 										(item) => item.field === key
 									)?.urlModel

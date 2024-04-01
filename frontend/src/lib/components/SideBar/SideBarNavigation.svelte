@@ -34,8 +34,8 @@
 					return subItem.permissions.some((permission) =>
 						Object.hasOwn(user.permissions, permission)
 					);
-				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[1])) {
-					const model = URL_MODEL_MAP[subItem.href.split('/')[1]];
+				} else if (Object.hasOwn(URL_MODEL_MAP, subItem.href.split('/')[0])) {
+					const model = URL_MODEL_MAP[subItem.href.split('/')[0]];
 					const canViewObject = Object.hasOwn(user.permissions, `view_${model.name}`);
 					return canViewObject;
 				}
