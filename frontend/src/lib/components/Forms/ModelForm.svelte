@@ -74,6 +74,7 @@
 				objects: model.foreignKeys['reference_control'],
 				suggestions: suggestions['reference_control']
 			})}
+			data-focusindex="0"
 			field="reference_control"
 			label={m.referenceControl()}
 			nullable={true}
@@ -99,10 +100,10 @@
 		/>
 	{/if}
 	{#if shape.name}
-		<TextField {form} field="name" label={m.name()} />
+		<TextField {form} field="name" label={m.name()} data-focusindex="1"/>
 	{/if}
 	{#if shape.description}
-		<TextArea {form} field="description" label={m.description()} />
+		<TextArea {form} field="description" label={m.description()} data-focusindex="2"/>
 	{/if}
 	{#if URLModel === 'projects'}
 		<AutocompleteSelect
