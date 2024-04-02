@@ -835,6 +835,14 @@ class UserViewSet(BaseModelViewSet):
         # TODO: Implement a proper filter for the queryset
         return User.objects.all()
 
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user.user_groups.filter(name="BI-UG-ADM").exists() :
+            number_of_admin_users = User.objects.filter(user_groups__name="BI-UG-ADM").distinct().count()
+            if number_of_admin_users == 1 :
+                return Response({"error":"You can't delete the only admin account of your application."},status=HTTP_403_FORBIDDEN)
+
+        return super().destroy(request,*args,**kwargs)
 
 class UserGroupViewSet(BaseModelViewSet):
     """
