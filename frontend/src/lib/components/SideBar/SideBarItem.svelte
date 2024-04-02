@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
-	import { getModalStore } from '@skeletonlabs/skeleton';
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
@@ -9,10 +7,8 @@
 
 	export let item: any; // TODO: type this
 
-	const modalStore = getModalStore();
-
 	$: classesActive = (href: string) =>
-		href === $page.url.pathname
+		$page.url.pathname.includes(href)
 			? 'bg-primary-100 text-primary-800'
 			: 'hover:bg-primary-50 text-gray-800 ';
 </script>
