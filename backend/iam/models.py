@@ -2,7 +2,7 @@
     Inspired from Azure IAM model """
 
 from collections import defaultdict
-from typing import Any, List, Self, Tuple
+from typing import Any, List, Self, Tuple, Self
 import uuid
 from django.utils import timezone
 from django.db import models
@@ -236,6 +236,9 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
                 user_group_list.append(user_group)
         return user_group_list
 
+    @staticmethod
+    def get_admin_group():
+        return UserGroup.objects.get(name="BI-UG-ADM",builtin=True)
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -290,7 +293,6 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(email, password, **extra_fields)
         UserGroup.objects.get(name="BI-UG-ADM").user_set.add(superuser)
         return superuser
-
 
 class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     """a user is a principal corresponding to a human"""
@@ -471,6 +473,12 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def set_username(self, username):
         self.email = username
 
+    @staticmethod
+    def get_admin_users() -> List[Self] :
+        return User.objects.filter(user_groups__name="BI-UG-ADM",user_groups__builtin=True)
+
+    def is_admin(self) -> bool :
+        return self.user_groups.filter(name="BI-UG-ADM",builtin=True).exists()
 
 class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""

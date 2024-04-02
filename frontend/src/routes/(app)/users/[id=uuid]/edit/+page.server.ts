@@ -2,8 +2,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { UserEditSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms/server';
 import type { PageServerLoad } from './$types';
-import { redirect, type Actions } from '@sveltejs/kit';
-import { fail } from 'assert';
+import { redirect, fail, type Actions } from '@sveltejs/kit';
 import { getModelInfo } from '$lib/utils/crud';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
@@ -58,6 +57,10 @@ export const actions: Actions = {
 		if (!res.ok) {
 			const response = await res.json();
 			console.error('server response:', response);
+			if (response.error) {
+				setFlash({ type: 'error', message: response.error }, event);
+				return fail(403, { form: form });
+			}
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
