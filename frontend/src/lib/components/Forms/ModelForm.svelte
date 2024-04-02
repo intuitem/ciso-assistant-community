@@ -42,14 +42,12 @@
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
 
-	const modelFormId = `${Math.floor(Math.random()*Math.pow(10,16))}`;
-
 	onMount(() => {
-		const form = document.querySelector(`form[model-form-id="${modelFormId}"]`);
-		const first_input = form?.querySelector(`input:not([type]), input[type="password"], input[type="tel"], input[type="email"]`);
-		console.log(first_input);
-		first_input?.focus();
-	})
+		if (shape.reference_control) {
+			const reference_control_input: HTMLElement | null = document.querySelector(`div.multiselect[role="searchbox"] input`); // The MultiSelect component can't be focused automatically with data-focusindex="0" so we focus manually
+			reference_control_input?.focus();
+		}
+	});
 </script>
 
 <SuperForm
@@ -60,7 +58,6 @@
 	let:form
 	let:data
 	let:initialData
-	model-form-id={modelFormId}
 	validators={schema}
 	{...$$restProps}
 >
@@ -74,7 +71,6 @@
 				objects: model.foreignKeys['reference_control'],
 				suggestions: suggestions['reference_control']
 			})}
-			data-focusindex="0"
 			field="reference_control"
 			label={m.referenceControl()}
 			nullable={true}
@@ -100,10 +96,10 @@
 		/>
 	{/if}
 	{#if shape.name}
-		<TextField {form} field="name" label={m.name()} data-focusindex="1"/>
+		<TextField {form} field="name" label={m.name()} data-focusindex="0"/>
 	{/if}
 	{#if shape.description}
-		<TextArea {form} field="description" label={m.description()} data-focusindex="2"/>
+		<TextArea {form} field="description" label={m.description()} data-focusindex="1"/>
 	{/if}
 	{#if URLModel === 'projects'}
 		<AutocompleteSelect
@@ -397,7 +393,7 @@
 		<HiddenInput {form} field="requirement" />
 		<HiddenInput {form} field="compliance_assessment" />
 	{:else if URLModel === 'users'}
-		<TextField {form} field="email" label={m.email()} />
+		<TextField {form} field="email" label={m.email()} data-focusindex="2"/>
 		{#if shape.first_name && shape.last_name}
 			<TextField {form} field="first_name" label={m.firstName()} />
 			<TextField {form} field="last_name" label={m.lastName()} />
