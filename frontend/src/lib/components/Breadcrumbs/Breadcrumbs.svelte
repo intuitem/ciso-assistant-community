@@ -5,6 +5,7 @@
 	import { listViewFields } from '$lib/utils/table';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
+	import { base } from '$app/paths';
 
 	let crumbs: Array<{ label: string; href: string; icon?: string }> = [];
 
@@ -21,8 +22,7 @@
 
 	$: {
 		// Remove zero-length tokens.
-		const tokens = $page.url.pathname.split('/').filter((t) => t !== '');
-		let title = '';
+		const tokens = $page.url.pathname.split('/').filter((t) => t !== '' && t !== base.replace('/', ''));
 
 		// Create { label, href } pairs for each token.
 		let tokenPath = '';
