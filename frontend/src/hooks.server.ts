@@ -38,7 +38,7 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 		event.cookies.delete('sessionid', {
 			path: '/'
 		});
-		redirect(302, `${base}/login?next=${base}${event.url.pathname}`);
+		redirect(302, `${base}/login?next=${event.url.pathname}`);
 	}
 	return res.json();
 }
