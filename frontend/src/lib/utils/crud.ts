@@ -67,6 +67,11 @@ interface ForeignKeyField {
 	urlParams?: string;
 }
 
+interface Field {
+	field: string;
+	type?: 'date' | 'datetime';
+}
+
 interface SelectField {
 	field: string;
 }
@@ -76,6 +81,7 @@ export interface ModelMapEntry {
 	verboseName: string;
 	verboseNamePlural?: string;
 	urlModel?: urlModel;
+	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ForeignKeyField[];
 	selectFields?: SelectField[];
@@ -178,11 +184,26 @@ export const URL_MODEL_MAP: ModelMap = {
 		localFrGender: 'f',
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
+		detailViewFields: [
+			{ field: 'id'},
+			{ field: 'folder' },
+			{ field: 'reference_control' },
+			{ field: 'category' },
+			{ field: 'effort' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'expiry_date', type: 'date' },
+			{ field: 'link' }
+		],
 		foreignKeyFields: [
 			{ field: 'reference_control', urlModel: 'reference-controls' },
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
+		reverseForeignKeyFields: [{ field: 'applied_controls', urlModel: 'evidences' }],
 		selectFields: [{ field: 'status' }, { field: 'category' }, { field: 'effort' }],
 		filters: [
 			{ field: 'reference_control' },

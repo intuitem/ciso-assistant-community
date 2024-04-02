@@ -22,7 +22,7 @@
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
-	export let origin: string = "default";
+	export let origin = 'default';
 	export let closeModal = false;
 	export let parent: any;
 	export let suggestions: { [key: string]: any } = {};
@@ -42,14 +42,16 @@
 	$: shape = schema.shape || schema._def.schema.shape;
 	let updated_fields = new Set();
 
-	const modelFormId = `${Math.floor(Math.random()*Math.pow(10,16))}`;
+	const modelFormId = `${Math.floor(Math.random() * Math.pow(10, 16))}`;
 
 	onMount(() => {
 		const form = document.querySelector(`form[model-form-id="${modelFormId}"]`);
-		const first_input = form?.querySelector(`input:not([type]), input[type="password"], input[type="tel"], input[type="email"]`);
+		const first_input = form?.querySelector(
+			`input:not([type]), input[type="password"], input[type="tel"], input[type="email"]`
+		);
 		console.log(first_input);
 		first_input?.focus();
-	})
+	});
 </script>
 
 <SuperForm
@@ -84,7 +86,7 @@
 						.then((r) => {
 							form.form.update((currentData) => {
 								if (
-									origin === "edit" &&
+									origin === 'edit' &&
 									currentData['reference_control'] === initialData['reference_control'] &&
 									!updated_fields.has('reference_control')
 								) {
@@ -128,12 +130,7 @@
 			hide={initialData.project}
 		/>
 		<TextField {form} field="version" label={m.version()} />
-		<Select
-			{form}
-			options={model.selectOptions['status']}
-			field="status"
-			label={m.status()}
-		/>
+		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
@@ -155,13 +152,7 @@
 			field="reviewers"
 			label={m.reviewers()}
 		/>
-		<TextField
-			type="date"
-			{form}
-			field="eta"
-			label={m.eta()}
-			helpText={m.etaHelpText()}
-		/>
+		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} />
 		<TextField
 			type="date"
 			{form}
@@ -211,13 +202,7 @@
 			field="evidences"
 			label={m.evidences()}
 		/>
-		<TextField
-			type="date"
-			{form}
-			field="eta"
-			label={m.eta()}
-			helpText={m.etaHelpText()}
-		/>
+		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} />
 		<TextField
 			type="date"
 			{form}
@@ -225,12 +210,7 @@
 			label={m.expiryDate()}
 			helpText={m.expiryDateHelpText()}
 		/>
-		<TextField
-			{form}
-			field="link"
-			label={m.link()}
-			helpText={m.linkHelpText()}
-		/>
+		<TextField {form} field="link" label={m.link()} helpText={m.linkHelpText()} />
 		<Select
 			{form}
 			options={model.selectOptions['effort']}
@@ -301,6 +281,8 @@
 			hide={initialData.folder}
 		/>
 	{:else if URLModel === 'evidences'}
+		<HiddenInput {form} field="applied_controls" />
+		<HiddenInput {form} field="requirement_assessments" />
 		<FileInput
 			{form}
 			helpText={object.attachment
@@ -316,12 +298,7 @@
 			label={m.domain()}
 			hide={initialData.applied_controls || initialData.requirement_assessments}
 		/>
-		<TextField
-			{form}
-			field="link"
-			label={m.link()}
-			helpText={m.linkHelpText()}
-		/>
+		<TextField {form} field="link" label={m.link()} helpText={m.linkHelpText()} />
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
 			{form}
@@ -331,12 +308,7 @@
 			hide={initialData.project}
 		/>
 		<TextField {form} field="version" label={m.version()} />
-		<Select
-			{form}
-			options={model.selectOptions['status']}
-			field="status"
-			label={m.status()}
-		/>
+		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
@@ -357,13 +329,7 @@
 			field="reviewers"
 			label={m.reviewers()}
 		/>
-		<TextField
-			type="date"
-			{form}
-			field="eta"
-			label={m.eta()}
-			helpText={m.etaHelpText()}
-		/>
+		<TextField type="date" {form} field="eta" label={m.eta()} helpText={m.etaHelpText()} />
 		<TextField
 			type="date"
 			{form}
@@ -411,12 +377,7 @@
 			/>
 		{/if}
 		{#if shape.is_active}
-			<Checkbox
-				{form}
-				field="is_active"
-				label={m.isActive()}
-				helpText={m.isActiveHelpText()}
-			/>
+			<Checkbox {form} field="is_active" label={m.isActive()} helpText={m.isActiveHelpText()} />
 		{/if}
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
