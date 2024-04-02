@@ -26,5 +26,5 @@ export const POST = async ({ fetch, cookies }) => {
 
 	cookies.delete('sessionid', { path: '/' });
 
-	redirect(302, '/login');
+	redirect(302, `${base}/login`);
 };

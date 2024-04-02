@@ -5,11 +5,12 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms/server';
+import { base } from '$app/paths';
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	// redirect user if already logged in
 	if (locals.user) {
-		redirect(302, '/analytics');
+		redirect(301, `${base}/analytics`);
 	}
 
 	const form = await superValidate(request, loginSchema);
@@ -86,6 +87,6 @@ export const actions: Actions = {
 				});
 			}
 		}
-		redirect(302, url.searchParams.get('next') || '/analytics');
+		redirect(302, url.searchParams.get('next') || `${base}/analytics`);
 	}
 };
