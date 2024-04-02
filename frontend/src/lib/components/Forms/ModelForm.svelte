@@ -74,6 +74,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['reference_control'],
+				extra_fields: [["folder","str"]],
 				suggestions: suggestions['reference_control']
 			})}
 			field="reference_control"
@@ -173,7 +174,10 @@
 	{:else if URLModel === 'risk-scenarios'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['risk_assessment'] })}
+			options={getOptions({
+				objects: model.foreignKeys['risk_assessment'],
+				extra_fields: [["project","str"]]
+			})}
 			field="risk_assessment"
 			label={m.riskAssessment()}
 			hide={initialData.risk_assessment}
@@ -181,7 +185,10 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			options={getOptions({ objects: model.foreignKeys['threats'] })}
+			options={getOptions({
+				objects: model.foreignKeys['threats'],
+				extra_fields: [["folder","str"]]
+			})}
 			field="threats"
 			label={m.threats()}
 		/>
@@ -198,7 +205,10 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			options={getOptions({ objects: model.foreignKeys['evidences'] })}
+			options={getOptions({
+				objects: model.foreignKeys['evidences'],
+				extra_fields: [["folder","str"]]
+			})}
 			field="evidences"
 			label={m.evidences()}
 		/>
@@ -258,7 +268,10 @@
 		/>
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['risk_scenarios'] })}
+			options={getOptions({
+				objects: model.foreignKeys['risk_scenarios'],
+				extra_fields: [["project","folder","str"],["project","str"]]
+			})}
 			field="risk_scenarios"
 			label={m.riskScenarios()}
 			helpText={m.riskAcceptanceRiskScenariosHelpText()}
