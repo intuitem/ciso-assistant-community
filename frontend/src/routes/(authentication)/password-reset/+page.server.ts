@@ -7,6 +7,7 @@ import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import * as m from '$paraglide/messages';
+import { base } from '$app/paths';
 
 export const load: PageServerLoad = async (event) => {
 	// redirect user if already logged in
@@ -55,7 +56,7 @@ export const actions: Actions = {
 				},
 				event
 			);
-			redirect(302, '/login');
+			redirect(302, `${base}/login`);
 		}
 
 		const endpoint = `${BASE_API_URL}/iam/password-reset/`;
@@ -76,7 +77,7 @@ export const actions: Actions = {
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
 			}
-			redirect(302, '/login');
+			redirect(302, `${base}/login`);
 		}
 
 		setFlash(
@@ -87,6 +88,6 @@ export const actions: Actions = {
 			event
 		);
 
-		redirect(302, '/login');
+		redirect(302, `${base}/login`);
 	}
 };

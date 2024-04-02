@@ -27,6 +27,7 @@ from core.utils import RoleCodename, UserGroupCodename
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from ciso_assistant.settings import (
+    BASE_NAME,
     CISO_ASSISTANT_URL,
     EMAIL_HOST,
     EMAIL_HOST_USER,
@@ -376,7 +377,7 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         header = {
             "email": self.email,
-            "root_url": CISO_ASSISTANT_URL,
+            "root_url": CISO_ASSISTANT_URL + "/" + BASE_NAME if BASE_NAME else CISO_ASSISTANT_URL,
             "uid": urlsafe_base64_encode(force_bytes(self.pk)),
             "user": self,
             "token": default_token_generator.make_token(self),

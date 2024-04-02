@@ -5,6 +5,7 @@ import { setError, superValidate } from 'sveltekit-superforms/server';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';
+import { base } from '$app/paths';
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, ResetPasswordSchema);
@@ -40,12 +41,12 @@ export const actions: Actions = {
 			}
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
-				redirect(302, '/login');
+				redirect(302, `${base}/login`);
 			}
 			return fail(400, { form });
 		}
 
 		setFlash({ type: 'success', message: m.passwordSuccessfullyReset() }, event);
-		redirect(302, '/login');
+		redirect(302, `${base}/login`);
 	}
 };

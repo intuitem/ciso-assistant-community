@@ -23,6 +23,7 @@ LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
+BASE_NAME = os.environ.get("BASE_NAME", "")
 
 
 def set_ciso_assistant_url(_, __, event_dict):
