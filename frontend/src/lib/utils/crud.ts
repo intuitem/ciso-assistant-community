@@ -185,6 +185,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Applied control',
 		verboseNamePlural: 'Applied controls',
 		detailViewFields: [
+			{ field: 'id'},
 			{ field: 'folder' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
