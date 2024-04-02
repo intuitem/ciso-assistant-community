@@ -2,6 +2,7 @@
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DB_DIR=$APP_DIR/backend/db
 DB_NAME=test-database.sqlite3
+VENV_PATH=$APP_DIR
 
 SCRIPT_LONG_ARGS=()
 SCRIPT_SHORT_ARGS=()
@@ -18,6 +19,13 @@ do
             BACKEND_PORT="${arg#*=}"
         else
             echo "Invalid format for --port argument. Please use --port=PORT"
+            exit 1
+        fi
+    elif [[ $arg == --env* ]]; then
+        if [[ "${arg#*=}" =~ ^(.+)\/([^\/.]+)$ ]]; then
+            VENV_PATH="${arg#*=}"
+        else
+            echo "Invalid format for --env argument. Please use --env=PATH"
             exit 1
         fi
     elif [[ $arg == --mailer* ]]; then
@@ -45,6 +53,7 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     echo "Run the end-to-end tests for the CISO Assistant application."
     echo "Options:"
     echo "  --browser=NAME          Run the tests in the specified browser (chromium, firefox, webkit)"
+    echo "  --env=PATH              Path to the virtual environment to use for the tests (default: first one found in $VENV_PATH)"
     echo "  --global-timeout=MS     Maximum time this test suite can run in milliseconds (default: unlimited)"
     echo "  --grep=SEARCH           Only run tests matching this regular expression (default: \".*\")"
     echo "  --headed                Run the tests in headful mode"
@@ -61,6 +70,19 @@ if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -h " ]] || [[ " ${SCRIPT_LONG_ARGS[@]} " 
     echo -e "  --workers=COUNT         Number of concurrent workers or percentage of logical CPU cores, use 1 to run in a single worker (default: 1)"
     echo "                          Be aware that increasing the number of workers may reduce tests accuracy and stability"
     exit 0
+fi
+
+ENV_CFG=$(find "$VENV_PATH" -name "pyvenv.cfg" -print -quit)
+if [[ ! -z $ENV_CFG ]]; then
+    VENV_PATH=$(dirname $ENV_CFG)
+    if [ -d "$VENV_PATH/bin" ] ; then
+        source "$VENV_PATH/bin/activate"
+    else
+        source "$VENV_PATH/Scripts/activate"
+    fi
+    echo "Using virtual environment at $VENV_PATH"
+else
+    echo "No virtual environment found at $VENV_PATH, using standard python environment instead."
 fi
 
 if python -c "import socket;exit(0 if 0 == socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('localhost',$BACKEND_PORT)) else 1)" ; then
@@ -86,6 +108,9 @@ done
 
 cleanup() {
     echo -e "\nCleaning up..."
+    if type deactivate >/dev/null 2>&1; then
+        deactivate
+    fi
     if [ -n "$BACKEND_PID" ] ; then
         kill $BACKEND_PID > /dev/null 2>&1
         echo "| backend server stopped"
@@ -95,12 +120,12 @@ cleanup() {
         docker rm $MAILER_PID > /dev/null 2>&1
         echo "| mailer service stopped"
     fi
-    if [ -f $DB_DIR/$DB_NAME ] ; then
-        rm $DB_DIR/$DB_NAME
+    if [ -f "$DB_DIR/$DB_NAME" ] ; then
+        rm "$DB_DIR/$DB_NAME"
         echo "| test database deleted"
     fi
-    if [ -d $APP_DIR/frontend/tests/utils/.testhistory ] ; then
-        rm -rf $APP_DIR/frontend/tests/utils/.testhistory
+    if [ -d "$APP_DIR/frontend/tests/utils/.testhistory" ] ; then
+        rm -rf "$APP_DIR/frontend/tests/utils/.testhistory"
         echo "| test data history removed"
     fi
     trap - SIGINT SIGTERM EXIT
@@ -116,7 +141,7 @@ finish() {
 trap cleanup SIGINT SIGTERM
 trap finish EXIT
 
-echo "starting backend server..."
+echo "Starting backend server..."
 unset POSTGRES_NAME POSTGRES_USER POSTGRES_PASSWORD
 export CISO_ASSISTANT_URL=http://localhost:4173
 export ALLOWED_HOSTS=localhost
@@ -165,15 +190,16 @@ export MAILER_WEB_SERVER_PORT=$MAILER_WEB_SERVER_PORT
 cd $APP_DIR/frontend/
 
 if (( ${#TEST_PATHS[@]} == 0 )); then
-    echo "running every functional test"
+    echo "| running every functional test"
 else
-    echo "running tests: ${TEST_PATHS[@]}"
+    echo "| running tests: ${TEST_PATHS[@]}"
 fi
 if (( ${#SCRIPT_LONG_ARGS[@]} == 0 )); then
-    echo "without args"
+    echo "| without args"
 else
-    echo "with args: ${SCRIPT_LONG_ARGS[@]}"
+    echo "| with args: ${SCRIPT_LONG_ARGS[@]}"
 fi
+echo "=========================================================================================="
 
 if [[ " ${SCRIPT_SHORT_ARGS[@]} " =~ " -q " ]] ; then
     npx playwright test ./tests/functional/"${TEST_PATHS[@]}" -x --project=chromium "${SCRIPT_LONG_ARGS[@]}"
