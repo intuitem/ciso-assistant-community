@@ -108,6 +108,7 @@
 	import Search from './Search.svelte';
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
+	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
@@ -242,7 +243,7 @@
                 {:else if value && value.hexcolor}
                   <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
 				{:else if ISO_8601_REGEX.test(value)}
-					{new Date(value).toLocaleString(languageTag())}
+									{formatDateOrDateTime(value, languageTag())}
                 {:else}
 					{#if localItems(languageTag())[toCamelCase(value)]}
 						{localItems(languageTag())[toCamelCase(value)]}
