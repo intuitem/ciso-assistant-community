@@ -199,7 +199,10 @@
 								: null}
 						>
 							{#if value}
-								{#if Array.isArray(value)}
+								{#if key === "library"}
+									{@const itemHref = `/libraries/${value.urn}`}
+									<a href={itemHref} class="anchor">{value.name}</a>
+								{:else if Array.isArray(value)}
 									{#if Object.keys(value).length > 0}
 										<ul>
 											{#each value as val}
