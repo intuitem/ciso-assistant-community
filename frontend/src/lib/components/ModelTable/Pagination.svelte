@@ -1,10 +1,15 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables';
+	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages';
 	export let handler: DataHandler;
 	const pageNumber = handler.getPageNumber();
 	const pageCount = handler.getPageCount();
 	const pages = handler.getPages({ ellipsis: true });
+
+	$: if ($page.url) {
+		handler.setPage(1);
+	}
 </script>
 
 <section class="flex">
