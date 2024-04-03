@@ -487,7 +487,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         return round(count * 100 / total)
 
     def __str__(self):
-        return self.name
+        return self.folder.name + '/' + self.name
 
 
 class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -806,7 +806,7 @@ class RiskAssessment(Assessment):
         verbose_name_plural = _("Risk assessments")
 
     def __str__(self) -> str:
-        return f"{self.project.folder}/{self.project}/{self.name} - {self.version}"
+        return f"{self.project}/{self.name} - {self.version}"
 
     @property
     def path_display(self) -> str:
@@ -1237,9 +1237,7 @@ class RiskScenario(NameDescriptionMixin):
 
     def __str__(self):
         return (
-            str(self.parent_project().folder)
-            + _("/")
-            + str(self.parent_project())
+            str(self.parent_project())
             + _(": ")
             + str(self.name)
         )
