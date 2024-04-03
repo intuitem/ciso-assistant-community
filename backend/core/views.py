@@ -843,7 +843,7 @@ class UserViewSet(BaseModelViewSet):
             if number_of_admin_users == 1 :
                 new_user_groups = set(request.data["user_groups"])
                 if str(admin_group.pk) not in new_user_groups :
-                    return Response({"error":"You can't remove the admin user group from the only admin user of the application."},status=HTTP_403_FORBIDDEN)
+                    return Response({"error":"attemptToRemoveOnlyAdminUserGroup"},status=HTTP_403_FORBIDDEN)
 
         return super().update(request, *args, **kwargs)
 
@@ -852,7 +852,7 @@ class UserViewSet(BaseModelViewSet):
         if user.is_admin() :
             number_of_admin_users = User.get_admin_users().count()
             if number_of_admin_users == 1 :
-                return Response({"error":"You can't delete the only admin account of your application."},status=HTTP_403_FORBIDDEN)
+                return Response({"error":"attemptToDeleteOnlyAdminAccountError"},status=HTTP_403_FORBIDDEN)
 
         return super().destroy(request,*args,**kwargs)
 

@@ -6,6 +6,8 @@ import { redirect, fail, type Actions } from '@sveltejs/kit';
 import { getModelInfo } from '$lib/utils/crud';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
+import { languageTag } from '$paraglide/runtime';
+import { localItems } from '$lib/utils/locales';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'users';
@@ -58,7 +60,7 @@ export const actions: Actions = {
 			const response = await res.json();
 			console.error('server response:', response);
 			if (response.error) {
-				setFlash({ type: 'error', message: response.error }, event);
+				setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
 				return fail(403, { form: form });
 			}
 			if (response.non_field_errors) {
