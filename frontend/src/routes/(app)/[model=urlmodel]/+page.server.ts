@@ -156,7 +156,7 @@ export const actions: Actions = {
 				const response = await res.json();
 				console.log(response);
 				if (response.error) {
-					setFlash({ type: 'error', message: response.error }, event);
+					setFlash({ type: 'error', message: localItems(languageTag())[response.error] }, event);
 					return fail(403, { form: deleteForm });
 				}
 				if (response.non_field_errors) {
