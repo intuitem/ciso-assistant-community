@@ -125,7 +125,10 @@
 	{:else if URLModel === 'risk-assessments'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['project'] })}
+			options={getOptions({ 
+				objects: model.foreignKeys['project'],
+				extra_fields: [["folder","str"]]
+				})}
 			field="project"
 			label={m.project()}
 			hide={initialData.project}
@@ -270,7 +273,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_scenarios'],
-				extra_fields: [["project","folder","str"],["project","str"]]
+				extra_fields: [["project","str"]]
 			})}
 			field="risk_scenarios"
 			label={m.riskScenarios()}
@@ -315,7 +318,10 @@
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ objects: model.foreignKeys['project'] })}
+			options={getOptions({ 
+				objects: model.foreignKeys['project'],
+				extra_fields: [["folder","str"]]
+				})}
 			field="project"
 			label={m.project()}
 			hide={initialData.project}
