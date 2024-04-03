@@ -43,9 +43,10 @@
 		{@const compliance_assessments = Object.values(project.compliance_assessments.objects)}
 		{@const risk_assessments = Object.values(project.risk_assessments.objects)}
 		<div>
-			<h1 class="text-2xl font-bold mb-1">
-				&#128161; {project.project.name}
-			</h1>
+			<span class="text-2xl">&#128161;</span>
+			<a class="text-2xl font-bold mb-1 hover:underline text-blue-600" href="/projects/{project.project.id}">
+				{project.project.folder.str}/{project.project.name}
+			</a>
 			<TabGroup>
 				<Tab bind:group={project.tabSet} name="compliance_assessments_tab" value={0}
 					>{m.complianceAssessments()}
