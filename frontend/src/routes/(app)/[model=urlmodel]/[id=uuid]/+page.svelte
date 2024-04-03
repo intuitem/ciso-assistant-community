@@ -34,8 +34,6 @@
 		);
 	}
 
-	console.log(data.data);
-
 	$: breadcrumbObject.set(data.data);
 
 	let tabSet = 0;
