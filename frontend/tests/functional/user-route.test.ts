@@ -123,7 +123,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.complianceAssessmentsPage.createItem({
 			name: vars.assessmentName,
 			description: vars.description,
-			project: vars.projectName,
+			project: vars.folderName + '/' + vars.projectName,
 			version: '1.4.2',
 			status: 'Done',
 			framework: vars.framework.name,
@@ -178,7 +178,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
 			description: vars.description,
-			project: vars.projectName,
+			project: vars.folderName + '/' + vars.projectName,
 			version: '1.4.2',
 			status: 'Done',
 			risk_matrix: vars.matrix.displayName,
@@ -212,7 +212,7 @@ test('user usual routine actions are working correctly', async ({
 		await pages.riskScenariosPage.createItem({
 			name: vars.riskScenarioName,
 			description: vars.description,
-			risk_assessment: `${vars.projectName}/${vars.riskAssessmentName}`,
+			risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName}`,
 			threats: [`${vars.folderName}/${vars.threatName}`]
 		});
 
