@@ -3,6 +3,7 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	import type { AnyZodObject } from 'zod';
+	import { focusTrap } from '@skeletonlabs/skeleton';
 
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -47,7 +48,7 @@
 	<SuperDebug data={$errors} />
 {/if}
 
-<form method="POST" use:enhance {...$$restProps}>
+<form method="POST" use:enhance use:focusTrap={true} {...$$restProps}>
 	{#if $errors._errors}
 		{#each $errors._errors as error}
 			<p class="text-error-500 text-sm font-medium">{error}</p>
