@@ -40,29 +40,31 @@ You can also have a look at our [data model](documentation/architecture/data-mod
 ## Supported frameworks
 
 - ISO 27001:2022
-- NIST Cyber Security Framework (CSF) v1.1
-- NIST Cyber Security Framework (CSF) v2.0
-- NIS2
+- NIST Cyber Security Framework (CSF) v1.1 🇺🇸
+- NIST Cyber Security Framework (CSF) v2.0 🇺🇸
+- NIS2 🇪🇺
 - SOC2
 - PCI DSS 4.0
-- CMMC v2
-- PSPF
-- GDPR checklist from GDPR.EU
-- Essential Eight
+- CMMC v2 🇺🇸
+- PSPF 🇦🇺
+- GDPR checklist from GDPR.EU 🇪🇺
+- Essential Eight 🇦🇺
 - DFS 500 with 2023-11 amendments
-- DORA
+- DORA 🇪🇺
 - NIST AI Risk Management Framework
 - NIST SP 800-53 rev5
-- France LPM/OIV rules
+- France LPM/OIV rules 🇫🇷
+- CCB CyberFundamentals Framework 🇧🇪
+- NIST SP-800-66 (HIPAA) 
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
 - ANSSI hygiene guide
-- CCB CyberFundamentals Framework
+- HDS/HDH
 - CRA
-- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, free of charge 😉
+- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
 
