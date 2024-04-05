@@ -839,7 +839,7 @@ class UserViewSet(BaseModelViewSet):
         user = self.get_object()
         if user.is_admin() :
             number_of_admin_users = User.get_admin_users().count()
-            admin_group = UserGroup.get_admin_group()
+            admin_group = UserGroup.objects.get(name="BI-UG-ADM")
             if number_of_admin_users == 1 :
                 new_user_groups = set(request.data["user_groups"])
                 if str(admin_group.pk) not in new_user_groups :
