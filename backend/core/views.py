@@ -57,7 +57,7 @@ from core.utils import RoleCodename, UserGroupCodename
 
 from django.db import models
 
-from iam.models import User, RoleAssignment, Folder
+from iam.models import User, UserGroup, RoleAssignment, Folder
 
 User = get_user_model()
 
@@ -835,6 +835,26 @@ class UserViewSet(BaseModelViewSet):
         # TODO: Implement a proper filter for the queryset
         return User.objects.all()
 
+    def update(self, request: Request, *args, **kwargs) -> Response:
+        user = self.get_object()
+        if user.is_admin() :
+            number_of_admin_users = User.get_admin_users().count()
+            admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+            if number_of_admin_users == 1 :
+                new_user_groups = set(request.data["user_groups"])
+                if str(admin_group.pk) not in new_user_groups :
+                    return Response({"error":"attemptToRemoveOnlyAdminUserGroup"},status=HTTP_403_FORBIDDEN)
+
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user.is_admin() :
+            number_of_admin_users = User.get_admin_users().count()
+            if number_of_admin_users == 1 :
+                return Response({"error":"attemptToDeleteOnlyAdminAccountError"},status=HTTP_403_FORBIDDEN)
+
+        return super().destroy(request,*args,**kwargs)
 
 class UserGroupViewSet(BaseModelViewSet):
     """

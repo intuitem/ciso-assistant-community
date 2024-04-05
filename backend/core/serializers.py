@@ -162,6 +162,19 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 
 class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
     folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name","urn"])
+
+
+class LibraryReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
+
+
+class LibraryWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Library
+        fields = "__all__"
 
 
 class ThreatWriteSerializer(BaseModelSerializer):
@@ -174,6 +187,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 
 class ThreatReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name","urn"])
 
     class Meta:
         model = Threat
@@ -489,14 +503,3 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         model = RequirementAssessment
         fields = "__all__"
 
-
-class LibraryReadSerializer(BaseModelSerializer):
-    class Meta:
-        model = Library
-        fields = "__all__"
-
-
-class LibraryWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Library
-        fields = "__all__"
