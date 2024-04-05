@@ -40,7 +40,7 @@
 			}
 			return {
 				label: $page.data.label || t,
-				href: Object.keys(listViewFields).includes(tokens[0]) ? tokenPath : null
+				href: Object.keys(listViewFields).includes(tokens[0]) && !listViewFields[tokens[0]].breadcrumb_link_disabled ? tokenPath : null
 			};
 		});
 
