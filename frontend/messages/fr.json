@@ -493,5 +493,7 @@
 	"taintedFormMessage": "Voulez-vous vraiment quitter cette page ? Toutes les données non enregistrées seront perdues.",
 	"riskScenariosStatus": "Statut des scénarios de risque",
 	"onlineDocs": "Documentation en ligne",
-	"warning": "Attention"
+	"warning": "Attention",
+	"missingMandatoyObjects1": "Des objets obligatoires pour {model} ne sont pas encore créés ou importés",
+	"missingMandatoyObjects2": "Veuillez les ajouter avant de continuer"
 }
