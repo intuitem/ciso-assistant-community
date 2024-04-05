@@ -2,7 +2,7 @@
     Inspired from Azure IAM model """
 
 from collections import defaultdict
-from typing import Any, List, Self, Tuple, Self
+from typing import Any, List, Self, Tuple
 import uuid
 from django.utils import timezone
 from django.db import models
@@ -235,10 +235,6 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             if user in user_group.user_set.all():
                 user_group_list.append(user_group)
         return user_group_list
-
-    @staticmethod
-    def get_admin_group():
-        return UserGroup.objects.get(name="BI-UG-ADM",builtin=True)
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -475,10 +471,10 @@ class User(AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     @staticmethod
     def get_admin_users() -> List[Self] :
-        return User.objects.filter(user_groups__name="BI-UG-ADM",user_groups__builtin=True)
+        return User.objects.filter(user_groups__name="BI-UG-ADM")
 
     def is_admin(self) -> bool :
-        return self.user_groups.filter(name="BI-UG-ADM",builtin=True).exists()
+        return self.user_groups.filter(name="BI-UG-ADM").exists()
 
 class Role(NameDescriptionMixin, FolderMixin):
     """A role is a list of permissions"""
