@@ -162,6 +162,7 @@ class ReferenceControlWriteSerializer(BaseModelSerializer):
 
 class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
     folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name","urn"])
 
 
 class LibraryReadSerializer(BaseModelSerializer):
