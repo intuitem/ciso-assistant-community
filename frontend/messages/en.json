@@ -495,5 +495,7 @@
 	"invalidLibraryFileError": "Invalid library file. Please make sure the format is correct.",
 	"taintedFormMessage": "Do you want to leave this page? Changes you made may not be saved.",
 	"riskScenariosStatus": "Risk scenarios status",
-	"onlineDocs": "Online documentation"
+	"onlineDocs": "Online documentation",
+	"attemptToDeleteOnlyAdminAccountError": "You can't delete the only admin account of your application.",
+	"attemptToRemoveOnlyAdminUserGroup": "You can't remove the only admin user of the application from the admin user group."
 }

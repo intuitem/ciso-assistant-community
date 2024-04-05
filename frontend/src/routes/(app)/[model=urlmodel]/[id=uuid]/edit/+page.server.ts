@@ -35,6 +35,10 @@ export const actions: Actions = {
 		if (!res.ok) {
 			const response = await res.json();
 			console.error('server response:', response);
+			if (response.error) {
+				setFlash({ type: 'error', message: response.error }, event);
+				return fail(403, { form: form });
+			}
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
