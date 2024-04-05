@@ -14,6 +14,7 @@ export class SideBar {
 	readonly moreButton: Locator;
 	readonly morePanel: Locator;
 	readonly profileButton: Locator;
+	readonly docsButton: Locator;
 	readonly languageSelect: Locator;
 	readonly aboutButton: Locator;
 	readonly logoutButton: Locator;
@@ -32,6 +33,7 @@ export class SideBar {
 		this.moreButton = this.page.getByTestId('sidebar-more-btn');
 		this.morePanel = this.page.getByTestId('sidebar-more-panel');
 		this.profileButton = this.page.getByTestId('profile-button');
+		this.docsButton = this.page.getByTestId('docs-button');
 		this.languageSelect = this.page.getByTestId('language-select');
 		this.aboutButton = this.page.getByTestId('about-button');
 		this.logoutButton = this.page.getByTestId('logout-button');
@@ -43,10 +45,10 @@ export class SideBar {
 		await expect(this.morePanel).not.toHaveAttribute('inert');
 		await expect(this.logoutButton).toBeVisible();
 		await this.logoutButton.click();
-		await expect(this.page).toHaveURL(/^.*\/login$/)
+		await expect(this.page).toHaveURL(/^.*\/login$/);
 	}
 
-	async click(parent: string, tab: string, waitForURL: boolean = true) {
+	async click(parent: string, tab: string, waitForURL = true) {
 		if (!(await this.page.getByTestId('accordion-item-' + tab.substring(1)).isVisible())) {
 			await this.page.locator('#' + parent.toLowerCase().replace(' ', '-')).click();
 		}
