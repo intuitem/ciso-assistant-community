@@ -21,7 +21,7 @@
 	{@const value = $modalStore[0].value}
 	<div class="modal-example-form {cBase}">
 		<header class={cHeader} data-testid="modal-title">
-			<i class="fa-solid fa-triangle-exclamation"></i>{$modalStore[0].title ?? '(title missing)'}
+			<i class="fa-solid fa-triangle-exclamation"></i> {$modalStore[0].title ?? '(title missing)'}
 		</header>
 		<div>
 			{#if value}
