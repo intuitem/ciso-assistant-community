@@ -13,6 +13,16 @@ type GetOptionsParams = {
 	extra_fields: (string[] | string)[];
 };
 
+export function checkConstraints(constraints: { [key: string]: any }, foreignKeys: any) {
+	const emptyConstraintsList = [];
+	for (const [key, constraint] of Object.entries(constraints)) {
+		if (constraint.required && foreignKeys[key])
+			if (foreignKeys[key].length === 0)
+				emptyConstraintsList.push(key);
+	}
+	return emptyConstraintsList;
+}	
+
 function getValue(object: {[key: string]: any},keys: string[]) {
 	if (typeof keys === "string") {
 		return object[keys];
