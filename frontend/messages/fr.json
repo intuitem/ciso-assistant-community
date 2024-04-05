@@ -492,5 +492,6 @@
 	"invalidLibraryFileError": "Fichier de bibliothèque invalide. Veuillez vérifier le format du fichier.",
 	"taintedFormMessage": "Voulez-vous vraiment quitter cette page ? Toutes les données non enregistrées seront perdues.",
 	"riskScenariosStatus": "Statut des scénarios de risque",
-	"onlineDocs": "Documentation en ligne"
+	"onlineDocs": "Documentation en ligne",
+	"warning": "Attention"
 }
