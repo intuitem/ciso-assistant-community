@@ -6,6 +6,9 @@
 	// Stores
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import * as m from '$paraglide/messages';
+	import { localItems, toCamelCase } from '$lib/utils/locales';
+	import { languageTag } from '$paraglide/runtime';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -22,11 +25,11 @@
 		</header>
 		<div>
 			{#if value}
-				Some mandatory objects for {$modalStore[0].body} are not created or imported yet:
+				{m.missingMandatoyObjects1({model: $modalStore[0].body})}:
 				{#each value as key}
-					<li class="font-bold">{key}</li>
+					<li class="font-bold">{localItems(languageTag())[toCamelCase(key)]}</li>
 				{/each}
-				Please add them before proceeding.
+				{m.missingMandatoyObjects2()}.
 			{/if}
 		</div>
 	</div>
