@@ -86,6 +86,11 @@ export const listViewFields = {
 		head: ['name', 'framework', 'description', 'project'],
 		body: ['name', 'framework', 'description', 'project']
 	},
+	'requirement-assessments': {
+		head: ['name', 'description', 'complianceAssessment'],
+		body: ['name', 'description', 'compliance_assessment'],
+		breadcrumb_link_disabled: true
+	},
 	evidences: {
 		head: ['name', 'file', 'description'],
 		body: ['name', 'attachment', 'description']
