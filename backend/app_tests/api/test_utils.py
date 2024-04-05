@@ -724,7 +724,7 @@ class EndpointTestsQueries:
             if not (fails or user_perm_fails):
                 if view_perms[2] == "outside_scope":
                     assert (
-                        response.json() == {'detail': 'Not found.'}
+                        response.json() == {'detail': f'No {object.__name__} matches the given query.'}
                     ), f"{verbose_name} object detail can be accessed outside the domain"
                 else:
                     for key, value in {**build_params, **test_build_params}.items():
