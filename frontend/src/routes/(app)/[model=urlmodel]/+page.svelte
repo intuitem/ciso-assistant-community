@@ -40,8 +40,8 @@
 			modal = {
 				type: 'component',
 				component: modalComponent,
-				title: 'Warning',
-				body: data.model.localName,
+				title: m.warning(),
+				body: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)].toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}
