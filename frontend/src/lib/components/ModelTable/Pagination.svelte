@@ -1,14 +1,35 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import * as m from '$paraglide/messages';
+
 	export let handler: DataHandler;
 	const pageNumber = handler.getPageNumber();
 	const pageCount = handler.getPageCount();
 	const pages = handler.getPages({ ellipsis: true });
+	let urlModel: string | undefined;
+	let _sessionStorage = null;
+	
+	onMount(() => {
+		_sessionStorage = sessionStorage;
+	});
 
-	$: if ($page.url) {
-		handler.setPage(1);
+	$: if ($page.url && _sessionStorage) {
+		const pageData = JSON.parse(_sessionStorage.getItem("model_table_page_data") ?? "{}");
+		urlModel = (`${$page.url}`).replace("/\/+$/","").split("/").pop()
+
+		const currentPage = pageData[urlModel] ?? 1;
+		handler.setPage(currentPage);
+		pageData[urlModel] = currentPage;
+
+		_sessionStorage.setItem("model_table_page_data",JSON.stringify(pageData));
+	}
+
+	$: if ($pageNumber && urlModel && _sessionStorage) {
+		const pageData = JSON.parse(_sessionStorage.getItem("model_table_page_data") ?? "{}");
+		pageData[urlModel] = $pageNumber;
+		_sessionStorage.setItem("model_table_page_data",JSON.stringify(pageData));
 	}
 </script>
 
