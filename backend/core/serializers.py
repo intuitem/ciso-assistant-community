@@ -186,7 +186,7 @@ class ThreatWriteSerializer(BaseModelSerializer):
 
 class ThreatReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    library = LibraryReadSerializer()
+    library = FieldsRelatedField(["name","urn"])
 
     class Meta:
         model = Threat
