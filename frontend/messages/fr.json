@@ -492,5 +492,7 @@
 	"invalidLibraryFileError": "Fichier de bibliothèque invalide. Veuillez vérifier le format du fichier.",
 	"taintedFormMessage": "Voulez-vous vraiment quitter cette page ? Toutes les données non enregistrées seront perdues.",
 	"riskScenariosStatus": "Statut des scénarios de risque",
-	"onlineDocs": "Documentation en ligne"
+	"onlineDocs": "Documentation en ligne",
+	"attemptToDeleteOnlyAdminAccountError": "Vous ne pouvez pas supprimer votre unique compte administrateur de l'application.",
+	"attemptToRemoveOnlyAdminUserGroup": "Vous ne pouvez pas retirer le seul compte administrateur de l'application du groupe des administrateurs."
 }
