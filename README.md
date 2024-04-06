@@ -55,14 +55,15 @@ You can also have a look at our [data model](documentation/architecture/data-mod
 - NIST SP 800-53 rev5
 - France LPM/OIV rules 🇫🇷
 - CCB CyberFundamentals Framework 🇧🇪
-- NIST SP-800-66 (HIPAA) 
+- NIST SP-800-66 (HIPAA)
+- HDS/HDH 
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
 - ANSSI hygiene guide
-- HDS/HDH
+- CCPA
 - CRA
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
