@@ -9,8 +9,8 @@
     ·
     <a href="https://discord.gg/qvkaMdQ8da">Discord</a>
     ·
-    <a href="https://github.com/intuitem/ciso-assistant-community#supported-frameworks-">Frameworks</a>
-
+    <a href="#supported-frameworks-">Frameworks</a>
+    <br />
 </p>
 
 
