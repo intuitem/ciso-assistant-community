@@ -5,15 +5,21 @@
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
 - by explicitly decoupling compliance from cybersecurity controls implementation
-- providing simplified tools for decision making
-- while providing capabilities for a program, product or an organization assessment against standard frameworks
 - has built-in standards, security controls and threats
+- risk assessment and remediation plan follow-up
 - allows to manage a catalog for security controls and threats
 - you can bring your own framework as well using a simple syntax
 - manage audit, evidences collection and report generation
-- aims to be a one stop shop for cyber security management and cover the layers of GRC (Governance, Risk and Compliance)
+
+Our vision is to provide a one stop shop for cyber security posture management and cover the layers of GRC (Governance, Risk and Compliance). As practionners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
+
+CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
+
+The vision of the tool is based on this model:
 
 ![](posture.png)
+
+The full details are available in the [data model](documentation/architecture/data-model.md).
 
 The decoupling allows you to save a considerable amount of time:
 
@@ -33,11 +39,9 @@ Alternatively, clone the repo and run:
 
 ## Documentation
 
-Check the online documentation at https://intuitem.gitbook.io/ciso-assistant.
+Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant.
 
-You can also have a look at our [data model](documentation/architecture/data-model.md).
-
-## Supported frameworks
+## Supported frameworks 🐙
 
 - ISO 27001:2022
 - NIST Cyber Security Framework (CSF) v1.1 🇺🇸
@@ -56,13 +60,15 @@ You can also have a look at our [data model](documentation/architecture/data-mod
 - France LPM/OIV rules 🇫🇷
 - CCB CyberFundamentals Framework 🇧🇪
 - NIST SP-800-66 (HIPAA)
-- HDS/HDH 
+- HDS/HDH
+- OWASP Application Security Verification Standard (ASVS)
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
 - ANSSI hygiene guide
+- RGS
 - CCPA
 - CRA
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
