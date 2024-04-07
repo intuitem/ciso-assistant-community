@@ -162,6 +162,7 @@ for tab in dataframe:
                     print("URN duplicate:", urn)
                     exit(1)
                 urn_unicity_checker.add(urn)
+                assert type(depth) == int, f"incorrect depth for {row}"
                 if depth == current_depth + 1:
                     parent_for_depth[depth]=current_node_urn
                     parent_urn = parent_for_depth[depth]
