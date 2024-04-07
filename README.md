@@ -82,13 +82,13 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 17. NIST SP-800-66 (HIPAA)
 18. HDS/HDH
 19. OWASP Application Security Verification Standard (ASVS)
+20. France RGS v2.0
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
 - ANSSI hygiene guide
-- RGS
 - CIS
 - CCM
 - CCPA
