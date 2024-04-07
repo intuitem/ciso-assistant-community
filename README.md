@@ -93,6 +93,12 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - CCM
 - CCPA
 - CRA
+- Tisax
+- AI Act
+- Part-IS
+- TIBER-EU / TIBER-FR
+- SecNumCloud
+- SOX
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
