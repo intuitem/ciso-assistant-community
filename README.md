@@ -73,16 +73,16 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 8. PSPF 🇦🇺
 9. GDPR checklist from GDPR.EU 🇪🇺
 10. Essential Eight 🇦🇺
-11. DFS 500 with 2023-11 amendments
+11. DFS 500 with 2023-11 amendments 🇺🇸
 12. DORA 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
 17. NIST SP-800-66 (HIPAA) 🇺🇸
-18. HDS/HDH
+18. HDS/HDH 🇫🇷
 19. OWASP Application Security Verification Standard (ASVS)
-20. France RGS v2.0 🇫🇷
+20. RGS v2.0 🇫🇷
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
