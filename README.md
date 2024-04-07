@@ -1,4 +1,18 @@
-# CISO Assistant
+
+<p align="center">
+    <br />
+    <a href="https://intuitem.com">intuitem.com</a>
+    ·
+    <a href="https://intuitem.com/trial">Free trial</a>
+    ·
+    <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
+    ·
+    <a href="https://discord.gg/qvkaMdQ8da">Discord</a>
+    ·
+    <a href="https://github.com/intuitem/ciso-assistant-community#supported-frameworks-">Frameworks</a>
+
+</p>
+
 
 ![](gh_banner.png)
 
@@ -11,7 +25,7 @@ CISO Assistant brings a different take to **GRC** and Cyber Security Posture Man
 - you can bring your own framework as well using a simple syntax
 - manage audit, evidences collection and report generation
 
-Our vision is to provide a one stop shop for cyber security posture management and cover the layers of GRC (Governance, Risk and Compliance). As practionners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
+Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practionners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
 
 CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
 
@@ -30,9 +44,12 @@ The decoupling allows you to save a considerable amount of time:
 
 ## Quick Start 🚀
 
+> [!TIP]
 > The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
-Alternatively, clone the repo and run:
+
+Alternatively, make sure you have *Docker* and *Docker-compose* installed, on your workstation or server, clone the repo and run:
+
 ```sh
 ./docker-compose.sh
 ```
@@ -43,25 +60,25 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 
 ## Supported frameworks 🐙
 
-- ISO 27001:2022
-- NIST Cyber Security Framework (CSF) v1.1 🇺🇸
-- NIST Cyber Security Framework (CSF) v2.0 🇺🇸
-- NIS2 🇪🇺
-- SOC2
-- PCI DSS 4.0
-- CMMC v2 🇺🇸
-- PSPF 🇦🇺
-- GDPR checklist from GDPR.EU 🇪🇺
-- Essential Eight 🇦🇺
-- DFS 500 with 2023-11 amendments
-- DORA 🇪🇺
-- NIST AI Risk Management Framework
-- NIST SP 800-53 rev5
-- France LPM/OIV rules 🇫🇷
-- CCB CyberFundamentals Framework 🇧🇪
-- NIST SP-800-66 (HIPAA)
-- HDS/HDH
-- OWASP Application Security Verification Standard (ASVS)
+1. ISO 27001:2022
+2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
+3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
+4. NIS2 🇪🇺
+5. SOC2
+6. PCI DSS 4.0
+7. CMMC v2 🇺🇸
+8. PSPF 🇦🇺
+9. GDPR checklist from GDPR.EU 🇪🇺
+10. Essential Eight 🇦🇺
+11. DFS 500 with 2023-11 amendments
+12. DORA 🇪🇺
+13. NIST AI Risk Management Framework
+14. NIST SP 800-53 rev5
+15. France LPM/OIV rules 🇫🇷
+16. CCB CyberFundamentals Framework 🇧🇪
+17. NIST SP-800-66 (HIPAA)
+18. HDS/HDH
+19. OWASP Application Security Verification Standard (ASVS)
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
@@ -69,6 +86,8 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 - ANSSI hygiene guide
 - RGS
+- CIS
+- CCM
 - CCPA
 - CRA
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
@@ -285,9 +304,11 @@ npm run dev
 
 5. Reach the frontend on http://localhost:5173
 
-Note: Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
 
-## Managing migrations
+> [!NOTE]
+> Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
+
+### Managing migrations
 
 The migrations are tracked by version control, https://docs.djangoproject.com/en/4.2/topics/migrations/#version-control
 
@@ -309,7 +330,7 @@ python manage.py migrate
 
 These migration files should be tracked by version control.
 
-## Test harness
+### Test suite
 
 To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
 
@@ -321,7 +342,7 @@ tests/e2e-tests.sh
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
 
-## Built With
+## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend framework
