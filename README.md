@@ -73,7 +73,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 8. PSPF 🇦🇺
 9. GDPR checklist from GDPR.EU 🇪🇺
 10. Essential Eight 🇦🇺
-11. DFS 500 with 2023-11 amendments 🇺🇸
+11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸
 14. NIST SP 800-53 rev5 🇺🇸
