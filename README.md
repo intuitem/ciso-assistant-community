@@ -16,6 +16,9 @@
 
 ![](gh_banner.png)
 
+[![Backend code coverage](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml)
+[![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
+
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
 
 - by explicitly decoupling compliance from cybersecurity controls implementation
