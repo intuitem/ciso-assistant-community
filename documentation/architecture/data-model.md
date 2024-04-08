@@ -109,6 +109,9 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        int     min_score
+        int     max_score
+        json    score_definition
     } 
 
     COMPLIANCE_ASSESSMENT {
@@ -122,8 +125,6 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
-
-        int score_scale
     }
 
     RISK_ASSESSMENT {
@@ -698,6 +699,18 @@ A requirement node can be covered by typical reference controls. A requirement n
 
 The order_id variable allows to sort the requirements nodes, it starts at 0 and is incremented automatically in a given group at import.
 
+A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a score_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
+
+```json
+{
+  "score": 1,
+  "name": "Performed",
+  "description": "Principle:\\nA process is followed which is not or insufficiently documented (“informal process”) and there is some evidence that it achieves its objective.\\nDefinition:\\n- The implemented process achieves its (process) purpose.\\n- The intended base practices are verifiably performed."
+}
+```
+
+When present, the score_definition allows to customize the score display as a drop-down list.
+
 ## Threats
 
 Threats are referential objects used to clarify the aim of a requirement node or a applied  control. They are informative, assessments can be realised without using them.
@@ -721,7 +734,7 @@ A applied  control has the following specific fields:
 - a url link
 - a list of user-defined tags
 
-When a applied  control derives from a reference control, the same category is proposed, but this can be changed.
+When a applied control derives from a reference control, the same category is proposed, but this can be changed.
 
 ## Compliance and risk assessments
 
@@ -747,16 +760,16 @@ The state of a review can be: created/submitted/validated/changes requested/depr
 
 When a compliance assessment is created, each requirement of the corresponding framework is linked to a requirement assessment object. To cover a requirement, the assessor shall link it to Applied controls.
 
-The score_scale of a compliance assessment indicates if a scale is applied for this assessment. A value of 0 (default) means there is no scale. A value >0 means there is a scale, from 0 to the given value. Typical values are 4 (e.g. for CIS controls) or 100.
-
 Here are the specific fields for requirement assessments: 
 - status: --/to do/in progress/done.
 - result: --/compliant/non-compliant minor/non-compliant major/not applicable
-- score: --/<integer value from 0 to score_scale>.
+- score: --/<integer value from min_score to max_score>.
 - ETA (Estimated Time of Arrival) date 
 - due date. This is for example useful to organize an audit plan.
 
 Requirement assessments can have attached evidences. An evidence contains a name, a description, an attached file, a url link.
+
+The auditor is free to use the result field (qualitative assessment), the score field (quantitative assessment), or both of them.
 
 ### Mappings
 
