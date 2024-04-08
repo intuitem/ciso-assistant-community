@@ -3,7 +3,7 @@
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
     ·
-    <a href="https://intuitem.com/trial">Free trial</a>
+    <a href="https://intuitem.com/trial">SaaS Free trial</a>
     ·
     <a href="https://intuitem.gitbook.io/ciso-assistant" target="_blank">Docs</a>
     ·
