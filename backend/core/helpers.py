@@ -198,7 +198,7 @@ def get_sorted_requirement_nodes(
     Recursive function to build framework groups tree
     requirement_nodes: the list of all requirement_nodes
     requirements_assessed: the list of all requirements_assessed
-    Returns a dictionary containing key=name and value={"description": description, "style": "leaf|node"}}
+    Returns a dictionary containing key=name and value={"description": description}
     Values are correctly sorted based on order_id
     If order_id is missing, sorting is based on created_at
     """
@@ -230,40 +230,43 @@ def get_sorted_requirement_nodes(
                 for requirement_node in requirement_nodes
                 if requirement_node.parent_urn == node.urn
             ]
+            req_as = requirement_assessment_from_requirement_id[str(node.id)]
             result[str(node.id)] = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
-                "node_content": node.display_long,
-                "style": "node",
                 "assessable": node.assessable,
                 "description": node.description,
+                "ra_id": str(req_as.id),
+                "status": req_as.status,
+                "status_display": req_as.get_status_display(),
+                "status_i18n": camel_case(req_as.status),
+                "threats": ThreatReadSerializer(
+                    node.threats.all(), many=True
+                ).data,
+                "reference_controls": ReferenceControlReadSerializer(
+                    node.reference_controls.all(), many=True
+                ).data,
                 "children": get_sorted_requirement_nodes_rec(
                     requirement_nodes, requirements_assessed, children
                 ),
             }
-            for req in sorted(
-                [
-                    requirement_node
-                    for requirement_node in requirement_nodes
-                    if requirement_node.parent_urn == node.urn
-                ],
-                key=lambda x: x.order_id,
-            ):
+            for req in sorted(children, key=lambda x: x.order_id):
                 if requirements_assessed:
                     req_as = requirement_assessment_from_requirement_id[str(req.id)]
                     result[str(node.id)]["children"][str(req.id)].update(
                         {
                             "urn": req.urn,
+                            "parent_urn": node.urn,
                             "ref_id": req.ref_id,
                             "name": req.name,
+                            "assessable": req.assessable,
                             "description": req.description,
                             "ra_id": str(req_as.id),
                             "status": req_as.status,
                             "status_display": req_as.get_status_display(),
                             "status_i18n": camel_case(req_as.status),
-                            "style": "leaf",
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
                             ).data,
@@ -279,7 +282,6 @@ def get_sorted_requirement_nodes(
                             "ref_id": req.ref_id,
                             "name": req.name,
                             "description": req.description,
-                            "style": "leaf",
                             "threats": ThreatReadSerializer(
                                 req.threats.all(), many=True
                             ).data,

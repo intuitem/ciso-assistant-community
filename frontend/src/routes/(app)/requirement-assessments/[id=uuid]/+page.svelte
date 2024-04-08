@@ -39,9 +39,7 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const title =
-		(data.parent.display_short ? data.parent.display_short + ': ' : '') +
-		data.requirement.display_short;
+	const title = data.requirement.display_short;
 	breadcrumbObject.set({
 		id: data.requirementAssessment.id,
 		name: title ?? 'Requirement assessment',
