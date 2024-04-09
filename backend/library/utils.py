@@ -54,6 +54,7 @@ def get_available_library_files():
             files.append(f)
     return files
 
+AVAILABLE_LIBRARIES = {}
 
 def get_available_libraries():
     """
@@ -66,13 +67,18 @@ def get_available_libraries():
     path = settings.BASE_DIR / "library/libraries"
     libraries = []
     for f in files:
-        with open(path / f, "r", encoding="utf-8") as file:
-            libs = yaml.safe_load_all(file)
-            for _lib in list(libs):
-                if (lib := Library.objects.filter(urn=_lib["urn"]).first()) is not None:
-                    _lib["id"] = lib.id
-                    _lib["reference_count"] = lib.reference_count
-                libraries.append(_lib)
+        fname = path / f
+        modified_time = os.path.getmtime(fname)
+        libs = AVAILABLE_LIBRARIES.get((fname,modified_time))
+        if libs is None :
+            with open(fname, "r", encoding="utf-8") as file:
+                libs = list(yaml.safe_load_all(file))
+            AVAILABLE_LIBRARIES[(fname,os.path.getmtime(fname))] = libs
+        for _lib in libs :
+            if (lib := Library.objects.filter(urn=_lib["urn"]).first()) is not None:
+                _lib["id"] = lib.id
+                _lib["reference_count"] = lib.reference_count
+            libraries.append(_lib)
     return libraries
 
 
