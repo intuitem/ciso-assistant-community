@@ -40,8 +40,12 @@
 	}
 
 	function short_name(node): string {
-		return node ? (node.ref_id ? node.ref_id : node.name ? node.name : '') : '';
+		const pattern = node ? ((node.ref_id ? 2 : 0) + (node.name ? 1 : 0)) : 0;
+		return pattern == 3 ? node.ref_id + ' - ' + node.name :
+				pattern == 2 ? node.ref_id :
+				pattern == 1 ? node.name : '';
 	}
+
 	const s1 = short_name(data.parent)
 	const s2 = short_name(data.requirement)
 	const title = s2 == '' ? s1 : s2;
@@ -148,9 +152,6 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<h3 class="h3 font-semibold whitespace-pre-line">
-		{title}
-	</h3>
 	<code class="code">{data.requirement.urn}</code>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line">{data.requirement.description}</p>
