@@ -83,6 +83,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 18. HDS/HDH 🇫🇷
 19. OWASP Application Security Verification Standard (ASVS)
 20. RGS v2.0 🇫🇷
+21. AirCyber
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
@@ -99,7 +100,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - TIBER-EU / TIBER-FR
 - SecNumCloud
 - SOX
-- AirCyber
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
