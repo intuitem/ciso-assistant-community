@@ -25,11 +25,19 @@
 	// }
 
 	const user = $page.data.user;
+	const user_groups = new Set(user.user_groups.map(user_group => user_group[0]));
 
 	const items = navData.items
 		.map((item) => {
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
+				if (subItem.user_groups) {
+					if (!subItem.user_groups.some(
+						user_group => user_groups.has(user_group)
+					)) {
+						return false;
+					}
+				}
 				if (subItem.permissions) {
 					return subItem.permissions.some((permission) =>
 						Object.hasOwn(user.permissions, permission)

@@ -137,7 +137,8 @@ export const navData = {
 				{
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
-					href: '/users'
+					href: '/users',
+					user_groups: ["Global - Administrator"]
 				},
 				{
 					name: 'userGroups',
