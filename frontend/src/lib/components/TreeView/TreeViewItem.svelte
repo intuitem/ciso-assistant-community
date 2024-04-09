@@ -390,16 +390,16 @@
 			{/if}
 		{/if}
 
+		<!-- Slot: Content -->
+		<div class="tree-item-content w-full">
+			<slot />
+		</div>
 		<!-- Slot: Lead -->
 		{#if $$slots.lead && !hideLead}
 			<div class="tree-item-lead">
 				<slot name="lead" />
 			</div>
 		{/if}
-		<!-- Slot: Content -->
-		<div class="tree-item-content w-full">
-			<slot />
-		</div>
 	</summary>
 	<div bind:this={childrenDiv} class="tree-item-children {classesChildren}" role="group">
 		<slot name="children" />
