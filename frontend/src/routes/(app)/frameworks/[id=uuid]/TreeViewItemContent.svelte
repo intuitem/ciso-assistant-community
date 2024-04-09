@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getRequirementTitle } from "$lib/utils/helpers";
 	export let ref_id: string;
 	export let name: string;
 	export let description: string;
@@ -35,11 +36,7 @@
 
 	const assessableNodes = getAssessableNodes(node);
 
-	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0)
-	const title: string = 
-		pattern == 3 ? `${ref_id} - ${name}` :
-		pattern == 2 ? ref_id :
-		pattern == 1 ? name : '';
+	const title: string = getRequirementTitle(ref_id, name);
 
 	let showInfo = false;
 
