@@ -224,7 +224,7 @@ def get_sorted_requirement_nodes(
         start: the initial list
         """
         result = {}
-        for node in start:
+        for node in sorted(start, key=lambda x: x.order_id):
             children = [
                 requirement_node
                 for requirement_node in requirement_nodes
@@ -247,50 +247,6 @@ def get_sorted_requirement_nodes(
                     requirement_nodes, requirements_assessed, children
                 ),
             }
-            for req in sorted(
-                [
-                    requirement_node
-                    for requirement_node in requirement_nodes
-                    if requirement_node.parent_urn == node.urn
-                ],
-                key=lambda x: x.order_id,
-            ):
-                if requirements_assessed:
-                    req_as = requirement_assessment_from_requirement_id[str(req.id)]
-                    result[str(node.id)]["children"][str(req.id)].update(
-                        {
-                            "urn": req.urn,
-                            "ref_id": req.ref_id,
-                            "name": req.name,
-                            "description": req.description,
-                            "ra_id": str(req_as.id),
-                            "status": req_as.status,
-                            "status_display": req_as.get_status_display(),
-                            "status_i18n": camel_case(req_as.status),
-                            "threats": ThreatReadSerializer(
-                                req.threats.all(), many=True
-                            ).data,
-                            "reference_controls": ReferenceControlReadSerializer(
-                                req.reference_controls.all(), many=True
-                            ).data,
-                        }
-                    )
-                else:
-                    result[str(node.id)]["children"][str(req.id)].update(
-                        {
-                            "urn": req.urn,
-                            "ref_id": req.ref_id,
-                            "name": req.name,
-                            "description": req.description,
-                            "style": "leaf",
-                            "threats": ThreatReadSerializer(
-                                req.threats.all(), many=True
-                            ).data,
-                            "reference_controls": ReferenceControlReadSerializer(
-                                req.reference_controls.all(), many=True
-                            ).data,
-                        }
-                    )
         return result
 
     tree = get_sorted_requirement_nodes_rec(
