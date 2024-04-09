@@ -230,11 +230,16 @@ def get_sorted_requirement_nodes(
                 for requirement_node in requirement_nodes
                 if requirement_node.parent_urn == node.urn
             ]
+            req_as = requirement_assessment_from_requirement_id[str(node.id)] if requirements_assessed else None
             result[str(node.id)] = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
+                "ra_id": str(req_as.id) if requirements_assessed else None,
+                "status": req_as.status if requirements_assessed else None,
+                "status_display": req_as.get_status_display() if requirements_assessed else None,
+                "status_i18n": camel_case(req_as.status) if requirements_assessed else None,
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
