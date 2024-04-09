@@ -32,6 +32,8 @@
 	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
 
+	import { getRequirementTitle } from '$lib/utils/helpers';
+
 	function cancel(): void {
 		var currentUrl = window.location.href;
 		var url = new URL(currentUrl);
@@ -39,9 +41,9 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const title =
-		(data.parent.display_short ? data.parent.display_short + ': ' : '') +
-		data.requirement.display_short;
+	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name) ?
+		getRequirementTitle(data.requirement.ref_id, data.requirement.name) :
+		getRequirementTitle(data.parent.ref_id, data.parent.name);
 	breadcrumbObject.set({
 		id: data.requirementAssessment.id,
 		name: title ?? 'Requirement assessment',
@@ -145,9 +147,6 @@
 </script>
 
 <div class="card space-y-2 p-4 bg-white shadow">
-	<h3 class="h3 font-semibold whitespace-pre-line">
-		{title}
-	</h3>
 	<code class="code">{data.requirement.urn}</code>
 	{#if data.requirement.description}
 		<p class="whitespace-pre-line">{data.requirement.description}</p>
