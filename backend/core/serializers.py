@@ -407,6 +407,7 @@ class FolderReadSerializer(BaseModelSerializer):
 
 class FrameworkReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    library = FieldsRelatedField(["name","urn"])
 
     class Meta:
         model = Framework
