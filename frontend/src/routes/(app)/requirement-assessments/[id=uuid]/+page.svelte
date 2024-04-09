@@ -45,13 +45,13 @@
 		child_pattern == 2 ? data.requirement.ref_id :
 		child_pattern == 1 ? data.requirement.name : '';
 
-	const parent_pattern = (data.parent.ref_id ? 2 : 0) + (data.parent.name ? 1 : 0)
+	const parent_pattern = data.parent ? ((data.parent.ref_id ? 2 : 0) + (data.parent.name ? 1 : 0)) : 0
 	const parent_title: string = 
 		parent_pattern == 3 ? `${data.parent.ref_id} - ${data.parent.name}` :
 		parent_pattern == 2 ? data.parent.ref_id :
 		parent_pattern == 1 ? data.parent.name : '';
-
-	const title = parent_pattern + child_title;
+	console.log("coucou", data.parent)
+	const title = parent_title + child_title;
 	breadcrumbObject.set({
 		id: data.requirementAssessment.id,
 		name: title ?? 'Requirement assessment',
