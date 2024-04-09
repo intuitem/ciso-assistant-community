@@ -15,3 +15,12 @@ export const isURL = (url: string) => {
 		return false;
 	}
 };
+
+export function getRequirementTitle(ref_id: string, name: string) {
+	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0)
+	const title: string = 
+		pattern == 3 ? `${ref_id} - ${name}` :
+		pattern == 2 ? ref_id :
+		pattern == 1 ? name : '';
+	return title;
+}
