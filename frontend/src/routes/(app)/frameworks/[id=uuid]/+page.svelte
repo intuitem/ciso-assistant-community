@@ -57,7 +57,10 @@
 					<ul class="text-sm">
 						<li class="text-gray-600 list-none">
 							{#if value}
-								{#if Array.isArray(value)}
+								{#if key === "library"}
+									{@const itemHref = `/libraries/${value.urn}`}
+									<a href={itemHref} class="anchor">{value.name}</a>
+								{:else if Array.isArray(value)}
 									<ul>
 										{#each value as val}
 											<li>
