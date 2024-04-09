@@ -39,19 +39,12 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const child_pattern = (data.requirement.ref_id ? 2 : 0) + (data.requirement.name ? 1 : 0)
-	const child_title: string = 
-		child_pattern == 3 ? `${data.requirement.ref_id} - ${data.requirement.name}` :
-		child_pattern == 2 ? data.requirement.ref_id :
-		child_pattern == 1 ? data.requirement.name : '';
-
-	const parent_pattern = data.parent ? ((data.parent.ref_id ? 2 : 0) + (data.parent.name ? 1 : 0)) : 0
-	const parent_title: string = 
-		parent_pattern == 3 ? `${data.parent.ref_id} - ${data.parent.name}` :
-		parent_pattern == 2 ? data.parent.ref_id :
-		parent_pattern == 1 ? data.parent.name : '';
-	console.log("coucou", data.parent)
-	const title = parent_title + child_title;
+	function short_name(node): string {
+		return node ? (node.ref_id ? node.ref_id : node.name ? node.name : '') : '';
+	}
+	const s1 = short_name(data.parent)
+	const s2 = short_name(data.requirement)
+	const title = s2 == '' ? s1 : s2;
 	breadcrumbObject.set({
 		id: data.requirementAssessment.id,
 		name: title ?? 'Requirement assessment',
