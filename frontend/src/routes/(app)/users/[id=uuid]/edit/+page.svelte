@@ -9,7 +9,6 @@
 
 	export let data: PageData;
 	breadcrumbObject.set(data.object);
-	console.log(data);
 </script>
 
 <div class="card bg-white shadow p-4">
