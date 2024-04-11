@@ -500,5 +500,8 @@
 	"missingMandatoyObjects1": "Des objets obligatoires pour {model} ne sont pas encore créés ou importés",
 	"missingMandatoyObjects2": "Veuillez les ajouter avant de continuer",
 	"attemptToDeleteOnlyAdminAccountError": "Vous ne pouvez pas supprimer votre unique compte administrateur de l'application.",
-	"attemptToRemoveOnlyAdminUserGroup": "Vous ne pouvez pas retirer le seul compte administrateur de l'application du groupe des administrateurs."
+	"attemptToRemoveOnlyAdminUserGroup": "Vous ne pouvez pas retirer le seul compte administrateur de l'application du groupe des administrateurs.",
+	"setTemporaryPassword1": "Si l'utilisateur ne peut pas définir son propre mot de passe, vous pouvez",
+	"setTemporaryPassword": "définir un mot de passe temporaire",
+	"setTemporaryPassword2": "Veuillez en utiliser un solide et assurez-vous d'informer l'utilisateur de le modifier dès que possible."
 }
