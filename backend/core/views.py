@@ -832,6 +832,8 @@ class UserViewSet(BaseModelViewSet):
     search_fields = ["email", "first_name", "last_name"]
 
     def get_queryset(self):
+        if not self.request.user.is_admin() :
+            return User.objects.none()
         # TODO: Implement a proper filter for the queryset
         return User.objects.all()
 
