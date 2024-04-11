@@ -190,3 +190,10 @@ export const navData = {
 		}
 	]
 };
+
+export const modelNavData = navData.items.reduce((acc, navMenu) => {
+	return [...acc,...navMenu.items];
+}, []).reduce((acc, item) => {
+	acc[item.href.substring(1)] = item;
+	return acc;
+}, {});
