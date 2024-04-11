@@ -119,6 +119,7 @@ erDiagram
         string      description
 
         string      version
+        float       score
         date        eta
         date        due_date
         string      status
@@ -766,6 +767,8 @@ Here are the specific fields for requirement assessments:
 - score: --/<integer value from min_score to max_score>.
 - ETA (Estimated Time of Arrival) date 
 - due date. This is for example useful to organize an audit plan.
+
+The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score).
 
 Requirement assessments can have attached evidences. An evidence contains a name, a description, an attached file, a url link.
 
