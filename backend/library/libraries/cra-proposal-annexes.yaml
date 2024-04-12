@@ -2,9 +2,11 @@ urn: urn:intuitem:risk:library:cra-proposal-annexes
 locale: en
 ref_id: CRA-proposal-annexes
 name: Cyber Resilience Act
-description: ANNEXES to the PROPOSAL FOR A REGULATION OF THE EUROPEAN PARLIAMENT AND
-  OF THE COUNCIL on horizontal cybersecurity requirements for products with digital
+description: 'ANNEXES to the PROPOSAL FOR A REGULATION OF THE EUROPEAN PARLIAMENT
+  AND OF THE COUNCIL on horizontal cybersecurity requirements for products with digital
   elements and amending Regulation (EU) 2019/1020
+
+  https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=celex:52022PC0454'
 copyright: European Union law
 version: 1
 provider: EU
