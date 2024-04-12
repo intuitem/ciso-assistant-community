@@ -84,6 +84,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 19. OWASP Application Security Verification Standard (ASVS)
 20. RGS v2.0 🇫🇷
 21. AirCyber
+22. Cyber Resilience Act (CRA)
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
@@ -93,7 +94,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - CIS
 - CCM
 - CCPA
-- CRA
 - Tisax
 - AI Act
 - Part-IS
