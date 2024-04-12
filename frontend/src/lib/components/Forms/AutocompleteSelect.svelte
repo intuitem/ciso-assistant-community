@@ -2,18 +2,23 @@
 	import { formFieldProxy } from 'sveltekit-superforms/client';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { onMount } from 'svelte';
+	import { formSubmittedStore } from '$lib/utils/stores';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;
 
 	export let form;
+	export let origin: string;
+	export let URLModel: string;
 	export let multiple = false;
 	export let nullable = false;
 
 	export let hide = false;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	const dataSaving = origin === "create";
 
 	export let options: { label: string; value: string; suggested?: boolean }[];
 
@@ -27,6 +32,32 @@
 	let selectedValues: (string | undefined)[] = [];
 
 	$: selectedValues = selected.map((item) => item.value);
+
+	let _sessionStorage = null;
+	onMount(() => {
+		if (!dataSaving) return;
+		_sessionStorage = sessionStorage;
+		const savedData = JSON.parse(_sessionStorage.getItem("create_form_saved_data") ?? "{}");
+		const currentData = savedData[URLModel];
+		if (currentData) {
+			const savedValue = currentData[field];
+			if (savedValue) {
+				selected = savedValue;
+			}
+		}
+	});
+
+	$: if (dataSaving && _sessionStorage && !$formSubmittedStore) {
+		const savedData = JSON.parse(_sessionStorage.getItem("create_form_saved_data") ?? "{}");
+
+		const currentData = savedData[URLModel] ?? {};
+		if (!sessionStorage.hasOwnProperty(URLModel)) {
+			currentData[field] = selected;
+		}
+		savedData[URLModel] = currentData;
+
+		_sessionStorage.setItem("create_form_saved_data",JSON.stringify(savedData));
+	}
 
 	const default_value = nullable ? null : selectedValues[0];
 

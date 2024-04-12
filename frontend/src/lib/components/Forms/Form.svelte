@@ -4,6 +4,8 @@
 	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
 	import type { AnyZodObject } from 'zod';
 	import { focusTrap } from '@skeletonlabs/skeleton';
+	import { onMount } from 'svelte';
+	import { formSubmittedStore } from '$lib/utils/stores';
 
 	import type { ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -14,12 +16,15 @@
 
 	export let data: SuperValidated<AnyZodObject>;
 	export let dataType: 'form' | 'json';
+	export let origin: String;
+	export let URLModel: string;
 	export let invalidateAll = true; // set to false to keep form data using muliple forms on a page
 	export let validators: AnyZodObject;
 	export let applyAction = true;
 	export let resetForm = false;
 	export let onSubmit = (submit_data: any) => {};
 	export let taintedMessage: string | null = m.taintedFormMessage();
+	const dataSaving = origin === "create";
 
 	export let debug = false; // set to true to enable SuperDebug component
 
@@ -41,6 +46,13 @@
 	});
 
 	const { form, message /*, tainted*/, delayed, errors, allErrors, enhance } = _form;
+
+	let _sessionStorage = null;
+	onMount(() => {
+		_sessionStorage = sessionStorage;
+	})
+
+	$: if (URLModel) { formSubmittedStore.set(false); }
 </script>
 
 {#if debug}
@@ -48,7 +60,14 @@
 	<SuperDebug data={$errors} />
 {/if}
 
-<form method="POST" use:enhance use:focusTrap={true} {...$$restProps}>
+<form method="POST" on:submit={() => {
+	if (dataSaving) {
+		formSubmittedStore.set(true);
+		const savedData = JSON.parse(_sessionStorage?.getItem("create_form_saved_data") ?? "{}");
+		savedData[URLModel] = {};
+		_sessionStorage?.setItem("create_form_saved_data",JSON.stringify(savedData));
+	}
+}} use:enhance use:focusTrap={true} {...$$restProps}>
 	{#if $errors._errors}
 		{#each $errors._errors as error}
 			<p class="text-error-500 text-sm font-medium">{error}</p>
