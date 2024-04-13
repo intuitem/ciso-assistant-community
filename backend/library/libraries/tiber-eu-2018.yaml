@@ -2,8 +2,10 @@ urn: urn:intuitem:risk:library:tiber-eu-2018
 locale: en
 ref_id: TIBER-EU-2018
 name: TIBER-EU FRAMEWORK
-description: How to implement the European framework for Threat Intelligence-based
+description: 'How to implement the European framework for Threat Intelligence-based
   Ethical Red Teaming
+
+  https://www.ecb.europa.eu/paym/cyber-resilience/tiber-eu/html/index.en.html'
 copyright: "Copyright \xA9 for the entire content of this website: European Central\
   \ Bank, Frankfurt am Main, Germany.\n\nSubject to the exception below, users of\
   \ this website may make free use of the information obtained directly from it subject\
