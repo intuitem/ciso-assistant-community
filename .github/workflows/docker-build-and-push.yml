@@ -32,9 +32,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Get git version
-      run: echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
-
+    - name: Get git version and build
+      run: |
+        echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
+        echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+  
     - name: Build and Push Backend Docker Image
       uses: docker/build-push-action@v5
       with:
@@ -45,6 +47,9 @@ jobs:
           ghcr.io/${{ github.repository }}/backend:${{ env.VERSION }}
           ghcr.io/${{ github.repository }}/backend:latest
         platforms: linux/amd64,linux/arm64,linux/arm64/v8
+        build-args: |
+          VERSION=${{ env.VERSION }}
+          BUILD=${{ env.BUILD }}
 
     - name: Build and Push Frontend Docker Image
       uses: docker/build-push-action@v5
