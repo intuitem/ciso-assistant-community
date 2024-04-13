@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+export VERSION=$(git describe --tags --always 2> /dev/null || echo "unknown")
+export BUILD=$(git rev-parse --short HEAD 2> /dev/null || echo "unknown")
+
 if [ -f db/ciso-assistant.sqlite3 ] ; then
     echo "the database seems already created"
     echo "you should launch docker compose up -d"
