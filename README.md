@@ -51,13 +51,20 @@ The decoupling allows you to save a considerable amount of time:
 > The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
 
-Alternatively, make sure you have *Docker* and *Docker-compose* installed, on your workstation or server, clone the repo and run:
+Alternatively, once you have *Docker* and *Docker-compose* installed, on your workstation or server, *clone* the repo and run:
 
 ```sh
 ./docker-compose.sh
 ```
 
-## Documentation
+> [!NOTE]
+> The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
+> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+> [!WARNING]
+If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+
+## End-user Documentation
 
 Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant.
 
@@ -131,10 +138,16 @@ git clone git@github.com:intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
-2. Launch docker-compose script
+2. Launch docker-compose script for prebuilt images:
 
 ```sh
 ./docker-compose.sh
+```
+
+*Alternatively*, you can use this variant to build the docker images for your specific architecture:
+
+```sh
+./docker-compose-build.sh
 ```
 
 When asked for, enter your email and password for your superuser.
@@ -143,7 +156,8 @@ You can then reach CISO Assistant using your web brower at [https://localhost:84
 
 For the following executions, use "docker compose up" directly.
 
-If you want to restart a fresh install, simply delete the db directory, where the database is stored.
+> [!TIP]
+> If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
 
 
 ## Setting up CISO Assistant for development
@@ -152,6 +166,7 @@ If you want to restart a fresh install, simply delete the db directory, where th
 
 - Python 3.11+
 - pip 20.3+
+- node 18+
 - npm 10.2+
 
 ### Running the backend
