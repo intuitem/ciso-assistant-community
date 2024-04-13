@@ -108,6 +108,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - Part-IS
 - SecNumCloud
 - SOX
+- MASVS
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
