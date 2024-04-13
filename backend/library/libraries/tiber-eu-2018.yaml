@@ -1,0 +1,484 @@
+urn: urn:intuitem:risk:library:tiber-eu-2018
+locale: en
+ref_id: TIBER-EU-2018
+name: TIBER-EU FRAMEWORK
+description: 'How to implement the European framework for Threat Intelligence-based
+  Ethical Red Teaming
+
+  https://www.ecb.europa.eu/paym/cyber-resilience/tiber-eu/html/index.en.html'
+copyright: "Copyright \xA9 for the entire content of this website: European Central\
+  \ Bank, Frankfurt am Main, Germany.\n\nSubject to the exception below, users of\
+  \ this website may make free use of the information obtained directly from it subject\
+  \ to the following conditions:\n\n    When such information is distributed or reproduced,\
+  \ it must appear accurately and the ECB must be cited as the source.\n    Where\
+  \ the information is incorporated in documents that are sold (regardless of the\
+  \ medium), the natural or legal person publishing the information must inform buyers,\
+  \ both before they pay any subscription or fee and each time they access the information\
+  \ taken from this website, that the information may be obtained free of charge through\
+  \ this website.\n    If the information is modified by the user (e.g. by seasonal\
+  \ adjustment of statistical data or calculation of growth rates) this must be stated\
+  \ explicitly.\n    When linking to this website from business sites or for promotional\
+  \ purposes, this website must load into the browser's entire window (i.e. it must\
+  \ not appear within another website's frame).\n\nAs an exception to the above, any\
+  \ reproduction, publication or reprint, in whole or in part, of documents that bear\
+  \ the name of their authors, such as ECB Working Papers and ECB Occasional Papers,\
+  \ in the form of a different publication (whether printed or produced electronically)\
+  \ is permitted only with the explicit prior written authorisation of the ECB or\
+  \ the authors."
+version: 1
+provider: ECB
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:tiber-eu-2018
+    ref_id: TIBER-EU-2018
+    name: TIBER-EU FRAMEWORK
+    description: How to implement the European framework for Threat Intelligence-based
+      Ethical Red Teaming
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      assessable: false
+      depth: 1
+      name: 'Adoption and implementation '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'The TIBER-EU framework is adopted and implemented by each jurisdiction
+        in the EU. (optional) '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: If a jurisdiction decides to implement a TIBER-XX framework, then
+        the framework is formally adopted by an authority, and the TIBER-EU Knowledge
+        Centre is informed.
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'The jurisdiction adopts the TIBER-XX framework as a supervisory
+        or oversight tool, as a catalyst, or for the purposes of financial stability. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'On adoption, the core documentation of the national TIBER-XX framework
+        is published, and the sector is informed. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: "The jurisdiction determines which entities should undertake a\
+        \ test \u2013 either on a voluntary or mandatory basis. "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'The jurisdiction conducts a legal analysis of its TIBER-XX framework
+        to ensure it complies with national laws and regulations. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'The jurisdiction puts in place appropriate governance structures
+        and allocates adequate resources to implement the TIBER-XX framework. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'The jurisdiction has a centralised TIBER Cyber Team (TCT) to manage
+        the programme, oversee the tests and liaise with the TIBER-EU Knowledge Centre. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'In case of cross-border entities, the test is initiated and driven
+        by the lead authority. If another relevant authority seeks to initiate and
+        lead the test, the lead authority must agree to it. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: In case of cross-border entities, the test is conducted jointly
+        between the lead authority and other relevant authorities. (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node2
+      description: 'The TIBER-EU test is conducted by independent third-party providers,
+        i.e. external threat  intelligence (TI) and red team (RT) providers. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      assessable: false
+      depth: 1
+      name: 'Preparation phase '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'For each test, there is a White Team (WT), independent TCT (and
+        Test Manager), and external TI/RT providers. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'The national intelligence agency/national cyber security centre/high-tech
+        crime unit is involved in each test. (optional) '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'Once the procurement process has been completed, there are appropriate
+        contracts in place between the different stakeholders, with relevant controls
+        embedded into the contracts, to facilitate a controlled test (in a discreet
+        manner). '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'Prior to conducting the test, the WT conducts a risk assessment
+        and then puts in place all the necessary risk management controls, processes
+        and procedures to facilitate a controlled test. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'Throughout the end-to-end test process, in all documentation and
+        communication between stakeholders a code name is used to conceal the identity
+        of the entity being tested. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'At the outset of the test process, there is a launch meeting which
+        includes the WT and TCT. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: The launch meeting also includes other relevant authorities and
+        the TI/RT providers. (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'The scope of the test includes critical functions (CFs), as well
+        as the people, processes, and technology and databases that support the delivery
+        of CFs. This is documented in the TIBEREU Scope Specification document and
+        signed off in the attestation by the board. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: The entity expands the scope of the test beyond the CFs and includes
+        other functions and processes. (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: "During the scoping phase, the WT (with agreement from the TCT),\
+        \ sets \u201Cflags\u201D, which are targets or objectives, that the RT provider\
+        \ aims to meet during the test. "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'The test is conducted on live production systems. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: "Only the WT and TCT are informed about the test, its details and\
+        \ the timings \u2013 all other staff members (i.e. Blue Team, BT) remain unaware\
+        \ of the test. "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node14
+      description: 'Only TI/RT providers that meet the minimum requirements set out
+        in the TIBER-EU Services Procurement Guidelines can undertake the TIBER-EU
+        test. The TI/RT providers will be TIBEREU-certified and accredited once the
+        EU has these capabilities in place. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      assessable: false
+      depth: 1
+      name: 'Threat intelligence and red team testing phase '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: 'For each test, an external TI provider produces a dedicated Targeted
+        Threat Intelligence Report (TTI Report) on the entity being tested. Where
+        infrastructure has been outsourced and a third party is included in the scope
+        of the test, the TTI Report also includes information about that third party.  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: "For each national implementation, a Generic Threat Landscape Report\
+        \ (GTL Report) for the country\u2019s financial sector is produced and maintained,\
+        \ and is used to help inform the TTI Report.  (optional)"
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: For each threat intelligence report (TTI and GTL), the national
+        intelligence agency/national cyber security centre/high-tech crime unit is
+        involved to provide feedback.  (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: For each TTI Report on the entity, the TI provider sets out multiple
+        threat scenarios which can be used by the RT provider.
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node33
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: The TI provider holds a handover session with the RT provider,
+        providing the basis for the threat scenarios.
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node34
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: Following the handover, the TI provider continues to be engaged
+        during the testing phase and provides additional up-to-date, credible threat
+        intelligence to the RT provider, where needed. (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node35
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: 'The RT provider develops multiple attack scenarios, based on the
+        TTI Report. This is documented in the Red Team Test Plan and shared with the
+        WT and TCT.  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node36
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: The jurisdiction, in its implementation of the TIBER framework,
+        allows physical red teaming in the scope of the methodology for the TIBER
+        test (e.g. planting a device at the entity), provided all necessary precautions
+        are taken.  (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node37
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: "The RT provider executes the attack based on the scenarios (with\
+        \ some flexibility) in the Red Team Test Plan and goes through each of the\
+        \ phases of the kill chain methodology. Where needed, a \u201Cleg-up\u201D\
+        \ will be provided by the entity.  "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node38
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: "During the test, the RT provider keeps the WT and TCT informed\
+        \ about progress, \u201Ccapture the flag\u201D moments, the possible need\
+        \ for leg-ups, etc. The RT provider takes a stage-by-stage approach and consults\
+        \ the WT and TCT at all critical points to ensure a controlled test.   "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node39
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node28
+      description: "The duration of the red team test is proportionate to the scope,\
+        \ size of the entity, complexity of threat scenarios, etc. Sufficient time\
+        \ is allocated to testing to guarantee that a comprehensive test has been\
+        \ conducted across the enterprise.  Experience suggests that a period of at\
+        \ least 10\u201312 weeks is required. "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      assessable: false
+      depth: 1
+      name: Closure phase
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node41
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'At the end of the test, the RT provider produces a Red Team Test
+        Report, outlining the findings from the test.  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node42
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: "The entity\u2019s BT is informed of the test and uses the Red\
+        \ Team Test Report to deliver its own Blue Team Report. In the Blue Team Report,\
+        \ the BT maps its actions alongside the RT provider\u2019s Team actions. "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node43
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'At the end of the test, the RT provider, the BT and the WT conduct
+        an interactive replay of the test, where possible using live production systems,
+        to review the impact of the actions of the RT provider. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node44
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: The TCT, supervisors/overseers and TI provider are also present
+        during these replay workshops. (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node45
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: A purple teaming element is added in which the BT and the RT provider
+        can work together to see which other steps could have been taken by the RT
+        provider and how the BT could have responded to those steps. (optional)
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node46
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'At the end of the test, there is a 360-degree feedback meeting
+        which includes the entity, TI/RT providers and TCT. In this meeting, the parties
+        review the TIBER-EU test process and give feedback. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node47
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'After the BT and RT provider replay and 360-degree feedback workshop,
+        the entity produces a Remediation Plan to address the findings. The Remediation
+        Plan is agreed with the supervisor and/or overseer as part of their planning
+        and control cycle.  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node48
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'The entity produces a Test Summary Report, which it shares with
+        the lead authority.  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node49
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: "The entity\u2019s board and the TI/RT providers sign an attestation\
+        \ to validate the true and fair conduct of the TIBER-EU test (to enable recognition\
+        \ by other relevant authorities).  "
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node50
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'If mutually agreed, the lead authority and/or the entity share
+        the Test Summary Report and attestation with other relevant authorities (where
+        applicable).  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node51
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'The TCT in each jurisdiction analyses the results of all the TIBER
+        tests and the lessons learned from the 360-degree feedback meetings to produce
+        high-level, aggregated findings. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node52
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node40
+      description: 'This information is used to enhance sector resilience and improve
+        the TIBER-XX framework. '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node53
+      assessable: false
+      depth: 1
+      name: 'Abbreviations '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node53
+      name: 'Term  '
+      description: 'Explanation  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node55
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'BT  '
+      description: 'Blue Team  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node56
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'CF  '
+      description: 'critical function  '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node57
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'GTL '
+      description: 'generic threat landscape '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node58
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'HUMINT '
+      description: 'human intelligence '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node59
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'NDA '
+      description: 'non-disclosure agreement '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node60
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'OSINT '
+      description: 'open-source intelligence '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node61
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'RACI '
+      description: 'Responsibility Assignment Matrix (RACI stands for Responsible,
+        Accountable, Consulted, Informed) '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node62
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'RT provider '
+      description: 'red team provider '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node63
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TCT '
+      description: 'TIBER Cyber Team '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node64
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TIBER '
+      description: 'threat intelligence-based ethical red teaming '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node65
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TI provider '
+      description: 'threat intelligence provider '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node66
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TKC '
+      description: 'TIBER-EU Knowledge Centre '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node67
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TTI '
+      description: 'targeted threat intelligence '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node68
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TTM '
+      description: 'Team Test Manager '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node69
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'TTP '
+      description: 'tactics, techniques and procedures '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node70
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'WT '
+      description: 'White Team '
+    - urn: urn:intuitem:risk:req_node:tiber-eu-2018:node71
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:tiber-eu-2018:node54
+      name: 'WTL '
+      description: 'White Team Lead '
