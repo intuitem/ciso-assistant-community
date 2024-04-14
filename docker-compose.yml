@@ -9,8 +9,6 @@ services:
       - ALLOWED_HOSTS=backend
       - CISO_ASSISTANT_URL=https://localhost:8443
       - DJANGO_DEBUG=True
-      - CISO_ASSISTANT_VERSION=${VERSION:-unknown}
-      - CISO_ASSISTANT_BUILD=${BUILD:-unknown}
     volumes:
       - ./db:/code/db
 
