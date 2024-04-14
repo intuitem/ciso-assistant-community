@@ -71,12 +71,12 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2022
+1. ISO 27001:2022 🌐
 2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
-5. SOC2
-6. PCI DSS 4.0
+5. SOC2 🇺🇸
+6. PCI DSS 4.0 💳
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. GDPR checklist from GDPR.EU 🇪🇺
@@ -87,13 +87,14 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
-17. NIST SP-800-66 (HIPAA) 🇺🇸
+17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS)
+19. OWASP Application Security Verification Standard (ASVS) 🐝
 20. RGS v2.0 🇫🇷
-21. AirCyber
+21. AirCyber ✈️
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
+24. NIST Privacy Framework 🇺🇸
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
