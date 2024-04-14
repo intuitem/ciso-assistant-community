@@ -1,17 +1,34 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
-export VERSION=$(git describe --tags --always 2> /dev/null || echo "unknown")
-export BUILD=$(git rev-parse --short HEAD 2> /dev/null || echo "unknown")
+prepare_meta_file() {
+    VERSION=$(git describe --tags --always)
+    BUILD=$(git rev-parse --short HEAD)
 
-if [ -f db/ciso-assistant.sqlite3 ] ; then
-    echo "the database seems already created"
-    echo "you should launch docker compose up -d"
+    echo "CISO_ASSISTANT_VERSION=${VERSION}" > .meta
+    echo "CISO_ASSISTANT_BUILD=${BUILD}" >> .meta
+
+    cp .meta ./backend/ciso_assistant/.meta
+    cp .meta ./backend/.meta
+}
+
+# Check if the database already exists
+if [ -f db/ciso-assistant.sqlite3 ]; then
+    echo "The database seems already created."
+    echo "You should launch 'docker compose up -d'."
 else
+    prepare_meta_file
+
+    # Build and start the containers
     docker compose -f docker-compose-build.yml build 
     docker compose -f docker-compose-build.yml up -d
+
+    # Perform database migrations
     docker compose exec backend python manage.py migrate
-    echo "initialize your superuser account..."
+
+    # Initialize the superuser account
+    echo "Initialize your superuser account..."
     docker compose exec backend python manage.py createsuperuser
-    echo "connect to ciso assistant on https://localhost:8443"
-    echo "for successive runs you can now use docker compose up"
+
+    echo "Connect to CISO Assistant on https://localhost:8443"
+    echo "For successive runs, you can now use 'docker compose up'."
 fi

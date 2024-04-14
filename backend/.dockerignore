@@ -5,3 +5,5 @@
 .git*
 .pytest*
 .idea*
+.dockerignore
+Dockerfile
