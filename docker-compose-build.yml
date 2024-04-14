@@ -6,9 +6,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      args:
-        VERSION: ${VERSION:-unknown}
-        BUILD: ${BUILD:-unknown}
     restart: always
     environment:
       - ALLOWED_HOSTS=backend
