@@ -1373,6 +1373,12 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RequirementAssessment.Status.choices))
+    
+    @action(detail=False, name="Get score choices")
+    def score(self, request):
+        dict_score = dict([('--', -1)])
+        dict_score.update([(i, i) for i in range(0, 101)])
+        return Response(dict_score)
 
 
 @api_view(["GET"])

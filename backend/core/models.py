@@ -1465,6 +1465,7 @@ class ComplianceAssessment(Assessment):
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin):
+
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1473,11 +1474,16 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
 
+
     status = models.CharField(
         max_length=100,
         choices=Status.choices,
         default=Status.TODO,
         verbose_name=_("Status"),
+    )
+    score = models.IntegerField(
+        default=-1,
+        choices=[(i, i) for i in range(-1, 101)]
     )
     evidences = models.ManyToManyField(
         Evidence,
