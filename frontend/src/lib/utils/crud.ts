@@ -390,7 +390,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localFrGender: 'f',
 		verboseName: 'Requirement assessment',
 		verboseNamePlural: 'Requirement assessments',
-		selectFields: [{ field: 'status' }, { field: 'score' }],
+		selectFields: [{ field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' },

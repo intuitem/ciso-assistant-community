@@ -1,31 +1,32 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms/client';
-	import { localItems, toCamelCase } from '$lib/utils/locales';
-	import { languageTag } from '$paraglide/runtime';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { RangeSlider } from '@skeletonlabs/skeleton';
 	import type { AnyZodObject } from 'zod';
 
-	let _class = '';
-
-	export { _class as class };
 	export let label: string | undefined = undefined;
 	export let field: string;
-	export let helpText: string | undefined = undefined;
-
-	export let color_map = {};
 
 	export let form: SuperForm<AnyZodObject>;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
+	
+	$: scoringEnabled = $value < 0 ? false : true
 
-	interface Option {
-		label: unknown;
-		value: unknown;
+	function preventNegative(value: number){
+		if(value < 0){
+			return 0
+		}
+		return value
+	
 	}
 
-	export let options: Option[];
-
-	$: classesTextField = (errors: string[] | undefined) =>
-		errors && errors.length > 0 ? 'input-error' : '';
+	function displayNoValue(value: number){
+		if(value === -1){
+			return '--'
+		}
+		return value
+	}
 </script>
 
 <div>
@@ -45,26 +46,29 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="control">
-		<select
-			class="{'select ' + _class} {classesTextField($errors)}"
-			data-testid="form-input-{field.replaceAll('_', '-')}"
+	<div class="flex flex-row w-full items-center space-x-4 ml-2">
+		<input
 			name={field}
-			aria-invalid={$errors ? 'true' : undefined}
-			placeholder=""
-			bind:value={$value}
+			type="checkbox"
+			class="checkbox"
+			data-testid="form-input-{field.replaceAll('_', '-')}"
+			bind:checked={scoringEnabled}
+			on:change={() => $value = -1}
 			{...$constraints}
 			{...$$restProps}
-		>
-			{#each options as option}
-				<option value={option.label}>
-					{option.value}
-					</option
-				>
-			{/each}
-		</select>
+			{...$constraints}
+			{...$$restProps}
+		/>
+		<div class="flex w-1/2 items-center justify-center">
+			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} max={100} step={1}></RangeSlider>
+		</div>
+		<div class="flex w-1/2 items-center justify-center">
+			{#if scoringEnabled}
+				<ProgressRadial stroke={175} value={preventNegative($value)} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
+			{:else}
+				<ProgressRadial stroke={175} value={0} width={'w-32'}>--</ProgressRadial>
+			{/if}
+		</div>
 	</div>
-	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
-	{/if}
+	<p class="text-sm text-gray-500">Check to enable scoring</p>
 </div>
