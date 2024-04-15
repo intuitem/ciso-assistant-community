@@ -7,3 +7,4 @@
 django_secret_key
 temp/
 db/
+.dccache
