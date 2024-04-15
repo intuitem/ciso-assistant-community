@@ -267,7 +267,7 @@
 			<HiddenInput {form} field="compliance_assessment" />
 			<div class="flex flex-col space-y-3 mt-3">
 				<Select {form} options={data.model.selectOptions['status']} field="status" label="Status" />
-				<Score {form} options={data.model.selectOptions['score']} field="score" label="score" />
+				<Score {form} field="score" label="Score" />
 				<TextArea {form} field="observation" label="Observation" />
 
 				<div class="flex flex-row justify-between space-x-4">
