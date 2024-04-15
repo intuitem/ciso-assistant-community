@@ -5,6 +5,8 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { SetPasswordSchema } from '$lib/utils/schemas';
 
+	import * as m from '$paraglide/messages';
+
 	export let data: PageData;
 
 	function getUUID() {
@@ -19,8 +21,8 @@
 			<i class="fa-solid fa-key" />
 		</div>
 		<p class="text-gray-600 text-sm text-center">
-			You can set the new password here.<br />
-			Careful, the user will be disconnected if he has a session running.
+			{m.youCanSetNewPassword()}.<br />
+			{m.userWillBeDisconnected()}.
 		</p>
 		<!-- SuperForm with dataType 'form' -->
 		<div class="flex w-full">
@@ -32,17 +34,17 @@
 				validators={SetPasswordSchema}
 			>
 				<input class="input" type="hidden" name="user" value={getUUID()} />
-				<TextField type="password" {form} field="new_password" label="New password" mandatory />
+				<TextField type="password" {form} field="new_password" label={m.newPassword()} mandatory />
 				<TextField
 					type="password"
 					{form}
 					field="confirm_new_password"
-					label="Confirm new password"
+					label={m.confirmNewPassword()}
 					mandatory
 				/>
 				<p class="pt-3">
 					<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button" type="submit"
-						>Set Password</button
+						>{m.setPassword()}</button
 					>
 				</p>
 			</SuperForm>
