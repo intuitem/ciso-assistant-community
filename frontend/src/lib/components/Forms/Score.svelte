@@ -2,6 +2,7 @@
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms/client';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import { RangeSlider } from '@skeletonlabs/skeleton';
+	import * as m from '$paraglide/messages';
 	import type { AnyZodObject } from 'zod';
 
 	export let label: string | undefined = undefined;
@@ -70,5 +71,5 @@
 			{/if}
 		</div>
 	</div>
-	<p class="text-sm text-gray-500">Check to enable scoring</p>
+	<p class="text-sm text-gray-500">{m.scoringHelpText()}</p>
 </div>
