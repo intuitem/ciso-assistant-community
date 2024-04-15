@@ -36,6 +36,7 @@ erDiagram
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
     ROOT_FOLDER           ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER           ||--o{ LIBRARY                     : contains
+    ROOT_FOLDER           ||--o{ IMPORTED_LIBRARY            : contains
     ROOT_FOLDER           ||--o{ USER                        : contains
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
@@ -427,7 +428,9 @@ NameDescriptionMixin   <|-- RiskScenario
 AbstractBaseModel      <|-- NameDescriptionMixin
 NameDescriptionMixin   <|-- ReferentialObjectMixin
 FolderMixin            <|-- ReferentialObjectMixin
-ReferentialObjectMixin <|-- Library
+ReferentialObjectMixin <|-- LibraryMixin
+LibraryMixin           <|-- Library
+LibraryMixin           <|-- ImportedLibrary
 ReferentialObjectMixin <|-- Threat
 ReferentialObjectMixin <|-- ReferenceControl
 ReferentialObjectMixin <|-- RiskMatrix
@@ -464,23 +467,31 @@ namespace ReferentialObjects {
         +display_long() str
     }
 
-    class Library {
+    class LibraryMixin {
         +CharField copyright
         +IntegerField version
         +CharField provider
         +CharField packager
         +Library[] dependencies
+    }
+
+    class Library {
+        +CharField hash_checksum
+        +BinaryField content
+    }
+
+    class ImportedLibrary {
         +reference_count() int
     }
 
     class Threat {
-        +Library library
+        +ImportedLibrary library
         +is_deletable() bool
         +frameworks() Framework[]
     }
 
     class ReferenceControl {
-        +Library library
+        +ImportedLibrary library
         +CharField category
         +JSONField typical_evidence
         +is_deletable() bool
@@ -488,7 +499,7 @@ namespace ReferentialObjects {
     }
 
     class RiskMatrix {
-        +Library library
+        +ImportedLibrary library
         +JSONField json_definition
         +BooleanField is_enabled
         +CharField provider
@@ -501,7 +512,7 @@ namespace ReferentialObjects {
     }
 
     class Framework {
-        +Library library
+        +ImportedLibrary library
         +int get_next_order_id(obj_type, _parent_urn)
         +is_deletable() bool
     }
