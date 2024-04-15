@@ -31,11 +31,8 @@
 			if (t === $breadcrumbObject.id) {
 				if ($breadcrumbObject.name) {
 					t = $breadcrumbObject.name;
-				} else if ($breadcrumbObject.first_name) {
-					t = $breadcrumbObject.first_name;
-					if ($breadcrumbObject.last_name) {
-						t = `${t} ${$breadcrumbObject.last_name}`;
-					}
+				} else if ($breadcrumbObject.first_name && $breadcrumbObject.last_name) {
+					t = `${$breadcrumbObject.first_name} ${$breadcrumbObject.last_name}`;
 				} else {
 					t = $breadcrumbObject.email;
 				}
