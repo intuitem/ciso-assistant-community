@@ -290,6 +290,8 @@ class FrameworkImporter:
             ref_id=self.framework_data["ref_id"],
             name=self.framework_data.get("name"),
             description=self.framework_data.get("description"),
+            min_score=self.framework_data.get("min_score", 0),
+            max_score=self.framework_data.get("max_score", 100),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
