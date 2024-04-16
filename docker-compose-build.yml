@@ -3,7 +3,9 @@ version: "3.9"
 services:
   backend:
     container_name: backend
-    image: ghcr.io/intuitem/ciso-assistant-community/backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     restart: always
     environment:
       - ALLOWED_HOSTS=backend
@@ -19,7 +21,7 @@ services:
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
 
-    image: ghcr.io/intuitem/ciso-assistant-community/frontend:latest
+    build: ./frontend
     depends_on:
       - backend
 

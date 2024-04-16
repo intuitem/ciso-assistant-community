@@ -1,0 +1,922 @@
+urn: urn:intuitem:risk:library:nist-privacy-1.0
+locale: en
+ref_id: NIST-PRIVACY-1.0
+name: NIST PRIVACY FRAMEWORK 1.0
+description: 'NIST Privacy Framework: A Tool for Improving Privacy through Enterprise
+  Risk Management. Details and credits on https://www.nist.gov/privacy-framework'
+copyright: With the exception of material marked as copyrighted, information presented
+  on NIST sites are considered public information and may be distributed or copied.
+version: 1
+provider: NIST
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nist-privacy-1.0
+    ref_id: NIST-PRIVACY-1.0
+    name: NIST PRIVACY FRAMEWORK 1.0
+    description: NIST Privacy Framework
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id-p
+      assessable: false
+      depth: 1
+      ref_id: ID-P
+      name: IDENTIFY-P
+      description: Develop the organizational understanding to manage privacy risk
+        for individuals arising from data processing.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id-p
+      ref_id: ID.IM-P
+      name: Inventory and Mapping
+      description: Data processing by systems, products, or services is understood
+        and informs the management of privacy risk.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P1
+      description: Systems/products/services that process data are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P2
+      description: Owners or operators (e.g., the organization or third parties such
+        as service providers, partners, customers, and developers) and their roles
+        with respect to the systems/products/services and components (e.g., internal
+        or external) that process data are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P3
+      description: Categories of individuals (e.g., customers, employees or prospective
+        employees, consumers) whose data are being processed are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P4
+      description: Data actions of the systems/products/services are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P5
+      description: The purposes for the data actions are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P6
+      description: Data elements within the data actions are inventoried.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P7
+      description: The data processing environment is identified (e.g., geographic
+        location, internal, cloud, third parties).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.im-p
+      ref_id: ID.IM-P8
+      description: Data processing is mapped, illustrating the data actions and associated
+        data elements for systems/products/services, including components; roles of
+        the component owners/operators; and interactions of individuals or third parties
+        with the systems/products/services.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id-p
+      ref_id: ID.BE-P
+      name: Business Environment
+      description: "The organization\u2019s mission, objectives, stakeholders, and\
+        \ activities are understood and prioritized; this information is used to inform\
+        \ privacy roles, responsibilities, and risk management decisions."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p
+      ref_id: ID.BE-P1
+      description: "The organization\u2019s role(s) in the data processing ecosystem\
+        \ are identified and communicated."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p
+      ref_id: ID.BE-P2
+      description: Priorities for organizational mission, objectives, and activities
+        are established and communicated.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.be-p
+      ref_id: ID.BE-P3
+      description: Systems/products/services that support organizational priorities
+        are identified and key requirements communicated.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id-p
+      ref_id: ID.RA-P
+      name: Risk Assessment
+      description: The organization understands the privacy risks to individuals and
+        how such privacy risks may create follow-on impacts on organizational operations,
+        including mission, functions, other risk management priorities (e.g., compliance,
+        financial), reputation, workforce, and culture.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p
+      ref_id: ID.RA-P1
+      description: "Contextual factors related to the systems/products/services and\
+        \ the data actions are identified (e.g., individuals\u2019 demographics and\
+        \ privacy interests or perceptions, data sensitivity and/or types, visibility\
+        \ of data processing to individuals and third parties). "
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p
+      ref_id: ID.RA-P2
+      description: Data analytic inputs and outputs are identified and evaluated for
+        bias.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p
+      ref_id: ID.RA-P3
+      description: 'Potential problematic data actions and associated problems are
+        identified. '
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p
+      ref_id: ID.RA-P4
+      description: Problematic data actions, likelihoods, and impacts are used to
+        determine and prioritize risk.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.ra-p
+      ref_id: ID.RA-P5
+      description: Risk responses are identified, prioritized, and implemented.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id-p
+      ref_id: ID.DE-P
+      name: Data Processing Ecosystem Risk Management
+      description: "The organization\u2019s priorities, constraints, risk tolerance,\
+        \ and assumptions are established and used to support risk decisions associated\
+        \ with managing privacy risk and third parties within the data processing\
+        \ ecosystem. The organization has established and implemented the processes\
+        \ to identify, assess, and manage privacy risks within the data processing\
+        \ ecosystem."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p
+      ref_id: ID.DE-P1
+      description: Data processing ecosystem risk management policies, processes,
+        and procedures are identified, established, assessed, managed, and agreed
+        to by organizational stakeholders.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p
+      ref_id: ID.DE-P2
+      description: Data processing ecosystem parties (e.g., service providers, customers,
+        partners, product manufacturers, application developers) are identified, prioritized,
+        and assessed using a privacy risk assessment process.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p
+      ref_id: ID.DE-P3
+      description: "Contracts with data processing ecosystem parties are used to implement\
+        \ appropriate measures designed to meet the objectives of an organization\u2019\
+        s privacy program. "
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p
+      ref_id: ID.DE-P4
+      description: 'Interoperability frameworks or similar multi-party approaches
+        are used to manage data processing ecosystem privacy risks. '
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:id.de-p
+      ref_id: ID.DE-P5
+      description: Data processing ecosystem parties are routinely assessed using
+        audits, test results, or other forms of evaluations to confirm they are meeting
+        their contractual, interoperability framework, or other obligations.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv-p
+      assessable: false
+      depth: 1
+      ref_id: GV-P
+      name: GOVERN-P
+      description: "Develop\_and implement\_the organizational governance structure\
+        \ to enable an ongoing understanding of the organization\u2019s risk management\
+        \ priorities\_that are\_informed by privacy risk."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv-p
+      ref_id: GV.PO-P
+      name: Governance Policies, Processes, and Procedures
+      description: "The policies, processes, and procedures to manage and monitor\
+        \ the organization\u2019s regulatory, legal, risk, environmental, and operational\
+        \ requirements are understood and inform the management of privacy risk."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      ref_id: GV.PO-P1
+      description: "Organizational privacy values and policies (e.g., conditions on\
+        \ data processing such as data uses or retention periods, individuals\u2019\
+        \ prerogatives with respect to data processing) are established and communicated."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      ref_id: GV.PO-P2
+      description: Processes to instill organizational privacy values within system/product/service
+        development and operations are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      ref_id: GV.PO-P3
+      description: 'Roles and responsibilities for the workforce are established with
+        respect to privacy. '
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      ref_id: GV.PO-P4
+      description: Privacy roles and responsibilities are coordinated and aligned
+        with third-party stakeholders (e.g., service providers, customers, partners).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      ref_id: GV.PO-P5
+      description: Legal, regulatory, and contractual requirements regarding privacy
+        are understood and managed.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.po-p
+      ref_id: GV.PO-P6
+      description: Governance and risk management policies, processes, and procedures
+        address privacy risks.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv-p
+      ref_id: GV.RM-P
+      name: Risk Management Strategy
+      description: "The organization\u2019s priorities, constraints, risk tolerances,\
+        \ and assumptions are established and used to support operational risk decisions."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p
+      ref_id: GV.RM-P1
+      description: Risk management processes are established, managed, and agreed
+        to by organizational stakeholders.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p
+      ref_id: GV.RM-P2
+      description: Organizational risk tolerance is determined and clearly expressed.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.rm-p
+      ref_id: GV.RM-P3
+      description: "The organization\u2019s determination of risk tolerance is informed\
+        \ by its role(s) in the data processing ecosystem."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv-p
+      ref_id: GV.AT-P
+      name: Awareness and Training
+      description: "The organization\u2019s workforce and third parties engaged in\
+        \ data processing are provided privacy awareness education and are trained\
+        \ to perform their privacy-related duties and responsibilities consistent\
+        \ with related policies, processes, procedures, and agreements and organizational\
+        \ privacy values."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p
+      ref_id: GV.AT-P1
+      description: 'The workforce is informed and trained on its roles and responsibilities. '
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p
+      ref_id: GV.AT-P2
+      description: Senior executives understand their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p
+      ref_id: GV.AT-P3
+      description: Privacy personnel understand their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.at-p
+      ref_id: GV.AT-P4
+      description: Third parties (e.g., service providers, customers, partners) understand
+        their roles and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv-p
+      ref_id: GV.MT-P
+      name: Monitoring and Review
+      description: "The policies, processes, and procedures for ongoing review of\
+        \ the organization\u2019s privacy posture are understood and inform the management\
+        \ of privacy risk."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P1
+      description: "Privacy risk is re-evaluated on an ongoing basis and as key factors,\
+        \ including the organization\u2019s business environment (e.g., introduction\
+        \ of new technologies), governance (e.g., legal obligations, risk tolerance),\
+        \ data processing, and systems/products/services change."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P2
+      description: 'Privacy values, policies, and training are reviewed and any updates
+        are communicated. '
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P3
+      description: Policies, processes, and procedures for assessing compliance with
+        legal requirements and privacy policies are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P4
+      description: Policies, processes, and procedures for communicating progress
+        on managing privacy risks are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P5
+      description: Policies, processes, and procedures are established and in place
+        to receive, analyze, and respond to problematic data actions disclosed to
+        the organization from internal and external sources (e.g., internal discovery,
+        privacy researchers, professional events).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P6
+      description: Policies, processes, and procedures incorporate lessons learned
+        from problematic data actions.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:gv.mt-p
+      ref_id: GV.MT-P7
+      description: Policies, processes, and procedures for receiving, tracking, and
+        responding to complaints, concerns, and questions from individuals about organizational
+        privacy practices are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct-p
+      assessable: false
+      depth: 1
+      ref_id: CT-P
+      name: CONTROL-P
+      description: Develop and implement appropriate activities to enable organizations
+        or individuals to manage data with sufficient granularity to manage privacy
+        risks.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct-p
+      ref_id: CT.PO-P
+      name: Data Processing Policies, Processes, and Procedures
+      description: "Policies, processes, and procedures are maintained and used to\
+        \ manage data processing (e.g., purpose, scope, roles and responsibilities\
+        \ in the data processing ecosystem, and management commitment) consistent\
+        \ with the organization\u2019s risk strategy to protect individuals\u2019\
+        \ privacy."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p
+      ref_id: CT.PO-P1
+      description: Policies, processes, and procedures for authorizing data processing
+        (e.g., organizational decisions, individual consent), revoking authorizations,
+        and maintaining authorizations are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p
+      ref_id: CT.PO-P2
+      description: Policies, processes, and procedures for enabling data review, transfer,
+        sharing or disclosure, alteration, and deletion are established and in place
+        (e.g., to maintain data quality, manage data retention).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p
+      ref_id: CT.PO-P3
+      description: "Policies, processes, and procedures for enabling individuals\u2019\
+        \ data processing preferences and requests are established and in place."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.po-p
+      ref_id: CT.PO-P4
+      description: A data life cycle to manage data is aligned and implemented with
+        the system development life cycle to manage systems.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct-p
+      ref_id: CT.DM-P
+      name: Data Processing Management
+      description: "Data are managed consistent with the organization\u2019s risk\
+        \ strategy to protect individuals\u2019 privacy, increase manageability, and\
+        \ enable the implementation of privacy principles (e.g., individual participation,\
+        \ data quality, data minimization). "
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P1
+      description: Data elements can be accessed for review.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P2
+      description: Data elements can be accessed for transmission or disclosure.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P3
+      description: Data elements can be accessed for alteration.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P4
+      description: Data elements can be accessed for deletion.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P5
+      description: Data are destroyed according to policy.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P6
+      description: Data are transmitted using standardized formats.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P7
+      description: Mechanisms for transmitting processing permissions and related
+        data values with data elements are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P8
+      description: Audit/log records are determined, documented, implemented, and
+        reviewed in accordance with policy and incorporating the principle of data
+        minimization.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P9
+      description: Technical measures implemented to manage data processing are tested
+        and assessed.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dm-p
+      ref_id: CT.DM-P10
+      description: Stakeholder privacy preferences are included in algorithmic design
+        objectives and outputs are evaluated against these preferences.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct-p
+      ref_id: CT.DP-P
+      name: Disassociated Processing
+      description: "Data processing solutions increase disassociability consistent\
+        \ with the organization\u2019s risk strategy to protect individuals\u2019\
+        \ privacy and enable implementation of privacy principles (e.g., data minimization)."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p
+      ref_id: CT.DP-P1
+      description: Data are processed to limit observability and linkability (e.g.,
+        data actions take place on local devices, privacy-preserving cryptography).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p
+      ref_id: CT.DP-P2
+      description: Data are processed to limit the identification of individuals (e.g.,
+        de-identification privacy techniques, tokenization).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p
+      ref_id: CT.DP-P3
+      description: "Data are processed to limit the formulation of inferences about\
+        \ individuals\u2019 behavior or activities (e.g., data processing is decentralized,\
+        \ distributed architectures)."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p
+      ref_id: CT.DP-P4
+      description: 'System or device configurations permit selective collection or
+        disclosure of data elements. '
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:ct.dp-p
+      ref_id: CT.DP-P5
+      description: Attribute references are substituted for attribute values.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm-p
+      assessable: false
+      depth: 1
+      ref_id: CM-P
+      name: COMMUNICATE-P
+      description: Develop and implement appropriate activities to enable organizations
+        and individuals to have a reliable understanding and engage in a dialogue
+        about how data are processed and associated privacy risks.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.po-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm-p
+      ref_id: CM.PO-P
+      name: Communication Policies, Processes, and Procedures
+      description: "Policies, processes, and procedures are maintained and used to\
+        \ increase transparency of the organization\u2019s data processing practices\
+        \ (e.g., purpose, scope, roles and responsibilities in the data processing\
+        \ ecosystem, and management commitment) and associated privacy risks."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.po-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.po-p
+      ref_id: CM.PO-P1
+      description: Transparency policies, processes, and procedures for communicating
+        data processing purposes, practices, and associated privacy risks are established
+        and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.po-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.po-p
+      ref_id: CM.PO-P2
+      description: Roles and responsibilities (e.g., public relations) for communicating
+        data processing purposes, practices, and associated privacy risks are established.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm-p
+      ref_id: CM.AW-P
+      name: Data Processing Awareness
+      description: "Individuals and organizations have reliable knowledge about data\
+        \ processing practices and associated privacy risks, and effective mechanisms\
+        \ are used and maintained to increase predictability consistent with the organization\u2019\
+        s risk strategy to protect individuals\u2019 privacy. "
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P1
+      description: "Mechanisms (e.g., notices, internal or public reports) for communicating\
+        \ data processing purposes, practices, associated privacy risks, and options\
+        \ for enabling individuals\u2019 data processing preferences and requests\
+        \ are established and in place."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P2
+      description: Mechanisms for obtaining feedback from individuals (e.g., surveys
+        or focus groups) about data processing and associated privacy risks are established
+        and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P3
+      description: System/product/service design enables data processing visibility.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P4
+      description: Records of data disclosures and sharing are maintained and can
+        be accessed for review or transmission/disclosure.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P5
+      description: Data corrections or deletions can be communicated to individuals
+        or organizations (e.g., data sources) in the data processing ecosystem.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P6
+      description: Data provenance and lineage are maintained and can be accessed
+        for review or transmission/disclosure.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P7
+      description: Impacted individuals and organizations are notified about a privacy
+        breach or event.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:cm.aw-p
+      ref_id: CM.AW-P8
+      description: Individuals are provided with mitigation mechanisms (e.g., credit
+        monitoring, consent withdrawal, data alteration or deletion) to address impacts
+        of problematic data actions.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr-p
+      assessable: false
+      depth: 1
+      ref_id: PR-P
+      name: PROTECT-P
+      description: Develop and implement appropriate data processing safeguards.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr-p
+      ref_id: PR.PO-P
+      name: Data Protection Policies, Processes, and Procedures
+      description: Security and privacy policies (e.g., purpose, scope, roles and
+        responsibilities in the data processing ecosystem, and management commitment),
+        processes, and procedures are maintained and used to manage the protection
+        of data.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P1
+      description: A baseline configuration of information technology is created and
+        maintained incorporating security principles (e.g., concept of least functionality).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P2
+      description: Configuration change control processes are established and in place.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P3
+      description: Backups of information are conducted, maintained, and tested.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P4
+      description: Policy and regulations regarding the physical operating environment
+        for organizational assets are met.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P5
+      description: Protection processes are improved.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P6
+      description: Effectiveness of protection technologies is shared.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P7
+      description: Response plans (Incident Response and Business Continuity) and
+        recovery plans (Incident Recovery and Disaster Recovery) are established,
+        in place, and managed.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P8
+      description: Response and recovery plans are tested.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P9
+      description: Privacy procedures are included in human resources practices (e.g.,
+        deprovisioning, personnel screening).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.po-p
+      ref_id: PR.PO-P10
+      description: A vulnerability management plan is developed and implemented.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr-p
+      ref_id: PR.AC-P
+      name: Identity Management, Authentication, and Access Control
+      description: Access to data and devices is limited to authorized individuals,
+        processes, and devices, and is managed consistent with the assessed risk of
+        unauthorized access.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      ref_id: PR.AC-P1
+      description: Identities and credentials are issued, managed, verified, revoked,
+        and audited for authorized individuals, processes, and devices.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      ref_id: PR.AC-P2
+      description: Physical access to data and devices is managed.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      ref_id: PR.AC-P3
+      description: Remote access is managed.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      ref_id: PR.AC-P4
+      description: Access permissions and authorizations are managed, incorporating
+        the principles of least privilege and separation of duties.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      ref_id: PR.AC-P5
+      description: Network integrity is protected (e.g., network segregation, network
+        segmentation).
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ac-p
+      ref_id: PR.AC-P6
+      description: "Individuals and devices are proofed and bound to credentials,\
+        \ and authenticated commensurate with the risk of the transaction (e.g., individuals\u2019\
+        \ security and privacy risks and other organizational risks)."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr-p
+      ref_id: PR.DS-P
+      name: Data Security
+      description: "Data are managed consistent with the organization\u2019s risk\
+        \ strategy to protect individuals\u2019 privacy and maintain data confidentiality,\
+        \ integrity, and availability."
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P1
+      description: Data-at-rest are protected.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P2
+      description: Data-in-transit are protected.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P3
+      description: Systems/products/services and associated data are formally managed
+        throughout removal, transfers, and disposition.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P4
+      description: Adequate capacity to ensure availability is maintained.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P5
+      description: Protections against data leaks are implemented.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P6
+      description: Integrity checking mechanisms are used to verify software, firmware,
+        and information integrity.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P7
+      description: The development and testing environment(s) are separate from the
+        production environment.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ds-p
+      ref_id: PR.DS-P8
+      description: Integrity checking mechanisms are used to verify hardware integrity.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ma-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr-p
+      ref_id: PR.MA-P
+      name: Maintenance
+      description: System maintenance and repairs are performed consistent with policies,
+        processes, and procedures.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ma-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ma-p
+      ref_id: PR.MA-P1
+      description: Maintenance and repair of organizational assets are performed and
+        logged, with approved and controlled tools.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ma-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.ma-p
+      ref_id: PR.MA-P2
+      description: Remote maintenance of organizational assets is approved, logged,
+        and performed in a manner that prevents unauthorized access.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr-p
+      ref_id: PR.PT-P
+      name: Protective Technology
+      description: Technical security solutions are managed to ensure the security
+        and resilience of systems/products/services and associated data, consistent
+        with related policies, processes, procedures, and agreements.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p
+      ref_id: PR.PT-P1
+      description: Removable media is protected and its use restricted according to
+        policy.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p
+      ref_id: PR.PT-P2
+      description: The principle of least functionality is incorporated by configuring
+        systems to provide only essential capabilities.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p
+      ref_id: PR.PT-P3
+      description: Communications and control networks are protected.
+    - urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-privacy-1.0:pr.pt-p
+      ref_id: PR.PT-P4
+      description: Mechanisms (e.g., failsafe, load balancing, hot swap) are implemented
+        to achieve resilience requirements in normal and adverse situations.

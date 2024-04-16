@@ -29,8 +29,13 @@
 		crumbs = tokens.map((t) => {
 			tokenPath += '/' + t;
 			if (t === $breadcrumbObject.id) {
-				if ($breadcrumbObject.name) t = $breadcrumbObject.name;
-				else t = $breadcrumbObject.email;
+				if ($breadcrumbObject.name) {
+					t = $breadcrumbObject.name;
+				} else if ($breadcrumbObject.first_name && $breadcrumbObject.last_name) {
+					t = `${$breadcrumbObject.first_name} ${$breadcrumbObject.last_name}`;
+				} else {
+					t = $breadcrumbObject.email;
+				}
 			} else if (t === 'folders') {
 				t = 'domains';
 			}

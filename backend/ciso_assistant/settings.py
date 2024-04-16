@@ -11,6 +11,8 @@ else it is sqlite, and no env variable is required
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+import subprocess
 import json
 import logging.config
 import structlog
@@ -18,16 +20,20 @@ from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".meta")
+
+VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
+BUILD = os.getenv("CISO_ASSISTANT_BUILD", "unset")
 
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
-
 def set_ciso_assistant_url(_, __, event_dict):
     event_dict["ciso_assistant_url"] = CISO_ASSISTANT_URL
     return event_dict
+
 
 
 LOGGING = {
@@ -63,7 +69,8 @@ structlog.configure(
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
         structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.StackInfoRenderer(),  # Include stack information in log entries
+        # Include stack information in log entries
+        structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
@@ -76,20 +83,10 @@ logging.config.dictConfig(LOGGING)
 logger = structlog.getLogger(__name__)
 
 logger.info("BASE_DIR: %s", BASE_DIR)
+logger.info("VERSION: %s", VERSION)
+logger.info("BUILD: %s", BUILD)
 
-with open(BASE_DIR / "ciso_assistant/VERSION") as f:
-    VERSION = f.read().strip()
-    logger.info("CISO Assistant Version: %s" % VERSION)
-
-try:
-    with open(BASE_DIR / "ciso_assistant/build.json") as f:
-        BUILD = json.load(f)["build"]
-        logger.info("CISO Assistant Build: %s" % BUILD)
-except FileNotFoundError:
-    BUILD = "unset"
-    logger.warning(
-        "CISO Assistant Build: unset. Please refer to the documentation to set it."
-    )
+# TODO: multiple paths are explicit, it should use path join to be more generic
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -133,6 +130,7 @@ INSTALLED_APPS = [
     "library",
     "serdes",
     "rest_framework",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -191,6 +189,7 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": PAGINATE_BY,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 if DEBUG:
@@ -270,7 +269,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # SQLIte file can be changed, useful for tests
-SQLITE_FILE = os.environ.get('SQLITE_FILE', BASE_DIR / "db/ciso-assistant.sqlite3")
+SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
 
 
 if "POSTGRES_NAME" in os.environ:
@@ -290,7 +289,7 @@ else:
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": SQLITE_FILE,
             "OPTIONS": {
-                'timeout': 120,
+                "timeout": 120,
             },
         }
     }
@@ -305,3 +304,11 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.ScryptPasswordHasher",
 ]
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'CISO Assistant API',
+    'DESCRIPTION': 'CISO Assistant - API Documentation',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}

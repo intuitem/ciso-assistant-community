@@ -17,6 +17,7 @@
 ![](gh_banner.png)
 
 [![Backend code coverage](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-coverage.yaml)
+[![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
 [![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
 
 CISO Assistant brings a different take to **GRC** and Cyber Security Posture Management:
@@ -51,24 +52,31 @@ The decoupling allows you to save a considerable amount of time:
 > The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
 
-Alternatively, make sure you have *Docker* and *Docker-compose* installed, on your workstation or server, clone the repo and run:
+Alternatively, once you have *Docker* and *Docker-compose* installed, on your workstation or server, *clone* the repo and run:
 
 ```sh
 ./docker-compose.sh
 ```
 
-## Documentation
+> [!NOTE]
+> The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
+> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+> [!WARNING]
+If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+
+## End-user Documentation
 
 Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant.
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2022
+1. ISO 27001:2022 🌐
 2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
-5. SOC2
-6. PCI DSS 4.0
+5. SOC2 🇺🇸
+6. PCI DSS 4.0 💳
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. GDPR checklist from GDPR.EU 🇪🇺
@@ -79,12 +87,14 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
-17. NIST SP-800-66 (HIPAA) 🇺🇸
+17. NIST SP-800-66 (HIPAA) 🏥
 18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS)
+19. OWASP Application Security Verification Standard (ASVS) 🐝
 20. RGS v2.0 🇫🇷
-21. AirCyber
-22. Cyber Resilience Act (CRA)
+21. AirCyber ✈️
+22. Cyber Resilience Act (CRA) 🇪🇺
+23. TIBER-EU 🇪🇺
+24. NIST Privacy Framework 🇺🇸
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
@@ -97,9 +107,9 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - Tisax
 - AI Act
 - Part-IS
-- TIBER-EU / TIBER-FR
 - SecNumCloud
 - SOX
+- MASVS
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
@@ -131,10 +141,16 @@ git clone git@github.com:intuitem/ciso-assistant-community.git
 cd ciso-assistant-community
 ```
 
-2. Launch docker-compose script
+2. Launch docker-compose script for prebuilt images:
 
 ```sh
 ./docker-compose.sh
+```
+
+*Alternatively*, you can use this variant to build the docker images for your specific architecture:
+
+```sh
+./docker-compose-build.sh
 ```
 
 When asked for, enter your email and password for your superuser.
@@ -143,7 +159,8 @@ You can then reach CISO Assistant using your web brower at [https://localhost:84
 
 For the following executions, use "docker compose up" directly.
 
-If you want to restart a fresh install, simply delete the db directory, where the database is stored.
+> [!TIP]
+> If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
 
 
 ## Setting up CISO Assistant for development
@@ -152,6 +169,7 @@ If you want to restart a fresh install, simply delete the db directory, where th
 
 - Python 3.11+
 - pip 20.3+
+- node 18+
 - npm 10.2+
 
 ### Running the backend
