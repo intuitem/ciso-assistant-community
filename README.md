@@ -155,7 +155,7 @@ cd ciso-assistant-community
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
+You can then reach CISO Assistant using your web browser at [https://localhost:8443/](https://localhost:8443/)
 
 For the following executions, use "docker compose up" directly.
 
