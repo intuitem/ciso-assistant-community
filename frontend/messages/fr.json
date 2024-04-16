@@ -367,7 +367,7 @@
 	"extraLarge": "Très grand",
 	"rid": "RID",
 	"scope": "Périmètre",
-	"auditor": "Lecteur",
+	"auditor": "Auditor",
 	"lastUpdate": "Dernière mise à jour",
 	"riskScenarioAssetHelpText": "Biens sensibles impactés par ce scénario de risque",
 	"riskScenarioMeasureHelpText": "Les mesures appliquées existantes pour gérer ce risque",
