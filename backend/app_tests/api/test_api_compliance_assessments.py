@@ -122,6 +122,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "min_score": 0,
+                    "max_score": 100
                 },
             },
             user_group=test.user_group,
@@ -150,6 +152,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "min_score": Framework.objects.all()[0].min_score,
+                    "max_score": Framework.objects.all()[0].max_score
                 },
             },
             user_group=test.user_group,
@@ -190,6 +194,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "min_score": Framework.objects.all()[0].min_score,
+                    "max_score": Framework.objects.all()[0].max_score
                 },
             },
             user_group=test.user_group,
