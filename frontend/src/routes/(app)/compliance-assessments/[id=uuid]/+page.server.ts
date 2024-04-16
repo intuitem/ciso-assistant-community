@@ -17,5 +17,9 @@ export const load = (async ({ fetch, params }) => {
 		`${BASE_API_URL}/${URLModel}/${params.id}/donut_data/`
 	).then((res) => res.json());
 
-	return { URLModel, compliance_assessment, object, tree, compliance_assessment_donut_values };
+	const global_score = await fetch(
+		`${BASE_API_URL}/${URLModel}/${params.id}/global_score/`
+	).then((res) => res.json());
+
+	return { URLModel, compliance_assessment, object, tree, compliance_assessment_donut_values, global_score };
 }) satisfies PageServerLoad;
