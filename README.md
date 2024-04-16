@@ -95,6 +95,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
+25. Tisax 🇪🇺
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
@@ -104,7 +105,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - CIS
 - CCM
 - CCPA
-- Tisax
 - AI Act
 - Part-IS
 - SecNumCloud
