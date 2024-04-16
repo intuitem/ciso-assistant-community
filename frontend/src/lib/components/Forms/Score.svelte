@@ -17,12 +17,11 @@
 	
 	$: scoringEnabled = $value === null ? false : true
 
-	function preventNull(value: number){
+	function formatValue(value: number){
 		if(value === null){
 			return 0
 		}
 		return value * 100 / max_score
-	
 	}
 
 	function displayNoValue(value: number){
@@ -68,7 +67,7 @@
 		</div>
 		<div class="flex w-1/2 items-center justify-center">
 			{#if scoringEnabled}
-				<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={preventNull($value)} font={100} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
+				<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={formatValue($value)} font={100} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
 			{:else}
 				<ProgressRadial stroke={100} value={0} font={100} width={'w-32'}>--</ProgressRadial>
 			{/if}
