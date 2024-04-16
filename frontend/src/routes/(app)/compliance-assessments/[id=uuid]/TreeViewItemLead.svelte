@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { displayScoreColor } from '$lib/utils/helpers';
 	import { localItems } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
@@ -17,13 +18,13 @@
 
 {#if assessable}
 <div class="flex flex-row space-x-2 items-center">
-	{#if score !== null}
-		<span>
-			<ProgressRadial stroke={100} font={150} value={score * 100 / max_score} width={'w-12'}>{score}</ProgressRadial>
-		</span>
-	{/if}
 	<span class="badge {classesText} h-fit" style="background-color: {statusColor};">
 		{lead}
 	</span>
+	{#if score !== null}
+		<span>
+			<ProgressRadial stroke={100} meter={displayScoreColor(score, max_score)} font={150} value={score * 100 / max_score} width={'w-10'}>{score}</ProgressRadial>
+		</span>
+	{/if}
 </div>
 {/if}

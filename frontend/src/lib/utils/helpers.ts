@@ -1,4 +1,4 @@
-export function formatStringToDate(inputString: string,locale: string="en") {
+export function formatStringToDate(inputString: string, locale: string="en") {
 	const date = new Date(inputString);
 	return date.toLocaleDateString(locale, {
 		year: 'numeric',
@@ -23,4 +23,18 @@ export function getRequirementTitle(ref_id: string, name: string) {
 		pattern == 2 ? ref_id :
 		pattern == 1 ? name : '';
 	return title;
+}
+
+export function displayScoreColor(value: number, max_score: number){
+	value = value * 100 / max_score
+	if(value < 25){
+		return 'stroke-red-500'
+	}
+	if(value < 50){
+		return 'stroke-orange-500'
+	}
+	if(value < 75){
+		return 'stroke-yellow-500'
+	}
+	return 'stroke-green-500'
 }

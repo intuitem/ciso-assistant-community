@@ -90,6 +90,7 @@
 
 	import { ProgressRadial, localStorageStore } from '@skeletonlabs/skeleton';
 	import type { Writable } from 'svelte/store';
+	import { displayScoreColor } from '$lib/utils/helpers';
 
 	const expandedNodesState: Writable<any> = localStorageStore('expandedNodes', expandedNodes, {
 		storage: 'session'
@@ -161,7 +162,7 @@
 		</div>
 		{#if data.global_score.score >= 0}
 			<div class="flex items-center cursor-pointer">
-				<ProgressRadial stroke={100} font={150} value={data.global_score.score * 100 / data.global_score.max_score} width={'w-52'}>{data.global_score.score}</ProgressRadial>
+				<ProgressRadial stroke={100} meter={displayScoreColor(data.global_score.score, data.global_score.max_score)} font={125} value={data.global_score.score * 100 / data.global_score.max_score} width={'w-52'}>{data.global_score.score}</ProgressRadial>
 			</div>
 		{/if}
 		<div class="w-1/2">

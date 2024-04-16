@@ -4,6 +4,7 @@
 	import { RangeSlider } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import type { AnyZodObject } from 'zod';
+	import { displayScoreColor } from '$lib/utils/helpers';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -67,7 +68,7 @@
 		</div>
 		<div class="flex w-1/2 items-center justify-center">
 			{#if scoringEnabled}
-				<ProgressRadial stroke={100} value={preventNull($value)} font={100} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
+				<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={preventNull($value)} font={100} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
 			{:else}
 				<ProgressRadial stroke={100} value={0} font={100} width={'w-32'}>--</ProgressRadial>
 			{/if}
