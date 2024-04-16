@@ -498,6 +498,8 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
+    #add undefined as the first element in the labels to balance the values
+    labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
 
