@@ -88,7 +88,7 @@
 
 	let expandedNodes: TreeViewNode[] = [];
 
-	import { localStorageStore } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, localStorageStore } from '@skeletonlabs/skeleton';
 	import type { Writable } from 'svelte/store';
 
 	const expandedNodesState: Writable<any> = localStorageStore('expandedNodes', expandedNodes, {
@@ -100,8 +100,8 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
-		<div class="flex flex-col space-y-2 whitespace-pre-line">
+	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
+		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/6">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers', 'status'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
@@ -159,7 +159,12 @@
 				</div>
 			{/each}
 		</div>
-		<div class="w-full">
+		{#if data.global_score.score >= 0}
+			<div class="flex items-center cursor-pointer">
+				<ProgressRadial stroke={100} font={150} value={data.global_score.score * 100 / data.global_score.max_score} width={'w-52'}>{data.global_score.score}</ProgressRadial>
+			</div>
+		{/if}
+		<div class="w-1/2">
 			<DonutChart
 				s_label={m.complianceAssessments()}
 				values={compliance_assessment_donut_values.values}

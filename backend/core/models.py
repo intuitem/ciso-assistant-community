@@ -1294,6 +1294,11 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+        
+    def get_global_score(self):
+        requirement_assessments_scored = RequirementAssessment.objects.filter(compliance_assessment=self).exclude(score=None)
+        score = requirement_assessments_scored.aggregate(models.Avg('score'))
+        return score['score__avg'] or -1
 
     def get_requirements_status_count(self):
         requirements_status_count = []
