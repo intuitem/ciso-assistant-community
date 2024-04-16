@@ -8,19 +8,19 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 
-	export let form: SuperForm<AnyZodObject>;
+	export let min_score: number;
+	export let max_score: number;
 
+	export let form: SuperForm<AnyZodObject>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 	
 	$: scoringEnabled = $value === null ? false : true
-
-	console.log($value)
 
 	function preventNull(value: number){
 		if(value === null){
 			return 0
 		}
-		return value
+		return value * 100 / max_score
 	
 	}
 
@@ -63,7 +63,7 @@
 			{...$$restProps}
 		/>
 		<div class="flex w-1/2 items-center justify-center">
-			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} max={100} step={1} ticked></RangeSlider>
+			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked></RangeSlider>
 		</div>
 		<div class="flex w-1/2 items-center justify-center">
 			{#if scoringEnabled}

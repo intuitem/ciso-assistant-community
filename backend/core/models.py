@@ -328,6 +328,12 @@ class RiskMatrix(ReferentialObjectMixin):
 
 
 class Framework(ReferentialObjectMixin):
+    min_score = models.IntegerField(
+        default=0, verbose_name=_("Minimum score")
+    )
+    max_score = models.IntegerField(
+        default=100, verbose_name=_("Maximum score")
+    )
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -1482,9 +1488,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         verbose_name=_("Status"),
     )
     score = models.IntegerField(
-        null=True,
         blank=True,
-        choices=[(i, i) for i in range(0, 101)]
+        null=True,
+        verbose_name=_("Score"),
     )
     evidences = models.ManyToManyField(
         Evidence,
@@ -1508,6 +1514,13 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         verbose_name=_("Applied controls"),
         related_name="requirement_assessments",
     )
+    
+    def get_score_choices(self):
+        return [(i, i) for i in range(self.compliance_assessment.framework.min_score, self.compliance_assessment.framework.max_score + 1)]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._meta.get_field('score').choices = self.get_score_choices()
 
     def __str__(self) -> str:
         return self.requirement.display_short
