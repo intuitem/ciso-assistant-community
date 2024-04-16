@@ -67,9 +67,9 @@
 		</div>
 		<div class="flex w-1/2 items-center justify-center">
 			{#if scoringEnabled}
-				<ProgressRadial stroke={175} value={preventNull($value)} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
+				<ProgressRadial stroke={100} value={preventNull($value)} font={100} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
 			{:else}
-				<ProgressRadial stroke={175} value={0} width={'w-32'}>--</ProgressRadial>
+				<ProgressRadial stroke={100} value={0} font={100} width={'w-32'}>--</ProgressRadial>
 			{/if}
 		</div>
 	</div>

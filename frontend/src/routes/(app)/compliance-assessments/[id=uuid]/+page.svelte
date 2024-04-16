@@ -63,7 +63,9 @@
 					statusI18n: node.status_i18n,
 					assessable: node.assessable,
 					statusDisplay: node.status_display,
-					statusColor: complianceColorMap[node.status]
+					statusColor: complianceColorMap[node.status],
+					score: node.score,
+					max_score: node.max_score
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children)) : []
 			};
