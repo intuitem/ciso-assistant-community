@@ -501,5 +501,7 @@
 	"missingMandatoyObjects2": "Veuillez les ajouter avant de continuer",
 	"attemptToDeleteOnlyAdminAccountError": "Vous ne pouvez pas supprimer votre unique compte administrateur de l'application.",
 	"attemptToRemoveOnlyAdminUserGroup": "Vous ne pouvez pas retirer le seul compte administrateur de l'application du groupe des administrateurs.",
-	"scoringHelpText": "Cocher pour activer le score"
+	"scoringHelpText": "Cocher pour activer le score",
+	"minScore": "Score minimum",
+	"maxScore": "Score maximum"
 }
