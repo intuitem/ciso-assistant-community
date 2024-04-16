@@ -12,10 +12,12 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 	
-	$: scoringEnabled = $value < 0 ? false : true
+	$: scoringEnabled = $value === null ? false : true
 
-	function preventNegative(value: number){
-		if(value < 0){
+	console.log($value)
+
+	function preventNull(value: number){
+		if(value === null){
 			return 0
 		}
 		return value
@@ -23,7 +25,7 @@
 	}
 
 	function displayNoValue(value: number){
-		if(value === -1){
+		if(value === null){
 			return '--'
 		}
 		return value
@@ -54,18 +56,18 @@
 			class="checkbox"
 			data-testid="form-input-{field.replaceAll('_', '-')}"
 			bind:checked={scoringEnabled}
-			on:change={() => $value = -1}
+			on:change={() => $value = null}
 			{...$constraints}
 			{...$$restProps}
 			{...$constraints}
 			{...$$restProps}
 		/>
 		<div class="flex w-1/2 items-center justify-center">
-			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} max={100} step={1}></RangeSlider>
+			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} max={100} step={1} ticked></RangeSlider>
 		</div>
 		<div class="flex w-1/2 items-center justify-center">
 			{#if scoringEnabled}
-				<ProgressRadial stroke={175} value={preventNegative($value)} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
+				<ProgressRadial stroke={175} value={preventNull($value)} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
 			{:else}
 				<ProgressRadial stroke={175} value={0} width={'w-32'}>--</ProgressRadial>
 			{/if}

@@ -1482,8 +1482,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         verbose_name=_("Status"),
     )
     score = models.IntegerField(
-        default=-1,
-        choices=[(i, i) for i in range(-1, 101)]
+        null=True,
+        blank=True,
+        choices=[(i, i) for i in range(0, 101)]
     )
     evidences = models.ManyToManyField(
         Evidence,
