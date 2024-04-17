@@ -318,8 +318,6 @@ OR
 export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
 ```
 
-Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
-
 3. Install dependencies
 
 ```bash
