@@ -359,3 +359,5 @@ class CoreConfig(AppConfig):
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
+        
+        import core.signals

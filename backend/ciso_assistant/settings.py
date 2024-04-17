@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     "serdes",
     "rest_framework",
     "drf_spectacular",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -181,6 +182,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
