@@ -384,6 +384,7 @@ export class TestContent {
 			},
 			assetsPage: {
 				displayName: 'Assets',
+				permName: 'complianceassessment',
 				build: {
 					name: vars.assetName,
 					description: vars.description,
