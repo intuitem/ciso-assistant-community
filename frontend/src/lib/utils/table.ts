@@ -14,7 +14,7 @@ export const listViewFields = {
 	},
 	'risk-assessments': {
 		head: ['name', 'riskMatrix', 'description', 'riskScenarios', 'project'],
-		body: ['name', 'risk_matrix', 'description', 'risk_scenarios', 'project']
+		body: ['name', 'risk_matrix', 'description', 'risk_scenarios_count', 'project']
 	},
 	threats: {
 		head: ['ref', 'name', 'description', 'provider', 'domain'],
@@ -22,14 +22,7 @@ export const listViewFields = {
 		meta: ['id', 'urn']
 	},
 	'risk-scenarios': {
-		head: [
-			'name',
-			'threats',
-			'riskAssessment',
-			'appliedControls',
-			'currentLevel',
-			'residualLevel'
-		],
+		head: ['name', 'threats', 'riskAssessment', 'appliedControls', 'currentLevel', 'residualLevel'],
 		body: [
 			'name',
 			'threats',
