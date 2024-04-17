@@ -29,7 +29,7 @@ CISO Assistant brings a different take to **GRC** and Cyber Security Posture Man
 - you can bring your own framework as well using a simple syntax
 - manage audit, evidences collection and report generation
 
-Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practionners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
+Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practitioners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
 
 CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
 
@@ -43,7 +43,7 @@ The decoupling allows you to save a considerable amount of time:
 
 - reuse previous assessments,
 - assess a scope against multiple frameworks at the same time,
-- leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
+- leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
 ## Quick Start 🚀
@@ -110,6 +110,8 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - SecNumCloud
 - SOX
 - MASVS
+- ECC
+- FedRAMP
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
@@ -155,7 +157,7 @@ cd ciso-assistant-community
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
+You can then reach CISO Assistant using your web browser at [https://localhost:8443/](https://localhost:8443/)
 
 For the following executions, use "docker compose up" directly.
 
@@ -221,7 +223,7 @@ export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
 
-# You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initlization
+# You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initialization
 export CISO_SUPERUSER_EMAIL=<XXX>
 
 # By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test,
@@ -274,7 +276,7 @@ python manage.py migrate
 
 7. Create a Django superuser, that will be CISO Assistant administrator.
 
-> If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with createsuperuser, as it will be created automatically on first start. You should receive an email with a link to setup your password.
+> If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
 python manage.py createsuperuser
