@@ -3,10 +3,12 @@ from django.contrib.auth import login
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
+from iam.serializers import LoginSerializer
 
 
 class LoginView(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
+    serializer_class = LoginSerializer
 
     def post(self, request, format=None):
         serializer = AuthTokenSerializer(data=request.data)
