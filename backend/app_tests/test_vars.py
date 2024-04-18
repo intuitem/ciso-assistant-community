@@ -44,7 +44,7 @@ GROUPS_PERMISSIONS = {
     },
     "BI-UG-GAD": {
         "folder": "Global",
-        "name": "Global_auditor",
+        "name": "Global_reader",
         "perms": READER_PERMISSIONS_LIST,
     },
     "BI-UG-GAP": {

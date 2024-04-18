@@ -903,7 +903,7 @@ class FolderViewSet(BaseModelViewSet):
         serializer.save()
         folder = Folder.objects.get(id=serializer.data["id"])
         if folder.content_type == Folder.ContentType.DOMAIN:
-            auditors = UserGroup.objects.create(
+            readers = UserGroup.objects.create(
                 name=UserGroupCodename.READER, folder=folder, builtin=True
             )
             approvers = UserGroup.objects.create(
@@ -916,7 +916,7 @@ class FolderViewSet(BaseModelViewSet):
                 name=UserGroupCodename.DOMAIN_MANAGER, folder=folder, builtin=True
             )
             ra1 = RoleAssignment.objects.create(
-                user_group=auditors,
+                user_group=readers,
                 role=Role.objects.get(name=RoleCodename.READER),
                 builtin=True,
                 folder=Folder.get_root_folder(),
