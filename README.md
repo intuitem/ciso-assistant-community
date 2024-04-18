@@ -98,12 +98,12 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
 25. Tisax 🚘
+26. ANSSI hygiene guide 🇧🇪
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- ANSSI hygiene guide
 - CIS
 - CCM
 - CCPA
