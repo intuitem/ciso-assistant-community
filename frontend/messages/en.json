@@ -367,7 +367,7 @@
 	"extraLarge": "Extra-large",
 	"rid": "RID",
 	"scope": "Scope",
-	"auditor": "Auditor",
+	"auditor": "Reader",
 	"lastUpdate": "Last update",
 	"riskScenarioAssetHelpText": "Assets impacted by this risk scenario",
 	"riskScenarioMeasureHelpText": "The existing applied controls to manage this risk",

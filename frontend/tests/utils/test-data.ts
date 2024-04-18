@@ -77,7 +77,7 @@ export default {
 			]
 		},
 		auditor: {
-			name: 'Auditor',
+			name: 'Reader',
 			perms: [
 				"view_project",
 				"view_riskassessment",
