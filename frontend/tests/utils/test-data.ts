@@ -76,7 +76,7 @@ export default {
 				"view_user",
 			]
 		},
-		auditor: {
+		reader: {
 			name: 'Reader',
 			perms: [
 				"view_project",
