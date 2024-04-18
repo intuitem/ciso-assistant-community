@@ -269,8 +269,8 @@
 				<Select {form} options={data.model.selectOptions['status']} field="status" label="Status" />
 				<Score 
 				{form}
-				min_score={data.compliance_assessment.framework.min_score}
-				max_score={data.compliance_assessment.framework.max_score}
+				min_score={data.compliance_assessment_score.min_score}
+				max_score={data.compliance_assessment_score.max_score}
 				field="score"
 				label="Score" />
 				<TextArea {form} field="observation" label="Observation" />

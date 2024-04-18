@@ -9,8 +9,8 @@
 	export let label: string | undefined = undefined;
 	export let field: string;
 
-	export let min_score: number;
-	export let max_score: number;
+	export let min_score: number = 0;
+	export let max_score: number = 100;
 
 	export let form: SuperForm<AnyZodObject>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
