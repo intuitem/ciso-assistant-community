@@ -53,39 +53,15 @@ export const actions: Actions = {
 			return { form };
 		}
 
-		if (res.headers.has('Set-Cookie')) {
-			const splitted = Object.fromEntries(res.headers)
-				['set-cookie'].split(' ')
-				.filter((string) => string.indexOf('=') >= 0 && string.split('=')[0] === 'sessionid')
-				.map((string) => string.split('=')[1]);
+		const data = await res.json();
 
-			if (splitted.length < 1) {
-				throw fail(500, {
-					message:
-						"Failed to create a session, the API returned cookies the 'sessionid' cookie is missing !"
-				});
-			}
+		cookies.set('token', data.token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
 
-			const sessionid = splitted[0];
-			cookies.set('sessionid', sessionid, {
-				httpOnly: true,
-				sameSite: 'lax',
-				path: '/',
-				secure: true
-			});
-
-			const csrftoken = cookies.get('csrftoken');
-			if (csrftoken) {
-				cookies.set('csrftoken', csrftoken, {
-					// Setting httpOnly to true for the CSRF token offers no additional security.
-					// https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
-					httpOnly: false,
-					sameSite: 'lax',
-					path: '/',
-					secure: true
-				});
-			}
-		}
 		redirect(302, url.searchParams.get('next') || '/analytics');
 	}
 };

@@ -22,19 +22,19 @@ async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 }
 
 async function validateUserSession(event: RequestEvent): Promise<User | null> {
-	const session = event.cookies.get('sessionid');
-	if (!session) return null;
+	const token = event.cookies.get('token');
+	if (!token) return null;
 
 	const res = await fetch(`${BASE_API_URL}/iam/current-user/`, {
 		credentials: 'include',
 		headers: {
 			'content-type': 'application/json',
-			Cookie: `sessionid=${session}`
+			Authorization: `Token ${token}`
 		}
 	});
 
 	if (!res.ok) {
-		event.cookies.delete('sessionid', {
+		event.cookies.delete('token', {
 			path: '/'
 		});
 		redirect(302, `/login?next=${event.url.pathname}`);
@@ -61,11 +61,11 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event: { cookie
 	if (request.url.startsWith(BASE_API_URL)) {
 		request.headers.set('Content-Type', 'application/json');
 
-		const sessionid = cookies.get('sessionid');
+		const token = cookies.get('token');
 		const csrfToken = cookies.get('csrftoken');
 
-		if (sessionid) {
-			request.headers.append('Cookie', `sessionid=${sessionid}`);
+		if (token) {
+			request.headers.append('Authorization', `Token ${token}`);
 		}
 
 		if (unsafeMethods.has(request.method) && csrfToken) {
