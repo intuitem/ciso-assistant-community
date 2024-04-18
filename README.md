@@ -99,6 +99,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 24. NIST Privacy Framework 🇺🇸
 25. Tisax 🚘
 26. ANSSI hygiene guide 🇫🇷
+27. Essential Cybersecurity Controls (ECC) 🇸🇦
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
@@ -112,7 +113,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - SecNumCloud
 - SOX
 - MASVS
-- ECC
 - FedRAMP
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
