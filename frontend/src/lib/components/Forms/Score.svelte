@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms/client';
-	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, SlideToggle } from '@skeletonlabs/skeleton';
 	import { RangeSlider } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import type { AnyZodObject } from 'zod';
@@ -49,20 +49,9 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="flex flex-row w-full items-center space-x-4 ml-2">
-		<input
-			name={field}
-			type="checkbox"
-			class="checkbox"
-			data-testid="form-input-{field.replaceAll('_', '-')}"
-			bind:checked={scoringEnabled}
-			on:change={() => $value = null}
-			{...$constraints}
-			{...$$restProps}
-			{...$constraints}
-			{...$$restProps}
-		/>
-		<div class="flex w-1/2 items-center justify-center">
+	<div class="flex flex-row w-full items-center justify-evenly px-2">
+		<div class="flex w-1/2 items-center justify-center space-x-8">
+			<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:change={() => $value = null} name="score-slider"></SlideToggle>
 			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked></RangeSlider>
 		</div>
 		<div class="flex w-1/2 items-center justify-center">
