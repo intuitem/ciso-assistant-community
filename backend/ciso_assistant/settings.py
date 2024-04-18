@@ -112,15 +112,6 @@ MEDIA_URL = ""
 
 PAGINATE_BY = os.environ.get("PAGINATE_BY", default=500)
 
-AUTHENTICATION_METHOD = os.environ.get("AUTHENTICATION_METHOD", "session")
-
-AUTHENTICATION_CLASS = {
-    "session": "rest_framework.authentication.SessionAuthentication",
-    "knox": "knox.auth.TokenAuthentication",
-}
-
-logger.info("AUTHENTICATION_METHOD: %s", AUTHENTICATION_METHOD)
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -189,7 +180,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        AUTHENTICATION_CLASS[AUTHENTICATION_METHOD],
+        "knox.auth.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
