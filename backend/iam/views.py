@@ -14,6 +14,8 @@ from rest_framework.status import (
 )
 from rest_framework.settings import api_settings
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.views import LoginView as KnoxLoginView
 
 from .serializers import (
     ChangePasswordSerializer,
@@ -31,37 +33,16 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 
-class LoginView(views.APIView):
-    permission_classes = [permissions.AllowAny]
+class LoginView(KnoxLoginView):
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = LoginSerializer
 
-    @method_decorator(ensure_csrf_cookie)
-    def post(self, request) -> Response:
-        serializer = LoginSerializer(
-            data=self.request.data,
-            context={"request": self.request},
-        )
-        try:
-            serializer.is_valid(raise_exception=True)
-            user = serializer.validated_data["user"]
-            login(request, user)
-            logger.info("login succesful", user=user)
-        except serializers.ValidationError as e:
-            logger.warning(
-                "login attempt failed",
-                error=e,
-                username=request.data.get("username"),
-            )
-            if isinstance(e.detail, dict):
-                return Response(data={**e.detail}, status=HTTP_401_UNAUTHORIZED)
-            else:
-                return Response(
-                    data={api_settings.NON_FIELD_ERRORS_KEY: [e.detail]},
-                    status=HTTP_401_UNAUTHORIZED,
-                )
-
-        user.first_login = False
-        user.save()
-        return Response(None, status=HTTP_202_ACCEPTED)
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        login(request, user)
+        return super(LoginView, self).post(request, format=None)
 
 
 class LogoutView(views.APIView):

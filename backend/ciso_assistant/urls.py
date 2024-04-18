@@ -22,18 +22,18 @@ from drf_spectacular.views import (
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
-    path("api/", include("core.urls")),
-    path("serdes/", include("serdes.urls")),
-    path("i18n/", include("django.conf.urls.i18n")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("", SpectacularAPIView.as_view(), name="schema"),
     path(
-        "api/schema/swagger/",
+        "schema/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger",
     ),
     path(
-        "api/schema/redoc/",
+        "schema/redoc/",
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    path("api/", include("core.urls")),
+    path("serdes/", include("serdes.urls")),
+    path("i18n/", include("django.conf.urls.i18n")),
 ]
