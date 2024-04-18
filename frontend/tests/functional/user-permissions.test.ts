@@ -88,10 +88,10 @@ Object.entries(userGroups).forEach(([userGroup, userGroupData]) => {
 
             Object.entries(testObjectsData).forEach(([objectPage, objectData], index) => {
                 test.describe(`${objectData.displayName.toLowerCase()} permissions`, () => {
-                    const userCanView = userFromUserGroupHasPermission(userGroup, 'view', objectData.displayName);
-                    const userCanCreate = userFromUserGroupHasPermission(userGroup, 'add', objectData.displayName);
-                    const userCanUpdate = userFromUserGroupHasPermission(userGroup, 'change', objectData.displayName);
-                    const userCanDelete = userFromUserGroupHasPermission(userGroup, 'delete', objectData.displayName);
+                    const userCanView = userFromUserGroupHasPermission(userGroup, 'view', objectData.permName ?? objectData.displayName);
+                    const userCanCreate = userFromUserGroupHasPermission(userGroup, 'add', objectData.permName ?? objectData.displayName);
+                    const userCanUpdate = userFromUserGroupHasPermission(userGroup, 'change', objectData.permName ?? objectData.displayName);
+                    const userCanDelete = userFromUserGroupHasPermission(userGroup, 'delete', objectData.permName ?? objectData.displayName);
                     
                     test.beforeAll(async ({pages}) => {
                         await pages[objectPage].goto();
