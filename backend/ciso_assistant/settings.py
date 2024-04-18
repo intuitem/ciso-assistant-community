@@ -30,10 +30,10 @@ LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
+
 def set_ciso_assistant_url(_, __, event_dict):
     event_dict["ciso_assistant_url"] = CISO_ASSISTANT_URL
     return event_dict
-
 
 
 LOGGING = {
@@ -112,6 +112,14 @@ MEDIA_URL = ""
 
 PAGINATE_BY = os.environ.get("PAGINATE_BY", default=500)
 
+AUTHENTICATION_METHOD = os.environ.get("AUTHENTICATION_METHOD", "session")
+
+AUTHENTICATION_CLASS = {
+    "session": "rest_framework.authentication.SessionAuthentication",
+    "knox": "knox.auth.TokenAuthentication",
+}
+
+logger.info("AUTHENTICATION_METHOD: %s", AUTHENTICATION_METHOD)
 
 # Application definition
 
@@ -130,6 +138,7 @@ INSTALLED_APPS = [
     "library",
     "serdes",
     "rest_framework",
+    "knox",
     "drf_spectacular",
 ]
 
@@ -180,7 +189,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
+        AUTHENTICATION_CLASS[AUTHENTICATION_METHOD],
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -306,9 +315,9 @@ PASSWORD_HASHERS = [
 ]
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'CISO Assistant API',
-    'DESCRIPTION': 'CISO Assistant - API Documentation',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "CISO Assistant API",
+    "DESCRIPTION": "CISO Assistant - API Documentation",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
 }
