@@ -306,37 +306,32 @@ ln -fs ../../git_hooks/post-merge .
 cd frontend
 ```
 
-2. Declare the PUBLIC_BACKEND_API_URL environment variable.
 
-EITHER
-
-```bash
-echo "PUBLIC_BACKEND_API_URL=http://localhost:8000/api" > .env
-```
-
-OR
-
-```bash
-export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
-```
-
-3. Install dependencies
+2. Install dependencies
 
 ```bash
 npm install
 ```
 
-4. Start a development server (make sure that the django app is running)
+3. Start a development server (make sure that the django app is running)
 
 ```bash
 npm run dev
 ```
 
-5. Reach the frontend on http://localhost:5173
+4. Reach the frontend on http://localhost:5173
 
 
 > [!NOTE]
 > Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
+
+5. Environment variables
+
+All variables in the frontend have handy default values.
+
+If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is http://localhost:8000/api.
+
+When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. http://localhost:3000).
 
 ### Managing migrations
 
@@ -371,6 +366,18 @@ tests/e2e-tests.sh
 ```
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
+
+## Setting CISO Assistant for production
+
+The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
+
+Set DJANGO_DEBUG=False for security reason.
+
+> [!NOTE]
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue.
+
+> [!NOTE]
+> Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
 ## Built With 💜
 
