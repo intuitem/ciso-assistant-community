@@ -46,6 +46,8 @@ The decoupling allows you to save a considerable amount of time:
 - leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
 
+CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
+
 ## Quick Start 🚀
 
 > [!TIP]
