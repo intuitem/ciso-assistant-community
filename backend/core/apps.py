@@ -3,7 +3,7 @@ from django.db.models.signals import post_migrate
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
 import os
 
-AUDITOR_PERMISSIONS_LIST = [
+READER_PERMISSIONS_LIST = [
     "view_project",
     "view_riskassessment",
     "view_appliedcontrol",
@@ -252,7 +252,7 @@ def startup(**kwargs):
     print("startup handler: initialize database")
 
     auditor_permissions = Permission.objects.filter(
-        codename__in=AUDITOR_PERMISSIONS_LIST
+        codename__in=READER_PERMISSIONS_LIST
     )
 
     approver_permissions = Permission.objects.filter(
