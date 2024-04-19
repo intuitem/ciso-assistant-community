@@ -39,20 +39,20 @@ objects:
     max_score: 5
     score_definition:
     - score: 1
-      name: '1'
-      description: '1'
+      name: 'Score 1'
+      description: 'Description of Score 1'
     - score: 2
-      name: '2'
-      description: '2'
+      name: 'Score 2'
+      description: 'Description of Score 2'
     - score: 3
-      name: '3'
-      description: '3'
+      name: 'Score 3'
+      description: 'Description of Score 3'
     - score: 4
-      name: '4'
-      description: '4'
+      name: 'Score 4'
+      description: 'Description of Score 4'
     - score: 5
-      name: '5'
-      description: '5'    
+      name: 'Score 5'
+      description: 'Description of Score 5'    
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
       assessable: false
