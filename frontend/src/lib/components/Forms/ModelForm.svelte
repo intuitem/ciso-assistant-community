@@ -283,6 +283,7 @@
 			field="category"
 			label={m.category()}
 		/>
+		<TextArea {form} field="annotation" label={m.annotation()} />
 		<TextField {form} field="provider" label={m.provider()} />
 		<AutocompleteSelect
 			{form}
