@@ -1298,7 +1298,9 @@ class ComplianceAssessment(Assessment):
     def get_global_score(self):
         requirement_assessments_scored = RequirementAssessment.objects.filter(compliance_assessment=self).exclude(score=None)
         score = requirement_assessments_scored.aggregate(models.Avg('score'))
-        return round(score['score__avg'], 1) or -1
+        if score['score__avg']:
+            return round(score['score__avg'], 1)
+        return -1
 
     def get_requirements_status_count(self):
         requirements_status_count = []
