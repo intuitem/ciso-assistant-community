@@ -334,6 +334,7 @@ class Framework(ReferentialObjectMixin):
     max_score = models.IntegerField(
         default=100, verbose_name=_("Maximum score")
     )
+    score_definition = models.JSONField(blank=True, null=True, verbose_name=_("Score definition"))
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,

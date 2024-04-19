@@ -292,6 +292,7 @@ class FrameworkImporter:
             description=self.framework_data.get("description"),
             min_score=self.framework_data.get("min_score", 0),
             max_score=self.framework_data.get("max_score", 100),
+            score_definition=self.framework_data.get("score_definition"),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?

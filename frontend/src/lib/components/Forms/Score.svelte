@@ -11,6 +11,9 @@
 
 	export let min_score: number = 0;
 	export let max_score: number = 100;
+	export let score_definition: string = '';
+
+	console.log(score_definition)
 
 	export let form: SuperForm<AnyZodObject>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
@@ -49,18 +52,19 @@
 			{/each}
 		</div>
 	{/if}
-	<div class="flex flex-row w-full items-center justify-evenly px-2">
-		<div class="flex w-1/2 items-center justify-center space-x-8">
-			<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:change={() => $value = null} name="score-slider"></SlideToggle>
-			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked></RangeSlider>
-		</div>
-		<div class="flex w-1/2 items-center justify-center">
-			{#if scoringEnabled}
-				<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={formatValue($value)} font={100} width={'w-32'}>{displayNoValue($value)}</ProgressRadial>
-			{:else}
-				<ProgressRadial stroke={100} value={0} font={100} width={'w-32'}>--</ProgressRadial>
-			{/if}
+	<div class="flex flex-row w-full items-center justify-evenly space-x-4">
+		<div class="flex w-full items-center justify-center">
+			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked>
+				<div class="flex justify-between items-center">
+					<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:change={() => $value = null} name="score-slider">
+						<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>	
+					{#if scoringEnabled}
+						<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={formatValue($value)} font={150} width={'w-12'}>{displayNoValue($value)}</ProgressRadial>
+					{:else}
+						<ProgressRadial stroke={100} value={0} font={150} width={'w-12'}>--</ProgressRadial>
+					{/if}
+				</div>
+			</RangeSlider>
 		</div>
 	</div>
-	<p class="text-sm text-gray-500">{m.scoringHelpText()}</p>
 </div>
