@@ -1,3 +1,4 @@
+import { observation } from '$paraglide/messages';
 import { z, type AnyZodObject } from 'zod';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -156,7 +157,8 @@ export const RequirementAssessmentSchema = z.object({
 	requirement: z.string(),
 	evidences: z.string().uuid().optional().array(),
 	compliance_assessment: z.string(),
-	applied_controls: z.string().uuid().optional().array()
+	applied_controls: z.string().uuid().optional().array(),
+	observation: z.string().optional().nullable()
 });
 
 export const UserEditSchema = z.object({
