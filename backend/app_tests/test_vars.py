@@ -1,6 +1,6 @@
 from typing import Any
 from core.apps import (
-    AUDITOR_PERMISSIONS_LIST,
+    READER_PERMISSIONS_LIST,
     APPROVER_PERMISSIONS_LIST,
     ANALYST_PERMISSIONS_LIST,
     DOMAIN_MANAGER_PERMISSIONS_LIST,
@@ -44,8 +44,8 @@ GROUPS_PERMISSIONS = {
     },
     "BI-UG-GAD": {
         "folder": "Global",
-        "name": "Global_auditor",
-        "perms": AUDITOR_PERMISSIONS_LIST,
+        "name": "Global_reader",
+        "perms": READER_PERMISSIONS_LIST,
     },
     "BI-UG-GAP": {
         "folder": "Global",
@@ -54,8 +54,8 @@ GROUPS_PERMISSIONS = {
     },
     "BI-UG-AUD": {
         "folder": "test",
-        "name": "Auditor",
-        "perms": AUDITOR_PERMISSIONS_LIST,
+        "name": "Reader",
+        "perms": READER_PERMISSIONS_LIST,
     },
     "BI-UG-APP": {
         "folder": "test",

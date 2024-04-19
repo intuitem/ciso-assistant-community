@@ -12,8 +12,7 @@ else it is sqlite, and no env variable is required
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-import subprocess
-import json
+from datetime import timedelta
 import logging.config
 import structlog
 from django.core.management.utils import get_random_secret_key
@@ -30,10 +29,10 @@ LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 
+
 def set_ciso_assistant_url(_, __, event_dict):
     event_dict["ciso_assistant_url"] = CISO_ASSISTANT_URL
     return event_dict
-
 
 
 LOGGING = {
@@ -112,7 +111,6 @@ MEDIA_URL = ""
 
 PAGINATE_BY = os.environ.get("PAGINATE_BY", default=500)
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -130,6 +128,7 @@ INSTALLED_APPS = [
     "library",
     "serdes",
     "rest_framework",
+    "knox",
     "drf_spectacular",
 ]
 
@@ -149,14 +148,12 @@ ROOT_URLCONF = "ciso_assistant.urls"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
 
-SESSION_COOKIE_AGE = int(
-    os.environ.get("SESSION_COOKIE_AGE", default=60 * 15)
+AUTH_TOKEN_TTL = int(
+    os.environ.get("AUTH_TOKEN_TTL", default=60 * 15)
 )  # defaults to 15 minutes
-# prevents session from expiring when user is active
-SESSION_SAVE_EVERY_REQUEST = os.environ.get("SESSION_SAVE_EVERY_REQUEST", default=True)
-SESSION_EXPIRE_AT_BROWSER_CLOSE = os.environ.get(
-    "SESSION_EXPIRE_AT_BROWSER_CLOSE", default=True
-)
+AUTH_TOKEN_AUTO_REFRESH = (
+    os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
+)  # prevents token from expiring while user is active
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
@@ -180,7 +177,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
+        "knox.auth.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -190,6 +187,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": PAGINATE_BY,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+REST_KNOX = {
+    "SECURE_HASH_ALGORITHM": "cryptography.hazmat.primitives.hashes.SHA512",
+    "AUTH_TOKEN_CHARACTER_LENGTH": 64,
+    "TOKEN_TTL": timedelta(seconds=AUTH_TOKEN_TTL),
+    "TOKEN_LIMIT_PER_USER": None,
+    "AUTO_REFRESH": AUTH_TOKEN_AUTO_REFRESH,
+    "MIN_REFRESH_INTERVAL": 60,
 }
 
 if DEBUG:
@@ -306,9 +312,9 @@ PASSWORD_HASHERS = [
 ]
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'CISO Assistant API',
-    'DESCRIPTION': 'CISO Assistant - API Documentation',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "CISO Assistant API - Experimental",
+    "DESCRIPTION": "CISO Assistant - API Documentation for automating all your GRC needs",
+    "VERSION": "0.7.0",
+    "SERVE_INCLUDE_SCHEMA": False,
     # OTHER SETTINGS
 }

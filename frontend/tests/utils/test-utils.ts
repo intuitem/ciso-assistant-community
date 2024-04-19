@@ -95,7 +95,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	complianceAssessmentsPage: async ({ page }, use) => {
-		const aPage = new PageContent(page, '/compliance-assessments', 'Compliance assessments', [
+		const aPage = new PageContent(page, '/compliance-assessments', 'Audits', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'project', type: type.SELECT_AUTOCOMPLETE },
@@ -359,7 +359,7 @@ export class TestContent {
 					last_name: vars.user.lastName,
 					user_groups: [
 						`${vars.folderName} - ${vars.usergroups.analyst.name}`,
-						`${vars.folderName} - ${vars.usergroups.auditor.name}`,
+						`${vars.folderName} - ${vars.usergroups.reader.name}`,
 						`${vars.folderName} - ${vars.usergroups.domainManager.name}`,
 						`${vars.folderName} - ${vars.usergroups.approver.name}`
 					],
@@ -469,7 +469,8 @@ export class TestContent {
 				}
 			},
 			complianceAssessmentsPage: {
-				displayName: 'Compliance assessments',
+				displayName: 'Audits',
+				permName: 'complianceassessment',
 				dependency: vars.framework,
 				build: {
 					name: vars.assessmentName,

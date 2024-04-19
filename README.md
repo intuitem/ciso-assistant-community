@@ -29,7 +29,7 @@ CISO Assistant brings a different take to **GRC** and Cyber Security Posture Man
 - you can bring your own framework as well using a simple syntax
 - manage audit, evidences collection and report generation
 
-Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practionners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
+Our vision is to provide a one stop shop for cyber security posture management and cover the layers of **GRC** (Governance, Risk and Compliance). As practitioners interacting with multiple cybersecurity and IT professionals, we have struggled with fragmentation and lack of efficient tooling. We keep improving CISO Assistant with anything that could bring clarity and productivity to cybersecurity teams and reduce the effort of research, audit management and paperwork.
 
 CyberSecurity teams need to use GRC as a foundation to structure their program and implement the right tools and processes to mitigate the risks, and leave the rest to CISO Assistant 🐙
 
@@ -43,8 +43,10 @@ The decoupling allows you to save a considerable amount of time:
 
 - reuse previous assessments,
 - assess a scope against multiple frameworks at the same time,
-- leave the reporting formatting and sanity check to CISO assistant and focus on your remediations
+- leave the reporting formatting and sanity check to CISO assistant and focus on your fixes,
 - balance controls implementation and compliance follow-up
+
+CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/), a French 🇫🇷 company specialized in Cyber Security, Cloud and Data/AI.
 
 ## Quick Start 🚀
 
@@ -95,21 +97,23 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
+25. Tisax 🚘
+26. ANSSI hygiene guide 🇫🇷
+27. Essential Cybersecurity Controls (ECC) 🇸🇦
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- ANSSI hygiene guide
 - CIS
 - CCM
 - CCPA
-- Tisax
 - AI Act
 - Part-IS
 - SecNumCloud
 - SOX
 - MASVS
+- FedRAMP
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
@@ -155,7 +159,7 @@ cd ciso-assistant-community
 
 When asked for, enter your email and password for your superuser.
 
-You can then reach CISO Assistant using your web brower at [https://localhost:8443/](https://localhost:8443/)
+You can then reach CISO Assistant using your web browser at [https://localhost:8443/](https://localhost:8443/)
 
 For the following executions, use "docker compose up" directly.
 
@@ -221,7 +225,7 @@ export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
 
-# You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initlization
+# You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initialization
 export CISO_SUPERUSER_EMAIL=<XXX>
 
 # By default, Django secret key is generated randomly at each start of CISO Assistant. This is convenient for quick test,
@@ -274,7 +278,7 @@ python manage.py migrate
 
 7. Create a Django superuser, that will be CISO Assistant administrator.
 
-> If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with createsuperuser, as it will be created automatically on first start. You should receive an email with a link to setup your password.
+> If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
 ```sh
 python manage.py createsuperuser
@@ -302,39 +306,32 @@ ln -fs ../../git_hooks/post-merge .
 cd frontend
 ```
 
-2. Declare the PUBLIC_BACKEND_API_URL environment variable.
 
-EITHER
-
-```bash
-echo "PUBLIC_BACKEND_API_URL=http://localhost:8000/api" > .env
-```
-
-OR
-
-```bash
-export PUBLIC_BACKEND_API_URL=http://localhost:8000/api
-```
-
-Note: for docker compose, or if you use a proxy like caddy, the ORIGIN variable has to be declared too (see https://kit.svelte.dev/docs/configuration#csrf).
-
-3. Install dependencies
+2. Install dependencies
 
 ```bash
 npm install
 ```
 
-4. Start a development server (make sure that the django app is running)
+3. Start a development server (make sure that the django app is running)
 
 ```bash
 npm run dev
 ```
 
-5. Reach the frontend on http://localhost:5173
+4. Reach the frontend on http://localhost:5173
 
 
 > [!NOTE]
 > Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
+
+5. Environment variables
+
+All variables in the frontend have handy default values.
+
+If you move the frontend on another host, you should set the following variable: PUBLIC_BACKEND_API_URL. Its default value is http://localhost:8000/api.
+
+When you launch "node server" instead of "npm run dev", you need to set the ORIGIN variable to the same value as CISO_ASSISTANT_URL in the backend (e.g. http://localhost:3000).
 
 ### Managing migrations
 
@@ -369,6 +366,18 @@ tests/e2e-tests.sh
 ```
 
 The goal of the test harness is to prevent any regression, i.e. all the tests shall be successful, both for backend and frontend.
+
+## Setting CISO Assistant for production
+
+The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend.
+
+Set DJANGO_DEBUG=False for security reason.
+
+> [!NOTE]
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the HOST_HEADER and PROTOCOL_HEADER variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue.
+
+> [!NOTE]
+> Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in CISO_ASSISTANT_URL), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
 
 ## Built With 💜
 
