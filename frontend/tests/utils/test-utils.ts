@@ -359,7 +359,7 @@ export class TestContent {
 					last_name: vars.user.lastName,
 					user_groups: [
 						`${vars.folderName} - ${vars.usergroups.analyst.name}`,
-						`${vars.folderName} - ${vars.usergroups.auditor.name}`,
+						`${vars.folderName} - ${vars.usergroups.reader.name}`,
 						`${vars.folderName} - ${vars.usergroups.domainManager.name}`,
 						`${vars.folderName} - ${vars.usergroups.approver.name}`
 					],
