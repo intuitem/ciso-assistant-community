@@ -169,7 +169,7 @@ for tab in dataframe:
                 elif depth <= current_depth:
                     pass
                 else:
-                    error(f"wrong level in requirement (tab {title})")
+                    error(f"wrong level in requirement (tab {title}) {urn}")
                 current_node_urn = urn
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth

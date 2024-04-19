@@ -22,7 +22,7 @@ export const POST = async ({ fetch, cookies }) => {
 		return fail(400, response.error);
 	}
 
-	cookies.delete('sessionid', { path: '/' });
+	cookies.delete('token', { path: '/' });
 
 	redirect(302, '/login');
 };
