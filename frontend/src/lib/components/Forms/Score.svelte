@@ -13,8 +13,6 @@
 	export let max_score: number = 100;
 	export let score_definition: string = '';
 
-	console.log(score_definition)
-
 	export let form: SuperForm<AnyZodObject>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 	
@@ -57,7 +55,10 @@
 			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked>
 				<div class="flex justify-between items-center">
 					<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:change={() => $value = null} name="score-slider">
-						<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>	
+						<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>
+					{#if score_definition && $value !== null}
+						<p class="text-sm text-gray-500">{score_definition[$value-1].name}: {score_definition[$value-1].description}</p>
+					{/if}
 					{#if scoringEnabled}
 						<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={formatValue($value)} font={150} width={'w-12'}>{displayNoValue($value)}</ProgressRadial>
 					{:else}
