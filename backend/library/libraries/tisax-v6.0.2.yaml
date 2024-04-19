@@ -35,6 +35,24 @@ objects:
       \ performed by internal departments (e.g. Internal Audit, Information Security)\n\
       - TISAX\u24C7 Assessments (Trusted Information Security Assessment Exchange,\
       \ https://enx.com/tisax/)\nSource: https://portal.enx.com/isa6-en.xlsx\n"
+    min_score: 1
+    max_score: 5
+    score_definition:
+    - score: 1
+      name: '1'
+      description: '1'
+    - score: 2
+      name: '2'
+      description: '2'
+    - score: 3
+      name: '3'
+      description: '3'
+    - score: 4
+      name: '4'
+      description: '4'
+    - score: 5
+      name: '5'
+      description: '5'    
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
       assessable: false
