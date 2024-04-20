@@ -10,7 +10,8 @@
 
 	const language: any = {
 		french: m.french(),
-		english: m.english()
+		english: m.english(),
+		arabic: m.arabic()
 	};
 
 	const modalStore = getModalStore();
