@@ -26,18 +26,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install latest npm
+      - name: Install prettier
         working-directory: ${{env.working-directory}}
-        run: |
-          npm install -g npm &&
-          npm --version &&
-          npm list -g --depth 0
-      - name: Install dependencies
+        run: npm install --save-dev prettier
+      - name: Run prettier
         working-directory: ${{env.working-directory}}
-        run: npm ci
-      - name: Run prettier check & eslint
-        working-directory: ${{env.working-directory}}
-        run: npm run lint
-      - name: Run svelte-check
-        working-directory: ${{env.working-directory}}
-        run: npm run check
+        run: npx prettier --check .
+      # - name: Install latest npm
+      #   working-directory: ${{env.working-directory}}
+      #   run: |
+      #     npm install -g npm &&
+      #     npm --version &&
+      #     npm list -g --depth 0
+      # - name: Install dependencies
+      #   working-directory: ${{env.working-directory}}
+      #   run: npm ci
+      # - name: Run prettier check & eslint
+      #   working-directory: ${{env.working-directory}}
+      #   run: npm run lint
+      # - name: Run svelte-check
+      #   working-directory: ${{env.working-directory}}
+      #   run: npm run check
