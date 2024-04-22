@@ -1,0 +1,12 @@
+export DJANGO_DEBUG=True
+
+# Default url is set to http://localhost:5173 but you can change it, e.g. to use https with a caddy proxy
+export CISO_ASSISTANT_URL=https://localhost:8443
+
+# https://ott.high-net.ru/live/htvn/index.m3u8
+# Setup a development mailer with Mailhog for example
+export EMAIL_HOST_USER='Dh4iskh3AS39ks'
+export EMAIL_HOST_PASSWORD='ASj9349jpps3j'
+export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
+export EMAIL_HOST=localhost
+export EMAIL_PORT=1025
