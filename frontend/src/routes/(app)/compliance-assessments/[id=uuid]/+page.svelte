@@ -109,7 +109,7 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-						{localItems(languageTag())[toCamelCase(key)]}
+							{localItems(languageTag())[toCamelCase(key)]}
 						{/if}
 					</div>
 					<ul class="text-sm">
@@ -142,12 +142,10 @@
 										)?.urlModel
 									}/${value.id}`}
 									<a href={itemHref} class="anchor">{value.str}</a>
+								{:else if localItems(languageTag())[toCamelCase(value.str ?? value)]}
+									{localItems(languageTag())[toCamelCase(value.str ?? value)]}
 								{:else}
-									{#if localItems(languageTag())[toCamelCase(value.str ?? value)]}
-										{localItems(languageTag())[toCamelCase(value.str ?? value)]}
-									{:else}
-										{value.str ?? value}
-									{/if}
+									{value.str ?? value}
 								{/if}
 							{:else}
 								--

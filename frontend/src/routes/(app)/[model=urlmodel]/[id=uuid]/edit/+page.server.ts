@@ -71,7 +71,16 @@ export const actions: Actions = {
 		}
 
 		const model: string = urlParamModelVerboseName(event.params.model!);
-		setFlash({ type: 'success', message: m.successfullyUpdatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(), name: form.data.name}) }, event);
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyUpdatedObject({
+					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase(),
+					name: form.data.name
+				})
+			},
+			event
+		);
 		redirect(
 			302,
 			event.url.searchParams.get('next') ?? `/${event.params.model}/${event.params.id}`

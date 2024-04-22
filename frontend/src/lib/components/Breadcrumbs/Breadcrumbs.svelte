@@ -38,14 +38,17 @@
 				}
 			} else if (t === 'folders') {
 				t = 'domains';
-			}
-			else{
+			} else {
 				t = t.replace(/-/g, ' ');
 				t = capitalizeSecondWord(t);
 			}
 			return {
 				label: $page.data.label || t,
-				href: Object.keys(listViewFields).includes(tokens[0]) && !listViewFields[tokens[0]].breadcrumb_link_disabled ? tokenPath : null
+				href:
+					Object.keys(listViewFields).includes(tokens[0]) &&
+					!listViewFields[tokens[0]].breadcrumb_link_disabled
+						? tokenPath
+						: null
 			};
 		});
 

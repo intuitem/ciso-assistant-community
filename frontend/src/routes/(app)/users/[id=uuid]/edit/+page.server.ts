@@ -68,7 +68,10 @@ export const actions: Actions = {
 			}
 			return fail(400, { form: form });
 		}
-		setFlash({ type: 'success', message: m.successfullyUpdatedUser({email:form.data.email}) }, event);
+		setFlash(
+			{ type: 'success', message: m.successfullyUpdatedUser({ email: form.data.email }) },
+			event
+		);
 		redirect(302, event.url.searchParams.get('next') ?? `/users/${event.params.id}`);
 	}
 };

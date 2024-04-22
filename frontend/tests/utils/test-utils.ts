@@ -41,7 +41,7 @@ export const test = base.extend<Fixtures>({
 		await mailer.goto();
 		await use(mailer);
 	},
-	
+
 	sideBar: async ({ page }, use) => {
 		await use(new SideBar(page));
 	},
@@ -244,18 +244,18 @@ export const test = base.extend<Fixtures>({
 		await use(tPage);
 	},
 
-    usersPage: async ({ page }, use) => {
-        const uPage = new PageContent(page, '/users', 'Users', [
-            { name: 'email', type: type.TEXT },
-            { name: 'first_name', type: type.TEXT },
-            { name: 'last_name', type: type.TEXT },
-            { name: 'user_groups', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
-            { name: 'is_active', type: type.CHECKBOX },
-            { name: 'new_password', type: type.TEXT },
-            { name: 'confirm_new_password', type: type.TEXT },
-        ]);
-        await use(uPage);
-    },
+	usersPage: async ({ page }, use) => {
+		const uPage = new PageContent(page, '/users', 'Users', [
+			{ name: 'email', type: type.TEXT },
+			{ name: 'first_name', type: type.TEXT },
+			{ name: 'last_name', type: type.TEXT },
+			{ name: 'user_groups', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'is_active', type: type.CHECKBOX },
+			{ name: 'new_password', type: type.TEXT },
+			{ name: 'confirm_new_password', type: type.TEXT }
+		]);
+		await use(uPage);
+	},
 
 	logedPage: async ({ page }, use) => {
 		const loginPage = new LoginPage(page);
@@ -268,7 +268,7 @@ export const test = base.extend<Fixtures>({
 		await use(new LoginPage(page));
 	},
 
-	data: { ...testData},
+	data: { ...testData },
 
 	populateDatabase: async ({ pages, loginPage, sideBar, data }, use) => {
 		test.slow();
@@ -541,10 +541,7 @@ export class TestContent {
 					name: vars.riskScenarioName,
 					description: vars.description,
 					risk_assessment: `${vars.folderName}/${vars.projectName}/${vars.riskAssessmentName}`,
-					threats: [
-						'Global/' + vars.threat.name, 
-						'Global/' + vars.threat2.name
-					]
+					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
 					name: '',
@@ -603,13 +600,16 @@ export function setHttpResponsesListener(page: Page) {
 }
 
 export function getSingularName(pluralName: string) {
-    const exceptions: any = {
-		"Domains": "Folder",
-        "Libraries": "Library",
-        "Risk matrices": "Risk matrix",
-        "Policies": "Policy",
-    }
-    return exceptions[pluralName] ?? (pluralName.endsWith("s") ? pluralName.substring(0, pluralName.length - 1) : pluralName)
+	const exceptions: any = {
+		Domains: 'Folder',
+		Libraries: 'Library',
+		'Risk matrices': 'Risk matrix',
+		Policies: 'Policy'
+	};
+	return (
+		exceptions[pluralName] ??
+		(pluralName.endsWith('s') ? pluralName.substring(0, pluralName.length - 1) : pluralName)
+	);
 }
 
 export function getUniqueValue(value: string): string {
@@ -630,13 +630,17 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 	}
 }
 
-export function userFromUserGroupHasPermission(userGroup: string, permission: string, object: string) {
-	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;	
-	return (userGroup in testData.usergroups) && (testData.usergroups[userGroup].perms.includes(perm));
+export function userFromUserGroupHasPermission(
+	userGroup: string,
+	permission: string,
+	object: string
+) {
+	const perm = `${permission}_${getSingularName(object).toLowerCase().replace(' ', '')}`;
+	return userGroup in testData.usergroups && testData.usergroups[userGroup].perms.includes(perm);
 }
 
 export function getObjectNameWithoutScope(name: string) {
-	const scopeList = name.split('/');	
+	const scopeList = name.split('/');
 	return scopeList[scopeList.length - 1];
 }
 
