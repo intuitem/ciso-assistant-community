@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms/client';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import type { AnyZodObject } from 'zod';

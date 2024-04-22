@@ -22,7 +22,7 @@
 
 	import { browser } from '$app/environment';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';

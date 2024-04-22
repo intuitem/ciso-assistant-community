@@ -1,4 +1,4 @@
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 
 import { BASE_API_URL } from '$lib/utils/constants';

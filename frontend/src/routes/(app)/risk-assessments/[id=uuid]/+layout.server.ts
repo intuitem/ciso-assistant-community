@@ -3,7 +3,7 @@ import { getModelInfo } from '$lib/utils/crud';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 
