@@ -57,19 +57,17 @@
 			{...$constraints}
 			{...$$restProps}
 		>
-			{#if !$constraints?.required && !options.find((o) => new Set(["--","undefined"]).has(o.label.toLowerCase()))}
+			{#if !$constraints?.required && !options.find( (o) => new Set( ['--', 'undefined'] ).has(o.label.toLowerCase()) )}
 				<option value={null} selected>--</option>
 			{/if}
 			{#each options as option}
-				<option value={option.value} style="background-color: {color_map[option.value]}"
-					>
+				<option value={option.value} style="background-color: {color_map[option.value]}">
 					{#if localItems(languageTag())[toCamelCase(option.label)]}
 						{localItems(languageTag())[toCamelCase(option.label)]}
 					{:else}
 						{option.label}
 					{/if}
-					</option
-				>
+				</option>
 			{/each}
 		</select>
 	</div>

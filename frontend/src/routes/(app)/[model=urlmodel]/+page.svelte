@@ -2,11 +2,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import MissingConstraintsModal from '$lib/components/Modals/MissingConstraintsModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type {
-		ModalComponent,
-		ModalSettings,
-		ModalStore,
-	} from '@skeletonlabs/skeleton';
+	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import * as m from '$paraglide/messages';
@@ -17,7 +13,7 @@
 	export let data: PageData;
 
 	const modalStore: ModalStore = getModalStore();
-	
+
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -41,7 +37,9 @@
 				type: 'component',
 				component: modalComponent,
 				title: m.warning(),
-				body: localItems(languageTag())['add' + capitalizeFirstLetter(data.model.localName)].toLowerCase(),
+				body: localItems(languageTag())[
+					'add' + capitalizeFirstLetter(data.model.localName)
+				].toLowerCase(),
 				value: checkConstraints(data.createForm.constraints, data.model.foreignKeys)
 			};
 		}

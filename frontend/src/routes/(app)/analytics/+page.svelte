@@ -274,7 +274,10 @@
 						<div class="flex flex-col items-center">
 							{#if project.compliance_assessments && project.compliance_assessments.length > 1}
 								<div class="flex flex-row space-x-2 w-1/2 justify-between items-center">
-									<a class="text-xl font-bold mb-1 hover:underline text-primary-600" href="/projects/{project.id}">{project.folder.str}/{project.name}</a>
+									<a
+										class="text-xl font-bold mb-1 hover:underline text-primary-600"
+										href="/projects/{project.id}">{project.folder.str}/{project.name}</a
+									>
 									<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
 										{#each project.overallCompliance.values as sp}
 											<div
@@ -293,7 +296,9 @@
 									<div class="w-1/5 flex flex-col space-y-2">
 										<div>
 											<p class="text-sm font-semibold">{m.name()}</p>
-											<a class="anchor" href="compliance-assessments/{compliance_assessment.id}">{compliance_assessment.name}</a>
+											<a class="anchor" href="compliance-assessments/{compliance_assessment.id}"
+												>{compliance_assessment.name}</a
+											>
 										</div>
 										<div>
 											<p class="text-sm font-semibold">{m.framework()}</p>

@@ -487,7 +487,7 @@ class Project(NameDescriptionMixin, FolderMixin):
         return round(count * 100 / total)
 
     def __str__(self):
-        return self.folder.name + '/' + self.name
+        return self.folder.name + "/" + self.name
 
 
 class Asset(NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin):
@@ -1236,11 +1236,7 @@ class RiskScenario(NameDescriptionMixin):
         return self.DEFAULT_SOK_OPTIONS[self.strength_of_knowledge]
 
     def __str__(self):
-        return (
-            str(self.parent_project())
-            + _(": ")
-            + str(self.name)
-        )
+        return str(self.parent_project()) + _(": ") + str(self.name)
 
     @property
     def rid(self):

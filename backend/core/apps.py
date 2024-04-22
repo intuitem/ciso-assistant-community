@@ -251,9 +251,7 @@ def startup(**kwargs):
 
     print("startup handler: initialize database")
 
-    reader_permissions = Permission.objects.filter(
-        codename__in=READER_PERMISSIONS_LIST
-    )
+    reader_permissions = Permission.objects.filter(codename__in=READER_PERMISSIONS_LIST)
 
     approver_permissions = Permission.objects.filter(
         codename__in=APPROVER_PERMISSIONS_LIST

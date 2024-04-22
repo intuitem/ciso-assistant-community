@@ -51,13 +51,13 @@
 						{#if key === 'urn'}
 							{m.urn()}
 						{:else}
-						{localItems(languageTag())[toCamelCase(key)]}
+							{localItems(languageTag())[toCamelCase(key)]}
 						{/if}
 					</div>
 					<ul class="text-sm">
 						<li class="text-gray-600 list-none">
 							{#if value}
-								{#if key === "library"}
+								{#if key === 'library'}
 									{@const itemHref = `/libraries/${value.urn}`}
 									<a href={itemHref} class="anchor">{value.name}</a>
 								{:else if Array.isArray(value)}
