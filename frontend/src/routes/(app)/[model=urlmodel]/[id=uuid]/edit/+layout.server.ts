@@ -1,4 +1,4 @@
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';

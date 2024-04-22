@@ -5,7 +5,7 @@
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { superValidate } from 'sveltekit-superforms/server';
+	import { superValidate } from 'sveltekit-superforms';
 
 	export let data;
 

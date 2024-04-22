@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
-	import { formFieldProxy } from 'sveltekit-superforms/client';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	export let label: string | undefined = undefined;
 	export let field: string;
 	export let helpText: string | undefined = undefined;

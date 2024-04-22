@@ -6,7 +6,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { SuperValidated } from 'sveltekit-superforms';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import { z, type AnyZodObject } from 'zod';
 import type { LayoutServerLoad } from './$types';
 

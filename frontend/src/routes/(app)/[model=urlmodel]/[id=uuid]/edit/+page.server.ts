@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
 import { redirect } from '@sveltejs/kit';

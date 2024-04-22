@@ -1,7 +1,7 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { emailSchema } from '$lib/utils/schemas';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
 import { BASE_API_URL } from '$lib/utils/constants';

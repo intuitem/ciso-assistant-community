@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { UserEditSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { redirect, fail, type Actions } from '@sveltejs/kit';
 import { getModelInfo } from '$lib/utils/crud';

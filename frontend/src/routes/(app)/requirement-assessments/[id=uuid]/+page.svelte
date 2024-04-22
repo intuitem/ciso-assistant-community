@@ -26,7 +26,7 @@
 		type ToastStore,
 		TabGroup
 	} from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';

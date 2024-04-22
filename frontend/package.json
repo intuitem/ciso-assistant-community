@@ -62,7 +62,7 @@
 		"svelte-typewriter": "^3.2.3",
 		"sveltekit-flash-message": "^2.2.1",
 		"sveltekit-rate-limiter": "^0.4.1",
-		"sveltekit-superforms": "^1.6.0",
+		"sveltekit-superforms": "^2.12.5",
 		"tailwindcss": "^3.3.2",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",

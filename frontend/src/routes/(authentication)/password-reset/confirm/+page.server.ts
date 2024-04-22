@@ -1,7 +1,7 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { ResetPasswordSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';

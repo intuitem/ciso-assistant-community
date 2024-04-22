@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { z } from 'zod';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import type { PageServerLoad } from './$types';
 import type { urlModel } from '$lib/utils/types';

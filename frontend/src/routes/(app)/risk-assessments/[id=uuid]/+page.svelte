@@ -14,7 +14,7 @@
 		ToastStore
 	} from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import * as m from '$paraglide/messages';

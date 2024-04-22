@@ -3,7 +3,7 @@ import { BASE_API_URL, URN_REGEX } from '$lib/utils/constants';
 import { LibraryUploadSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';

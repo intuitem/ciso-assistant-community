@@ -5,7 +5,7 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 
