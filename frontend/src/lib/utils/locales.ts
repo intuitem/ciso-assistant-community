@@ -317,7 +317,8 @@ export function localItems(languageTag: string): LocalItems {
 		attemptToDeleteOnlyAdminAccountError: m.attemptToDeleteOnlyAdminAccountError({ languageTag: languageTag }),
 		attemptToRemoveOnlyAdminUserGroup: m.attemptToRemoveOnlyAdminUserGroup({ languageTag: languageTag }),
 		minScore: m.minScore({ languageTag: languageTag }),
-		maxScore: m.maxScore({ languageTag: languageTag })
+		maxScore: m.maxScore({ languageTag: languageTag }),
+		scoreDefinition: m.scoreDefinition({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
