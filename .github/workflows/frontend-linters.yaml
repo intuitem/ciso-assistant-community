@@ -32,6 +32,7 @@ jobs:
       - name: Run prettier
         working-directory: ${{env.working-directory}}
         run: npx prettier --check .
+      # NOTE: The following will be uncommented once the codebase is cleaned up
       # - name: Install latest npm
       #   working-directory: ${{env.working-directory}}
       #   run: |
