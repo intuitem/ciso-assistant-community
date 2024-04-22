@@ -60,6 +60,12 @@
 								{#if key === "library"}
 									{@const itemHref = `/libraries/${value.urn}`}
 									<a href={itemHref} class="anchor">{value.name}</a>
+								{:else if key === "score_definition"}
+									{#each Object.entries(value) as [key, definition]}
+										<div>
+											{definition.score}. {definition.name}: {definition.description}
+										</div>
+									{/each}
 								{:else if Array.isArray(value)}
 									<ul>
 										{#each value as val}
@@ -87,6 +93,8 @@
 								{:else}
 									{value.str ?? value}
 								{/if}
+							{:else if value === 0 && key === 'min_score'}
+								{value}
 							{:else}
 								--
 							{/if}
