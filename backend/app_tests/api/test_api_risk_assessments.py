@@ -121,7 +121,10 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": risk_matrix,
             },
             {
-                "project": {"id": str(project.id), "str": project.folder.name + "/" + project.name},
+                "project": {
+                    "id": str(project.id),
+                    "str": project.folder.name + "/" + project.name,
+                },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
             user_group=test.user_group,
@@ -147,7 +150,10 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": str(risk_matrix.id),
             },
             {
-                "project": {"id": str(project.id), "str": project.folder.name + "/" + project.name},
+                "project": {
+                    "id": str(project.id),
+                    "str": project.folder.name + "/" + project.name,
+                },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
             user_group=test.user_group,
@@ -185,7 +191,10 @@ class TestRiskAssessmentAuthenticated:
                 "risk_matrix": str(risk_matrix2.id),
             },
             {
-                "project": {"id": str(project.id), "str": project.folder.name + "/" + project.name},
+                "project": {
+                    "id": str(project.id),
+                    "str": project.folder.name + "/" + project.name,
+                },
                 "risk_matrix": {"id": str(risk_matrix.id), "str": str(risk_matrix)},
             },
             user_group=test.user_group,

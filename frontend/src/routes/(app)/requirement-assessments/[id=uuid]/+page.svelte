@@ -41,9 +41,9 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name) ?
-		getRequirementTitle(data.requirement.ref_id, data.requirement.name) :
-		getRequirementTitle(data.parent.ref_id, data.parent.name);
+	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+		: getRequirementTitle(data.parent.ref_id, data.parent.name);
 	breadcrumbObject.set({
 		id: data.requirementAssessment.id,
 		name: title ?? 'Requirement assessment',
@@ -274,7 +274,8 @@
 						type="button"
 						on:click={cancel}>{m.cancel()}</button
 					>
-					<button class="btn variant-filled-primary font-semibold w-full" type="submit">{m.save()}</button
+					<button class="btn variant-filled-primary font-semibold w-full" type="submit"
+						>{m.save()}</button
 					>
 				</div>
 			</div>

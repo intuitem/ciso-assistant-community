@@ -19,7 +19,7 @@ export abstract class BasePage {
 		await this.page.goto(this.url);
 		await this.page.waitForURL(this.url);
 	}
-	
+
 	async hasTitle(title: string | RegExp = this.name) {
 		await expect.soft(this.pageTitle).toHaveText(title);
 	}
@@ -28,24 +28,31 @@ export abstract class BasePage {
 		await expect(this.page).toHaveURL(this.url);
 	}
 
-	async hasBreadcrumbPath(paths: (string | RegExp)[], fullPath: boolean = true, origin: string = 'Home') {
+	async hasBreadcrumbPath(
+		paths: (string | RegExp)[],
+		fullPath: boolean = true,
+		origin: string = 'Home'
+	) {
 		paths.unshift(new RegExp('.+' + origin));
 		if (fullPath) {
 			await expect.soft(this.breadcrumbs).toHaveText(paths);
-		}
-		else {
+		} else {
 			await expect.soft(this.breadcrumbs.last()).toHaveText(paths[paths.length - 1]);
 		}
 	}
 
 	async checkForUndefinedText() {
-		await expect.soft(this.page.getByText('undefined'), "An undefined text is visible on the page").toHaveCount(0);
+		await expect
+			.soft(this.page.getByText('undefined'), 'An undefined text is visible on the page')
+			.toHaveCount(0);
 	}
 
 	async waitUntilLoaded() {
 		const loadingFields = this.page.getByTestId('loading-field');
-		if (await loadingFields.count() > 0) {
-			await Promise.all((await loadingFields.all()).map(async field => await expect(field).toBeHidden()));
+		if ((await loadingFields.count()) > 0) {
+			await Promise.all(
+				(await loadingFields.all()).map(async (field) => await expect(field).toBeHidden())
+			);
 		}
 	}
 

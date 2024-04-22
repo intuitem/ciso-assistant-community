@@ -43,8 +43,10 @@
 					mandatory
 				/>
 				<p class="pt-3">
-					<button class="btn variant-filled-primary font-semibold w-full" data-testid="save-button" type="submit"
-						>{m.setPassword()}</button
+					<button
+						class="btn variant-filled-primary font-semibold w-full"
+						data-testid="save-button"
+						type="submit">{m.setPassword()}</button
 					>
 				</p>
 			</SuperForm>

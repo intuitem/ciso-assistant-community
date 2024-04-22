@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { Library, urlModel } from '$lib/utils/types';
-import * as m from '$paraglide/messages'
+import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
 import { languageTag } from '$paraglide/runtime';
 
@@ -138,7 +138,10 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: "library"}) }, event);
+			setFlash(
+				{ type: 'success', message: m.successfullyDeletedObject({ object: 'library' }) },
+				event
+			);
 		}
 		return { deleteForm };
 	}

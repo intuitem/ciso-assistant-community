@@ -128,9 +128,25 @@ export const actions: Actions = {
 			const model: string = event.params.model ? urlParamModelVerboseName(event.params.model) : '';
 			// TODO: reference newly created object
 			if (model === 'User') {
-				setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model)].toLowerCase()}) }, event);
+				setFlash(
+					{
+						type: 'success',
+						message: m.successfullyCreatedObject({
+							object: localItems(languageTag())[toCamelCase(model)].toLowerCase()
+						})
+					},
+					event
+				);
 			}
-			setFlash({ type: 'success', message: m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model)].toLowerCase()}) }, event);
+			setFlash(
+				{
+					type: 'success',
+					message: m.successfullyCreatedObject({
+						object: localItems(languageTag())[toCamelCase(model)].toLowerCase()
+					})
+				},
+				event
+			);
 		}
 		return { createForm };
 	},
@@ -166,7 +182,15 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(event.params.model!);
 			// TODO: reference object by name instead of id
-			setFlash({ type: 'success', message: m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(toCamelCase(model))].toLowerCase()}) }, event);
+			setFlash(
+				{
+					type: 'success',
+					message: m.successfullyDeletedObject({
+						object: localItems(languageTag())[toCamelCase(toCamelCase(model))].toLowerCase()
+					})
+				},
+				event
+			);
 		}
 		return { deleteForm };
 	}

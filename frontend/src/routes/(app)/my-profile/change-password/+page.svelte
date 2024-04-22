@@ -38,14 +38,16 @@
 						class="btn bg-gray-400 text-white font-semibold w-full"
 						href="/my-profile"
 						data-testid="cancel-button"
-						type="button">
+						type="button"
+					>
 						{m.cancel()}
 					</a>
-					<button class="btn variant-filled-primary font-semibold w-full" 
-					type="submit"
-					data-testid="save-button"
+					<button
+						class="btn variant-filled-primary font-semibold w-full"
+						type="submit"
+						data-testid="save-button"
 					>
-					{m.changePassword()}
+						{m.changePassword()}
 					</button>
 				</div>
 			</SuperForm>

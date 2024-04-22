@@ -11,7 +11,8 @@
 
 		types.forEach((type) => {
 			result[type] = Object.entries(item.objects).reduce((acc, [key, value]) => {
-				if (key !== 'object') { // if key === 'quality_check'
+				if (key !== 'object') {
+					// if key === 'quality_check'
 					acc = [...acc, ...value.quality_check[type]];
 				}
 				return acc;
@@ -44,7 +45,10 @@
 		{@const risk_assessments = Object.values(project.risk_assessments.objects)}
 		<div>
 			<span class="text-2xl">&#128161;</span>
-			<a class="text-2xl font-bold mb-1 hover:underline text-blue-600" href="/projects/{project.project.id}">
+			<a
+				class="text-2xl font-bold mb-1 hover:underline text-blue-600"
+				href="/projects/{project.project.id}"
+			>
 				{project.project.folder.str}/{project.project.name}
 			</a>
 			<TabGroup>
@@ -85,7 +89,10 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each compliance_assessments as compliance_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									<a href="/compliance-assessments/{compliance_assessment.object.id}" class="hover:underline text-blue-600">{compliance_assessment.object.name}</a>
+									<a
+										href="/compliance-assessments/{compliance_assessment.object.id}"
+										class="hover:underline text-blue-600">{compliance_assessment.object.name}</a
+									>
 								</li>
 								{@const quality_check = compliance_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -95,10 +102,10 @@
 												<i class="fa-solid fa-bug mr-1" />
 												{#if quality_check.errors.length === 1}
 													<span class="font-bold">{quality_check.errors.length}</span>
-													{m.errorsFound({ s: ''})}
+													{m.errorsFound({ s: '' })}
 												{:else}
 													<span class="font-bold">{quality_check.errors.length}</span>
-													{m.errorsFound({ s: ''})}
+													{m.errorsFound({ s: '' })}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -114,10 +121,10 @@
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
 												{#if quality_check.warnings.length === 1}
 													<span class="font-bold">{quality_check.warnings.length}</span>
-													{m.warningsFound({ s: ''})}
+													{m.warningsFound({ s: '' })}
 												{:else}
 													<span class="font-bold">{quality_check.warnings.length}</span>
-													{m.warningsFound({ s: 's'})}
+													{m.warningsFound({ s: 's' })}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -133,10 +140,10 @@
 												<i class="fa-solid fa-circle-info mr-1" />
 												{#if quality_check.info.length === 1}
 													<span class="font-bold">{quality_check.info.length}</span>
-													{m.infosFound({ s: ''})}
+													{m.infosFound({ s: '' })}
 												{:else}
 													<span class="font-bold">{quality_check.info.length}</span>
-													{m.infosFound({ s: 's'})}
+													{m.infosFound({ s: 's' })}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -157,7 +164,10 @@
 						<ul class="list-none pl-4 text-sm space-y-2">
 							{#each risk_assessments as risk_assessment, index}
 								<li class="h4 font-semibold mb-1">
-									<a href="/risk-assessments/{risk_assessment.object.id}" class="hover:underline text-blue-600">{risk_assessment.object.name}</a>
+									<a
+										href="/risk-assessments/{risk_assessment.object.id}"
+										class="hover:underline text-blue-600">{risk_assessment.object.name}</a
+									>
 								</li>
 								{@const quality_check = risk_assessment.quality_check}
 								<div class="flex flex-col space-y-3">
@@ -167,10 +177,10 @@
 												<i class="fa-solid fa-bug mr-1" />
 												{#if quality_check.errors.length === 1}
 													<span class="font-bold">{quality_check.errors.length}</span>
-													{m.errorsFound({ s: ''})}
+													{m.errorsFound({ s: '' })}
 												{:else}
 													<span class="font-bold">{quality_check.errors.length}</span>
-													{m.errorsFound({ s: ''})}
+													{m.errorsFound({ s: '' })}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -186,10 +196,10 @@
 												<i class="fa-solid fa-triangle-exclamation mr-1" />
 												{#if quality_check.warnings.length === 1}
 													<span class="font-bold">{quality_check.warnings.length}</span>
-													{m.warningsFound({ s: ''})}
+													{m.warningsFound({ s: '' })}
 												{:else}
 													<span class="font-bold">{quality_check.warnings.length}</span>
-													{m.warningsFound({ s: 's'})}
+													{m.warningsFound({ s: 's' })}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">
@@ -205,10 +215,10 @@
 												<i class="fa-solid fa-circle-info mr-1" />
 												{#if quality_check.info.length === 1}
 													<span class="font-bold">{quality_check.info.length}</span>
-													{m.infosFound({ s: ''})}
+													{m.infosFound({ s: '' })}
 												{:else}
 													<span class="font-bold">{quality_check.info.length}</span>
-													{m.infosFound({ s: 's'})}
+													{m.infosFound({ s: 's' })}
 												{/if}
 											</div>
 											<ul class="list-disc pl-4 text-sm">

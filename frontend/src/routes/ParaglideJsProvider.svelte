@@ -19,7 +19,7 @@
 	onDestroy(() => {
 		if (browser) {
 			deleteCookie('lang');
-		 	// sessionStorage.removeItem('lang');
+			// sessionStorage.removeItem('lang');
 		}
 	});
 
