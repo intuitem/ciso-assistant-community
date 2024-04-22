@@ -142,7 +142,7 @@ export const ReferenceControlSchema = baseNamedObject({
 	category: z.string().optional().nullable(),
 	folder: z.string(),
 	ref_id: z.string().optional().nullable(),
-	annotation: z.string().optional().nullable(),
+	annotation: z.string().optional().nullable()
 });
 
 export const AssetSchema = baseNamedObject({

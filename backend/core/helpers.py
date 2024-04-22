@@ -230,7 +230,11 @@ def get_sorted_requirement_nodes(
                 for requirement_node in requirement_nodes
                 if requirement_node.parent_urn == node.urn
             ]
-            req_as = requirement_assessment_from_requirement_id[str(node.id)] if requirements_assessed else None
+            req_as = (
+                requirement_assessment_from_requirement_id[str(node.id)]
+                if requirements_assessed
+                else None
+            )
             result[str(node.id)] = {
                 "urn": node.urn,
                 "parent_urn": node.parent_urn,
@@ -238,8 +242,12 @@ def get_sorted_requirement_nodes(
                 "name": node.name,
                 "ra_id": str(req_as.id) if requirements_assessed else None,
                 "status": req_as.status if requirements_assessed else None,
-                "status_display": req_as.get_status_display() if requirements_assessed else None,
-                "status_i18n": camel_case(req_as.status) if requirements_assessed else None,
+                "status_display": req_as.get_status_display()
+                if requirements_assessed
+                else None,
+                "status_i18n": camel_case(req_as.status)
+                if requirements_assessed
+                else None,
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
@@ -494,7 +502,7 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
-    #add undefined as the first element in the labels to balance the values
+    # add undefined as the first element in the labels to balance the values
     labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}

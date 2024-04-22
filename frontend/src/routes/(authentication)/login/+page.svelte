@@ -69,8 +69,10 @@
 									</a>
 								</div>
 								<p class="">
-									<button class="btn variant-filled-primary font-semibold w-full" data-testid="login-btn" type="submit"
-										>{m.login()}</button
+									<button
+										class="btn variant-filled-primary font-semibold w-full"
+										data-testid="login-btn"
+										type="submit">{m.login()}</button
 									>
 								</p>
 							</SuperForm>

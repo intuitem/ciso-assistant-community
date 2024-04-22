@@ -837,24 +837,31 @@ class UserViewSet(BaseModelViewSet):
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         user = self.get_object()
-        if user.is_admin() :
+        if user.is_admin():
             number_of_admin_users = User.get_admin_users().count()
             admin_group = UserGroup.objects.get(name="BI-UG-ADM")
-            if number_of_admin_users == 1 :
+            if number_of_admin_users == 1:
                 new_user_groups = set(request.data["user_groups"])
-                if str(admin_group.pk) not in new_user_groups :
-                    return Response({"error":"attemptToRemoveOnlyAdminUserGroup"},status=HTTP_403_FORBIDDEN)
+                if str(admin_group.pk) not in new_user_groups:
+                    return Response(
+                        {"error": "attemptToRemoveOnlyAdminUserGroup"},
+                        status=HTTP_403_FORBIDDEN,
+                    )
 
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         user = self.get_object()
-        if user.is_admin() :
+        if user.is_admin():
             number_of_admin_users = User.get_admin_users().count()
-            if number_of_admin_users == 1 :
-                return Response({"error":"attemptToDeleteOnlyAdminAccountError"},status=HTTP_403_FORBIDDEN)
+            if number_of_admin_users == 1:
+                return Response(
+                    {"error": "attemptToDeleteOnlyAdminAccountError"},
+                    status=HTTP_403_FORBIDDEN,
+                )
 
-        return super().destroy(request,*args,**kwargs)
+        return super().destroy(request, *args, **kwargs)
+
 
 class UserGroupViewSet(BaseModelViewSet):
     """

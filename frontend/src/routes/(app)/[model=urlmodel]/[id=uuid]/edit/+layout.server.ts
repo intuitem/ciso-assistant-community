@@ -28,7 +28,7 @@ export const load: LayoutServerLoad = async (event) => {
 			setFlash(
 				{
 					type: 'error',
-					message: m.riskAcceptanceStateDoesntAllowEdit({riskAcceptance: riskAcceptance.name})
+					message: m.riskAcceptanceStateDoesntAllowEdit({ riskAcceptance: riskAcceptance.name })
 				},
 				event
 			);

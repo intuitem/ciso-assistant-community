@@ -54,7 +54,9 @@ def get_available_library_files():
             files.append(f)
     return files
 
+
 AVAILABLE_LIBRARIES = {}
+
 
 def get_available_libraries():
     """
@@ -69,12 +71,12 @@ def get_available_libraries():
     for f in files:
         fname = path / f
         modified_time = os.path.getmtime(fname)
-        libs = AVAILABLE_LIBRARIES.get((fname,modified_time))
-        if libs is None :
+        libs = AVAILABLE_LIBRARIES.get((fname, modified_time))
+        if libs is None:
             with open(fname, "r", encoding="utf-8") as file:
                 libs = list(yaml.safe_load_all(file))
-            AVAILABLE_LIBRARIES[(fname,os.path.getmtime(fname))] = libs
-        for _lib in libs :
+            AVAILABLE_LIBRARIES[(fname, os.path.getmtime(fname))] = libs
+        for _lib in libs:
             if (lib := Library.objects.filter(urn=_lib["urn"]).first()) is not None:
                 _lib["id"] = lib.id
                 _lib["reference_count"] = lib.reference_count
@@ -212,6 +214,7 @@ class RequirementNodeImporter:
             requirement_node.reference_controls.add(
                 ReferenceControl.objects.get(urn=reference_control.lower())
             )
+
 
 # The couple (URN, locale) is unique. ===> Check it in the future
 class FrameworkImporter:
@@ -586,13 +589,11 @@ class LibraryImporter:
             risk_matrix.import_risk_matrix(library_object)
 
     @transaction.atomic
-    def _import_library(self) :
+    def _import_library(self):
         library_object = self.create_or_update_library()
         self.import_objects(library_object)
         library_object.dependencies.set(
-            Library.objects.filter(
-                urn__in=self._library_data.get("dependencies", [])
-            )
+            Library.objects.filter(urn__in=self._library_data.get("dependencies", []))
         )
 
     def import_library(self):
@@ -602,19 +603,20 @@ class LibraryImporter:
 
         self.check_and_import_dependencies()
 
-        for _ in range(10) :
+        for _ in range(10):
             try:
                 self._import_library()
                 break
-            except OperationalError as e :
-                if e.args and e.args[0] == 'database is locked' :
+            except OperationalError as e:
+                if e.args and e.args[0] == "database is locked":
                     time.sleep(1)
-                else :
+                else:
                     raise e
-            except Exception as e :
+            except Exception as e:
                 # TODO: Switch to proper logging
                 print(f"Library import exception: {e}")
                 raise e
+
 
 def import_library_view(library: dict) -> Union[str, None]:
     """
