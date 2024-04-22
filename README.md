@@ -104,7 +104,12 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 29. CSA CCM (Cloud Controls Matrix)*
 30. FADP (Federal Act on Data Protection) 🇨🇭
 
-* These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage. 
+<br/>
+
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage. 
+
+<br/>
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
