@@ -52,24 +52,30 @@
 	{/if}
 	<div class="flex flex-row w-full items-center justify-evenly space-x-4">
 		<div class="flex w-full items-center justify-center">
-			<RangeSlider disabled={!scoringEnabled} class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked>
-				<div class="flex justify-between items-center">
-					<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:change={() => $value = null} name="score-slider">
-						<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>
-					{#if score_definition && $value !== null}
-						{#each score_definition as definition, index}
-							{#if definition.score === $value}
-								<p class="">{definition.name}: {definition.description}</p>
-							{/if}
-						{/each}
-					{/if}
-					{#if scoringEnabled}
+			{#if scoringEnabled}
+				<RangeSlider class="w-full" name="range-slider" bind:value={$value} min={min_score} max={max_score} step={1} ticked>
+					<div class="flex justify-between items-center">
+						<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:click={() => $value=null} name="score-slider">
+							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>
+						{#if score_definition && $value !== null}
+							{#each score_definition as definition, index}
+								{#if definition.score === $value}
+									<p class="">{definition.name}: {definition.description}</p>
+								{/if}
+							{/each}
+						{/if}
 						<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={formatValue($value)} font={150} width={'w-12'}>{displayNoValue($value)}</ProgressRadial>
-					{:else}
+					</div>
+				</RangeSlider>
+			{:else}
+				<RangeSlider disabled class="w-full" name="range-slider" value={min_score} min={min_score} max={max_score} step={1} ticked>
+					<div class="flex justify-between items-center">
+						<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:click={() => $value=min_score} name="score-slider">
+							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>
 						<ProgressRadial stroke={100} value={0} font={150} width={'w-12'}>--</ProgressRadial>
-					{/if}
-				</div>
-			</RangeSlider>
+					</div>
+				</RangeSlider>
+			{/if}
 		</div>
 	</div>
 </div>
