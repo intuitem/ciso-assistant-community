@@ -57,7 +57,11 @@
 					<SlideToggle bind:checked={scoringEnabled} active="bg-primary-500" on:change={() => $value = null} name="score-slider">
 						<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle>
 					{#if score_definition && $value !== null}
-						<p class="">{score_definition[$value-1].name}: {score_definition[$value-1].description}</p>
+						{#each score_definition as definition, index}
+							{#if definition.score === $value}
+								<p class="">{definition.name}: {definition.description}</p>
+							{/if}
+						{/each}
 					{/if}
 					{#if scoringEnabled}
 						<ProgressRadial stroke={100} meter={displayScoreColor($value, max_score)} value={formatValue($value)} font={150} width={'w-12'}>{displayNoValue($value)}</ProgressRadial>
