@@ -12,9 +12,10 @@
 	import { localItems } from '$lib/utils/locales.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
+	import { displayScoreColor } from '$lib/utils/helpers';
 
 	interface Counters {
 		domains: number;
@@ -272,7 +273,7 @@
 				<div class="flex flex-col space-y-2">
 					{#each data.projects as project}
 						<div class="flex flex-col items-center">
-							{#if project.compliance_assessments && project.compliance_assessments.length > 1}
+							{#if project.compliance_assessments && project.compliance_assessments.length > 0}
 								<div class="flex flex-row space-x-2 w-1/2 justify-between items-center">
 									<a class="text-xl font-bold mb-1 hover:underline text-primary-600" href="/projects/{project.id}">{project.folder.str}/{project.name}</a>
 									<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
@@ -300,6 +301,11 @@
 											<p>{compliance_assessment.framework.str}</p>
 										</div>
 									</div>
+									{#if compliance_assessment.globalScore.score >= 0}
+									<div class="justify-center flex items-center">
+										<ProgressRadial stroke={100} meter={displayScoreColor(compliance_assessment.globalScore.score, compliance_assessment.globalScore.max_score)} value={compliance_assessment.globalScore.score} font={150} width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRadial>
+									</div>
+									{/if}
 									<div class="w-3/5 h-32">
 										<DonutChart
 											s_label={m.complianceAssessments()}
