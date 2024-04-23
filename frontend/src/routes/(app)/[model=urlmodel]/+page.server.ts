@@ -102,11 +102,11 @@ export const actions: Actions = {
 			console.error(response);
 			if (response.warning) {
 				setFlash({ type: 'warning', message: response.warning }, event);
-				return { form };
+				return { createForm: form };
 			}
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
-				return { form };
+				return { createForm: form };
 			}
 			Object.entries(response).forEach(([key, value]) => {
 				setError(form, key, value);
@@ -116,7 +116,7 @@ export const actions: Actions = {
 
 		const createdObject = await res.json();
 
-		if (fileFields.length > 0) {
+		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
 				if (file.size <= 0) {
 					continue;

@@ -23,27 +23,27 @@ export const actions: Actions = {
 		const schema = modelSchema(formData.get('urlmodel') as string);
 		const urlModel = formData.get('urlmodel');
 
-		const createForm = await superValidate(formData, zod(schema));
+		const form = await superValidate(formData, zod(schema));
 
-		if (!createForm.valid) {
-			console.log(createForm.errors);
-			return fail(400, { form: createForm });
+		if (!form.valid) {
+			console.log(form.errors);
+			return fail(400, { form });
 		}
 
 		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
-		const requestInitOptions: RequestInit = {
-			method: 'POST',
-			body: JSON.stringify(createForm.data)
-		};
-
 		const fileFields = Object.fromEntries(
-			Object.entries(createForm.data).filter(([, value]) => value instanceof File)
+			Object.entries(form.data).filter(([, value]) => value instanceof File)
 		);
 
 		Object.keys(fileFields).forEach((key) => {
-			createForm.data[key] = undefined;
+			form.data[key] = undefined;
 		});
+
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
 
@@ -52,21 +52,21 @@ export const actions: Actions = {
 			console.error(response);
 			if (response.warning) {
 				setFlash({ type: 'warning', message: response.warning }, event);
-				return { createForm };
+				return { createForm: form };
 			}
 			if (response.error) {
 				setFlash({ type: 'error', message: response.error }, event);
-				return { createForm };
+				return { createForm: form };
 			}
 			Object.entries(response).forEach(([key, value]) => {
-				setError(createForm, key, value);
+				setError(form, key, value);
 			});
-			return fail(400, { form: createForm });
+			return fail(400, { form: form });
 		}
 
 		const createdObject = await res.json();
 
-		if (fileFields.length > 0) {
+		if (fileFields) {
 			for (const [, file] of Object.entries(fileFields)) {
 				if (file.size <= 0) {
 					continue;
@@ -84,9 +84,9 @@ export const actions: Actions = {
 					const response = await fileUploadRes.json();
 					console.error(response);
 					if (response.non_field_errors) {
-						setError(createForm, 'non_field_errors', response.non_field_errors);
+						setError(form, 'non_field_errors', response.non_field_errors);
 					}
-					return fail(400, { form: createForm });
+					return fail(400, { form: form });
 				}
 			}
 		}
@@ -113,7 +113,7 @@ export const actions: Actions = {
 			},
 			event
 		);
-		return { createForm };
+		return { createForm: form };
 	},
 	delete: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
