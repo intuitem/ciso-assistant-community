@@ -6,6 +6,7 @@
 	import { SetPasswordSchema } from '$lib/utils/schemas';
 
 	import * as m from '$paraglide/messages';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 
@@ -31,7 +32,7 @@
 				data={data?.form}
 				dataType="form"
 				let:form
-				validators={SetPasswordSchema}
+				validators={zod(SetPasswordSchema)}
 			>
 				<input class="input" type="hidden" name="user" value={getUUID()} />
 				<TextField type="password" {form} field="new_password" label={m.newPassword()} mandatory />

@@ -4,6 +4,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 </script>
@@ -29,7 +30,7 @@
 					data={data?.form}
 					dataType="form"
 					let:form
-					validators={ResetPasswordSchema}
+					validators={zod(ResetPasswordSchema)}
 				>
 					<TextField type="password" {form} field="new_password" label="New password" />
 					<TextField

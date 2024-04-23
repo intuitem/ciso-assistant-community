@@ -1,4 +1,5 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { BASE_API_URL } from '$lib/utils/constants';
@@ -12,14 +13,14 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		redirect(302, '/analytics');
 	}
 
-	const form = await superValidate(request, loginSchema);
+	const form = await superValidate(request, zod(loginSchema));
 
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async ({ request, url, fetch, cookies }) => {
-		const form = await superValidate(request, loginSchema);
+		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}

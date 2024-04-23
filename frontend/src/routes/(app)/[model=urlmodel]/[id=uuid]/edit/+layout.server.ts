@@ -6,13 +6,14 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import * as m from '$paraglide/messages';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async (event) => {
 	const URLModel = event.params.model!;
 	const schema = modelSchema(event.params.model);
 	const objectEndpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
 	const object = await event.fetch(objectEndpoint).then((res) => res.json());
-	const form = await superValidate(object, schema, { errors: false });
+	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(event.params.model!);
 	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
