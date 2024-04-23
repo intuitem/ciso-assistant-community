@@ -122,7 +122,7 @@ class LibraryViewSet(BaseModelViewSet):
         except Exception as e:
             return Response(
                 {
-                    "error": "Failed to load library, please check if it has dependencies"
+                    "error": f"Failed to load library, please check if it has dependencies: {e}"
                 },
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
