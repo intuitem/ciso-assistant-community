@@ -20,7 +20,7 @@
 			props: {
 				form: data.createForm,
 				model: data.model,
-				debug: false
+				debug: true
 			}
 		};
 		let modal: ModalSettings = {

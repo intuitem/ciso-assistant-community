@@ -208,7 +208,7 @@ export const actions: Actions = {
 		const res = await event.fetch(endpoint, requestInitOptions);
 
 		if (!res.ok) {
-			const response = await res.json();
+			const response: Record<string, any> = await res.json();
 			console.error('server response:', response);
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
@@ -218,11 +218,12 @@ export const actions: Actions = {
 			});
 			return fail(400, { form: form });
 		}
-		const model: string = urlParamModelVerboseName(URLModel);
+
+		const modelVerboseName: string = urlParamModelVerboseName(URLModel);
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: model, name: form.data.name })
+				message: m.successfullyUpdatedObject({ object: modelVerboseName, name: form.data.name })
 			},
 			event
 		);
