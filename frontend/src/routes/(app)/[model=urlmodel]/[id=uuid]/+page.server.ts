@@ -1,63 +1,87 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { urlParamModelVerboseName } from '$lib/utils/crud';
 
-import * as m from '$paraglide/messages';
 import { localItems, toCamelCase } from '$lib/utils/locales';
+import * as m from '$paraglide/messages';
 import { languageTag } from '$paraglide/runtime';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
 import { message, setError, superValidate } from 'sveltekit-superforms';
-import { z } from 'zod';
 import { zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 
 export const actions: Actions = {
-	create: async ({ request, fetch }) => {
-		const formData = await request.formData();
+	create: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
 
 		const schema = modelSchema(formData.get('urlmodel') as string);
 		const urlModel = formData.get('urlmodel');
 
 		const createForm = await superValidate(formData, zod(schema));
 
-		const endpoint = `${BASE_API_URL}/${urlModel}/`;
-
 		if (!createForm.valid) {
 			console.log(createForm.errors);
 			return fail(400, { form: createForm });
 		}
 
-		if (formData) {
-			const requestInitOptions: RequestInit = {
-				method: 'POST',
-				body: JSON.stringify(createForm.data)
-			};
+		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
-			const res = await fetch(endpoint, requestInitOptions);
-			if (!res.ok) {
-				const response = await res.json();
-				console.log(response);
-				if (response.non_field_errors) {
-					setError(createForm, 'non_field_errors', response.non_field_errors);
-				}
-				return fail(400, { form: createForm });
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(createForm.data)
+		};
+
+		const fileFields = Object.fromEntries(
+			Object.entries(createForm.data).filter(([, value]) => value instanceof File)
+		);
+
+		Object.keys(fileFields).forEach((key) => {
+			createForm.data[key] = undefined;
+		});
+
+		const res = await event.fetch(endpoint, requestInitOptions);
+
+		if (!res.ok) {
+			const response: Record<string, any> = await res.json();
+			console.error(response);
+			if (response.warning) {
+				setFlash({ type: 'warning', message: response.warning }, event);
+				return { createForm };
 			}
-			const createdObject = await res.json();
+			if (response.error) {
+				setFlash({ type: 'error', message: response.error }, event);
+				return { createForm };
+			}
+			Object.entries(response).forEach(([key, value]) => {
+				setError(createForm, key, value);
+			});
+			return fail(400, { form: createForm });
+		}
 
-			if (formData.has('attachment') && (formData.get('attachment') as File).size > 0) {
-				const { attachment } = Object.fromEntries(formData) as { attachment: File };
-				const attachmentEndpoint = `${BASE_API_URL}/${urlModel}/${createdObject.id}/upload/`;
-				const attachmentRequestInitOptions: RequestInit = {
+		const createdObject = await res.json();
+
+		if (fileFields.length > 0) {
+			for (const [, file] of Object.entries(fileFields)) {
+				if (file.size <= 0) {
+					continue;
+				}
+				const fileUploadEndpoint = `${BASE_API_URL}/${urlModel}/${createdObject.id}/upload/`;
+				const fileUploadRequestInitOptions: RequestInit = {
 					headers: {
-						'Content-Disposition': `attachment; filename=${encodeURIComponent(attachment.name)}`
+						'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`
 					},
 					method: 'POST',
-					body: attachment
+					body: file
 				};
-				console.log(attachmentRequestInitOptions);
-				const attachmentRes = await fetch(attachmentEndpoint, attachmentRequestInitOptions);
-				if (!attachmentRes.ok) {
-					const response = await attachmentRes.json();
+				const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
+				if (!fileUploadRes.ok) {
+					const response = await fileUploadRes.json();
 					console.error(response);
 					if (response.non_field_errors) {
 						setError(createForm, 'non_field_errors', response.non_field_errors);
@@ -65,18 +89,30 @@ export const actions: Actions = {
 					return fail(400, { form: createForm });
 				}
 			}
+		}
 
-			const model: string = urlParamModelVerboseName(urlModel);
-			if (model === 'User') {
-				return message(createForm, m.successfullyCreatedUser());
-			}
-			return message(
-				createForm,
-				m.successfullyCreatedObject({
-					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
-				})
+		const modelVerboseName: string = urlParamModelVerboseName(urlModel);
+
+		if (modelVerboseName === 'User') {
+			setFlash(
+				{
+					type: 'success',
+					message: m.successfullyCreatedObject({
+						object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+					})
+				},
+				event
 			);
 		}
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyCreatedObject({
+					object: localItems(languageTag())[toCamelCase(modelVerboseName)].toLowerCase()
+				})
+			},
+			event
+		);
 		return { createForm };
 	},
 	delete: async ({ request, fetch, params }) => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formFieldProxy } from 'sveltekit-superforms';
+	import { formFieldProxy, fileProxy } from 'sveltekit-superforms';
 
 	let _class = '';
 
@@ -9,9 +9,11 @@
 	export let helpText: string | undefined = undefined;
 	export let form;
 
-	const { value, errors, constraints } = formFieldProxy(form, field);
+	const { errors, constraints } = formFieldProxy(form, field);
+	let value = fileProxy(form, field);
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
+	$: console.log($value);
 </script>
 
 <div>
@@ -39,7 +41,7 @@
 			data-testid="form-input-{field.replaceAll('_', '-')}"
 			aria-invalid={$errors ? 'true' : undefined}
 			placeholder=""
-			bind:value={$value}
+			bind:files={$value}
 			{...$constraints}
 			{...$$restProps}
 		/>
