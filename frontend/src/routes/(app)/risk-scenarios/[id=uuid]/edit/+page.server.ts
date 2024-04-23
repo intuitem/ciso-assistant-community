@@ -10,6 +10,7 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'risk-scenarios';
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 	const scenario = await fetch(baseEndpoint).then((res) => res.json());
-	const form = await superValidate(object, schema, { errors: false });
+	const form = await superValidate(object, zod(schema), { errors: false });
 	const model = getModelInfo(URLModel);
 	const foreignKeyFields = model.foreignKeyFields;
 	const selectFields = model.selectFields;
@@ -127,7 +128,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const initialData = {
 		folder: scenario.project.folder.id
 	};
-	const measureCreateForm = await superValidate(initialData, measureCreateSchema, {
+	const measureCreateForm = await superValidate(initialData, zod(measureCreateSchema), {
 		errors: false
 	});
 
@@ -192,7 +193,7 @@ export const actions: Actions = {
 		const URLModel = 'risk-scenarios';
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/`;
-		const form = await superValidate(event.request, schema);
+		const form = await superValidate(event.request, zod(schema));
 
 		if (!form.valid) {
 			console.log(form.errors);
@@ -235,7 +236,7 @@ export const actions: Actions = {
 		const schema = modelSchema(URLModel);
 		const model = getModelInfo(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
-		const form = await superValidate(event.request, schema);
+		const form = await superValidate(event.request, zod(schema));
 
 		if (!form.valid) {
 			console.log(form.errors);

@@ -9,13 +9,14 @@ import { redirect } from '@sveltejs/kit';
 import { localItems, toCamelCase } from '$lib/utils/locales';
 import * as m from '$paraglide/messages';
 import { languageTag } from '$paraglide/runtime';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions: Actions = {
 	default: async (event) => {
 		const formData = await event.request.formData();
 		const schema = modelSchema(event.params.model!);
 		const endpoint = `${BASE_API_URL}/${event.params.model}/${event.params.id}/`;
-		const form = await superValidate(formData, schema);
+		const form = await superValidate(formData, zod(schema));
 
 		if (!form.valid) {
 			console.error(form.errors);

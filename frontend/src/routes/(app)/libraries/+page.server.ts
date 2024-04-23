@@ -12,6 +12,7 @@ import type { Library, urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
 import { languageTag } from '$paraglide/runtime';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/libraries/`;
@@ -72,7 +73,7 @@ export const load = (async ({ fetch }) => {
 	const importedLibrariesTable = librariesTable(libraries.filter((lib) => lib.id));
 
 	const schema = z.object({ id: z.string() });
-	const deleteForm = await superValidate(schema);
+	const deleteForm = await superValidate(zod(schema));
 
 	return { libraries, defaultLibrariesTable, importedLibrariesTable, deleteForm };
 }) satisfies PageServerLoad;
@@ -80,7 +81,7 @@ export const load = (async ({ fetch }) => {
 export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
-		const form = await superValidate(formData, LibraryUploadSchema);
+		const form = await superValidate(formData, zod(LibraryUploadSchema));
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
@@ -114,7 +115,7 @@ export const actions: Actions = {
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const schema = z.object({ id: z.string().regex(URN_REGEX) });
-		const deleteForm = await superValidate(formData, schema);
+		const deleteForm = await superValidate(formData, zod(schema));
 
 		const id = deleteForm.data.id;
 		const endpoint = `${BASE_API_URL}/libraries/${id}/`;

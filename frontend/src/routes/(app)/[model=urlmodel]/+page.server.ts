@@ -15,15 +15,16 @@ import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import type { ModelInfo } from '$lib/utils/types';
 import { setFlash } from 'sveltekit-flash-message/server';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	// NOTE: We might be able to have only one form here looking at the CRUD example in superform docs.
 	// https://superforms.rocks/crud
 	const schema = z.object({ id: z.string().uuid() });
-	const deleteForm = await superValidate(schema);
+	const deleteForm = await superValidate(zod(schema));
 	const URLModel = params.model!;
 	const createSchema = modelSchema(params.model!);
-	const createForm = await superValidate(createSchema);
+	const createForm = await superValidate(zod(createSchema));
 	const model: ModelInfo = getModelInfo(params.model!);
 	const foreignKeyFields = urlParamModelForeignKeyFields(params.model);
 	const selectFields = urlParamModelSelectFields(params.model);
@@ -69,7 +70,7 @@ export const actions: Actions = {
 	create: async (event) => {
 		const formData = await event.request.formData();
 		const schema = modelSchema(event.params.model!);
-		const createForm = await superValidate(formData, schema);
+		const createForm = await superValidate(formData, zod(schema));
 
 		const endpoint = `${BASE_API_URL}/${event.params.model}/`;
 
@@ -153,7 +154,7 @@ export const actions: Actions = {
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const schema = z.object({ id: z.string().uuid() });
-		const deleteForm = await superValidate(formData, schema);
+		const deleteForm = await superValidate(formData, zod(schema));
 
 		const id = deleteForm.data.id;
 		const endpoint = `${BASE_API_URL}/${event.params.model}/${id}/`;

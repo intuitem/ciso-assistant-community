@@ -8,6 +8,7 @@ import type { urlModel } from '$lib/utils/types';
 import { listViewFields } from '$lib/utils/table';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import * as m from '$paraglide/messages';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ fetch, params }) => {
 	const URLModel = 'evidences';
@@ -45,7 +46,7 @@ export const actions: Actions = {
 	deleteAttachment: async (event) => {
 		const formData = await event.request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const deleteAttachmentForm = await superValidate(formData, schema);
+		const deleteAttachmentForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = deleteAttachmentForm.data.urlmodel;
 		const id = deleteAttachmentForm.data.id;

@@ -8,6 +8,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import * as m from '$paraglide/messages';
 import { languageTag } from '$paraglide/runtime';
 import { localItems } from '$lib/utils/locales';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'users';
@@ -16,7 +17,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const object = await fetch(objectEndpoint).then((res) => res.json());
 	const schema = UserEditSchema;
-	const form = await superValidate(object, schema);
+	const form = await superValidate(object, zod(schema));
 
 	const foreignKeys: Record<string, any> = {};
 
@@ -42,7 +43,7 @@ export const actions: Actions = {
 	default: async (event) => {
 		const schema = UserEditSchema;
 		const endpoint = `${BASE_API_URL}/users/${event.params.id}/`;
-		const form = await superValidate(event.request, schema);
+		const form = await superValidate(event.request, zod(schema));
 
 		if (!form.valid) {
 			console.log(form.errors);

@@ -9,6 +9,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions: Actions = {
 	create: async ({ request, fetch }) => {
@@ -17,7 +18,7 @@ export const actions: Actions = {
 		const schema = modelSchema(formData.get('urlmodel') as string);
 		const urlModel = formData.get('urlmodel');
 
-		const createForm = await superValidate(formData, schema);
+		const createForm = await superValidate(formData, zod(schema));
 
 		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
@@ -81,7 +82,7 @@ export const actions: Actions = {
 	delete: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const deleteForm = await superValidate(formData, schema);
+		const deleteForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = deleteForm.data.urlmodel;
 		const id = deleteForm.data.id;
@@ -118,7 +119,7 @@ export const actions: Actions = {
 	reject: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const rejectForm = await superValidate(formData, schema);
+		const rejectForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = rejectForm.data.urlmodel;
 		const id = rejectForm.data.id;
@@ -152,7 +153,7 @@ export const actions: Actions = {
 	accept: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const acceptForm = await superValidate(formData, schema);
+		const acceptForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = acceptForm.data.urlmodel;
 		const id = acceptForm.data.id;
@@ -186,7 +187,7 @@ export const actions: Actions = {
 	revoke: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const revokeForm = await superValidate(formData, schema);
+		const revokeForm = await superValidate(formData, zod(schema));
 
 		const urlmodel = revokeForm.data.urlmodel;
 		const id = revokeForm.data.id;
