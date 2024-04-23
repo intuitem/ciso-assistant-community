@@ -1,9 +1,6 @@
 <script lang="ts">
-	import type { AggregatedData } from '$lib/utils/types';
-
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 
-	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
