@@ -85,7 +85,11 @@ export const actions: Actions = {
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
-			// Should i check if attachment.size > 0 ?
+
+			if (file.size <= 0) {
+				return fail(400, { form });
+			}
+
 			const endpoint = `${BASE_API_URL}/libraries/upload/`;
 			const req = await event.fetch(endpoint, {
 				method: 'POST',
@@ -98,7 +102,6 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const error_string = response.error;
 				const translate_error = localItems(languageTag())[response.error];
 				const toast_error_message = translate_error ?? m.libraryImportError();
 
@@ -110,7 +113,6 @@ export const actions: Actions = {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });
 		}
-		return { form };
 	},
 	delete: async (event) => {
 		const formData = await event.request.formData();
