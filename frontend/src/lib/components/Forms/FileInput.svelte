@@ -13,7 +13,6 @@
 	let value = fileProxy(form, field);
 
 	$: classesTextField = (errors: string[] | undefined) => (errors ? 'input-error' : '');
-	$: console.log($value);
 </script>
 
 <div>

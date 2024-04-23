@@ -19,8 +19,7 @@
 			ref: CreateModal,
 			props: {
 				form: data.createForm,
-				model: data.model,
-				debug: true
+				model: data.model
 			}
 		};
 		let modal: ModalSettings = {
