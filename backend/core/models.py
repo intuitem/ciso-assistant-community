@@ -1523,13 +1523,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         related_name="requirement_assessments",
     )
     
-    def get_score_choices(self):
-        return [(i, i) for i in range(self.compliance_assessment.framework.min_score, self.compliance_assessment.framework.max_score + 1)]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._meta.get_field('score').choices = self.get_score_choices()
-
     def __str__(self) -> str:
         return self.requirement.display_short
 
