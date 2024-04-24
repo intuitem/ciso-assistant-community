@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("dump-db/", views.dump_db_view, name="dump-db"),
+    path("dump-db/", views.ExportBackupView.as_view(), name="dump-db"),
     path(
         "load-backup/",
         views.LoadBackupView.as_view(),
