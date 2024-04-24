@@ -1,20 +1,21 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { ResetPasswordSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import * as m from '$paraglide/messages';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event) => {
-	const form = await superValidate(event.request, ResetPasswordSchema);
+	const form = await superValidate(event.request, zod(ResetPasswordSchema));
 
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async (event) => {
-		const form = await superValidate(event.request, ResetPasswordSchema);
+		const form = await superValidate(event.request, zod(ResetPasswordSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}

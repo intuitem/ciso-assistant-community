@@ -1,6 +1,5 @@
 from django.urls import path
 
-from core.views import FirstConnexionPasswordConfirmView
 
 from .views import (
     LoginView,
@@ -25,9 +24,4 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
-    path(
-        "first_connexion/<uidb64>/<token>/",
-        FirstConnexionPasswordConfirmView.as_view(),
-        name="first_connexion_confirm",
-    ),
 ]

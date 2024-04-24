@@ -9,7 +9,8 @@ User = get_user_model()
 
 
 class RBACPermissions(permissions.DjangoObjectPermissions):
-    """ this is the DRF custom permission model enforcing our RBAC logic """
+    """this is the DRF custom permission model enforcing our RBAC logic"""
+
     perms_map = {
         "GET": ["%(app_label)s.view_%(model_name)s"],
         "OPTIONS": [],

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getRequirementTitle } from "$lib/utils/helpers";
+	import { getRequirementTitle } from '$lib/utils/helpers';
 	export let ref_id: string;
 	export let name: string;
 	export let description: string;
@@ -18,7 +18,7 @@
 		assessable,
 		...$$restProps
 	} as const;
-	
+
 	type TreeViewItemNode = typeof node;
 
 	const getAssessableNodes = (
@@ -42,17 +42,16 @@
 
 	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
-
 </script>
 
 <div>
 	<span class="whitespace-pre-line" style="font-weight: 300};">
 		<p class="max-w-[80ch]">
-			{#if title} 
+			{#if title}
 				<span style="font-weight: 600;">
 					{title}
 				</span>
-				{#if assessableNodes.length > 1} 
+				{#if assessableNodes.length > 1}
 					<span class="badge variant-soft-primary">
 						{assessableNodes.length}
 					</span>

@@ -3,9 +3,10 @@ import { getModelInfo } from '$lib/utils/crud';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
@@ -45,13 +46,13 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	risk_assessment.risk_matrix = risk_matrix;
 
 	const deleteSchema = z.object({ id: z.string() });
-	const scenarioDeleteForm = await superValidate(deleteSchema);
+	const scenarioDeleteForm = await superValidate(zod(deleteSchema));
 
 	const scenarioSchema = modelSchema('risk-scenarios');
 	const initialData = {
 		risk_assessment: params.id
 	};
-	const scenarioCreateForm = await superValidate(initialData, scenarioSchema, {
+	const scenarioCreateForm = await superValidate(initialData, zod(scenarioSchema), {
 		errors: false
 	});
 

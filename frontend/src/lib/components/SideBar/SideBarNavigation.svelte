@@ -57,7 +57,13 @@
 </script>
 
 <nav class="flex-grow scrollbar">
-	<Accordion autocollapse spacing="space-y-4" regionPanel="space-y-2" caretClosed="-rotate-90" caretOpen="">
+	<Accordion
+		autocollapse
+		spacing="space-y-4"
+		regionPanel="space-y-2"
+		caretClosed="-rotate-90"
+		caretOpen=""
+	>
 		{#each items as item}
 			<!-- This commented code adds Accordion persistency but changes its visual behavior -->
 			<!-- {#if $lastAccordionItem === item.name}

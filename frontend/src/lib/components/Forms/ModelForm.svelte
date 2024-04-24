@@ -19,6 +19,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -44,7 +45,9 @@
 
 	onMount(() => {
 		if (shape.reference_control) {
-			const reference_control_input: HTMLElement | null = document.querySelector(`div.multiselect[role="searchbox"] input`); // The MultiSelect component can't be focused automatically with data-focusindex="0" so we focus manually
+			const reference_control_input: HTMLElement | null = document.querySelector(
+				`div.multiselect[role="searchbox"] input`
+			); // The MultiSelect component can't be focused automatically with data-focusindex="0" so we focus manually
 			reference_control_input?.focus();
 		}
 	});
@@ -58,7 +61,7 @@
 	let:form
 	let:data
 	let:initialData
-	validators={schema}
+	validators={zod(schema)}
 	{...$$restProps}
 >
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
@@ -69,7 +72,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['reference_control'],
-				extra_fields: [["folder","str"]],
+				extra_fields: [['folder', 'str']],
 				suggestions: suggestions['reference_control']
 			})}
 			field="reference_control"
@@ -97,10 +100,10 @@
 		/>
 	{/if}
 	{#if shape.name}
-		<TextField {form} field="name" label={m.name()} data-focusindex="0"/>
+		<TextField {form} field="name" label={m.name()} data-focusindex="0" />
 	{/if}
 	{#if shape.description}
-		<TextArea {form} field="description" label={m.description()} data-focusindex="1"/>
+		<TextArea {form} field="description" label={m.description()} data-focusindex="1" />
 	{/if}
 	{#if URLModel === 'projects'}
 		<AutocompleteSelect
@@ -120,10 +123,10 @@
 	{:else if URLModel === 'risk-assessments'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ 
+			options={getOptions({
 				objects: model.foreignKeys['project'],
-				extra_fields: [["folder","str"]]
-				})}
+				extra_fields: [['folder', 'str']]
+			})}
 			field="project"
 			label={m.project()}
 			hide={initialData.project}
@@ -174,7 +177,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_assessment'],
-				extra_fields: [["project","str"]]
+				extra_fields: [['project', 'str']]
 			})}
 			field="risk_assessment"
 			label={m.riskAssessment()}
@@ -185,7 +188,7 @@
 			multiple
 			options={getOptions({
 				objects: model.foreignKeys['threats'],
-				extra_fields: [["folder","str"]]
+				extra_fields: [['folder', 'str']]
 			})}
 			field="threats"
 			label={m.threats()}
@@ -205,7 +208,7 @@
 			multiple
 			options={getOptions({
 				objects: model.foreignKeys['evidences'],
-				extra_fields: [["folder","str"]]
+				extra_fields: [['folder', 'str']]
 			})}
 			field="evidences"
 			label={m.evidences()}
@@ -268,7 +271,7 @@
 			{form}
 			options={getOptions({
 				objects: model.foreignKeys['risk_scenarios'],
-				extra_fields: [["project","str"]]
+				extra_fields: [['project', 'str']]
 			})}
 			field="risk_scenarios"
 			label={m.riskScenarios()}
@@ -283,6 +286,7 @@
 			field="category"
 			label={m.category()}
 		/>
+		<TextArea {form} field="annotation" label={m.annotation()} />
 		<TextField {form} field="provider" label={m.provider()} />
 		<AutocompleteSelect
 			{form}
@@ -313,10 +317,10 @@
 	{:else if URLModel === 'compliance-assessments'}
 		<AutocompleteSelect
 			{form}
-			options={getOptions({ 
+			options={getOptions({
 				objects: model.foreignKeys['project'],
-				extra_fields: [["folder","str"]]
-				})}
+				extra_fields: [['folder', 'str']]
+			})}
 			field="project"
 			label={m.project()}
 			hide={initialData.project}
@@ -376,7 +380,7 @@
 		<HiddenInput {form} field="requirement" />
 		<HiddenInput {form} field="compliance_assessment" />
 	{:else if URLModel === 'users'}
-		<TextField {form} field="email" label={m.email()} data-focusindex="2"/>
+		<TextField {form} field="email" label={m.email()} data-focusindex="2" />
 		{#if shape.first_name && shape.last_name}
 			<TextField {form} field="first_name" label={m.firstName()} />
 			<TextField {form} field="last_name" label={m.lastName()} />

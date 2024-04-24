@@ -67,19 +67,23 @@ class TestLibrariesAuthenticated:
             Framework.objects.all().count() == 0
         ), "libraries are already imported in the database"
         EndpointTestsQueries.Auth.get_object(
-            test.client, "Frameworks", user_group=test.user_group,
+            test.client,
+            "Frameworks",
+            user_group=test.user_group,
         )
 
         EndpointTestsQueries.Auth.import_object(
             test.client, "Framework", user_group=test.user_group
         )
 
-        assert (
-            Framework.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
-                    "add", "library", str(test.folder), test.user_group
-                )[0] else 0)
+        assert Framework.objects.all().count() == (
+            1
+            if not EndpointTestsUtils.expected_request_response(
+                "add", "library", str(test.folder), test.user_group
+            )[0]
+            else 0
         ), "Frameworks are not correctly imported in the database"
-        
+
         # Uses the API endpoint to assert that the library was properly imported
         EndpointTestsQueries.Auth.get_object(
             test.client,
@@ -93,8 +97,8 @@ class TestLibrariesAuthenticated:
             base_count=1,
             user_group=test.user_group,
             fails=EndpointTestsUtils.expected_request_response(
-                    "add", "library", str(test.folder), test.user_group
-                )[0]
+                "add", "library", str(test.folder), test.user_group
+            )[0],
         )
 
     def test_delete_frameworks(self, test):
@@ -133,10 +137,12 @@ class TestLibrariesAuthenticated:
             test.client, "Risk matrix", user_group=test.user_group
         )
 
-        assert (
-            RiskMatrix.objects.all().count() == (1 if not EndpointTestsUtils.expected_request_response(
-                    "add", "library", str(test.folder), test.user_group
-                )[0] else 0)
+        assert RiskMatrix.objects.all().count() == (
+            1
+            if not EndpointTestsUtils.expected_request_response(
+                "add", "library", str(test.folder), test.user_group
+            )[0]
+            else 0
         ), "Risk matrices are not correctly imported in the database"
 
         # Uses the API endpoint to assert that the library was properly imported
@@ -153,8 +159,8 @@ class TestLibrariesAuthenticated:
             base_count=1,
             user_group=test.user_group,
             fails=EndpointTestsUtils.expected_request_response(
-                    "add", "library", str(test.folder), test.user_group
-                )[0]
+                "add", "library", str(test.folder), test.user_group
+            )[0],
         )
 
     def test_delete_matrix(self, test):
@@ -163,14 +169,13 @@ class TestLibrariesAuthenticated:
         EndpointTestsQueries.Auth.import_object(test.admin_client, "Risk matrix")
         EndpointTestsQueries.Auth.delete_object(
             test.client,
-            "Risk matrices", 
-            RiskMatrix, 
+            "Risk matrices",
+            RiskMatrix,
             user_group=test.user_group,
             scope="Global",
-            **({
-                    "fails": True, 
-                    "expected_status": status.HTTP_403_FORBIDDEN
-                } 
-                if test.user_group == "BI-UG-DMA" else {} # Domain Manager can't delete Global risk matrices (i.e. imported matrices)
-            )
+            **(
+                {"fails": True, "expected_status": status.HTTP_403_FORBIDDEN}
+                if test.user_group == "BI-UG-DMA"
+                else {}  # Domain Manager can't delete Global risk matrices (i.e. imported matrices)
+            ),
         )

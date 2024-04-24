@@ -118,7 +118,10 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": Framework.objects.all()[0],
             },
             {
-                "project": {"id": str(project.id), "str": project.folder.name + "/" + project.name},
+                "project": {
+                    "id": str(project.id),
+                    "str": project.folder.name + "/" + project.name,
+                },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
@@ -148,7 +151,10 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": str(Framework.objects.all()[0].id),
             },
             {
-                "project": {"id": str(project.id), "str": project.folder.name + "/" + project.name},
+                "project": {
+                    "id": str(project.id),
+                    "str": project.folder.name + "/" + project.name,
+                },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
@@ -190,7 +196,10 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": str(Framework.objects.all()[1].id),
             },
             {
-                "project": {"id": str(project.id), "str": project.folder.name + "/" + project.name},
+                "project": {
+                    "id": str(project.id),
+                    "str": project.folder.name + "/" + project.name,
+                },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),

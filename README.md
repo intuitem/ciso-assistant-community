@@ -100,13 +100,21 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 25. Tisax 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
+28. CIS Controls v8*
+29. CSA CCM (Cloud Controls Matrix)*
+30. FADP (Federal Act on Data Protection) 🇨🇭
+
+<br/>
+
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage. 
+
+<br/>
 
 Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the Domain Specific Language used and how you can define your own.
 
 ### Coming soon
 
-- CIS
-- CCM
 - CCPA
 - AI Act
 - Part-IS
@@ -114,6 +122,8 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - SOX
 - MASVS
 - FedRAMP
+- NIST 800-171
+- UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
 
 ### Add your own framework
