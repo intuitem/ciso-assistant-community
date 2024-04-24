@@ -44,7 +44,7 @@ def test_get_rating_options_perm_to_view_matrix():
     )
     RiskScenario.objects.create(name="test", risk_assessment=risk_assessment)
     role = Role.objects.create(name="test")
-    auditor_permissions = Permission.objects.filter(
+    reader_permissions = Permission.objects.filter(
         codename__in=[
             "view_project",
             "view_riskassessment",
@@ -58,7 +58,7 @@ def test_get_rating_options_perm_to_view_matrix():
             "view_usergroup",
         ]
     )
-    role.permissions.set(auditor_permissions)
+    role.permissions.set(reader_permissions)
     role.save()
     role_assignment = RoleAssignment.objects.create(
         user=user,
@@ -109,7 +109,7 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
     )
     RiskScenario.objects.create(name="test", risk_assessment=risk_assessment)
     role = Role.objects.create(name="test")
-    auditor_permissions = Permission.objects.filter(
+    reader_permissions = Permission.objects.filter(
         codename__in=[
             "view_project",
             "view_riskassessment",
@@ -123,7 +123,7 @@ def test_get_rating_options_abbr_perm_to_view_matrix():
             "view_usergroup",
         ]
     )
-    role.permissions.set(auditor_permissions)
+    role.permissions.set(reader_permissions)
     role.save()
     role_assignment = RoleAssignment.objects.create(
         user=user,

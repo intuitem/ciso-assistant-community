@@ -5,7 +5,8 @@
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { superValidate } from 'sveltekit-superforms/server';
+	import { superValidate } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data;
 
@@ -51,7 +52,7 @@
 </div>
 {#if tabSet === 1}
 	<div class="card bg-white p-4 mt-4 shadow">
-		{#await superValidate(LibraryUploadSchema)}
+		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>
 		{:then form}
 			<SuperForm
@@ -60,12 +61,12 @@
 				enctype="multipart/form-data"
 				data={form}
 				let:form
-				validators={LibraryUploadSchema}
+				validators={zod(LibraryUploadSchema)}
 				action="?/upload"
 				onSubmit={() => {
 					const fileInput = document.querySelector(`input[type="file"]`);
 					console.log(fileInput);
-					fileInput.value = "";
+					fileInput.value = '';
 				}}
 				{...$$restProps}
 			>

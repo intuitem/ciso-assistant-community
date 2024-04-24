@@ -13,7 +13,8 @@
 		sortedKeys.forEach((key) => {
 			if (!filter.includes(key) && Object.prototype.hasOwnProperty.call($page.data.user, key)) {
 				const str = toCamelCase(key);
-				if (key === 'date_joined') filtered[str] = new Date($page.data.user[key]).toLocaleString(languageTag());
+				if (key === 'date_joined')
+					filtered[str] = new Date($page.data.user[key]).toLocaleString(languageTag());
 				else filtered[str] = $page.data.user[key];
 			}
 		});
@@ -33,7 +34,9 @@
 				><i class="fa-solid fa-key mr-2" />{m.changePassword()}</a
 			>
 			{#if canEditObject}
-				<a href="/users/{$page.data.user.id}/edit?next=/my-profile" class="btn variant-filled-primary h-fit"
+				<a
+					href="/users/{$page.data.user.id}/edit?next=/my-profile"
+					class="btn variant-filled-primary h-fit"
 					><i class="fa-solid fa-pen-to-square mr-2" />{m.edit()}</a
 				>
 			{/if}
@@ -54,7 +57,9 @@
 				{#each $page.data.user.user_groups as group}
 					<div class="flex flex-row items-center">
 						{#if group[1]}
-							<span class="bg-primary-300 p-1 rounded-lg font-medium text-xs mr-2">{m.builtin()}</span>
+							<span class="bg-primary-300 p-1 rounded-lg font-medium text-xs mr-2"
+								>{m.builtin()}</span
+							>
 						{/if}
 						<p class="font-semibold text-sm">{group[0]}</p>
 					</div>

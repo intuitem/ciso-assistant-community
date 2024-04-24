@@ -146,7 +146,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
         # "reference_count" is not always defined (is this normal ?)
-        if library.get("reference_count",0) != 0 :
+        if library.get("reference_count", 0) != 0:
             return Response(
                 data="Library cannot be deleted because it has references.",
                 status=status.HTTP_400_BAD_REQUEST,
@@ -213,9 +213,11 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             return HttpResponse(json.dumps({}), status=HTTP_200_OK)
         except IntegrityError:
             return HttpResponse(
-                json.dumps({"error" : "libraryAlreadyImportedError"}), status=HTTP_400_BAD_REQUEST
+                json.dumps({"error": "libraryAlreadyImportedError"}),
+                status=HTTP_400_BAD_REQUEST,
             )
-        except :
+        except:
             return HttpResponse(
-                json.dumps({"error": "invalidLibraryFileError"}), status=HTTP_400_BAD_REQUEST
+                json.dumps({"error": "invalidLibraryFileError"}),
+                status=HTTP_400_BAD_REQUEST,
             )

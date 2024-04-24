@@ -7,6 +7,7 @@
 	import Typewriter from 'svelte-typewriter';
 
 	import * as m from '$paraglide/messages.js';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 
@@ -55,7 +56,7 @@
 								data={data?.form}
 								dataType="form"
 								let:form
-								validators={loginSchema}
+								validators={zod(loginSchema)}
 							>
 								<TextField type="email" {form} field="username" label={m.email()} />
 								<TextField type="password" {form} field="password" label={m.password()} />
@@ -69,8 +70,10 @@
 									</a>
 								</div>
 								<p class="">
-									<button class="btn variant-filled-primary font-semibold w-full" data-testid="login-btn" type="submit"
-										>{m.login()}</button
+									<button
+										class="btn variant-filled-primary font-semibold w-full"
+										data-testid="login-btn"
+										type="submit">{m.login()}</button
 									>
 								</p>
 							</SuperForm>

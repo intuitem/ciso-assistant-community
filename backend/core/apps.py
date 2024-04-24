@@ -3,7 +3,7 @@ from django.db.models.signals import post_migrate
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, LIBRARIES_PATH
 import sys, os
 
-AUDITOR_PERMISSIONS_LIST = [
+READER_PERMISSIONS_LIST = [
     "view_project",
     "view_riskassessment",
     "view_appliedcontrol",
@@ -257,9 +257,7 @@ def startup(sender: AppConfig,**kwargs):
 
     print("startup handler: initialize database")
 
-    auditor_permissions = Permission.objects.filter(
-        codename__in=AUDITOR_PERMISSIONS_LIST
-    )
+    reader_permissions = Permission.objects.filter(codename__in=READER_PERMISSIONS_LIST)
 
     approver_permissions = Permission.objects.filter(
         codename__in=APPROVER_PERMISSIONS_LIST
@@ -283,8 +281,8 @@ def startup(sender: AppConfig,**kwargs):
             name="Global", content_type=Folder.ContentType.ROOT, builtin=True
         )
     # update builtin roles to facilitate migrations
-    auditor, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
-    auditor.permissions.set(auditor_permissions)
+    reader, created = Role.objects.get_or_create(name="BI-RL-AUD", builtin=True)
+    reader.permissions.set(reader_permissions)
     approver, created = Role.objects.get_or_create(name="BI-RL-APP", builtin=True)
     approver.permissions.set(approver_permissions)
     analyst, created = Role.objects.get_or_create(name="BI-RL-ANA", builtin=True)
@@ -308,23 +306,23 @@ def startup(sender: AppConfig,**kwargs):
             folder=Folder.get_root_folder(),
         )
         ra1.perimeter_folders.add(administrators.folder)
-    # if global auditors user group does not exist, then create it
+    # if global readers user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-GAD", folder=Folder.get_root_folder()
     ).exists():
-        global_auditors = UserGroup.objects.create(
+        global_readers = UserGroup.objects.create(
             name="BI-UG-GAD",
             folder=Folder.objects.get(content_type=Folder.ContentType.ROOT),
             builtin=True,
         )
         ra2 = RoleAssignment.objects.create(
-            user_group=global_auditors,
+            user_group=global_readers,
             role=Role.objects.get(name="BI-RL-AUD"),
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
         )
-        ra2.perimeter_folders.add(global_auditors.folder)
+        ra2.perimeter_folders.add(global_readers.folder)
     # if global approvers user group does not exist, then create it
     if not UserGroup.objects.filter(
         name="BI-UG-GAP", folder=Folder.get_root_folder()

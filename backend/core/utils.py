@@ -19,7 +19,7 @@ class RoleCodename(Enum):
     DOMAIN_MANAGER = "BI-RL-DMA"
     ANALYST = "BI-RL-ANA"
     APPROVER = "BI-RL-APP"
-    AUDITOR = "BI-RL-AUD"
+    READER = "BI-RL-AUD"
 
     def __str__(self) -> str:
         return self.value
@@ -27,12 +27,12 @@ class RoleCodename(Enum):
 
 class UserGroupCodename(Enum):
     ADMINISTRATOR = "BI-UG-ADM"
-    GLOBAL_AUDITOR = "BI-UG-GAD"
+    GLOBAL_READER = "BI-UG-GAD"
     GLOBAL_APPROVER = "BI-UG-GAP"
     DOMAIN_MANAGER = "BI-UG-DMA"
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
-    AUDITOR = "BI-UG-AUD"
+    READER = "BI-UG-AUD"
 
     def __str__(self) -> str:
         return self.value
@@ -43,17 +43,17 @@ BUILTIN_ROLE_CODENAMES = {
     str(RoleCodename.DOMAIN_MANAGER): _("Domain manager"),
     str(RoleCodename.ANALYST): _("Analyst"),
     str(RoleCodename.APPROVER): _("Approver"),
-    str(RoleCodename.AUDITOR): _("Auditor"),
+    str(RoleCodename.READER): _("Reader"),
 }
 
 BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
-    str(UserGroupCodename.GLOBAL_AUDITOR): _("Auditor"),
+    str(UserGroupCodename.GLOBAL_READER): _("Reader"),
     str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
     str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
     str(UserGroupCodename.ANALYST): _("Analyst"),
     str(UserGroupCodename.APPROVER): _("Approver"),
-    str(UserGroupCodename.AUDITOR): _("Auditor"),
+    str(UserGroupCodename.READER): _("Reader"),
 }
 
 COUNTRY_FLAGS = {

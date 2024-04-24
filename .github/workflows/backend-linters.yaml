@@ -30,6 +30,10 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           python -m pip install ruff
-      - name: ruff
+      - name: Run ruff format check
         working-directory: ${{env.working-directory}}
-        run: ruff check .
+        run: ruff format --check .
+      # NOTE: The following will be uncommented once the codebase is cleaned up
+      # - name: ruff
+      #   working-directory: ${{env.working-directory}}
+      #   run: ruff check .

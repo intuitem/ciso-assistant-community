@@ -76,8 +76,8 @@ export default {
 				"view_user",
 			]
 		},
-		auditor: {
-			name: 'Auditor',
+		reader: {
+			name: 'Reader',
 			perms: [
 				"view_project",
 				"view_riskassessment",
@@ -184,7 +184,7 @@ export default {
 				"view_loadedlibrary",
 				"view_user",
 			]
-		},
+		}
 	},
 	framework: {
 		name: 'NIST CSF v1.1',

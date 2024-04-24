@@ -33,11 +33,9 @@
 
 	type TreeViewItemNode = typeof node;
 
-	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0)
-	const title: string = 
-		pattern == 3 ? `${ref_id} - ${name}` :
-		pattern == 2 ? ref_id :
-		pattern == 1 ? name : '';
+	const pattern = (ref_id ? 2 : 0) + (name ? 1 : 0);
+	const title: string =
+		pattern == 3 ? `${ref_id} - ${name}` : pattern == 2 ? ref_id : pattern == 1 ? name : '';
 
 	let showInfo = false;
 
@@ -55,7 +53,8 @@
 	};
 
 	const assessableNodes = getAssessableNodes(node);
-	const hasAssessableChildren = children && Object.keys(children).length > 0 && assessableNodes.length > 0;
+	const hasAssessableChildren =
+		children && Object.keys(children).length > 0 && assessableNodes.length > 0;
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
@@ -91,13 +90,14 @@
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
 	$: classesPercentText = (statusColor: string) => (statusColor === '#000000' ? 'text-white' : '');
 </script>
+
 <div class="flex flex-row justify-between space-x-8">
 	<div class="flex flex-1 max-w-[80ch] flex-col">
 		<span style="font-weight: 300;">
 			{#if assessable && canEditRequirementAssessment}
 				<span class="w-full h-full flex rounded-token hover:text-primary-500">
 					<a href="/requirement-assessments/{ra_id}?next={$page.url.pathname}">
-						{#if title} 
+						{#if title}
 							<span style="font-weight: 600;">{title}</span>
 						{/if}
 						{#if description}
@@ -107,9 +107,9 @@
 				</span>
 			{:else}
 				<p class="max-w-[80ch] whitespace-pre-line">
-					{#if title} 
+					{#if title}
 						<span style="font-weight: 600;">{title}</span>
-						{#if assessableNodes.length > 0} 
+						{#if assessableNodes.length > 0}
 							<span class="badge variant-soft-primary">
 								{assessableNodes.length}
 							</span>

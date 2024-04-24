@@ -11,8 +11,8 @@ export const load = (async ({ fetch, params }) => {
 	const project = await fetch(`${BASE_API_URL}/projects/${risk_assessment.project.id}/`).then(
 		(res) => res.json()
 	);
-	const folder = await fetch(`${BASE_API_URL}/folders/${project.folder.id}/`).then(
-		(res) => res.json()
+	const folder = await fetch(`${BASE_API_URL}/folders/${project.folder.id}/`).then((res) =>
+		res.json()
 	);
 	risk_assessment.folder = folder;
 	return { URLModel, risk_assessment };
