@@ -20,7 +20,7 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
     # Not used yet
     class Meta:
         model = StoredLibrary
-        fields = ["name","description","locale","version","builtin","objects_meta"]
+        fields = ["id","name","description","locale","version","builtin","objects_meta"]
 
     # name = serializers.CharField()
     # description = serializers.CharField()
@@ -29,6 +29,11 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
     # copyright = serializers.CharField()
     # builtin = serializers.BooleanField()
     # objects_meta = serializers.JSONField()
+
+class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StoredLibrary
+        fields = "__all__"
 
 """
 class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
@@ -39,6 +44,7 @@ class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
 """
 
 class LoadedLibrarySerializer(serializers.Serializer):
+    id = serializers.CharField()
     name = serializers.CharField()
     description = serializers.CharField()
     locale = serializers.ChoiceField(choices=["en", "fr"])

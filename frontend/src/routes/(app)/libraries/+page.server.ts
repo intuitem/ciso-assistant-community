@@ -6,26 +6,26 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
 import { listViewFields } from '$lib/utils/table';
 import type { Library, urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
 import { languageTag } from '$paraglide/runtime';
-import { zod } from 'sveltekit-superforms/adapters';
 
 
 // ----------------------------------------------------------- //
 
 
 export const load = (async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/stored-libraries/`;
-	const endpoint2 = `${BASE_API_URL}/loaded-libraries/`;
+	const stored_libraries_endpoint = `${BASE_API_URL}/stored-libraries/`;
+	const loaded_libaries_endpoint = `${BASE_API_URL}/loaded-libraries/`;
 
-	const [res,res2] = await Promise.all([fetch(endpoint),fetch(endpoint2)]);
+	const [stored_libraries_res,loaded_libaries_res] = await Promise.all([fetch(stored_libraries_endpoint),fetch(loaded_libaries_endpoint)]);
 
-	const storedLibraries = await res.json().then((res) => res.results);
-	const loadedLibraries = await res2.json().then((res) => res.results);
+	const storedLibraries = await stored_libraries_res.json().then((res) => res.results);
+	const loadedLibraries = await loaded_libaries_res.json().then((res) => res.results);
 
 	const prepareRow = (row) => {
 		row.overview = [
@@ -65,7 +65,7 @@ export const load = (async ({ fetch }) => {
 	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries,'loaded-libraries');
 
 	const schema = z.object({ id: z.string() });
-	const deleteForm = await superValidate(schema);
+	const deleteForm = await superValidate(zod(schema));
 
 	loadedLibrariesTable.body.push(storedLibrariesTable.body[0]);
 	loadedLibrariesTable.meta.push(storedLibrariesTable.meta[0]);

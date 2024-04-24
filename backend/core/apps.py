@@ -377,9 +377,9 @@ class CoreConfig(AppConfig):
         # ./library/libraries/soc2-2017.yaml
 
         # Remove the 3 following lines after
-        from core.models import LoadedLibrary
+        """from core.models import LoadedLibrary
         for lib in LoadedLibrary.objects.all() :
-            lib.delete()
+            lib.delete()"""
 
         start = time.perf_counter()
         StoredLibrary.__init_class__()

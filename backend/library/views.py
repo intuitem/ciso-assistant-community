@@ -28,7 +28,7 @@ from .helpers import preview_library
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .serializers import StoredLibrarySerializer, LoadedLibrarySerializer, LibraryUploadSerializer
+from .serializers import StoredLibraryDetailedSerializer, LoadedLibrarySerializer, LibraryUploadSerializer
 from .utils import LibraryImporter, get_available_libraries, get_library, import_library_view
 
 class StoredLibraryViewSet(viewsets.ModelViewSet):
@@ -40,17 +40,21 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
     model = StoredLibrary
 
     def list(self, request, *args, **kwargs):
+        print("WOOWOWOWOWOWOWOWOWOW\n"*20)
         if not "view_storedlibrary" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        available_libraries = StoredLibrary.objects.filter(is_obsolete=False).values("name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta") # The frontend doesn't receive the obsolete libraries for now.
+        available_libraries = StoredLibrary.objects.filter(is_obsolete=False).values("id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta") # The frontend doesn't receive the obsolete libraries for now.
 
         return Response({"results": available_libraries})
 
     def retrieve(self, request, *args, pk, **kwargs):
         if not "view_storedlibrary" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        return StoredLibrary.objects.get(pk=urn) # Handle the exception if the pk urn doesn't exist
-        # raise NotImplementedError() # This method must be implemented.
+        lib = StoredLibrary.objects.get(urn=pk,is_obsolete=False) # Handle the exception if the pk urn doesn't exist
+        print(f"-------- {pk}"*20)
+        print(f"FETCHED {lib}")
+        # return Response(StoredLibraryDetailedSerializer(lib).data)
+        return Response(StoredLibraryDetailedSerializer(lib).data)
 
     @action(detail=True, methods=["get"], url_path="import")
     def import_library(self, request, pk=None):
@@ -120,7 +124,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         if not "view_storedlibrary" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        available_libraries = LoadedLibrary.objects.all().values("name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta")
+        available_libraries = LoadedLibrary.objects.all().values("id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta")
 
         return Response({"results": available_libraries})
         # return Response({"results": get_available_libraries()})
