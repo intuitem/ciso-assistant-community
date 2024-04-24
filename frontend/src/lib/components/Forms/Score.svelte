@@ -11,12 +11,15 @@
 
 	export let min_score: number = 0;
 	export let max_score: number = 100;
+	export let score_step: number = 1;
+
 	export let score_definition: string = '';
 
 	export let form: SuperForm<AnyZodObject>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$: scoringEnabled = $value === null ? false : true;
+	$: if (max_score === 100) score_step = 5;
 
 	function formatValue(value: number) {
 		if (value === null) {
@@ -55,7 +58,7 @@
 						bind:value={$value}
 						min={min_score}
 						max={max_score}
-						step={1}
+						step={score_step}
 						ticked
 					>
 						<div class="flex justify-between items-center">
@@ -91,7 +94,7 @@
 						value={min_score}
 						min={min_score}
 						max={max_score}
-						step={1}
+						step={score_step}
 						ticked
 					>
 						<div class="flex justify-between items-center">
