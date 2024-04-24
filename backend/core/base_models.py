@@ -90,9 +90,9 @@ class AbstractBaseModel(models.Model):
         if not self.is_unique_in_scope(scope=scope, fields_to_check=_fields_to_check):
             for field in _fields_to_check:
                 if not self.is_unique_in_scope(scope=scope, fields_to_check=[field]):
-                    field_errors[
-                        field
-                    ] = f"{getattr(self, field)} is already used in this scope. Please choose another value."
+                    field_errors[field] = (
+                        f"{getattr(self, field)} is already used in this scope. Please choose another value."
+                    )
         super().clean()
         if field_errors:
             raise ValidationError(field_errors)
