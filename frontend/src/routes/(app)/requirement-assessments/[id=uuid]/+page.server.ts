@@ -7,9 +7,10 @@ import { tableSourceMapper, type TableSource } from '@skeletonlabs/skeleton';
 import type { Actions } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import * as m from '$paraglide/messages';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'requirement-assessments';
@@ -39,7 +40,7 @@ export const load = (async ({ fetch, params }) => {
 	}
 
 	const schema = modelSchema(URLModel);
-	const form = await superValidate(object, schema, { errors: true });
+	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const foreignKeys: Record<string, any> = {};
 
@@ -84,7 +85,7 @@ export const load = (async ({ fetch, params }) => {
 		folder: requirementAssessment.folder.id
 	};
 
-	const measureCreateForm = await superValidate(initialData, measureCreateSchema, {
+	const measureCreateForm = await superValidate(initialData, zod(measureCreateSchema), {
 		errors: false
 	});
 
@@ -158,7 +159,7 @@ export const load = (async ({ fetch, params }) => {
 		requirement_assessments: [params.id],
 		folder: requirementAssessment.folder.id
 	};
-	const evidenceCreateForm = await superValidate(evidenceInitialData, evidenceCreateSchema, {
+	const evidenceCreateForm = await superValidate(evidenceInitialData, zod(evidenceCreateSchema), {
 		errors: false
 	});
 
@@ -226,7 +227,7 @@ export const actions: Actions = {
 		const URLModel = 'requirement-assessments';
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/${event.params.id}/`;
-		const form = await superValidate(event.request, schema);
+		const form = await superValidate(event.request, zod(schema));
 
 		if (!form.valid) {
 			console.log(form.errors);
@@ -261,7 +262,7 @@ export const actions: Actions = {
 		const URLModel = 'applied-controls';
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
-		const form = await superValidate(event.request, schema);
+		const form = await superValidate(event.request, zod(schema));
 
 		if (!form.valid) {
 			console.log(form.errors);
@@ -323,7 +324,7 @@ export const actions: Actions = {
 		const schema = modelSchema(URLModel);
 		const endpoint = `${BASE_API_URL}/${URLModel}/`;
 		const formData = await event.request.formData();
-		const form = await superValidate(formData, schema);
+		const form = await superValidate(formData, zod(schema));
 
 		if (!form.valid) {
 			console.error(form.errors);

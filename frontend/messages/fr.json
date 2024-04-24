@@ -2,6 +2,7 @@
 	"$schema": "https://inlang.com/schema/inlang-message-format",
 	"french": "Français",
 	"english": "Anglais",
+	"arabic": "Arabe",
 	"addThreat": "Ajouter une menace",
 	"addReferenceControl": "Ajouter une mesure de référence",
 	"addAppliedControl": "Ajouter une mesure appliquée",

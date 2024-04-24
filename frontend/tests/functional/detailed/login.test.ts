@@ -10,7 +10,12 @@ baseTest.skip('login page as expected title', async ({ page }) => {
 	await expect.soft(page.getByRole('heading', { name: 'Hello there 👋' })).toBeVisible();
 });
 
-test('login / logout process is working properly', async ({ loginPage, analyticsPage, sideBar, page }) => {
+test('login / logout process is working properly', async ({
+	loginPage,
+	analyticsPage,
+	sideBar,
+	page
+}) => {
 	await loginPage.hasUrl(1);
 	await expect.soft(page.getByTestId('login')).toBeVisible();
 	await loginPage.checkForUndefinedText();
@@ -33,9 +38,15 @@ test('login invalid message is showing properly', async ({ loginPage, page }) =>
 	await loginPage.hasUrl();
 });
 
-test('forgot password process is working properly', async ({ logedPage, usersPage, sideBar, mailer, page }) => {
+test('forgot password process is working properly', async ({
+	logedPage,
+	usersPage,
+	sideBar,
+	mailer,
+	page
+}) => {
 	const email = getUniqueValue(testData.user.email);
-	
+
 	await usersPage.goto();
 	await usersPage.createItem({
 		email: email
@@ -52,7 +63,7 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	await usersPage.isToastVisible('Your password has been successfully set');
 
 	await sideBar.logout();
-	
+
 	await logedPage.login(email, testData.user.password);
 	await expect(page).toHaveURL(/.*\/analytics/);
 
@@ -62,23 +73,29 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	await expect(page).toHaveURL('/password-reset');
 	await logedPage.emailInput.fill(email);
 	await logedPage.sendEmailButton.click();
-	await logedPage.isToastVisible('The request has been received, you should receive a reset link at the following address: ' + email);
-	
+	await logedPage.isToastVisible(
+		'The request has been received, you should receive a reset link at the following address: ' +
+			email
+	);
+
 	const lastMail = await mailer.getLastEmail();
 	await lastMail.hasResetPasswordEmailDetails();
 	await lastMail.hasEmailRecipient(email);
-	
+
 	await lastMail.open();
 	const pagePromise = page.context().waitForEvent('page');
 	await expect(mailer.emailContent.resetPasswordButton).toBeVisible();
 	await mailer.emailContent.resetPasswordButton.click();
 	const resetPasswordPage = await pagePromise;
 	await resetPasswordPage.waitForLoadState();
-	await expect(resetPasswordPage).toHaveURL(await mailer.emailContent.resetPasswordButton.getAttribute('href') || 'Reset password link could not be found');
+	await expect(resetPasswordPage).toHaveURL(
+		(await mailer.emailContent.resetPasswordButton.getAttribute('href')) ||
+			'Reset password link could not be found'
+	);
 
 	const resetLoginPage = new LoginPage(resetPasswordPage);
-	await resetLoginPage.newPasswordInput.fill("new" + testData.user.password);
-	await resetLoginPage.confirmPasswordInput.fill("new" + testData.user.password);
+	await resetLoginPage.newPasswordInput.fill('new' + testData.user.password);
+	await resetLoginPage.confirmPasswordInput.fill('new' + testData.user.password);
 	await resetLoginPage.setPasswordButton.click();
 
 	await resetLoginPage.isToastVisible('Your password has been successfully reset');
@@ -96,6 +113,6 @@ test('forgot password process is working properly', async ({ logedPage, usersPag
 	await logedPage.passwordInput.clear();
 
 	// login with the new password
-	await logedPage.login(email, "new" + testData.user.password);
+	await logedPage.login(email, 'new' + testData.user.password);
 	await expect(page).toHaveURL('/analytics');
 });

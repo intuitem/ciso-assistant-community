@@ -14,7 +14,7 @@
 		ToastStore
 	} from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore, popup } from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import * as m from '$paraglide/messages';
@@ -212,7 +212,9 @@
 					<ul>
 						<li class="pb-1">
 							<span class="font-semibold">{m.status()}:</span>
-							{risk_assessment.status === null ? "--" : localItems(languageTag())[toCamelCase(risk_assessment.status)]}
+							{risk_assessment.status === null
+								? '--'
+								: localItems(languageTag())[toCamelCase(risk_assessment.status)]}
 						</li>
 						<li class="pb-1">
 							<span class="font-semibold">{m.authors()}:</span>

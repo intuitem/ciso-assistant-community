@@ -27,13 +27,14 @@
 		type ToastStore,
 		TabGroup
 	} from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -42,9 +43,9 @@
 		if (nextValue) window.location.href = nextValue;
 	}
 
-	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name) ?
-		getRequirementTitle(data.requirement.ref_id, data.requirement.name) :
-		getRequirementTitle(data.parent.ref_id, data.parent.name);
+	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+		: getRequirementTitle(data.parent.ref_id, data.parent.name);
 	breadcrumbObject.set({
 		id: data.requirementAssessment.id,
 		name: title ?? 'Requirement assessment',
@@ -208,7 +209,7 @@
 			data={data.form}
 			dataType="json"
 			let:form
-			validators={schema}
+			validators={zod(schema)}
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
 		>
@@ -282,7 +283,8 @@
 						type="button"
 						on:click={cancel}>{m.cancel()}</button
 					>
-					<button class="btn variant-filled-primary font-semibold w-full" type="submit">{m.save()}</button
+					<button class="btn variant-filled-primary font-semibold w-full" type="submit"
+						>{m.save()}</button
 					>
 				</div>
 			</div>

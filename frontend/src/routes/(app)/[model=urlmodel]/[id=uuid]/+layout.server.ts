@@ -6,9 +6,10 @@ import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { SuperValidated } from 'sveltekit-superforms';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
 import { z, type AnyZodObject } from 'zod';
 import type { LayoutServerLoad } from './$types';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${params.model}/${params.id}/`;
@@ -61,11 +62,11 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 				const info = getModelInfo(e.urlModel);
 				const urlModel = e.urlModel;
 
-				const deleteForm = await superValidate(z.object({ id: z.string().uuid() }));
+				const deleteForm = await superValidate(zod(z.object({ id: z.string().uuid() })));
 				const createSchema = modelSchema(e.urlModel);
 				initialData[e.field] = data.id;
 				if (data.folder) initialData['folder'] = data.folder.id ?? data.folder;
-				const createForm = await superValidate(initialData, createSchema, { errors: false });
+				const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
 				const foreignKeys: Record<string, any> = {};
 

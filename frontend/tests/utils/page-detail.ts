@@ -71,10 +71,9 @@ export class PageDetail extends BasePage {
 					if (key === 'lc_status') {
 						//TODO replace this with a better solution
 						await expect
-						.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
-						.toHaveText(new RegExp(key.replaceAll('_', ' ').replace('lc ', ''), 'i'));
-					}
-					else {
+							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
+							.toHaveText(new RegExp(key.replaceAll('_', ' ').replace('lc ', ''), 'i'));
+					} else {
 						await expect
 							.soft(this.page.getByTestId(key.replaceAll('_', '-') + '-field-title'))
 							.toHaveText(new RegExp(key.replaceAll('_', ' '), 'i'));
@@ -94,7 +93,9 @@ export class PageDetail extends BasePage {
 
 						expect
 							.soft(displayedValue)
-							.toMatch(/(\d{1,2}\/\d{1,2}\/\d{4})|(\d{1,2}\/\d{1,2}\/\d{2})|(\d{4}-\d{2}-\d{2}),\s\d{1,2}(:\d{1,2}){2} (AM|PM)/);
+							.toMatch(
+								/(\d{1,2}\/\d{1,2}\/\d{4})|(\d{1,2}\/\d{1,2}\/\d{2})|(\d{4}-\d{2}-\d{2}),\s\d{1,2}(:\d{1,2}){2} (AM|PM)/
+							);
 						expect.soft(displayedDate.getFullYear()).toBe(date.getFullYear());
 						expect.soft(displayedDate.getMonth()).toBe(date.getMonth());
 						expect.soft(displayedDate.getDate()).toBe(date.getDate());
@@ -127,7 +128,7 @@ export class PageDetail extends BasePage {
 												? values[key].value
 												: values[key][0]
 											: values[key]
-										),
+									),
 									{ ignoreCase: true }
 								);
 						}

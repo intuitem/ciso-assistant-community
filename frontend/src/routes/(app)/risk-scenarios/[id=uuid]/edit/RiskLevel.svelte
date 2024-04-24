@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
-	import { formFieldProxy } from 'sveltekit-superforms/client';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';

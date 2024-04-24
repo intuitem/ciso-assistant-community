@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import * as m from '$paraglide/messages'
+	import * as m from '$paraglide/messages';
 
 	const authorizedExtensions = ['.json'];
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
