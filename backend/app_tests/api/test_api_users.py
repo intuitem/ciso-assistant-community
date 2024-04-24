@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from iam.models import User
 
-from test_vars import GROUPS_PERMISSIONS, USERS_ENDPOINT as API_ENDPOINT
+from test_vars import USERS_ENDPOINT as API_ENDPOINT
 from test_utils import EndpointTestsQueries
 
 # Generic user data for tests

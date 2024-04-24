@@ -48,54 +48,62 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const risk_assessments = await req_risk_assessments.json();
 
 	const projects = await fetch(`${BASE_API_URL}/projects/`)
-    .then((res) => res.json())
-    .then(async (projects) => {
-        if (projects && Array.isArray(projects.results)) {
-            const projectPromises = projects.results.map(async (project) => {
-                try {
-                    const complianceAssessmentsResponse = await fetch(`${BASE_API_URL}/compliance-assessments/?project=${project.id}`);
-                    const complianceAssessmentsData = await complianceAssessmentsResponse.json();
+		.then((res) => res.json())
+		.then(async (projects) => {
+			if (projects && Array.isArray(projects.results)) {
+				const projectPromises = projects.results.map(async (project) => {
+					try {
+						const complianceAssessmentsResponse = await fetch(
+							`${BASE_API_URL}/compliance-assessments/?project=${project.id}`
+						);
+						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
 
-                    if (complianceAssessmentsData && Array.isArray(complianceAssessmentsData.results)) {
-                        const updatedAssessmentsPromises = complianceAssessmentsData.results.map(async (complianceAssessment) => {
-                            try {
-                                const [donutDataResponse, globalScoreResponse] = await Promise.all([
-                                    fetch(`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/donut_data/`),
-                                    fetch(`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/global_score/`)
-                                ]);
+						if (complianceAssessmentsData && Array.isArray(complianceAssessmentsData.results)) {
+							const updatedAssessmentsPromises = complianceAssessmentsData.results.map(
+								async (complianceAssessment) => {
+									try {
+										const [donutDataResponse, globalScoreResponse] = await Promise.all([
+											fetch(
+												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/donut_data/`
+											),
+											fetch(
+												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/global_score/`
+											)
+										]);
 
-                                const [donutData, globalScoreData] = await Promise.all([
-                                    donutDataResponse.json(),
-                                    globalScoreResponse.json()
-                                ]);
+										const [donutData, globalScoreData] = await Promise.all([
+											donutDataResponse.json(),
+											globalScoreResponse.json()
+										]);
 
-                                complianceAssessment.donut = donutData;
-                                complianceAssessment.globalScore = globalScoreData;
-                                return complianceAssessment;
-                            } catch (error) {
-                                console.error('Error fetching data for compliance assessment:', error);
-                                throw error;
-                            }
-                        });
+										complianceAssessment.donut = donutData;
+										complianceAssessment.globalScore = globalScoreData;
+										return complianceAssessment;
+									} catch (error) {
+										console.error('Error fetching data for compliance assessment:', error);
+										throw error;
+									}
+								}
+							);
 
-                        const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
-                        project.compliance_assessments = updatedAssessments;
-                        return project;
-                    } else {
-                        throw new Error('Compliance assessments results not found or not an array');
-                    }
-                } catch (error) {
-                    console.error('Error fetching compliance assessments:', error);
-                    throw error;
-                }
-            });
+							const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
+							project.compliance_assessments = updatedAssessments;
+							return project;
+						} else {
+							throw new Error('Compliance assessments results not found or not an array');
+						}
+					} catch (error) {
+						console.error('Error fetching compliance assessments:', error);
+						throw error;
+					}
+				});
 
-            return Promise.all(projectPromises);
-        } else {
-            throw new Error('Projects results not found or not an array');
-        }
-    })
-    .catch((error) => console.error('Error:', error));
+				return Promise.all(projectPromises);
+			} else {
+				throw new Error('Projects results not found or not an array');
+			}
+		})
+		.catch((error) => console.error('Error:', error));
 
 	if (projects) {
 		projects.forEach((project) => {

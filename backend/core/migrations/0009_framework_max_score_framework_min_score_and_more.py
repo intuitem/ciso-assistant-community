@@ -4,25 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0008_alter_complianceassessment_status_and_more'),
+        ("core", "0008_alter_complianceassessment_status_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='framework',
-            name='max_score',
-            field=models.IntegerField(default=100, verbose_name='Maximum score'),
+            model_name="framework",
+            name="max_score",
+            field=models.IntegerField(default=100, verbose_name="Maximum score"),
         ),
         migrations.AddField(
-            model_name='framework',
-            name='min_score',
-            field=models.IntegerField(default=0, verbose_name='Minimum score'),
+            model_name="framework",
+            name="min_score",
+            field=models.IntegerField(default=0, verbose_name="Minimum score"),
         ),
         migrations.AddField(
-            model_name='requirementassessment',
-            name='score',
-            field=models.IntegerField(blank=True, null=True, verbose_name='Score'),
+            model_name="requirementassessment",
+            name="score",
+            field=models.IntegerField(blank=True, null=True, verbose_name="Score"),
         ),
     ]

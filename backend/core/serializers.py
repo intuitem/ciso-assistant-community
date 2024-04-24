@@ -11,7 +11,6 @@ from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
 import structlog
-from rest_framework.status import HTTP_403_FORBIDDEN
 
 logger = structlog.get_logger(__name__)
 
@@ -297,7 +296,7 @@ class UserWriteSerializer(BaseModelSerializer):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
-            perm=Permission.objects.get(codename=f"add_user"),
+            perm=Permission.objects.get(codename="add_user"),
             folder=Folder.get_root_folder(),
         ):
             raise PermissionDenied(
@@ -499,18 +498,16 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
-    
     def validate(self, attrs):
-        min_score = attrs['compliance_assessment'].framework.min_score
-        max_score = attrs['compliance_assessment'].framework.max_score
-        if attrs['score'] is not None:
-            if attrs['score'] < min_score or attrs['score'] > max_score:
+        min_score = attrs["compliance_assessment"].framework.min_score
+        max_score = attrs["compliance_assessment"].framework.max_score
+        if attrs["score"] is not None:
+            if attrs["score"] < min_score or attrs["score"] > max_score:
                 raise serializers.ValidationError(
-                    {
-                        "score": f"Score must be between {min_score} and {max_score}"
-                    }
+                    {"score": f"Score must be between {min_score} and {max_score}"}
                 )
         return super().validate(attrs)
+
     class Meta:
         model = RequirementAssessment
         fields = "__all__"

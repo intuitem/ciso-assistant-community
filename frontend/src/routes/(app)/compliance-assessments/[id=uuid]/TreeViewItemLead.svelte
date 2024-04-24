@@ -17,14 +17,20 @@
 </script>
 
 {#if assessable}
-<div class="flex flex-row space-x-2 items-center">
-	<span class="badge {classesText} h-fit" style="background-color: {statusColor};">
-		{lead}
-	</span>
-	{#if score !== null && statusI18n !== 'notApplicable'}
-		<span>
-			<ProgressRadial stroke={100} meter={displayScoreColor(score, max_score)} font={150} value={score * 100 / max_score} width={'w-10'}>{score}</ProgressRadial>
+	<div class="flex flex-row space-x-2 items-center">
+		<span class="badge {classesText} h-fit" style="background-color: {statusColor};">
+			{lead}
 		</span>
-	{/if}
-</div>
+		{#if score !== null && statusI18n !== 'notApplicable'}
+			<span>
+				<ProgressRadial
+					stroke={100}
+					meter={displayScoreColor(score, max_score)}
+					font={150}
+					value={(score * 100) / max_score}
+					width={'w-10'}>{score}</ProgressRadial
+				>
+			</span>
+		{/if}
+	</div>
 {/if}

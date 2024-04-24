@@ -1,9 +1,8 @@
 import pytest
 from core.models import User
 
-from iam.models import Folder, UserGroup, RoleAssignment
+from iam.models import RoleAssignment
 from test_vars import GROUPS_PERMISSIONS, TEST_USER_EMAIL
-from test_utils import EndpointTestsQueries
 
 
 @pytest.mark.django_db

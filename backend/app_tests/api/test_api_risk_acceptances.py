@@ -10,7 +10,6 @@ from core.models import (
 )
 from iam.models import Folder, UserGroup
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic risk acceptance data for tests
