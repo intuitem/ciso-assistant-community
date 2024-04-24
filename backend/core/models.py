@@ -1293,7 +1293,7 @@ class ComplianceAssessment(Assessment):
         verbose_name_plural = _("Compliance assessments")
         
     def get_global_score(self):
-        requirement_assessments_scored = RequirementAssessment.objects.filter(compliance_assessment=self).exclude(score=None)
+        requirement_assessments_scored = RequirementAssessment.objects.filter(compliance_assessment=self).exclude(score=None).exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
         score = requirement_assessments_scored.aggregate(models.Avg('score'))
         if score['score__avg']:
             return round(score['score__avg'], 1)
