@@ -378,7 +378,7 @@ class CoreConfig(AppConfig):
 
         # Remove the 3 following lines after
         """from core.models import LoadedLibrary
-        for lib in LoadedLibrary.objects.all() :
+        for lib in StoredLibrary.objects.all() :
             lib.delete()"""
 
         start = time.perf_counter()
