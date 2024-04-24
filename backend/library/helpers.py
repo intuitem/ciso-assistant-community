@@ -2,16 +2,16 @@ from core.models import RequirementNode
 from iam.models import Folder
 
 
-def preview_library(library) -> dict[str, list]:
+def preview_library(library_objects) -> dict[str, list]:
     """
     Function to create temporary requirement nodes list
     Used to display requirements in tree view inside library detail view
     """
     preview = {}
     requirement_nodes_list = []
-    if library["objects"]["framework"].get("requirement_nodes"):
+    if library_objects["framework"].get("requirement_nodes"):
         index = 0
-        for requirement_node in library["objects"]["framework"]["requirement_nodes"]:
+        for requirement_node in library_objects["framework"]["requirement_nodes"]:
             index += 1
             requirement_nodes_list.append(
                 RequirementNode(

@@ -1,7 +1,7 @@
 urn: urn:intuitem:risk:library:critical_risk_matrix_3x3
 locale: en
 ref_id: critical_3x3
-name: Critical risk matrix 3x3
+nam: Critical risk matrix 3x3
 description: Critical risk matrix 3x3
 version: 1
 provider: intuitem

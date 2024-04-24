@@ -38,8 +38,8 @@ export class PageContent extends BasePage {
 
 	async createItem(values: { [k: string]: any }, dependency?: any) {
 		if (dependency) {
-			await this.page.goto('/libraries');
-			await this.page.waitForURL('/libraries');
+			await this.page.goto('/loaded-libraries');
+			await this.page.waitForURL('/loaded-libraries');
 
 			await this.importLibrary(dependency.ref || dependency.name, dependency.urn);
 			await this.goto();

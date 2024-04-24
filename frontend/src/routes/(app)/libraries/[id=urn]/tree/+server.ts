@@ -3,10 +3,11 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ fetch, url }) => {
-	const endpoint = `${BASE_API_URL}${url.pathname}/${
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
+	/* const endpoint = `${BASE_API_URL}${url.pathname}/${
 		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	}`; */
+	const endpoint = `${BASE_API_URL}/stored-libraries/${params.id}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
