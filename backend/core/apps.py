@@ -231,7 +231,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_framework",
     "delete_framework",
     "view_requirementnode",
-    "view_requirementlevel",  # Permits to see the object on api by an admin
     "view_library",
     "add_library",
     "delete_library",
