@@ -1077,16 +1077,6 @@ class RequirementNodeViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
 
 
-class RequirementLevelViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows requirement levels to be viewed or edited.
-    """
-
-    model = RequirementLevel
-    filterset_fields = ["framework"]
-    search_fields = ["name"]
-
-
 class RequirementViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirements to be viewed or edited.
