@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0009_framework_max_score_framework_min_score_and_more'),
+        ("core", "0009_framework_max_score_framework_min_score_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='framework',
-            name='score_definition',
-            field=models.JSONField(blank=True, null=True, verbose_name='Score definition'),
+            model_name="framework",
+            name="score_definition",
+            field=models.JSONField(
+                blank=True, null=True, verbose_name="Score definition"
+            ),
         ),
     ]

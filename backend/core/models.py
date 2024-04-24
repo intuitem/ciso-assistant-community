@@ -3,7 +3,6 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.utils.html import mark_safe
 from django.db.models import Q
 
 from .base_models import *
@@ -328,13 +327,11 @@ class RiskMatrix(ReferentialObjectMixin):
 
 
 class Framework(ReferentialObjectMixin):
-    min_score = models.IntegerField(
-        default=0, verbose_name=_("Minimum score")
+    min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
+    max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
+    score_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Score definition")
     )
-    max_score = models.IntegerField(
-        default=100, verbose_name=_("Maximum score")
-    )
-    score_definition = models.JSONField(blank=True, null=True, verbose_name=_("Score definition"))
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -1291,12 +1288,16 @@ class ComplianceAssessment(Assessment):
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
-        
+
     def get_global_score(self):
-        requirement_assessments_scored = RequirementAssessment.objects.filter(compliance_assessment=self).exclude(score=None).exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
-        score = requirement_assessments_scored.aggregate(models.Avg('score'))
-        if score['score__avg']:
-            return round(score['score__avg'], 1)
+        requirement_assessments_scored = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .exclude(score=None)
+            .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
+        )
+        score = requirement_assessments_scored.aggregate(models.Avg("score"))
+        if score["score__avg"]:
+            return round(score["score__avg"], 1)
         return -1
 
     def get_requirements_status_count(self):
@@ -1475,7 +1476,6 @@ class ComplianceAssessment(Assessment):
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin):
-
     class Status(models.TextChoices):
         TODO = "to_do", _("To do")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -1483,7 +1483,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         PARTIALLY_COMPLIANT = "partially_compliant", _("Partially compliant")
         COMPLIANT = "compliant", _("Compliant")
         NOT_APPLICABLE = "not_applicable", _("Not applicable")
-
 
     status = models.CharField(
         max_length=100,
@@ -1518,7 +1517,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         verbose_name=_("Applied controls"),
         related_name="requirement_assessments",
     )
-    
+
     def __str__(self) -> str:
         return self.requirement.display_short
 

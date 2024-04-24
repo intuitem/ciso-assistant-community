@@ -12,7 +12,6 @@ from rest_framework.status import (
     HTTP_401_UNAUTHORIZED,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
-from rest_framework.settings import api_settings
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView

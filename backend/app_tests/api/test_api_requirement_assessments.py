@@ -10,7 +10,6 @@ from core.models import (
 from core.models import Project, AppliedControl
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic requirement assessment data for tests

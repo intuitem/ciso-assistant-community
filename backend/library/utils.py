@@ -288,10 +288,17 @@ class FrameworkImporter:
     def import_framework(self, library_object: Library):
         min_score = self.framework_data.get("min_score", 0)
         max_score = self.framework_data.get("max_score", 100)
-        
-        if min_score > max_score or min_score < 0 or max_score < 0 or min_score == max_score:
-            raise ValueError("minimum score must be less than maximum score and equal or greater than 0.")
-        
+
+        if (
+            min_score > max_score
+            or min_score < 0
+            or max_score < 0
+            or min_score == max_score
+        ):
+            raise ValueError(
+                "minimum score must be less than maximum score and equal or greater than 0."
+            )
+
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
