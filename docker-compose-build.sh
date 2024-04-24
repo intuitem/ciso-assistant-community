@@ -19,7 +19,7 @@ else
     prepare_meta_file
 
     # Build and start the containers
-    docker compose -f docker-compose-build.yml build 
+    docker compose -f docker-compose-build.yml build
     docker compose -f docker-compose-build.yml up -d
 
     # Perform database migrations

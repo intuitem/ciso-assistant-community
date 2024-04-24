@@ -264,7 +264,7 @@
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
               {@const actionsComponent = field_component_map['actions']}
-              <TableRowActions 
+              <TableRowActions
                 deleteForm={!row.meta.builtin ? deleteForm : undefined}
                 model={URL_MODEL_MAP[URLModel]}
                 {URLModel}

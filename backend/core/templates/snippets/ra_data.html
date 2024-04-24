@@ -17,7 +17,7 @@
                             {% endfor %}
                           </ul>
                         </li>
-                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> {% if risk_assessment.is_draft %} 
+                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> {% if risk_assessment.is_draft %}
                         <span class="bg-blue-200 py-1 px-2 rounded-lg">{% trans "Draft" %}</span> {% else %} <span class="bg-green-200 py-1 px-2 rounded-lg">{% trans "Ready" %} </span>{% endif %}
                         </li>
                         <li class="pb-1"><span class="font-semibold">{% trans "Created at:" %}</span> {{ risk_assessment.created_at|date }}</li>

@@ -41,7 +41,7 @@ erDiagram
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
-    ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains  
+    ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ RISK_ACCEPTANCE             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ ASSET                       : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ THREAT                      : contains
@@ -112,7 +112,7 @@ erDiagram
         int     min_score
         int     max_score
         json    score_definition
-    } 
+    }
 
     COMPLIANCE_ASSESSMENT {
         string      name
@@ -333,8 +333,8 @@ FolderMixin          <|-- UserGroup
 FolderMixin          <|-- User
 AbstractBaseModel    <|-- User
 AbstractBaseUser     <|-- User
-NameDescriptionMixin <|-- Role 
-FolderMixin          <|-- Role 
+NameDescriptionMixin <|-- Role
+FolderMixin          <|-- Role
 NameDescriptionMixin <|-- RoleAssignment
 FolderMixin          <|-- RoleAssignment
 
@@ -436,8 +436,8 @@ ReferentialObjectMixin <|-- RequirementLevel
 ReferentialObjectMixin <|-- RequirementNode
 ReferentialObjectMixin <|-- Mapping
 NameDescriptionMixin   <|-- Assessment
-FolderMixin            <|-- Project 
-NameDescriptionMixin   <|-- Project 
+FolderMixin            <|-- Project
+NameDescriptionMixin   <|-- Project
 FolderMixin            <|-- Asset
 NameDescriptionMixin   <|-- Asset
 FolderMixin            <|-- Evidence
@@ -566,7 +566,7 @@ namespace DomainObjects {
         +DateField expiry_date
         +CharField link
         +CharField effort
-        
+
         +RiskScenario[] risk_scenarios()
         +RiskAssessments[] risk_assessments()
         +Project[] projects()
@@ -609,7 +609,7 @@ class RiskAssessment {
     +get_scenario_count() int
     +quality_check()
     +risk_scoring(probability, impact, risk_matrix) int
-}    
+}
 
 
 class ComplianceAssessment {
@@ -645,7 +645,7 @@ class RiskScenario {
     +CharField treatment
     +CharField strength_of_knowledge
     +CharField justification
-    
+
     +Project parent_project()
     +RiskMatrix get_matrix()
     +get_current_risk(s) int
@@ -721,7 +721,7 @@ Threats are referential objects used to clarify the aim of a requirement node or
 Reference controls are templates for Applied controls. They facilitate the creation of a applied  control, and help to have consistent Applied controls. They are not mandatory to create a applied  control, but recommended.
 
 Reference controls have a category within the following possibilities: --/Policy/Process/Technical/Physical.
- 
+
 ## Applied controls
 
 Applied controls are fundamental objects for compliance and remediation. They can derive from a reference control, which provides better consistency, or be independent.
@@ -761,11 +761,11 @@ The state of a review can be: created/submitted/validated/changes requested/depr
 
 When a compliance assessment is created, each requirement of the corresponding framework is linked to a requirement assessment object. To cover a requirement, the assessor shall link it to Applied controls.
 
-Here are the specific fields for requirement assessments: 
+Here are the specific fields for requirement assessments:
 - status: --/to do/in progress/done.
 - result: --/compliant/non-compliant minor/non-compliant major/not applicable
 - score: --/<integer value from min_score to max_score>.
-- ETA (Estimated Time of Arrival) date 
+- ETA (Estimated Time of Arrival) date
 - due date. This is for example useful to organize an audit plan.
 
 The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score).
@@ -811,7 +811,7 @@ The risk evaluation is automatically done based on the selected risk matrix.
 
 ## Risk matrices
 
-Risk matrices are referential objects that are imported from a library. 
+Risk matrices are referential objects that are imported from a library.
 
 The definition JSON field has the following format:
 
@@ -835,7 +835,7 @@ The definition JSON field has the following format:
             {"abbreviation": "H", "name": "High", "description": "unacceptable risk", "hexcolor": "#FF0000"}
         ],
         "grid": [
-            [1, 2, 2], 
+            [1, 2, 2],
             [0, 1, 2],
             [0, 0, 1]]
   }
@@ -895,7 +895,7 @@ Referential objects can be downloaded from a library. They are called "global re
 
 Conversely, a referential object with a null URN is called a "local referential object" has the following characteristics:
 - it is created by a user in a given domain (not in the root folder)
-- it can be edited with proper permission. 
+- it can be edited with proper permission.
 - The URN cannot be edited and is hidden.
 - default_locale=True (non-localized object)
 
@@ -908,7 +908,7 @@ Framework and risk matrix objects can only come from a library.
 
 The URN allows in particular having a threat or reference control used in several frameworks.
 
-It is possible to mix global and local referential objects. For example, a client can use threats coming from the MITRE referential and also define custom threats directly in CISO Assistant. 
+It is possible to mix global and local referential objects. For example, a client can use threats coming from the MITRE referential and also define custom threats directly in CISO Assistant.
 
 Note: links to URN occur only in libraries, links in the database shall always use the UUID of the object.
 
@@ -995,4 +995,3 @@ Built-in objects are predefined in CISO Assistant. They can be viewed following 
 Types that can be built-in are: folders, roles, role assignments and groups.
 
 Names of built-in objects can be internationalized.
-
