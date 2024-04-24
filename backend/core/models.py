@@ -102,7 +102,7 @@ class LibraryMixin(ReferentialObjectMixin):
     )
     builtin = models.BooleanField(default=False)
     objects_meta = models.JSONField()
-    dependencies = models.CharField(blank=False,null=True,max_length=16384)
+    dependencies = models.JSONField(null=True) # models.CharField(blank=False,null=True,max_length=16384)
 
     def get_dependencies(self) -> List[str] : # We should add some kind of descriptor to LibaryMixin so that model_instance.dependencies directly returns a list instead of a string, using a function to get the desired value of a field is bad
         return [] if self.dependencies is None else self.dependencies.split(" ")
@@ -169,9 +169,7 @@ class StoredLibrary(LibraryMixin):
             for key, value in library_data["objects"].items()
         }
 
-        dependencies = library_data.get("dependencies")
-        if dependencies is not None :
-            dependencies = " ".join(dependencies) # Which means we have to make the URN format more restrictive so that an URN is considered invalid if it contains any kind of whitespace.
+        dependencies = library_data.get("dependencies") # I don't want whitespaces in URN anymore nontheless
 
         library_objects = json.dumps(library_data["objects"])
         StoredLibrary.objects.create(
