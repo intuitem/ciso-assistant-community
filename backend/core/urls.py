@@ -1,5 +1,4 @@
 from .views import *
-from django.contrib.auth import views as auth_views
 from library.views import LibraryViewSet
 
 
@@ -58,25 +57,6 @@ urlpatterns = [
     path("agg_data/", get_agg_data, name="get_agg_data"),
     path("composer_data/", get_composer_data, name="get_composer_data"),
     path("i18n/", include("django.conf.urls.i18n")),
-    path(
-        "password_reset/done/",
-        auth_views.PasswordResetDoneView.as_view(
-            template_name="registration/password_reset_done.html"
-        ),
-        name="password_reset_done",
-    ),
-    path(
-        "reset/done/",
-        auth_views.PasswordResetCompleteView.as_view(
-            template_name="registration/password_reset_complete.html"
-        ),
-        name="password_reset_complete",
-    ),
-    path(
-        "first_connexion/<uidb64>/<token>/",
-        FirstConnexionPasswordConfirmView.as_view(),
-        name="first_connexion_confirm",
-    ),
 ]
 
 if DEBUG:

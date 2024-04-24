@@ -1,5 +1,5 @@
-""" IAM model for CISO Assistant
-    Inspired from Azure IAM model """
+"""IAM model for CISO Assistant
+Inspired from Azure IAM model"""
 
 from collections import defaultdict
 from typing import Any, List, Self, Tuple

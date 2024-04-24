@@ -80,9 +80,9 @@ class SearchableSelect(Select):
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         if self.recommended_reference_controls:
-            context[
-                "recommended_reference_controls"
-            ] = self.recommended_reference_controls
+            context["recommended_reference_controls"] = (
+                self.recommended_reference_controls
+            )
         return context
 
 
@@ -127,31 +127,31 @@ class StyledModelForm(ModelForm):
                 f.widget.attrs["id"] = (
                     f"id_{model_name}_{fname}" if model_name else f"id_{fname}"
                 )
-                f.widget.attrs[
-                    "class"
-                ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                f.widget.attrs["class"] = (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                )
             if input_type in select_inputs:
                 f.widget.attrs["id"] = f"id_{model_name}_{fname}"
-                f.widget.attrs[
-                    "autocomplete"
-                ] = "off"  # workaround for Firefox behavior: https://stackoverflow.com/questions/4831848/firefox-ignores-option-selected-selected
-                f.widget.attrs[
-                    "class"
-                ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50"
+                f.widget.attrs["autocomplete"] = (
+                    "off"  # workaround for Firefox behavior: https://stackoverflow.com/questions/4831848/firefox-ignores-option-selected-selected
+                )
+                f.widget.attrs["class"] = (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 disabled:opacity-50"
+                )
             if input_type == Textarea:
-                f.widget.attrs[
-                    "class"
-                ] = "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                f.widget.attrs["class"] = (
+                    "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                )
             if input_type == CheckboxInput:
                 f.widget.attrs["id"] = f"id_{model_name}_{fname}"
-                f.widget.attrs[
-                    "class"
-                ] = "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                f.widget.attrs["class"] = (
+                    "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                )
             if input_type == DefaultDateInput:
                 f.widget.attrs["id"] = f"id_{model_name}_{fname}"
-                f.widget.attrs[
-                    "class"
-                ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                f.widget.attrs["class"] = (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                )
             if input_type == Select:
                 self.default_if_one(fname)
 
@@ -181,9 +181,9 @@ class FirstConnexionConfirmForm(SetPasswordForm):
         super(__class__, self).__init__(*args, **kwargs)
         for password in self.fields.items():
             password[1].widget.attrs["class"] = style
-        self.fields["terms_service"].widget.attrs[
-            "class"
-        ] = "ml-2 rounded border-gray-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 text-indigo-500"
+        self.fields["terms_service"].widget.attrs["class"] = (
+            "ml-2 rounded border-gray-300 shadow-sm focus:border-indigo-600 focus:ring focus:ring-indigo-500 focus:ring-opacity-50 text-indigo-500"
+        )
         self.fields["terms_service"].widget.attrs["id"] = "terms_service"
 
     terms_service = forms.BooleanField(label=_("terms and conditions of use"))

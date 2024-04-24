@@ -6,6 +6,7 @@
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 
 	import * as m from '$paraglide/messages.js';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 </script>
@@ -35,7 +36,7 @@
 						data={data?.form}
 						dataType="form"
 						let:form
-						validators={emailSchema}
+						validators={zod(emailSchema)}
 					>
 						<TextField type="email" {form} field="email" label={m.email()} />
 						<p class="pt-3">

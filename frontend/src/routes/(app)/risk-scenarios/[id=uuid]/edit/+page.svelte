@@ -22,12 +22,13 @@
 
 	import { browser } from '$app/environment';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/stores';
 
 	import * as m from '$paraglide/messages';
 	import { localItems, capitalizeFirstLetter, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 
@@ -129,7 +130,7 @@
 		data={data.form}
 		dataType="json"
 		let:form
-		validators={schema}
+		validators={zod(schema)}
 		action="?/updateRiskScenario={next}"
 		{...$$restProps}
 	>

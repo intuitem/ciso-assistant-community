@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formFieldProxy } from 'sveltekit-superforms/client';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	export let field: string;
 	export let form;

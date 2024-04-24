@@ -11,7 +11,7 @@
 	} from '@skeletonlabs/skeleton';
 	import { TabGroup, Tab, getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import { isURL } from '$lib/utils/helpers';
