@@ -6,7 +6,8 @@
 	import { ResetPasswordSchema } from '$lib/utils/schemas';
 	import Typewriter from 'svelte-typewriter';
 
-	import * as m from '$paraglide/messages.js'
+	import * as m from '$paraglide/messages.js';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 </script>
@@ -47,7 +48,7 @@
 					data={data?.form}
 					dataType="form"
 					let:form
-					validators={ResetPasswordSchema}
+					validators={zod(ResetPasswordSchema)}
 				>
 					<TextField type="password" {form} field="new_password" label="New password" />
 					<TextField
@@ -57,8 +58,10 @@
 						label="Confirm new password"
 					/>
 					<p class="pt-3">
-						<button class="btn variant-filled-primary font-semibold w-full" type="submit" data-testid="set-password-btn"
-							>{m.setPassword()}</button
+						<button
+							class="btn variant-filled-primary font-semibold w-full"
+							type="submit"
+							data-testid="set-password-btn">{m.setPassword()}</button
 						>
 					</p>
 				</SuperForm>

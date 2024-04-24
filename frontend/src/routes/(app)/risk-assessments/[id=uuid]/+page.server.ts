@@ -7,8 +7,9 @@ import { languageTag } from '$paraglide/runtime';
 
 import { modelSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
-import { message, setError, superValidate } from 'sveltekit-superforms/server';
+import { message, setError, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const actions: Actions = {
 	create: async ({ request, fetch }) => {
@@ -17,7 +18,7 @@ export const actions: Actions = {
 		const schema = modelSchema(formData.get('urlmodel') as string);
 		const urlModel = formData.get('urlmodel');
 
-		const createForm = await superValidate(formData, schema);
+		const createForm = await superValidate(formData, zod(schema));
 
 		const endpoint = `${BASE_API_URL}/${urlModel}/`;
 
@@ -42,14 +43,19 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(urlModel);
 			// TODO: reference newly created object
-			return message(createForm, m.successfullyCreatedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}));
+			return message(
+				createForm,
+				m.successfullyCreatedObject({
+					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
+				})
+			);
 		}
 		return { createForm };
 	},
 	delete: async ({ request, fetch, params }) => {
 		const formData = await request.formData();
 		const schema = z.object({ urlmodel: z.string(), id: z.string().uuid() });
-		const deleteForm = await superValidate(formData, schema);
+		const deleteForm = await superValidate(formData, zod(schema));
 
 		const id = deleteForm.data.id;
 		const endpoint = `${BASE_API_URL}/risk-scenarios/${id}/`;
@@ -73,7 +79,12 @@ export const actions: Actions = {
 			}
 			const model: string = urlParamModelVerboseName(params.model!);
 			// TODO: reference object by name instead of id
-			return message(deleteForm, m.successfullyDeletedObject({object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()}));
+			return message(
+				deleteForm,
+				m.successfullyDeletedObject({
+					object: localItems(languageTag())[toCamelCase(model.toLowerCase())].toLowerCase()
+				})
+			);
 		}
 		return { deleteForm };
 	}

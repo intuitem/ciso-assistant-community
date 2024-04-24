@@ -8,6 +8,10 @@ export const LOCALE_MAP = {
 	fr: {
 		name: 'french',
 		flag: '🇫🇷'
+	},
+	ar: {
+		name: 'arabic',
+		flag: '🇸🇦'
 	}
 };
 
@@ -29,6 +33,7 @@ export function localItems(languageTag: string): LocalItems {
 	const LOCAL_ITEMS = {
 		french: m.french({ languageTag: languageTag }),
 		english: m.english({ languageTag: languageTag }),
+		arabic: m.arabic({ languageTag: languageTag }),
 		home: m.home({ languageTag: languageTag }),
 		edit: m.edit({ languageTag: languageTag }),
 		overview: m.overview({ languageTag: languageTag }),
@@ -300,7 +305,7 @@ export function localItems(languageTag: string): LocalItems {
 		notApplicable: m.notApplicable({ languageTag: languageTag }),
 		administrator: m.administrator({ languageTag: languageTag }),
 		analyst: m.analyst({ languageTag: languageTag }),
-		auditor: m.auditor({ languageTag: languageTag }),
+		reader: m.reader({ languageTag: languageTag }),
 		domainManager: m.domainManager({ languageTag: languageTag }),
 		authors: m.authors({ languageTag: languageTag }),
 		reviewers: m.reviewers({ languageTag: languageTag }),
@@ -314,8 +319,12 @@ export function localItems(languageTag: string): LocalItems {
 		libraryImportError: m.libraryImportError({ languageTag: languageTag }),
 		libraryAlreadyExistsError: m.libraryAlreadyImportedError({ languageTag: languageTag }),
 		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag }),
-		attemptToDeleteOnlyAdminAccountError: m.attemptToDeleteOnlyAdminAccountError({ languageTag: languageTag }),
-		attemptToRemoveOnlyAdminUserGroup: m.attemptToRemoveOnlyAdminUserGroup({ languageTag: languageTag })
+		attemptToDeleteOnlyAdminAccountError: m.attemptToDeleteOnlyAdminAccountError({
+			languageTag: languageTag
+		}),
+		attemptToRemoveOnlyAdminUserGroup: m.attemptToRemoveOnlyAdminUserGroup({
+			languageTag: languageTag
+		})
 	};
 	return LOCAL_ITEMS;
 }

@@ -4,6 +4,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import { ChangePasswordSchema } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let data: PageData;
 </script>
@@ -23,7 +24,7 @@
 				data={data?.form}
 				dataType="form"
 				let:form
-				validators={ChangePasswordSchema}
+				validators={zod(ChangePasswordSchema)}
 			>
 				<TextField type="password" {form} field="old_password" label={m.oldPassword()} />
 				<TextField type="password" {form} field="new_password" label={m.newPassword()} />
@@ -38,14 +39,16 @@
 						class="btn bg-gray-400 text-white font-semibold w-full"
 						href="/my-profile"
 						data-testid="cancel-button"
-						type="button">
+						type="button"
+					>
 						{m.cancel()}
 					</a>
-					<button class="btn variant-filled-primary font-semibold w-full" 
-					type="submit"
-					data-testid="save-button"
+					<button
+						class="btn variant-filled-primary font-semibold w-full"
+						type="submit"
+						data-testid="save-button"
 					>
-					{m.changePassword()}
+						{m.changePassword()}
 					</button>
 				</div>
 			</SuperForm>

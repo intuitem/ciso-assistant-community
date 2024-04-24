@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formFieldProxy } from 'sveltekit-superforms/client';
+	import { formFieldProxy } from 'sveltekit-superforms';
 	import { localItems, toCamelCase } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 
@@ -30,7 +30,8 @@
 
 	const default_value = nullable ? null : selectedValues[0];
 
-	$: ($value = multiple ? selectedValues : selectedValues[0] ?? default_value), handleSelectChange();
+	$: ($value = multiple ? selectedValues : selectedValues[0] ?? default_value),
+		handleSelectChange();
 
 	$: disabled = selected.length && options.length === 1 && $constraints?.required;
 
@@ -87,12 +88,10 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
+				{:else if localItems(languageTag())[toCamelCase(option.label)]}
+					{localItems(languageTag())[toCamelCase(option.label)]}
 				{:else}
-					{#if localItems(languageTag())[toCamelCase(option.label)]}
-						{localItems(languageTag())[toCamelCase(option.label)]}
-					{:else}
-						{option.label}
-					{/if}
+					{option.label}
 				{/if}
 			</MultiSelect>
 		{:else}

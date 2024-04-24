@@ -1,7 +1,8 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { emailSchema } from '$lib/utils/schemas';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { RetryAfterRateLimiter } from 'sveltekit-rate-limiter/server';
 import { BASE_API_URL } from '$lib/utils/constants';
@@ -14,7 +15,7 @@ export const load: PageServerLoad = async (event) => {
 		redirect(302, '/');
 	}
 
-	const form = await superValidate(event.request, emailSchema);
+	const form = await superValidate(event.request, zod(emailSchema));
 
 	await limiter.cookieLimiter?.preflight(event);
 
@@ -25,13 +26,13 @@ const limiter = new RetryAfterRateLimiter({
 	// A rate is defined as [number, unit]
 	rates: {
 		IP: [10, 'h'], // IP address limiter
-		IPUA: [5, 'm'], // IP + User Agent limiter
+		IPUA: [5, 'm'] // IP + User Agent limiter
 	}
 });
 
 export const actions: Actions = {
 	default: async (event) => {
-		const form = await superValidate(event.request, emailSchema);
+		const form = await superValidate(event.request, zod(emailSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}
@@ -44,7 +45,7 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'error',
-					message: m.waitBeforeRequestingResetLink({timing: status.retryAfter.toString()})
+					message: m.waitBeforeRequestingResetLink({ timing: status.retryAfter.toString() })
 				},
 				event
 			);
@@ -75,7 +76,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.resetLinkSent({email: email})
+				message: m.resetLinkSent({ email: email })
 			},
 			event
 		);

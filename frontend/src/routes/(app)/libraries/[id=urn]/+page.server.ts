@@ -14,7 +14,13 @@ export const actions: Actions = {
 			return fail(400, { error: m.errorImportingLibrary() });
 		}
 		setFlash(
-			{ type: 'success', message: m.successfullyImportedObject({object: "library", id: event.params.id?.toString() ?? ''}) },
+			{
+				type: 'success',
+				message: m.successfullyImportedObject({
+					object: 'library',
+					id: event.params.id?.toString() ?? ''
+				})
+			},
 			event
 		);
 	}

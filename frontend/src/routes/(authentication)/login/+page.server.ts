@@ -1,10 +1,11 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	// redirect user if already logged in
@@ -12,14 +13,14 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		redirect(302, '/analytics');
 	}
 
-	const form = await superValidate(request, loginSchema);
+	const form = await superValidate(request, zod(loginSchema));
 
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async ({ request, url, fetch, cookies }) => {
-		const form = await superValidate(request, loginSchema);
+		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}
@@ -53,39 +54,15 @@ export const actions: Actions = {
 			return { form };
 		}
 
-		if (res.headers.has('Set-Cookie')) {
-			const splitted = Object.fromEntries(res.headers)
-				['set-cookie'].split(' ')
-				.filter((string) => string.indexOf('=') >= 0 && string.split('=')[0] === 'sessionid')
-				.map((string) => string.split('=')[1]);
+		const data = await res.json();
 
-			if (splitted.length < 1) {
-				throw fail(500, {
-					message:
-						"Failed to create a session, the API returned cookies the 'sessionid' cookie is missing !"
-				});
-			}
+		cookies.set('token', data.token, {
+			httpOnly: true,
+			sameSite: 'lax',
+			path: '/',
+			secure: true
+		});
 
-			const sessionid = splitted[0];
-			cookies.set('sessionid', sessionid, {
-				httpOnly: true,
-				sameSite: 'lax',
-				path: '/',
-				secure: true
-			});
-
-			const csrftoken = cookies.get('csrftoken');
-			if (csrftoken) {
-				cookies.set('csrftoken', csrftoken, {
-					// Setting httpOnly to true for the CSRF token offers no additional security.
-					// https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
-					httpOnly: false,
-					sameSite: 'lax',
-					path: '/',
-					secure: true
-				});
-			}
-		}
 		redirect(302, url.searchParams.get('next') || '/analytics');
 	}
 };
