@@ -1,63 +1,50 @@
 import csv
-from datetime import datetime
-import mimetypes
-import tempfile
-from uuid import UUID
-import zipfile
-from django.core.files.storage import default_storage
-
-from django.http import FileResponse, HttpResponse
-from rest_framework.parsers import FileUploadParser
-from rest_framework.request import Request
-from rest_framework.views import APIView
-from core.forms import FirstConnexionConfirmForm, ResetConfirmForm
-from core.models import AppliedControl
-
-from core.helpers import *
-from rest_framework.response import Response
-
-from .models import *
-from .serializers import *
-from .permissions import IsAdministrator
-
-from ciso_assistant.settings import (
-    BUILD,
-    VERSION,
-)
-
-from django.middleware import csrf
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import permissions, status, viewsets, filters
-from rest_framework.decorators import (
-    api_view,
-    permission_classes,
-    action,
-)
-
-import csv
 import importlib
+import mimetypes
 import re
+import tempfile
 import uuid
+import zipfile
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
 import django_filters as df
-from core.models import ComplianceAssessment
-from core.serializers import ComplianceAssessmentReadSerializer
+from ciso_assistant.settings import (
+    BUILD,
+    VERSION,
+)
 from django.contrib.auth.models import Permission
-from django.contrib.auth.views import PasswordResetConfirmView
+from django.core.files.storage import default_storage
+from django.db import models
 from django.forms import ValidationError
+from django.http import FileResponse, HttpResponse
+from django.middleware import csrf
 from django.template.loader import render_to_string
 from django.utils.functional import Promise
+from django_filters.rest_framework import DjangoFilterBackend
+from iam.models import Folder, RoleAssignment, User, UserGroup
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import (
+    action,
+    api_view,
+    permission_classes,
+)
+from rest_framework.parsers import FileUploadParser
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN
 from rest_framework.utils.serializer_helpers import ReturnDict
+from rest_framework.views import APIView
 from weasyprint import HTML
 
+from core.helpers import *
+from core.models import AppliedControl, ComplianceAssessment
+from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import RoleCodename, UserGroupCodename
 
-from django.db import models
-
-from iam.models import User, UserGroup, RoleAssignment, Folder
+from .models import *
+from .serializers import *
 
 User = get_user_model()
 
@@ -1174,7 +1161,7 @@ class UploadAttachmentView(APIView):
                 evidence.attachment = attachment
                 evidence.save()
                 return Response(status=status.HTTP_200_OK)
-            except Exception as e:
+            except Exception:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -1400,11 +1387,6 @@ def get_build(request):
 
 
 # NOTE: Important functions/classes from old views.py, to be reviewed
-
-
-class FirstConnexionPasswordConfirmView(PasswordResetConfirmView):
-    template_name = "registration/first_connexion_confirm.html"
-    form_class = FirstConnexionConfirmForm
 
 
 def generate_html(
