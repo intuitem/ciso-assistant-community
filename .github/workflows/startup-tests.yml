@@ -11,7 +11,7 @@ env:
 
 jobs:
   startup-functional-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     services:
       postgres:
@@ -92,7 +92,7 @@ jobs:
             ${{ env.working-directory }}/tests/reports/
           retention-days: 5
   startup-docker-compose-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       COMPOSE_TEST: True
     steps:
