@@ -499,6 +499,18 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
+    
+    def validate(self, attrs):
+        min_score = attrs['compliance_assessment'].framework.min_score
+        max_score = attrs['compliance_assessment'].framework.max_score
+        if attrs['score'] is not None:
+            if attrs['score'] < min_score or attrs['score'] > max_score:
+                raise serializers.ValidationError(
+                    {
+                        "score": f"Score must be between {min_score} and {max_score}"
+                    }
+                )
+        return super().validate(attrs)
     class Meta:
         model = RequirementAssessment
         fields = "__all__"

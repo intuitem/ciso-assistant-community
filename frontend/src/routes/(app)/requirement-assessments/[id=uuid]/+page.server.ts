@@ -247,6 +247,9 @@ export const actions: Actions = {
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
 			}
+			if (response.score) {
+				setError(form, 'score', response.score);
+			}
 			return fail(400, { form: form });
 		}
 		const object = await res.json();
