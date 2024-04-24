@@ -72,7 +72,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
+		goto(`/${LocalURLModel}/${rowMetaData[identifierField]}`);
 	}
 
 	// Row Keydown Handler
@@ -89,6 +89,8 @@
 
 	export let URLModel: urlModel | undefined = undefined;
 	$: model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
+	export let LocalURLModel: urlModel | undefined = undefined;
+	LocalURLModel = LocalURLModel ?? URLModel;
 
 	const user = $page.data.user;
 
@@ -265,10 +267,10 @@
             {#if row.meta[identifierField]}
               {@const actionsComponent = field_component_map['actions']}
               <TableRowActions 
-                deleteForm={!row.meta.builtin ? deleteForm : undefined}
+                deleteForm={!(row.meta.builtin && URLModel !== "stored-libraries" && URLModel !== "loaded-libraries") ? deleteForm : undefined}
                 model={URL_MODEL_MAP[URLModel]}
                 {URLModel}
-                detailURL={`/${URLModel}/${row.meta[identifierField]}`}
+                detailURL={`/${LocalURLModel}/${row.meta[identifierField]}`}
                 editURL={!(row.meta.builtin || row.meta.urn) ? `/${URLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}

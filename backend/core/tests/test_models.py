@@ -18,7 +18,7 @@ from core.models import (
     Asset,
     Threat,
     RiskMatrix,
-    Library,
+    LoadedLibrary,
     Framework,
 )
 from django.contrib.auth import get_user_model
@@ -863,7 +863,7 @@ class TestLibrary:
     pytestmark = pytest.mark.django_db
 
     def test_library_creation(self):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -877,7 +877,7 @@ class TestLibrary:
         assert library.folder == Folder.get_root_folder()
 
     def test_library_reference_count_zero_if_unused(self):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -890,7 +890,7 @@ class TestLibrary:
     def test_library_reference_count_incremented_when_framework_is_referenced_by_compliance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -923,7 +923,7 @@ class TestLibrary:
     def test_library_reference_count_incremented_when_reference_control_is_referenced_by_complance_assessment_and_decremented_when_compliance_assessment_is_deleted(
         self,
     ):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -983,7 +983,7 @@ class TestLibrary:
         domain = Folder.objects.create(name="Domain", description="Domain description")
         project = Project.objects.create(name="Project", folder=domain)
 
-        library = Library.objects.get()
+        library = LoadedLibrary.objects.get()
         risk_matrix = RiskMatrix.objects.get()
 
         assert library.reference_count == 0
@@ -1010,7 +1010,7 @@ class TestLibrary:
 
         risk_matrix = RiskMatrix.objects.get()
 
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -1055,7 +1055,7 @@ class TestLibrary:
 
         risk_matrix = RiskMatrix.objects.get()
 
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -1101,7 +1101,7 @@ class TestLibrary:
     def test_library_reference_count_must_be_zero_for_library_deletion(
         self,
     ):
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -1132,18 +1132,18 @@ class TestLibrary:
 
         library.delete()
 
-        assert Library.objects.count() == 0
+        assert LoadedLibrary.objects.count() == 0
 
     @pytest.mark.usefixtures("domain_project_fixture")
     def test_library_cannot_be_deleted_if_it_is_a_dependency_of_other_libraries(self):
-        dependency_library = Library.objects.create(
+        dependency_library = LoadedLibrary.objects.create(
             name="Dependency Library",
             description="Dependency Library description",
             folder=Folder.get_root_folder(),
             locale="en",
             version=1,
         )
-        library = Library.objects.create(
+        library = LoadedLibrary.objects.create(
             name="Library",
             description="Library description",
             folder=Folder.get_root_folder(),
@@ -1156,7 +1156,7 @@ class TestLibrary:
             dependency_library.delete()
 
         library.delete()
-        assert Library.objects.count() == 1
+        assert LoadedLibrary.objects.count() == 1
 
         dependency_library.delete()
-        assert Library.objects.count() == 0
+        assert LoadedLibrary.objects.count() == 0

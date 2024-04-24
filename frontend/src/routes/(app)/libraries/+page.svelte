@@ -10,37 +10,40 @@
 	export let data;
 
 	import { TabGroup, Tab } from '@skeletonlabs/skeleton';
-	let tabSet: number = data.importedLibrariesTable.body.length > 0 ? 0 : 1;
-	$: if (data.importedLibrariesTable.body.length === 0) tabSet = 1;
+	let tabSet: number = data.loadedLibrariesTable.body.length > 0 ? 0 : 1;
+	$: if (data.loadedLibrariesTable.body.length === 0) tabSet = 0;
 </script>
 
 <div class="card bg-white shadow">
-	<TabGroup>
-		{#if data.importedLibrariesTable.body.length > 0}
-			<Tab bind:group={tabSet} value={0}>{m.importedLibraries()}</Tab>
-			<Tab bind:group={tabSet} value={1}>{m.librariesStore()}</Tab>
+	<TabGroup> <!-- data.loadedLibrariesTable.body.length > 0 -->
+		{#if data.loadedLibrariesTable.body.length > 0}
+			<Tab bind:group={tabSet} value={0}>{m.librariesStore()}</Tab>
+			<Tab bind:group={tabSet} value={1}>{m.importedLibraries()}</Tab>
 		{:else}
 			<div class="card p-4 variant-soft-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2" />
 				{m.currentlyNoImportedLibraries()}.
 			</div>
 		{/if}
-		<svelte:fragment slot="panel">
+		<svelte:fragment slot="panel"> <!-- storedlibraries -->
 			{#if tabSet === 0}
 				<ModelTable
-					source={data.importedLibrariesTable}
-					URLModel="libraries"
+					source={data.storedLibrariesTable}
+					URLModel="stored-libraries"
+					LocalURLModel="libraries"
 					identifierField="urn"
-					deleteForm={data.deleteForm}
 					pagination={false}
+					deleteForm={data.deleteForm}
 				/>
 			{/if}
-			{#if tabSet === 1}
+			{#if tabSet === 1} <!-- loadedlibraries -->
 				<ModelTable
-					source={data.defaultLibrariesTable}
-					URLModel="libraries"
+					source={data.loadedLibrariesTable}
+					URLModel="loaded-libraries"
+					LocalURLModel="libraries"
 					identifierField="urn"
 					pagination={false}
+					deleteForm={data.deleteForm}
 				/>
 			{/if}
 		</svelte:fragment>

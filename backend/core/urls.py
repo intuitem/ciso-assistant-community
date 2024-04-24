@@ -1,6 +1,6 @@
 from .views import *
 from django.contrib.auth import views as auth_views
-from library.views import LibraryViewSet
+from library.views import StoredLibraryViewSet, LoadedLibraryViewSet
 
 
 from django.urls import include, path
@@ -43,7 +43,8 @@ router.register(
     RequirementAssessmentViewSet,
     basename="requirement-assessments",
 )
-router.register(r"libraries", LibraryViewSet, basename="libraries")
+router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
+router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
 
 
 urlpatterns = [

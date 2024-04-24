@@ -4,9 +4,9 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
-	const endpoint = `${BASE_API_URL}${url.pathname}/${
+	const endpoint = `${BASE_API_URL}/stored-libraries/${
 		url.searchParams ? '?' + url.searchParams.toString() : ''
-	}`;
+	}`; // ${url.pathname}
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

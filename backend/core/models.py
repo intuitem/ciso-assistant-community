@@ -8,16 +8,18 @@ from django.db.models import Q
 
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
-from .utils import camel_case
+from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 
 import os
+import re
 import json
+import yaml
 
 from django.urls import reverse
 from datetime import date, datetime
-from typing import Self
+from typing import Union, List, Self
 from django.utils.html import format_html
 
 from structlog import get_logger
@@ -83,19 +85,14 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     def __str__(self) -> str:
         return self.display_short
 
+class LibraryMixin(ReferentialObjectMixin):
+    class Meta:
+        abstract = True
 
-class Library(ReferentialObjectMixin):
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
     version = models.IntegerField(null=False, verbose_name=_("Version"))
-    provider = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text=_("Provider of the library"),
-        verbose_name=_("Provider"),
-    )
     packager = models.CharField(
         max_length=100,
         blank=True,
@@ -103,6 +100,106 @@ class Library(ReferentialObjectMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    builtin = models.BooleanField(default=False)
+    objects_meta = models.JSONField()
+    dependencies = models.CharField(blank=False,null=True,max_length=16384)
+
+    def get_dependencies(self) -> List[str] : # We should add some kind of descriptor to LibaryMixin so that model_instance.dependencies directly returns a list instead of a string, using a function to get the desired value of a field is bad
+        return [] if self.dependencies is None else self.dependencies.split(" ")
+
+class StoredLibrary(LibraryMixin):
+    is_obsolete = models.BooleanField(default=False)
+    is_imported = models.BooleanField(default=False)
+    hash_checksum = models.CharField(max_length=64)
+    content = models.TextField()
+
+    REQUIRED_FIELDS = {"urn","name","version","objects"}
+    FIELDS_VERIFIERS = {}
+    HASH_CHECKSUM_SET = set() # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+
+    @classmethod
+    def __init_class__(cls) :
+        cls.HASH_CHECKSUM_SET = set(
+            value["hash_checksum"]
+            for value in cls.objects.values("hash_checksum")
+        )
+
+    @staticmethod
+    def store_library_file(fname: str) -> Union[str,None] :
+        with open(fname,"rb") as f :
+            library_content = f.read()
+
+        hash_checksum = sha256(library_content)
+        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET :
+            return None # We do not store the libary if its hash checksum is in the database.
+
+        # urn(str:max_length=100), version(int), name(str:max_length=200)
+
+        try :
+            library_data = yaml.safe_load(library_content)
+        except Exception :
+            return "Invalid formatted file, the library file must be formatted in YAML."
+
+        missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
+
+        if missing_fields :
+            return "The following fields are missing : {}".format(", ".join(repr(field) for field in missing_fields))
+
+        urn = library_data["urn"]
+        locale = library_data.get("locale","en")
+        version = library_data["version"]
+
+        library_matches = [*StoredLibrary.objects.filter(
+            urn=urn,
+            locale=locale
+        )]
+        if any(
+            libary.version >= version
+            for libary in library_matches
+        ) :
+            # The library isn't stored if it's obsolete due to be a too old version of itself.
+            return "A library with the urn '{}', a locale '{}' with a superior superior or equal to {} is already stored in the database.".format(urn,locale,version)
+
+        for library in library_matches :
+            libary.is_obsolete = True
+            library.save() # If a user delete a library from the libary store we must set the is_obsolete value of its most recent obsolete version to False.
+
+        objects_meta = {
+            key: len(value)
+            for key, value in library_data["objects"].items()
+        }
+
+        dependencies = library_data.get("dependencies")
+        if dependencies is not None :
+            dependencies = " ".join(dependencies) # Which means we have to make the URN format more restrictive so that an URN is considered invalid if it contains any kind of whitespace.
+
+        library_objects = json.dumps(library_data["objects"])
+        StoredLibrary.objects.create(
+            name=library_data["name"],
+            is_published=True,
+            urn=urn,
+            locale=locale,
+            version=version,
+            ref_id=library_data["ref_id"],
+            default_locale=False, # We don't care about this value yet.
+            description=library_data.get("description"),
+            annotation=library_data.get("annotation"),
+            copyright=library_data.get("copyright"),
+            provider=library_data.get("provider"),
+            packager=library_data.get("packager"),
+            objects_meta=objects_meta,
+            dependencies=dependencies,
+            builtin=library_data.get("builtin",False), # We have to add a "builtin: true" line to every builtin library file.
+            hash_checksum=hash_checksum,
+            content=library_objects
+        )
+
+    def loads(self) -> Union[str,None] :
+        from library.utils import LibraryImporter
+        library_importer = LibraryImporter(self)
+        return library_importer.import_library()
+
+class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
@@ -152,7 +249,7 @@ class Library(ReferentialObjectMixin):
             )
             .distinct()
             .count()
-            + Library.objects.filter(dependencies=self).distinct().count()
+            + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
         )
 
     def delete(self, *args, **kwargs):
@@ -160,17 +257,17 @@ class Library(ReferentialObjectMixin):
             raise ValueError(
                 "This library is still referenced by some risk or compliance assessments"
             )
-        dependent_libraries = Library.objects.filter(dependencies=self)
+        dependent_libraries = LoadedLibrary.objects.filter(dependencies=self)
         if dependent_libraries:
             raise ValueError(
                 f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
-        super(Library, self).delete(*args, **kwargs)
+        super(LoadedLibrary, self).delete(*args, **kwargs)
 
 
 class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
-        Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
+        LoadedLibrary, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
     )
 
     fields_to_check = ["ref_id", "name"]
@@ -204,7 +301,7 @@ class ReferenceControl(ReferentialObjectMixin):
     ]
 
     library = models.ForeignKey(
-        Library,
+        LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -247,7 +344,7 @@ class ReferenceControl(ReferentialObjectMixin):
 
 class RiskMatrix(ReferentialObjectMixin):
     library = models.ForeignKey(
-        Library,
+        LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -329,7 +426,7 @@ class RiskMatrix(ReferentialObjectMixin):
 
 class Framework(ReferentialObjectMixin):
     library = models.ForeignKey(
-        Library,
+        LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,

@@ -142,7 +142,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	librariesPage: async ({ page }, use) => {
-		const lPage = new PageContent(page, '/libraries', 'Libraries');
+		const lPage = new PageContent(page, '/loaded-ibraries', 'Loaded Libraries');
 		await use(lPage);
 	},
 

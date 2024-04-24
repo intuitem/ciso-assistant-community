@@ -13,7 +13,70 @@ import * as m from '$paraglide/messages'
 import { localItems } from '$lib/utils/locales';
 import { languageTag } from '$paraglide/runtime';
 
+
+// ----------------------------------------------------------- //
+
+
 export const load = (async ({ fetch }) => {
+	const endpoint = `${BASE_API_URL}/stored-libraries/`;
+	const endpoint2 = `${BASE_API_URL}/loaded-libraries/`;
+
+	const [res,res2] = await Promise.all([fetch(endpoint),fetch(endpoint2)]);
+
+	const storedLibraries = await res.json().then((res) => res.results);
+	const loadedLibraries = await res2.json().then((res) => res.results);
+
+	const prepareRow = (row) => {
+		row.overview = [
+			`Provider: ${row.provider}`,
+			`Packager: ${row.packager}`,
+			...Object.entries(row.objects_meta).map(([key,value]) => `${key}: ${value}`)
+		];
+		row.allowDeleteLibrary = row.allowDeleteLibrary = row.reference_count && row.reference_count > 0 ? false : true;
+	}
+
+	storedLibraries.forEach(prepareRow);
+	loadedLibraries.forEach(prepareRow);
+
+	// const headData: Record<string, string>
+
+	const makeHeadData = (modelName: string) => {
+		return listViewFields['stored-libraries'].body.reduce(
+			(obj, key, index) => {
+				obj[key] = listViewFields['stored-libraries'].head[index];
+				return obj;
+			},
+			{}
+		);
+	}
+
+	const makeBodyData = (libraries,modelName: string) => tableSourceMapper(libraries, listViewFields[modelName].body);
+
+	const makeLibrariesTable = (libraries: Library[],modelName: string) => {
+		return {
+			head: makeHeadData(modelName),
+			body: makeBodyData(libraries,modelName),
+			meta: libraries
+		};
+	};
+
+	const storedLibrariesTable = makeLibrariesTable(storedLibraries,'stored-libraries');
+	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries,'loaded-libraries');
+
+	const schema = z.object({ id: z.string() });
+	const deleteForm = await superValidate(schema);
+
+	loadedLibrariesTable.body.push(storedLibrariesTable.body[0]);
+	loadedLibrariesTable.meta.push(storedLibrariesTable.meta[0]);
+
+	return { storedLibrariesTable, loadedLibrariesTable, deleteForm }
+}) satisfies PageServerLoad;
+
+
+
+
+
+const old_load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/libraries/`;
 
 	const res = await fetch(endpoint);
@@ -77,6 +140,10 @@ export const load = (async ({ fetch }) => {
 	return { libraries, defaultLibrariesTable, importedLibrariesTable, deleteForm };
 }) satisfies PageServerLoad;
 
+
+// ----------------------------------------------------------- //
+
+
 export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
@@ -85,7 +152,7 @@ export const actions: Actions = {
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
 			// Should i check if attachment.size > 0 ?
-			const endpoint = `${BASE_API_URL}/libraries/upload/`;
+			const endpoint = `${BASE_API_URL}/loaded-libraries/upload/`;
 			const req = await event.fetch(endpoint, {
 				method: 'POST',
 				headers: {
@@ -117,7 +184,7 @@ export const actions: Actions = {
 		const deleteForm = await superValidate(formData, schema);
 
 		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/libraries/${id}/`;
+		const endpoint = `${BASE_API_URL}/loaded-libraries/${id}/`;
 
 		if (!deleteForm.valid) {
 			console.error(deleteForm.errors);

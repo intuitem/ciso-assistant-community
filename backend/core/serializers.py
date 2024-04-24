@@ -163,18 +163,17 @@ class ReferenceControlReadSerializer(ReferenceControlWriteSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "urn"])
 
-
-class LibraryReadSerializer(BaseModelSerializer):
+"""class LibraryReadSerializer(BaseModelSerializer):
     class Meta:
-        model = Library
+        model = LoadedLibrary
         fields = "__all__"
 
 
 class LibraryWriteSerializer(BaseModelSerializer):
     class Meta:
-        model = Library
+        model = LoadedLibrary
         fields = "__all__"
-
+"""
 
 class ThreatWriteSerializer(BaseModelSerializer):
     class Meta:
