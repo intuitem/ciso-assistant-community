@@ -1,6 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { composerSchema } from '$lib/utils/schemas';
-import { superValidate } from 'sveltekit-superforms/server';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
@@ -130,7 +131,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 	}
 
-	const composerForm = await superValidate(composerSchema);
+	const composerForm = await superValidate(zod(composerSchema));
 
 	return {
 		composerForm,

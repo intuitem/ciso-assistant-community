@@ -3,7 +3,7 @@ import { BASE_API_URL, URN_REGEX } from '$lib/utils/constants';
 import { LibraryUploadSchema } from '$lib/utils/schemas';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { tableSourceMapper } from '@skeletonlabs/skeleton';
@@ -12,6 +12,7 @@ import type { Library, urlModel } from '$lib/utils/types';
 import * as m from '$paraglide/messages';
 import { localItems } from '$lib/utils/locales';
 import { languageTag } from '$paraglide/runtime';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/libraries/`;
@@ -72,7 +73,7 @@ export const load = (async ({ fetch }) => {
 	const importedLibrariesTable = librariesTable(libraries.filter((lib) => lib.id));
 
 	const schema = z.object({ id: z.string() });
-	const deleteForm = await superValidate(schema);
+	const deleteForm = await superValidate(zod(schema));
 
 	return { libraries, defaultLibrariesTable, importedLibrariesTable, deleteForm };
 }) satisfies PageServerLoad;
@@ -80,11 +81,15 @@ export const load = (async ({ fetch }) => {
 export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
-		const form = await superValidate(formData, LibraryUploadSchema);
+		const form = await superValidate(formData, zod(LibraryUploadSchema));
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
-			// Should i check if attachment.size > 0 ?
+
+			if (file.size <= 0) {
+				return fail(400, { form });
+			}
+
 			const endpoint = `${BASE_API_URL}/libraries/upload/`;
 			const req = await event.fetch(endpoint, {
 				method: 'POST',
@@ -97,7 +102,6 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const error_string = response.error;
 				const translate_error = localItems(languageTag())[response.error];
 				const toast_error_message = translate_error ?? m.libraryImportError();
 
@@ -109,12 +113,11 @@ export const actions: Actions = {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });
 		}
-		return { form };
 	},
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const schema = z.object({ id: z.string().regex(URN_REGEX) });
-		const deleteForm = await superValidate(formData, schema);
+		const deleteForm = await superValidate(formData, zod(schema));
 
 		const id = deleteForm.data.id;
 		const endpoint = `${BASE_API_URL}/libraries/${id}/`;

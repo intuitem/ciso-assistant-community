@@ -16,7 +16,7 @@
 	export let _form;
 	export let URLModel: urlModel;
 	export let id: string;
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 
 	const { form /*, message*/, enhance } = superForm(_form);
 
@@ -25,7 +25,7 @@
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container-token';
 
-	import SuperDebug from 'sveltekit-superforms/client/SuperDebug.svelte';
+	import SuperDebug from 'sveltekit-superforms';
 	export let debug = false;
 </script>
 

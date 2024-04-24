@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CssClasses } from '@skeletonlabs/skeleton';
-	import { formFieldProxy } from 'sveltekit-superforms/client';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	let _class = '';
 

@@ -1,10 +1,11 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { csrfToken } from '$lib/utils/csrf';
 import { loginSchema } from '$lib/utils/schemas';
-import { setError, superValidate } from 'sveltekit-superforms/server';
+import { setError, superValidate } from 'sveltekit-superforms';
 
 export const load: PageServerLoad = async ({ request, locals }) => {
 	// redirect user if already logged in
@@ -12,14 +13,14 @@ export const load: PageServerLoad = async ({ request, locals }) => {
 		redirect(302, '/analytics');
 	}
 
-	const form = await superValidate(request, loginSchema);
+	const form = await superValidate(request, zod(loginSchema));
 
 	return { form };
 };
 
 export const actions: Actions = {
 	default: async ({ request, url, fetch, cookies }) => {
-		const form = await superValidate(request, loginSchema);
+		const form = await superValidate(request, zod(loginSchema));
 		if (!form.valid) {
 			return fail(400, { form });
 		}

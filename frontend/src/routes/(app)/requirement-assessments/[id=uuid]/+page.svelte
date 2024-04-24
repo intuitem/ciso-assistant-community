@@ -26,13 +26,14 @@
 		type ToastStore,
 		TabGroup
 	} from '@skeletonlabs/skeleton';
-	import { superForm } from 'sveltekit-superforms/client';
+	import { superForm } from 'sveltekit-superforms';
 
 	import { localItems, capitalizeFirstLetter } from '$lib/utils/locales';
 	import { languageTag } from '$paraglide/runtime';
 	import * as m from '$paraglide/messages';
 
 	import { getRequirementTitle } from '$lib/utils/helpers';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	function cancel(): void {
 		var currentUrl = window.location.href;
@@ -207,7 +208,7 @@
 			data={data.form}
 			dataType="json"
 			let:form
-			validators={schema}
+			validators={zod(schema)}
 			action="?/updateRequirementAssessment"
 			{...$$restProps}
 		>
