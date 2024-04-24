@@ -5,7 +5,6 @@
 	import * as m from '$paraglide/messages';
 	import type { AnyZodObject } from 'zod';
 	import { displayScoreColor } from '$lib/utils/helpers';
-	import test from 'node:test';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
