@@ -73,5 +73,3 @@ for row in output_table:
     ws1.append(row)
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
-
-
