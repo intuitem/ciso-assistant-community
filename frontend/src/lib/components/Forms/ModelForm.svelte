@@ -19,6 +19,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import * as m from '$paraglide/messages.js';
+	import { zod } from 'sveltekit-superforms/adapters';
 
 	export let form: SuperValidated<AnyZodObject>;
 	export let model: ModelInfo;
@@ -60,7 +61,7 @@
 	let:form
 	let:data
 	let:initialData
-	validators={schema}
+	validators={zod(schema)}
 	{...$$restProps}
 >
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
