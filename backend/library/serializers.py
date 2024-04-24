@@ -31,7 +31,6 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
     # objects_meta = serializers.JSONField()
 
 class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
-    dependencies = lambda dependencies: dependencies.split(" ")
     class Meta:
         model = StoredLibrary
         fields = "__all__"
