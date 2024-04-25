@@ -59,11 +59,7 @@
 						ticked
 					>
 						<div class="flex justify-between items-center">
-							<SlideToggle
-								bind:checked={$isScored}
-								active="bg-primary-500"
-								name="score-slider"
-							>
+							<SlideToggle bind:checked={$isScored} active="bg-primary-500" name="score-slider">
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 							>
 							{#if score_definition && $value !== null}
@@ -94,11 +90,7 @@
 						ticked
 					>
 						<div class="flex justify-between items-center">
-							<SlideToggle
-								bind:checked={$isScored}
-								active="bg-primary-500"
-								name="score-slider"
-							>
+							<SlideToggle bind:checked={$isScored} active="bg-primary-500" name="score-slider">
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 							>
 							<ProgressRadial stroke={100} value={0} font={150} width={'w-12'}>--</ProgressRadial>
