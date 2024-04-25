@@ -9,11 +9,19 @@ export const GET: RequestHandler = async ({ fetch, setHeaders, params }) => {
 
 	try {
 		const attachmentResponse = await fetch(endpoint);
-		const contentType = attachmentResponse.headers.get('Content-Type');
-		const fileExtension = contentType ? mimeTypes[contentType][0] : 'bin';
 
 		if (!attachmentResponse.body) {
 			throw new Error('No response body');
+		}
+
+		const contentType = attachmentResponse.headers.get('Content-Type');
+		if (!contentType) {
+			return new Response('No Content-Type header', { status: 400 });
+		}
+
+		const fileExtension = mimeTypes[contentType] ? mimeTypes[contentType][0] : 'bin';
+		if (!mimeTypes[contentType]) {
+			console.warn(`Unknown content type ${contentType}`);
 		}
 
 		const reader = attachmentResponse.body.getReader();
