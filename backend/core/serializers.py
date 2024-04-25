@@ -498,15 +498,34 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
-    def validate(self, attrs):
-        min_score = attrs["compliance_assessment"].framework.min_score
-        max_score = attrs["compliance_assessment"].framework.max_score
-        if attrs["score"] is not None:
-            if attrs["score"] < min_score or attrs["score"] > max_score:
+    def validate_score(self, value):
+        framework = self.get_framework()
+
+        if value is not None:
+            if value < framework.min_score or value > framework.max_score:
                 raise serializers.ValidationError(
-                    {"score": f"Score must be between {min_score} and {max_score}"}
+                    f"Score must be between {framework.min_score} and {framework.max_score}"
                 )
-        return super().validate(attrs)
+        return value
+
+    def get_framework(self):
+        if hasattr(self, "instance") and self.instance:
+            return self.instance.compliance_assessment.framework
+
+        # If for some reason the instance isn't set or doesn't have a compliance assessment, try the request data
+        # NOTE: I have no idea how this can happen at the time of writing this, adding guardrails just in case
+        try:
+            compliance_assessment_data = self.context.get("request", {}).data.get(
+                "compliance_assessment", {}
+            )
+            framework_id = compliance_assessment_data.get("framework")
+            if framework_id is not None:
+                return Framework.objects.get(id=framework_id)
+        except Framework.DoesNotExist:
+            raise serializers.ValidationError("The specified framework does not exist.")
+        raise serializers.ValidationError(
+            "Framework information is required but was not provided."
+        )
 
     class Meta:
         model = RequirementAssessment
