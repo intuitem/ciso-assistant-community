@@ -1294,6 +1294,7 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(score=None)
             .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
+            .exclude(is_scored=False)
         )
         score = requirement_assessments_scored.aggregate(models.Avg("score"))
         if score["score__avg"]:
@@ -1494,6 +1495,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         blank=True,
         null=True,
         verbose_name=_("Score"),
+    )
+    is_scored = models.BooleanField(
+        default=False,
+        verbose_name=_("Is scored"),
     )
     evidences = models.ManyToManyField(
         Evidence,
