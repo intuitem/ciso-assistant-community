@@ -1,0 +1,2584 @@
+urn: urn:intuitem:risk:library:nist-800-171-rev2
+locale: en
+ref_id: nist-800-171-rev2
+name: NIST SP 800-171 Rev. 2
+description: 'Protecting Controlled Unclassified Information in Nonfederal Systems
+  and Organizations
+
+  https://csrc.nist.gov/pubs/sp/800/171/r2/upd1/final'
+copyright: NIST
+version: 1
+provider: NIST
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:nist-800-171-rev2
+    ref_id: nist-800-171-rev2
+    name: NIST SP 800-171 Rev. 2
+    description: 'Protecting Controlled Unclassified Information in Nonfederal Systems
+      and Organizations
+
+      https://csrc.nist.gov/pubs/sp/800/171/r2/upd1/final'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      assessable: false
+      depth: 1
+      name: Access Control
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.1
+      description: Limit system access to authorized users, processes acting on behalf
+        of authorized users, and devices (including other systems).
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.1
+      description: 'Access control policies (e.g., identity- or role-based policies,
+        control matrices, and cryptography) control access between active entities
+        or subjects (i.e., users or processes acting on behalf of users) and passive
+        entities or objects (e.g., devices, files, records, and domains) in systems.
+        Access enforcement mechanisms can be employed at the application and service
+        level to provide increased information security. Other systems include systems
+        internal and external to the organization. This requirement focuses on account
+        management for systems and applications. The definition of and enforcement
+        of access authorizations, other than those determined by account
+
+        type (e.g., privileged verses non-privileged) are addressed in requirement
+        3.1.2.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.2
+      description: Limit system access to the types of transactions and functions
+        that authorized users are permitted to execute.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node6
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.2
+      description: Organizations may choose to define access privileges or other attributes
+        by account, by type of account, or a combination of both. System account types
+        include individual, shared, group, system, anonymous, guest, emergency, developer,
+        manufacturer, vendor, and temporary. Other attributes required for authorizing
+        access include restrictions on time-of-day, day-of-week, and point-of-origin.
+        In defining other account attributes, organizations consider system-related
+        requirements (e.g., system upgrades scheduled maintenance,) and mission or
+        business requirements, (e.g., time zone differences, customer requirements,
+        remote access to support travel requirements).
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.3
+      description: Control the flow of CUI in accordance with approved authorizations.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node8
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.3
+      description: 'Information flow control regulates where information can travel
+        within a system and between systems (versus who can access the information)
+        and without explicit regard to subsequent accesses to that information. Flow
+        control restrictions include the following: keeping export-controlled information
+        from being transmitted in the clear to the Internet; blocking outside traffic
+        that claims to be from within the organization; restricting requests to the
+        Internet that are not from the internal web proxy server; and limiting information
+        transfers between organizations based on data structures and content.  Organizations
+        commonly use information flow control policies and enforcement mechanisms
+        to control the flow of information between designated sources and destinations
+        (e.g., networks, individuals, and devices) within systems and between interconnected
+        systems. Flow control is based on characteristics of the information or the
+        information path. Enforcement occurs in boundary protection devices (e.g.,
+        gateways, routers, guards, encrypted tunnels, firewalls) that employ rule
+        sets or establish configuration settings that restrict system services, provide
+        a packet-filtering capability based on header information, or message-filtering
+        capability based on message content (e.g., implementing key word searches
+        or using document characteristics). Organizations also consider the trustworthiness
+        of filtering and inspection mechanisms (i.e., hardware, firmware, and software
+        components) that are critical to information flow enforcement.  Transferring
+        information between systems representing different security domains with different
+        security policies introduces risk that such transfers violate one or more
+        domain security policies. In such situations, information owners or stewards
+        provide guidance at designated policy enforcement points between interconnected
+        systems. Organizations consider mandating specific architectural solutions
+        when required to enforce specific security policies. Enforcement includes:
+        prohibiting information transfers between interconnected systems (i.e., allowing
+        access only); employing hardware mechanisms to enforce one-way information
+        flows; and implementing trustworthy regrading mechanisms to reassign security
+        attributes and security labels.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.4
+      description: Separate the duties of individuals to reduce the risk of malevolent
+        activity without collusion.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node10
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.4
+      description: Separation of duties addresses the potential for abuse of authorized
+        privileges and helps to reduce the risk of malevolent activity without collusion.
+        Separation of duties includes dividing mission functions and system support
+        functions among different individuals or roles; conducting system support
+        functions with different individuals (e.g., configuration management, quality
+        assurance and testing, system management, programming, and network security);
+        and ensuring that security personnel administering access control functions
+        do not also administer audit functions. Because separation of duty violations
+        can span systems and application domains, organizations consider the entirety
+        of organizational systems and system components when developing policy on
+        separation of duties.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.5
+      description: Employ the principle of least privilege, including for specific
+        security functions and privileged accounts.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.5
+      description: Organizations employ the principle of least privilege for specific
+        duties and authorized accesses for users and processes. The principle of least
+        privilege is applied with the goal of authorized privileges no higher than
+        necessary to accomplish required organizational missions or business functions.
+        Organizations consider the creation of additional processes, roles, and system
+        accounts as necessary, to achieve least privilege. Organizations also apply
+        least privilege to the development, implementation, and operation of organizational
+        systems. Security functions include establishing system accounts, setting
+        events to be logged, setting intrusion detection parameters, and configuring
+        access authorizations (i.e., permissions, privileges).  Privileged accounts,
+        including super user accounts, are typically described as system administrator
+        for various types of commercial off-the-shelf operating systems. Restricting
+        privileged accounts to specific personnel or roles prevents day-to-day users
+        from having access to privileged information or functions. Organizations may
+        differentiate in the application of this requirement between allowed privileges
+        for local accounts and for domain accounts provided organizations retain the
+        ability to control system configurations for key security parameters and as
+        otherwise necessary to sufficiently mitigate risk.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.6
+      description: Use non-privileged accounts or roles when accessing nonsecurity
+        functions
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node14
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.6
+      description: This requirement limits exposure when operating from within privileged
+        accounts or roles. The inclusion of roles addresses situations where organizations
+        implement access control policies such as role-based access control and where
+        a change of role provides the same degree of assurance in the change of access
+        authorizations for the user and all processes acting on behalf of the user
+        as would be provided by a change between a privileged and non-privileged account.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.7
+      description: Prevent non-privileged users from executing privileged functions
+        and capture the execution of such functions in audit logs.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.7
+      description: Privileged functions include establishing system accounts, performing
+        system integrity checks, conducting patching operations, or administering
+        cryptographic key management activities. Non-privileged users are individuals
+        that do not possess appropriate authorizations. Circumventing intrusion detection
+        and prevention mechanisms or malicious code protection mechanisms are examples
+        of privileged functions that require protection from non-privileged users.
+        Note that this requirement represents a condition to be achieved by the definition
+        of authorized privileges in 3.1.2.  Misuse of privileged functions, either
+        intentionally or unintentionally by authorized users, or by unauthorized external
+        entities that have compromised system accounts, is a serious and ongoing concern
+        and can have significant adverse impacts on organizations. Logging the use
+        of privileged functions is one way to detect such misuse, and in doing so,
+        help mitigate the risk from insider threats and the advanced persistent threat.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.8
+      description: Limit unsuccessful logon attempts.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node18
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.8
+      description: This requirement applies regardless of whether the logon occurs
+        via a local or network connection.  Due to the potential for denial of service,
+        automatic lockouts initiated by systems are, in most cases, temporary and
+        automatically release after a predetermined period established by the organization
+        (i.e., a delay algorithm). If a delay algorithm is selected, organizations
+        may employ different algorithms for different system components based on the
+        capabilities of the respective components. Responses to unsuccessful logon
+        attempts may be implemented at the operating system and application levels.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.9
+      description: Provide privacy and security notices consistent with applicable
+        CUI rules.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node20
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.9
+      description: System use notifications can be implemented using messages or warning
+        banners displayed before individuals log in to organizational systems. System
+        use notifications are used only for access via logon interfaces with human
+        users and are not required when such human interfaces do not exist. Based
+        on a risk assessment, organizations consider whether a secondary system use
+        notification is needed to access applications or other system resources after
+        the initial network logon. Where necessary, posters or other printed materials
+        may be used in lieu of an automated system banner. Organizations consult with
+        the Office of General Counsel for legal review and approval of warning banner
+        content
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.10
+      description: Use session lock with pattern-hiding displays to prevent access
+        and viewing of data after a period of inactivity
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node22
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.10
+      description: Session locks are temporary actions taken when users stop work
+        and move away from the immediate vicinity of the system but do not want to
+        log out because of the temporary nature of their absences. Session locks are
+        implemented where session activities can be determined, typically at the operating
+        system level (but can also be at the application level). Session locks are
+        not an acceptable substitute for logging out of the system, for example, if
+        organizations require users to log out at the end of the workday.  Pattern-hiding
+        displays can include static or dynamic images, for example, patterns used
+        with screen savers, photographic images, solid colors, clock, battery life
+        indicator, or a blank screen, with the additional caveat that none of the
+        images convey controlled unclassified information.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.11
+      description: Terminate (automatically) a user session after a defined condition.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node24
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.11
+      description: "This requirement addresses the termination of user-initiated logical\
+        \ sessions in contrast to the termination of network connections that are\
+        \ associated with communications sessions (i.e., disconnecting from the network).\
+        \ A logical session (for local, network, and remote access) is initiated whenever\
+        \ a user (or process acting on behalf of a user) accesses an organizational\
+        \ system. Such user sessions can be terminated (and thus terminate user access)\
+        \ without terminating network sessions. Session termination terminates all\
+        \ processes associated with a user\u2019s logical session except those processes\
+        \ that are specifically created by the user (i.e., session owner) to continue\
+        \ after the session is terminated. Conditions or trigger events requiring\
+        \ automatic session termination can include organization-defined periods of\
+        \ user inactivity, targeted responses to certain types of incidents, and time-of-day\
+        \ restrictions on system use"
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.12
+      description: Monitor and control remote access sessions.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node26
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.12
+      description: Remote access is access to organizational systems by users (or
+        processes acting on behalf of users) communicating through external networks
+        (e.g., the Internet). Remote access methods include dial-up, broadband, and
+        wireless. Organizations often employ encrypted virtual private networks (VPNs)
+        to enhance confidentiality over remote connections. The use of encrypted VPNs
+        does not make the access non-remote; however, the use of VPNs, when adequately
+        provisioned with appropriate control (e.g., employing encryption techniques
+        for confidentiality protection), may provide sufficient assurance to the organization
+        that it can effectively treat such connections as internal networks. VPNs
+        with encrypted tunnels can affect the capability to adequately monitor network
+        communications traffic for malicious code.  Automated monitoring and control
+        of remote access sessions allows organizations to detect cyber-attacks and
+        help to ensure ongoing compliance with remote access policies by auditing
+        connection activities of remote users on a variety of system components (e.g.,
+        servers, workstations, notebook computers, smart phones, and tablets).  [SP
+        800-46], [SP 800-77], and [SP 800-113] provide guidance on secure remote access
+        and virtual private networks.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.13
+      description: Employ cryptographic mechanisms to protect the confidentiality
+        of remote access sessions.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node28
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.13
+      description: Cryptographic standards include FIPS-validated cryptography and
+        NSA-approved cryptography. See [NIST CRYPTO]; [NIST CAVP]; [NIST CMVP]; National
+        Security Agency Cryptographic Standards.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.14
+      description: Route remote access via managed access control points.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node30
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.14
+      description: Routing remote access through managed access control points enhances
+        explicit, organizational control over such connections, reducing the susceptibility
+        to unauthorized access to organizational systems resulting in the unauthorized
+        disclosure of CUI.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.15
+      description: Authorize remote execution of privileged commands and remote access
+        to security-relevant information.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node32
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.15
+      description: A privileged command is a human-initiated (interactively or via
+        a process operating on behalf of the human) command executed on a system involving
+        the control, monitoring, or administration of the system including security
+        functions and associated security-relevant information. Security-relevant
+        information is any information within the system that can potentially impact
+        the operation of security functions or the provision of security services
+        in a manner that could result in failure to enforce the system security policy
+        or maintain isolation of code and data. Privileged commands give individuals
+        the ability to execute sensitive, security-critical, or security-relevant
+        system functions. Controlling such access from remote locations helps to ensure
+        that unauthorized individuals are not able to execute such commands freely
+        with the potential to do serious or catastrophic damage to organizational
+        systems. Note that the ability to affect the integrity of the system is considered
+        security-relevant as that could enable the means to by-pass security functions
+        although not directly impacting the function itself.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.16
+      description: Authorize wireless access prior to allowing such connections
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node34
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.16
+      description: Establishing usage restrictions and configuration/connection requirements
+        for wireless access to the system provides criteria for organizations to support
+        wireless access authorization decisions. Such restrictions and requirements
+        reduce the susceptibility to unauthorized access to the system through wireless
+        technologies. Wireless networks use authentication protocols which provide
+        credential protection and mutual authentication.  [SP 800-97] provides guidance
+        on secure wireless networks.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.17
+      description: Protect wireless access using authentication and encryption
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node36
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.17
+      description: Organizations authenticate individuals and devices to help protect
+        wireless access to the system. Special attention is given to the wide variety
+        of devices that are part of the Internet of Things with potential wireless
+        access to organizational systems. See [NIST CRYPTO].
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.18
+      description: Control connection of mobile devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node38
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.18
+      description: 'A mobile device is a computing device that has a small form factor
+        such that it can easily be carried by a single individual; is designed to
+        operate without a physical connection (e.g., wirelessly transmit or receive
+        information); possesses local, non-removable or removable data storage; and
+        includes a self-contained power source. Mobile devices may also include voice
+        communication capabilities, on-board sensors that allow the device to capture
+        information, or built-in features for synchronizing local data with remote
+        locations. Examples of mobile devices include smart phones, e-readers, and
+        tablets.  Due to the large variety of mobile devices with different technical
+        characteristics and capabilities, organizational restrictions may vary for
+        the different types of devices. Usage restrictions and implementation guidance
+        for mobile devices include: device identification and authentication; configuration
+        management; implementation of mandatory protective software (e.g., malicious
+        code detection, firewall); scanning devices for malicious code; updating virus
+        protection software; scanning for critical software updates and patches; conducting
+        primary operating system (and possibly other resident software) integrity
+        checks; and disabling unnecessary hardware (e.g., wireless, infrared). The
+        need to provide adequate security for mobile devices goes beyond this requirement.
+        Many controls for mobile devices are reflected in other CUI security requirements.  [SP
+        800-124] provides guidance on mobile device security.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.19
+      description: 'Encrypt CUI on mobile devices and mobile computing platforms.[23] '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node40
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.19
+      description: 'Organizations can employ full-device encryption or container-based
+        encryption to protect the confidentiality of CUI on mobile devices and computing
+        platforms. Container-based encryption provides a more fine-grained approach
+        to the encryption of data and information including encrypting selected data
+        structures such as files, records, or fields. See [NIST CRYPTO].
+
+
+        [23] Mobile devices and computing platforms include, for example, smartphones
+        and tablets.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.20
+      description: Verify and control/limit connections to and use of external systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node42
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.20
+      description: "External systems are systems or components of systems for which\
+        \ organizations typically have no direct supervision and authority over the\
+        \ application of security requirements and controls or the determination of\
+        \ the effectiveness of implemented controls on those systems. External systems\
+        \ include personally owned systems, components, or devices and privately-owned\
+        \ computing and communications devices resident in commercial or public facilities.\
+        \ This requirement also addresses the use of external systems for the processing,\
+        \ storage, or transmission of CUI, including accessing cloud services (e.g.,\
+        \ infrastructure as a service, platform as a service, or software as a service)\
+        \ from organizational systems.  Organizations establish terms and conditions\
+        \ for the use of external systems in accordance with organizational security\
+        \ policies and procedures. Terms and conditions address as a minimum, the\
+        \ types of applications that can be accessed on organizational systems from\
+        \ external systems. If terms and conditions with the owners of external systems\
+        \ cannot be established, organizations may impose restrictions on organizational\
+        \ personnel using those external systems.  This requirement recognizes that\
+        \ there are circumstances where individuals using external systems (e.g.,\
+        \ contractors, coalition partners) need to access organizational systems.\
+        \ In those situations, organizations need confidence that the external systems\
+        \ contain the necessary controls so as not to compromise, damage, or otherwise\
+        \ harm organizational systems. Verification that the required controls have\
+        \ been effectively implemented can be achieved by third-party, independent\
+        \ assessments, attestations, or other means, depending on the assurance or\
+        \ confidence level required by organizations.  Note that while \u201Cexternal\u201D\
+        \ typically refers to outside of the organization\u2019s direct supervision\
+        \ and authority, that is not always the case. Regarding the protection of\
+        \ CUI across an organization, the organization may have systems that process\
+        \ CUI and others that do not. And among the systems that process CUI there\
+        \ are likely access restrictions for CUI that apply between systems. Therefore,\
+        \ from the perspective of a given system, other systems within the organization\
+        \ may be considered \u201Cexternal\" to that system."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.21
+      description: Limit use of portable storage devices on external systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node44
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.21
+      description: "Limits on the use of organization-controlled portable storage\
+        \ devices in external systems include complete prohibition of the use of such\
+        \ devices or restrictions on how the devices may be used and under what conditions\
+        \ the devices may be used. Note that while \u201Cexternal\u201D typically\
+        \ refers to outside of the organization\u2019s direct supervision and authority,\
+        \ that is not always the case.  Regarding the protection of CUI across an\
+        \ organization, the organization may have systems that process CUI and others\
+        \ that do not. Among the systems that process CUI there are likely access\
+        \ restrictions for CUI that apply between systems. Therefore, from the perspective\
+        \ of a given system, other systems within the organization may be considered\
+        \ \u201Cexternal\" to that system."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node2
+      ref_id: 3.1.22
+      description: Control CUI posted or processed on publicly accessible systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node46
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.1.22
+      description: In accordance with laws, Executive Orders, directives, policies,
+        regulations, or standards, the public is not authorized access to nonpublic
+        information (e.g., information protected under the Privacy Act, CUI, and proprietary
+        information). This requirement addresses systems that are controlled by the
+        organization and accessible to the public, typically without identification
+        or authentication. Individuals authorized to post CUI onto publicly accessible
+        systems are designated. The content of information is reviewed prior to posting
+        onto publicly accessible systems to ensure that nonpublic information is not
+        included.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node47
+      assessable: false
+      depth: 1
+      name: Awareness and Training
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node47
+      ref_id: 3.2.1
+      description: Ensure that managers, systems administrators, and users of organizational
+        systems are made aware of the security risks associated with their activities
+        and of the applicable policies, standards, and procedures related to the security
+        of those systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node49
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.1
+      description: 'Organizations determine the content and frequency of security
+        awareness training and security awareness techniques based on the specific
+        organizational requirements and the systems to which personnel have authorized
+        access. The content includes a basic understanding of the need for information
+        security and user actions to maintain security and to respond to suspected
+        security incidents. The content also addresses awareness of the need for operations
+        security. Security awareness techniques include: formal training; offering
+        supplies inscribed with security reminders; generating email advisories or
+        notices from organizational officials; displaying logon screen messages; displaying
+        security awareness posters; and conducting information security awareness
+        events.  [SP 800-50] provides guidance on security awareness and training
+        programs.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node47
+      ref_id: 3.2.2
+      description: Ensure that personnel are trained to carry out their assigned information
+        security-related duties and responsibilities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node51
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.2
+      description: Organizations determine the content and frequency of security training
+        based on the assigned duties, roles, and responsibilities of individuals and
+        the security requirements of organizations and the systems to which personnel
+        have authorized access. In addition, organizations provide system developers,
+        enterprise architects, security architects, acquisition/procurement officials,
+        software developers, system developers, systems integrators, system/network
+        administrators, personnel conducting configuration management and auditing
+        activities, personnel performing independent verification and validation,
+        security assessors, and other personnel having access to system-level software,
+        security-related technical training specifically tailored for their assigned
+        duties.  Comprehensive role-based training addresses management, operational,
+        and technical roles and responsibilities covering physical, personnel, and
+        technical controls. Such training can include policies, procedures, tools,
+        and artifacts for the security roles defined. Organizations also provide the
+        training necessary for individuals to carry out their responsibilities related
+        to operations and supply chain security within the context of organizational
+        information security programs.  [SP 800-181] provides guidance on role-based
+        information security training in the workplace. [SP 800-161] provides guidance
+        on supply chain risk management.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node47
+      ref_id: 3.2.3
+      description: Provide security awareness training on recognizing and reporting
+        potential indicators of insider threat.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node53
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.2.3
+      description: 'Potential indicators and possible precursors of insider threat
+        include behaviors such as: inordinate, long-term job dissatisfaction; attempts
+        to gain access to information that is not required for job performance; unexplained
+        access to financial resources; bullying or sexual harassment of fellow employees;
+        workplace violence; and other serious violations of the policies, procedures,
+        directives, rules, or practices of organizations. Security awareness training
+        includes how to communicate employee and management concerns regarding potential
+        indicators of insider threat through appropriate organizational channels in
+        accordance with established organizational policies and procedures. Organizations
+        may consider tailoring insider threat awareness topics to the role (e.g.,
+        training for managers may be focused on specific changes in behavior of team
+        members, while training for employees may be focused on more general observations).'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      assessable: false
+      depth: 1
+      name: Audit and Accountability
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.1
+      description: Create and retain system audit logs and records to the extent needed
+        to enable the monitoring, analysis, investigation, and reporting of unlawful
+        or unauthorized system activity
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node56
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.1
+      description: An event is any observable occurrence in a system, which includes
+        unlawful or unauthorized system activity. Organizations identify event types
+        for which a logging functionality is needed as those events which are significant
+        and relevant to the security of systems and the environments in which those
+        systems operate to meet specific and ongoing auditing needs. Event types can
+        include password changes, failed logons or failed accesses related to systems,
+        administrative privilege usage, or third-party credential usage. In determining
+        event types that require logging, organizations consider the monitoring and
+        auditing appropriate for each of the CUI security requirements. Monitoring
+        and auditing requirements can be balanced with other system needs. For example,
+        organizations may determine that systems must have the capability to log every
+        file access both successful and unsuccessful, but not activate that capability
+        except for specific circumstances due to the potential burden on system performance.  Audit
+        records can be generated at various levels of abstraction, including at the
+        packet level as information traverses the network. Selecting the appropriate
+        level of abstraction is a critical aspect of an audit logging capability and
+        can facilitate the identification of root causes to problems. Organizations
+        consider in the definition of event types, the logging necessary to cover
+        related events such as the steps in distributed, transaction-based processes
+        (e.g., processes that are distributed across multiple organizations) and actions
+        that occur in service-oriented or cloud-based architectures.  Audit record
+        content that may be necessary to satisfy this requirement includes time stamps,
+        source and destination addresses, user or process identifiers, event descriptions,
+        success or fail indications, filenames involved, and access control or flow
+        control rules invoked. Event outcomes can include indicators of event success
+        or failure and event-specific results (e.g., the security state of the system
+        after the event occurred).  Detailed information that organizations may consider
+        in audit records includes full text recording of privileged commands or the
+        individual identities of group account users. Organizations consider limiting
+        the additional audit log information to only that information explicitly needed
+        for specific audit requirements. This facilitates the use of audit trails
+        and audit logs by not including information that could potentially be misleading
+        or could make it more difficult to locate information of interest. Audit logs
+        are reviewed and analyzed as often as needed to provide important information
+        to organizations to facilitate risk-based decision making.  [SP 800-92] provides
+        guidance on security log management.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.2
+      description: Ensure that the actions of individual system users can be uniquely
+        traced to those users, so they can be held accountable for their actions.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node58
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.2
+      description: This requirement ensures that the contents of the audit record
+        include the information needed to link the audit event to the actions of an
+        individual to the extent feasible. Organizations consider logging for traceability
+        including results from monitoring of account usage, remote access, wireless
+        connectivity, mobile device connection, communications at system boundaries,
+        configuration settings, physical access, nonlocal maintenance, use of maintenance
+        tools, temperature and humidity, equipment delivery and removal, system component
+        inventory, use of mobile code, and use of Voice over Internet Protocol (VoIP).
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.3
+      description: Review and update logged events.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node60
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.3
+      description: The intent of this requirement is to periodically re-evaluate which
+        logged events will continue to be included in the list of events to be logged.
+        The event types that are logged by organizations may change over time. Reviewing
+        and updating the set of logged event types periodically is necessary to ensure
+        that the current set remains necessary and sufficient.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.4
+      description: Alert in the event of an audit logging process failure.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node62
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.4
+      description: Audit logging process failures include software and hardware errors,
+        failures in the audit record capturing mechanisms, and audit record storage
+        capacity being reached or exceeded. This requirement applies to each audit
+        record data storage repository (i.e., distinct system component where audit
+        records are stored), the total audit record storage capacity of organizations
+        (i.e., all audit record data storage repositories combined), or both.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.5
+      description: Correlate audit record review, analysis, and reporting processes
+        for investigation and response to indications of unlawful, unauthorized, suspicious,
+        or unusual activity.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node64
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.5
+      description: Correlating audit record review, analysis, and reporting processes
+        helps to ensure that they do not operate independently, but rather collectively.
+        Regarding the assessment of a given organizational system, the requirement
+        is agnostic as to whether this correlation is applied at the system level
+        or at the organization level across all systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.6
+      description: Provide audit record reduction and report generation to support
+        on-demand analysis and reporting.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node66
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.6
+      description: Audit record reduction is a process that manipulates collected
+        audit information and organizes such information in a summary format that
+        is more meaningful to analysts. Audit record reduction and report generation
+        capabilities do not always emanate from the same system or organizational
+        entities conducting auditing activities. Audit record reduction capability
+        can include, for example, modern data mining techniques with advanced data
+        filters to identify anomalous behavior in audit records. The report generation
+        capability provided by the system can help generate customizable reports.
+        Time ordering of audit records can be a significant issue if the granularity
+        of the time stamp in the record is insufficient.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.7
+      description: Provide a system capability that compares and synchronizes internal
+        system clocks with an authoritative source to generate time stamps for audit
+        records
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node68
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.7
+      description: 'Internal system clocks are used to generate time stamps, which
+        include date and time. Time is expressed in Coordinated Universal Time (UTC),
+        a modern continuation of Greenwich Mean Time (GMT), or local time with an
+        offset from UTC. The granularity of time measurements refers to the degree
+        of synchronization between system clocks and reference clocks, for example,
+        clocks synchronizing within hundreds of milliseconds or within tens of milliseconds.
+        Organizations may define different time granularities for different system
+        components. Time service can also be critical to other security capabilities
+        such as access control and identification and authentication, depending on
+        the nature of the mechanisms used to support those capabilities. This requirement
+        provides uniformity of time stamps for systems with multiple system clocks
+        and systems connected over a network. See [IETF 5905].  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.8
+      description: Protect audit information and audit logging tools from unauthorized
+        access, modification, and deletion.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node70
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.8
+      description: Audit information includes all information (e.g., audit records,
+        audit log settings, and audit reports) needed to successfully audit system
+        activity. Audit logging tools are those programs and devices used to conduct
+        audit and logging activities. This requirement focuses on the technical protection
+        of audit information and limits the ability to access and execute audit logging
+        tools to authorized individuals. Physical protection of audit information
+        is addressed by media protection and physical and environmental protection
+        requirements.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node54
+      ref_id: 3.3.9
+      description: Limit management of audit logging functionality to a subset of
+        privileged users.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node72
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.3.9
+      description: Individuals with privileged access to a system and who are also
+        the subject of an audit by that system, may affect the reliability of audit
+        information by inhibiting audit logging activities or modifying audit records.
+        This requirement specifies that privileged access be further defined between
+        audit-related privileges and other privileges, thus limiting the users with
+        audit-related privileges
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      assessable: false
+      depth: 1
+      name: Configuration Management
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.1
+      description: Establish and maintain baseline configurations and inventories
+        of organizational systems (including hardware, software, firmware, and documentation)
+        throughout the respective system development life cycles.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node75
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.1
+      description: 'Baseline configurations are documented, formally reviewed, and
+        agreed-upon specifications for systems or configuration items within those
+        systems. Baseline configurations serve as a basis for future builds, releases,
+        and changes to systems. Baseline configurations include information about
+        system components (e.g., standard software packages installed on workstations,
+        notebook computers, servers, network components, or mobile devices; current
+        version numbers and update and patch information on operating systems and
+        applications; and configuration settings and parameters), network topology,
+        and the logical placement of those components within the system architecture.
+        Baseline configurations of systems also reflect the current enterprise architecture.
+        Maintaining effective baseline configurations requires creating new baselines
+        as organizational systems change over time. Baseline configuration maintenance
+        includes reviewing and updating the baseline configuration when changes are
+        made based on security risks and deviations from the established baseline
+        configuration.  Organizations can implement centralized system component inventories
+        that include components from multiple organizational systems. In such situations,
+        organizations ensure that the resulting inventories include system-specific
+        information required for proper component accountability (e.g., system association,
+        system owner). Information deemed necessary for effective accountability of
+        system components includes hardware inventory specifications, software license
+        information, software version numbers, component owners, and for networked
+        components or devices, machine names and network addresses. Inventory specifications
+        include manufacturer, device type, model, serial number, and physical location.  [SP
+        800-128] provides guidance on security-focused configuration management.  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.2
+      description: Establish and enforce security configuration settings for information
+        technology products employed in organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node77
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.2
+      description: 'Configuration settings are the set of parameters that can be changed
+        in hardware, software, or firmware components of the system that affect the
+        security posture or functionality of the system. Information technology products
+        for which security-related configuration settings can be defined include mainframe
+        computers, servers, workstations, input and output devices (e.g., scanners,
+        copiers, and printers), network components (e.g., firewalls, routers, gateways,
+        voice and data switches, wireless access points, network appliances, sensors),
+        operating systems, middleware, and applications.  Security parameters are
+        those parameters impacting the security state of systems including the parameters
+        required to satisfy other security requirements. Security parameters include:
+        registry settings; account, file, directory permission settings; and settings
+        for functions, ports, protocols, and remote connections. Organizations establish
+        organization-wide configuration settings and subsequently derive specific
+        configuration settings for systems. The established settings become part of
+        the systems configuration baseline.  Common secure configurations (also referred
+        to as security configuration checklists, lockdown and hardening guides, security
+        reference guides, security technical implementation guides) provide recognized,
+        standardized, and established benchmarks that stipulate secure configuration
+        settings for specific information technology platforms/products and instructions
+        for configuring those system components to meet operational requirements.
+        Common secure configurations can be developed by a variety of organizations
+        including information technology product developers, manufacturers, vendors,
+        consortia, academia, industry, federal agencies, and other organizations in
+        the public and private sectors.  [SP 800-70] and [SP 800-128] provide guidance
+        on security configuration settings.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.3
+      description: Track, review, approve or disapprove, and log changes to organizational
+        systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node79
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.3
+      description: Tracking, reviewing, approving/disapproving, and logging changes
+        is called configuration change control. Configuration change control for organizational
+        systems involves the systematic proposal, justification, implementation, testing,
+        review, and disposition of changes to the systems, including system upgrades
+        and modifications. Configuration change control includes changes to baseline
+        configurations for components and configuration items of systems, changes
+        to configuration settings for information technology products (e.g., operating
+        systems, applications, firewalls, routers, and mobile devices), unscheduled
+        and unauthorized changes, and changes to remediate vulnerabilities.  Processes
+        for managing configuration changes to systems include Configuration Control
+        Boards or Change Advisory Boards that review and approve proposed changes
+        to systems. For new development systems or systems undergoing major upgrades,
+        organizations consider including representatives from development organizations
+        on the Configuration Control Boards or Change Advisory Boards. Audit logs
+        of changes include activities before and after changes are made to organizational
+        systems and the activities required to implement such changes.  [SP 800-128]
+        provides guidance on configuration change control.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.4
+      description: Analyze the security impact of changes prior to implementation.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node81
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.4
+      description: Organizational personnel with information security responsibilities
+        (e.g., system administrators, system security officers, system security managers,
+        and systems security engineers) conduct security impact analyses. Individuals
+        conducting security impact analyses possess the necessary skills and technical
+        expertise to analyze the changes to systems and the associated security ramifications.
+        Security impact analysis may include reviewing security plans to understand
+        security requirements and reviewing system design documentation to understand
+        the implementation of controls and how specific changes might affect the controls.
+        Security impact analyses may also include risk assessments to better understand
+        the impact of the changes and to determine if additional controls are required.  [SP
+        800-128] provides guidance on configuration change control and security impact
+        analysis.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.5
+      description: Define, document, approve, and enforce physical and logical access
+        restrictions associated with changes to organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node83
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.5
+      description: Any changes to the hardware, software, or firmware components of
+        systems can potentially have significant effects on the overall security of
+        the systems. Therefore, organizations permit only qualified and authorized
+        individuals to access systems for purposes of initiating changes, including
+        upgrades and modifications. Access restrictions for change also include software
+        libraries.  Access restrictions include physical and logical access control
+        requirements, workflow automation, media libraries, abstract layers (e.g.,
+        changes implemented into external interfaces rather than directly into systems),
+        and change windows (e.g., changes occur only during certain specified times).
+        In addition to security concerns, commonly-accepted due diligence for configuration
+        management includes access restrictions as an essential part in ensuring the
+        ability to effectively manage the configuration.  [SP 800-128] provides guidance
+        on configuration change control.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.6
+      description: Employ the principle of least functionality by configuring organizational
+        systems to provide only essential capabilities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node85
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.6
+      description: Systems can provide a wide variety of functions and services. Some
+        of the functions and services routinely provided by default, may not be necessary
+        to support essential organizational missions, functions, or operations. It
+        is sometimes convenient to provide multiple services from single system components.
+        However, doing so increases risk over limiting the services provided by any
+        one component. Where feasible, organizations limit component functionality
+        to a single function per component.  Organizations review functions and services
+        provided by systems or components of systems, to determine which functions
+        and services are candidates for elimination. Organizations disable unused
+        or unnecessary physical and logical ports and protocols to prevent unauthorized
+        connection of devices, transfer of information, and tunneling. Organizations
+        can utilize network scanning tools, intrusion detection and prevention systems,
+        and end-point protections such as firewalls and host-based intrusion detection
+        systems to identify and prevent the use of prohibited functions, ports, protocols,
+        and services.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.7
+      description: Restrict, disable, or prevent the use of nonessential programs,
+        functions, ports, protocols, and services.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node87
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.7
+      description: Restricting the use of nonessential software (programs) includes
+        restricting the roles allowed to approve program execution; prohibiting auto-execute;
+        program blacklisting and whitelisting; or restricting the number of program
+        instances executed at the same time. The organization makes a security-based
+        determination which functions, ports, protocols, and/or services are restricted.
+        Bluetooth, File Transfer Protocol (FTP), and peer-to-peer networking are examples
+        of protocols organizations consider preventing the use of, restricting, or
+        disabling.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.8
+      description: Apply deny-by-exception (blacklisting) policy to prevent the use
+        of unauthorized software or deny-all, permit-by-exception (whitelisting) policy
+        to allow the execution of authorized software.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node89
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.8
+      description: The process used to identify software programs that are not authorized
+        to execute on systems is commonly referred to as blacklisting. The process
+        used to identify software programs that are authorized to execute on systems
+        is commonly referred to as whitelisting. Whitelisting is the stronger of the
+        two policies for restricting software program execution. In addition to whitelisting,
+        organizations consider verifying the integrity of whitelisted software programs
+        using, for example, cryptographic checksums, digital signatures, or hash functions.
+        Verification of whitelisted software can occur either prior to execution or
+        at system startup.  [SP 800-167] provides guidance on application whitelisting.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node73
+      ref_id: 3.4.9
+      description: Control and monitor user-installed software.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node91
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.4.9
+      description: "Users can install software in organizational systems if provided\
+        \ the necessary privileges. To maintain control over the software installed,\
+        \ organizations identify permitted and prohibited actions regarding software\
+        \ installation through policies. Permitted software installations include\
+        \ updates and security patches to existing software and applications from\
+        \ organization-approved \u201Capp stores.\u201D Prohibited software installations\
+        \ may include software with unknown or suspect pedigrees or software that\
+        \ organizations consider potentially malicious. The policies organizations\
+        \ select governing user-installed software may be organization-developed or\
+        \ provided by some external entity. Policy enforcement methods include procedural\
+        \ methods, automated methods, or both."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      assessable: false
+      depth: 1
+      name: Identification and Authentication
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.1
+      description: Identify system users, processes acting on behalf of users, and
+        devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node94
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.1
+      description: 'Common device identifiers include Media Access Control (MAC),
+        Internet Protocol (IP) addresses, or device-unique token identifiers. Management
+        of individual identifiers is not applicable to shared system accounts. Typically,
+        individual identifiers are the user names associated with the system accounts
+        assigned to those individuals. Organizations may require unique identification
+        of individuals in group accounts or for detailed accountability of individual
+        activity. In addition, this requirement addresses individual identifiers that
+        are not necessarily associated with system accounts. Organizational devices
+        requiring identification may be defined by type, by device, or by a combination
+        of type/device.  [SP 800-63-3] provides guidance on digital identities.  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.2
+      description: Authenticate (or verify) the identities of users, processes, or
+        devices, as a prerequisite to allowing access to organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node96
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.2
+      description: 'Individual authenticators include the following: passwords, key
+        cards, cryptographic devices, and one-time password devices. Initial authenticator
+        content is the actual content of the authenticator, for example, the initial
+        password. In contrast, the requirements about authenticator content include
+        the minimum password length. Developers ship system components with factory
+        default authentication credentials to allow for initial installation and configuration.
+        Default authentication credentials are often well known, easily discoverable,
+        and present a significant security risk.  Systems support authenticator management
+        by organization-defined settings and restrictions for various authenticator
+        characteristics including minimum password length, validation time window
+        for time synchronous one-time tokens, and number of allowed rejections during
+        the verification stage of biometric authentication. Authenticator management
+        includes issuing and revoking, when no longer needed, authenticators for temporary
+        access such as that required for remote maintenance. Device authenticators
+        include certificates and passwords.  [SP 800-63-3] provides guidance on digital
+        identities.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.3
+      description: 'Use multifactor authentication for local and network access to
+        privileged accounts and for network access to non-privileged accounts.[24]
+        [25].  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node98
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.3
+      description: "Multifactor authentication requires the use of two or more different\
+        \ factors to authenticate. The factors are defined as something you know (e.g.,\
+        \ password, personal identification number [PIN]); something you have (e.g.,\
+        \ cryptographic identification device, token); or something you are (e.g.,\
+        \ biometric). Multifactor authentication solutions that feature physical authenticators\
+        \ include hardware authenticators providing time-based or challenge-response\
+        \ authenticators and smart cards. In addition to authenticating users at the\
+        \ system level (i.e., at logon), organizations may also employ authentication\
+        \ mechanisms at the application level, when necessary, to provide increased\
+        \ information security. Access to organizational systems is defined as local\
+        \ access or network access. Local access is any access to organizational systems\
+        \ by users (or processes acting on behalf of users) where such access is obtained\
+        \ by direct connections without the use of networks. Network access is access\
+        \ to systems by users (or processes acting on behalf of users) where such\
+        \ access is obtained through network connections (i.e., nonlocal accesses).\
+        \ Remote access is a type of network access that involves communication through\
+        \ external networks. The use of encrypted virtual private networks for connections\
+        \ between organization-controlled and non-organization controlled endpoints\
+        \ may be treated as internal networks with regard to protecting the confidentiality\
+        \ of information.  [SP 800-63-3] provides guidance on digital identities.\n\
+        \n[24] Multifactor authentication requires two or more different factors to\
+        \ achieve authentication. The factors include: something you know (e.g., password/PIN);\
+        \ something you have (e.g., cryptographic identification device, token); or\
+        \ something you are (e.g., biometric). The requirement for multifactor authentication\
+        \ should not be interpreted as requiring federal Personal Identity Verification\
+        \ (PIV) card or Department of Defense Common Access Card (CAC)-like solutions.\
+        \ A variety of multifactor solutions (including those with replay resistance)\
+        \ using tokens and biometrics are commercially available. Such solutions may\
+        \ employ hard tokens (e.g., smartcards, key fobs, or dongles) or soft tokens\
+        \ to store user credentials.  \n[25] Local access is any access to a system\
+        \ by a user (or process acting on behalf of a user) communicating through\
+        \ a direct connection without the use of a network. Network access is any\
+        \ access to a system by a user (or a process acting on behalf of a user) communicating\
+        \ through a network (e.g., local area network, wide area network, Internet)."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.4
+      description: Employ replay-resistant authentication mechanisms for network access
+        to privileged and non-privileged accounts.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node100
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.4
+      description: Authentication processes resist replay attacks if it is impractical
+        to successfully authenticate by recording or replaying previous authentication
+        messages. Replay-resistant techniques include protocols that use nonces or
+        challenges such as time synchronous or challenge-response one-time authenticators.  [SP
+        800-63-3] provides guidance on digital identities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.5
+      description: Prevent reuse of identifiers for a defined period.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node102
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.5
+      description: Identifiers are provided for users, processes acting on behalf
+        of users, or devices (3.5.1). Preventing reuse of identifiers implies preventing
+        the assignment of previously used individual, group, role, or device identifiers
+        to different individuals, groups, roles, or devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.6
+      description: Disable identifiers after a defined period of inactivity.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node104
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.6
+      description: Inactive identifiers pose a risk to organizational information
+        because attackers may exploit an inactive identifier to gain undetected access
+        to organizational devices. The owners of the inactive accounts may not notice
+        if unauthorized access to the account has been obtained.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.7
+      description: Enforce a minimum password complexity and change of characters
+        when new passwords are created.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node106
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.7
+      description: This requirement applies to single-factor authentication of individuals
+        using passwords as individual or group authenticators, and in a similar manner,
+        when passwords are used as part of multifactor authenticators. The number
+        of changed characters refers to the number of changes required with respect
+        to the total number of positions in the current password. To mitigate certain
+        brute force attacks against passwords, organizations may also consider salting
+        passwords.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.8
+      description: Prohibit password reuse for a specified number of generations.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node108
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.8
+      description: Password lifetime restrictions do not apply to temporary passwords
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.9
+      description: Allow temporary password use for system logons with an immediate
+        change to a permanent password.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node110
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.9
+      description: Changing temporary passwords to permanent passwords immediately
+        after system logon ensures that the necessary strength of the authentication
+        mechanism is implemented at the earliest opportunity, reducing the susceptibility
+        to authenticator compromises.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.10
+      description: Store and transmit only cryptographically-protected passwords.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node112
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.10
+      description: Cryptographically-protected passwords use salted one-way cryptographic
+        hashes of passwords. See [NIST CRYPTO].
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node92
+      ref_id: 3.5.11
+      description: Obscure feedback of authentication information
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node114
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.5.11
+      description: The feedback from systems does not provide any information that
+        would allow unauthorized individuals to compromise authentication mechanisms.
+        For some types of systems or system components, for example, desktop or notebook
+        computers with relatively large monitors, the threat (often referred to as
+        shoulder surfing) may be significant. For other types of systems or components,
+        for example, mobile devices with small displays, this threat may be less significant,
+        and is balanced against the increased likelihood of typographic input errors
+        due to the small keyboards. Therefore, the means for obscuring the authenticator
+        feedback is selected accordingly. Obscuring authenticator feedback includes
+        displaying asterisks when users type passwords into input devices or displaying
+        feedback for a very limited time before fully obscuring it.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node115
+      assessable: false
+      depth: 1
+      name: Incident response
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node115
+      ref_id: 3.6.1
+      description: Establish an operational incident-handling capability for organizational
+        systems that includes preparation, detection, analysis, containment, recovery,
+        and user response activities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node117
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.1
+      description: Organizations recognize that incident handling capability is dependent
+        on the capabilities of organizational systems and the mission/business processes
+        being supported by those systems. Organizations consider incident handling
+        as part of the definition, design, and development of mission/business processes
+        and systems. Incident-related information can be obtained from a variety of
+        sources including audit monitoring, network monitoring, physical access monitoring,
+        user and administrator reports, and reported supply chain events. Effective
+        incident handling capability includes coordination among many organizational
+        entities including mission/business owners, system owners, authorizing officials,
+        human resources offices, physical and personnel security offices, legal departments,
+        operations personnel, procurement offices, and the risk executive.  As part
+        of user response activities, incident response training is provided by organizations
+        and is linked directly to the assigned roles and responsibilities of organizational
+        personnel to ensure that the appropriate content and level of detail is included
+        in such training. For example, regular users may only need to know who to
+        call or how to recognize an incident on the system; system administrators
+        may require additional training on how to handle or remediate incidents; and
+        incident responders may receive more specific training on forensics, reporting,
+        system recovery, and restoration. Incident response training includes user
+        training in the identification/reporting of suspicious activities from external
+        and internal sources. User response activities also includes incident response
+        assistance which may consist of help desk support, assistance groups, and
+        access to forensics services or consumer redress services, when required.  [SP
+        800-61] provides guidance on incident handling. [SP 800-86] and [SP 800-101]
+        provide guidance on integrating forensic techniques into incident response.
+        [SP 800-161] provides guidance on supply chain risk management.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node115
+      ref_id: 3.6.2
+      description: Track, document, and report incidents to designated officials and/or
+        authorities both internal and external to the organization.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node119
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.2
+      description: Tracking and documenting system security incidents includes maintaining
+        records about each incident, the status of the incident, and other pertinent
+        information necessary for forensics, evaluating incident details, trends,
+        and handling. Incident information can be obtained from a variety of sources
+        including incident reports, incident response teams, audit monitoring, network
+        monitoring, physical access monitoring, and user/administrator reports.  Reporting
+        incidents addresses specific incident reporting requirements within an organization
+        and the formal incident reporting requirements for the organization. Suspected
+        security incidents may also be reported and include the receipt of suspicious
+        email communications that can potentially contain malicious code. The types
+        of security incidents reported, the content and timeliness of the reports,
+        and the designated reporting authorities reflect applicable laws, Executive
+        Orders, directives, regulations, and policies.  [SP 800-61] provides guidance
+        on incident handling.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node115
+      ref_id: 3.6.3
+      description: Test the organizational incident response capability.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node121
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.6.3
+      description: Organizations test incident response capabilities to determine
+        the effectiveness of the capabilities and to identify potential weaknesses
+        or deficiencies. Incident response testing includes the use of checklists,
+        walk-through or tabletop exercises, simulations (both parallel and full interrupt),
+        and comprehensive exercises. Incident response testing can also include a
+        determination of the effects on organizational operations (e.g., reduction
+        in mission capabilities), organizational assets, and individuals due to incident
+        response.  [SP 800-84] provides guidance on testing programs for information
+        technology capabilities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      assessable: false
+      depth: 1
+      name: Maintenance
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      ref_id: 3.7.1
+      description: 'Perform maintenance on organizational systems.[26]. '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node124
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.1
+      description: 'This requirement addresses the information security aspects of
+        the system maintenance program and applies to all types of maintenance to
+        any system component (including hardware, firmware, applications) conducted
+        by any local or nonlocal entity. System maintenance also includes those components
+        not directly associated with information processing and data or information
+        retention such as scanners, copiers, and printers.
+
+
+        [26] In general, system maintenance requirements tend to support the security
+        objective of availability. However, improper system maintenance or a failure
+        to perform maintenance can result in the unauthorized disclosure of CUI, thus
+        compromising confidentiality of that information.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      ref_id: 3.7.2
+      description: Provide controls on the tools, techniques, mechanisms, and personnel
+        used to conduct system maintenance.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node126
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.2
+      description: This requirement addresses security-related issues with maintenance
+        tools that are not within the organizational system boundaries that process,
+        store, or transmit CUI, but are used specifically for diagnostic and repair
+        actions on those systems. Organizations have flexibility in determining the
+        controls in place for maintenance tools, but can include approving, controlling,
+        and monitoring the use of such tools. Maintenance tools are potential vehicles
+        for transporting malicious code, either intentionally or unintentionally,
+        into a facility and into organizational systems. Maintenance tools can include
+        hardware, software, and firmware items, for example, hardware and software
+        diagnostic test equipment and hardware and software packet sniffers.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      ref_id: 3.7.3
+      description: Ensure equipment removed for off-site maintenance is sanitized
+        of any CUI.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node128
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.3
+      description: This requirement addresses the information security aspects of
+        system maintenance that are performed off-site and applies to all types of
+        maintenance to any system component (including applications) conducted by
+        a local or nonlocal entity (e.g., in-contract, warranty, in- house, software
+        maintenance agreement).  [SP 800-88] provides guidance on media sanitization.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      ref_id: 3.7.4
+      description: Check media containing diagnostic and test programs for malicious
+        code before the media are used in organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node130
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.4
+      description: If, upon inspection of media containing maintenance diagnostic
+        and test programs, organizations determine that the media contain malicious
+        code, the incident is handled consistent with incident handling policies and
+        procedures.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      ref_id: 3.7.5
+      description: Require multifactor authentication to establish nonlocal maintenance
+        sessions via external network connections and terminate such connections when
+        nonlocal maintenance is complete.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node132
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.5
+      description: Nonlocal maintenance and diagnostic activities are those activities
+        conducted by individuals communicating through an external network. The authentication
+        techniques employed in the establishment of these nonlocal maintenance and
+        diagnostic sessions reflect the network access requirements in 3.5.3.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node122
+      ref_id: 3.7.6
+      description: Supervise the maintenance activities of maintenance personnel without
+        required access authorization.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node134
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.7.6
+      description: This requirement applies to individuals who are performing hardware
+        or software maintenance on organizational systems, while 3.10.1 addresses
+        physical access for individuals whose maintenance duties place them within
+        the physical protection perimeter of the systems (e.g., custodial staff, physical
+        plant maintenance personnel). Individuals not previously identified as authorized
+        maintenance personnel, such as information technology manufacturers, vendors,
+        consultants, and systems integrators, may require privileged access to organizational
+        systems, for example, when required to conduct maintenance activities with
+        little or no notice. Organizations may choose to issue temporary credentials
+        to these individuals based on organizational risk assessments. Temporary credentials
+        may be for one-time use or for very limited time periods.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      assessable: false
+      depth: 1
+      name: Media Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.1
+      description: Protect (i.e., physically control and securely store) system media
+        containing CUI, both paper and digital.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node137
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.1
+      description: System media includes digital and non-digital media. Digital media
+        includes diskettes, magnetic tapes, external and removable hard disk drives,
+        flash drives, compact disks, and digital video disks. Non-digital media includes
+        paper and microfilm. Protecting digital media includes limiting access to
+        design specifications stored on compact disks or flash drives in the media
+        library to the project leader and any individuals on the development team.
+        Physically controlling system media includes conducting inventories, maintaining
+        accountability for stored media, and ensuring procedures are in place to allow
+        individuals to check out and return media to the media library. Secure storage
+        includes a locked drawer, desk, or cabinet, or a controlled media library.  Access
+        to CUI on system media can be limited by physically controlling such media,
+        which includes conducting inventories, ensuring procedures are in place to
+        allow individuals to check out and return media to the media library, and
+        maintaining accountability for all stored media.  [SP 800-111] provides guidance
+        on storage encryption technologies for end user devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.2
+      description: Limit access to CUI on system media to authorized users
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node139
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.2
+      description: Access can be limited by physically controlling system media and
+        secure storage areas. Physically controlling system media includes conducting
+        inventories, ensuring procedures are in place to allow individuals to check
+        out and return system media to the media library, and maintaining accountability
+        for all stored media. Secure storage includes a locked drawer, desk, or cabinet,
+        or a controlled media library
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.3
+      description: Sanitize or destroy system media containing CUI before disposal
+        or release for reuse.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node141
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.3
+      description: 'This requirement applies to all system media, digital and non-digital,
+        subject to disposal or reuse. Examples include: digital media found in workstations,
+        network components, scanners, copiers, printers, notebook computers, and mobile
+        devices; and non-digital media such as paper and microfilm. The sanitization
+        process removes information from the media such that the information cannot
+        be retrieved or reconstructed. Sanitization techniques, including clearing,
+        purging, cryptographic erase, and destruction, prevent the disclosure of information
+        to unauthorized individuals when such media is released for reuse or disposal.  Organizations
+        determine the appropriate sanitization methods, recognizing that destruction
+        may be necessary when other methods cannot be applied to the media requiring
+        sanitization. Organizations use discretion on the employment of sanitization
+        techniques and procedures for media containing information that is in the
+        public domain or publicly releasable or deemed to have no adverse impact on
+        organizations or individuals if released for reuse or disposal. Sanitization
+        of non-digital media includes destruction, removing CUI from documents, or
+        redacting selected sections or words from a document by obscuring the redacted
+        sections or words in a manner equivalent in effectiveness to removing the
+        words or sections from the document. NARA policy and guidance control sanitization
+        processes for controlled unclassified information.  [SP 800-88] provides guidance
+        on media sanitization.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.4
+      description: 'Mark media with necessary CUI markings and distribution limitations.[27] '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node143
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.4
+      description: "The term security marking refers to the application or use of\
+        \ human-readable security attributes. System media includes digital and non-digital\
+        \ media. Marking of system media reflects applicable federal laws, Executive\
+        \ Orders, directives, policies, and regulations. See [NARA MARK].\n\n[27]\
+        \ The implementation of this requirement is per marking guidance in [32 CFR\
+        \ 2002] and [NARA CUI]. Standard Form (SF) 902 (approximate size 2.125\u201D\
+        \ x 1.25\u201D) and SF 903 (approximate size 2.125\u201D x .625\u201D) can\
+        \ be used on media that contains CUI such as hard drives, or USB devices.\
+        \ Both forms are available from https://www.gsaadvantage.gov."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.5
+      description: Control access to media containing CUI and maintain accountability
+        for media during transport outside of controlled areas.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node145
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.5
+      description: Controlled areas are areas or spaces for which organizations provide
+        physical or procedural controls to meet the requirements established for protecting
+        systems and information. Controls to maintain accountability for media during
+        transport include locked containers and cryptography. Cryptographic mechanisms
+        can provide confidentiality and integrity protections depending upon the mechanisms
+        used. Activities associated with transport include the actual transport as
+        well as those activities such as releasing media for transport and ensuring
+        that media enters the appropriate transport processes. For the actual transport,
+        authorized transport and courier personnel may include individuals external
+        to the organization. Maintaining accountability of media during transport
+        includes restricting transport activities to authorized personnel and tracking
+        and obtaining explicit records of transport activities as the media moves
+        through the transportation system to prevent and detect loss, destruction,
+        or tampering.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.6
+      description: Implement cryptographic mechanisms to protect the confidentiality
+        of CUI stored on digital media during transport unless otherwise protected
+        by alternative physical safeguards.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node147
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.6
+      description: This requirement applies to portable storage devices (e.g., USB
+        memory sticks, digital video disks, compact disks, external or removable hard
+        disk drives). See [NIST CRYPTO].  [SP 800-111] provides guidance on storage
+        encryption technologies for end user devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.7
+      description: Control the use of removable media on system components.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node149
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.7
+      description: In contrast to requirement 3.8.1, which restricts user access to
+        media, this requirement restricts the use of certain types of media on systems,
+        for example, restricting or prohibiting the use of flash drives or external
+        hard disk drives. Organizations can employ technical and nontechnical controls
+        (e.g., policies, procedures, and rules of behavior) to control the use of
+        system media. Organizations may control the use of portable storage devices,
+        for example, by using physical cages on workstations to prohibit access to
+        certain external ports, or disabling or removing the ability to insert, read,
+        or write to such devices.  Organizations may also limit the use of portable
+        storage devices to only approved devices including devices provided by the
+        organization, devices provided by other approved organizations, and devices
+        that are not personally owned. Finally, organizations may control the use
+        of portable storage devices based on the type of device, prohibiting the use
+        of writeable, portable devices, and implementing this restriction by disabling
+        or removing the capability to write to such devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.8
+      description: Prohibit the use of portable storage devices when such devices
+        have no identifiable owner.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node151
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.8
+      description: Requiring identifiable owners (e.g., individuals, organizations,
+        or projects) for portable storage devices reduces the overall risk of using
+        such technologies by allowing organizations to assign responsibility and accountability
+        for addressing known vulnerabilities in the devices (e.g., insertion of malicious
+        code).
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node135
+      ref_id: 3.8.9
+      description: Protect the confidentiality of backup CUI at storage locations.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node153
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.8.9
+      description: Organizations can employ cryptographic mechanisms or alternative
+        physical controls to protect the confidentiality of backup information at
+        designated storage locations. Backed-up information containing CUI may include
+        system-level information and user-level information. System-level information
+        includes system-state information, operating system software, application
+        software, and licenses. User-level information includes information other
+        than system-level information.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node154
+      assessable: false
+      depth: 1
+      name: Personnel Security
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node154
+      ref_id: 3.9.1
+      description: Screen individuals prior to authorizing access to organizational
+        systems containing CUI.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node156
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.9.1
+      description: "Personnel security screening (vetting) activities involve the\
+        \ evaluation/assessment of individual\u2019s conduct, integrity, judgment,\
+        \ loyalty, reliability, and stability (i.e., the trustworthiness of the individual)\
+        \ prior to authorizing access to organizational systems containing CUI. The\
+        \ screening activities reflect applicable federal laws, Executive Orders,\
+        \ directives, policies, regulations, and specific criteria established for\
+        \ the level of access required for assigned positions."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node154
+      ref_id: 3.9.2
+      description: Ensure that organizational systems containing CUI are protected
+        during and after personnel actions such as terminations and transfers
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node158
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.9.2
+      description: Protecting CUI during and after personnel actions may include returning
+        system-related property and conducting exit interviews. System-related property
+        includes hardware authentication tokens, identification cards, system administration
+        technical manuals, keys, and building passes. Exit interviews ensure that
+        individuals who have been terminated understand the security constraints imposed
+        by being former employees and that proper accountability is achieved for system-related
+        property. Security topics of interest at exit interviews can include reminding
+        terminated individuals of nondisclosure agreements and potential limitations
+        on future employment. Exit interviews may not be possible for some terminated
+        individuals, for example, in cases related to job abandonment, illnesses,
+        and non-availability of supervisors. For termination actions, timely execution
+        is essential for individuals terminated for cause. In certain situations,
+        organizations consider disabling the system accounts of individuals that are
+        being terminated prior to the individuals being notified.  This requirement
+        applies to reassignments or transfers of individuals when the personnel action
+        is permanent or of such extended durations as to require protection. Organizations
+        define the CUI protections appropriate for the types of reassignments or transfers,
+        whether permanent or extended. Protections that may be required for transfers
+        or reassignments to other positions within organizations include returning
+        old and issuing new keys, identification cards, and building passes; changing
+        system access authorizations (i.e., privileges); closing system accounts and
+        establishing new accounts; and providing for access to official records to
+        which individuals had access at previous work locations and in previous system
+        accounts.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      assessable: false
+      depth: 1
+      name: Physical Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      ref_id: 3.10.1
+      description: Limit physical access to organizational systems, equipment, and
+        the respective operating environments to authorized individuals.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node161
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.1
+      description: This requirement applies to employees, individuals with permanent
+        physical access authorization credentials, and visitors. Authorized individuals
+        have credentials that include badges, identification cards, and smart cards.
+        Organizations determine the strength of authorization credentials needed consistent
+        with applicable laws, directives, policies, regulations, standards, procedures,
+        and guidelines. This requirement applies only to areas within facilities that
+        have not been designated as publicly accessible.  Limiting physical access
+        to equipment may include placing equipment in locked rooms or other secured
+        areas and allowing access to authorized individuals only; and placing equipment
+        in locations that can be monitored by organizational personnel. Computing
+        devices, external disk drives, networking devices, monitors, printers, copiers,
+        scanners, facsimile machines, and audio devices are examples of equipment.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      ref_id: 3.10.2
+      description: Protect and monitor the physical facility and support infrastructure
+        for organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node163
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.2
+      description: Monitoring of physical access includes publicly accessible areas
+        within organizational facilities. This can be accomplished, for example, by
+        the employment of guards; the use of sensor devices; or the use of video surveillance
+        equipment such as cameras. Examples of support infrastructure include system
+        distribution, transmission, and power lines. Security controls applied to
+        the support infrastructure prevent accidental damage, disruption, and physical
+        tampering. Such controls may also be necessary to prevent eavesdropping or
+        modification of unencrypted transmissions. Physical access controls to support
+        infrastructure include locked wiring closets; disconnected or locked spare
+        jacks; protection of cabling by conduit or cable trays; and wiretapping sensors.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      ref_id: 3.10.3
+      description: Escort visitors and monitor visitor activity.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node165
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.3
+      description: Individuals with permanent physical access authorization credentials
+        are not considered visitors. Audit logs can be used to monitor visitor activity.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      ref_id: 3.10.4
+      description: Maintain audit logs of physical access.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node167
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.4
+      description: Organizations have flexibility in the types of audit logs employed.
+        Audit logs can be procedural (e.g., a written log of individuals accessing
+        the facility), automated (e.g., capturing ID provided by a PIV card), or some
+        combination thereof. Physical access points can include facility access points,
+        interior access points to systems or system components requiring supplemental
+        access controls, or both. System components (e.g., workstations, notebook
+        computers) may be in areas designated as publicly accessible with organizations
+        safeguarding access to such devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      ref_id: 3.10.5
+      description: Control and manage physical access devices.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node169
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.5
+      description: Physical access devices include keys, locks, combinations, and
+        card readers.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node159
+      ref_id: 3.10.6
+      description: Enforce safeguarding measures for CUI at alternate work sites.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node171
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.10.6
+      description: Alternate work sites may include government facilities or the private
+        residences of employees. Organizations may define different security requirements
+        for specific alternate work sites or types of sites depending on the work-related
+        activities conducted at those sites.  [SP 800-46] and [SP 800-114] provide
+        guidance on enterprise and user security when teleworking.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node172
+      assessable: false
+      depth: 1
+      name: Risk Assessment
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node172
+      ref_id: 3.11.1
+      description: Periodically assess the risk to organizational operations (including
+        mission, functions, image, or reputation), organizational assets, and individuals,
+        resulting from the operation of organizational systems and the associated
+        processing, storage, or transmission of CUI
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node174
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.1
+      description: Clearly defined system boundaries are a prerequisite for effective
+        risk assessments. Such risk assessments consider threats, vulnerabilities,
+        likelihood, and impact to organizational operations, organizational assets,
+        and individuals based on the operation and use of organizational systems.
+        Risk assessments also consider risk from external parties (e.g., service providers,
+        contractors operating systems on behalf of the organization, individuals accessing
+        organizational systems, outsourcing entities). Risk assessments, either formal
+        or informal, can be conducted at the organization level, the mission or business
+        process level, or the system level, and at any phase in the system development
+        life cycle.  [SP 800-30] provides guidance on conducting risk assessments.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node172
+      ref_id: 3.11.2
+      description: Scan for vulnerabilities in organizational systems and applications
+        periodically and when new vulnerabilities affecting those systems and applications
+        are identified.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node176
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.2
+      description: 'Organizations determine the required vulnerability scanning for
+        all system components, ensuring that potential sources of vulnerabilities
+        such as networked printers, scanners, and copiers are not overlooked. The
+        vulnerabilities to be scanned are readily updated as new vulnerabilities are
+        discovered, announced, and scanning methods developed. This process ensures
+        that potential vulnerabilities in the system are identified and addressed
+        as quickly as possible. Vulnerability analyses for custom software applications
+        may require additional approaches such as static analysis, dynamic analysis,
+        binary analysis, or a hybrid of the three approaches. Organizations can employ
+        these analysis approaches in source code reviews and in a variety of tools
+        (e.g., static analysis tools, web-based application scanners, binary analyzers)
+        and in source code reviews. Vulnerability scanning includes: scanning for
+        patch levels; scanning for functions, ports, protocols, and services that
+        should not be accessible to users or devices; and scanning for improperly
+        configured or incorrectly operating information flow control mechanisms.  To
+        facilitate interoperability, organizations consider using products that are
+        Security Content Automated Protocol (SCAP)-validated, scanning tools that
+        express vulnerabilities in the Common Vulnerabilities and Exposures (CVE)
+        naming convention, and that employ the Open Vulnerability Assessment Language
+        (OVAL) to determine the presence of system vulnerabilities. Sources for vulnerability
+        information include the Common Weakness Enumeration (CWE) listing and the
+        National Vulnerability Database (NVD).  Security assessments, such as red
+        team exercises, provide additional sources of potential vulnerabilities for
+        which to scan. Organizations also consider using scanning tools that express
+        vulnerability impact by the Common Vulnerability Scoring System (CVSS). In
+        certain situations, the nature of the vulnerability scanning may be more intrusive
+        or the system component that is the subject of the scanning may contain highly
+        sensitive information. Privileged access authorization to selected system
+        components facilitates thorough vulnerability scanning and protects the sensitive
+        nature of such scanning. [SP 800-40] provides guidance on vulnerability management.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node172
+      ref_id: 3.11.3
+      description: Remediate vulnerabilities in accordance with risk assessments.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node178
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.11.3
+      description: Vulnerabilities discovered, for example, via the scanning conducted
+        in response to 3.11.2, are remediated with consideration of the related assessment
+        of risk. The consideration of risk influences the prioritization of remediation
+        efforts and the level of effort to be expended in the remediation for specific
+        vulnerabilities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node179
+      assessable: false
+      depth: 1
+      name: Security Assessment
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node179
+      ref_id: 3.12.1
+      description: Periodically assess the security controls in organizational systems
+        to determine if the controls are effective in their application.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node181
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.1
+      description: Organizations assess security controls in organizational systems
+        and the environments in which those systems operate as part of the system
+        development life cycle. Security controls are the safeguards or countermeasures
+        organizations implement to satisfy security requirements. By assessing the
+        implemented security controls, organizations determine if the security safeguards
+        or countermeasures are in place and operating as intended. Security control
+        assessments ensure that information security is built into organizational
+        systems; identify weaknesses and deficiencies early in the development process;
+        provide essential information needed to make risk-based decisions; and ensure
+        compliance to vulnerability mitigation procedures. Assessments are conducted
+        on the implemented security controls as documented in system security plans.  Security
+        assessment reports document assessment results in sufficient detail as deemed
+        necessary by organizations, to determine the accuracy and completeness of
+        the reports and whether the security controls are implemented correctly, operating
+        as intended, and producing the desired outcome with respect to meeting security
+        requirements. Security assessment results are provided to the individuals
+        or roles appropriate for the types of assessments being conducted.  Organizations
+        ensure that security assessment results are current, relevant to the determination
+        of security control effectiveness, and obtained with the appropriate level
+        of assessor independence. Organizations can choose to use other types of assessment
+        activities such as vulnerability scanning and system monitoring to maintain
+        the security posture of systems during the system life cycle.  [SP 800-53]
+        provides guidance on security and privacy controls for systems and organizations.
+        [SP 800-53A] provides guidance on developing security assessment plans and
+        conducting assessments.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node179
+      ref_id: 3.12.2
+      description: Develop and implement plans of action designed to correct deficiencies
+        and reduce or eliminate vulnerabilities in organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node183
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.2
+      description: The plan of action is a key document in the information security
+        program. Organizations develop plans of action that describe how any unimplemented
+        security requirements will be met and how any planned mitigations will be
+        implemented. Organizations can document the system security plan and plan
+        of action as separate or combined documents and in any chosen format.  Federal
+        agencies may consider the submitted system security plans and plans of action
+        as critical inputs to an overall risk management decision to process, store,
+        or transmit CUI on a system hosted by a nonfederal organization and whether
+        it is advisable to pursue an agreement or contract with the nonfederal organization.
+        [NIST CUI] provides supplemental material for Special Publication 800-171
+        including templates for plans of action.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node179
+      ref_id: 3.12.3
+      description: Monitor security controls on an ongoing basis to ensure the continued
+        effectiveness of the controls.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node185
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.3
+      description: Continuous monitoring programs facilitate ongoing awareness of
+        threats, vulnerabilities, and information security to support organizational
+        risk management decisions. The terms continuous and ongoing imply that organizations
+        assess and analyze security controls and information security-related risks
+        at a frequency sufficient to support risk-based decisions. The results of
+        continuous monitoring programs generate appropriate risk response actions
+        by organizations. Providing access to security information on a continuing
+        basis through reports or dashboards gives organizational officials the capability
+        to make effective and timely risk management decisions.  Automation supports
+        more frequent updates to hardware, software, firmware inventories, and other
+        system information. Effectiveness is further enhanced when continuous monitoring
+        outputs are formatted to provide information that is specific, measurable,
+        actionable, relevant, and timely. Monitoring requirements, including the need
+        for specific monitoring, may also be referenced in other requirements.  [SP
+        800-137] provides guidance on continuous monitoring.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node179
+      ref_id: 3.12.4
+      description: 'Develop, document, and periodically update system security plans
+        that describe system boundaries, system environments of operation, how security
+        requirements are implemented, and the relationships with or connections to
+        other systems.[28]  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node187
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.12.4
+      description: System security plans relate security requirements to a set of
+        security controls. System security plans also describe, at a high level, how
+        the security controls meet those security requirements, but do not provide
+        detailed, technical descriptions of the design or implementation of the controls.
+        System security plans contain sufficient information to enable a design and
+        implementation that is unambiguously compliant with the intent of the plans
+        and subsequent determinations of risk if the plan is implemented as intended.
+        Security plans need not be single documents; the plans can be a collection
+        of various documents including documents that already exist. Effective security
+        plans make extensive use of references to policies, procedures, and additional
+        documents (e.g., design and implementation specifications) where more detailed
+        information can be obtained. This reduces the documentation requirements associated
+        with security programs and maintains security-related information in other
+        established management/operational areas related to enterprise architecture,
+        system development life cycle, systems engineering, and acquisition.  Federal
+        agencies may consider the submitted system security plans and plans of action
+        as critical inputs to an overall risk management decision to process, store,
+        or transmit CUI on a system hosted by a nonfederal organization and whether
+        it is advisable to pursue an agreement or contract with the nonfederal organization.  [SP
+        800-18] provides guidance on developing security plans. [NIST CUI] provides
+        supplemental material for Special Publication 800-171 including templates
+        for system security plans.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      assessable: false
+      depth: 1
+      name: System and Communications Protection
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.1
+      description: Monitor, control, and protect communications (i.e., information
+        transmitted or received by organizational systems) at the external boundaries
+        and key internal boundaries of organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node190
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.1
+      description: 'Communications can be monitored, controlled, and protected at
+        boundary components and by restricting or prohibiting interfaces in organizational
+        systems. Boundary components include gateways, routers, firewalls, guards,
+        network-based malicious code analysis and virtualization systems, or encrypted
+        tunnels implemented within a system security architecture (e.g., routers protecting
+        firewalls or application gateways residing on protected subnetworks). Restricting
+        or prohibiting interfaces in organizational systems includes restricting external
+        web communications traffic to designated web servers within managed interfaces
+        and prohibiting external traffic that appears to be spoofing internal addresses.  Organizations
+        consider the shared nature of commercial telecommunications services in the
+        implementation of security requirements associated with the use of such services.
+        Commercial telecommunications services are commonly based on network components
+        and consolidated management systems shared by all attached commercial customers
+        and may also include third party-provided access lines and other service elements.
+        Such transmission services may represent sources of increased risk despite
+        contract security provisions. [SP 800-41] provides guidance on firewalls and
+        firewall policy. [SP 800-125B] provides guidance on security for virtualization
+        technologies.
+
+
+        [28] There is no prescribed format or specified level of detail for system
+        security plans. However, organizations ensure that the required information
+        in 3.12.4 is conveyed in those plans.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.2
+      description: Employ architectural designs, software development techniques,
+        and systems engineering principles that promote effective information security
+        within organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node192
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.2
+      description: Organizations apply systems security engineering principles to
+        new development systems or systems undergoing major upgrades. For legacy systems,
+        organizations apply systems security engineering principles to system upgrades
+        and modifications to the extent feasible, given the current state of hardware,
+        software, and firmware components within those systems. The application of
+        systems security engineering concepts and principles helps to develop trustworthy,
+        secure, and resilient systems and system components and reduce the susceptibility
+        of organizations to disruptions, hazards, and threats. Examples of these concepts
+        and principles include developing layered protections; establishing security
+        policies, architecture, and controls as the foundation for design; incorporating
+        security requirements into the system development life cycle; delineating
+        physical and logical security boundaries; ensuring that developers are trained
+        on how to build secure software; and performing threat modeling to identify
+        use cases, threat agents, attack vectors and patterns, design patterns, and
+        compensating controls needed to mitigate risk. Organizations that apply security
+        engineering concepts and principles can facilitate the development of trustworthy,
+        secure systems, system components, and system services; reduce risk to acceptable
+        levels; and make informed risk-management decisions.  [SP 800-160-1] provides
+        guidance on systems security engineering.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.3
+      description: Separate user functionality from system management functionality.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node194
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.3
+      description: System management functionality includes functions necessary to
+        administer databases, network components, workstations, or servers, and typically
+        requires privileged user access. The separation of user functionality from
+        system management functionality is physical or logical. Organizations can
+        implement separation of system management functionality from user functionality
+        by using different computers, different central processing units, different
+        instances of operating systems, or different network addresses; virtualization
+        techniques; or combinations of these or other methods, as appropriate. This
+        type of separation includes web administrative interfaces that use separate
+        authentication methods for users of any other system resources. Separation
+        of system and user functionality may include isolating administrative interfaces
+        on different domains and with additional access controls.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.4
+      description: Prevent unauthorized and unintended information transfer via shared
+        system resources.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node196
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.4
+      description: The control of information in shared system resources (e.g., registers,
+        cache memory, main memory, hard disks) is also commonly referred to as object
+        reuse and residual information protection. This requirement prevents information
+        produced by the actions of prior users or roles (or the actions of processes
+        acting on behalf of prior users or roles) from being available to any current
+        users or roles (or current processes acting on behalf of current users or
+        roles) that obtain access to shared system resources after those resources
+        have been released back to the system. This requirement also applies to encrypted
+        representations of information. This requirement does not address information
+        remanence, which refers to residual representation of data that has been nominally
+        deleted; covert channels (including storage or timing channels) where shared
+        resources are manipulated to violate information flow restrictions; or components
+        within systems for which there are only single users or roles.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.5
+      description: Implement subnetworks for publicly accessible system components
+        that are physically or logically separated from internal networks.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node198
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.5
+      description: Subnetworks that are physically or logically separated from internal
+        networks are referred to as demilitarized zones (DMZs). DMZs are typically
+        implemented with boundary control devices and techniques that include routers,
+        gateways, firewalls, virtualization, or cloud-based technologies.  [SP 800-41]
+        provides guidance on firewalls and firewall policy. [SP 800-125B] provides
+        guidance on security for virtualization technologies
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.6
+      description: Deny network communications traffic by default and allow network
+        communications traffic by exception (i.e., deny all, permit by exception).
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node200
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.6
+      description: This requirement applies to inbound and outbound network communications
+        traffic at the system boundary and at identified points within the system.
+        A deny-all, permit-by-exception network communications traffic policy ensures
+        that only those connections which are essential and approved are allowed.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.7
+      description: Prevent remote devices from simultaneously establishing non-remote
+        connections with organizational systems and communicating via some other connection
+        to resources in external networks (i.e., split tunneling).
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node202
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.7
+      description: Split tunneling might be desirable by remote users to communicate
+        with local system resources such as printers or file servers. However, split
+        tunneling allows unauthorized external connections, making the system more
+        vulnerable to attack and to exfiltration of organizational information. This
+        requirement is implemented in remote devices (e.g., notebook computers, smart
+        phones, and tablets) through configuration settings to disable split tunneling
+        in those devices, and by preventing configuration settings from being readily
+        configurable by users. This requirement is implemented in the system by the
+        detection of split tunneling (or of configuration settings that allow split
+        tunneling) in the remote device, and by prohibiting the connection if the
+        remote device is using split tunneling.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.8
+      description: Implement cryptographic mechanisms to prevent unauthorized disclosure
+        of CUI during transmission unless otherwise protected by alternative physical
+        safeguards.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node204
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.8
+      description: This requirement applies to internal and external networks and
+        any system components that can transmit information including servers, notebook
+        computers, desktop computers, mobile devices, printers, copiers, scanners,
+        and facsimile machines. Communication paths outside the physical protection
+        of controlled boundaries are susceptible to both interception and modification.
+        Organizations relying on commercial providers offering transmission services
+        as commodity services rather than as fully dedicated services (i.e., services
+        which can be highly specialized to individual customer needs), may find it
+        difficult to obtain the necessary assurances regarding the implementation
+        of the controls for transmission confidentiality. In such situations, organizations
+        determine what types of confidentiality services are available in commercial
+        telecommunication service packages. If it is infeasible or impractical to
+        obtain the necessary safeguards and assurances of the effectiveness of the
+        safeguards through appropriate contracting vehicles, organizations implement
+        compensating safeguards or explicitly accept the additional risk. An example
+        of an alternative physical safeguard is a protected distribution system (PDS)
+        where the distribution medium is protected against electronic or physical
+        intercept, thereby ensuring the confidentiality of the information being transmitted.
+        See [NIST CRYPTO].
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.9
+      description: Terminate network connections associated with communications sessions
+        at the end of the sessions or after a defined period of inactivity.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node206
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.9
+      description: This requirement applies to internal and external networks. Terminating
+        network connections associated with communications sessions include de-allocating
+        associated TCP/IP address or port pairs at the operating system level, or
+        de-allocating networking assignments at the application level if multiple
+        application sessions are using a single, operating system-level network connection.
+        Time periods of user inactivity may be established by organizations and include
+        time periods by type of network access or for specific network accesses
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.10
+      description: Establish and manage cryptographic keys for cryptography employed
+        in organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node208
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.10
+      description: Cryptographic key management and establishment can be performed
+        using manual procedures or mechanisms supported by manual procedures. Organizations
+        define key management requirements in accordance with applicable federal laws,
+        Executive Orders, policies, directives, regulations, and standards specifying
+        appropriate options, levels, and parameters.  [SP 800-56A] and [SP 800-57-1]
+        provide guidance on cryptographic key management and key  establishment.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.11
+      description: Employ FIPS-validated cryptography when used to protect the confidentiality
+        of CUI.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node210
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.11
+      description: Cryptography can be employed to support many security solutions
+        including the protection of controlled unclassified information, the provision
+        of digital signatures, and the enforcement of information separation when
+        authorized individuals have the necessary clearances for such information
+        but lack the necessary formal access approvals. Cryptography can also be used
+        to support random number generation and hash generation. Cryptographic standards
+        include FIPS-validated cryptography and/or NSA-approved cryptography. See
+        [NIST CRYPTO]; [NIST CAVP]; and [NIST CMVP].
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.12
+      description: 'Prohibit remote activation of collaborative computing devices
+        and provide indication of devices in use to users present at the device.[29].  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node212
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.12
+      description: 'Collaborative computing devices include networked white boards,
+        cameras, and microphones. Indication of use includes signals to users when
+        collaborative computing devices are activated. Dedicated video conferencing
+        systems, which rely on one of the participants calling or connecting to the
+        other party to activate the video conference, are excluded.
+
+
+        [29] Dedicated video conferencing systems, which rely on one of the participants
+        calling or connecting to the other party to activate the video conference,
+        are excluded.'
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.13
+      description: Control and monitor the use of mobile code.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node214
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.13
+      description: Mobile code technologies include Java, JavaScript, ActiveX, Postscript,
+        PDF, Flash animations, and VBScript. Decisions regarding the use of mobile
+        code in organizational systems are based on the potential for the code to
+        cause damage to the systems if used maliciously. Usage restrictions and implementation
+        guidance apply to the selection and use of mobile code installed on servers
+        and mobile code downloaded and executed on individual workstations, notebook
+        computers, and devices (e.g., smart phones). Mobile code policy and procedures
+        address controlling or preventing the development, acquisition, or introduction
+        of unacceptable mobile code in systems, including requiring mobile code to
+        be digitally signed by a trusted source.  [SP 800-28] provides guidance on
+        mobile code.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.14
+      description: Control and monitor the use of Voice over Internet Protocol (VoIP)
+        technologies.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node216
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.14
+      description: VoIP has different requirements, features, functionality, availability,
+        and service limitations when compared with the Plain Old Telephone Service
+        (POTS) (i.e., the standard telephone service). In contrast, other telephone
+        services are based on high-speed, digital communications lines, such as Integrated
+        Services Digital Network (ISDN) and Fiber Distributed Data Interface (FDDI).
+        The main distinctions between POTS and non-POTS services are speed and bandwidth.
+        To address the threats associated with VoIP, usage restrictions and implementation
+        guidelines are based on the potential for the VoIP technology to cause damage
+        to the system if it is used maliciously. Threats to VoIP are similar to those
+        inherent with any Internet-based application.  [SP 800-58] provides guidance
+        on Voice Over IP Systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.15
+      description: Protect the authenticity of communications sessions.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node218
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.15
+      description: Authenticity protection includes protecting against man-in-the-middle
+        attacks, session hijacking, and the insertion of false information into communications
+        sessions. This requirement addresses communications protection at the session
+        versus packet level (e.g., sessions in service-oriented architectures providing
+        web-based services) and establishes grounds for confidence at both ends of
+        communications sessions in ongoing identities of other parties and in the
+        validity of information transmitted.  [SP 800-77], [SP 800-95], and [SP 800-113]
+        provide guidance on secure communications sessions.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node188
+      ref_id: 3.13.16
+      description: Protect the confidentiality of CUI at rest.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node220
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.13.16
+      description: Information at rest refers to the state of information when it
+        is not in process or in transit and is located on storage devices as specific
+        components of systems. The focus of protection at rest is not on the type
+        of storage device or the frequency of access but rather the state of the information.
+        Organizations can use different mechanisms to achieve confidentiality protections,
+        including the use of cryptographic mechanisms and file share scanning. Organizations
+        may also use other controls including secure off-line storage in lieu of online
+        storage when adequate protection of information at rest cannot otherwise be
+        achieved or continuous monitoring to identify malicious code at rest. See
+        [NIST CRYPTO].
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      assessable: false
+      depth: 1
+      name: System and Information Integrity
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.1
+      description: Identify, report, and correct system flaws in a timely manner.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node223
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.1
+      description: Organizations identify systems that are affected by announced software
+        and firmware flaws including potential vulnerabilities resulting from those
+        flaws and report this information to designated personnel with information
+        security responsibilities. Security-relevant updates include patches, service
+        packs, hot fixes, and anti-virus signatures. Organizations address flaws discovered
+        during security assessments, continuous monitoring, incident response activities,
+        and system error handling. Organizations can take advantage of available resources
+        such as the Common Weakness Enumeration (CWE) database or Common Vulnerabilities
+        and Exposures (CVE) database in remediating flaws discovered in organizational
+        systems.  Organization-defined time periods for updating security-relevant
+        software and firmware may vary based on a variety of factors including the
+        criticality of the update (i.e., severity of the vulnerability related to
+        the discovered flaw). Some types of flaw remediation may require more testing
+        than other types of remediation.  [SP 800-40] provides guidance on patch management
+        technologies.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.2
+      description: Provide protection from malicious code at designated locations
+        within organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node225
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.2
+      description: Designated locations include system entry and exit points which
+        may include firewalls, remote-access servers, workstations, electronic mail
+        servers, web servers, proxy servers, notebook computers, and mobile devices.
+        Malicious code includes viruses, worms, Trojan horses, and spyware. Malicious
+        code can be encoded in various formats (e.g., UUENCODE, Unicode), contained
+        within compressed or hidden files, or hidden in files using techniques such
+        as steganography. Malicious code can be inserted into systems in a variety
+        of ways including web accesses, electronic mail, electronic mail attachments,
+        and portable storage devices. Malicious code insertions occur through the
+        exploitation of system vulnerabilities.  Malicious code protection mechanisms
+        include anti-virus signature definitions and reputation-based technologies.
+        A variety of technologies and methods exist to limit or eliminate the effects
+        of malicious code. Pervasive configuration management and comprehensive software
+        integrity controls may be effective in preventing execution of unauthorized
+        code. In addition to commercial off-the-shelf software, malicious code may
+        also be present in custom-built software. This could include logic bombs,
+        back doors, and other types of cyber-attacks that could affect organizational
+        missions/business functions. Traditional malicious code protection mechanisms
+        cannot always detect such code. In these situations, organizations rely instead
+        on other safeguards including secure coding practices, configuration management
+        and control, trusted procurement processes, and monitoring practices to help
+        ensure that software does not perform functions other than the functions intended.
+        [SP 800-83] provides guidance on malware incident prevention.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.3
+      description: Monitor system security alerts and advisories and take action in
+        response.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node227
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.3
+      description: "There are many publicly available sources of system security alerts\
+        \ and advisories. For example, the Department of Homeland Security\u2019s\
+        \ Cybersecurity and Infrastructure Security Agency (CISA) generates security\
+        \ alerts and advisories to maintain situational awareness across the federal\
+        \ government and in nonfederal organizations. Software vendors, subscription\
+        \ services, and industry information sharing and analysis centers (ISACs)\
+        \ may also provide security alerts and advisories. Examples of response actions\
+        \ include notifying relevant external organizations, for example, external\
+        \ mission/business partners, supply chain partners, external service providers,\
+        \ and peer or supporting organizations.  [SP 800-161] provides guidance on\
+        \ supply chain risk management."
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.4
+      description: Update malicious code protection mechanisms when new releases are
+        available.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node229
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.4
+      description: 'Malicious code protection mechanisms include anti-virus signature
+        definitions and reputation-based technologies. A variety of technologies and
+        methods exist to limit or eliminate the effects of malicious code. Pervasive
+        configuration management and comprehensive software integrity controls may
+        be effective in preventing execution of unauthorized code. In addition to
+        commercial off-the-shelf software, malicious code may also be present in custom-built
+        software. This could include logic bombs, back doors, and other types of cyber-attacks
+        that could affect organizational missions/business functions. Traditional
+        malicious code protection mechanisms cannot always detect such code. In these
+        situations, organizations rely instead on other safeguards including secure
+        coding practices, configuration management and control, trusted procurement
+        processes, and monitoring practices to help ensure that software does not
+        perform functions other than the functions intended.  '
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.5
+      description: Perform periodic scans of organizational systems and real-time
+        scans of files from external sources as files are downloaded, opened, or executed.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node231
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.5
+      description: Periodic scans of organizational systems and real-time scans of
+        files from external sources can detect malicious code. Malicious code can
+        be encoded in various formats (e.g., UUENCODE, Unicode), contained within
+        compressed or hidden files, or hidden in files using techniques such as steganography.
+        Malicious code can be inserted into systems in a variety of ways including
+        web accesses, electronic mail, electronic mail attachments, and portable storage
+        devices. Malicious code insertions occur through the exploitation of system
+        vulnerabilities.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.6
+      description: Monitor organizational systems, including inbound and outbound
+        communications traffic, to detect attacks and indicators of potential attacks.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node233
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.6
+      description: System monitoring includes external and internal monitoring. External
+        monitoring includes the observation of events occurring at the system boundary
+        (i.e., part of perimeter defense and boundary protection). Internal monitoring
+        includes the observation of events occurring within the system. Organizations
+        can monitor systems, for example, by observing audit record activities in
+        real time or by observing other system aspects such as access patterns, characteristics
+        of access, and other actions. The monitoring objectives may guide determination
+        of the events. System monitoring capability is achieved through a variety
+        of tools and techniques (e.g., intrusion detection systems, intrusion prevention
+        systems, malicious code protection software, scanning tools, audit record
+        monitoring software, network monitoring software). Strategic locations for
+        monitoring devices include selected perimeter locations and near server farms
+        supporting critical applications, with such devices being employed at managed
+        system interfaces. The granularity of monitoring information collected is
+        based on organizational monitoring objectives and the capability of systems
+        to support such objectives.  System monitoring is an integral part of continuous
+        monitoring and incident response programs. Output from system monitoring serves
+        as input to continuous monitoring and incident response programs. A network
+        connection is any connection with a device that communicates through a network
+        (e.g., local area network, Internet). A remote connection is any connection
+        with a device communicating through an external network (e.g., the Internet).
+        Local, network, and remote connections can be either wired or wireless.  Unusual
+        or unauthorized activities or conditions related to inbound/outbound communications
+        traffic include internal traffic that indicates the presence of malicious
+        code in systems or propagating among system components, the unauthorized exporting
+        of information, or signaling to external systems. Evidence of malicious code
+        is used to identify potentially compromised systems or system components.
+        System monitoring requirements, including the need for specific types of system
+        monitoring, may be referenced in other requirements.  [SP 800-94] provides
+        guidance on intrusion detection and prevention systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node221
+      ref_id: 3.14.7
+      description: Identify unauthorized use of organizational systems.
+    - urn: urn:intuitem:risk:req_node:nist-800-171-rev2:node235
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:nist-800-171-rev2:3.14.7
+      description: 'System monitoring includes external and internal monitoring. System
+        monitoring can detect unauthorized use of organizational systems.  System
+        monitoring is an integral part of continuous monitoring and incident response
+        programs. Monitoring is achieved through a variety of tools and techniques
+        (e.g., intrusion detection systems, intrusion prevention systems, malicious
+        code protection software, scanning tools, audit record monitoring software,
+        network monitoring software). Output from system monitoring serves as input
+        to continuous monitoring and incident response programs.  Unusual/unauthorized
+        activities or conditions related to inbound and outbound communications traffic
+        include internal traffic that indicates the presence of malicious code in
+        systems or propagating among system components, the unauthorized exporting
+        of information, or signaling to external systems. Evidence of malicious code
+        is used to identify potentially compromised systems or system components.
+        System monitoring requirements, including the need for specific types of system
+        monitoring, may be referenced in other requirements.  [SP 800-94] provides
+        guidance on intrusion detection and prevention systems. '
