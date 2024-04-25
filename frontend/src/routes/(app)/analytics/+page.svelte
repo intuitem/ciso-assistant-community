@@ -12,7 +12,7 @@
 	import { ProgressRadial, Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
 	interface Counters {
 		domains: number;
@@ -311,7 +311,10 @@
 													compliance_assessment.globalScore.score,
 													compliance_assessment.globalScore.max_score
 												)}
-												value={compliance_assessment.globalScore.score}
+												value={formatScoreValue(
+													compliance_assessment.globalScore.score,
+													compliance_assessment.globalScore.max_score
+												)}
 												font={150}
 												width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRadial
 											>
