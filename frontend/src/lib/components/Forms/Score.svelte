@@ -4,7 +4,7 @@
 	import { RangeSlider } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
 	import type { AnyZodObject } from 'zod';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
@@ -18,12 +18,6 @@
 
 	$: scoringEnabled = $value === null ? false : true;
 
-	function formatValue(value: number) {
-		if (value === null) {
-			return 0;
-		}
-		return (value * 100) / max_score;
-	}
 	const status = formFieldProxy(form, 'status')['value'];
 	$: isApplicable = $status === 'not_applicable' ? false : true;
 </script>
@@ -77,7 +71,7 @@
 							<ProgressRadial
 								stroke={100}
 								meter={displayScoreColor($value, max_score)}
-								value={formatValue($value)}
+								value={formatScoreValue($value, max_score)}
 								font={150}
 								width={'w-12'}>{$value}</ProgressRadial
 							>

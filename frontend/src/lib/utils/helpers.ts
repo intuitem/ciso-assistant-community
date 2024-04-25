@@ -36,3 +36,10 @@ export function displayScoreColor(value: number, max_score: number) {
 	}
 	return 'stroke-green-500';
 }
+
+export function formatScoreValue(value: number, max_score: number) {
+	if (value === null) {
+		return 0;
+	}
+	return (value * 100) / max_score;
+}
