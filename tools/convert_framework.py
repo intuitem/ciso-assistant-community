@@ -19,20 +19,11 @@ Conventions:
         framework_description       | <description>
         reference_control_base_urn  | <base_urn>            | id
         threat_base_urn             | <base_urn>            | id
-        tab                         | <tab_name>            | levels
         tab                         | <tab_name>            | requirements       | <section_name>
         tab                         | <tab_name>            | threats            | <base_urn>
         tab                         | <tab_name>            | reference_controls | <base_urn>
 
 
-    For levels:
-        A "levels" tab enumerates levels. If it exists, it shall be placed before the correponding framework.
-        The first line is a header, with the following possible fields (* for required):
-            - level(*)
-            - ref_id(*)
-            - name
-            - description
-            - annotation
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
@@ -41,7 +32,6 @@ Conventions:
             - ref_id
             - name
             - description
-            - level
             - maturity
             - threats
             - reference_controls
@@ -154,7 +144,6 @@ for tab in dataframe:
                 name = row[header['name']].value if 'name' in header else None
                 description = row[header['description']].value if 'description' in header else None
                 annotation = row[header['annotation']].value if 'annotation' in header else None
-                level = row[header['level']].value if 'level' in header else None
                 maturity = row[header['maturity']].value if 'maturity' in header else None
                 ref_id_urn = ref_id.lower().replace(' ', '-') if ref_id else f"node{counter}"
                 urn = f"{root_nodes_urn}:{ref_id_urn}"
@@ -169,7 +158,7 @@ for tab in dataframe:
                 elif depth <= current_depth:
                     pass
                 else:
-                    error(f"wrong level in requirement (tab {title}) {urn}")
+                    error(f"wrong depth in requirement (tab {title}) {urn}")
                 current_node_urn = urn
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth
