@@ -16,8 +16,6 @@ This will produce a file name your_library_file.yaml
 
 ## Format of Excel files
 
-This is documented in the header of the python file. Please note the notion of level is not yet implemented in CISO Assistant.
-
 ```
 Conventions:
     | means a cell separation, <> means empty cell
@@ -38,20 +36,11 @@ Conventions:
         framework_description       | <description>
         reference_control_base_urn  | <base_urn>            | id
         threat_base_urn             | <base_urn>            | id
-        tab                         | <tab_name>            | levels
         tab                         | <tab_name>            | requirements       | <section_name>
         tab                         | <tab_name>            | threats            | <base_urn>
         tab                         | <tab_name>            | reference_controls | <base_urn>
 
 
-    For levels:
-        A "levels" tab enumerates levels. If it exists, it shall be placed before the correponding framework.
-        The first line is a header, with the following possible fields (* for required):
-            - level(*)
-            - ref_id(*)
-            - name
-            - description
-            - annotation
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
@@ -60,7 +49,6 @@ Conventions:
             - ref_id
             - name
             - description
-            - level
             - maturity
             - threats
             - reference_controls

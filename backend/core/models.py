@@ -355,10 +355,6 @@ class Framework(ReferentialObjectMixin):
         if requirement_nodes:
             res["requirement_nodes"] = requirement_nodes
 
-        requirement_levels = self.get_requirement_levels()
-        if requirement_levels:
-            res["requirement_levels"] = requirement_levels
-
         return res
 
     def get_requirement_nodes(self):
@@ -384,28 +380,6 @@ class Framework(ReferentialObjectMixin):
                 for reference_control in node.reference_controls.all()
             ]
         return node_dict
-
-    def get_requirement_levels(self):
-        levels_queryset = self.requirement_levels.all()
-        if levels_queryset.exists():
-            return [model_to_dict(level) for level in levels_queryset]
-        return []
-
-
-class RequirementLevel(ReferentialObjectMixin):
-    framework = models.ForeignKey(
-        Framework,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        verbose_name=_("Framework"),
-        related_name="requirement_levels",
-    )
-    level = models.IntegerField(null=False, blank=False, verbose_name=_("Level"))
-
-    class Meta:
-        verbose_name = _("Requirements level")
-        verbose_name_plural = _("Requirements levels")
 
 
 class RequirementNode(ReferentialObjectMixin):
@@ -433,7 +407,6 @@ class RequirementNode(ReferentialObjectMixin):
         max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
     )
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
-    level = models.IntegerField(null=True, verbose_name=_("Level"))
     maturity = models.IntegerField(null=True, verbose_name=_("Maturity"))
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
 
