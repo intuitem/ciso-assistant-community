@@ -1297,7 +1297,7 @@ class ComplianceAssessment(Assessment):
             .exclude(is_scored=False)
         )
         score = requirement_assessments_scored.aggregate(models.Avg("score"))
-        if score["score__avg"]:
+        if score["score__avg"] is not None:
             return round(score["score__avg"], 1)
         return -1
 
