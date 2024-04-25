@@ -3,19 +3,24 @@
 	import { ProgressRadial, SlideToggle } from '@skeletonlabs/skeleton';
 	import { RangeSlider } from '@skeletonlabs/skeleton';
 	import * as m from '$paraglide/messages';
-	import type { AnyZodObject } from 'zod';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
 
-	export let min_score: number = 0;
-	export let max_score: number = 100;
-	export let score_step: number = 1;
+	export let min_score = 0;
+	export let max_score = 100;
+	export let score_step = 1;
 
-	export let score_definition: string = '';
+	interface ScoreDefinition {
+		score: number;
+		name: string;
+		description: string;
+	}
 
-	export let form: SuperForm<AnyZodObject>;
+	export let score_definition: ScoreDefinition[] = [];
+
+	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
 	$value = $value ?? min_score;
@@ -58,14 +63,21 @@
 						step={score_step}
 						ticked
 					>
-						<div class="flex justify-between items-center">
-							<SlideToggle bind:checked={$isScored} active="bg-primary-500" name="score-slider">
+						<div class="flex justify-between space-x-8 items-center">
+							<SlideToggle
+								bind:checked={$isScored}
+								class="shrink-0"
+								active="bg-primary-500"
+								name="score-slider"
+							>
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 							>
 							{#if score_definition && $value !== null}
-								{#each score_definition as definition, index}
+								{#each score_definition as definition}
 									{#if definition.score === $value}
-										<p class="">{definition.name}: {definition.description}</p>
+										<p class="w-full max-w-[80ch]">
+											{definition.name}: {definition.description}
+										</p>
 									{/if}
 								{/each}
 							{/if}
@@ -74,6 +86,7 @@
 								meter={displayScoreColor($value, max_score)}
 								value={formatScoreValue($value, max_score)}
 								font={150}
+								class="shrink-0"
 								width={'w-12'}>{$value}</ProgressRadial
 							>
 						</div>
