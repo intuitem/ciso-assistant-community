@@ -32,6 +32,7 @@ export const mimeTypes: MimeTypes = {
 	'application/rtf': ['rtf'],
 	'application/vnd.ms-excel': ['xls'],
 	'application/vnd.ms-powerpoint': ['ppt'],
+	'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
 	'application/vnd.wap.wmlc': ['wmlc'],
 	'application/vnd.google-earth.kml+xml': ['kml'],
 	'application/vnd.google-earth.kmz': ['kmz'],
