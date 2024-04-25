@@ -511,21 +511,16 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     def get_framework(self):
         if hasattr(self, "instance") and self.instance:
             return self.instance.compliance_assessment.framework
-
-        # If for some reason the instance isn't set or doesn't have a compliance assessment, try the request data
-        # NOTE: I have no idea how this can happen at the time of writing this, adding guardrails just in case
         try:
-            compliance_assessment_data = self.context.get("request", {}).data.get(
+            compliance_assessment_id = self.context.get("request", {}).data.get(
                 "compliance_assessment", {}
             )
-            framework_id = compliance_assessment_data.get("framework")
-            if framework_id is not None:
-                return Framework.objects.get(id=framework_id)
+            compliance_assessment = ComplianceAssessment.objects.get(
+                id=compliance_assessment_id
+            )
+            return compliance_assessment.framework
         except Framework.DoesNotExist:
             raise serializers.ValidationError("The specified framework does not exist.")
-        raise serializers.ValidationError(
-            "Framework information is required but was not provided."
-        )
 
     class Meta:
         model = RequirementAssessment
