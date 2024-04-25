@@ -242,6 +242,7 @@ def get_sorted_requirement_nodes(
                 "name": node.name,
                 "ra_id": str(req_as.id) if requirements_assessed else None,
                 "status": req_as.status if requirements_assessed else None,
+                "is_scored": req_as.is_scored if requirements_assessed else None,   
                 "score": req_as.score if requirements_assessed else None,
                 "max_score": req_as.compliance_assessment.framework.max_score
                 if requirements_assessed
@@ -278,6 +279,7 @@ def get_sorted_requirement_nodes(
                             "description": req.description,
                             "ra_id": str(req_as.id),
                             "status": req_as.status,
+                            "is_scored": req_as.is_scored,
                             "score": req_as.score,
                             "max_score": req_as.compliance_assessment.framework.max_score,
                             "status_display": req_as.get_status_display(),

@@ -18,7 +18,10 @@
 	export let form: SuperForm<AnyZodObject>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	$: scoringEnabled = $value === null ? false : true;
+	$value = $value ?? min_score;
+
+	const isScored = formFieldProxy(form, 'is_scored')['value'];
+
 	$: if (max_score === 100) score_step = 5;
 
 	const status = formFieldProxy(form, 'status')['value'];
@@ -45,7 +48,7 @@
 	<div class="flex flex-row w-full items-center justify-evenly space-x-4">
 		{#if isApplicable}
 			<div class="flex w-full items-center justify-center">
-				{#if scoringEnabled}
+				{#if $isScored}
 					<RangeSlider
 						class="w-full"
 						name="range-slider"
@@ -57,9 +60,8 @@
 					>
 						<div class="flex justify-between items-center">
 							<SlideToggle
-								bind:checked={scoringEnabled}
+								bind:checked={$isScored}
 								active="bg-primary-500"
-								on:click={() => ($value = null)}
 								name="score-slider"
 							>
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
@@ -85,7 +87,7 @@
 						disabled
 						class="w-full"
 						name="range-slider"
-						value={min_score}
+						value={$value}
 						min={min_score}
 						max={max_score}
 						step={score_step}
@@ -93,9 +95,8 @@
 					>
 						<div class="flex justify-between items-center">
 							<SlideToggle
-								bind:checked={scoringEnabled}
+								bind:checked={$isScored}
 								active="bg-primary-500"
-								on:click={() => ($value = min_score)}
 								name="score-slider"
 							>
 								<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle

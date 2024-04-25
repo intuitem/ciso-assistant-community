@@ -65,6 +65,7 @@
 					statusDisplay: node.status_display,
 					statusColor: complianceColorMap[node.status],
 					score: node.score,
+					isScored: node.is_scored,
 					max_score: node.max_score
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children)) : []

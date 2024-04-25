@@ -9,6 +9,7 @@
 	export let statusColor: string;
 	export let assessable: boolean;
 	export let score: number;
+	export let isScored: boolean;
 	export let max_score: number;
 
 	const lead = localItems(languageTag())[statusI18n] ?? statusDisplay ?? '';
@@ -21,7 +22,7 @@
 		<span class="badge {classesText} h-fit" style="background-color: {statusColor};">
 			{lead}
 		</span>
-		{#if score !== null && statusI18n !== 'notApplicable'}
+		{#if score !== null && statusI18n !== 'notApplicable' && isScored}
 			<span>
 				<ProgressRadial
 					stroke={100}
