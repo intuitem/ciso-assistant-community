@@ -27,6 +27,7 @@ export const mimeTypes: MimeTypes = {
 	'application/java-archive': ['jar', 'war', 'ear'],
 	'application/mac-binhex40': ['hqx'],
 	'application/msword': ['doc'],
+	'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
 	'application/pdf': ['pdf'],
 	'application/postscript': ['ps', 'eps', 'ai'],
 	'application/rtf': ['rtf'],
