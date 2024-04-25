@@ -31,6 +31,7 @@ export const mimeTypes: MimeTypes = {
 	'application/postscript': ['ps', 'eps', 'ai'],
 	'application/rtf': ['rtf'],
 	'application/vnd.ms-excel': ['xls'],
+	'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
 	'application/vnd.ms-powerpoint': ['ppt'],
 	'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
 	'application/vnd.wap.wmlc': ['wmlc'],
