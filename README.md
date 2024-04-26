@@ -1,4 +1,3 @@
-
 <p align="center">
     <br />
     <a href="https://intuitem.com">intuitem.com</a>
@@ -12,7 +11,6 @@
     <a href="#supported-frameworks-">Frameworks</a>
     <br />
 </p>
-
 
 ![](gh_banner.png)
 
@@ -53,8 +51,7 @@ CISO Assistant is developed and maintained by [intuitem](https://intuitem.com/),
 > [!TIP]
 > The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
 
-
-Alternatively, once you have *Docker* and *Docker-compose* installed, on your workstation or server, *clone* the repo and run:
+Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server, _clone_ the repo and run:
 
 ```sh
 ./docker-compose.sh
@@ -65,7 +62,7 @@ Alternatively, once you have *Docker* and *Docker-compose* installed, on your wo
 > If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
 
 > [!WARNING]
-If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+> If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
 
 ## End-user Documentation
 
@@ -100,15 +97,14 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 25. Tisax 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
-28. CIS Controls v8*
-29. CSA CCM (Cloud Controls Matrix)*
+28. CIS Controls v8\*
+29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 🇺🇸
 
 <br/>
 
-> [!NOTE]
-> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
@@ -125,7 +121,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - FedRAMP
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
-- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, *free of charge* 😉
+- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
 ### Add your own framework
 
@@ -162,7 +158,7 @@ cd ciso-assistant-community
 ./docker-compose.sh
 ```
 
-*Alternatively*, you can use this variant to build the docker images for your specific architecture:
+_Alternatively_, you can use this variant to build the docker images for your specific architecture:
 
 ```sh
 ./docker-compose-build.sh
@@ -176,7 +172,6 @@ For the following executions, use "docker compose up" directly.
 
 > [!TIP]
 > If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
-
 
 ## Setting up CISO Assistant for development
 
@@ -269,7 +264,13 @@ deactivate
 pip install -r requirements.txt
 ```
 
-5. If you want to setup Postgres:
+5. Recommended: Install the pre-commit hooks.
+
+```sh
+pre-commit install
+```
+
+6. If you want to setup Postgres:
 
 - Launch one of these commands to enter in Postgres:
   - `psql as superadmin`
@@ -281,13 +282,13 @@ pip install -r requirements.txt
   - `create user ciso-assistantuser with password '<POSTGRES_PASSWORD>';`
   - `grant all privileges on database ciso-assistant to ciso-assistantuser;`
 
-6. Apply migrations.
+7. Apply migrations.
 
 ```sh
 python manage.py migrate
 ```
 
-7. Create a Django superuser, that will be CISO Assistant administrator.
+8. Create a Django superuser, that will be CISO Assistant administrator.
 
 > If you have set a mailer and CISO_SUPERUSER_EMAIL variable, there's no need to create a Django superuser with `createsuperuser`, as it will be created automatically on first start. You should receive an email with a link to setup your password.
 
@@ -295,13 +296,13 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-8.  Run development server.
+9.  Run development server.
 
 ```sh
 python manage.py runserver
 ```
 
-9.  Configure the git hooks for generating the build name.
+10. Configure the git hooks for generating the build name.
 
 ```sh
 cd .git/hooks
@@ -317,7 +318,6 @@ ln -fs ../../git_hooks/post-merge .
 cd frontend
 ```
 
-
 2. Install dependencies
 
 ```bash
@@ -331,7 +331,6 @@ npm run dev
 ```
 
 4. Reach the frontend on http://localhost:5173
-
 
 > [!NOTE]
 > Safari will not properly work in this setup, as it requires https for secure cookies. The simplest solution is to use Chrome or Firefox. An alternative is to use a caddy proxy. This is the solution used in docker-compose, so you can use it as an example.
@@ -371,7 +370,9 @@ These migration files should be tracked by version control.
 To run API tests on the backend, simply type "pytest" in a shell in the backend folder.
 
 To run functional tests on the frontend, do the following actions:
+
 - in the frontend folder, launch the following command:
+
 ```shell
 tests/e2e-tests.sh
 ```
