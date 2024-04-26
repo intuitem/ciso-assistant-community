@@ -218,11 +218,10 @@ class RequirementNodeImporter:
 # The couple (URN, locale) is unique. ===> Check it in the future
 class FrameworkImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
-    OBJECT_FIELDS = {"requirement_nodes", "requirements"}  # "requirement_levels"
+    OBJECT_FIELDS = {"requirement_nodes", "requirements"}
 
     def __init__(self, framework_data: dict):
         self.framework_data = framework_data
-        # self._requirement_levels = []
         self._requirement_nodes = []
 
     def init_requirement_nodes(self, requirement_nodes: List[dict]) -> Union[str, None]:
