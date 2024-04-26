@@ -44,7 +44,7 @@ Conventions:
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
-            - assessable(*): non-empty (e.g x) if this is a requirement 
+            - assessable(*): non-empty (e.g x) if this is a requirement
             - depth(*): 1/2/3/... to describe the tree
             - ref_id
             - name
@@ -65,7 +65,7 @@ Conventions:
             - category (policy/process/techncial/physical).
             - annotation
     A library has a single locale. Translated libraries have the same urns, they are merged during import.
-    Dependencies are given as a comma or blank separated list of urns. 
+    Dependencies are given as a comma or blank separated list of urns.
 ```
 
 ## Caveats
