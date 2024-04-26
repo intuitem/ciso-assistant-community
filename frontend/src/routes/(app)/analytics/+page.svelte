@@ -12,6 +12,7 @@
 	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
+	import type { PageData } from './$types';
 
 	interface Counters {
 		domains: number;
@@ -22,12 +23,11 @@
 		policies: number;
 	}
 
-	export let data;
+	export let data: PageData;
 
-	let counters: Counters = data.get_counters;
+	const counters: Counters = data.get_counters;
 
-	let risk_level = data.risks_level;
-	let risk_assessments = data.risk_assessments;
+	const risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
@@ -249,8 +249,8 @@
 
 							<DonutChart
 								s_label={cur_rsk_label}
-								values={risk_level.current}
-								colors={risk_level.current.map((object) => object.color)}
+								values={data.risks_count_per_level.current}
+								colors={data.risks_count_per_level.current.map((object) => object.color)}
 							/>
 						</div>
 						<div class="h-96 flex-1">
@@ -258,8 +258,8 @@
 
 							<DonutChart
 								s_label={rsd_rsk_label}
-								values={risk_level.residual}
-								colors={risk_level.residual.map((object) => object.color)}
+								values={data.risks_count_per_level.residual}
+								colors={data.risks_count_per_level.residual.map((object) => object.color)}
 							/>
 						</div>
 					</div>
