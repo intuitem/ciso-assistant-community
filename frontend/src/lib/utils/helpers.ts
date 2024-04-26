@@ -26,15 +26,15 @@ export function getRequirementTitle(ref_id: string, name: string) {
 export function displayScoreColor(value: number, max_score: number) {
 	value = (value * 100) / max_score;
 	if (value < 25) {
-		return 'stroke-red-500';
+		return 'stroke-red-400';
 	}
 	if (value < 50) {
-		return 'stroke-orange-500';
+		return 'stroke-orange-400';
 	}
 	if (value < 75) {
-		return 'stroke-yellow-500';
+		return 'stroke-yellow-300';
 	}
-	return 'stroke-green-500';
+	return 'stroke-green-300';
 }
 
 export function formatScoreValue(value: number, max_score: number) {
