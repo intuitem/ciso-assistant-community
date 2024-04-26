@@ -1077,16 +1077,6 @@ class RequirementNodeViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
 
 
-class RequirementLevelViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows requirement levels to be viewed or edited.
-    """
-
-    model = RequirementLevel
-    filterset_fields = ["framework"]
-    search_fields = ["name"]
-
-
 class RequirementViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirements to be viewed or edited.
@@ -1126,6 +1116,9 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     evidence.attachment,
                     content_type=content_type,
+                    headers={
+                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response

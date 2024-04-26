@@ -416,16 +416,6 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     pass
 
 
-class RequirementLevelReadSerializer(BaseModelSerializer):
-    class Meta:
-        model = RequirementLevel
-        fields = "__all__"
-
-
-class RequirementLevelWriteSerializer(RequirementLevelReadSerializer):
-    pass
-
-
 class RequirementNodeReadSerializer(BaseModelSerializer):
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)

@@ -81,7 +81,7 @@
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
-				_form: data.data.form,
+				_form: data.form,
 				id: id,
 				debug: false,
 				URLModel: getModelInfo('risk-acceptances').urlModel,
