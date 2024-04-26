@@ -39,6 +39,10 @@
 		if (node.status && node.assessable) {
 			statusCounts[node.status] = (statusCounts[node.status] || 0) + 1;
 		}
+		if (node.is_scored && node.assessable && node.status !== 'not_applicable') {
+			statusCounts['scored'] = (statusCounts['scored'] || 0) + 1;
+			statusCounts['total_score'] = (statusCounts['total_score'] || 0) + node.score;
+		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
 			for (const childId in node.children) {
@@ -63,7 +67,10 @@
 					statusI18n: node.status_i18n,
 					assessable: node.assessable,
 					statusDisplay: node.status_display,
-					statusColor: complianceColorMap[node.status]
+					statusColor: complianceColorMap[node.status],
+					score: node.score,
+					isScored: node.is_scored,
+					max_score: node.max_score
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children)) : []
 			};
@@ -86,8 +93,9 @@
 
 	let expandedNodes: TreeViewNode[] = [];
 
-	import { localStorageStore } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, localStorageStore } from '@skeletonlabs/skeleton';
 	import type { Writable } from 'svelte/store';
+	import { displayScoreColor } from '$lib/utils/helpers';
 
 	const expandedNodesState: Writable<any> = localStorageStore('expandedNodes', expandedNodes, {
 		storage: 'session'
@@ -98,8 +106,8 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
-		<div class="flex flex-col space-y-2 whitespace-pre-line">
+	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg w-full">
+		<div class="flex flex-col space-y-2 whitespace-pre-line w-1/6">
 			{#each Object.entries(data.compliance_assessment).filter( ([key, _]) => ['name', 'description', 'project', 'framework', 'authors', 'reviewers', 'status'].includes(key) ) as [key, value]}
 				<div class="flex flex-col">
 					<div
@@ -155,7 +163,18 @@
 				</div>
 			{/each}
 		</div>
-		<div class="w-full">
+		{#if data.global_score.score >= 0}
+			<div class="flex items-center">
+				<ProgressRadial
+					stroke={100}
+					meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
+					font={125}
+					value={(data.global_score.score * 100) / data.global_score.max_score}
+					width={'w-52'}>{data.global_score.score}</ProgressRadial
+				>
+			</div>
+		{/if}
+		<div class="w-1/2">
 			<DonutChart
 				s_label={m.complianceAssessments()}
 				values={compliance_assessment_donut_values.values}

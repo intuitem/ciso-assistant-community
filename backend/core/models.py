@@ -3,7 +3,6 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.utils.html import mark_safe
 from django.db.models import Q
 
 from .base_models import *
@@ -328,6 +327,11 @@ class RiskMatrix(ReferentialObjectMixin):
 
 
 class Framework(ReferentialObjectMixin):
+    min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
+    max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
+    score_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Score definition")
+    )
     library = models.ForeignKey(
         Library,
         on_delete=models.CASCADE,
@@ -1258,6 +1262,18 @@ class ComplianceAssessment(Assessment):
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
 
+    def get_global_score(self):
+        requirement_assessments_scored = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .exclude(score=None)
+            .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
+            .exclude(is_scored=False)
+        )
+        score = requirement_assessments_scored.aggregate(models.Avg("score"))
+        if score["score__avg"] is not None:
+            return round(score["score__avg"], 1)
+        return -1
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:
@@ -1447,6 +1463,15 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         choices=Status.choices,
         default=Status.TODO,
         verbose_name=_("Status"),
+    )
+    score = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_("Score"),
+    )
+    is_scored = models.BooleanField(
+        default=False,
+        verbose_name=_("Is scored"),
     )
     evidences = models.ManyToManyField(
         Evidence,

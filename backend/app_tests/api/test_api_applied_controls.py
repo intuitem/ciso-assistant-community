@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from core.models import ReferenceControl, AppliedControl
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic applied control data for tests

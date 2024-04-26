@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from core.models import RequirementNode, Framework
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries, EndpointTestsUtils
 
 # Generic requirement data for tests

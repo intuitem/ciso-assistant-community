@@ -82,40 +82,55 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	const projects: ProjectAnalytics[] = await fetch(`${BASE_API_URL}/projects/`)
 		.then((res) => res.json())
-		.then((projects) => {
+		.then(async (projects) => {
 			if (projects && Array.isArray(projects.results)) {
-				// Process each project to fetch its compliance assessments
-				const projectPromises = projects.results.map(async (project: Record<string, any>) => {
-					return fetch(`${BASE_API_URL}/compliance-assessments/?project=${project.id}`)
-						.then((res) => res.json())
-						.then(async (compliance_assessments) => {
-							if (compliance_assessments && Array.isArray(compliance_assessments.results)) {
-								// Fetch donut data for each compliance assessment
-								const donutDataPromises = compliance_assessments.results.map(
-									async (compliance_assessment: Record<string, any>) => {
-										return fetch(
-											`${BASE_API_URL}/compliance-assessments/${compliance_assessment.id}/donut_data/`
-										)
-											.then((res) => res.json())
-											.then((donutData) => {
-												compliance_assessment.donut = donutData;
-												return compliance_assessment; // Return the updated compliance assessment
-											});
-									}
-								);
+				const projectPromises = projects.results.map(async (project) => {
+					try {
+						const complianceAssessmentsResponse = await fetch(
+							`${BASE_API_URL}/compliance-assessments/?project=${project.id}`
+						);
+						const complianceAssessmentsData = await complianceAssessmentsResponse.json();
 
-								// Wait for all donut data fetches to complete, then return the updated assessments
-								return Promise.all(donutDataPromises).then(() => {
-									project.compliance_assessments = compliance_assessments.results; // Assign the updated assessments to the project
-									return project; // Return the updated project
-								});
-							} else {
-								throw new Error('Compliance assessments results not found or not an array');
-							}
-						});
+						if (complianceAssessmentsData && Array.isArray(complianceAssessmentsData.results)) {
+							const updatedAssessmentsPromises = complianceAssessmentsData.results.map(
+								async (complianceAssessment) => {
+									try {
+										const [donutDataResponse, globalScoreResponse] = await Promise.all([
+											fetch(
+												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/donut_data/`
+											),
+											fetch(
+												`${BASE_API_URL}/compliance-assessments/${complianceAssessment.id}/global_score/`
+											)
+										]);
+
+										const [donutData, globalScoreData] = await Promise.all([
+											donutDataResponse.json(),
+											globalScoreResponse.json()
+										]);
+
+										complianceAssessment.donut = donutData;
+										complianceAssessment.globalScore = globalScoreData;
+										return complianceAssessment;
+									} catch (error) {
+										console.error('Error fetching data for compliance assessment:', error);
+										throw error;
+									}
+								}
+							);
+
+							const updatedAssessments = await Promise.all(updatedAssessmentsPromises);
+							project.compliance_assessments = updatedAssessments;
+							return project;
+						} else {
+							throw new Error('Compliance assessments results not found or not an array');
+						}
+					} catch (error) {
+						console.error('Error fetching compliance assessments:', error);
+						throw error;
+					}
 				});
 
-				// Wait for all projects to be processed
 				return Promise.all(projectPromises);
 			} else {
 				throw new Error('Projects results not found or not an array');

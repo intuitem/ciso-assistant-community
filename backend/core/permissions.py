@@ -29,8 +29,7 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
     def has_object_permission(self, request: Request, view, obj):
         if not request.method:
             return False
-        queryset = self._queryset(view)
-        perms = self.get_required_permissions(request.method, queryset.model)
+        perms = self.get_required_permissions(request.method, type(obj))
         if not perms:
             return False
         _codename = perms[0].split(".")[1]

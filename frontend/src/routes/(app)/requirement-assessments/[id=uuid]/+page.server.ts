@@ -19,8 +19,8 @@ export const load = (async ({ fetch, params }) => {
 	const res = await fetch(endpoint);
 	const requirementAssessment = await res.json();
 
-	const compliance_assessment = await fetch(
-		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/`
+	const compliance_assessment_score = await fetch(
+		`${BASE_API_URL}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/global_score`
 	).then((res) => res.json());
 	const requirement = await fetch(
 		`${BASE_API_URL}/requirement-nodes/${requirementAssessment.requirement}/`
@@ -209,7 +209,7 @@ export const load = (async ({ fetch, params }) => {
 	return {
 		URLModel,
 		requirementAssessment,
-		compliance_assessment,
+		compliance_assessment_score,
 		requirement,
 		parent,
 		model,
@@ -246,6 +246,9 @@ export const actions: Actions = {
 			console.error('server response:', response);
 			if (response.non_field_errors) {
 				setError(form, 'non_field_errors', response.non_field_errors);
+			}
+			if (response.score) {
+				setError(form, 'score', response.score);
 			}
 			return fail(400, { form: form });
 		}

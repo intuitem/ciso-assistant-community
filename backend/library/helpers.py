@@ -1,5 +1,4 @@
 from core.models import RequirementNode
-from iam.models import Folder
 
 
 def preview_library(library) -> dict[str, list]:

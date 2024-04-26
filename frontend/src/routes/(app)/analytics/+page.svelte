@@ -9,9 +9,10 @@
 	import { localItems } from '$lib/utils/locales.js';
 	import * as m from '$paraglide/messages';
 	import { languageTag } from '$paraglide/runtime';
-	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
+	import { ProgressRadial, Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 
 	interface Counters {
@@ -310,6 +311,23 @@
 											<p>{compliance_assessment.framework.str}</p>
 										</div>
 									</div>
+									{#if compliance_assessment.globalScore.score >= 0}
+										<div class="justify-center flex items-center">
+											<ProgressRadial
+												stroke={100}
+												meter={displayScoreColor(
+													compliance_assessment.globalScore.score,
+													compliance_assessment.globalScore.max_score
+												)}
+												value={formatScoreValue(
+													compliance_assessment.globalScore.score,
+													compliance_assessment.globalScore.max_score
+												)}
+												font={150}
+												width={'w-20'}>{compliance_assessment.globalScore.score}</ProgressRadial
+											>
+										</div>
+									{/if}
 									<div class="w-3/5 h-32">
 										<DonutChart
 											s_label={m.complianceAssessments()}

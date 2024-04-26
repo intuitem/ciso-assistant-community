@@ -285,6 +285,19 @@ class FrameworkImporter:
                 return requirement_node_import_error
 
     def import_framework(self, library_object: Library):
+        min_score = self.framework_data.get("min_score", 0)
+        max_score = self.framework_data.get("max_score", 100)
+
+        if (
+            min_score > max_score
+            or min_score < 0
+            or max_score < 0
+            or min_score == max_score
+        ):
+            raise ValueError(
+                "minimum score must be less than maximum score and equal or greater than 0."
+            )
+
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
@@ -292,6 +305,9 @@ class FrameworkImporter:
             ref_id=self.framework_data["ref_id"],
             name=self.framework_data.get("name"),
             description=self.framework_data.get("description"),
+            min_score=min_score,
+            max_score=max_score,
+            score_definition=self.framework_data.get("score_definition"),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?

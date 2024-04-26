@@ -4,8 +4,6 @@ from django.urls.base import reverse_lazy
 from django.core.exceptions import ValidationError
 import uuid
 
-from ciso_assistant import settings
-
 
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
