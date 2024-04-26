@@ -39,6 +39,10 @@
 		if (node.status && node.assessable) {
 			statusCounts[node.status] = (statusCounts[node.status] || 0) + 1;
 		}
+		if (node.score && node.assessable && node.status !== 'not_applicable') {
+			statusCounts['scored'] = (statusCounts['scored'] || 0) + 1;
+			statusCounts['total_score'] = (statusCounts['total_score'] || 0) + node.score;
+		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
 			for (const childId in node.children) {
@@ -160,7 +164,7 @@
 			{/each}
 		</div>
 		{#if data.global_score.score >= 0}
-			<div class="flex items-center cursor-pointer">
+			<div class="flex items-center">
 				<ProgressRadial
 					stroke={100}
 					meter={displayScoreColor(data.global_score.score, data.global_score.max_score)}
