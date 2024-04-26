@@ -13,6 +13,7 @@
 	import ComposerSelect from './ComposerSelect.svelte';
 	import CounterCard from './CounterCard.svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import type { PageData } from './$types';
 
 	interface Counters {
 		domains: number;
@@ -23,12 +24,11 @@
 		policies: number;
 	}
 
-	export let data;
+	export let data: PageData;
 
-	let counters: Counters = data.get_counters;
+	const counters: Counters = data.get_counters;
 
-	let risk_level = data.risks_level;
-	let risk_assessments = data.risk_assessments;
+	const risk_assessments = data.risk_assessments;
 
 	const cur_rsk_label = m.currentRisk();
 	const rsd_rsk_label = m.residualRisk();
@@ -77,12 +77,23 @@
 		meta: data.acceptances_to_review
 	};
 
-	let tabSet = $page.url.searchParams.get('tab') ? parseInt($page.url.searchParams.get('tab')) : 0;
+	let tabSet = $page.url.searchParams.get('tab')
+		? parseInt($page.url.searchParams.get('tab') || '0')
+		: 0;
 
 	function handleTabChange(index: number) {
 		$page.url.searchParams.set('tab', index.toString());
 		goto($page.url);
 	}
+
+	const REQUIREMENT_ASSESSMENT_STATUS = [
+		'compliant',
+		'partially_compliant',
+		'in_progress',
+		'non_compliant',
+		'not_applicable',
+		'to_do'
+	] as const;
 </script>
 
 <TabGroup>
@@ -172,7 +183,6 @@
 						/>
 						<DonutChart
 							classesContainer="flex-1 card p-4 bg-white"
-							name="riskScenariosPerStatus"
 							title={m.riskScenariosStatus()}
 							values={data.riskScenariosPerStatus.values}
 						/>
@@ -239,20 +249,18 @@
 							<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
 							<DonutChart
-								name="current_risk"
 								s_label={cur_rsk_label}
-								values={risk_level.current}
-								colors={risk_level.current.map((object) => object.color)}
+								values={data.risks_count_per_level.current}
+								colors={data.risks_count_per_level.current.map((object) => object.color)}
 							/>
 						</div>
 						<div class="h-96 flex-1">
 							<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
 
 							<DonutChart
-								name="residual_risk"
 								s_label={rsd_rsk_label}
-								values={risk_level.residual}
-								colors={risk_level.residual.map((object) => object.color)}
+								values={data.risks_count_per_level.residual}
+								colors={data.risks_count_per_level.residual.map((object) => object.color)}
 							/>
 						</div>
 					</div>
@@ -277,7 +285,7 @@
 										href="/projects/{project.id}">{project.folder.str}/{project.name}</a
 									>
 									<div class="flex flex-1 bg-gray-200 rounded-full overflow-hidden h-4 shrink">
-										{#each project.overallCompliance.values as sp}
+										{#each project.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 											<div
 												class="flex flex-col justify-center overflow-hidden text-black text-xs text-center"
 												style="width: {sp.percentage}%; background-color: {sp.itemStyle.color}"

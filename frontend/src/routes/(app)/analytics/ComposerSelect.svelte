@@ -9,7 +9,7 @@
 	import * as m from '$paraglide/messages';
 	import { zod } from 'sveltekit-superforms/adapters';
 
-	export let composerForm: SuperValidated<AnyZodObject>;
+	export let composerForm: SuperValidated<Record<string, any>>;
 
 	let options: { label: string; value: string }[];
 
