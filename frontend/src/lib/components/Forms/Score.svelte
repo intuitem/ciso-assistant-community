@@ -2,7 +2,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import * as m from '$paraglide/messages';
 	import { ProgressRadial, RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
-	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms/client';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	export let label: string | undefined = undefined;
 	export let field: string;
