@@ -3,6 +3,35 @@ import { composerSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
+import type { Project } from '$lib/utils/types';
+
+const REQUIREMENT_ASSESSMENT_STATUS = [
+	'compliant',
+	'partially_compliant',
+	'in_progress',
+	'non_compliant',
+	'not_applicable',
+	'to_do'
+] as const;
+
+interface DonutItem {
+	name: string;
+	localName?: string;
+	value: number;
+	itemStyle: Record<string, unknown>;
+}
+
+interface RequirementAssessmentDonutItem extends Omit<DonutItem, 'name'> {
+	name: (typeof REQUIREMENT_ASSESSMENT_STATUS)[number];
+	percentage: string;
+}
+
+interface ProjectAnalytics extends Project {
+	overallCompliance: {
+		values: RequirementAssessmentDonutItem[];
+		total: number;
+	};
+}
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
@@ -26,17 +55,21 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_get_counters = await fetch(`${BASE_API_URL}/get_counters/`);
 	const counters = await req_get_counters.json();
 
-	const usedRiskMatrices = await fetch(`${BASE_API_URL}/risk-matrices/used/`)
-		.then((res) => res.json())
-		.then((res) => res.results);
-	const usedFrameworks = await fetch(`${BASE_API_URL}/frameworks/used/`)
-		.then((res) => res.json())
-		.then((res) => res.results);
-
+	const usedRiskMatrices: { id: string; name: string; risk_assessments_count: number }[] =
+		await fetch(`${BASE_API_URL}/risk-matrices/used/`)
+			.then((res) => res.json())
+			.then((res) => res.results);
+	const usedFrameworks: { id: string; name: string; compliance_assessments_count: number }[] =
+		await fetch(`${BASE_API_URL}/frameworks/used/`)
+			.then((res) => res.json())
+			.then((res) => res.results);
 	const req_get_risks_count_per_level = await fetch(
 		`${BASE_API_URL}/risk-scenarios/count_per_level/`
 	);
-	const risks_count_per_level = await req_get_risks_count_per_level.json();
+	const risks_count_per_level: {
+		current: Record<string, any>[];
+		residual: Record<string, any>[];
+	} = await req_get_risks_count_per_level.json().then((res) => res.results);
 
 	const req_get_measures_to_review = await fetch(`${BASE_API_URL}/applied-controls/to_review/`);
 	const measures_to_review = await req_get_measures_to_review.json();
@@ -47,19 +80,19 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
 	const risk_assessments = await req_risk_assessments.json();
 
-	const projects = await fetch(`${BASE_API_URL}/projects/`)
+	const projects: ProjectAnalytics[] = await fetch(`${BASE_API_URL}/projects/`)
 		.then((res) => res.json())
 		.then((projects) => {
 			if (projects && Array.isArray(projects.results)) {
 				// Process each project to fetch its compliance assessments
-				const projectPromises = projects.results.map((project) => {
+				const projectPromises = projects.results.map(async (project: Record<string, any>) => {
 					return fetch(`${BASE_API_URL}/compliance-assessments/?project=${project.id}`)
 						.then((res) => res.json())
-						.then((compliance_assessments) => {
+						.then(async (compliance_assessments) => {
 							if (compliance_assessments && Array.isArray(compliance_assessments.results)) {
 								// Fetch donut data for each compliance assessment
 								const donutDataPromises = compliance_assessments.results.map(
-									(compliance_assessment) => {
+									async (compliance_assessment: Record<string, any>) => {
 										return fetch(
 											`${BASE_API_URL}/compliance-assessments/${compliance_assessment.id}/donut_data/`
 										)
@@ -88,24 +121,29 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 				throw new Error('Projects results not found or not an array');
 			}
 		})
-		.catch((error) => console.error('Error:', error));
+		.catch((error) => {
+			console.error('Failed to load projects:', error);
+			return []; // Ensure always returning an array of Record<string, any>
+		});
 
 	if (projects) {
 		projects.forEach((project) => {
 			// Initialize an object to hold the aggregated donut data
-			const aggregatedDonutData = {
+			const aggregatedDonutData: {
+				values: RequirementAssessmentDonutItem[];
+				total: number;
+			} = {
 				values: [],
 				total: 0
 			};
 
 			// Iterate through each compliance assessment of the project
-			project.compliance_assessments.forEach((compliance_assessment) => {
+			project.compliance_assessments.forEach((compliance_assessment: Record<string, any>) => {
 				// Process the donut data of each assessment
-				compliance_assessment.donut.values.forEach((donutItem) => {
+				compliance_assessment.donut.values.forEach((donutItem: RequirementAssessmentDonutItem) => {
 					// Find the corresponding item in the aggregated data
-					const aggregatedItem = aggregatedDonutData.values.find(
-						(item) => item.name === donutItem.name
-					);
+					const aggregatedItem: RequirementAssessmentDonutItem | undefined =
+						aggregatedDonutData.values.find((item) => item.name === donutItem.name);
 
 					if (aggregatedItem) {
 						// If the item already exists, increment its value
@@ -123,7 +161,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			// Calculate and store the percentage for each item
 			aggregatedDonutData.values = aggregatedDonutData.values.map((item) => ({
 				...item,
-				percentage: totalValue > 0 ? parseFloat((item.value / totalValue) * 100).toFixed(1) : 0
+				percentage: totalValue > 0 ? ((item.value / totalValue) * 100).toFixed(1) : '0'
 			}));
 
 			// Assign the aggregated donut data to the project
@@ -140,7 +178,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		riskAssessmentsPerStatus,
 		complianceAssessmentsPerStatus,
 		riskScenariosPerStatus,
-		risks_level: risks_count_per_level.results,
+		risks_count_per_level,
 		measures_to_review: measures_to_review.results,
 		acceptances_to_review: acceptances_to_review.results,
 		risk_assessments: risk_assessments.results,
