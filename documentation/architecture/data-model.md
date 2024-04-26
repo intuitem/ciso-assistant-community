@@ -81,7 +81,6 @@ erDiagram
     REQUIREMENT_ASSESSMENT       }o--o{ EVIDENCE              : is_proved_by
     APPLIED_CONTROL              }o--o| REFERENCE_CONTROL     : implements
     REQUIREMENT_NODE             }o--o{ THREAT                : addresses
-    FRAMEWORK                    ||--o{ REQUIREMENT_LEVEL     : contains
     FRAMEWORK                    ||--o{ REQUIREMENT_NODE      : contains
     APPLIED_CONTROL              }o--o{ EVIDENCE              : is_proved_by
     RISK_ASSESSMENT              }o--|| RISK_MATRIX           : applies
@@ -154,18 +153,6 @@ erDiagram
         string  provider
     }
 
-    REQUIREMENT_LEVEL {
-        string  urn
-        string  locale
-        boolean default_locale
-        string  ref_id
-        string  name
-        string  description
-        string  annotation
-
-        int     level
-    }
-
     REQUIREMENT_NODE {
         string  urn
         string  locale
@@ -177,7 +164,6 @@ erDiagram
 
         urn     parent_urn
         int     order_id
-        int     level
         int     maturity
         boolean assessable
     }
@@ -432,7 +418,6 @@ ReferentialObjectMixin <|-- Threat
 ReferentialObjectMixin <|-- ReferenceControl
 ReferentialObjectMixin <|-- RiskMatrix
 ReferentialObjectMixin <|-- Framework
-ReferentialObjectMixin <|-- RequirementLevel
 ReferentialObjectMixin <|-- RequirementNode
 ReferentialObjectMixin <|-- Mapping
 NameDescriptionMixin   <|-- Assessment
@@ -506,18 +491,12 @@ namespace ReferentialObjects {
         +is_deletable() bool
     }
 
-    class RequirementLevel {
-        +Framework framework
-        +IntegerField level
-    }
-
     class RequirementNode {
         +Threat[] threats
         +ReferenceControl[] REFERENCE_CONTROLs
         +Framework framework
         +CharField parent_urn
         +IntegerField order_id
-        +IntegerField level
         +IntegerField maturity
         +BooleanField assessable
     }
@@ -688,11 +667,7 @@ Assets are of category primary or support. A primary asset has no parent, a supp
 ## Frameworks
 
 The fundamental object of CISO Assistant for compliance is the framework. It corresponds to a given standard, e.g. ISO27001:2013. It mainly contains requirements nodes. A requirement node can be assessable or not (e.g. title or informational elements are not assessable). Assessable requirement nodes can be simply called "requirements".
-The structure (tree) of requirements is defined by the level and requirement node objects. The *parent_urn* of a requirement node can either be the URN of another requirement node or null for top-level objects. This allows to simply define the structure of a framework. An assessable requirement node can be the child of another assessable requirement node, which is very convenient for frameworks that have lists of conditions attached to a requirement.
-
-The requirement level objects of a framework optionally provide the naming of each level from 1 to n, when applicable. Requirement nodes have a nullable *level* field to refer to the corresponding requirement level. If requirement nodes are set at a defined level, the term "requirement" is replaced by the name of the correponding level (e.g. "subcategory" for CSF).
-
-If no level information is provided, requirement nodes will be displayed without reference to a notion of level, only as a tree containing requirement nodes. This can address potential frameworks with branches of various depths.
+The structure (tree) of requirements is defined by the requirement node objects. The *parent_urn* of a requirement node can either be the URN of another requirement node or null for top-level objects. This allows to simply define the structure of a framework. An assessable requirement node can be the child of another assessable requirement node, which is very convenient for frameworks that have lists of conditions attached to a requirement.
 
 The maturity field describes the maturity level of the requirement node, when this is relevant (e.g. for CMMC or CIS).
 
