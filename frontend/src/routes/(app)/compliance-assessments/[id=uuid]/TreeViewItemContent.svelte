@@ -208,7 +208,9 @@
 	</div>
 	{#if hasAssessableChildren}
 		<div class="flex max-w-96 grow items-center space-x-2">
-			<div class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center">
+			<div
+				class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+			>
 				{#each orderedStatusPercentages as sp}
 					<div
 						class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
