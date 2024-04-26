@@ -71,7 +71,7 @@
 						>
 							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 						>
-						{#if score_definition && $value !== null}
+						{#if $isScored && score_definition && $value !== null}
 							{#each score_definition as definition}
 								{#if definition.score === $value}
 									<p class="w-full max-w-[80ch]">
