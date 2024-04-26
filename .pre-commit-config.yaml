@@ -18,5 +18,6 @@ repos:
     hooks:
       - id: format-frontend
         name: format-frontend
+        files: ^frontend/.$
         language: system
         entry: sh -c "npm run format --prefix frontend"
