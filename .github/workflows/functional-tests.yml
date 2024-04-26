@@ -11,7 +11,7 @@ env:
 
 jobs:
   functional-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       backend-directory: ./backend
       working-directory: ./frontend

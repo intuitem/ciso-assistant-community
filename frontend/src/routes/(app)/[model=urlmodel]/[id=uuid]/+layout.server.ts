@@ -31,6 +31,8 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		[K in urlModel]: RelatedModel;
 	};
 
+	const form = await superValidate(zod(z.object({ id: z.string().uuid() })));
+
 	const model = getModelInfo(params.model);
 	const relatedModels = {} as RelatedModels;
 
@@ -115,5 +117,5 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 			})
 		);
 	}
-	return { data, relatedModels, urlModel: params.model, model: URL_MODEL_MAP[params.model] };
+	return { data, form, relatedModels, urlModel: params.model, model: URL_MODEL_MAP[params.model] };
 };

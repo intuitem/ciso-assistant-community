@@ -198,7 +198,6 @@ class RequirementNodeImporter:
             annotation=self.requirement_data.get("annotation"),
             provider=framework_object.provider,
             order_id=self.index,
-            level=self.requirement_data.get("level"),
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             maturity=self.requirement_data.get("maturity"),
