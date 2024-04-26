@@ -11,7 +11,6 @@ REQUIREMENT_NODE_DESCRIPTION = "Test Description"
 REQUIREMENT_NODE_URN = "urn:test:req_node.t:1"
 REQUIREMENT_NODE_PARENT_URN = "urn:test:req_node.t"
 REQUIREMENT_NODE_ORDER_ID = 1
-REQUIREMENT_NODE_LEVEL = 2
 REQUIREMENT_NODE_REFERENCE = "test ref"
 
 
@@ -56,7 +55,6 @@ class TestRequirementNodesAuthenticated:
                 "urn": REQUIREMENT_NODE_URN,
                 "parent_urn": REQUIREMENT_NODE_PARENT_URN,
                 "order_id": REQUIREMENT_NODE_ORDER_ID,
-                "level": REQUIREMENT_NODE_LEVEL,
                 "assessable": True,
                 "folder": test.folder,
                 "framework": Framework.objects.all()[0],

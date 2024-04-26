@@ -70,7 +70,6 @@
 				<FileInput
 					{form}
 					helpText={m.libraryFileInYaml()}
-					mandatory={true}
 					field="file"
 					label={m.uploadYourLibrary()}
 				/>
