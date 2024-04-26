@@ -504,7 +504,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         if value is not None:
             if value < framework.min_score or value > framework.max_score:
                 raise serializers.ValidationError(
-                    {"score": f"Score must be between {framework.min_score} and {framework.max_score}"}
+                    {
+                        "score": f"Score must be between {framework.min_score} and {framework.max_score}"
+                    }
                 )
         return value
 
