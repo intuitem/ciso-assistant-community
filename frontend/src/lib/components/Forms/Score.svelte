@@ -75,7 +75,7 @@
 							{#each score_definition as definition}
 								{#if definition.score === $value}
 									<p class="w-full max-w-[80ch]">
-										{definition.name}: {definition.description}
+										{definition.name}{definition.description ? `: ${definition.description}` : ''}
 									</p>
 								{/if}
 							{/each}

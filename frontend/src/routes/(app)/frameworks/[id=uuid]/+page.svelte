@@ -63,7 +63,8 @@
 								{:else if key === 'score_definition'}
 									{#each Object.entries(value) as [key, definition]}
 										<div>
-											{definition.score}. {definition.name}: {definition.description}
+											{definition.score}.
+											{definition.name}{definition.description ? `: ${definition.description}` : ''}
 										</div>
 									{/each}
 								{:else if Array.isArray(value)}
