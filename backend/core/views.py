@@ -1211,6 +1211,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         ]
         return Response({"results": res})
 
+    @action(detail=True, methods=["get"])
+    def global_score(self, request, pk):
+        """Returns the global score of the compliance assessment"""
+        return Response(
+            {
+                "score": self.get_object().get_global_score(),
+                "max_score": self.get_object().framework.max_score,
+                "min_score": self.get_object().framework.min_score,
+                "score_definition": self.get_object().framework.score_definition,
+            }
+        )
+
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):
         """

@@ -5,7 +5,6 @@ from core.models import AppliedControl
 from core.models import Evidence
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic evidence data for tests

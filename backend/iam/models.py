@@ -23,9 +23,6 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import send_mail, get_connection, EmailMessage
 from django.core.validators import validate_email
-from core.utils import RoleCodename, UserGroupCodename
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from ciso_assistant.settings import (
     CISO_ASSISTANT_URL,
     EMAIL_HOST,
@@ -38,7 +35,6 @@ from ciso_assistant.settings import (
     EMAIL_USE_TLS,
     EMAIL_USE_TLS_RESCUE,
 )
-from django.core.exceptions import ObjectDoesNotExist
 
 import structlog
 

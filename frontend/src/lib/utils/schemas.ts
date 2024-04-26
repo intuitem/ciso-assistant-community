@@ -154,6 +154,8 @@ export const AssetSchema = baseNamedObject({
 
 export const RequirementAssessmentSchema = z.object({
 	status: z.string(),
+	score: z.number().optional().nullable(),
+	is_scored: z.boolean().optional(),
 	comment: z.string().optional().nullable(),
 	folder: z.string(),
 	requirement: z.string(),

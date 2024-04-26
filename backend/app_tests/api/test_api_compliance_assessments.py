@@ -4,7 +4,6 @@ from core.models import ComplianceAssessment, Framework
 from core.models import Project
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic compliance assessment data for tests
@@ -125,6 +124,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "min_score": 0,
+                    "max_score": 100,
                 },
             },
             user_group=test.user_group,
@@ -156,6 +157,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "min_score": Framework.objects.all()[0].min_score,
+                    "max_score": Framework.objects.all()[0].max_score,
                 },
             },
             user_group=test.user_group,
@@ -199,6 +202,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
+                    "min_score": Framework.objects.all()[0].min_score,
+                    "max_score": Framework.objects.all()[0].max_score,
                 },
             },
             user_group=test.user_group,

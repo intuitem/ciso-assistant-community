@@ -10,7 +10,6 @@ from core.models import (
 from core.models import Project, AppliedControl
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic requirement assessment data for tests
@@ -46,6 +45,7 @@ class TestRequirementAssessmentsUnauthenticated:
                 "requirement": RequirementNode.objects.create(
                     name="test", folder=folder, assessable=False
                 ),
+                "score": None,
             },
         )
 
@@ -83,6 +83,7 @@ class TestRequirementAssessmentsUnauthenticated:
                 "requirement": RequirementNode.objects.create(
                     name="test", folder=folder, assessable=False
                 ),
+                "score": None,
             },
             {
                 "status": REQUIREMENT_ASSESSMENT_STATUS2,
@@ -115,6 +116,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
+                "score": None,
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
@@ -151,6 +153,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "compliance_assessment": str(compliance_assessment.id),
                 "requirement": str(RequirementNode.objects.all()[0].id),
                 "applied_controls": [str(applied_control.id)],
+                "score": None,
             },
             {
                 "compliance_assessment": {
@@ -190,6 +193,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
+                "score": None,
             },
             {
                 "status": REQUIREMENT_ASSESSMENT_STATUS2,
@@ -198,6 +202,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "compliance_assessment": str(compliance_assessment2.id),
                 "requirement": str(RequirementNode.objects.all()[1].id),
                 "applied_controls": [str(applied_control.id)],
+                "score": 50,
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
