@@ -4,7 +4,7 @@
 	import { languageTag } from '$paraglide/runtime';
 
 	// export let name: string;
-	export let s_label: string;
+	export let s_label = '';
 
 	export let width = 'w-auto';
 	export let height = 'h-full';

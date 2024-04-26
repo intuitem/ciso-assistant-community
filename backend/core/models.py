@@ -1315,7 +1315,7 @@ class ComplianceAssessment(Assessment):
                 compliance_assessment=self
             ).count()
             v = {
-                "name": st.label,
+                "name": st,
                 "localName": camel_case(st.value),
                 "value": count,
                 "itemStyle": {"color": color_map[st]},
