@@ -24,8 +24,8 @@ Permission given to include AirCyber in CISO Assistant.
 '''
 packager = 'intuitem'
 
-library_description = '''AirCyber is the AeroSpace and Defense official standard for Cybersecurity maturity evaluation and increase built by Airbus, Dassault Aviation, Safran and Thales to help the AeroSpace SupplyChain to be more resilient. 
-Their joint venture BoostAeroSpace is offering this extract of the AirCyber maturity level matrix to provide further details on this standard, the questions and the AirCyber maturity levels they are associated to. 
+library_description = '''AirCyber is the AeroSpace and Defense official standard for Cybersecurity maturity evaluation and increase built by Airbus, Dassault Aviation, Safran and Thales to help the AeroSpace SupplyChain to be more resilient.
+Their joint venture BoostAeroSpace is offering this extract of the AirCyber maturity level matrix to provide further details on this standard, the questions and the AirCyber maturity levels they are associated to.
 AirCyber program uses this maturity level matrix as the base of the cyber maturity evaluation as is the evaluation activity is the very starting point for any cyber maturity progression. Being aware of the problems is the mandatory very first knowledge a company shall know to decide to launch a cybersecurity company program.
 Source: https://boostaerospace.com/aircyber/
 '''
@@ -55,7 +55,7 @@ for tab in dataframe:
                     if devenv:
                         question_en += '\n[Development Environment]'
                 output_table.append(('x', 1, question_number, question_name, question_en))
-                    
+
 
 print("generating", output_file_name)
 wb_output = openpyxl.Workbook()
@@ -82,5 +82,3 @@ for row in output_table:
     ws1.append(row)
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
-
-
