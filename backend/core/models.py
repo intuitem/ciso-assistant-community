@@ -104,9 +104,6 @@ class LibraryMixin(ReferentialObjectMixin):
     objects_meta = models.JSONField()
     dependencies = models.JSONField(null=True) # models.CharField(blank=False,null=True,max_length=16384)
 
-    def get_dependencies(self) -> List[str] : # We should add some kind of descriptor to LibaryMixin so that model_instance.dependencies directly returns a list instead of a string, using a function to get the desired value of a field is bad
-        return [] if self.dependencies is None else self.dependencies.split(" ")
-
 class StoredLibrary(LibraryMixin):
     is_obsolete = models.BooleanField(default=False)
     is_imported = models.BooleanField(default=False)
@@ -125,10 +122,7 @@ class StoredLibrary(LibraryMixin):
         )
 
     @staticmethod
-    def store_library_file(fname: str) -> Union[str,None] :
-        with open(fname,"rb") as f :
-            library_content = f.read()
-
+    def store_libary_content(library_content: str) -> Union[str,None] :
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET :
             return None # We do not store the libary if its hash checksum is in the database.
@@ -169,7 +163,7 @@ class StoredLibrary(LibraryMixin):
             for key, value in library_data["objects"].items()
         }
 
-        dependencies = library_data.get("dependencies") # I don't want whitespaces in URN anymore nontheless
+        dependencies = library_data.get("dependencies",[]) # I don't want whitespaces in URN anymore nontheless
 
         library_objects = json.dumps(library_data["objects"])
         StoredLibrary.objects.create(
@@ -192,10 +186,20 @@ class StoredLibrary(LibraryMixin):
             content=library_objects
         )
 
+    @staticmethod
+    def store_library_file(fname: str) -> Union[str,None] :
+        with open(fname,"rb") as f :
+            library_content = f.read()
+        return StoredLibrary.store_libary_content(library_content)
+
     def loads(self) -> Union[str,None] :
         from library.utils import LibraryImporter
         library_importer = LibraryImporter(self)
-        return library_importer.import_library()
+        error_msg = library_importer.import_library()
+        if error_msg is None :
+            self.is_imported = True
+            self.save()
+        return error_msg
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
@@ -261,7 +265,9 @@ class LoadedLibrary(LibraryMixin):
                 f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
-
+        stored_library = StoredLibrary.objects.get(urn=self.urn,locale=self.locale,version=self.version) # I don't if it works yet
+        stored_library.is_imported = False
+        stored_library.save()
 
 class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(

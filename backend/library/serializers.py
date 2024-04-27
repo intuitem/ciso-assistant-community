@@ -35,6 +35,11 @@ class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
         model = StoredLibrary
         fields = "__all__"
 
+class LoadedLibraryDetailedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LoadedLibrary
+        fields = "__all__"
+
 """
 class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
     content = serializers.SerializerMethodField()

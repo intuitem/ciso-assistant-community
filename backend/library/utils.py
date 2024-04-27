@@ -551,9 +551,10 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self):
         """Check and import library dependencies."""
-        dependencies = self._library.get_dependencies()
 
-        for dependency_urn in dependencies:
+        if not self._library.dependencies :
+            return None
+        for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
                 # import_library_view(get_library(dependency))
                 dependency = StoredLibrary.objects.get(urn=dependency_urn,is_obsolete=False) # We only fetch by URN without thinking about what locale, that may be a problem in the future.
@@ -609,11 +610,12 @@ class LibraryImporter:
     def _import_library(self):
         library_object = self.create_or_update_library()
         self.import_objects(library_object)
-        library_object.dependencies.set(
-            LoadedLibrary.objects.filter(
-                urn__in=self._library.get_dependencies()
+        if (dependencies := self._library.dependencies) :
+            library_object.dependencies.set(
+                LoadedLibrary.objects.filter(
+                    urn__in=dependencies
+                )
             )
-        )
 
     def import_library(self):
         """Main method to import a library."""

@@ -45,12 +45,13 @@
 					identifierField="urn"
 					pagination={false}
 					deleteForm={data.deleteForm}
+					detailQueryParameter="loaded"
 				/>
 			{/if}
 		</svelte:fragment>
 	</TabGroup>
 </div>
-{#if tabSet === 1}
+{#if tabSet === 0}
 	<div class="card bg-white p-4 mt-4 shadow">
 		{#await superValidate(zod(LibraryUploadSchema))}
 			<h1>{m.loadingLibraryUploadButton()}...</h1>

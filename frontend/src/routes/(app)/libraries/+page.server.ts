@@ -67,9 +67,6 @@ export const load = (async ({ fetch }) => {
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
 
-	loadedLibrariesTable.body.push(storedLibrariesTable.body[0]);
-	loadedLibrariesTable.meta.push(storedLibrariesTable.meta[0]);
-
 	return { storedLibrariesTable, loadedLibrariesTable, deleteForm }
 }) satisfies PageServerLoad;
 
@@ -153,7 +150,7 @@ export const actions: Actions = {
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
 			// Should i check if attachment.size > 0 ?
-			const endpoint = `${BASE_API_URL}/loaded-libraries/upload/`;
+			const endpoint = `${BASE_API_URL}/stored-libraries/upload/`;
 			const req = await event.fetch(endpoint, {
 				method: 'POST',
 				headers: {
@@ -182,8 +179,10 @@ export const actions: Actions = {
 		const schema = z.object({ id: z.string().regex(URN_REGEX) });
 		const deleteForm = await superValidate(formData, zod(schema));
 
+		const URLModel = formData.get("urlmodel");
+
 		const id = deleteForm.data.id;
-		const endpoint = `${BASE_API_URL}/loaded-libraries/${id}/`;
+		const endpoint = `${BASE_API_URL}/${URLModel}/${id}/`;
 
 		if (!deleteForm.valid) {
 			console.error(deleteForm.errors);
