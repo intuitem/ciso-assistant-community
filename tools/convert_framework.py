@@ -402,9 +402,11 @@ if has_framework:
         "ref_id": library_vars["framework_ref_id"],
         "name": library_vars["framework_name"],
         "description": library_vars["framework_description"],
-        "min_score": library_vars["framework_min_score"],
-        "max_score": library_vars["framework_max_score"],
     }
+    if "framework_min_score" in library_vars:
+        library["objects"]["framework"]["min_score"] = library_vars["framework_min_score"]
+    if "framework_max_score" in library_vars:
+        library["objects"]["framework"]["max_score"] = library_vars["framework_max_score"]
     if scores_definition:
         library["objects"]["framework"]["scores_definition"] = scores_definition
     if implementation_groups_definition:
