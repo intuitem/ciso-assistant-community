@@ -11,13 +11,13 @@
 	export let max_score = 100;
 	export let score_step = 1;
 
-	interface ScoreDefinition {
+	interface ScoresDefinition {
 		score: number;
 		name: string;
 		description: string;
 	}
 
-	export let score_definition: ScoreDefinition[] = [];
+	export let scores_definition: ScoresDefinition[] = [];
 
 	export let form: SuperForm<Record<string, any>>;
 	const { value, errors, constraints } = formFieldProxy(form, field);
@@ -71,8 +71,8 @@
 						>
 							<p class="text-sm text-gray-500">{m.scoringHelpText()}</p></SlideToggle
 						>
-						{#if $isScored && score_definition && $value !== null}
-							{#each score_definition as definition}
+						{#if $isScored && scores_definition && $value !== null}
+							{#each scores_definition as definition}
 								{#if definition.score === $value}
 									<p class="w-full max-w-[80ch]">
 										{definition.name}{definition.description ? `: ${definition.description}` : ''}

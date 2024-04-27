@@ -510,5 +510,5 @@
 	"setTemporaryPassword2": "Please use a strong one and make sure to inform the user to change it as soon as possible",
 	"youCanSetNewPassword": "You can set a new password here",
 	"userWillBeDisconnected": "The user will be disconnected and will need to log in again",
-	"scoreDefinition": "Score definition"
+	"scoresDefinition": "Score definition"
 }
