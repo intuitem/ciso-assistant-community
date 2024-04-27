@@ -104,7 +104,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 
 <br/>
 
-> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
@@ -119,6 +120,7 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - SOX
 - MASVS
 - FedRAMP
+- FBI CJIS
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
