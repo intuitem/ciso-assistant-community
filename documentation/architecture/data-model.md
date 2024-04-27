@@ -110,7 +110,8 @@ erDiagram
         string  provider
         int     min_score
         int     max_score
-        json    score_definition
+        json    scores_definition
+        json    implementation_groups_definition
     }
 
     COMPLIANCE_ASSESSMENT {
@@ -125,6 +126,7 @@ erDiagram
         principal[] author
         principal[] reviewer
         string[]    tags
+        string[]    selected_implementation_groups
     }
 
     RISK_ASSESSMENT {
@@ -164,7 +166,7 @@ erDiagram
 
         urn     parent_urn
         int     order_id
-        int     maturity
+        json    implementation_groups
         boolean assessable
     }
 
@@ -202,6 +204,7 @@ erDiagram
         int    score
         string result
         string mapping_inference
+        bool   selected
     }
 
     EVIDENCE {
@@ -497,7 +500,7 @@ namespace ReferentialObjects {
         +Framework framework
         +CharField parent_urn
         +IntegerField order_id
-        +IntegerField maturity
+        +json implementation_groups
         +BooleanField assessable
     }
 
@@ -669,13 +672,21 @@ Assets are of category primary or support. A primary asset has no parent, a supp
 The fundamental object of CISO Assistant for compliance is the framework. It corresponds to a given standard, e.g. ISO27001:2013. It mainly contains requirements nodes. A requirement node can be assessable or not (e.g. title or informational elements are not assessable). Assessable requirement nodes can be simply called "requirements".
 The structure (tree) of requirements is defined by the requirement node objects. The *parent_urn* of a requirement node can either be the URN of another requirement node or null for top-level objects. This allows to simply define the structure of a framework. An assessable requirement node can be the child of another assessable requirement node, which is very convenient for frameworks that have lists of conditions attached to a requirement.
 
-The maturity field describes the maturity level of the requirement node, when this is relevant (e.g. for CMMC or CIS).
+The implementation_groups field contains a comma-separated list of implementation groups where the requirement node is found, when this is relevant (e.g. for CMMC or CIS). Implementation groups are identified by their ref_id string. Implementation groups are independent, a requirement can be member of any implementation group. Implementation groups are defined in the implementation_groups_definition json field (None by default), that contains a list of objects containing the following fields (example for CMMC):
+
+```json
+{
+  "ref_id": "1",
+  "name": "Foundational",
+  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause"
+}
+```
 
 A requirement node can be covered by typical reference controls. A requirement node can cover typical threats. This information is provided in the form of optional links between requirement nodes and reference controls/threats. This is only informative, but is an important added value of CISO Assistant.
 
 The order_id variable allows to sort the requirements nodes, it starts at 0 and is incremented automatically in a given group at import.
 
-A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a score_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
+A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a scores_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
 
 ```json
 {
@@ -685,7 +696,7 @@ A framework always has a numerical score scale from min_score to max_score. If n
 }
 ```
 
-When present, the score_definition allows to customize the score display as a drop-down list.
+When present, the scores_definition allows to customize the score display as a drop-down list.
 
 ## Threats
 
@@ -743,11 +754,16 @@ Here are the specific fields for requirement assessments:
 - ETA (Estimated Time of Arrival) date
 - due date. This is for example useful to organize an audit plan.
 
-The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score).
+The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
 Requirement assessments can have attached evidences. An evidence contains a name, a description, an attached file, a url link.
 
 The auditor is free to use the result field (qualitative assessment), the score field (quantitative assessment), or both of them.
+
+Compliance assessments have a selected_implementation_groups field that contains the selected implementation groups. The None default value consists in selecting all groups, which makes sense also for the case no implementation groups are defined.
+For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
+
+Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
 
 ### Mappings
 

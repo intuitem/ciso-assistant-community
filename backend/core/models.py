@@ -329,8 +329,11 @@ class RiskMatrix(ReferentialObjectMixin):
 class Framework(ReferentialObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
-    score_definition = models.JSONField(
+    scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
+    )
+    implementation_groups_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Implementation groups definition")
     )
     library = models.ForeignKey(
         Library,
@@ -411,7 +414,9 @@ class RequirementNode(ReferentialObjectMixin):
         max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
     )
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
-    maturity = models.IntegerField(null=True, verbose_name=_("Maturity"))
+    implementation_groups = models.JSONField(
+        null=True, verbose_name=_("Implementation groups")
+    )
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
 
     class Meta:
@@ -1257,6 +1262,9 @@ class ComplianceAssessment(Assessment):
         choices=Result.choices,
         verbose_name=_("Result"),
     )
+    selected_implementation_groups = models.JSONField(
+        blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
 
     class Meta:
         verbose_name = _("Compliance assessment")
@@ -1494,6 +1502,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         blank=True,
         verbose_name=_("Applied controls"),
         related_name="requirement_assessments",
+    )
+    selected = models.BooleanField(
+        default=True,
+        verbose_name=_("Selected"),
     )
 
     def __str__(self) -> str:

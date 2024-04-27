@@ -321,7 +321,7 @@ export function localItems(languageTag: string): LocalItems {
 		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag }),
 		minScore: m.minScore({ languageTag: languageTag }),
 		maxScore: m.maxScore({ languageTag: languageTag }),
-		scoreDefinition: m.scoreDefinition({ languageTag: languageTag }),
+		scoresDefinition: m.scoresDefinition({ languageTag: languageTag }),
 		attemptToDeleteOnlyAdminAccountError: m.attemptToDeleteOnlyAdminAccountError({
 			languageTag: languageTag
 		}),
