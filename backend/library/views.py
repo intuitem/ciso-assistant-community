@@ -28,46 +28,63 @@ from .helpers import preview_library
 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .serializers import StoredLibraryDetailedSerializer, LoadedLibrarySerializer, LibraryUploadSerializer
+from .serializers import StoredLibraryDetailedSerializer, LoadedLibrarySerializer, LoadedLibraryDetailedSerializer, LibraryUploadSerializer
 from .utils import LibraryImporter, get_available_libraries, get_library, import_library_view
 
 class StoredLibraryViewSet(viewsets.ModelViewSet):
     # serializer_class = StoredLibrarySerializer
-    # parser_classes = [FileUploadParser]
+    parser_classes = [FileUploadParser]
 
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
     lookup_value_regex = r"[\w.:-]+"
     model = StoredLibrary
+    queryset = StoredLibrary.objects.filter(is_obsolete=False)
 
     def list(self, request, *args, **kwargs):
-        print("WOOWOWOWOWOWOWOWOWOW\n"*20)
         if not "view_storedlibrary" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        available_libraries = StoredLibrary.objects.filter(is_obsolete=False).values("id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta") # The frontend doesn't receive the obsolete libraries for now.
+        available_libraries = self.queryset.values("id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta","is_imported") # The frontend doesn't receive the obsolete libraries for now.
 
         return Response({"results": available_libraries})
+
+    def destroy(self, request, pk): # We may have to also get the locale of the library we want to delete in the future for this method and all other libary viewset methods which goal is to apply an operation on a specific library
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="delete_storedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try :
+            lib = self.queryset.get(urn=pk) # the libraries with is_obsolete=True are not displayed in the frontend and therefore not meant to be destroyable (at least yet)
+        except :
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+
+        lib.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, pk, **kwargs):
         if not "view_storedlibrary" in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        lib = StoredLibrary.objects.get(urn=pk,is_obsolete=False) # Handle the exception if the pk urn doesn't exist
-        print(f"-------- {pk}"*20)
-        print(f"FETCHED {lib}")
-        # return Response(StoredLibraryDetailedSerializer(lib).data)
+        try :
+            lib = self.queryset.get(urn=pk)
+        except :
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
         return Response(StoredLibraryDetailedSerializer(lib).data)
 
     @action(detail=True, methods=["get"], url_path="import")
-    def import_library(self, request, pk=None):
+    def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_loadedlibrary"),
             folder=Folder.get_root_folder(),
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        library = StoredLibrary.objects.get(urn=pk) # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
+        try :
+            library = StoredLibrary.objects.get(urn=pk) # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
+        except :
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
-        # return Response({"error":f"ERROR !!! {str(lib)}"},status=status.HTTP_403_FORBIDDEN)
-        # library = get_library(pk)
         try:
             error_msg = library.loads()
             if error_msg is not None :
@@ -86,107 +103,18 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
-        lib = StoredLibrary.objects.get(urn=pk) # It should return a 404 error if the query doesn't return anything and therefore raise an exception
-        library_objects = json.loads(lib.content) # We need caching for this
-        """library = {
-            "id": lib.id,
-            "urn": lib.urn,
-            "name": lib.name,
-            "description": lib.description,
-            "provider": lib.provider,
-            "packager": lib.packager,
-            "copyright": lib.copyright,
-            "reference_count": lib.reference_count,
-            "objects": library_objects,
-        }"""
-        """if not library:
-            return Response(
-                data="This library does not exist.", status=HTTP_404_NOT_FOUND
-            )"""
-        if not library_objects.get("framework"):
-            return Response(
-                data="This library does not include a framework.",
-                status=HTTP_400_BAD_REQUEST,
-            )
-        preview = preview_library(library_objects)
-        return Response(
-            get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
-        )
-
-class LoadedLibraryViewSet(viewsets.ModelViewSet):
-    serializer_class = LoadedLibrarySerializer
-    parser_classes = [FileUploadParser]
-
-    # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
-    lookup_value_regex = r"[\w.:-]+"
-    model = LoadedLibrary
-
-    def list(self, request, *args, **kwargs):
-        if not "view_storedlibrary" in request.user.permissions:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        available_libraries = LoadedLibrary.objects.all().values("id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta")
-
-        return Response({"results": available_libraries})
-        # return Response({"results": get_available_libraries()})
-
-    def retrieve(self, request, *args, pk, **kwargs):
-        if not "view_loadedlibrary" in request.user.permissions:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        raise NotImplementedError() # This method must me implemented
-        # library = get_library(pk)
-        # return Response(library)
-
-    def destroy(self, request, *args, pk, **kwargs):
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="delete_loadedlibrary"),
-            folder=Folder.get_root_folder(),
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        library = get_library(pk)
-
-        if library is None:
+        try :
+            lib = StoredLibrary.objects.get(urn=pk)
+        except :
             return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
-        # "reference_count" is not always defined (is this normal ?)
-        if library.get("reference_count", 0) != 0:
-            return Response(
-                data="Library cannot be deleted because it has references.",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            LoadedLibrary.objects.get(id=library.get("id")).delete()
-        except IntegrityError as e:
-            # TODO: Log the exception if logging is set up
-            # logging.exception("Integrity error while deleting library: %s", e)
-            print(e)
-        except Exception as e:
-            # TODO: Log the exception if logging is set up
-            # logging.exception("Unexpected error while deleting library: %s", e)
-            print(e)
-            return Response(
-                data="Unexpected error occurred while deleting the library.",
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=["get"])
-    def tree(self, request, pk):
-        lib = get_library(pk)
-        # library_objects = json.loads(lib.content) # How to this for loaded libarries
-        if not library:
-            return Response(
-                data="This library does not exist.", status=HTTP_404_NOT_FOUND
-            )
-        if not library["objects"].get("framework"):
+        library_objects = json.loads(lib.content) # We may need caching for this
+        if not (framework := library_objects.get("framework")) :
             return Response(
                 data="This library does not include a framework.",
                 status=HTTP_400_BAD_REQUEST,
             )
-        preview = preview_library(library_objects)
+        preview = preview_library(framework)
         return Response(
             get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
         )
@@ -202,11 +130,10 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             attachment = request.FILES["file"]
             validate_file_extension(attachment)
             # Use safe_load to prevent arbitrary code execution.
-            library = yaml.safe_load(attachment)
 
-            # This code doesn't handle the library "dependencies" field yet as decribed in the architecture.
+            content = attachment.read() # Should we read it chunck by chunck or ensure that the file size of the libary content is reasonnable before reading ?
 
-            error_msg = import_library_view(library)
+            error_msg = StoredLibrary.store_libary_content(content)
 
             if error_msg is not None:
                 return HttpResponse(
@@ -220,8 +147,81 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
                 json.dumps({"error": "libraryAlreadyImportedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except:
+        except :
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
+
+class LoadedLibraryViewSet(viewsets.ModelViewSet):
+    # serializer_class = LoadedLibrarySerializer
+    # parser_classes = [FileUploadParser]
+
+    # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
+    lookup_value_regex = r"[\w.:-]+"
+    model = LoadedLibrary
+    queryset = LoadedLibrary.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        if not "view_storedlibrary" in request.user.permissions:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        loaded_libraries = [{
+                key: getattr(library,key)
+                for key in ["id","name","description","urn","ref_id","locale","version","packager","provider","builtin","objects_meta","reference_count"]
+            }
+            for library in LoadedLibrary.objects.all()
+        ]
+        return Response({"results": loaded_libraries})
+
+    def retrieve(self, request, *args, pk, **kwargs):
+        if not "view_loadedlibrary" in request.user.permissions:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        try :
+            lib = LoadedLibrary.objects.get(urn=pk) # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
+        except :
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+        data = LoadedLibraryDetailedSerializer(lib).data
+        data["objects"] = lib._objects
+        return Response(data)
+
+    def destroy(self, request, *args, pk, **kwargs):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="delete_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try :
+            lib = LoadedLibrary.objects.get(urn=pk)
+        except :
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+
+        if lib.reference_count != 0:
+            return Response(
+                data="Library cannot be deleted because it has references.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        lib.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"])
+    def tree(self, request, pk): # We must ensure that users that are not allowed to read the content of libraries can't have any access to them either from the /api/{URLModel/{library_urn}/tree view or the /api/{URLModel}/{library_urn} view.
+        try :
+            lib = LoadedLibrary.objects.get(urn=pk)
+        except :
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+
+        if lib.frameworks.count() == 0:
+            return Response(
+                data="This library doesn't contain any framework.", status=HTTP_404_NOT_FOUND
+            )
+
+        framework = lib.frameworks.first()
+        requirement_nodes = framework.requirement_nodes.all()
+        return Response(
+            get_sorted_requirement_nodes(requirement_nodes, None)
+        )
+

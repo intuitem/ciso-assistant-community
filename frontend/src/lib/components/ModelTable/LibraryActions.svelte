@@ -24,7 +24,8 @@
 	}
 </script>
 
-{#if !library.id}{#if loading.form && loading.library === library.urn}
+{#if !library.is_imported}
+	{#if loading.form && loading.library === library.urn}
 		<div class="flex items-center cursor-progress" role="status">
 			<svg
 				aria-hidden="true"
