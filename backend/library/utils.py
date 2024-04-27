@@ -307,14 +307,19 @@ class FrameworkImporter:
             min_score=min_score,
             max_score=max_score,
             scores_definition=self.framework_data.get("scores_definition"),
-            implementation_groups_definition=self.framework_data.get("implementation_groups_definition"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
             is_published=True,
         )
         print("framework_object1", self.framework_data.get("scores_definition"))
-        print("framework_object2", self.framework_data.get("implementation_groups_definition"))
+        print(
+            "framework_object2",
+            self.framework_data.get("implementation_groups_definition"),
+        )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
 
