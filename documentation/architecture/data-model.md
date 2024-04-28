@@ -108,10 +108,10 @@ erDiagram
         string  description
         string  annotation
         string  provider
+        json    implementation_groups_definition
         int     min_score
         int     max_score
         json    scores_definition
-        json    implementation_groups_definition
     }
 
     COMPLIANCE_ASSESSMENT {
@@ -127,6 +127,9 @@ erDiagram
         principal[] reviewer
         string[]    tags
         string[]    selected_implementation_groups
+        int     min_score
+        int     max_score
+        json    scores_definition
     }
 
     RISK_ASSESSMENT {
@@ -698,6 +701,8 @@ A framework always has a numerical score scale from min_score to max_score. If n
 
 When present, the scores_definition allows to customize the score display as a drop-down list.
 
+Note: the score scale for a framework can be overridden when creating a compliance assessment.
+
 ## Threats
 
 Threats are referential objects used to clarify the aim of a requirement node or a applied  control. They are informative, assessments can be realised without using them.
@@ -764,6 +769,12 @@ Compliance assessments have a selected_implementation_groups field that contains
 For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
+
+Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
+- percentage (0-100%, no score definition)
+- CMMI (1-5, Initial/Managed/Defined/Quantitatively Managed/Optimizing)
+- 0-5 (0-5, no score definition)
+- 0-10 (0-10, no score definition)
 
 ### Mappings
 

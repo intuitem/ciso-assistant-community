@@ -1179,6 +1179,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         """
         serializer.save()
         instance = ComplianceAssessment.objects.get(id=serializer.data["id"])
+        if instance.min_score is None:
+            instance.min_score = instance.framework.min_score
+            instance.max_score = instance.framework.max_score
+            instance.scores_definition = instance.framework.scores_definition
+        instance.save()
         requirements = RequirementNode.objects.filter(framework=instance.framework)
         for requirement in requirements:
             RequirementAssessment.objects.create(
@@ -1217,9 +1222,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return Response(
             {
                 "score": self.get_object().get_global_score(),
-                "max_score": self.get_object().framework.max_score,
-                "min_score": self.get_object().framework.min_score,
-                "scores_definition": self.get_object().framework.scores_definition,
+                "max_score": self.get_object().max_score,
+                "min_score": self.get_object().min_score,
+                "scores_definition": self.get_object().scores_definition,
             }
         )
 
