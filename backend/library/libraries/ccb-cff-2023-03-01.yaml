@@ -19,21 +19,44 @@ objects:
     scores_definition:
     - score: 1
       name: Initial
-      description: Process unpredictable, reactive, not documented & poorly controlled
+      description: 'No Process documentation or not formally approved by management.
+
+        Standard process does not exist.'
     - score: 2
       name: Repeatable
-      description: Ad Hoc Processes, mostly informal, project oriented & often reactive
+      description: 'Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
+
+        Ad-hoc process exists and is done informally.'
     - score: 3
       name: Defined
-      description: Formal processes, organisation oriented & proactive
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for most activities.
+        Less than 10% process exceptions.'
     - score: 4
       name: Managed
-      description: Formal processes, organisation oriented, controlled, proactive
-        & measured
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 3% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established. Less than 5% of process exceptions.'
     - score: 5
       name: Optimizing
-      description: Formal processes, organisation oriented, controlled, proactive,
-        measured & continual improvement focus
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 0,5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established and continually improving.
+        Less than 1% of process exceptions.'
     implementation_groups_definition:
     - ref_id: B
       name: basic
