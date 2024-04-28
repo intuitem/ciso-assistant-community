@@ -1265,6 +1265,12 @@ class ComplianceAssessment(Assessment):
     selected_implementation_groups = models.JSONField(
         blank=True, null=True, verbose_name=_("Selected implementation groups")
     )
+    # score system is suggested by the framework, but can be changed at the start of the assessment
+    min_score = models.IntegerField(null=True, verbose_name=_("Minimum score"))
+    max_score = models.IntegerField(null=True, verbose_name=_("Maximum score"))
+    scores_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Score definition")
+    )
 
     class Meta:
         verbose_name = _("Compliance assessment")
