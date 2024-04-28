@@ -101,6 +101,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 🇺🇸
+32. CJIS Security Policy 5.9.4 🕵
 
 <br/>
 
@@ -120,10 +121,9 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - SOX
 - MASVS
 - FedRAMP
-- FBI CJIS
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
-- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
+- and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open and license-free standard, we'll do it for you, _free of charge_ 😉
 
 ### Add your own framework
 
