@@ -6,9 +6,8 @@ from django.db import migrations, models
 
 WELL_KNOWN_SCORES = {
     "urn:intuitem:risk:framework:tisax-v6.0.2": (0, 5),
-    "urn:intuitem:risk:framework:cis-controls-v8": (0, 5),
-    "urn:intuitem:risk:framework:ccm-controls-v4": (0, 5),
     "urn:intuitem:risk:framework:ccb-cff-2023-03-01": (1, 5),
+    "urn:intuitem:risk:framework:nist-csf-2.0": (1,4),
 }
 
 def fix_well_known_scores(apps, schema_editor):
@@ -18,10 +17,12 @@ def fix_well_known_scores(apps, schema_editor):
         if framework.urn in WELL_KNOWN_SCORES:
             (framework.min_score, framework.max_score) = WELL_KNOWN_SCORES[framework.urn]
             framework.save()
+            print("custom migration for", framework.urn)
     for assessment in ComplianceAssessment.objects.all():
         if assessment.framework.urn in WELL_KNOWN_SCORES:
             (assessment.min_score, assessment.max_score) = WELL_KNOWN_SCORES[assessment.framework.urn]
             assessment.save()
+            print("custom migration for", assessment.framework.urn)
 
 class Migration(migrations.Migration):
     dependencies = [
