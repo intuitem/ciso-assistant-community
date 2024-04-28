@@ -26,8 +26,12 @@ def fix_well_known_scores(apps, schema_editor):
             (assessment.min_score, assessment.max_score) = WELL_KNOWN_SCORES[
                 assessment.framework.urn
             ]
-            assessment.save()
             print("custom migration for", assessment.framework.urn)
+        else:
+            # no default value, so fix it now
+            (assessment.min_score, assessment.max_score) = (0, 100)
+        assessment.save()
+
 
 
 class Migration(migrations.Migration):
