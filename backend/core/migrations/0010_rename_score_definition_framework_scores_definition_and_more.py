@@ -33,7 +33,6 @@ def fix_well_known_scores(apps, schema_editor):
         assessment.save()
 
 
-
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0009_framework_max_score_framework_min_score_and_more"),
