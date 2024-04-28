@@ -1276,6 +1276,14 @@ class ComplianceAssessment(Assessment):
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
 
+    def save(self, *args, **kwargs) -> None:
+        if self.min_score is None:
+            self.min_score = self.framework.min_score
+            self.max_score = self.framework.max_score
+            self.scores_definition = self.framework.scores_definition
+        super().save(*args, **kwargs)
+
+
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
