@@ -61,7 +61,7 @@ for tab in dataframe:
                         id,
                         title,
                         pretify_content(specification),
-                        "i" if lite else "1,2",
+                        "lite,full" if lite == "Yes" else "full",
                     )
                 )
             else:
@@ -92,12 +92,17 @@ ws.append(["framework_ref_id", "CCM-Controls-v4"])
 ws.append(["framework_name", "CCM Controls v4"])
 ws.append(["framework_description", "CCM Controls v4"])
 ws.append(["tab", "controls", "requirements"])
+ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("controls")
 ws1.append(
     ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
-)
+    )
 for row in output_table:
     ws1.append(row)
+ws2 = wb_output.create_sheet("implementation_groups")
+ws2.append(["ref_id", "name", "description"])
+ws2.append(["lite", "foundational", "foundational controls that should be implemented by any organization, regardless of their budget, maturity and risk profile"])
+ws2.append(["full", "systematic ", "systematic assessment of a cloud implementation"])
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
