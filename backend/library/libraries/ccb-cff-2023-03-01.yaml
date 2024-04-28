@@ -28,15 +28,12 @@ objects:
       description: Formal processes, organisation oriented & proactive
     - score: 4
       name: Managed
-      description: 'Formal processes, organisation oriented, controlled, proactive
-        &
-
-        measured'
+      description: Formal processes, organisation oriented, controlled, proactive
+        & measured
     - score: 5
       name: Optimizing
-      description: 'Formal processes, organisation oriented, controlled, proactive,
-
-        measured & continual improvement focus'
+      description: Formal processes, organisation oriented, controlled, proactive,
+        measured & continual improvement focus
     implementation_groups_definition:
     - ref_id: B
       name: basic
