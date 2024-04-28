@@ -204,47 +204,47 @@ objects:
         scheduling of initial training and testing, and certification testing and
         all required reports by NCIC.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
       description: 'The AC shall:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node33
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 1.  Understand the communications, records capabilities, and needs
         of the Contractor which is accessing federal and state records through or
         because of its relationship with the CGA.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node34
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 2.  Participate in related meetings and provide input and comments
         for system improvement.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node35
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 3.  Receive information from the CGA (e.g., system updates) and
         disseminate it to appropriate Contractor employees.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node36
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 4.  Maintain and update manuals applicable to the effectuation
         of the agreement, and provide them to the Contractor.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node37
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: "5.  Maintain up-to-date records of Contractor\u2019s employees\
         \ who access the system, including name, date of birth, social security number,\
         \ date fingerprint card(s) submitted, date security clearance issued, and\
         \ date initially trained, tested, certified or recertified (if applicable)."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node38
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 6.  Train or ensure the training of Contractor personnel.  If Contractor
         personnel access NCIC, schedule the operators for testing or a certification
         exam with the CSA staff, or AC staff with permission from the CSA staff.  Schedule
@@ -254,28 +254,28 @@ objects:
         mandated class.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node39
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 7.  The AC will not permit an untrained/untested or non-certified
         Contractor employee to access CJI or systems supporting CJI where access to
         CJI can be gained.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node40
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 8.  Where appropriate, ensure compliance by the Contractor with
         NCIC validation requirements.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node41
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 9.  Provide completed applicant fingerprint cards on each Contractor
         employee who accesses the system to the CJA (or, where appropriate, CSA) for
         criminal background investigation prior to such employee accessing the system.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node42
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node30
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node32
       description: 10.  Any other responsibility for the AC promulgated by the FBI.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node43
       assessable: false
@@ -283,34 +283,34 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node2
       name: CJIS System Agency Information Secrurity Officer (CSA ISO)
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node44
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node43
       description: 'The CSA ISO shall:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node45
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node43
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node44
       description: 1.  Serve as the security point of contact (POC) to the FBI CJIS
         Division ISO.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node46
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node43
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node44
       description: "2.  Document technical compliance with the CJIS Security Policy\
         \ with the goal to assure the confidentiality, integrity, and availability\
         \ of criminal justice information to the user community throughout the CSA\u2019\
         s user community, to include the local level."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node47
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node43
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node44
       description: 3.  Document and provide assistance for implementing the security-related
         controls for the Interface Agency and its users.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node48
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node43
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node44
       description: 4.  Establish a security incident response and reporting procedure
         to discover, investigate, document, and report to the CSA, the affected criminal
         justice agency, and the FBI CJIS Division ISO major incidents that significantly
@@ -321,39 +321,39 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node2
       name: Local Agency Security Officer (LASO)
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node50
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node49
       description: 'Each LASO shall:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node51
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node49
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node50
       description: 1.  Identify who is using the CSA approved hardware, software,
         and firmware and ensure no unauthorized individuals or processes have access
         to the same.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node52
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node49
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node50
       description: 2.  Identify and document how the equipment is connected to the
         state system.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node53
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node49
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node50
       description: 3.  Ensure that personnel security screening procedures are being
         followed as stated in this policy.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node54
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node49
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node50
       description: 4.  Ensure the approved and appropriate security measures are in
         place and working as expected.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node55
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node49
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node50
       description: 5.  Support policy compliance and ensure CSA ISO is promptly informed
         of security incidents.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
@@ -362,51 +362,51 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node2
       name: FBI CJIS Division Information Security Officer (FBI CJIS ISO)
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
       description: 'The FBI CJIS ISO shall:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node58
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: 1.  Maintain the CJIS Security Policy.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node59
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: 2.  Disseminate the FBI Director approved CJIS Security Policy.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node60
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: "3.  Serve as a liaison with the CSA\u2019s ISO and with other\
         \ personnel across the CJIS community and in this regard provide technical\
         \ guidance as to the intent and implementation of operational and technical\
         \ policy issues."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node61
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: 4.  Serve as a point-of-contact (POC) for computer incident notification
         and distribution of security alerts to the CSOs and ISOs.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node62
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: 5.  Assist with developing audit compliance guidelines as well
         as identifying and reconciling security-related issues.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node63
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: 6.  Develop and participate in information security training programs
         for the CSOs and ISOs, and provide a means by which to acquire feedback to
         measure the effectiveness and success of such training.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node64
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node56
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node57
       description: 7.  Maintain a security policy resource center (SPRC) on FBI.gov
         and keep the CSOs and ISOs updated on pertinent information.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node65
@@ -694,64 +694,64 @@ objects:
         to which the agency will have access, and the FBI CJIS Division policies to
         which the agency must adhere.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
       description: 'These agreements shall include:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node115
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "1.\_Audit."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node116
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "2.\_Dissemination."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node117
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "3.\_Hit confirmation."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node118
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "4.\_Logging."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node119
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "5.\_Quality Assurance (QA)."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node120
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "6.\_Screening (Pre-Employment)."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node121
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "7.\_Security."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node122
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "8.\_Timeliness."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node123
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: "9.\_Training."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node124
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: 10. Use of the system.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node125
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node111
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node114
       description: 11. Validation.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node126
       assessable: false
@@ -7269,34 +7269,34 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1170
       name: Audits by the CSA
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1177
       description: 'Each CSA shall:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1179
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1177
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
       description: 1. At a minimum, triennially audit all CJAs and NCJAs which have
         direct access to the state system in order to ensure compliance with applicable
         statutes, regulations and policies.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1180
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1177
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
       description: 2. In coordination with the SIB, establish a process to periodically
         audit all NCJAs, with access to CJI, in order to ensure compliance with applicable
         statutes, regulations and policies.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1181
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1177
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
       description: 3. Have the authority to conduct unannounced security inspections
         and scheduled audits of Contractor facilities.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1182
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1177
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1178
       description: 4. Have the authority, on behalf of another CSA, to conduct a CSP
         compliance audit of contractor facilities and provide the results to the requesting
         CSA. If a subsequent CSA requests an audit of the same contractor facility,
@@ -7515,20 +7515,20 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1216
       name: 'Mobile Devices '
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1218
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1217
       description: 'The agency shall: '
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1219
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1217
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1218
       description: (i) establish usage restrictions and implementation guidance for
         mobile devices;
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1220
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1217
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1218
       description: '(ii) authorize, monitor, control wireless access to the information
         system. '
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1221
@@ -7843,51 +7843,51 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1216
       name: Wireless Device Risk Mitigations
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
       description: 'Organizations shall, as a minimum, ensure that wireless devices:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1276
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: "1.\_Apply available critical patches and upgrades to the operating\
         \ system as soon as they become available for the device and after necessary\
         \ testing as described in Section 5.10.4.1."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1277
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: "2.\_Are configured for local device authentication (see Section\
         \ 5.13.8.1)."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1278
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: "3.\_Use advanced authentication or CSO approved compensating controls\
         \ as per Section 5.13.7.2.1."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1279
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: "4.\_Encrypt all CJI resident on the device."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1280
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: "5.\_Erase cached information, to include authenticators (see Section\
         \ 5.6.2.1) in applications, when session is terminated."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1281
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: "6.\_Employ personal firewalls on full-featured operating system\
         \ devices or run a Mobile Device Management (MDM) system that facilitates\
         \ the ability to provide firewall services from the agency level."
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1282
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1274
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1275
       description: 7. Employ malicious code protection on full-featured operating
         system devices or run a MDM system that facilitates the ability to provide
         anti-malware services from the agency level.
@@ -7927,35 +7927,35 @@ objects:
         a full-feature operating system (i.e. laptops or tablets with Windows or Linux/Unix
         operating systems).
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
       description: 'At a minimum, the personal firewall shall perform the following
         activities:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1290
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
       description: 1. Manage program access to the Internet.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1291
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
       description: 2. Block unsolicited requests to connect to the PC.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1292
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
       description: 3. Filter Incoming traffic by IP address or protocol.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1293
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
       description: 4. Filter Incoming traffic by destination ports.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1294
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1287
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1289
       description: 5. Maintain an IP traffic log.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1295
       assessable: false
@@ -8068,54 +8068,54 @@ objects:
       description: Before CSOs consider approval of compensating controls, Mobile
         Device Management (MDM) shall be implemented per Section 5.13.2.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
       description: 'The compensating controls shall:'
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1316
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: 1. Meet the intent of the CJIS Security Policy AA requirement
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1317
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: 2. Provide a similar level of protection or security as the original
         AA requirement
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1318
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: 3. Not rely upon the existing requirements for AA as compensating
         controls
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1319
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: 4. Expire upon the CSO approved date or when a compliant AA solution
         is implemented.
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1320
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: "The following minimum controls shall be implemented as a part\
         \ of the CSO approved compensating controls:\_"
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1321
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: Possession and registration of an agency-issued smartphone or tablet
         as an indication it is the authorized user
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1322
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: Use of device certificates as per Section 5.13.7.3 Device Certificates
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1323
       assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1313
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1315
       description: Implemented CJIS Security Policy compliant standard authenticator
         protection on the secure location where CJI is stored
     - urn: urn:intuitem:risk:req_node:cjis-policy-5.9.4:node1324
