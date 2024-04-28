@@ -2,16 +2,22 @@ urn: urn:intuitem:risk:library:aircyber-v1.5.2
 locale: en
 ref_id: AirCyber-v1.5.2
 name: Public AirCyber Maturity Level Matrix
-description: "AirCyber is the AeroSpace and Defense official standard for Cybersecurity\
-  \ maturity evaluation and increase built by Airbus, Dassault Aviation, Safran and\
-  \ Thales to help the AeroSpace SupplyChain to be more resilient. \nTheir joint venture\
-  \ BoostAeroSpace is offering this extract of the AirCyber maturity level matrix\
-  \ to provide further details on this standard, the questions and the AirCyber maturity\
-  \ levels they are associated to. \nAirCyber program uses this maturity level matrix\
-  \ as the base of the cyber maturity evaluation as is the evaluation activity is\
-  \ the very starting point for any cyber maturity progression. Being aware of the\
-  \ problems is the mandatory very first knowledge a company shall know to decide\
-  \ to launch a cybersecurity company program.\nSource: https://boostaerospace.com/aircyber/\n"
+description: 'AirCyber is the AeroSpace and Defense official standard for Cybersecurity
+  maturity evaluation and increase built by Airbus, Dassault Aviation, Safran and
+  Thales to help the AeroSpace SupplyChain to be more resilient.
+
+  Their joint venture BoostAeroSpace is offering this extract of the AirCyber maturity
+  level matrix to provide further details on this standard, the questions and the
+  AirCyber maturity levels they are associated to.
+
+  AirCyber program uses this maturity level matrix as the base of the cyber maturity
+  evaluation as is the evaluation activity is the very starting point for any cyber
+  maturity progression. Being aware of the problems is the mandatory very first knowledge
+  a company shall know to decide to launch a cybersecurity company program.
+
+  Source: https://boostaerospace.com/aircyber/
+
+  '
 copyright: "\xA9 Boost Aerospace\nThis work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike\
   \ 4.0 International License. Any commercial use of this work must be contracted\
   \ with BoostAeroSpace.\nPermission given to include AirCyber in CISO Assistant.\n"
@@ -23,17 +29,33 @@ objects:
     urn: urn:intuitem:risk:framework:aircyber-v1.5.2
     ref_id: AirCyber-v1.5.2
     name: Public AirCyber Maturity Level Matrix
-    description: "AirCyber is the AeroSpace and Defense official standard for Cybersecurity\
-      \ maturity evaluation and increase built by Airbus, Dassault Aviation, Safran\
-      \ and Thales to help the AeroSpace SupplyChain to be more resilient. \nTheir\
-      \ joint venture BoostAeroSpace is offering this extract of the AirCyber maturity\
-      \ level matrix to provide further details on this standard, the questions and\
-      \ the AirCyber maturity levels they are associated to. \nAirCyber program uses\
-      \ this maturity level matrix as the base of the cyber maturity evaluation as\
-      \ is the evaluation activity is the very starting point for any cyber maturity\
-      \ progression. Being aware of the problems is the mandatory very first knowledge\
-      \ a company shall know to decide to launch a cybersecurity company program.\n\
-      Source: https://boostaerospace.com/aircyber/\n"
+    description: 'AirCyber is the AeroSpace and Defense official standard for Cybersecurity
+      maturity evaluation and increase built by Airbus, Dassault Aviation, Safran
+      and Thales to help the AeroSpace SupplyChain to be more resilient.
+
+      Their joint venture BoostAeroSpace is offering this extract of the AirCyber
+      maturity level matrix to provide further details on this standard, the questions
+      and the AirCyber maturity levels they are associated to.
+
+      AirCyber program uses this maturity level matrix as the base of the cyber maturity
+      evaluation as is the evaluation activity is the very starting point for any
+      cyber maturity progression. Being aware of the problems is the mandatory very
+      first knowledge a company shall know to decide to launch a cybersecurity company
+      program.
+
+      Source: https://boostaerospace.com/aircyber/
+
+      '
+    implementation_groups_definition:
+    - ref_id: Bronze
+      name: null
+      description: null
+    - ref_id: Silver
+      name: null
+      description: null
+    - ref_id: Gold
+      name: null
+      description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.1
       assessable: true
@@ -43,6 +65,8 @@ objects:
       description: Are access to your buildings, offices and IT facilities controlled
         and limited (e. g. through the use of locked doors, magnetic card readers,
         prevention, detection and intervention devices in the event of theft, etc.)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.2
       assessable: true
       depth: 1
@@ -51,6 +75,8 @@ objects:
       description: Is the enclosure of buildings hosting your server rooms and technical
         rooms secured by a fence, an entrance barrier, video surveillance, and an
         alarm?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.3
       assessable: true
       depth: 1
@@ -58,12 +84,16 @@ objects:
       name: Secure access to building (servers & technical room)
       description: Is the enclosure of your premises secured by guards with night
         surveillance, an entrance barrier, video surveillance and an alarm?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.4
       assessable: true
       depth: 1
       ref_id: '1.4'
       name: 'Visitor escorting '
       description: Are visitors permanently accompanied on your premises?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.5
       assessable: true
       depth: 1
@@ -71,6 +101,8 @@ objects:
       name: Redundancy of the power supply
       description: Do you use inverters or back-up batteries (to ensure the power
         supply in case of loss of power)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.6
       assessable: true
       depth: 1
@@ -78,6 +110,8 @@ objects:
       name: Clean office policy
       description: Do you have a clean desktop policy (physical and screen lock) for
         sensitive papers and removable storage media?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:1.7
       assessable: true
       depth: 1
@@ -85,6 +119,8 @@ objects:
       name: Verify compliance of entities, subsites
       description: If you have several geographical IT sites, do you visit them to
         check physical and IT security regularly (min. once every 2 years) ?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1
       assessable: true
       depth: 1
@@ -95,12 +131,16 @@ objects:
 
         Do you have an accurate and up-to-date inventory of the assets (workstation,
         servers, ...) used for your customers production?'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1.1
       assessable: true
       depth: 1
       ref_id: 2.1.1
       name: Map of the company network
       description: Do you have a complete network diagram of your company?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1.2
       assessable: true
       depth: 1
@@ -108,6 +148,8 @@ objects:
       name: Live / automatic update of the company network map
       description: Is your network diagram automatically updated with network information
         and service protocols?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.1.3
       assessable: true
       depth: 1
@@ -116,6 +158,8 @@ objects:
       description: "Have you implemented a detection and monitoring solution (NAC,\
         \ DHCP moni-toring) for the connection of new devices (PC, server, printer,\
         \ routers, Internet modems\u2026) on your internal network?"
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.2
       assessable: true
       depth: 1
@@ -124,6 +168,8 @@ objects:
       description: 'Is the list of your computer devices regularly updated?
 
         (servers, desktop PCs, laptops, printers, network device, smartphones, etc.)'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.3
       assessable: true
       depth: 1
@@ -132,6 +178,8 @@ objects:
         \ with respect to the number of IT users / devices / employees\_"
       description: Is there a person or department assigned to the management the
         computer systems?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.4
       assessable: true
       depth: 1
@@ -139,6 +187,8 @@ objects:
       name: Specify governance with clear roles and responsibilities
       description: Do you have an information systems security focal point (RSSI or
         equivalent)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.4.1
       assessable: true
       depth: 1
@@ -147,6 +197,8 @@ objects:
       description: Has your organization implemented an Information Security Policy
         and associated controls? Do you communicate them to all users and project
         managers?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.5
       assessable: true
       depth: 1
@@ -155,6 +207,8 @@ objects:
       description: Do you use a tool to ensure that all your workstations (servers,
         laptops, desk-top PCs) are secure in a consistent way (identical security
         policies between workstations, gap management, etc.)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.5.1
       assessable: true
       depth: 1
@@ -163,6 +217,8 @@ objects:
       description: Do you use a tool to ensure that all your smartphones are secure
         in a con-sistent way (identical security policies between them, gap management,
         etc.)
+      implementation_groups:
+      - SIlver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.6
       assessable: true
       depth: 1
@@ -170,6 +226,8 @@ objects:
       name: Malware protection based on signature list detection
       description: Do you implement an automatic malware detection tool across the
         entire IT infrastructure (workstations, servers)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.7
       assessable: true
       depth: 1
@@ -177,6 +235,8 @@ objects:
       name: Malware protection detecting abnormal behaviour based on system events
       description: Have you implemented an automatic malware removal or quarantine
         tool (anti-malware) on the entire IT device?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.8
       assessable: true
       depth: 1
@@ -185,12 +245,16 @@ objects:
         on open systems like Android'
       description: 'Are enterprise smartphones managed by your IT team (for example:
         password and anti-virus policy configuration)?'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.8.1
       assessable: true
       depth: 1
       ref_id: 2.8.1
       name: 'Light smartphones security policy  '
       description: Do enterprise smartphones have a dedicated security policy?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.8.2
       assessable: true
       depth: 1
@@ -199,6 +263,8 @@ objects:
         deployed by users.
       description: Are enterprise smartphones managed centrally with a tool to control
         their configuration, security status?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9
       assessable: true
       depth: 1
@@ -208,6 +274,8 @@ objects:
       description: Do you use a centralized solution to activate, keep for at least
         a year and configure the logs of the most important components like firewalls
         or internet access?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.1
       assessable: true
       depth: 1
@@ -216,6 +284,8 @@ objects:
       description: Do you perform log analysis (e.g. real time analysis, SOC, etc.)
         of the most important components (servers, workstations, laptops, printers,
         network equipment, smartphones, etc.)?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.2
       assessable: true
       depth: 1
@@ -223,6 +293,8 @@ objects:
       name: logs check for admin accounts usage
       description: Do you activate, keep for at least a year and configure the administrator
         au-thentication logs on network, the server and computer device?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.3
       assessable: true
       depth: 1
@@ -230,6 +302,8 @@ objects:
       name: inventory log sources on ICT sensitive systems
       description: Do you use a procedure to implement log backup of the most important
         com-ponents such as firewalls, internet access?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.4
       assessable: true
       depth: 1
@@ -243,6 +317,8 @@ objects:
         Directory service (read-only AD, validation of policies, security rules of
         work-stations managed via the AD, restriction and security of passwords of
         privileged accounts...)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.9.5
       assessable: true
       depth: 1
@@ -253,6 +329,8 @@ objects:
         \ of undeployed measures) and have you configured the generation of detailed\
         \ alerts in the event of a security incident (configuration of detailed logs,\
         \ active \u2013 with alerts \u2013 monitoring of the logs)?"
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.10
       assessable: true
       depth: 1
@@ -260,6 +338,8 @@ objects:
       name: Automatic and managed back-up / restore process & test
       description: Do you define and apply an automatic backup policy for critical
         components with a tested recovery procedure?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.11
       assessable: true
       depth: 1
@@ -269,6 +349,8 @@ objects:
         the de-vices they could connect to their computers (prohibit to connect a
         USB flash drive found by chance, do an antivirus scan of the partners' usb
         keys, do not connect any strange device on their computers...)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.1
       assessable: true
       depth: 1
@@ -276,6 +358,8 @@ objects:
       name: 'Individual identification to all users '
       description: Does each employee have a nominative identifier on IT production
         environments?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.1.1
       assessable: true
       depth: 1
@@ -285,6 +369,8 @@ objects:
         clearance requirements, do you check the background and profile suitability
         of new hired (e.g. criminal record/nationality) depending on the role they
         apply to (e.g. senior, IT staff, etc.)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.1.2
       assessable: true
       depth: 1
@@ -294,6 +380,8 @@ objects:
       description: When security constraints have been identified, such as national
         clearance requirements, do you check the background and profile suitability
         of new hires (criminal record/nationality)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.2
       assessable: true
       depth: 1
@@ -305,6 +393,8 @@ objects:
         devices and access all files on the computer)?
 
         '
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.3
       assessable: true
       depth: 1
@@ -312,6 +402,8 @@ objects:
       name: Up to date inventory of admin accounts
       description: Do you have a complete inventory of privileged (administrative)
         accounts and do you keep it up to date?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.31
       assessable: true
       depth: 1
@@ -320,6 +412,8 @@ objects:
       description: If you use administrator accounts on machines, do you have a solution
         in place to control their security (password security, account blocking, remote
         change, etc.)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.4
       assessable: true
       depth: 1
@@ -329,6 +423,8 @@ objects:
       description: Do you train operational teams (network administrators, security
         and systems administrators, project managers, developers, CISOs) in information
         systems security?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.5
       assessable: true
       depth: 1
@@ -342,6 +438,8 @@ objects:
         the rules and cybersecurity instructions that they must respect, or a legally
         enforceable equivalent (such as an annex to the internal company regulations,
         employment contract)?'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.5.1
       assessable: true
       depth: 1
@@ -351,6 +449,8 @@ objects:
       description: Do you set up systematic cybersecurity training for all employees
         and contractors, adapted or customized according to their role in the company,
         and do you follow up attendance to this training?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.6
       assessable: true
       depth: 1
@@ -358,6 +458,8 @@ objects:
       name: Secure laptops against data spying
       description: Do users have access to IT security resources related to travel
         on their laptops? (Screen filter, security cable, VPN, encryption, monitoring,...)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.1
       assessable: true
       depth: 1
@@ -366,6 +468,8 @@ objects:
       description: "Is there an entry and exit procedure for users and administrators?\
         \ \n(Creation of a specific identifier, signature of a user charter, account\
         \ deactivation)?\n"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.2
       assessable: true
       depth: 1
@@ -373,6 +477,8 @@ objects:
       name: Administrative rights needed to install software
       description: Do users need administrative rights that require different authentication
         with an admin account or computer support to install software on their computers?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.21
       assessable: true
       depth: 1
@@ -382,12 +488,16 @@ objects:
       description: 'Do you have a centralized and secure management of user accounts
         capable of detecting abnormal behavior (theft of identifiers, use on non-standard
         servers, attempt to discover the password...)?  '
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.3
       assessable: true
       depth: 1
       ref_id: '4.3'
       name: Encrypt passwords
       description: Do you protect passwords stored on systems (encryption)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.4
       assessable: true
       depth: 1
@@ -396,6 +506,8 @@ objects:
       description: Is there a password management policy (regular change, minimum
         security constraints, special characters, number of characters, adapted policy
         for administrators, etc.)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.4.1
       assessable: true
       depth: 1
@@ -403,6 +515,8 @@ objects:
       name: Change default ID and password for devices and services
       description: Do you change the default passwords and identifiers of the devices
         of your in-formation system?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.5
       assessable: true
       depth: 1
@@ -410,12 +524,16 @@ objects:
       name: 'Rules to update frequently SW and systems. '
       description: Do you regularly update components (servers, desktop PCs, laptops,
         printers, network device, smartphones, etc.)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.6
       assessable: true
       depth: 1
       ref_id: '4.6'
       name: Track frequently system not up to date
       description: Do you anticipate the end of software and system maintenance?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.6.1
       assessable: true
       depth: 1
@@ -424,12 +542,16 @@ objects:
       description: In order to avoid potential vulnerabilities (unknown software,
         not updated...) do you verify the versions of the software installed on your
         computer park?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.6.2
       assessable: true
       depth: 1
       ref_id: 4.6.2
       name: inventory of allowed and forbidden software
       description: Do you have a list of authorized and prohibited software?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.7
       assessable: true
       depth: 1
@@ -441,6 +563,8 @@ objects:
         and software editors?
 
         '
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8
       assessable: true
       depth: 1
@@ -448,6 +572,8 @@ objects:
       name: attacks or malicious activities detection (e.g. SOC)
       description: Is there a Security Operation Center (SOC) for detecting issues
         and monitoring the cybersecurity of the information system?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.1
       assessable: true
       depth: 1
@@ -455,6 +581,8 @@ objects:
       name: centralize    logs interpretation in SIEM
       description: Do you centralize security incidents and events through events
         collection tools (SIEM (Security Information Event Management))?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.2
       assessable: true
       depth: 1
@@ -462,6 +590,8 @@ objects:
       name: Monitor and alert on user device activity
       description: Do you monitor users' devices such as fixed PC, laptop, smartphone,
         USB key, etc...?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.3
       assessable: true
       depth: 1
@@ -469,6 +599,8 @@ objects:
       name: tool to alert and perform semi-automatic isolation or shut down of systems
       description: Is there an alert tool to automatically shut down or isolate some
         elements of the computer system in the event of a major incident?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.4
       assessable: true
       depth: 1
@@ -476,12 +608,16 @@ objects:
       name: Central Network cyber incidents monitoring
       description: Is there a Network Operations Center (NOC) or similar solution
         for detecting network security incidents?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.5
       assessable: true
       depth: 1
       ref_id: 4.8.5
       name: Detect / block unauthorized connection to network
       description: Do you block unauthorized connections to your network?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8.6
       assessable: true
       depth: 1
@@ -489,12 +625,16 @@ objects:
       name: Network traffic abnormal behaviour monitoring
       description: Have you deployed and monitor network probes to detect malicious
         or abnormal activities?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.9
       assessable: true
       depth: 1
       ref_id: '4.9'
       name: Process for cyber incidents management & escalation
       description: Are there escalation and alert processes for security incidents?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.9.1
       assessable: true
       depth: 1
@@ -503,6 +643,8 @@ objects:
         or system activities for malicious activities or policy violation.
       description: Have you implemented solutions on PCs and Servers to detect, block
         or alert abnormal behaviors (IDS/IPS)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.10
       assessable: true
       depth: 1
@@ -511,6 +653,8 @@ objects:
       description: Have you subscribed to a news feed informing you of new cyber security
         vulner-abilities and cyber security alerts such as those proposed by government
         CERTs (ANSSI FR, NIST US), international security monitoring sites?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.11
       assessable: true
       depth: 1
@@ -520,12 +664,16 @@ objects:
       description: Have you set up or contracted professional and customized security
         alert services for your company, its sector of activity, the IT devices you
         have deployed, etc. (professional or sectoral "CERT")?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.1
       assessable: true
       depth: 1
       ref_id: '5.1'
       name: "Identify the company's most sensitive servers\_"
       description: Do you know the most sensitive servers in your information system?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.2
       assessable: true
       depth: 1
@@ -533,6 +681,8 @@ objects:
       name: internal firewalls, physical network segmentation to segregate network
       description: Do you use security device to protect and partition your internal
         network?  (Firewall, proxy, etc.)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.2.1
       assessable: true
       depth: 1
@@ -540,6 +690,8 @@ objects:
       name: Firewall on laptop and desktop
       description: Do you use a firewall on client workstations? (laptop, desktop
         PC)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.2.2
       assessable: true
       depth: 1
@@ -547,6 +699,8 @@ objects:
       name: Yearly Firewall Control
       description: Do you check the configuration of the firewalls at least once a
         year?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.3
       assessable: true
       depth: 1
@@ -558,6 +712,8 @@ objects:
         only and forbidding non-secure protocols (e.g.: configure network and desktop/server
         firewall to forbid telnet-23 protocols in the local network, forbidding usage
         of Windows Samba v1 file-sharing protocol or NTLMv1 authentication, etc.)?'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.4
       assessable: true
       depth: 1
@@ -566,6 +722,8 @@ objects:
       description: Do you use secure authentication for connecting to your company
         emails from the Internet (double authentication with phone and/or blocking
         accounts against password attempts, regular password change, complex password)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.5
       assessable: true
       depth: 1
@@ -574,6 +732,8 @@ objects:
       description: 'Do you use strong authentication and monitor (alerts in case of
         failure) the connection to sensitive devices such as: IT device administration,
         cloud ser-vices administration and websites?  '
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.5.1
       assessable: true
       depth: 1
@@ -581,6 +741,8 @@ objects:
       name: 'Offer SSO for netw application or E-SSO password manager '
       description: Do you use SSO (single sign on) features for http or applications
         with an auto-mated password manager and auto fill?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.6
       assessable: true
       depth: 1
@@ -591,6 +753,8 @@ objects:
         etc.) for the administration of the information system?
 
         '
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.6.1
       assessable: true
       depth: 1
@@ -600,6 +764,8 @@ objects:
         opening unsecured Internet networks by connecting for example a modem / 3G
         USB flash drive, smartphone and at the same time having these same computers
         connected to the company network?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.7
       assessable: true
       depth: 1
@@ -609,6 +775,8 @@ objects:
       description: Do you protect yourselves from threats related to the use of removable
         media (specific security tool, antivirus configuration for USB, hardening
         computer)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.7.1
       assessable: true
       depth: 1
@@ -616,6 +784,8 @@ objects:
       name: Encrypt data on mobile devices (USB drives, smartphones)
       description: Do you encrypt sensitive data on removable media without any user
         interac-tion (transparent automatic encryption)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.8
       assessable: true
       depth: 1
@@ -624,6 +794,8 @@ objects:
       description: Have all devices (computer, tablet pc, smartphone) connected to
         the compa-ny's information system been subject to a formal and prior approval
         proce-dure?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.8.1
       assessable: true
       depth: 1
@@ -633,12 +805,16 @@ objects:
       description: "Do you have complete control over the professional usage of enterprise\
         \ appli-cations / data on mobile devices? \n(good separation  of personal\
         \ and professional environments)\n"
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.9
       assessable: true
       depth: 1
       ref_id: '5.9'
       name: Internet access filtered (blacklist / categorized)
       description: 'Are Internet accesses filtered by a proxy server? '
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.9.1
       assessable: true
       depth: 1
@@ -646,6 +822,8 @@ objects:
       name: Web-application firewall for internally internet facing application
       description: Do you protect your web servers accessible from outside the company's
         net-work with WAF (web access filtering) device?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.10
       assessable: true
       depth: 1
@@ -653,6 +831,8 @@ objects:
       name: 'Internet traffic level NW monitoring with alerting '
       description: Is there Internet traffic monitoring with alerts but also indicators
         (KPIs) on the use of company data on the Internet?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.10.1
       assessable: true
       depth: 1
@@ -660,6 +840,8 @@ objects:
       name: 'Encryption for internet links between different sites '
       description: Do you encrypt your connections between your various sites of your
         company and your partners?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.10.2
       assessable: true
       depth: 1
@@ -668,6 +850,8 @@ objects:
       description: If you have allowed browsing to non-professional websites, have
         you deployed a secure browsing solution for these sites that isolates it from
         the standard computer network?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.11
       assessable: true
       depth: 1
@@ -675,6 +859,8 @@ objects:
       name: 'Manage WI-Fi Guest access segregated '
       description: Do you have a "visitor" Wifi isolated from the rest of the Company's
         network? (Specific connection, dedicated Wifi?)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.12
       assessable: true
       depth: 1
@@ -684,6 +870,8 @@ objects:
         Manage Wi-Fi access segregated'
       description: Do you have a secure Wifi access with a separation of uses? (staff,
         industrial, professional, visitor, etc.)
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.13
       assessable: true
       depth: 1
@@ -692,6 +880,8 @@ objects:
         (.exe for example) or content '
       description: Is there a system for filtering valid e-mails against malicious
         ones? (Anti-spam, removal of suspicious attached files, etc...)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.13.1
       assessable: true
       depth: 1
@@ -699,6 +889,8 @@ objects:
       name: 'Encrypt email content easily '
       description: Do you offer users the possibility to easily encrypt the content
         of e-mails?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.14
       assessable: true
       depth: 1
@@ -706,6 +898,8 @@ objects:
       name: Security access to supplier and subcontractor to information system
       description: Do you secure network interconnections with your subcontractors
         and suppli-ers?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.14.1
       assessable: true
       depth: 1
@@ -714,6 +908,8 @@ objects:
         exchange sensitive data'
       description: Do you offer a secure exchange platform for your subcontractors
         and suppli-ers?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.14.2
       assessable: true
       depth: 1
@@ -723,6 +919,8 @@ objects:
       description: If your website is hosted within the company, do you separate your
         website and Internet-accessible services from the rest of the company's network
         (via a segregated network zone, e.g. "DMZ")?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.15
       assessable: true
       depth: 1
@@ -730,6 +928,8 @@ objects:
       name: ' Detect any new device connected to the network.'
       description: Do you allow connection to the network only to devices identified
         and man-aged by the information system?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.17
       assessable: true
       depth: 1
@@ -739,12 +939,16 @@ objects:
         users, remote sites) do you systematically implement a security solution that
         ensures strong identification and  authentication of the user (MFA, login
         / password, certificates, ...) ?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.1
       assessable: true
       depth: 1
       ref_id: '6.1'
       name: Define and apply a backup policy for sensitive data
       description: Is the important data saved regularly?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.2
       assessable: true
       depth: 1
@@ -753,6 +957,8 @@ objects:
 
         '
       description: Are your backups protected in a secure room?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.3
       assessable: true
       depth: 1
@@ -760,6 +966,8 @@ objects:
       name: "Setup secure backup storage on cloud system \n"
       description: Do you use a centrally managed data storage and backup system,
         such as a cloud (AWS, O365 Sharepoint, OneDrive, google drive,...)?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.4
       assessable: true
       depth: 1
@@ -767,6 +975,8 @@ objects:
       name: 'Hard Disk encryption on desktops '
       description: Do you encrypt computer, smartphones hard disks  without any user
         interaction (transparent automatic encryption)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.5
       assessable: true
       depth: 1
@@ -775,6 +985,8 @@ objects:
         solutions '
       description: Do you implement enterprise data protection management solutions
         (leak de-tection of confidential data, roles and responsibilities, etc.)?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.6
       assessable: true
       depth: 1
@@ -782,18 +994,24 @@ objects:
       name: 'Proceed to regular controls of the SI and set corrective solution '
       description: Do you carry out regular security audits (application, network,
         process), then apply the associated corrective actions?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.6.1
       assessable: true
       depth: 1
       ref_id: 6.6.1
       name: Verify compliance of entities
       description: Do you check the compliance of your company's subsidiaries?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.6.2
       assessable: true
       depth: 1
       ref_id: 6.6.2
       name: 'Optimize firewall rules management with regular audits '
       description: Do you regularly check the rules of your Firewalls?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.7
       assessable: true
       depth: 1
@@ -802,6 +1020,8 @@ objects:
         penetration testing, technical studies
       description: Do you carry out regular pentest on your IS and your subsidiaries,
         then apply the associated corrective actions?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.7.1
       assessable: true
       depth: 1
@@ -809,6 +1029,8 @@ objects:
       name: PENTEST of company website. Deploy corrective solutions
       description: Do you perform pentest on your company's websites and then apply
         the associ-ated corrective actions?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.7.2
       assessable: true
       depth: 1
@@ -817,6 +1039,8 @@ objects:
       description: Do you regularly check and update your cyberattack detection capabilities?
         (for example, updating security supervision rules following the pentest performed
         on your systems, or security project management to update your detection systems)
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.8
       assessable: true
       depth: 1
@@ -825,6 +1049,8 @@ objects:
         \ exchanges\u2026)"
       description: Have you deployed means and tools allowing users to encrypt sensitive
         data sent outside of the company?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.9
       assessable: true
       depth: 1
@@ -833,6 +1059,8 @@ objects:
       description: Did you defined a data classification policy according to its use
         (public, confi-dential company, confidential...) and the protection rules
         to be applied to this data?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.9.1
       assessable: true
       depth: 1
@@ -841,6 +1069,8 @@ objects:
       description: Have you implemented a solution to automatically classify your
         company's data, or to help users making a decision to protect data that would
         be classified as sensitive?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.9.2
       assessable: true
       depth: 1
@@ -850,6 +1080,8 @@ objects:
       description: Do you have a solution to prevent the sending of unprotected confidential
         data or to systematically encrypt it before it is saved or sent outside your
         infor-mation system?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:6.10
       assessable: true
       depth: 1
@@ -858,6 +1090,8 @@ objects:
       description: Have you defined that your company's data should be associated
         with identified managers and their responsibilities (HR data, design office
         data, etc.)
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.0
       assessable: true
       depth: 1
@@ -866,6 +1100,8 @@ objects:
       description: Do you implement segregation between the production environment
         and other environments (qualification, preproduction, company information
         system, etc.)?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.1.1
       assessable: true
       depth: 1
@@ -873,6 +1109,8 @@ objects:
       name: 'ICS : Identify most critical device on the industrial network'
       description: Have you performed an inventory of your industrial control system
         devices, identifying the most critical components?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.1.2
       assessable: true
       depth: 1
@@ -880,6 +1118,8 @@ objects:
       name: 'ICS :  specific backup for critical device of industrial control systems'
       description: Do you perform backup of your most sensitive industrial control
         systems (con-figuration, source code and data)?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.1.3
       assessable: true
       depth: 1
@@ -887,6 +1127,8 @@ objects:
       name: 'ICS :  Setup distinct physical sites for backup storage'
       description: Do you regularly verify that the backup of your industrial control
         systems can be restored without problems?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.2
       assessable: true
       depth: 1
@@ -894,6 +1136,8 @@ objects:
       name: 'ICS :  mapping of the company network'
       description: Are the documentation, nomenclature and diagrams of ICS devices
         kept up to date?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.3
       assessable: true
       depth: 1
@@ -903,6 +1147,8 @@ objects:
         '
       description: Is there a documented crisis management process? (such as, for
         example, disas-ter recovery after a system crash)
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.4
       assessable: true
       depth: 1
@@ -910,6 +1156,8 @@ objects:
       name: 'ICS :  documentation for design, components and operation'
       description: Is the documentation relating to the design, components and operation
         of ICS stored with an appropriate level of security?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.5
       assessable: true
       depth: 1
@@ -917,6 +1165,8 @@ objects:
       name: 'ICS : Set IT specific standard & governance'
       description: Is there a qualified person or department dedicated to the design,
         operation, and monitoring of ICS device?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.6
       assessable: true
       depth: 1
@@ -925,6 +1175,8 @@ objects:
         employees and sub-contractors '
       description: Is there an ICS security awareness or training program for employees
         and contractors?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.7
       assessable: true
       depth: 1
@@ -932,12 +1184,16 @@ objects:
       name: "Industrial IT : \_Make users sign a charter of good conduct"
       description: Do users, operators and administrators of Industrial Automation
         and Control Systems (IACS) signed cybersecurity best practices and charter?
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.8
       assessable: true
       depth: 1
       ref_id: '7.8'
       name: 'ICS : specific patch management'
       description: Are there procedures in place to manage the life cycle of ICS ?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.9
       assessable: true
       depth: 1
@@ -945,18 +1201,24 @@ objects:
       name: 'ICS :  dedicated and compartmentalized network for the administration  '
       description: Do you use a dedicated and partitioned network for the administration
         of ICS?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.10
       assessable: true
       depth: 1
       ref_id: '7.10'
       name: 'ICS : Secure industrial network & devices access from company network'
       description: Is there a specifically defined architecture and management rules?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.11
       assessable: true
       depth: 1
       ref_id: '7.11'
       name: 'Industrial IT :  Audit the change processes, and dedicated IACS solutions '
       description: Are ICS change processes and dedicated solutions audited annually?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.12
       assessable: true
       depth: 1
@@ -964,6 +1226,8 @@ objects:
       name: 'ICS :  process for monitoring threats and vulnerabilities   '
       description: Are ICS components subject to a threat and vulnerability monitoring
         process?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.13
       assessable: true
       depth: 1
@@ -973,6 +1237,8 @@ objects:
         Centre), backup status...) of your network allowing detection of security
         incidents, back up issues and/or active monitoring of Industrial Information
         System (ICS)?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:7.14
       assessable: true
       depth: 1
@@ -982,6 +1248,8 @@ objects:
         '
       description: When an incident occurs in the production, do you investigate whether
         it could be caused by a malicious element?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.7.1
       assessable: true
       depth: 1
@@ -990,12 +1258,16 @@ objects:
       description: Have you implemented, documented and tested, at least once a year,
         a security problem management procedure to ensure that you can react quickly
         and in-volve the right internal or external people?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.8
       assessable: true
       depth: 1
       ref_id: '9.8'
       name: Setup a risk analysis
       description: 'Have you ever done a cyber-risk analysis on your company? '
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.81
       assessable: true
       depth: 1
@@ -1003,6 +1275,8 @@ objects:
       name: Risk management process (reviewed yearly)
       description: Do you annually review your company's cyber risk level by reviewing
         your com-pany's risk analyses?
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.82
       assessable: true
       depth: 1
@@ -1012,6 +1286,8 @@ objects:
       description: Do you have a computer-based risk management solution that allows
         you to raise the level of cyber risk and process it in a more or less automated
         way ?
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext1
       assessable: true
       depth: 1
@@ -1021,6 +1297,8 @@ objects:
         they are generated) to ensure their integrity?
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext2
       assessable: true
       depth: 1
@@ -1029,6 +1307,8 @@ objects:
       description: 'Do you activate security log recording on your equipment?
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext3
       assessable: true
       depth: 1
@@ -1038,6 +1318,8 @@ objects:
         with your customers?
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext4
       assessable: true
       depth: 1
@@ -1046,6 +1328,8 @@ objects:
       description: 'Do you only use the internet access defined within the company?
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext5
       assessable: true
       depth: 1
@@ -1056,6 +1340,8 @@ objects:
         network equipments, laptops and desktops?
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext6
       assessable: true
       depth: 1
@@ -1065,6 +1351,8 @@ objects:
         designed to take into account your providers/suppliers?
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext7
       assessable: true
       depth: 1
@@ -1074,6 +1362,8 @@ objects:
         \ procedural instructions or processes based on a security standard framework\
         \ (ISO27001, NIST,\u2026.)?\nIf yes, which framework do you use? \n[Corporate\
         \ IT]"
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext8
       assessable: true
       depth: 1
@@ -1082,6 +1372,8 @@ objects:
       description: 'Is the business continuity plan (BCP) reviewed and tested regularly?
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext9
       assessable: true
       depth: 1
@@ -1101,6 +1393,8 @@ objects:
         - other types of data (please detail)
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext10
       assessable: true
       depth: 1
@@ -1122,6 +1416,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext11
       assessable: true
       depth: 1
@@ -1134,6 +1430,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext12
       assessable: true
       depth: 1
@@ -1145,6 +1443,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext13
       assessable: true
       depth: 1
@@ -1156,6 +1456,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext14
       assessable: true
       depth: 1
@@ -1167,6 +1469,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext15
       assessable: true
       depth: 1
@@ -1175,6 +1479,8 @@ objects:
       description: "Do you have a policy for antivirus signatures and engine update,\
         \ on a weekly basis minimum for all standard devices, with exception management\
         \ for specific devices? \n[Industrial IT]\n[Corporate IT]"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext16
       assessable: true
       depth: 1
@@ -1186,6 +1492,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext17
       assessable: true
       depth: 1
@@ -1193,6 +1501,8 @@ objects:
       name: Antivirus testing
       description: "Do you test the effectiveness of malware protection programs?\
         \ \n[Industrial IT]\n[Corporate IT]"
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext18
       assessable: true
       depth: 1
@@ -1204,6 +1514,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext19
       assessable: true
       depth: 1
@@ -1215,6 +1527,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext20
       assessable: true
       depth: 1
@@ -1228,6 +1542,8 @@ objects:
         [Corporate IT]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext21
       assessable: true
       depth: 1
@@ -1239,6 +1555,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext22
       assessable: true
       depth: 1
@@ -1252,6 +1570,8 @@ objects:
         [Corporate IT]
 
         [Development Environment]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext23
       assessable: true
       depth: 1
@@ -1266,6 +1586,8 @@ objects:
         [Corporate IT]
 
         [Development Environment]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext24
       assessable: true
       depth: 1
@@ -1277,6 +1599,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext25
       assessable: true
       depth: 1
@@ -1288,6 +1612,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext26
       assessable: true
       depth: 1
@@ -1301,6 +1627,8 @@ objects:
         [Corporate IT]
 
         [Development Environment]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext27
       assessable: true
       depth: 1
@@ -1311,6 +1639,8 @@ objects:
         [Industrial IT]
 
         [Corporate IT]'
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext28
       assessable: true
       depth: 1
@@ -1319,6 +1649,8 @@ objects:
       description: "Do you have an insurance contract covering the consequences of\
         \ an incident such as: \n- physical damages\n- IT damages\n- cyber damages\n\
         - business loss\n[Industrial IT]\n[Corporate IT]"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext29
       assessable: true
       depth: 1
@@ -1332,6 +1664,8 @@ objects:
         [Corporate IT]
 
         [Development Environment]'
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext30
       assessable: true
       depth: 1
@@ -1345,6 +1679,8 @@ objects:
         media?
 
         [Industrial IT]'
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext31
       assessable: true
       depth: 1
@@ -1354,6 +1690,8 @@ objects:
         of the information exchanged with your customers?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext32
       assessable: true
       depth: 1
@@ -1369,6 +1707,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext33
       assessable: true
       depth: 1
@@ -1381,6 +1721,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext34
       assessable: true
       depth: 1
@@ -1394,6 +1736,8 @@ objects:
         If the answer is yes, please provide explanations/details on the  locations.
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext35
       assessable: true
       depth: 1
@@ -1404,6 +1748,8 @@ objects:
         of Information directive?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext36
       assessable: true
       depth: 1
@@ -1416,6 +1762,8 @@ objects:
         (production, backup...)?
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext37
       assessable: true
       depth: 1
@@ -1425,6 +1773,8 @@ objects:
         of your production in relation to your customers contracts?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext38
       assessable: true
       depth: 1
@@ -1436,6 +1786,8 @@ objects:
         equipment)?
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext39
       assessable: true
       depth: 1
@@ -1443,6 +1795,8 @@ objects:
       name: Products logs
       description: "Do you have a default logging policy for products delivered to\
         \ customers that records key product actions?  \n[Product]"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext40
       assessable: true
       depth: 1
@@ -1455,6 +1809,8 @@ objects:
         your customers and you (IP mapping, servers, and addressing)?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext41
       assessable: true
       depth: 1
@@ -1469,6 +1825,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext42
       assessable: true
       depth: 1
@@ -1478,6 +1836,8 @@ objects:
         means?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext43
       assessable: true
       depth: 1
@@ -1487,6 +1847,8 @@ objects:
         and trained the appropriate employees?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext44
       assessable: true
       depth: 1
@@ -1495,6 +1857,8 @@ objects:
       description: 'Are production workstations regularly updated?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext45
       assessable: true
       depth: 1
@@ -1504,6 +1868,8 @@ objects:
         re-entry into service?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext46
       assessable: true
       depth: 1
@@ -1514,6 +1880,8 @@ objects:
         between shift planning and accounts used)?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext47
       assessable: true
       depth: 1
@@ -1521,6 +1889,8 @@ objects:
       name: logs for ICS systems & antivirus
       description: "Are systems and antivirus logs enabled on production environments?\
         \ \n[Industrial IT]"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext48
       assessable: true
       depth: 1
@@ -1533,6 +1903,8 @@ objects:
         If yes, please detail.
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext49
       assessable: true
       depth: 1
@@ -1544,6 +1916,8 @@ objects:
         and/or transparent screen lock software solutions)?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext50
       assessable: true
       depth: 1
@@ -1552,6 +1926,8 @@ objects:
       description: 'Do you perform production equipment updates at least twice a year?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext51
       assessable: true
       depth: 1
@@ -1561,6 +1937,8 @@ objects:
         production environments?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext52
       assessable: true
       depth: 1
@@ -1571,6 +1949,8 @@ objects:
         them if necessary?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext53
       assessable: true
       depth: 1
@@ -1580,6 +1960,8 @@ objects:
         wifi networks?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext54
       assessable: true
       depth: 1
@@ -1589,6 +1971,8 @@ objects:
         production benches) by default ?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext55
       assessable: true
       depth: 1
@@ -1598,6 +1982,8 @@ objects:
         of removable media used for your customers production?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext56
       assessable: true
       depth: 1
@@ -1607,6 +1993,8 @@ objects:
         of removable devices in production environments?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext57
       assessable: true
       depth: 1
@@ -1616,6 +2004,8 @@ objects:
         used on the workstations?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext58
       assessable: true
       depth: 1
@@ -1626,6 +2016,8 @@ objects:
         anti-malware protection...)?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext59
       assessable: true
       depth: 1
@@ -1636,6 +2028,8 @@ objects:
         your customer Security Manager)
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext60
       assessable: true
       depth: 1
@@ -1647,6 +2041,8 @@ objects:
         Do you archive these documents?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext61
       assessable: true
       depth: 1
@@ -1656,6 +2052,8 @@ objects:
         systems?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext62
       assessable: true
       depth: 1
@@ -1665,6 +2063,8 @@ objects:
         production information systems?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext63
       assessable: true
       depth: 1
@@ -1674,6 +2074,8 @@ objects:
         in the company''s BCP risk?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext64
       assessable: true
       depth: 1
@@ -1683,6 +2085,8 @@ objects:
         (where applicable)?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext65
       assessable: true
       depth: 1
@@ -1692,6 +2096,8 @@ objects:
         including machines and production benches?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext66
       assessable: true
       depth: 1
@@ -1701,6 +2107,8 @@ objects:
         access control (keys, badges...)?
 
         [Industrial IT]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext67
       assessable: true
       depth: 1
@@ -1710,6 +2118,8 @@ objects:
         provided to your customers?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext68
       assessable: true
       depth: 1
@@ -1719,6 +2129,8 @@ objects:
         customers'' service delivery?
 
         [Industrial IT]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext69
       assessable: true
       depth: 1
@@ -1732,6 +2144,8 @@ objects:
         [Industrial IT]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext70
       assessable: true
       depth: 1
@@ -1740,6 +2154,8 @@ objects:
       description: "Do you perform regular audits (compliance and/or technical) on\
         \ your supply chain connected to your information system or when regular equipment/material\
         \ exchange occur? \nIf yes, please precise the frequency.\n[Industrial IT]"
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext71
       assessable: true
       depth: 1
@@ -1752,6 +2168,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext72
       assessable: true
       depth: 1
@@ -1761,6 +2179,8 @@ objects:
         the environments in case of a security incident?
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext73
       assessable: true
       depth: 1
@@ -1772,6 +2192,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext74
       assessable: true
       depth: 1
@@ -1783,6 +2205,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext75
       assessable: true
       depth: 1
@@ -1796,6 +2220,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext76
       assessable: true
       depth: 1
@@ -1805,6 +2231,8 @@ objects:
         \ assessment process in order to control the development environments and\
         \ ensure the lack of known vulnerabilities in the framework (operating system,\
         \ libraries, \u2026) ?\n[Development Environment]"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext77
       assessable: true
       depth: 1
@@ -1818,6 +2246,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext78
       assessable: true
       depth: 1
@@ -1826,6 +2256,8 @@ objects:
       description: 'Do you include hardening principles to reduce the attack surface?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext79
       assessable: true
       depth: 1
@@ -1836,6 +2268,8 @@ objects:
         unnecessary unused components, ports, protocols or functions?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext80
       assessable: true
       depth: 1
@@ -1848,6 +2282,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext81
       assessable: true
       depth: 1
@@ -1861,6 +2297,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext82
       assessable: true
       depth: 1
@@ -1871,6 +2309,8 @@ objects:
         the product development cycle?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext83
       assessable: true
       depth: 1
@@ -1882,6 +2322,8 @@ objects:
         [Product]
 
         [Development Environment]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext84
       assessable: true
       depth: 1
@@ -1891,6 +2333,8 @@ objects:
         them to your customers?
 
         [Product]'
+      implementation_groups:
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext85
       assessable: true
       depth: 1
@@ -1902,6 +2346,8 @@ objects:
         to control them and do you inform your customers of this before delivery?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext86
       assessable: true
       depth: 1
@@ -1911,6 +2357,8 @@ objects:
         (initial or update)?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext87
       assessable: true
       depth: 1
@@ -1921,6 +2369,8 @@ objects:
         with?
 
         [Product]'
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext88
       assessable: true
       depth: 1
@@ -1930,6 +2380,8 @@ objects:
         in order to ensure the lack of malicious code?
 
         [Development Environment]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext89
       assessable: true
       depth: 1
@@ -1940,6 +2392,8 @@ objects:
         in the developped solution?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext90
       assessable: true
       depth: 1
@@ -1949,6 +2403,8 @@ objects:
         \ media and materials before their use, to ensure that they are free of malicious\
         \ code? \nOnce inspection is carried out, do you store storage media / materials\
         \ in a secure area ?\n[Product]"
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext91
       assessable: true
       depth: 1
@@ -1959,6 +2415,8 @@ objects:
         Plan?
 
         [Product]'
+      implementation_groups:
+      - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext92
       assessable: true
       depth: 1
@@ -1974,6 +2432,8 @@ objects:
         - Monitoring means (NOC, SOC)?
 
         [Development Environment]'
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext93
       assessable: true
       depth: 1
@@ -1983,6 +2443,8 @@ objects:
         \ to achieve product cyber certification when it is necessary? \nPlease detail\
         \ corresponding cyber certifications which can be achieved through your process.\n\
         [Product]\n[Development Environment]"
+      implementation_groups:
+      - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:ext94
       assessable: true
       depth: 1
@@ -1993,3 +2455,5 @@ objects:
         data retention, mechanisms ensuring access/modification/deletion to data)?
 
         [Product]'
+      implementation_groups:
+      - Bronze

@@ -70,7 +70,7 @@ for tab in dataframe:
                     if devenv:
                         question_en += "\n[Development Environment]"
                 output_table.append(
-                    ("x", 1, question_number, question_name, question_en)
+                    ("x", 1, question_number, question_name, question_en, level)
                 )
 
 
@@ -79,23 +79,30 @@ wb_output = openpyxl.Workbook()
 ws = wb_output.active
 ws.title = "library_content"
 ws.append(["library_urn", f"urn:{packager.lower()}:risk:library:aircyber-v1.5.2"])
-ws.append(["library_version", "1"])
+ws.append(["library_version", 1])
 ws.append(["library_locale", "en"])
-ws.append(["library_ref_id", "AirCyber v1.5.2"])
+ws.append(["library_ref_id", "AirCyber-v1.5.2"])
 ws.append(["library_name", "Public AirCyber Maturity Level Matrix"])
 ws.append(["library_description", library_description])
 ws.append(["library_copyright", library_copyright])
 ws.append(["library_provider", "Boost Aerospace"])
 ws.append(["library_packager", packager])
 ws.append(["framework_urn", f"urn:{packager.lower()}:risk:framework:aircyber-v1.5.2"])
-ws.append(["framework_ref_id", "AirCyber v1.5.2"])
+ws.append(["framework_ref_id", "AirCyber-v1.5.2"])
 ws.append(["framework_name", "Public AirCyber Maturity Level Matrix"])
 ws.append(["framework_description", library_description])
 ws.append(["tab", "controls", "requirements"])
+ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("controls")
-ws1.append(["assessable", "depth", "ref_id", "name", "description"])
+ws1.append(["assessable", "depth", "ref_id", "name", "description", "implementation_groups"])
 for row in output_table:
     ws1.append(row)
+ws2 = wb_output.create_sheet("implementation_groups")
+ws2.append(["ref_id", "name", "description"])
+ws2.append(["Bronze", "", ""])
+ws2.append(["Silver", "", ""])
+ws2.append(["Gold", "", ""])
+
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
