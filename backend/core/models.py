@@ -1283,7 +1283,6 @@ class ComplianceAssessment(Assessment):
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
 
-
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
