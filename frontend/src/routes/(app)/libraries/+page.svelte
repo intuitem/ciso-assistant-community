@@ -16,7 +16,8 @@
 </script>
 
 <div class="card bg-white shadow">
-	<TabGroup> <!-- data.loadedLibrariesTable.body.length > 0 -->
+	<TabGroup>
+		<!-- data.loadedLibrariesTable.body.length > 0 -->
 		{#if data.loadedLibrariesTable.body.length > 0}
 			<Tab bind:group={tabSet} value={0}>{m.librariesStore()}</Tab>
 			<Tab bind:group={tabSet} value={1}>{m.importedLibraries()}</Tab>
@@ -26,26 +27,25 @@
 				{m.currentlyNoImportedLibraries()}.
 			</div>
 		{/if}
-		<svelte:fragment slot="panel"> <!-- storedlibraries -->
+		<svelte:fragment slot="panel">
+			<!-- storedlibraries -->
 			{#if tabSet === 0}
 				<ModelTable
 					source={data.storedLibrariesTable}
-					URLModel="stored-libraries"
-					LocalURLModel="libraries"
+					URLModel="libraries"
 					identifierField="urn"
 					pagination={false}
 					deleteForm={data.deleteForm}
 				/>
 			{/if}
-			{#if tabSet === 1} <!-- loadedlibraries -->
+			{#if tabSet === 1}
+				<!-- loadedlibraries -->
 				<ModelTable
 					source={data.loadedLibrariesTable}
-					URLModel="loaded-libraries"
-					LocalURLModel="libraries"
+					URLModel="libraries"
 					identifierField="urn"
 					pagination={false}
 					deleteForm={data.deleteForm}
-					detailQueryParameter="loaded"
 				/>
 			{/if}
 		</svelte:fragment>

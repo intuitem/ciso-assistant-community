@@ -404,7 +404,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'compliance-assessments' }
 		]
 	},
-	"stored-libraries": {
+	'stored-libraries': {
 		name: 'storedlibrary',
 		localName: 'imported library',
 		localNamePlural: 'imported libraries',
@@ -412,7 +412,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Imported Library',
 		verboseNamePlural: 'Imported Libraries'
 	},
-	"loaded-libraries": {
+	'loaded-libraries': {
 		name: 'loadedlibrary',
 		localName: 'imported library',
 		localNamePlural: 'imported libraries',
@@ -426,14 +426,18 @@ export const FIELD_COMPONENT_MAP = {
 	evidences: {
 		attachment: EvidenceFilePreview
 	},
-	"stored-libraries": {
+	libraries: {
 		locale: LanguageDisplay,
 		actions: LibraryActions
 	},
-	"loaded-libraries": {
-		locale: LanguageDisplay
-		// actions: LibraryActions
-	},
+	// "stored-libraries": {
+	// 	locale: LanguageDisplay,
+	// 	actions: LibraryActions
+	// },
+	// "loaded-libraries": {
+	// 	locale: LanguageDisplay
+	// 	// actions: LibraryActions
+	// },
 	'user-groups': {
 		localization_dict: UserGroupNameDisplay
 	}
