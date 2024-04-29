@@ -24,7 +24,7 @@
 	}
 </script>
 
-{#if !library.is_imported}
+{#if Object.hasOwn(library, 'is_imported') && !library.is_imported}
 	{#if loading.form && loading.library === library.urn}
 		<div class="flex items-center cursor-progress" role="status">
 			<svg
