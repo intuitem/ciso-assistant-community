@@ -25,7 +25,7 @@ class EndpointTestsUtils:
 
         urn_varname = format_urn(object_name)
         urn = get_var(urn_varname)
-        return f"{reverse(LIBRARIES_ENDPOINT)}{urn}/" if resolved else eval(urn)
+        return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{urn}/" if resolved else eval(urn)
 
     @pytest.mark.django_db
     def get_test_client_and_folder(
