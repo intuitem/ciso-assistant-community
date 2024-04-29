@@ -16,11 +16,20 @@ from rest_framework import serializers
     fields = serializers.DictField(child=serializers.CharField())
 """
 
+
 class StoredLibrarySerializer(serializers.ModelSerializer):
     # Not used yet
     class Meta:
         model = StoredLibrary
-        fields = ["id","name","description","locale","version","builtin","objects_meta"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "locale",
+            "version",
+            "builtin",
+            "objects_meta",
+        ]
 
     # name = serializers.CharField()
     # description = serializers.CharField()
@@ -30,15 +39,18 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
     # builtin = serializers.BooleanField()
     # objects_meta = serializers.JSONField()
 
+
 class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoredLibrary
         fields = "__all__"
 
+
 class LoadedLibraryDetailedSerializer(serializers.ModelSerializer):
     class Meta:
         model = LoadedLibrary
         fields = "__all__"
+
 
 """
 class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
@@ -47,6 +59,7 @@ class StoredLibraryReadSerializer(StoredLibraryWriteSerializer):
     def get_content(self, content: bytes):
         return content.encode("utf-8") # Should we enforce UTF-8 for library files ?
 """
+
 
 class LoadedLibrarySerializer(serializers.Serializer):
     id = serializers.CharField()
@@ -58,11 +71,13 @@ class LoadedLibrarySerializer(serializers.Serializer):
     copyright = serializers.CharField()
     builtin = serializers.BooleanField()
 
+
 """class LibraryModelSerializer(BaseModelSerializer):
     class Meta:
         model = LoadedLibrary
         fields = "__all__"
 """
+
 
 class LibraryUploadSerializer(serializers.Serializer):
     file = serializers.FileField(required=True)

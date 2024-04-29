@@ -84,6 +84,7 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
     def __str__(self) -> str:
         return self.display_short
 
+
 class LibraryMixin(ReferentialObjectMixin):
     class Meta:
         abstract = True
@@ -101,7 +102,10 @@ class LibraryMixin(ReferentialObjectMixin):
     )
     builtin = models.BooleanField(default=False)
     objects_meta = models.JSONField()
-    dependencies = models.JSONField(null=True) # models.CharField(blank=False,null=True,max_length=16384)
+    dependencies = models.JSONField(
+        null=True
+    )  # models.CharField(blank=False,null=True,max_length=16384)
+
 
 class StoredLibrary(LibraryMixin):
     is_obsolete = models.BooleanField(default=False)
@@ -109,60 +113,58 @@ class StoredLibrary(LibraryMixin):
     hash_checksum = models.CharField(max_length=64)
     content = models.TextField()
 
-    REQUIRED_FIELDS = {"urn","name","version","objects"}
+    REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
     FIELDS_VERIFIERS = {}
-    HASH_CHECKSUM_SET = set() # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+    HASH_CHECKSUM_SET = set()  # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
 
     @classmethod
-    def __init_class__(cls) :
+    def __init_class__(cls):
         cls.HASH_CHECKSUM_SET = set(
-            value["hash_checksum"]
-            for value in cls.objects.values("hash_checksum")
+            value["hash_checksum"] for value in cls.objects.values("hash_checksum")
         )
 
     @staticmethod
-    def store_libary_content(library_content: str) -> Union[str,None] :
+    def store_libary_content(library_content: str) -> Union[str, None]:
         hash_checksum = sha256(library_content)
-        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET :
-            return None # We do not store the libary if its hash checksum is in the database.
+        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
+            return None  # We do not store the libary if its hash checksum is in the database.
 
         # urn(str:max_length=100), version(int), name(str:max_length=200)
 
-        try :
+        try:
             library_data = yaml.safe_load(library_content)
-        except Exception :
+        except Exception:
             return "Invalid formatted file, the library file must be formatted in YAML."
 
         missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
 
-        if missing_fields :
-            return "The following fields are missing : {}".format(", ".join(repr(field) for field in missing_fields))
+        if missing_fields:
+            return "The following fields are missing : {}".format(
+                ", ".join(repr(field) for field in missing_fields)
+            )
 
         urn = library_data["urn"]
-        locale = library_data.get("locale","en")
+        locale = library_data.get("locale", "en")
         version = library_data["version"]
 
-        library_matches = [*StoredLibrary.objects.filter(
-            urn=urn,
-            locale=locale
-        )]
-        if any(
-            libary.version >= version
-            for libary in library_matches
-        ) :
+        library_matches = [*StoredLibrary.objects.filter(urn=urn, locale=locale)]
+        if any(libary.version >= version for libary in library_matches):
             # The library isn't stored if it's obsolete due to be a too old version of itself.
-            return "A library with the urn '{}', a locale '{}' with a superior superior or equal to {} is already stored in the database.".format(urn,locale,version)
+            return "A library with the urn '{}', a locale '{}' with a superior superior or equal to {} is already stored in the database.".format(
+                urn, locale, version
+            )
 
-        for library in library_matches :
+        for library in library_matches:
             libary.is_obsolete = True
-            library.save() # If a user delete a library from the libary store we must set the is_obsolete value of its most recent obsolete version to False.
+            library.save()  # If a user delete a library from the libary store we must set the is_obsolete value of its most recent obsolete version to False.
 
         objects_meta = {
-            key: len(value)
-            for key, value in library_data["objects"].items()
+            key: len(value) for key, value in library_data["objects"].items()
         }
 
-        dependencies = library_data.get("dependencies",[]) # I don't want whitespaces in URN anymore nontheless
+        dependencies = library_data.get(
+            "dependencies", []
+        )  # I don't want whitespaces in URN anymore nontheless
 
         library_objects = json.dumps(library_data["objects"])
         StoredLibrary.objects.create(
@@ -172,7 +174,7 @@ class StoredLibrary(LibraryMixin):
             locale=locale,
             version=version,
             ref_id=library_data["ref_id"],
-            default_locale=False, # We don't care about this value yet.
+            default_locale=False,  # We don't care about this value yet.
             description=library_data.get("description"),
             annotation=library_data.get("annotation"),
             copyright=library_data.get("copyright"),
@@ -180,25 +182,29 @@ class StoredLibrary(LibraryMixin):
             packager=library_data.get("packager"),
             objects_meta=objects_meta,
             dependencies=dependencies,
-            builtin=library_data.get("builtin",False), # We have to add a "builtin: true" line to every builtin library file.
+            builtin=library_data.get(
+                "builtin", False
+            ),  # We have to add a "builtin: true" line to every builtin library file.
             hash_checksum=hash_checksum,
-            content=library_objects
+            content=library_objects,
         )
 
     @staticmethod
-    def store_library_file(fname: str) -> Union[str,None] :
-        with open(fname,"rb") as f :
+    def store_library_file(fname: str) -> Union[str, None]:
+        with open(fname, "rb") as f:
             library_content = f.read()
         return StoredLibrary.store_libary_content(library_content)
 
-    def loads(self) -> Union[str,None] :
+    def loads(self) -> Union[str, None]:
         from library.utils import LibraryImporter
+
         library_importer = LibraryImporter(self)
         error_msg = library_importer.import_library()
-        if error_msg is None :
+        if error_msg is None:
             self.is_imported = True
             self.save()
         return error_msg
+
 
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
@@ -264,13 +270,20 @@ class LoadedLibrary(LibraryMixin):
                 f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
-        stored_library = StoredLibrary.objects.get(urn=self.urn,locale=self.locale,version=self.version) # I don't if it works yet
+        stored_library = StoredLibrary.objects.get(
+            urn=self.urn, locale=self.locale, version=self.version
+        )  # I don't if it works yet
         stored_library.is_imported = False
         stored_library.save()
 
+
 class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
-        LoadedLibrary, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="threats",
     )
 
     fields_to_check = ["ref_id", "name"]

@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0009_framework_max_score_framework_min_score_and_more'),
-        ('core', '0010_alter_storedlibrary_dependencies'),
+        ("core", "0009_framework_max_score_framework_min_score_and_more"),
+        ("core", "0010_alter_storedlibrary_dependencies"),
     ]
 
-    operations = [
-    ]
+    operations = []
