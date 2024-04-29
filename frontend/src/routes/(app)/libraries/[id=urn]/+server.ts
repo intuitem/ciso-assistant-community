@@ -4,8 +4,8 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url, params }) => {
-	const isLoaded = url.searchParams.has("loaded");
-	const URLModel = isLoaded ? "loaded-libraries" : "stored-libraries";
+	const isLoaded = url.searchParams.has('loaded');
+	const URLModel = isLoaded ? 'loaded-libraries' : 'stored-libraries';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
 	const res = await fetch(endpoint);
