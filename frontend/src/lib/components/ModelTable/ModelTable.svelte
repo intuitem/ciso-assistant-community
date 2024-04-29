@@ -72,7 +72,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${LocalURLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
 	}
 
 	// Row Keydown Handler
@@ -89,10 +89,6 @@
 
 	export let URLModel: urlModel | undefined = undefined;
 	$: model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
-	export let LocalURLModel: urlModel | undefined = undefined;
-	LocalURLModel = LocalURLModel ?? URLModel;
-	export let detailQueryParameter: string | undefined;
-	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : "";
 
 	const user = $page.data.user;
 
@@ -268,16 +264,16 @@
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
               {@const actionsComponent = field_component_map['actions']}
-              <TableRowActions 
-                deleteForm={!(row.meta.builtin && URLModel !== "stored-libraries" && URLModel !== "loaded-libraries") ? deleteForm : undefined}
+              <TableRowActions
+                deleteForm={!row.meta.builtin ? deleteForm : undefined}
                 model={URL_MODEL_MAP[URLModel]}
                 {URLModel}
-                detailURL={`/${LocalURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+                detailURL={`/${URLModel}/${row.meta[identifierField]}`}
                 editURL={!(row.meta.builtin || row.meta.urn) ? `/${URLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
-                preventDelete={(row.meta.builtin) || (row.meta.reference_count) || !(row.meta.allowDeleteLibrary ?? false)}
+                preventDelete={(row.meta.builtin || (row.meta.urn ?? false)) && !(row.meta.allowDeleteLibrary ?? false)}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}
