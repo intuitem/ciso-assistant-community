@@ -15,7 +15,7 @@ class Test(dict):
 
 @pytest.fixture
 def app_config():
-    startup()
+    startup(sender=None, **{})
 
 
 @pytest.fixture
