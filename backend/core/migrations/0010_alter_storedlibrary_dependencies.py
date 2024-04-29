@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0009_loadedlibrary_alter_framework_library_and_more'),
+        ("core", "0009_loadedlibrary_alter_framework_library_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='storedlibrary',
-            name='dependencies',
+            model_name="storedlibrary",
+            name="dependencies",
             field=models.JSONField(null=True),
         ),
     ]

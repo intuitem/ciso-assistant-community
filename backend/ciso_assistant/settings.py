@@ -275,7 +275,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # SQLIte file can be changed, useful for tests
-SQLITE_FILE = os.environ.get('SQLITE_FILE', BASE_DIR / "db/ciso-assistant.sqlite3")
+SQLITE_FILE = os.environ.get("SQLITE_FILE", BASE_DIR / "db/ciso-assistant.sqlite3")
 LIBRARIES_PATH = library_path = BASE_DIR / "library/libraries"
 
 if "POSTGRES_NAME" in os.environ:
