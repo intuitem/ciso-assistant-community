@@ -15,7 +15,7 @@ objects:
     name: NIST CSF v2.0
     description: NIST Cybersecurity Framework
     scores_definition:
-    - score: 1
+    - score: 2
       name: Partial
       description: 'Application of the organizational cybersecurity risk strategy
         is managed in an ad hoc manner.
