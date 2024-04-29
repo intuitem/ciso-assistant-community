@@ -1,7 +1,9 @@
+import sys
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, LIBRARIES_PATH
 import os
+
 
 READER_PERMISSIONS_LIST = [
     "view_project",
@@ -360,6 +362,20 @@ class CoreConfig(AppConfig):
     verbose_name = "Core"
 
     def ready(self):
+        from .models import StoredLibrary
+
         # avoid post_migrate handler if we are in the main, as it interferes with restore
+        print("startup handler: import libraries")
+        print(LIBRARIES_PATH)
+        for fname in os.listdir(LIBRARIES_PATH):
+            print(f"Importing {fname}")
+            fname = str(LIBRARIES_PATH / fname)
+            if fname.endswith(".yaml"):
+                error = StoredLibrary.store_library_file(fname)
+                if error is not None:
+                    print(
+                        f"[ERROR] Can't import libary file '{fname}' : {error}",
+                        file=sys.stderr,
+                    )
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
