@@ -1,6 +1,6 @@
-''' 
+'''
 simple script to transform the official CCM Excel file to another Excel file for CISO assistant framework conversion tool
-''' 
+'''
 
 import openpyxl
 import sys

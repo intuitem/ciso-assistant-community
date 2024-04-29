@@ -36,14 +36,14 @@ jobs:
       run: |
         echo "VERSION=$(git describe --tags --always)" >> $GITHUB_ENV
         echo "BUILD=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-        
+
         echo "CISO_ASSISTANT_VERSION=$(git describe --tags --always)" > .meta
         echo "CISO_ASSISTANT_BUILD=$(git rev-parse --short HEAD)" >> .meta
-        
+
         cp .meta ./backend/
         cp .meta ./backend/ciso_assistant/
-  
-  
+
+
     - name: Build and Push Backend Docker Image
       uses: docker/build-push-action@v5
       with:

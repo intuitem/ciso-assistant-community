@@ -1,4 +1,4 @@
-''' 
+'''
 simple script to transform an Excel file to a yaml library for a CISO assistant framework
 Conventions:
     | means a cell separation, <> means empty cell
@@ -19,29 +19,19 @@ Conventions:
         framework_description       | <description>
         reference_control_base_urn  | <base_urn>            | id
         threat_base_urn             | <base_urn>            | id
-        tab                         | <tab_name>            | levels
         tab                         | <tab_name>            | requirements       | <section_name>
         tab                         | <tab_name>            | threats            | <base_urn>
         tab                         | <tab_name>            | reference_controls | <base_urn>
 
 
-    For levels:
-        A "levels" tab enumerates levels. If it exists, it shall be placed before the correponding framework.
-        The first line is a header, with the following possible fields (* for required):
-            - level(*)
-            - ref_id(*)
-            - name
-            - description
-            - annotation
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
         The first line is a header, with the following possible fields (* for required):
-            - assessable(*): non-empty (e.g x) if this is a requirement 
+            - assessable(*): non-empty (e.g x) if this is a requirement
             - depth(*): 1/2/3/... to describe the tree
             - ref_id
             - name
             - description
-            - level
             - maturity
             - threats
             - reference_controls
@@ -59,7 +49,7 @@ Conventions:
             - annotation
     A library has a single locale. Translated libraries have the same urns, they are merged during import.
     Dependencies are given as a comma or blank separated list of urns.
-''' 
+'''
 
 import openpyxl
 import sys
@@ -68,7 +58,7 @@ import yaml
 from pprint import pprint
 from collections import defaultdict
 
-LIBRARY_VARS = ('library_urn', 'library_version', 'library_locale', 'library_ref_id', 'library_name', 'library_description', 
+LIBRARY_VARS = ('library_urn', 'library_version', 'library_locale', 'library_ref_id', 'library_name', 'library_description',
                     'framework_urn', 'framework_ref_id', 'framework_name', 'framework_description', 'library_copyright',
                     'library_provider', 'library_packager', 'reference_control_base_urn', 'threat_base_urn', 'library_dependencies', 'tab')
 library_vars = {}
@@ -154,7 +144,6 @@ for tab in dataframe:
                 name = row[header['name']].value if 'name' in header else None
                 description = row[header['description']].value if 'description' in header else None
                 annotation = row[header['annotation']].value if 'annotation' in header else None
-                level = row[header['level']].value if 'level' in header else None
                 maturity = row[header['maturity']].value if 'maturity' in header else None
                 ref_id_urn = ref_id.lower().replace(' ', '-') if ref_id else f"node{counter}"
                 urn = f"{root_nodes_urn}:{ref_id_urn}"
@@ -169,7 +158,7 @@ for tab in dataframe:
                 elif depth <= current_depth:
                     pass
                 else:
-                    error(f"wrong level in requirement (tab {title}) {urn}")
+                    error(f"wrong depth in requirement (tab {title}) {urn}")
                 current_node_urn = urn
                 parent_urn = parent_for_depth[depth]
                 current_depth = depth
@@ -232,9 +221,9 @@ for tab in dataframe:
                 current_function = {}
                 current_function['urn'] = f"{reference_controls_base_urn}:{ref_id_urn}"
                 current_function['ref_id'] = ref_id
-                if name: 
+                if name:
                     current_function['name'] = name
-                if category: 
+                if category:
                     current_function['category'] = category
                 if description:
                     current_function['description'] = description

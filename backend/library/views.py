@@ -1,5 +1,4 @@
 import json
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import QuerySet
 from rest_framework import viewsets, permissions, status
@@ -11,7 +10,6 @@ from rest_framework.status import (
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
 from rest_framework.parsers import FileUploadParser
-from rest_framework.views import APIView
 
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _

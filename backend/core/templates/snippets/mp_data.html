@@ -11,12 +11,12 @@
     <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated risk scenarios" %}: </p>
     <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex">
         <table class="w-full p-2 mt-2">
-            <thead>    
+            <thead>
             </thead>
             <tbody>
             {% if not context %}
             <tr class="">
-                <td colspan="" class="p-4 m-2 text-xl text-center"><i class="fas fa-exclamation-circle"></i> 
+                <td colspan="" class="p-4 m-2 text-xl text-center"><i class="fas fa-exclamation-circle"></i>
                 {% trans "Risk risk_assessment seems to be empty. Measure Plan cannot be generated." %}
                 </td>
             </tr>
@@ -24,7 +24,7 @@
             {% for scenario in context %}
             <tr class="bg-gray-100">
                 <td class="text-lg p-3" colspan="9">
-                    <p class="text-indigo-500 hover:text-indigo-700">{{ scenario.rid }}: {{ scenario.name }}</p> 
+                    <p class="text-indigo-500 hover:text-indigo-700">{{ scenario.rid }}: {{ scenario.name }}</p>
                     <span class="text-xs text-center p-1 mx-1 rounded"
                     {% if scenario.treatment == 'open' %}
                     style="background-color: #fed7aa"
@@ -80,14 +80,14 @@
                 </td>
                 <td class="text-center"><span class="text-xs text-gray-900 whitespace-nowrap text-center p-1 mx-1 rounded
                     {% if appliedcontrol.status == 'open' %}
-                    bg-orange-200 
+                    bg-orange-200
                     {% elif appliedcontrol.status == 'in_progress' %}
-                    bg-blue-200 
+                    bg-blue-200
                     {% elif appliedcontrol.status == 'on_hold' %}
-                    bg-red-300 
+                    bg-red-300
                     {% else %}
-                    bg-green-200 
-                    {% endif %}">{{ appliedcontrol.get_status_display|lower }} 
+                    bg-green-200
+                    {% endif %}">{{ appliedcontrol.get_status_display|lower }}
                     </span></td>
             </tr>
             {% endfor %}

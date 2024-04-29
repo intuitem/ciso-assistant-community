@@ -28,6 +28,7 @@ logger = structlog.get_logger(__name__)
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:(.+)$"
 
+
 def match_urn(urn_string):
     match = re.match(URN_REGEX, urn_string)
     if match:
@@ -75,9 +76,11 @@ def get_available_libraries():
         if libs is None:
             with open(fname, "r", encoding="utf-8") as file:
                 libs = list(yaml.safe_load_all(file))
-            AVAILABLE_LIBRARIES[(fname,os.path.getmtime(fname))] = libs
-        for _lib in libs :
-            if (lib := LoadedLibrary.objects.filter(urn=_lib["urn"]).first()) is not None:
+            AVAILABLE_LIBRARIES[(fname, os.path.getmtime(fname))] = libs
+        for _lib in libs:
+            if (
+                lib := LoadedLibrary.objects.filter(urn=_lib["urn"]).first()
+            ) is not None:
                 _lib["id"] = lib.id
                 _lib["reference_count"] = lib.reference_count
             libraries.append(_lib)
@@ -198,7 +201,6 @@ class RequirementNodeImporter:
             annotation=self.requirement_data.get("annotation"),
             provider=framework_object.provider,
             order_id=self.index,
-            level=self.requirement_data.get("level"),
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
             maturity=self.requirement_data.get("maturity"),
@@ -286,6 +288,19 @@ class FrameworkImporter:
                 return requirement_node_import_error
 
     def import_framework(self, library_object: LoadedLibrary):
+        min_score = self.framework_data.get("min_score", 0)
+        max_score = self.framework_data.get("max_score", 100)
+
+        if (
+            min_score > max_score
+            or min_score < 0
+            or max_score < 0
+            or min_score == max_score
+        ):
+            raise ValueError(
+                "minimum score must be less than maximum score and equal or greater than 0."
+            )
+
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
@@ -293,6 +308,9 @@ class FrameworkImporter:
             ref_id=self.framework_data["ref_id"],
             name=self.framework_data.get("name"),
             description=self.framework_data.get("description"),
+            min_score=min_score,
+            max_score=max_score,
+            score_definition=self.framework_data.get("score_definition"),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -391,10 +409,10 @@ class RiskMatrixImporter:
             if key in self.MATRIX_FIELDS
         }
 
-        print("\n\n\n" + "-"*60)
+        print("\n\n\n" + "-" * 60)
         print("YES I HAVE BEEN CALLED")
-        print(json.dumps(matrix_data,indent=4))
-        print("-"*60)
+        print(json.dumps(matrix_data, indent=4))
+        print("-" * 60)
 
         created = RiskMatrix.objects.create(
             library=library_object,
@@ -415,7 +433,7 @@ class RiskMatrixImporter:
 
 class LibraryImporter:
     # The word "import" must be replaced by "load" in all classes/methods/variables declared in this file.
-    
+
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = ["threats", "reference_controls", "risk_matrix", "framework"]
 
@@ -552,14 +570,16 @@ class LibraryImporter:
     def check_and_import_dependencies(self):
         """Check and import library dependencies."""
 
-        if not self._library.dependencies :
+        if not self._library.dependencies:
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
                 # import_library_view(get_library(dependency))
-                dependency = StoredLibrary.objects.get(urn=dependency_urn,is_obsolete=False) # We only fetch by URN without thinking about what locale, that may be a problem in the future.
+                dependency = StoredLibrary.objects.get(
+                    urn=dependency_urn, is_obsolete=False
+                )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
                 error_msg = dependency.loads()
-                if error_msg is not None :
+                if error_msg is not None:
                     return error_msg
 
     def create_or_update_library(self):
@@ -585,7 +605,7 @@ class LibraryImporter:
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
                 "builtin": self._library.builtin,
-                "objects_meta": self._library.objects_meta
+                "objects_meta": self._library.objects_meta,
             },
             urn=_urn,
             locale=_locale,
@@ -610,20 +630,18 @@ class LibraryImporter:
     def _import_library(self):
         library_object = self.create_or_update_library()
         self.import_objects(library_object)
-        if (dependencies := self._library.dependencies) :
+        if dependencies := self._library.dependencies:
             library_object.dependencies.set(
-                LoadedLibrary.objects.filter(
-                    urn__in=dependencies
-                )
+                LoadedLibrary.objects.filter(urn__in=dependencies)
             )
 
     def import_library(self):
         """Main method to import a library."""
         if (error_message := self.init()) is not None:
-            return error_message # This error check should be done when storing the Library but no after.
+            return error_message  # This error check should be done when storing the Library but no after.
 
         error_msg = self.check_and_import_dependencies()
-        if error_msg is not None :
+        if error_msg is not None:
             return error_msg
 
         for _ in range(10):

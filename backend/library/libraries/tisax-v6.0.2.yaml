@@ -35,6 +35,27 @@ objects:
       \ performed by internal departments (e.g. Internal Audit, Information Security)\n\
       - TISAX\u24C7 Assessments (Trusted Information Security Assessment Exchange,\
       \ https://enx.com/tisax/)\nSource: https://portal.enx.com/isa6-en.xlsx\n"
+    min_score: 0
+    max_score: 5
+    score_definition:
+    - score: 0
+      name: 'Incomplete'
+      description: 'A process does not exist, is not followed or not suitable to achieve the objective.'
+    - score: 1
+      name: 'Performed'
+      description: 'A process is followed which is not or insufficiently documented (“informal process”) and there is some evidence that it achieves its objective.'
+    - score: 2
+      name: 'Managed'
+      description: 'A process achieving its objectives is followed. Process documentation and process implementation evidence are available.'
+    - score: 3
+      name: 'Established'
+      description: 'A standard process integrated into the overall system is followed. Dependencies on other processes are documented and suitable interfaces are created. Evidence exists that the process has been used sustainably and actively over an extended period.'
+    - score: 4
+      name: 'Predictable'
+      description: 'An established process is followed. The effectiveness of the process is continually monitored by collecting key figures. Limit values are defined at which the process is considered to be insufficiently effective and requires adjustment. (Key Performance Indicators)'
+    - score: 5
+      name: 'Optimizing'
+      description: 'A predictable process with continual improvement as a major objective is followed. Improvement is actively advanced by means of dedicated resources.'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
       assessable: false

@@ -3,6 +3,8 @@
 	import { page } from '$app/stores';
 	import type { z } from 'zod';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
+	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 
 	export let ref_id: string;
 	export let name: string;
@@ -15,6 +17,7 @@
 	export let status: string | undefined = undefined;
 	export let statusCounts: Record<string, number> | undefined;
 	export let assessable: boolean;
+	export let max_score: number;
 
 	const node = {
 		ref_id,
@@ -26,6 +29,7 @@
 		children,
 		canEditRequirementAssessment,
 		status,
+		max_score,
 		statusCounts,
 		assessable,
 		...$$restProps
@@ -85,6 +89,12 @@
 			return { status, percentage };
 		}
 	);
+
+	function nodeScore(): number {
+		if (!statusCounts) return -1;
+		let mean = statusCounts['total_score'] / statusCounts['scored'];
+		return Math.floor(mean * 10) / 10;
+	}
 
 	$: classesShowInfo = (show: boolean) => (!show ? 'hidden' : '');
 	$: classesShowInfoText = (show: boolean) => (show ? 'text-primary-500' : '');
@@ -197,19 +207,34 @@
 		{/if}
 	</div>
 	{#if hasAssessableChildren}
-		<div class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center">
-			{#each orderedStatusPercentages as sp}
-				<div
-					class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-						complianceColorMap[sp.status]
-					)}"
-					style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
-				>
-					{#if sp.status !== 'to_do'}
-						{sp.percentage.display}%
-					{/if}
-				</div>
-			{/each}
+		<div class="flex max-w-96 grow items-center space-x-2">
+			<div
+				class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+			>
+				{#each orderedStatusPercentages as sp}
+					<div
+						class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
+							complianceColorMap[sp.status]
+						)}"
+						style="width: {sp.percentage.value}%; background-color: {complianceColorMap[sp.status]}"
+					>
+						{#if sp.status !== 'to_do'}
+							{sp.percentage.display}%
+						{/if}
+					</div>
+				{/each}
+			</div>
+			{#if nodeScore() >= 0}
+				<span>
+					<ProgressRadial
+						stroke={100}
+						meter={displayScoreColor(nodeScore(), node.max_score)}
+						font={150}
+						value={formatScoreValue(nodeScore(), node.max_score)}
+						width={'w-10'}>{nodeScore()}</ProgressRadial
+					>
+				</span>
+			{/if}
 		</div>
 	{/if}
 </div>

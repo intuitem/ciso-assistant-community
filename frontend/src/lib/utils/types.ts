@@ -71,6 +71,19 @@ export interface RiskMatrix {
 	json_definition: string; // stringified
 }
 
+export interface Project {
+	id: string;
+	folder: Record<string, any>;
+	lc_status: string;
+	created_at: string;
+	updated_at: string;
+	is_published: boolean;
+	name: string;
+	description?: string;
+	internal_reference?: string;
+	compliance_assessments: Record<string, any>[];
+}
+
 export type RiskScenario = z.infer<typeof RiskScenarioSchema>;
 
 interface LibraryObject {

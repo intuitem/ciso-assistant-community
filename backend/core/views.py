@@ -1077,16 +1077,6 @@ class RequirementNodeViewSet(BaseModelViewSet):
     search_fields = ["name", "description"]
 
 
-class RequirementLevelViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows requirement levels to be viewed or edited.
-    """
-
-    model = RequirementLevel
-    filterset_fields = ["framework"]
-    search_fields = ["name"]
-
-
 class RequirementViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirements to be viewed or edited.
@@ -1126,6 +1116,9 @@ class EvidenceViewSet(BaseModelViewSet):
                 response = HttpResponse(
                     evidence.attachment,
                     content_type=content_type,
+                    headers={
+                        "Content-Disposition": f"attachment; filename={evidence.filename()}"
+                    },
                     status=status.HTTP_200_OK,
                 )
         return response
@@ -1217,6 +1210,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for a in compliance_assessments
         ]
         return Response({"results": res})
+
+    @action(detail=True, methods=["get"])
+    def global_score(self, request, pk):
+        """Returns the global score of the compliance assessment"""
+        return Response(
+            {
+                "score": self.get_object().get_global_score(),
+                "max_score": self.get_object().framework.max_score,
+                "min_score": self.get_object().framework.min_score,
+                "score_definition": self.get_object().framework.score_definition,
+            }
+        )
 
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):
