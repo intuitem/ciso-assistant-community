@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, LIBRARIES_PATH
-import sys, os
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+import os
 
 READER_PERMISSIONS_LIST = [
     "view_project",
@@ -245,7 +245,8 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
 ]
 
-def startup(sender: AppConfig,**kwargs):
+
+def startup(sender: AppConfig, **kwargs):
     """
     Implement CISO Assistant 1.0 default Roles and User Groups during migrate
     This makes sure root folder and global groups are defined before any other object is created
@@ -253,7 +254,6 @@ def startup(sender: AppConfig,**kwargs):
     """
     from django.contrib.auth.models import Permission
     from iam.models import Folder, Role, RoleAssignment, User, UserGroup
-    from core.models import StoredLibrary
 
     print("startup handler: initialize database")
 
@@ -353,53 +353,13 @@ def startup(sender: AppConfig,**kwargs):
         except Exception as e:
             print(e)  # NOTE: Add this exception in the logger
 
-from django.db import connection
 
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "core"
     verbose_name = "Core"
 
-    def _ready(self):
-        from core.models import StoredLibrary
-        import time
-
-        db_tables = set(connection.introspection.table_names())
-        required_models = [StoredLibrary]
-        required_tables = set(model._meta.db_table for model in required_models)
-        if not required_tables.issubset(db_tables) :
-            return None
-
-        """for lib in StoredLibrary.objects.all() :
-            # Delete this loop !
-            lib.delete()"""
-        
-        # ./library/libraries/soc2-2017.yaml
-
-        # Remove the 3 following lines after
-        """from core.models import LoadedLibrary
-        for lib in StoredLibrary.objects.all() :
-            lib.delete()"""
-
-        start = time.perf_counter()
-        StoredLibrary.__init_class__()
-        print(f"Importing new libraries...")
-        for fname in os.listdir(LIBRARIES_PATH) :
-            fname = str(LIBRARIES_PATH / fname)
-            if fname.endswith(".yaml") :
-                error = StoredLibrary.store_library_file(fname)
-                if error is not None :
-                    print(f"[ERROR] Can't import libary file '{fname}' : {error}",file=sys.stderr)
-        end = time.perf_counter()
-        print(f"Execution time = {end-start}")
-        stored_libaries = [*StoredLibrary.objects.all()]
-        print(f"There are {len(stored_libaries)} stored libraries :D !")
-        print(f"Stored libaries : {stored_libaries}")
-        print("Django initialization finished !")
-
     def ready(self):
-        self._ready()
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)
-
