@@ -5,7 +5,6 @@ from core.models import RiskMatrix
 from iam.models import Folder
 from rest_framework import status
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries, EndpointTestsUtils
 
 

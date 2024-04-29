@@ -11,7 +11,6 @@ from django.db import models
 from core.serializer_fields import FieldsRelatedField
 
 import structlog
-from rest_framework.status import HTTP_403_FORBIDDEN
 
 logger = structlog.get_logger(__name__)
 
@@ -296,7 +295,7 @@ class UserWriteSerializer(BaseModelSerializer):
         send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
-            perm=Permission.objects.get(codename=f"add_user"),
+            perm=Permission.objects.get(codename="add_user"),
             folder=Folder.get_root_folder(),
         ):
             raise PermissionDenied(
@@ -416,16 +415,6 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     pass
 
 
-class RequirementLevelReadSerializer(BaseModelSerializer):
-    class Meta:
-        model = RequirementLevel
-        fields = "__all__"
-
-
-class RequirementLevelWriteSerializer(RequirementLevelReadSerializer):
-    pass
-
-
 class RequirementNodeReadSerializer(BaseModelSerializer):
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
@@ -474,7 +463,7 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
-    framework = FieldsRelatedField()
+    framework = FieldsRelatedField(["id", "min_score", "max_score"])
 
     class Meta:
         model = ComplianceAssessment
@@ -498,6 +487,32 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
+    def validate_score(self, value):
+        framework = self.get_framework()
+
+        if value is not None:
+            if value < framework.min_score or value > framework.max_score:
+                raise serializers.ValidationError(
+                    {
+                        "score": f"Score must be between {framework.min_score} and {framework.max_score}"
+                    }
+                )
+        return value
+
+    def get_framework(self):
+        if hasattr(self, "instance") and self.instance:
+            return self.instance.compliance_assessment.framework
+        try:
+            compliance_assessment_id = self.context.get("request", {}).data.get(
+                "compliance_assessment", {}
+            )
+            compliance_assessment = ComplianceAssessment.objects.get(
+                id=compliance_assessment_id
+            )
+            return compliance_assessment.framework
+        except Framework.DoesNotExist:
+            raise serializers.ValidationError("The specified framework does not exist.")
+
     class Meta:
         model = RequirementAssessment
         fields = "__all__"

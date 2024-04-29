@@ -319,6 +319,9 @@ export function localItems(languageTag: string): LocalItems {
 		libraryImportError: m.libraryImportError({ languageTag: languageTag }),
 		libraryAlreadyExistsError: m.libraryAlreadyImportedError({ languageTag: languageTag }),
 		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag }),
+		minScore: m.minScore({ languageTag: languageTag }),
+		maxScore: m.maxScore({ languageTag: languageTag }),
+		scoreDefinition: m.scoreDefinition({ languageTag: languageTag }),
 		attemptToDeleteOnlyAdminAccountError: m.attemptToDeleteOnlyAdminAccountError({
 			languageTag: languageTag
 		}),

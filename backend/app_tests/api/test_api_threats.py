@@ -1,10 +1,9 @@
 import pytest
-from rest_framework.status import HTTP_403_FORBIDDEN, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APIClient
 from core.models import Threat
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic threat data for tests

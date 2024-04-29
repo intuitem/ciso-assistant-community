@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from core.models import Asset
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic asset data for tests

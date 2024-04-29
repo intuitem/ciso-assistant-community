@@ -36,9 +36,6 @@ router.register(
 )
 router.register(r"requirement-nodes", RequirementViewSet, basename="requirement-nodes")
 router.register(
-    r"requirement-levels", RequirementLevelViewSet, basename="requirement-levels"
-)
-router.register(
     r"requirement-assessments",
     RequirementAssessmentViewSet,
     basename="requirement-assessments",

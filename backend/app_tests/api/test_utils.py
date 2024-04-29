@@ -6,7 +6,6 @@ from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
 from test_vars import *
 
@@ -753,7 +752,7 @@ class EndpointTestsQueries:
                     ), f"{verbose_name} object detail can be accessed outside the domain"
                 else:
                     if (
-                        verbose_name is not "Users"
+                        verbose_name != "Users"
                     ):  # Users don't have permission to view users details
                         assert (
                             response.status_code == status.HTTP_200_OK
@@ -893,7 +892,7 @@ class EndpointTestsQueries:
                     ), f"{verbose_name} object detail can be accessed outside the domain"
                 else:
                     if (
-                        verbose_name is not "Users"
+                        verbose_name != "Users"
                     ):  # Users don't have permission to view users details
                         assert (
                             response.status_code == status.HTTP_200_OK
@@ -1013,7 +1012,7 @@ class EndpointTestsQueries:
             reference = authenticated_client.get(reference_url)
             assert (
                 reference.status_code == status.HTTP_200_OK
-            ), f"reference endpoint is not accessible"
+            ), "reference endpoint is not accessible"
 
             for object in reference.json()["objects"]["framework"][
                 object_name.lower().replace(" ", "_")

@@ -11,7 +11,6 @@ from core.models import (
 )
 from iam.models import Folder
 
-from test_vars import GROUPS_PERMISSIONS
 from test_utils import EndpointTestsQueries
 
 # Generic project data for tests

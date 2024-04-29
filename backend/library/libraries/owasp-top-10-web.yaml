@@ -47,7 +47,7 @@ objects:
         Insecure design is a broad category representing different weaknesses,
         expressed as missing or ineffective control design.
     - urn: urn:intuitem:risk:threat:A05
-      ref_id: A05 
+      ref_id: A05
       name: Security Misconfiguration
       description:
         "The application might be vulnerable if the application is: Missing

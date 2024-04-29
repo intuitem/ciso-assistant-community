@@ -35,13 +35,12 @@
 				validators={zod(SetPasswordSchema)}
 			>
 				<input class="input" type="hidden" name="user" value={getUUID()} />
-				<TextField type="password" {form} field="new_password" label={m.newPassword()} mandatory />
+				<TextField type="password" {form} field="new_password" label={m.newPassword()} />
 				<TextField
 					type="password"
 					{form}
 					field="confirm_new_password"
 					label={m.confirmNewPassword()}
-					mandatory
 				/>
 				<p class="pt-3">
 					<button
