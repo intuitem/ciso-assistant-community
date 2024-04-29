@@ -22,7 +22,7 @@ copyright: "\xA9 2023 ENX Association, an Association according to the French La
   \ to distribute derivatives under certain terms as detailed in section 9 which are\
   \ not part of the Creative Commons license. The complete and valid text of the license\
   \ is to be found in line 17ff.\n"
-version: '1'
+version: 2
 provider: VDA
 packager: intuitem
 objects:
