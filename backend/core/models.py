@@ -124,7 +124,7 @@ class StoredLibrary(LibraryMixin):
         )
 
     @staticmethod
-    def store_libary_content(library_content: str) -> Union[str, None]:
+    def store_libary_content(library_content: bytes) -> Union[str, None]:
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             return None  # We do not store the libary if its hash checksum is in the database.
@@ -145,7 +145,7 @@ class StoredLibrary(LibraryMixin):
 
         urn = library_data["urn"]
         locale = library_data.get("locale", "en")
-        version = library_data["version"]
+        version = int(library_data["version"])
 
         library_matches = [*StoredLibrary.objects.filter(urn=urn, locale=locale)]
         if any(libary.version >= version for libary in library_matches):
@@ -155,7 +155,7 @@ class StoredLibrary(LibraryMixin):
             )
 
         for library in library_matches:
-            libary.is_obsolete = True
+            library.is_obsolete = True
             library.save()  # If a user delete a library from the libary store we must set the is_obsolete value of its most recent obsolete version to False.
 
         objects_meta = {
