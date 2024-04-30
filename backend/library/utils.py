@@ -533,7 +533,7 @@ class LibraryImporter:
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
         ):
-            return "The libary 'objects' field data must contain at least one of the following fields : {}".format(
+            return "The library 'objects' field data must contain at least one of the following fields : {}".format(
                 ", ".join(self.OBJECT_FIELDS)
             )
 
