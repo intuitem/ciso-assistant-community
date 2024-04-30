@@ -57,7 +57,7 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
 
     def destroy(
         self, request, pk
-    ):  # We may have to also get the locale of the library we want to delete in the future for this method and all other libary viewset methods which goal is to apply an operation on a specific library
+    ):  # We may have to also get the locale of the library we want to delete in the future for this method and all other library viewset methods which goal is to apply an operation on a specific library
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="delete_storedlibrary"),
@@ -148,13 +148,13 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
             validate_file_extension(attachment)
             # Use safe_load to prevent arbitrary code execution.
 
-            content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the libary content is reasonnable before reading ?
+            content = attachment.read()  # Should we read it chunck by chunck or ensure that the file size of the library content is reasonnable before reading ?
 
-            error_msg = StoredLibrary.store_libary_content(content)
-
-            if error_msg is not None:
+            try:
+                StoredLibrary.store_library_content(content)
+            except ValueError as e:
                 return HttpResponse(
-                    json.dumps({"error": error_msg}),
+                    json.dumps({"error": e}),
                     status=HTTP_422_UNPROCESSABLE_ENTITY,
                 )
 
