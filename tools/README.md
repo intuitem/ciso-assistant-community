@@ -49,7 +49,7 @@ Conventions:
             - ref_id
             - name
             - description
-            - maturity
+            - implementation_groups
             - threats
             - reference_controls
             - annotation
