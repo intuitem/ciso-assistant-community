@@ -447,8 +447,11 @@ class RiskMatrix(ReferentialObjectMixin):
 class Framework(ReferentialObjectMixin):
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
-    score_definition = models.JSONField(
+    scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
+    )
+    implementation_groups_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Implementation groups definition")
     )
     library = models.ForeignKey(
         LoadedLibrary,
@@ -529,7 +532,9 @@ class RequirementNode(ReferentialObjectMixin):
         max_length=100, null=True, blank=True, verbose_name=_("Parent URN")
     )
     order_id = models.IntegerField(null=True, verbose_name=_("Order ID"))
-    maturity = models.IntegerField(null=True, verbose_name=_("Maturity"))
+    implementation_groups = models.JSONField(
+        null=True, verbose_name=_("Implementation groups")
+    )
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
 
     class Meta:
@@ -1375,10 +1380,26 @@ class ComplianceAssessment(Assessment):
         choices=Result.choices,
         verbose_name=_("Result"),
     )
+    selected_implementation_groups = models.JSONField(
+        blank=True, null=True, verbose_name=_("Selected implementation groups")
+    )
+    # score system is suggested by the framework, but can be changed at the start of the assessment
+    min_score = models.IntegerField(null=True, verbose_name=_("Minimum score"))
+    max_score = models.IntegerField(null=True, verbose_name=_("Maximum score"))
+    scores_definition = models.JSONField(
+        blank=True, null=True, verbose_name=_("Score definition")
+    )
 
     class Meta:
         verbose_name = _("Compliance assessment")
         verbose_name_plural = _("Compliance assessments")
+
+    def save(self, *args, **kwargs) -> None:
+        if self.min_score is None:
+            self.min_score = self.framework.min_score
+            self.max_score = self.framework.max_score
+            self.scores_definition = self.framework.scores_definition
+        super().save(*args, **kwargs)
 
     def get_global_score(self):
         requirement_assessments_scored = (
@@ -1612,6 +1633,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin):
         blank=True,
         verbose_name=_("Applied controls"),
         related_name="requirement_assessments",
+    )
+    selected = models.BooleanField(
+        default=True,
+        verbose_name=_("Selected"),
     )
 
     def __str__(self) -> str:

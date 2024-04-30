@@ -490,20 +490,23 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     def validate_score(self, value):
-        framework = self.get_framework()
+        compliance_assessment = self.get_compliance_assessment()
 
         if value is not None:
-            if value < framework.min_score or value > framework.max_score:
+            if (
+                value < compliance_assessment.min_score
+                or value > compliance_assessment.max_score
+            ):
                 raise serializers.ValidationError(
                     {
-                        "score": f"Score must be between {framework.min_score} and {framework.max_score}"
+                        "score": f"Score must be between {compliance_assessment.min_score} and {compliance_assessment.max_score}"
                     }
                 )
         return value
 
-    def get_framework(self):
+    def get_compliance_assessment(self):
         if hasattr(self, "instance") and self.instance:
-            return self.instance.compliance_assessment.framework
+            return self.instance.compliance_assessment
         try:
             compliance_assessment_id = self.context.get("request", {}).data.get(
                 "compliance_assessment", {}
@@ -511,9 +514,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             compliance_assessment = ComplianceAssessment.objects.get(
                 id=compliance_assessment_id
             )
-            return compliance_assessment.framework
-        except Framework.DoesNotExist:
-            raise serializers.ValidationError("The specified framework does not exist.")
+            return compliance_assessment
+        except ComplianceAssessment.DoesNotExist:
+            raise serializers.ValidationError(
+                "The specified Compliance Assessment does not exist."
+            )
 
     class Meta:
         model = RequirementAssessment

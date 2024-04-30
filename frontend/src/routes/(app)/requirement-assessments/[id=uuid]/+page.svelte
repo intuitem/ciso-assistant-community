@@ -272,7 +272,7 @@
 					{form}
 					min_score={data.compliance_assessment_score.min_score}
 					max_score={data.compliance_assessment_score.max_score}
-					score_definition={data.compliance_assessment_score.score_definition}
+					scores_definition={data.compliance_assessment_score.scores_definition}
 					field="score"
 					label="Score"
 				/>
