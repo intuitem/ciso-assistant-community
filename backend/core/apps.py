@@ -4,6 +4,7 @@ from django.db import connection
 from django.db.models.signals import post_migrate
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, LIBRARIES_PATH
 import os
+from django.core.management import call_command
 
 
 READER_PERMISSIONS_LIST = [
@@ -355,6 +356,8 @@ def startup(sender: AppConfig, **kwargs):
             )
         except Exception as e:
             print(e)  # NOTE: Add this exception in the logger
+
+    call_command("storelibraries")
 
 
 class CoreConfig(AppConfig):
