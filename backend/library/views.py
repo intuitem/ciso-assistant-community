@@ -44,6 +44,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return StoredLibrarySerializer
         return StoredLibraryDetailedSerializer
 
+    @action(detail=True, methods=["get"])
+    def content(self, request, pk):
+        lib = StoredLibrary.objects.get(id=pk)
+        return Response(lib.content)
+
     @action(detail=True, methods=["get"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
@@ -81,7 +86,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         try:
-            lib = StoredLibrary.objects.get(urn=pk)
+            lib = StoredLibrary.objects.get(id=pk)
         except:
             return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
