@@ -29,8 +29,6 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 		data.objects = JSON.parse(content);
 	}
 
-	console.log(data);
-
 	return new Response(JSON.stringify(data), {
 		headers: {
 			'Content-Type': 'application/json'
