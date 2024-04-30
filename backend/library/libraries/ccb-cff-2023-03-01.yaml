@@ -2,11 +2,12 @@ urn: urn:intuitem:risk:library:ccb-cff-2023-03-01
 locale: en
 ref_id: CCB-CFF-2023-03-01
 name: CCB CyberFundamentals Framework
-description: Centre For Cybersecurity Belgium - CyberFundamentals Framework
-  https://ccb.belgium.be
+description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework
+
+  https://ccb.belgium.be'
 copyright: All texts, layouts, designs and other elements of any nature in this document
   are subject to copyright law.
-version: 1
+version: 2
 provider: CCB
 packager: intuitem
 objects:
@@ -15,6 +16,57 @@ objects:
     ref_id: CCB-CFF-2023-03-01
     name: CCB CyberFundamentals Framework
     description: Centre For Cybersecurity Belgium - CyberFundamentals Framework
+    scores_definition:
+    - score: 1
+      name: Initial
+      description: 'No Process documentation or not formally approved by management.
+
+        Standard process does not exist.'
+    - score: 2
+      name: Repeatable
+      description: 'Formally approved Process documentation exists but not reviewed
+        in the previous 2 years.
+
+        Ad-hoc process exists and is done informally.'
+    - score: 3
+      name: Defined
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for most activities.
+        Less than 10% process exceptions.'
+    - score: 4
+      name: Managed
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 3% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established. Less than 5% of process exceptions.'
+    - score: 5
+      name: Optimizing
+      description: 'Formally approved Process documentation exists, and exceptions
+        are documented and approved. Documented & approved exceptions < 0,5% of the
+        time.
+
+        Formal process exists and is implemented. Evidence available for all activities.
+        Detailed metrics of the process are captured and reported.
+
+        Minimal target for metrics has been established and continually improving.
+        Less than 1% of process exceptions.'
+    implementation_groups_definition:
+    - ref_id: B
+      name: basic
+      description: null
+    - ref_id: I
+      name: important
+      description: null
+    - ref_id: E
+      name: essential
+      description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id
       assessable: false
@@ -51,6 +103,10 @@ objects:
         \ and other networked components or devices. \n\u2022\tThis inventory must\
         \ include all assets, whether or not they are connected to the organization's\
         \ network.\n\u2022\tThe use of an IT asset management tool could be considered."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-1.2
       assessable: true
       depth: 4
@@ -65,6 +121,9 @@ objects:
         \ justify, and take responsibility for one's actions, it implies answerability\
         \ for the outcome of the task or process.\n\u2022\tChanges include the decommissioning\
         \ of material."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-1.3
       assessable: true
       depth: 4
@@ -76,6 +135,9 @@ objects:
       annotation: "\u2022\tAny unsupported hardware without an exception documentation,\
         \ is designated as unauthorized.\n\u2022\tUnauthorized hardware can be detected\
         \ during inventory, requests for support by the user or other means."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-1.4
       assessable: true
       depth: 4
@@ -88,6 +150,8 @@ objects:
         \  basis; The organization may choose to remove the asset from the network,\
         \ deny the asset from connecting remotely to the network, or quarantine the\
         \ asset."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-2
       assessable: false
       depth: 3
@@ -110,6 +174,10 @@ objects:
         \ version, number of users, data processed, etc.\n\u2022\tA distinction should\
         \ be made between unsupported software and unauthorized software.\n\u2022\t\
         The use of an IT asset management tool could be considered."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.2
       assessable: true
       depth: 4
@@ -123,6 +191,9 @@ objects:
         the title, publisher, initial install/use date, and business purpose for each
         entry; where appropriate, include the Uniform Resource Locator (URL), app
         store(s), version(s), deployment mechanism, and decommission date.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.3
       assessable: true
       depth: 4
@@ -131,6 +202,9 @@ objects:
       description: Individuals who are responsible and who are accountable for administering
         software platforms and applications within the organization shall be identified.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-2.4
       assessable: true
       depth: 4
@@ -142,6 +216,9 @@ objects:
       annotation: "\u2022\tAny unsupported software without an exception documentation,\
         \ is designated as unauthorized.\n\u2022\tUnauthorized software can be detected\
         \ during inventory, requests for support by the user or other means."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-2.5
       assessable: true
       depth: 4
@@ -153,6 +230,8 @@ objects:
         \u2022\tThere should be a process to regularly address unauthorised assets;\
         \ The organization may choose to remove the asset from the network, deny the\
         \ asset from connecting remotely to the network, or quarantine the asset."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-3
       assessable: false
       depth: 3
@@ -175,6 +254,10 @@ objects:
         \ mapping this information with the associated assets identified in the inventories\
         \ of physical devices, systems, software platforms and applications used within\
         \ the organization (see ID.AM-1 & ID.AM-2)."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.am-3.2
       assessable: true
       depth: 4
@@ -190,6 +273,9 @@ objects:
         \ documentation should not be stored only on the network it represents.\n\u2022\
         \tConsider keeping a copy of this documentation in a safe offline environment\
         \ (e.g. offline hard disk, paper hardcopy, \u2026)"
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-3.3
       assessable: true
       depth: 4
@@ -205,6 +291,8 @@ objects:
         \ whenever there is an indication of increased risk to organization's critical\
         \ operations and assets.\no\tProtecting the system from information leakage\
         \ due to electromagnetic signals emanations."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-4
       assessable: false
       depth: 3
@@ -229,6 +317,9 @@ objects:
         \ made to them and authorizing them in advance avoids wasting unnecessary\
         \ resources investigating a supposedly non-authenticated connection to external\
         \ systems."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-4.2
       assessable: true
       depth: 4
@@ -239,6 +330,8 @@ objects:
       annotation: Consider requiring external service providers to identify and document
         the functions, ports, protocols, and services necessary for the connection
         services.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-5
       assessable: false
       depth: 3
@@ -274,6 +367,10 @@ objects:
         \ (DLP) tool to identify all sensitive data stored, processed, or transmitted\
         \ through enterprise assets, including those located onsite or at a remote\
         \ service provider."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-6
       assessable: false
       depth: 3
@@ -298,6 +395,9 @@ objects:
         \ roles and responsibilities for third-party providers (e.g., suppliers, customers,\
         \ partners) with physical or logical access to the organization\u2019s ICT/OT\
         \ environment."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.am-6.2
       assessable: true
       depth: 4
@@ -307,6 +407,8 @@ objects:
       annotation: The information security officer should be responsible for monitoring
         the implementation of the organization's information/cyber security strategy
         and safeguards.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be
       assessable: false
       depth: 2
@@ -336,6 +438,9 @@ objects:
         The organisation should communicate its position to its upstream and downstream\
         \ so that it is understood where they sit in terms of critical importance\
         \ to the organisation's operations."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-1.2
       assessable: true
       depth: 4
@@ -345,6 +450,8 @@ objects:
         chain threats by applying security safeguards as part of a documented comprehensive
         security strategy.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-2
       assessable: false
       depth: 3
@@ -362,6 +469,9 @@ objects:
       annotation: The organisation covered by NIS legislation has a responsibility
         to know the other organisations in the same sector in order to work with them
         to achieve the objectives set by NIS for that particular sector.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-3
       assessable: false
       depth: 3
@@ -378,6 +488,9 @@ objects:
         are established and communicated.
       annotation: Information protection needs should be determined, and the related
         processes revised as necessary.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-4
       assessable: false
       depth: 3
@@ -395,6 +508,9 @@ objects:
         to their criticality as part of the risk assessment process.
       annotation: Dependencies and business critical functions should include support
         services.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5
       assessable: false
       depth: 3
@@ -416,6 +532,9 @@ objects:
         \ hot swap).\n\u2022\tConsider aspects of business continuity management in\
         \ e.g. Business Impact Analyse (BIA), Disaster Recovery Plan (DRP) and Business\
         \ Continuity Plan (BCP)."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5.2
       assessable: true
       depth: 4
@@ -431,6 +550,8 @@ objects:
         \ from power outages and other failures due to utility interruptions (e.g.\
         \ UPS & NO-break, frequent test, service contracts that include regular maintenance,\
         \ redundant power cabling, 2 different power service providers...)."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.be-5.3
       assessable: true
       depth: 4
@@ -443,6 +564,8 @@ objects:
         \ locations and one copy should be stored at an off-site location).\n\u2022\
         \tConsider implementing mechanisms such as hot swap, load balancing and failsafe\
         \ to increase resilience."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.gv
       assessable: false
       depth: 2
@@ -477,6 +600,10 @@ objects:
         \u2022\tPolicies and procedures should be reviewed and updated at least annually\
         \ and every time there are changes in the organization or technology. Whenever\
         \ the policies are changed, employees should be made aware of the changes."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-1.2
       assessable: true
       depth: 4
@@ -496,6 +623,9 @@ objects:
         \ information, access control, media protection, vulnerability management,\
         \ maintenance, monitoring)\n\u2022\tThe coverage of the full life cycle of\
         \ the ICT/OT systems."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.gv-3
       assessable: false
       depth: 3
@@ -511,6 +641,10 @@ objects:
       description: Legal and regulatory requirements regarding information/cybersecurity,
         including privacy obligations, shall be understood and implemented.
       annotation: There are no additional guidelines.
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-3.2
       assessable: true
       depth: 4
@@ -522,6 +656,9 @@ objects:
         \ compliance with legal and regulatory requirements regarding information/cybersecurity,\
         \ including privacy obligations.\n\u2022\tThis requirement also applies to\
         \ contractors and service providers."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.gv-4
       assessable: false
       depth: 3
@@ -539,6 +676,10 @@ objects:
         and updated when changes occur.
       annotation: This strategy should include determining and allocating the required
         resources to protect the organisation's business-critical assets.
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.gv-4.2
       assessable: true
       depth: 4
@@ -547,6 +688,9 @@ objects:
       description: "Information security and cybersecurity risks shall be documented,\
         \ formally approved, and updated when changes occur.\t"
       annotation: Consider using Risk Management tools.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra
       assessable: false
       depth: 2
@@ -574,6 +718,10 @@ objects:
         \ an organization to threats.\n\u2022\tA threat is a malicious or negative\
         \ event that takes advantage of a vulnerability. \n\u2022\tThe risk is the\
         \ potential for loss and damage when the threat does occur."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-1.2
       assessable: true
       depth: 4
@@ -585,6 +733,9 @@ objects:
       annotation: "\u2022\tWhere safe and feasible, the use of vulnerability scanning\
         \ should be considered.\n\u2022\tThe organization should establish and maintain\
         \ a testing program appropriate to its size, complexity, and maturity."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-1.3
       assessable: true
       depth: 4
@@ -594,6 +745,8 @@ objects:
         \ by the testing process, performance/load testing and penetration testing\
         \ on the organization\u2019s systems shall be conducted with care."
       annotation: Consider validating security measures after each penetration test.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-2
       assessable: false
       depth: 3
@@ -616,6 +769,9 @@ objects:
         include the sharing of information about potential vulnerabilities and incidents.
         This sharing capability should have an unclassified and classified information
         sharing capability.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-2.2
       assessable: true
       depth: 4
@@ -625,6 +781,8 @@ objects:
         to make security alert and advisory information available to relevant organization
         stakeholders.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5
       assessable: false
       depth: 3
@@ -643,6 +801,10 @@ objects:
       annotation: "\u2022\tKeep in mind that threats exploit vulnerabilities.\n\u2022\
         \tIdentify the consequences that losses of confidentiality, integrity and\
         \ availability may have on the assets and related business processes."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_id.ra-5.2
       assessable: true
       depth: 4
@@ -655,6 +817,9 @@ objects:
         \ external parties.\n\u2022\tQualitative and/or quantitative  risk analysis\
         \ methods \n(MAPGOOD, ISO27005, CIS RAM, \u2026) can be used together with\
         \ software tooling."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-5.3
       assessable: true
       depth: 4
@@ -662,6 +827,8 @@ objects:
       ref_id: ID.RA-5.3
       description: Risk assessment results shall be disseminated to relevant stakeholders.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.ra-6
       assessable: false
       depth: 3
@@ -681,6 +848,9 @@ objects:
         \ assets are, and how they are protected.\n\u2022\tIt should be clear what\
         \ impact will be if these assets are compromised.\n\u2022\tIt should be established\
         \ how the implementation of adequate mitigation measures will be organized."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.rm
       assessable: false
       depth: 2
@@ -707,6 +877,9 @@ objects:
         occur.
       annotation: 'External stakeholders include  customers, investors and shareholders,
         suppliers, government agencies and the wider community. '
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.rm-2
       assessable: false
       depth: 3
@@ -723,6 +896,9 @@ objects:
         be in line with the policies on information security and cybersecurity, to
         facilitate demonstration of coherence between policies, risk tolerance and
         measures.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.rm-3
       assessable: false
       depth: 3
@@ -738,6 +914,9 @@ objects:
       description: "The organization\u2019s role in critical infrastructure and its\
         \ sector shall determine the organization\u2019s risk appetite."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc
       assessable: false
       depth: 2
@@ -766,6 +945,8 @@ objects:
         the distributed and interconnected nature of ICT/OT product and service supply
         chains.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-2
       assessable: false
       depth: 3
@@ -787,6 +968,9 @@ objects:
       annotation: This assessment should identify and prioritize potential negative
         impacts to the organization from the risks associated with the distributed
         and interconnected nature of ICT/OT product and service supply chains.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-2.2
       assessable: true
       depth: 4
@@ -798,6 +982,8 @@ objects:
       annotation: This list should include suppliers, vendors and partners contact
         information and the services they provide, so they can be contacted for assistance
         in the event of an outage or service degradation.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3
       assessable: false
       depth: 3
@@ -820,6 +1006,9 @@ objects:
         \ in mind that GDPR requirements need to be fulfilled when business information\
         \ contains personal data (applicable on all levels), i.e. security measures\
         \ need to be addressed in the contractual framework."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.2
       assessable: true
       depth: 4
@@ -840,6 +1029,8 @@ objects:
         \ monitoring, incident response activities, or information system error handling\
         \ are also addressed expeditiously. Flaw remediation should be incorporated\
         \ into configuration management as an emergency change."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-3.3
       assessable: true
       depth: 4
@@ -849,6 +1040,8 @@ objects:
         \ the organization to review the \u2018information security and cybersecurity\u2019\
         \ programs implemented by suppliers and third-party partners."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-4
       assessable: false
       depth: 3
@@ -867,6 +1060,9 @@ objects:
         \ reviewing audits, test results, and other evaluations."
       annotation: Entities not subject to the NIS legislation could limit themselves
         to business critical suppliers and third-party partners only.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-4.2
       assessable: true
       depth: 4
@@ -877,6 +1073,8 @@ objects:
         \ reviewing third-party independent audits, test results, and other evaluations."
       annotation: The depth of the review should depend on the criticality of delivered
         products and services.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-5
       assessable: false
       depth: 3
@@ -894,6 +1092,9 @@ objects:
         and recovery planning activities.
       annotation: Entities not subject to the NIS legislation could limit themselves
         to business critical suppliers and third-party partners only.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:id.sc-5.2
       assessable: true
       depth: 4
@@ -903,6 +1104,8 @@ objects:
         suppliers and third-party partners to include them as stakeholders in testing
         and execution of the response and recovery plans.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr
       assessable: false
       depth: 1
@@ -930,8 +1133,8 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1
       ref_id: BASIC_PR.AC-1.1
-      description: 'Identities and credentials for authorized devices and users shall
-        be managed.'
+      description: Identities and credentials for authorized devices and users shall
+        be managed.
       annotation: "Identities and credentials for authorized devices and users could\
         \ be managed through a password policy. A password policy is a set of rules\
         \ designed to enhance ICT/OT security by encouraging organization\u2019s to:\n\
@@ -944,6 +1147,10 @@ objects:
         \ of compromise.\n\u2022\tUse only individual accounts and never share passwords.\n\
         \u2022\tImmediately disable unused accounts\n\u2022\tRights and privileges\
         \ are managed by user groups."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-1.2
       assessable: true
       depth: 4
@@ -959,6 +1166,9 @@ objects:
         \ or inherence (something the user is) that are independent, in that the breach\
         \ of one does not compromise the reliability of the others, and is designed\
         \ in such a way to protect the confidentiality of the authentication data."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.3
       assessable: true
       depth: 4
@@ -970,6 +1180,8 @@ objects:
       annotation: "\u2022\tTo guarantee the safe operation, service accounts should\
         \ be used for running processes and services.\n\u2022\tConsider the use of\
         \ a formal access procedure for external parties."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.4
       assessable: true
       depth: 4
@@ -981,6 +1193,8 @@ objects:
         \ for system-to-system communications"
       annotation: Consider the use of SSO (Single Sign On) in combination with MFA
         for the organization's internal and external critical systems.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-1.5
       assessable: true
       depth: 4
@@ -992,6 +1206,8 @@ objects:
       annotation: "\u2022\tConsider limiting the number of failed login attempts by\
         \ implementing automatic lockout.\n\u2022\tThe locked account won\u2019t be\
         \ accessible until it has been reset or the account lockout duration elapses."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2
       assessable: false
       depth: 3
@@ -1013,6 +1229,10 @@ objects:
         \ to trace these accesses and restrict them technically to given time slots.\n\
         \u2022\tConsider to not leaving internal network access outlets accessible\
         \ in public areas. These public places can be waiting rooms, corridors..."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-2.2
       assessable: true
       depth: 4
@@ -1028,6 +1248,9 @@ objects:
         \ servers and network components to authorized personnel.\no\tLog all access\
         \ to servers and network components.\n\u2022\tVisitor access records should\
         \ be maintained, reviewed and acted upon as required."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2.3
       assessable: true
       depth: 4
@@ -1037,6 +1260,8 @@ objects:
         to the physical access to the facility.
       annotation: "E.g. production, R&D, organization\u2019s critical systems equipment\
         \ (server rooms\u2026)"
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-2.4
       assessable: true
       depth: 4
@@ -1047,6 +1272,8 @@ objects:
         \ cabling, and network access interfaces from accidental damage, disruption,\
         \ and physical tampering.\n\u2022\tConsider implementing redundant and physically\
         \ separated power systems for organization\u2019s critical operations."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-3
       assessable: false
       depth: 3
@@ -1070,6 +1297,10 @@ objects:
         \ be avoided, and if unavoidable done through an encrypted virtual private\
         \ network (VPN) capability.\n\u2022\tManage all endpoint devices (fixed and\
         \ mobile) according to the organization's security policies."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-3.2
       assessable: true
       depth: 4
@@ -1079,6 +1310,10 @@ objects:
         including through multi-factor authentication (MFA).
       annotation: Enforce MFA (e.g. 2FA) on Internet-facing systems, such as email,
         remote desktop, and Virtual Private Network (VPNs).
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-3.3
       assessable: true
       depth: 4
@@ -1095,6 +1330,9 @@ objects:
         \ organizational assets should be approved, logged, and performed in a manner\
         \ that prevents unauthorized access.\n\u2022\tThe user should be made aware\
         \ of any remote connection to its device by a visual indication."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.4
       assessable: true
       depth: 4
@@ -1105,6 +1343,8 @@ objects:
         \ necessary."
       annotation: This should include that only authorized use of privileged functions
         from remote access is allowed.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:r.ac-3.5
       assessable: true
       depth: 4
@@ -1113,6 +1353,8 @@ objects:
       description: The security for connections with external systems shall be verified
         and framed by documented agreements.
       annotation: Access from pre-defined IP addresses could be considered.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       assessable: false
       depth: 3
@@ -1141,6 +1383,10 @@ objects:
         \ for your business needs.\n\u2022\tPermission management should be documented\
         \ in a procedure and updated when appropriate.\n\u2022\tUse 'Single Sign On'\
         \ (SSO) when appropriate."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.2
       assessable: true
       depth: 4
@@ -1150,14 +1396,18 @@ objects:
         business's critical information and technology and the means to get access.
       annotation: 'Means to get access may include: a key, password, code, or administrative
         privilege.'
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.3
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       ref_id: BASIC_PR.AC-4.3
-      description: 'Employee access to data and information shall be limited to the
+      description: Employee access to data and information shall be limited to the
         systems and specific information they need to do their jobs (the principle
-        of Least Privilege).'
+        of Least Privilege).
       annotation: "The principle of Least Privilege should be understood as the principle\
         \ that a security architecture should be designed so that each employee is\
         \ granted the minimum system resources and authorizations that the employee\
@@ -1168,17 +1418,25 @@ objects:
         \ of exchanges more easily.\n\u2022\tEnsure that when an employee leaves the\
         \ business, all access to the business\u2019s information or systems is blocked\
         \ instantly."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-4.4
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4
       ref_id: BASIC_PR.AC-4.4
-      description: 'Nobody shall have administrator privileges for daily tasks.'
+      description: Nobody shall have administrator privileges for daily tasks.
       annotation: "Consider the following:\n\u2022\tSeparate administrator accounts\
         \ from user accounts.\n\u2022\tDo not privilege user accounts to effectuate\
         \ administration tasks.\n\u2022\tCreate unique local administrator passwords\
         \ and disable unused accounts.\n\u2022\tConsider prohibiting Internet browsing\
         \ from administrative accounts."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.5
       assessable: true
       depth: 4
@@ -1190,6 +1448,9 @@ objects:
       annotation: Consider separately identifying each person with access to the organization's
         critical systems with a username to remove generic and anonymous accounts
         and access.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.6
       assessable: true
       depth: 4
@@ -1203,6 +1464,9 @@ objects:
         not allow a single individual to both initiate and approve a transaction (financial\
         \ or otherwise).\n\u2022\tensuring that security personnel administering access\
         \ control functions do not also administer audit functions."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-4.7
       assessable: true
       depth: 4
@@ -1210,6 +1474,9 @@ objects:
       ref_id: IMPORTANT_PR.AC-4.7
       description: Priviliged users shall be managed and monitored.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4.8
       assessable: true
       depth: 4
@@ -1220,6 +1487,8 @@ objects:
         applied accordingly.
       annotation: Specific restrictions can include, for example, restricting usage
         to certain days of the week, time of day, or specific durations of time.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-4.9
       assessable: true
       depth: 4
@@ -1227,6 +1496,8 @@ objects:
       ref_id: PR.AC-4.9
       description: Priviliged users shall be managed,  monitored and audited.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5
       assessable: false
       depth: 3
@@ -1255,6 +1526,10 @@ objects:
         \ operational, and regularly updated.\n\u2022\tConsider installing an Intrusion\
         \ Detection / Prevention System (IDPS). These devices analyze network traffic\
         \ at a more detailed level and can provide a greater level of protection."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:basic_pr.ac-5.2
       assessable: true
       depth: 4
@@ -1267,6 +1542,10 @@ objects:
         \ control mechanisms) and control/monitor the traffic between these zones.\n\
         \u2022\tWhen the network is \"flat\", the compromise of a vital network component\
         \ can lead to the compromise of the entire network."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.3
       assessable: true
       depth: 4
@@ -1274,11 +1553,16 @@ objects:
       ref_id: IMPORTANT_PR.AC-5.3
       description: 'Where appropriate, network integrity of the organization''s critical
         systems shall be protected by
+
         (1) Identifying, documenting, and controlling connections between system components.
+
         (2) Limiting external connections to the organization''s critical systems.'
       annotation: Boundary protection mechanisms include, for example, routers, gateways,
         unidirectional gateways, data diodes, and firewalls separating system components
         into logically separate networks or subnetworks.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ac-5.4
       assessable: true
       depth: 4
@@ -1296,6 +1580,9 @@ objects:
         \u2022\tForce VPN on public networks.\n\u2022\tImplement a closed policy for\
         \ security gateways (deny all policy: only allow/open connections that have\
         \ been explicitly pre-authorized)."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.5
       assessable: true
       depth: 4
@@ -1305,6 +1592,8 @@ objects:
         proxy servers for defined communications traffic between the organization's
         critical systems and external networks.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-5.6
       assessable: true
       depth: 4
@@ -1313,6 +1602,8 @@ objects:
       description: The organization shall ensure that the organization's critical
         systems fail safely when a border protection device fails operationally.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-6
       assessable: false
       depth: 3
@@ -1329,6 +1620,9 @@ objects:
         the identity of individuals before issuing credentials that provide access
         to organization's systems.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-6.2
       assessable: true
       depth: 4
@@ -1339,6 +1633,8 @@ objects:
         critical systems; make sure that they are authenticated, and that the unique
         identifiers are captured when performing system interactions.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ac-7
       assessable: false
       depth: 3
@@ -1359,6 +1655,9 @@ objects:
         \ and other organizational risks)."
       annotation: Consider a security-by-design approach for new systems; For existing
         systems a separate risk assessment should be used.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at
       assessable: false
       depth: 2
@@ -1387,6 +1686,10 @@ objects:
         \ they will be expected to do to protect company\u2019s business information\
         \ and technology.\n\u2022\tTraining should be continually updated and reinforced\
         \ by awareness campaigns."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-1.2
       assessable: true
       depth: 4
@@ -1411,6 +1714,9 @@ objects:
         \ the event of an incident should be known to all.\n\u2022\tOrganize a simulation\
         \ of a scenario to test your knowledge. Consider performing the exercise for\
         \ example at least once a year."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-1.3
       assessable: true
       depth: 4
@@ -1419,6 +1725,8 @@ objects:
       description: The organization shall implement an evaluation method to measure
         the effectiveness of the awareness trainings.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-2
       assessable: false
       depth: 3
@@ -1434,6 +1742,9 @@ objects:
         and these users shall be able to demonstrate the understanding of their roles,
         responsibilities, and authorities.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-3
       assessable: false
       depth: 3
@@ -1451,6 +1762,9 @@ objects:
       annotation: "Enforcement should include that \u2018third party stakeholder\u2019\
         -users (e.g. suppliers, customers, partners) can demonstrate the understanding\
         \ of their roles and responsibilities."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.2
       assessable: true
       depth: 4
@@ -1462,6 +1776,9 @@ objects:
       annotation: Third-party providers include, for example, service providers, contractors,
         and other organizations providing system development, technology services,
         outsourced applications, or network and security management.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.at-3.3
       assessable: true
       depth: 4
@@ -1470,6 +1787,9 @@ objects:
       description: The organization shall monitor business critical service providers
         and users for security compliance.
       annotation: Third party audit results can be used as audit evidence.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-3.4
       assessable: true
       depth: 4
@@ -1478,6 +1798,8 @@ objects:
       description: The organization shall audit business-critical external service
         providers for security compliance.
       annotation: Third party audit results can be used as audit evidence.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-4
       assessable: false
       depth: 3
@@ -1495,6 +1817,9 @@ objects:
         tasks, skills, knowledge, competences is available in the "European Cybersecurity
         Skills Framework Role Profiles" by ENISA. (https://www.enisa.europa.eu/publications/european-cybersecurity-skills-framework-role-profiles
         )
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.at-5
       assessable: false
       depth: 3
@@ -1512,6 +1837,9 @@ objects:
         facilities are qualified through training before privileges are granted, and
         that they understand their responsibilities.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds
       assessable: false
       depth: 2
@@ -1545,6 +1873,8 @@ objects:
         \ of system data and audit records (e.g. restricted access rights, daily backups,\
         \ data encryption, firewall installation).\n\u2022\tEncrypt hard drives, external\
         \ media, stored files, configuration files and data stored in the cloud."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-2
       assessable: false
       depth: 3
@@ -1563,6 +1893,8 @@ objects:
         supported, and authorized software tools. If you send sensitive documents
         or emails, you may want to consider encrypting those documents and/or emails
         with appropriate, supported, and authorized software tools.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-3
       assessable: false
       depth: 3
@@ -1584,6 +1916,10 @@ objects:
         sanitization\u201D and thus related to the requirement and guidance in PR.IP-6.\n\
         \u2022\tConsider installing a remote-wiping application on company laptops,\
         \ tablets, cell phones, and other mobile devices."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-3.2
       assessable: true
       depth: 4
@@ -1595,6 +1931,9 @@ objects:
       annotation: "Accountability should include:\n\u2022\tThe authorization for business-critical\
         \ assets to enter and exit the facility.\n\u2022\tMonitoring and maintaining\
         \ documentation related to the movements of business-critical assets."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-3.3
       assessable: true
       depth: 4
@@ -1606,6 +1945,9 @@ objects:
         \ technical & organizational means (encryption, Access Control (AC), Mobile\
         \ Device Management (MDM), monitoring, secure wipe, awareness, signed user\
         \ agreement, guidelines & manuals, backups, inventory update \u2026)."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-3.4
       assessable: true
       depth: 4
@@ -1614,6 +1956,8 @@ objects:
       description: The organization shall ensure that disposal actions are approved,
         tracked, documented, and verified.
       annotation: Disposal actions include media sanitization actions (See PR.IP-6)
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-4
       assessable: false
       depth: 3
@@ -1629,6 +1973,9 @@ objects:
         critical system information processing, networking, telecommunications, and
         data storage.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ds-4.2
       assessable: true
       depth: 4
@@ -1638,6 +1985,9 @@ objects:
         to an alternative system.
       annotation: Be aware that log services can become a bottleneck and hinder the
         correct functioning of the source systems.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-4.3
       assessable: true
       depth: 4
@@ -1647,6 +1997,8 @@ objects:
         \ denial-of-service attacks or at least the effect of such attacks will be\
         \ limited."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-5
       assessable: false
       depth: 3
@@ -1667,6 +2019,9 @@ objects:
         \ etc.) for the most sensitive data.\n\u2022\tConsider frequent audit of the\
         \ configuration of the central directory (Active Directory in Windows environment),\
         \ with specific focus on the access to data of key persons in the company."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6
       assessable: false
       depth: 3
@@ -1686,6 +2041,9 @@ objects:
         checks, cyclical redundancy checks, cryptographic hashes) and associated tools
         can automatically monitor the integrity of information systems and hosted
         applications.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6.2
       assessable: true
       depth: 4
@@ -1694,6 +2052,8 @@ objects:
       description: The organization shall implement automated tools where feasible
         to provide notification upon discovering discrepancies during integrity verification.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-6.3
       assessable: true
       depth: 4
@@ -1702,6 +2062,8 @@ objects:
       description: The organization shall implement automatic response capability
         with pre-defined security safeguards when integrity violations are discovered.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-7
       assessable: false
       depth: 3
@@ -1730,6 +2092,8 @@ objects:
         \ can be made without disrupting operational activities.\n\u2022\tConsider\
         \ adding and testing cybersecurity features as early as during development\
         \ (secure development lifecycle  principles)."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-8
       assessable: false
       depth: 3
@@ -1747,6 +2111,8 @@ objects:
         checks, cyclical redundancy checks, cryptographic hashes) and associated tools
         can automatically monitor the integrity of information systems and hosted
         applications.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ds-8.2
       assessable: true
       depth: 4
@@ -1756,16 +2122,18 @@ objects:
         tampering to its critical system's hardware into the organization incident
         response capability.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr
       ref_id: PR.IP
       name: Information Protection Processes and Procedures
-      description: 'Security policies (that address purpose, scope, roles, responsibilities,
+      description: Security policies (that address purpose, scope, roles, responsibilities,
         management commitment, and coordination among organizational entities), processes,
         and procedures are maintained and used to manage protection of information
-        systems and assets.'
+        systems and assets.
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1
       assessable: false
       depth: 3
@@ -1789,6 +2157,9 @@ objects:
         \ system architecture.\n\u2022\tNetwork topology should include the nerve\
         \ points of the IT/OT environment (external connections, servers hosting data\
         \ and/or sensitive functions, DNS services security, etc.)."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-1.2
       assessable: true
       depth: 4
@@ -1801,6 +2172,8 @@ objects:
         \ mission essential capabilities is known as the \u201Cconcept of least functionality\u201D\
         .\n\u2022\tCapabilities include functions, ports, protocols, software, and/or\
         \ services."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-2
       assessable: false
       depth: 3
@@ -1821,6 +2194,9 @@ objects:
         \ training for high-profile roles should be considered.\n\u2022\tWhen hosting\
         \ internet facing applications the implementation of a web application firewall\
         \ (WAF) should be considered."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-2.2
       assessable: true
       depth: 4
@@ -1834,6 +2210,8 @@ objects:
         \ specification , design, development, implementation.\n\u2022\tConfiguration\
         \ management for planned and unplanned changes and change control during the\
         \ development.\n\u2022\tFlaw tracking & resolution.\n\u2022\tSecurity testing."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-3
       assessable: false
       depth: 3
@@ -1848,6 +2226,9 @@ objects:
       description: Changes shall be tested and validated before being implemented
         into operational systems.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-3.2
       assessable: true
       depth: 4
@@ -1857,6 +2238,8 @@ objects:
         impact analysis shall be performed in a separate test environment before implementation
         in an operational environment.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4
       assessable: false
       depth: 3
@@ -1880,6 +2263,10 @@ objects:
         \ backup on the same network as the system on which the original data resides\
         \ and provide an offline copy. Among other things, this prevents file encryption\
         \ by hackers (risk of ransomware)."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.2
       assessable: true
       depth: 4
@@ -1888,6 +2275,9 @@ objects:
       description: The reliability and integrity of backups shall be verified and
         tested on regular basis.
       annotation: This should include regularly testing of the backup restore procedures.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-4.3
       assessable: true
       depth: 4
@@ -1899,6 +2289,9 @@ objects:
       annotation: An offline backup of your data is ideally stored in a separate physical
         location from the original data source and where feasible offsite for extra
         protection and security.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4.4
       assessable: true
       depth: 4
@@ -1911,6 +2304,8 @@ objects:
         \ Plans, Critical Infrastructure Plans, and Cyber Incident response plans.\n\
         \u2022\tRestoration of backup data during contingency plan testing should\
         \ be provided."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-4.5
       assessable: true
       depth: 4
@@ -1920,6 +2315,8 @@ objects:
         backup.
       annotation: Seperation of critical system backup from critical information backup
         should lead to a shorter recovery time.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-5
       assessable: false
       depth: 3
@@ -1940,6 +2337,9 @@ objects:
         \ suppression mechanisms should take the organization's critical system environment\
         \ into account (e.g., water sprinkler systems could be hazardous in specific\
         \ environments)."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-5.2
       assessable: true
       depth: 4
@@ -1948,6 +2348,8 @@ objects:
       description: The organization shall implement fire detection devices that activate
         and notify key personnel automatically in the event of a fire.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-6
       assessable: false
       depth: 3
@@ -1967,6 +2369,9 @@ objects:
         \ or soft copy media (the bits and bytes contained in hard drives, random\
         \ access memory (RAM), read-only memory (ROM), disks, memory devices, phones,\
         \ mobile computing devices, networking equipment\u2026)"
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-6.2
       assessable: true
       depth: 4
@@ -1977,6 +2382,8 @@ objects:
         \u2022\tConsider applying non-destructive sanitization techniques to portable\
         \ storage devices.\n\u2022\tConsider sanitation procedures in proportion to\
         \ confidentiality requirements."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7
       assessable: false
       depth: 3
@@ -1992,6 +2399,9 @@ objects:
         monitoring, measurements, assessments, and lessons learned into protection
         process updates (continuous improvement).
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7.2
       assessable: true
       depth: 4
@@ -2006,6 +2416,8 @@ objects:
         conflicts of interest regarding the development, operation, or management
         of the organization''s critical system under assessment or to the determination
         of security control effectiveness.'
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-7.3
       assessable: true
       depth: 4
@@ -2015,6 +2427,8 @@ objects:
         systems facilitates the review, testing, and continual improvement of the
         security protection processes.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-8
       assessable: false
       depth: 3
@@ -2030,6 +2444,9 @@ objects:
         its critical system's related security incidents and mitigation measures with
         designated partners.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.2
       assessable: true
       depth: 4
@@ -2038,6 +2455,9 @@ objects:
       description: Communication of effectiveness of protection technologies shall
         be shared with appropriate parties.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-8.3
       assessable: true
       depth: 4
@@ -2046,6 +2466,9 @@ objects:
       description: The organization shall implement, where feasible, automated mechanisms
         to assist in information collaboration.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-9
       assessable: false
       depth: 3
@@ -2072,6 +2495,9 @@ objects:
         s systems, should be addressed.\n\u2022\tConsider defining incident types,\
         \ resources and management support needed to effectively maintain and mature\
         \ the incident response and contingency capabilities."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-9.2
       assessable: true
       depth: 4
@@ -2084,6 +2510,8 @@ objects:
         Recovery Plans, Continuity of Operations Plans, Crisis Communications Plans,
         Critical Infrastructure Plans, Cyber incident response plans, and Occupant
         Emergency Plans.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-11
       assessable: false
       depth: 3
@@ -2103,6 +2531,10 @@ objects:
         \tBackground verification checks should take into consideration applicable\
         \ laws, regulations, and ethics in proportion to the business requirements,\
         \ the classification of the information to be accessed and the perceived risks."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ip-11.2
       assessable: true
       depth: 4
@@ -2114,6 +2546,9 @@ objects:
       annotation: "The human resource information/cyber security process should include\
         \ access to critical information or technology; background verification checks;\
         \ code of conduct; roles, authorities, and responsibilities\u2026"
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ip-12
       assessable: false
       depth: 3
@@ -2132,6 +2567,9 @@ objects:
         \ in the identified components and distribute updates (software publisher\
         \ websites, CERT website, ENISA website).\n\u2022\tThe organization should\
         \ identify where its critical system's vulnerabilities may be exposed to adversaries."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma
       assessable: false
       depth: 2
@@ -2164,6 +2602,10 @@ objects:
         \ If you use one of these products, make sure it checks for updates for every\
         \ application you use.\n\u2022\tInstall patches and security updates in a\
         \ timely manner."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.2
       assessable: true
       depth: 4
@@ -2173,10 +2615,16 @@ objects:
         and repairs on its critical system components according to approved processes
         and tools.
       annotation: 'Consider the below measures:
+
         (1) Perform security updates on all software in a timely manner.
+
         (2) Automate the update process and audit its effectiveness.
+
         (3) Introduce an internal patching culture on desktops, mobile devices, servers,
         network components, etc. to ensure updates are tracked.'
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.3
       assessable: true
       depth: 4
@@ -2186,6 +2634,9 @@ objects:
         and monitoring of maintenance tools for use on the its critical systems.
       annotation: Maintenance tools can include, for example, hardware/software diagnostic
         test equipment, hardware/software packet sniffers and laptops.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-1.4
       assessable: true
       depth: 4
@@ -2194,6 +2645,9 @@ objects:
       description: The organization shall verify security controls following hardware
         maintenance or repairs, and take action as appropriate.
       annotation: No additional guidance on this topic
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.5
       assessable: true
       depth: 4
@@ -2202,6 +2656,8 @@ objects:
       description: The organization shall prevent the unauthorized removal of maintenance
         equipment containing organization's critical system information.
       annotation: This requirement maily focuses mainly on OT/ICS environments.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.6
       assessable: true
       depth: 4
@@ -2210,8 +2666,10 @@ objects:
       description: 'Maintenance tools and portable storage devices shall be inspected
         when  brought into the facility and shall be protected by anti-malware solutions
         so that they are scanned for malicious code before they are used on organization''s
-        systems.'
+        systems. '
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-1.7
       assessable: true
       depth: 4
@@ -2220,6 +2678,8 @@ objects:
       description: The organization shall verify security controls following hardware
         and software maintenance or repairs/patching and take action as appropriate.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-2
       assessable: false
       depth: 3
@@ -2236,6 +2696,9 @@ objects:
         to avoid unauthorised access, and approval of the outcome of the maintenance
         activities as described in approved processes or procedures.
       annotation: No additional guidance on this topic
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.ma-2.2
       assessable: true
       depth: 4
@@ -2244,6 +2707,9 @@ objects:
       description: The organization shall make sure that strong authenticators, record
         keeping, and session termination for remote maintenance is implemented.
       annotation: No additional guidance on this topic
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.ma-2.3
       assessable: true
       depth: 4
@@ -2254,6 +2720,8 @@ objects:
         capability comparable to the capability implemented on the equivalent organization's
         critical system.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt
       assessable: false
       depth: 2
@@ -2283,6 +2751,10 @@ objects:
         \ a large use of social media websites or an unusual number of viruses consistently\
         \ found on a particular computer. These trends may indicate a more serious\
         \ problem or signal the need for stronger protections in a particular area."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-1.2
       assessable: true
       depth: 4
@@ -2293,6 +2765,9 @@ objects:
         synchronized  to an authoritative time source. '
       annotation: Authoritative time sources include for example, an internal Network
         Time Protocol (NTP) server, radio clock, atomic clock, GPS time source.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1.3
       assessable: true
       depth: 4
@@ -2301,6 +2776,8 @@ objects:
       description: "The organization shall ensure that audit processing failures on\
         \ the organization's systems generate alerts and trigger defined responses.\t"
       annotation: The use of System Logging Protocol (Syslog) servers can be considered.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-1.4
       assessable: true
       depth: 4
@@ -2309,6 +2786,8 @@ objects:
       description: The organization shall enable authorized individuals to extend
         audit capabilities when required by events.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-2
       assessable: false
       depth: 3
@@ -2324,6 +2803,9 @@ objects:
       description: The usage restriction of portable storage devices shall be ensured
         through an appropriate documented policy and supporting safeguards.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_pr.pt-2.2
       assessable: true
       depth: 4
@@ -2333,6 +2815,9 @@ objects:
         removable media unless strictly necessary; in other instances, the execution
         of autoruns from such media should be disabled.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-2.3
       assessable: true
       depth: 4
@@ -2343,6 +2828,8 @@ objects:
       annotation: Protection and control should include the scanning of all portable
         storage devices for malicious code before they are used on organization's
         systems.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3
       assessable: false
       depth: 3
@@ -2359,6 +2846,9 @@ objects:
         to provide only essential capabilities.
       annotation: Consider applying the principle of least functionality to access
         systems and assets (see also PR.AC-4).
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3.2
       assessable: true
       depth: 4
@@ -2367,6 +2857,8 @@ objects:
       description: The organization shall disable defined functions, ports, protocols,
         and services within its critical systems that it deems unnecessary.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-3.3
       assessable: true
       depth: 4
@@ -2376,6 +2868,8 @@ objects:
         a deny-all, permit-by-exception policy to only allow the execution of authorized
         software programs.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4
       assessable: false
       depth: 3
@@ -2393,6 +2887,10 @@ objects:
         \ of the specified types are automatically processed (e.g. deleted).\n\u2022\
         \tWeb-filters should notify the user if a website may contain malware and\
         \ potentially preventing users from accessing that website."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4.2
       assessable: true
       depth: 4
@@ -2410,6 +2908,8 @@ objects:
         \ methods are typically static. Label or attribute policy mechanisms may be\
         \ implemented in hardware, firmware, and software that controls or has device\
         \ access, such as device drivers and communications controllers."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:pr.pt-4.3
       assessable: true
       depth: 4
@@ -2420,6 +2920,8 @@ objects:
         and integrity of the information being transmitted; This includes the review
         and documenting of each exception to the traffic flow policy.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de
       assessable: false
       depth: 1
@@ -2455,6 +2957,8 @@ objects:
         \ their generation.\n\u2022\tConsider centralizing your logs.\n\u2022\tConsider\
         \ deploying a Security Information and Event Management tool (SIEM) that will\
         \ facilitate the correlation and analysis of your data."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-2
       assessable: false
       depth: 3
@@ -2469,6 +2973,9 @@ objects:
       description: The organization shall review and analyze detected events to understand
         attack targets and methods.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-2.2
       assessable: true
       depth: 4
@@ -2478,6 +2985,8 @@ objects:
         to review and analyze detected events. '
       annotation: Consider to review your logs regularly to identify anomalies or
         abnormal events.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-3
       assessable: false
       depth: 3
@@ -2499,6 +3008,10 @@ objects:
         \ consistently found on a particular computer. These trends may indicate a\
         \ more serious problem or signal the need for stronger protections in a particular\
         \ area."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-3.2
       assessable: true
       depth: 4
@@ -2509,6 +3022,9 @@ objects:
         monitoring, network monitoring, physical access monitoring, and user/administrator
         reports.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-3.3
       assessable: true
       depth: 4
@@ -2519,6 +3035,8 @@ objects:
         its critical system's monitoring, and facility monitoring to further enhance
         the ability to identify inappropriate or unusual activity.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-4
       assessable: false
       depth: 3
@@ -2534,6 +3052,8 @@ objects:
         \ individuals resulting from detected events shall be determined and correlated\
         \ with risk assessment outcomes."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.ae-5
       assessable: false
       depth: 3
@@ -2549,6 +3069,9 @@ objects:
         generated alerts to support event detection and to assist in the identification
         of security alert thresholds.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.ae-5.2
       assessable: true
       depth: 4
@@ -2556,6 +3079,9 @@ objects:
       ref_id: IMPORTANT_DE.AE-5.2
       description: The organization shall define incident alert thresholds.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm
       assessable: false
       depth: 2
@@ -2581,6 +3107,10 @@ objects:
         \tConsider, where feasible, including smart phones and other networked devices\
         \ when installing and operating firewalls.\n\u2022\tConsider limiting the\
         \ number of interconnection gateways to the Internet."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-1.2
       assessable: true
       depth: 4
@@ -2594,6 +3124,9 @@ objects:
         \ key internal boundaries within the systems.\n\u2022\tWhen hosting internet\
         \ facing applications the implementation of a web application firewall (WAF)\
         \ should be considered."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-1.3
       assessable: true
       depth: 4
@@ -2609,6 +3142,8 @@ objects:
         \ information/cybersecurity events.\n\u2022\tBoosting system monitoring activity\
         \ whenever there is an indication of increased risk.\n\u2022\tPhysical environment,\
         \ personnel, and service provider."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-2
       assessable: false
       depth: 3
@@ -2624,6 +3159,9 @@ objects:
       description: The physical environment of the facility shall be monitored for
         potential information/cybersecurity events.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-2.2
       assessable: true
       depth: 4
@@ -2634,6 +3172,8 @@ objects:
         through physical intrusion alarms, surveillance equipment, independent surveillance
         teams.
       annotation: It is recommended to log all visitors.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-3
       assessable: false
       depth: 3
@@ -2649,6 +3189,10 @@ objects:
       description: End point and network protection tools to monitor end-user behavior
         for dangerous activity shall be implemented.
       annotation: Consider deploying an Intrusion Detection/Prevention system (IDS/IPS).
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.2
       assessable: true
       depth: 4
@@ -2661,6 +3205,9 @@ objects:
         generated because of suspicious activities and take the appropriate actions
         to remediate the threat, e.g. through the deployment of a security operations
         centre (SOC).
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-3.3
       assessable: true
       depth: 4
@@ -2670,6 +3217,9 @@ objects:
       annotation: Only authorized software should be used and user access rights should
         be limited to the specific data, resources and applications needed to complete
         a required task (least privilege principle).
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-4
       assessable: false
       depth: 3
@@ -2692,6 +3242,10 @@ objects:
         It should be considered to provide the same malicious code protection mechanisms\
         \ for home computers (e.g. teleworking) or personal devices that are used\
         \ for professional work (BYOD)."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-4.2
       assessable: true
       depth: 4
@@ -2700,6 +3254,8 @@ objects:
       description: The organisation shall set up a system to detect false positives
         while detecting and eradicating malicious code.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-5
       assessable: false
       depth: 3
@@ -2722,6 +3278,9 @@ objects:
         \ be based on the potential for the code to cause damage to the systems if\
         \ used maliciously. Usage restrictions and implementation guidance should\
         \ apply to the selection and use of mobile code installed."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-6
       assessable: false
       depth: 3
@@ -2739,6 +3298,9 @@ objects:
         permissible actions occur during the connection.
       annotation: This monitoring includes unauthorized personnel access, connections,
         devices, and software.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-6.2
       assessable: true
       depth: 4
@@ -2748,6 +3310,9 @@ objects:
         policies and procedures and contract security requirements shall be monitored
         relative to their cybersecurity risks.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-7
       assessable: false
       depth: 3
@@ -2767,6 +3332,9 @@ objects:
         \ service providers.\n\u2022\tSystem inventory discrepancies should be included\
         \ in the monitoring.\n\u2022\tUnauthorized configuration changes to organization's\
         \ critical systems should be included in the monitoring."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-7.2
       assessable: true
       depth: 4
@@ -2775,6 +3343,8 @@ objects:
       description: Unauthorized configuration changes to organization's systems shall
         be monitored and addressed with the appropriate mitigation actions.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.cm-8
       assessable: false
       depth: 3
@@ -2791,6 +3361,9 @@ objects:
         are not adversely impacted by the scanning process.
       annotation: Consider the implementation of a continuous vulnerability scanning
         program; Including reporting and mitigation plans.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_de.cm-8.2
       assessable: true
       depth: 4
@@ -2799,6 +3372,9 @@ objects:
       description: The vulnerability scanning process shall include analysis, remediation,
         and information sharing.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp
       assessable: false
       depth: 2
@@ -2822,6 +3398,9 @@ objects:
         with applicable federal and regional laws, industry regulations and standards,
         policies, and other applicable requirements.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp-3
       assessable: false
       depth: 3
@@ -2837,6 +3416,9 @@ objects:
         are operating as intended.
       annotation: "\u2022\tValidation includes testing.\n\u2022\tValidation should\
         \ be demonstrable."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp-4
       assessable: false
       depth: 3
@@ -2857,6 +3439,9 @@ objects:
         and humidity, equipment delivery and removal, communications at the information
         system boundaries, use of mobile code, use of Voice over Internet Protocol
         (VoIP), and malware disclosure.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp-5
       assessable: false
       depth: 3
@@ -2874,6 +3459,9 @@ objects:
       annotation: "\u2022\tThis results in a continuous improvement of the detection\
         \ processes.\n\u2022\tThe use of independent teams to assess the detection\
         \ process could be considered."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:de.dp-5.2
       assessable: true
       depth: 4
@@ -2884,6 +3472,8 @@ objects:
         threat assessment, performance/load testing, and verification and validation
         testing on the organization's critical systems.
       annotation: These activities can be outsourced, preferably to accredited organizations.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs
       assessable: false
       depth: 1
@@ -2924,6 +3514,10 @@ objects:
         \ The effectiveness of any corrective action taken should be reviewed. Corrective\
         \ actions should be appropriate to the effects of the information/cybersecurity\
         \ event encountered.\nInternal Note: Requirements are covered in PR.IP-9"
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co
       assessable: false
       depth: 2
@@ -2950,6 +3544,9 @@ objects:
       annotation: Consider the use the CCB Incident Management Guide to guide you
         through this exercise and consider bringing in outside experts if needed.
         Test your plan regularly and adjust it after each incident.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-2
       assessable: false
       depth: 3
@@ -2966,6 +3563,9 @@ objects:
         organization-defined personnel or roles.
       annotation: All users should have a single point of contact to report any incident
         and be encouraged to do so.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-2.2
       assessable: true
       depth: 4
@@ -2973,6 +3573,8 @@ objects:
       ref_id: RS.CO-2.2
       description: Events shall be reported consistent with established criteria.
       annotation: Criteria to report should be included in the incident response plan.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-3
       assessable: false
       depth: 3
@@ -2988,6 +3590,10 @@ objects:
         \ and shared with the organization\u2019s employees in a format that they\
         \ can understand."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.co-3.2
       assessable: true
       depth: 4
@@ -2997,6 +3603,9 @@ objects:
         information with relevant stakeholders as foreseen in the incident response
         plan.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-4
       assessable: false
       depth: 3
@@ -3017,6 +3626,9 @@ objects:
         \ legal departments, operations personnel, and procurement offices.\n\u2022\
         \tCoordination with stakeholders occurs consistent with incident response\
         \ plans."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.co-5
       assessable: false
       depth: 3
@@ -3033,6 +3645,9 @@ objects:
         \ voluntarily, as appropriate, with external stakeholders, industry security\
         \ groups,\u2026 to achieve broader information/cybersecurity situational awareness."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an
       assessable: false
       depth: 2
@@ -3055,6 +3670,9 @@ objects:
       description: The organization shall investigate information/cybersecurity-related
         notifications generated from detection systems.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-1.2
       assessable: true
       depth: 4
@@ -3063,6 +3681,8 @@ objects:
       description: The organization shall implement automated mechanisms to assist
         in the investigation and analysis of information/cybersecurity-related notifications.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-2
       assessable: false
       depth: 3
@@ -3081,6 +3701,9 @@ objects:
         \ of risk assessments. In this way, insight is gained into the impact of the\
         \ event across the organization.\n\u2022\tConsider including detection of\
         \ unauthorized changes to its critical systems in its incident response capabilities."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-2.2
       assessable: true
       depth: 4
@@ -3090,6 +3713,8 @@ objects:
         incident impact analysis.
       annotation: Implementation could vary from a ticketing system to a Security
         Information and Event Management (SIEM).
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3
       assessable: false
       depth: 3
@@ -3105,6 +3730,8 @@ objects:
         and reporting for after-the-fact investigations of information/cybersecurity
         incidents.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-3.2
       assessable: true
       depth: 4
@@ -3115,6 +3742,8 @@ objects:
       annotation: Consider to determine the root cause of an incident. If necessary,
         use forensics analysis on collected information/cybersecurity event information
         to achieve this.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-4
       assessable: false
       depth: 3
@@ -3134,6 +3763,9 @@ objects:
         \ not recur or occur elsewhere.\n\u2022\tThe effectiveness of any corrective\
         \ action taken should be reviewed.\n\u2022\tCorrective actions should be appropriate\
         \ to the effects of the information/cybersecurity incident encountered."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-5
       assessable: false
       depth: 3
@@ -3152,6 +3784,9 @@ objects:
         from internal and external sources. '
       annotation: Internal and external sources could be e.g. internal testing, security
         bulletins, or security researchers.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.an-5.2
       assessable: true
       depth: 4
@@ -3161,6 +3796,8 @@ objects:
         and track remediation efforts for vulnerability information, captured from
         internal and external sources, to key stakeholders.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.mi
       assessable: false
       depth: 2
@@ -3188,6 +3825,9 @@ objects:
         assesses as not dangerous to the organisation's business critical systems
         and where the risk owner formally accepts the risk (related with the risk
         appetite of the organization)
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.im
       assessable: false
       depth: 2
@@ -3214,6 +3854,10 @@ objects:
         reflect together on ways to improve what happened, how it happened, how we
         reacted, how it could have gone better, what should be done to prevent it
         from happening again, etc.
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:important_rs.im-1.2
       assessable: true
       depth: 4
@@ -3223,6 +3867,9 @@ objects:
         updated or new incident handling procedures that shall be tested, approved
         and trained.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rs.im-2
       assessable: false
       depth: 3
@@ -3240,6 +3887,9 @@ objects:
         \ its critical systems, attack vectors, new threats, improved technology,\
         \ environment of operation, problems encountered during plan implementation/execution/testing\
         \ and lessons learned."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc
       assessable: false
       depth: 1
@@ -3275,6 +3925,10 @@ objects:
         \ and information systems in case of an incident. This includes shutting down\
         \ or locking computers, moving to a backup site, physically removing important\
         \ documents, etc.\n\u2022\tWho to call in case of an incident."
+      implementation_groups:
+      - B
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.rp-1.2
       assessable: true
       depth: 4
@@ -3284,6 +3938,8 @@ objects:
         \ be continued with little or no loss of operational continuity and continuity\
         \ shall be sustained until full system restoration."
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.im
       assessable: false
       depth: 2
@@ -3307,6 +3963,9 @@ objects:
         recovery activities into updated or new system recovery procedures and, after
         testing, frame this with appropriate training.
       annotation: No additional guidance on this topic.
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co
       assessable: false
       depth: 2
@@ -3335,6 +3994,9 @@ objects:
         \ media requests with appropriate and available internal experts who are ready\
         \ to be interviewed, screening all of information provided to the media, ensuring\
         \ personnel are familiar with public relations and privacy policies."
+      implementation_groups:
+      - I
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-1.2
       assessable: true
       depth: 4
@@ -3343,6 +4005,8 @@ objects:
       description: A Public Relations Officer shall be assigned.
       annotation: "The Public Relations Officer should consider the use of pre-define\
         \ external contacts \n(e.g. press, regulators, interest groups)."
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-2
       assessable: false
       depth: 3
@@ -3360,6 +4024,8 @@ objects:
       annotation: Crisis response strategies include, for example, actions to shape
         attributions of the crisis, change perceptions of the organization in crisis,
         and reduce the negative effect generated by the crisis.
+      implementation_groups:
+      - E
     - urn: urn:intuitem:risk:req_node:ccb-cff-2023-03-01:rc.co-3
       assessable: false
       depth: 3
@@ -3376,3 +4042,6 @@ objects:
         stakeholders, executive and management teams.
       annotation: Communication of recovery activities to all relevant stakeholders
         applies only to entities subject to the NIS legislation.
+      implementation_groups:
+      - I
+      - E

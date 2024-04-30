@@ -60,7 +60,7 @@
 								{#if key === 'library'}
 									{@const itemHref = `/libraries/${value.urn}`}
 									<a href={itemHref} class="anchor">{value.name}</a>
-								{:else if key === 'score_definition'}
+								{:else if key === 'scores_definition'}
 									{#each Object.entries(value) as [key, definition]}
 										<div>
 											{definition.score}.

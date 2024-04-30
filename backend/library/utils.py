@@ -200,7 +200,7 @@ class RequirementNodeImporter:
             order_id=self.index,
             name=self.requirement_data.get("name"),
             description=self.requirement_data.get("description"),
-            maturity=self.requirement_data.get("maturity"),
+            implementation_groups=self.requirement_data.get("implementation_groups"),
             locale=framework_object.locale,
             default_locale=framework_object.default_locale,
             is_published=True,
@@ -218,11 +218,10 @@ class RequirementNodeImporter:
 # The couple (URN, locale) is unique. ===> Check it in the future
 class FrameworkImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
-    OBJECT_FIELDS = {"requirement_nodes", "requirements"}  # "requirement_levels"
+    OBJECT_FIELDS = {"requirement_nodes", "requirements"}
 
     def __init__(self, framework_data: dict):
         self.framework_data = framework_data
-        # self._requirement_levels = []
         self._requirement_nodes = []
 
     def init_requirement_nodes(self, requirement_nodes: List[dict]) -> Union[str, None]:
@@ -307,13 +306,20 @@ class FrameworkImporter:
             description=self.framework_data.get("description"),
             min_score=min_score,
             max_score=max_score,
-            score_definition=self.framework_data.get("score_definition"),
+            scores_definition=self.framework_data.get("scores_definition"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,  # Change this in the future ?
             is_published=True,
         )
-
+        print("framework_object1", self.framework_data.get("scores_definition"))
+        print(
+            "framework_object2",
+            self.framework_data.get("implementation_groups_definition"),
+        )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
 
