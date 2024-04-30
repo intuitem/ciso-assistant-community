@@ -64,6 +64,7 @@
 				let:form
 				validators={zod(LibraryUploadSchema)}
 				action="?/upload"
+				useFocusTrap={false}
 				onSubmit={() => {
 					const fileInput = document.querySelector(`input[type="file"]`);
 					console.log(fileInput);
