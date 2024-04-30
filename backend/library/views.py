@@ -44,35 +44,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return StoredLibrarySerializer
         return StoredLibraryDetailedSerializer
 
-    # def destroy(
-    #     self, request, pk
-    # ):  # We may have to also get the locale of the library we want to delete in the future for this method and all other library viewset methods which goal is to apply an operation on a specific library
-    #     if not RoleAssignment.is_access_allowed(
-    #         user=request.user,
-    #         perm=Permission.objects.get(codename="delete_storedlibrary"),
-    #         folder=Folder.get_root_folder(),
-    #     ):
-    #         return Response(status=status.HTTP_403_FORBIDDEN)
-    #
-    #     try:
-    #         lib = self.queryset.get(
-    #             urn=pk
-    #         )  # the libraries with is_obsolete=True are not displayed in the frontend and therefore not meant to be destroyable (at least yet)
-    #     except:
-    #         return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
-    #
-    #     lib.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # def retrieve(self, request, *args, pk, **kwargs):
-    #     if "view_storedlibrary" not in request.user.permissions:
-    #         return Response(status=status.HTTP_403_FORBIDDEN)
-    #     try:
-    #         lib = self.queryset.get(urn=pk)
-    #     except:
-    #         return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
-    #     return Response(StoredLibraryDetailedSerializer(lib).data)
-
     @action(detail=True, methods=["get"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
