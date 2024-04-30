@@ -1217,9 +1217,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return Response(
             {
                 "score": self.get_object().get_global_score(),
-                "max_score": self.get_object().framework.max_score,
-                "min_score": self.get_object().framework.min_score,
-                "score_definition": self.get_object().framework.score_definition,
+                "max_score": self.get_object().max_score,
+                "min_score": self.get_object().min_score,
+                "scores_definition": self.get_object().scores_definition,
             }
         )
 

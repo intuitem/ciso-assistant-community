@@ -14,6 +14,101 @@ objects:
     ref_id: NIST-CSF-2.0
     name: NIST CSF v2.0
     description: NIST Cybersecurity Framework
+    scores_definition:
+    - score: 2
+      name: Partial
+      description: 'Application of the organizational cybersecurity risk strategy
+        is managed in an ad hoc manner.
+
+        Prioritization is ad hoc and not formally based on objectives or threat environment.
+
+        There is limited awareness of cybersecurity risks at the organizational level.
+
+        The organization implements cybersecurity risk management on an irregular,
+        case-by-case basis.
+
+        The organization may not have processes that enable cybersecurity information
+        to be shared within the organization.
+
+        The organization is generally unaware of the cybersecurity risks associated
+        with its suppliers and the products and services it acquires and uses.'
+    - score: 2
+      name: Risk informed
+      description: 'Risk management practices are approved by management but may not
+        be established as organization-wide policy.
+
+        The prioritization of cybersecurity activities and protection needs is directly
+        informed by organizational risk objectives, the threat environment, or business/mission
+        requirements.
+
+        There is an awareness of cybersecurity risks at the organizational level,
+        but an organization-wide approach to managing cybersecurity risks has not
+        been established.
+
+        Consideration of cybersecurity in organizational objectives and programs may
+        occur at some but not all levels of the organization. Cyber risk assessment
+        of organizational and external assets occurs but is not typically repeatable
+        or reoccurring.
+
+        Cybersecurity information is shared within the organization on an informal
+        basis.
+
+        The organization is aware of the cybersecurity risks associated with its suppliers
+        and the products and services it acquires and uses, but it does not act consistently
+        or formally in response to those risks.'
+    - score: 3
+      name: Repeatable
+      description: "The organization\u2019s risk management practices are formally\
+        \ approved and expressed as policy. \nRisk-informed policies, processes, and\
+        \ procedures are defined, implemented as intended, and reviewed.\nOrganizational\
+        \ cybersecurity practices are regularly updated based on the application of\
+        \ risk management processes to changes in business/mission requirements, threats,\
+        \ and technological landscape.\nThere is an organization-wide approach to\
+        \ managing cybersecurity risks. Cybersecurity information is routinely shared\
+        \ throughout the organization.\nConsistent methods are in place to respond\
+        \ effectively to changes in risk. Personnel possess the knowledge and skills\
+        \ to perform their appointed roles and responsibilities.\nThe organization\
+        \ consistently and accurately monitors the cybersecurity risks of assets.\
+        \ Senior cybersecurity and non-cybersecurity executives communicate regularly\
+        \ regarding cybersecurity risks. Executives ensure that cybersecurity is considered\
+        \ through all lines of operation in the organization.\nThe organization risk\
+        \ strategy is informed by the cybersecurity risks associated with its suppliers\
+        \ and the products and services it acquires and uses. Personnel formally act\
+        \ upon those risks through mechanisms such as written agreements to communicate\
+        \ baseline requirements, governance structures (e.g., risk councils), and\
+        \ policy implementation and monitoring. These actions are implemented consistently\
+        \ and as intended and are continuously monitored and reviewed."
+    - score: 4
+      name: Adaptive
+      description: 'There is an organization-wide approach to managing cybersecurity
+        risks that uses risk-informed policies, processes, and procedures to address
+        potential cybersecurity events. The relationship between cybersecurity risks
+        and organizational objectives is clearly understood and considered when making
+        decisions. Executives monitor cybersecurity risks in the same context as financial
+        and other organizational risks. The organizational budget is based on an understanding
+        of the current and predicted risk environment and risk tolerance. Business
+        units implement executive vision and analyze system-level risks in the context
+        of the organizational risk tolerances.
+
+        Cybersecurity risk management is part of the organizational culture. It evolves
+        from an awareness of previous activities and continuous awareness of activities
+        on organizational systems and networks. The organization can quickly and efficiently
+        account for changes to business/mission objectives in how risk is approached
+        and communicated.
+
+        The organization adapts its cybersecurity practices based on previous and
+        current cybersecurity activities, including lessons learned and predictive
+        indicators. Through a process of continuous improvement that incorporates
+        advanced cybersecurity technologies and practices, the organization actively
+        adapts to a changing technological landscape and responds in a timely and
+        effective manner to evolving, sophisticated threats.
+
+        The organization uses real-time or near real-time information to understand
+        and consistently act upon the cybersecurity risks associated with its suppliers
+        and the products and services it acquires and uses.
+
+        Cybersecurity information is constantly shared throughout the organization
+        and with authorized third parties.'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:nist-csf-2.0:gv
       assessable: false

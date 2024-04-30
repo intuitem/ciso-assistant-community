@@ -21,8 +21,8 @@ copyright: "\xA9 2023 ENX Association, an Association according to the French La
   \ Works 4.0 International Public License. In addition, You are granted the right\
   \ to distribute derivatives under certain terms as detailed in section 9 which are\
   \ not part of the Creative Commons license. The complete and valid text of the license\
-  \ is to be found in line 17ff. \n"
-version: '1'
+  \ is to be found in line 17ff.\n"
+version: 2
 provider: VDA
 packager: intuitem
 objects:
@@ -37,25 +37,68 @@ objects:
       \ https://enx.com/tisax/)\nSource: https://portal.enx.com/isa6-en.xlsx\n"
     min_score: 0
     max_score: 5
-    score_definition:
+    scores_definition:
     - score: 0
-      name: 'Incomplete'
-      description: 'A process does not exist, is not followed or not suitable to achieve the objective.'
+      name: Incomplete
+      description: A process is not available, not followed or not suitable for achieving
+        the objective.
     - score: 1
-      name: 'Performed'
-      description: 'A process is followed which is not or insufficiently documented (“informal process”) and there is some evidence that it achieves its objective.'
+      name: Performed
+      description: An undocumented or incompletely documented process is followed
+        and indicators exist that it achieves its objective.
     - score: 2
-      name: 'Managed'
-      description: 'A process achieving its objectives is followed. Process documentation and process implementation evidence are available.'
+      name: Managed
+      description: A process achieving its objectives is followed. Process documentation
+        and process implementation evidence are available.
     - score: 3
-      name: 'Established'
-      description: 'A standard process integrated into the overall system is followed. Dependencies on other processes are documented and suitable interfaces are created. Evidence exists that the process has been used sustainably and actively over an extended period.'
+      name: Established
+      description: A standard process integrated into the overall system is followed.
+        Dependencies on other processes are documented and suitable interfaces are
+        created. Evidence exists that the process has been used sustainably and actively
+        over an extended period.
     - score: 4
-      name: 'Predictable'
-      description: 'An established process is followed. The effectiveness of the process is continually monitored by collecting key figures. Limit values are defined at which the process is considered to be insufficiently effective and requires adjustment. (Key Performance Indicators)'
+      name: Predictable
+      description: An established process is followed. The effectiveness of the process
+        is continually monitored by collecting key figures. Limit values are defined
+        at which the process is considered to be insufficiently effective and requires
+        adjustment. (Key Performance Indicators)
     - score: 5
-      name: 'Optimizing'
-      description: 'A predictable process with continual improvement as a major objective is followed. Improvement is actively advanced by means of dedicated resources.'
+      name: Optimizing
+      description: A predictable process with continual improvement as a major objective
+        is followed. Improvement is actively advanced by dedicated resources.
+    implementation_groups_definition:
+    - ref_id: must
+      name: Requirements (must)
+      description: Strict requirements without any exemptions.
+    - ref_id: should
+      name: Requirements (should)
+      description: Must be implemented by the organization. In certain circumstances,
+        however, there may be a valid justification for non-compliance with these
+        requirements. In case of any deviation, its effects must be understood by
+        the organization and it must be plausibly justified.
+    - ref_id: high
+      name: In case of high protection needs
+      description: Must additionally be met if the tested subject has high protection
+        needs.
+    - ref_id: very_high
+      name: In case of very high protection needs
+      description: Must additionally be met if the tested subject has very high protection
+        needs.
+    - ref_id: SGA
+      name: For Simplified Group Assessments (SGA)
+      description: A simplified way to audit very large organizations with a high
+        maturity. An example is the TISAX Simplified Group Assessment mechanism that
+        is an option for TISAX Assessments of an assessment scope with a large number
+        of sites.
+    - ref_id: vehicle
+      name: For vehicles classified as requiring protection
+      description: Protects physical prototypes which are classified as requiring
+        protection. Prototypes include vehicles, components and parts. The owner of
+        the intellectual property for the prototype is considered the owner of the
+        prototype. The owner's commissioning department is responsible for classifying
+        the protection need of a prototype. For prototypes classified as requiring
+        high or very high protection, the minimum requirements for prototype protection
+        must be applied.
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1
       assessable: false
@@ -84,6 +127,8 @@ objects:
         s goals,\n  - A policy is prepared and is released by the organization.\n\
         + The policy includes objectives and the significance of information security\
         \ within the organization."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node6
       assessable: true
       depth: 4
@@ -96,6 +141,8 @@ objects:
         \ revision of the policies are established.\n+ The policies are made available\
         \ to employees in a suitable form (e.g. intranet).\n+ Employees and external\
         \ business partners are informed of any changes relevant to them."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node7
       assessable: true
       depth: 4
@@ -103,6 +150,8 @@ objects:
       name: (for Simplified Group Assessments)
       description: + Policies are published and implemented in the entire assessment
         scope.
+      implementation_groups:
+      - SGA
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node8
       assessable: false
       depth: 4
@@ -168,6 +217,8 @@ objects:
         \ been determined (e.g. ISO\_27001 Statement of Applicability, completed ISA\
         \ catalogue).\n+ The effectiveness of the ISMS is regularly reviewed by the\
         \ management."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node12
       assessable: true
       depth: 4
@@ -176,6 +227,8 @@ objects:
       description: + The management system is approved by an entity that has the necessary
         authority for the entire assessment scope (i.e., all locations within the
         scope).
+      implementation_groups:
+      - SGA
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.2
       assessable: false
       depth: 3
@@ -196,6 +249,8 @@ objects:
 
         + The contact persons are known within the organization and to relevant business
         partners.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node15
       assessable: true
       depth: 4
@@ -204,6 +259,8 @@ objects:
       description: "+ There is a definition and documentation of an adequate information\
         \ security structure within the organization.\n  - Other relevant security\
         \ roles are considered."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node16
       assessable: true
       depth: 4
@@ -212,6 +269,8 @@ objects:
       description: + An appropriate organizational separation of responsibilities
         should be established in order to avoid conflict of interests (separation
         of duties). (C, I, A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node17
       assessable: true
       depth: 4
@@ -219,6 +278,8 @@ objects:
       name: (for Simplified Group Assessments)
       description: + A named person with overall responsibility for the management
         system exists and is available.
+      implementation_groups:
+      - SGA
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node18
       assessable: false
       depth: 4
@@ -241,6 +302,8 @@ objects:
       name: (must)
       description: + Projects are classified while taking into account the information
         security requirements.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node21
       assessable: true
       depth: 4
@@ -254,6 +317,8 @@ objects:
 
         + For identified information security risks, measures are derived and considered
         in the project.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node22
       assessable: true
       depth: 4
@@ -261,6 +326,8 @@ objects:
       name: (for high protection needs)
       description: + The measures thus derived are reviewed regularly during the project
         and reassessed in case of changes to the assessment criteria. (C, I, A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.2.4
       assessable: false
       depth: 3
@@ -283,6 +350,8 @@ objects:
         + Mechanisms for shared responsibilities are specified and implemented.
 
         + The responsible organization fulfils its respective responsibilities.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node25
       assessable: true
       depth: 4
@@ -292,6 +361,8 @@ objects:
         and documented based on the necessary security requirements.
 
         + The responsible staff is adequately trained.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node26
       assessable: true
       depth: 4
@@ -311,6 +382,8 @@ objects:
 
         + Integration into local protective measures (such as secure authentication
         mechanisms) is established and documented. (C, I, A)'
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3
       assessable: false
       depth: 2
@@ -333,6 +406,8 @@ objects:
         \ for these information assets is assigned.\n+ The supporting assets processing\
         \ the information assets are identified and recorded:\n  - A person responsible\
         \ for these supporting assets is assigned."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node30
       assessable: true
       depth: 4
@@ -341,6 +416,8 @@ objects:
       description: "+ A catalogue of the relevant information assets exists:\n  -\
         \ The corresponding supporting assets are assigned to each relevant information\
         \ asset,\n  - The catalogue is subject to regular review."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node31
       assessable: false
       depth: 4
@@ -399,6 +476,8 @@ objects:
         \ for the handling of supporting assets (e.g. identification, correct handling,\
         \ transport, storage, return, deletion/disposal) depending on the classification\
         \ of information assets are in place and implemented."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node34
       assessable: true
       depth: 4
@@ -406,6 +485,8 @@ objects:
       name: (should)
       description: + The protection goals of integrity and availability are taken
         into consideration.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node35
       assessable: false
       depth: 4
@@ -447,6 +528,8 @@ objects:
         \ and contractual requirements are considered.\n+ The external IT services\
         \ have been harmonized with the protection need of the processed information\
         \ assets."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node38
       assessable: true
       depth: 4
@@ -463,6 +546,8 @@ objects:
         are used.
 
         '
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.3.4
       assessable: false
       depth: 3
@@ -480,6 +565,8 @@ objects:
         \ roles\n  - Conformance to the information security requirements\n  - Software\
         \ use rights and licensing \n  - Source / reputation of the software\n+ Software\
         \ approval also applies to special purpose software such as maintenance tools"
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node41
       assessable: true
       depth: 4
@@ -495,6 +582,8 @@ objects:
         + Approval of software is regularly reviewed
 
         + Software versions and patch levels are known'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node42
       assessable: true
       depth: 4
@@ -502,6 +591,8 @@ objects:
       name: (for very high protection needs)
       description: + Additional requirements for software use (e.g., need for control
         or monitoring of usage) are determined (if any) (C, I, A)
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node43
       assessable: false
       depth: 4
@@ -598,6 +689,8 @@ objects:
         + A responsible person (risk owner) is assigned to each information security
         risk. This person is responsible for the assessment and handling of the information
         security risks.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node47
       assessable: true
       depth: 4
@@ -611,6 +704,8 @@ objects:
         \ followed.\n+ In case of changes to the environment (e.g. organizational\
         \ structure, location, changes to regulations), reassessment is carried out\
         \ in a timely manner."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5
       assessable: false
       depth: 2
@@ -640,6 +735,8 @@ objects:
         is verified at regular intervals.
 
         + The results of the conducted reviews are recorded and retained.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node51
       assessable: true
       depth: 4
@@ -647,6 +744,8 @@ objects:
       name: (should)
       description: + A plan for content and framework conditions (time schedule, scope,
         controls) of the reviews to be conducted is provided.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node52
       assessable: true
       depth: 4
@@ -660,6 +759,8 @@ objects:
         \ following aspects are considered:\n  - The entire assessment scope is covered\n\
         \  - Internal audits are conducted regularly\n  - Results of internal audits\
         \ are tracked within the ISMS structures"
+      implementation_groups:
+      - SGA
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.5.2
       assessable: false
       depth: 3
@@ -675,6 +776,8 @@ objects:
         and competent body at regular intervals and in case of fundamental changes.
 
         + Measures for correcting potential deviations are initiated and pursued.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node55
       assessable: true
       depth: 4
@@ -682,6 +785,8 @@ objects:
       name: (should)
       description: + The results of conducted reviews are documented and reported
         to the management of the organization.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node56
       assessable: true
       depth: 4
@@ -692,6 +797,8 @@ objects:
         \ departments which are objective, competent and free from undue influence\
         \ (independent)\n  - Findings and implementation of corrective actions is\
         \ tracked by the independent entity."
+      implementation_groups:
+      - SGA
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6
       assessable: false
       depth: 2
@@ -723,6 +830,8 @@ objects:
         \ based on perceived risks to report security events are defined, implemented,\
         \ and known to all relevant potential reporters\n+ Adequate channels for communication\
         \ with event reporters exist."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node60
       assessable: true
       depth: 4
@@ -738,6 +847,8 @@ objects:
         \ from external parties are defined\n+ Mechanism to - and information how\
         \ to - report incidents is accessible by all relevant reporters.\n+ A feedback\
         \ procedure to reporters is established."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node61
       assessable: true
       depth: 4
@@ -745,6 +856,8 @@ objects:
       name: (for very high protection needs)
       description: + Tests and exercises of event and observation reporting are conducted
         regularly. (C, I, A)
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.2
       assessable: false
       depth: 3
@@ -765,6 +878,8 @@ objects:
         + Lessons learned are incorporated into continuous improvement.
 
         '
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node64
       assessable: true
       depth: 4
@@ -782,6 +897,8 @@ objects:
         \ communication)\n  - Absence-management\n+ A strategy for filing official\
         \ reports and searching prosecution of potentially criminally relevant aspects\
         \ of security incidents exists. (C, I, A)\n"
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node65
       assessable: true
       depth: 4
@@ -806,6 +923,8 @@ objects:
         \ A)\n  - Analysis of the impact on the own organization and invocation of\
         \ appropriate internal mechanisms\n  - The need for reporting according to\
         \ own reporting procedures"
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node66
       assessable: true
       depth: 4
@@ -814,6 +933,8 @@ objects:
       description: "+ Handling of events in different categories and priorities is\
         \ regularly tested. (A)\n  - Exercise or simulation of rarely occurring categories\
         \ and priorities\n  - Exercise or simulation include escalation mechanisms"
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node67
       assessable: true
       depth: 4
@@ -821,6 +942,8 @@ objects:
       name: (for Simplified Group Assessments)
       description: + Standard mechanisms to report and track relevant security events
         are established.
+      implementation_groups:
+      - SGA
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:1.6.3
       assessable: false
       depth: 3
@@ -839,6 +962,8 @@ objects:
         \ and authority for crisis management within the organization are defined,\
         \ documented, and assigned.\n+ The responsible employees are defined and qualified\
         \ for their task."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node70
       assessable: true
       depth: 4
@@ -866,6 +991,8 @@ objects:
         \ decision making)\n  - Exceptional functions, responsibilities, and authority\
         \ (including reporting)\n  - Exceptional tools \n+ Crisis planning is reviewed\
         \ and updated regularly."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node71
       assessable: true
       depth: 4
@@ -897,6 +1024,8 @@ objects:
         \ of the crisis planning is evaluated regularly. (A)\n+ Spot based testing\
         \ of crisis planning is conducted ((e.g., simulation, table-top-exercises\
         \ involving key personnel) (A)"
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node72
       assessable: true
       depth: 4
@@ -904,6 +1033,8 @@ objects:
       name: (for very high protection needs)
       description: + Crisis exercises and simulations involving all relevant persons,
         decision makers are conducted regularly. (A)
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2
       assessable: false
       depth: 1
@@ -928,6 +1059,8 @@ objects:
 
         + The identity of potential employees is verified (e.g. checking identity
         documents).'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node76
       assessable: true
       depth: 3
@@ -940,6 +1073,8 @@ objects:
         and job is conducted. (e.g. assessment centre, psychological analysis, checking
         of references, certificates and diploma, checking of certificates of conduct,
         checking of professional and private background).'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.2
       assessable: false
       depth: 2
@@ -955,6 +1090,8 @@ objects:
       description: '+ A non-disclosure obligation is in effect.
 
         + An obligation to comply with the information security policies is in effect.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node79
       assessable: true
       depth: 3
@@ -967,6 +1104,8 @@ objects:
         of the staff.
 
         + A procedure for handling violations of said obligations is described.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.3
       assessable: false
       depth: 2
@@ -980,6 +1119,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.3
       name: (must)
       description: + Employees are trained and made aware.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node82
       assessable: true
       depth: 3
@@ -1000,6 +1141,8 @@ objects:
         \ out both at regular intervals and in response to events.\n+ Participation\
         \ in training and awareness measures is documented. \n+ Contact persons for\
         \ information security are known to employees."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:2.1.4
       assessable: false
       depth: 2
@@ -1019,6 +1162,8 @@ objects:
         \ in private surroundings,\n  - Behavior in public surroundings,\n  - Measures\
         \ for protection from theft (e.g. in public surroundings),\n+ The organization\u2019\
         s network is accessed via a secured connection (e.g. VPN) and strong authentication."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node85
       assessable: true
       depth: 3
@@ -1027,6 +1172,8 @@ objects:
       description: "+ The following aspects are considered:\n  - Measures for travelling\
         \ (e.g. viewing by authorities),\n  - Measures for travelling to security-critical\
         \ countries.\n+ Employee awareness."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node86
       assessable: true
       depth: 3
@@ -1034,6 +1181,8 @@ objects:
       name: (for high protection needs)
       description: + Protective measures against overhearing and viewing are implemented.
         (C)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node87
       assessable: false
       depth: 3
@@ -1062,6 +1211,8 @@ objects:
         \ are considered in the definition of security zones,\n  - This also includes\
         \ delivery and shipping areas.\n+ The defined protective measures are implemented.\n\
         + The code of conduct for security zones is known to all persons involved."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node91
       assessable: true
       depth: 3
@@ -1083,6 +1234,8 @@ objects:
         + External properties used for storing and processing information assets are
         considered in the security zone concept (e.g. storage rooms, garages, workshops,
         test tracks, data processing centres).'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node92
       assessable: true
       depth: 3
@@ -1090,6 +1243,8 @@ objects:
       name: (for high protection needs)
       description: + Protective measures against simple overhearing and viewing are
         implemented. (C)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node93
       assessable: false
       depth: 3
@@ -1173,6 +1328,8 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.2
       name: (must)
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:3.1.3
       assessable: false
       depth: 2
@@ -1186,6 +1343,8 @@ objects:
       name: (must)
       description: '+ The requirements for the handling of supporting assets (e.g.
         transport, storage, repair, loss, return, disposal) are determined and fulfilled. '
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node98
       assessable: true
       depth: 3
@@ -1194,6 +1353,8 @@ objects:
       description: "+ Supporting assets are protected. Disposal of supporting assets\
         \ is conducted in accordance with one of the relevant standards (e.g. ISO\_\
         21964, at least Security Level 4). (C)"
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node99
       assessable: false
       depth: 3
@@ -1232,6 +1393,8 @@ objects:
         \ devices are determined and fulfilled. The following aspects are considered:\
         \ \n  - Encryption,\n  - Access protection (e.g. PIN, password),\n  - Marking\
         \ (also considering requirements for use in the presence of customers)."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node102
       assessable: true
       depth: 3
@@ -1240,6 +1403,8 @@ objects:
       description: '+ Registration of the IT devices.
 
         + Users are informed of missing data protection on mobile devices.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node103
       assessable: true
       depth: 3
@@ -1248,6 +1413,8 @@ objects:
       description: "+ General encryption of mobile data storage devices or the information\
         \ assets stored thereon: (C, I)\n  - Where this is technically not feasible,\
         \ information is protected by similarly effective measures."
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4
       assessable: false
       depth: 1
@@ -1274,6 +1441,8 @@ objects:
         \ the entire lifecycle are determined and fulfilled. The following aspects\
         \ are considered:\n  - Creation, handover, return and destruction,\n  - Validity\
         \ periods,\n  - Traceability,\n  - Handling of loss."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node108
       assessable: true
       depth: 4
@@ -1281,6 +1450,8 @@ objects:
       name: (should)
       description: + Identification means can be produced under controlled conditions
         only.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node109
       assessable: true
       depth: 4
@@ -1291,6 +1462,8 @@ objects:
 
         + A strategy of blocking or invalidation of identification means in case of
         loss is prepared and implemented as far as possible. (C, I, A)'
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.2
       assessable: false
       depth: 3
@@ -1307,6 +1480,8 @@ objects:
         direct accessibility via the internet).
 
         + State of the art procedures for user authentication are applied.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node112
       assessable: true
       depth: 4
@@ -1318,6 +1493,8 @@ objects:
         \ state of the art.\n+ Superior procedures are used for the authentication\
         \ of privileged user accounts (e.g. Privileged Access Management, two-factor\
         \ authentication)."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node113
       assessable: true
       depth: 4
@@ -1330,6 +1507,8 @@ objects:
         (C, I, A)
 
         '
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node114
       assessable: true
       depth: 4
@@ -1338,6 +1517,8 @@ objects:
       description: + Before gaining access to data of very high protection needs,
         users are authenticated by means of strong authentication (e.g. two-factor
         authentication) according to the state of the art. (C, I)
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.1.3
       assessable: false
       depth: 3
@@ -1368,6 +1549,8 @@ objects:
         \ information (e.g. length of password, types of characters to be used).\n\
         + The login information (e.g. passwords) of a personalized user account must\
         \ be known to the assigned user only. "
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node117
       assessable: true
       depth: 4
@@ -1398,6 +1581,8 @@ objects:
 
         + Interactive login for service accounts (technical accounts) is technically
         prevented.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:4.2
       assessable: false
       depth: 2
@@ -1422,6 +1607,8 @@ objects:
         \ rights are revoked when no longer needed\n+ The access rights granted for\
         \ normal and privileged user accounts and technical accounts are reviewed\
         \ at regular intervals also within IT systems of customers."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node121
       assessable: true
       depth: 4
@@ -1433,6 +1620,8 @@ objects:
         \ accounts are not granted privileged access rights.\n+ The access rights\
         \ of a user account are adapted after the user has changed (e.g. to another\
         \ field of responsibility)."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node122
       assessable: true
       depth: 4
@@ -1440,6 +1629,8 @@ objects:
       name: (for high protection needs)
       description: + The access rights are approved by the responsible internal Information
         Officer. (C, I, A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node123
       assessable: true
       depth: 4
@@ -1451,6 +1642,8 @@ objects:
         \ information shall be protected by similarly effective measures. \n+ Existing\
         \ access rights are regularly reviewed at shorter intervals (e.g. quarterly)\
         \ (C)"
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node124
       assessable: false
       depth: 4
@@ -1485,6 +1678,8 @@ objects:
         \ and hash algorithms, protocols) provide the security required by the respective\
         \ application field according to the recognized industry standard,\n  - to\
         \ the extent legally feasible."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node129
       assessable: true
       depth: 4
@@ -1497,6 +1692,8 @@ objects:
         \  - Procedures for the complete lifecycle of cryptographic keys, including\
         \ generation, storage, archiving, retrieval, distribution, deactivation, renewal,\
         \ and deletion.\n+ An emergency process for restoring key material is established."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node130
       assessable: true
       depth: 4
@@ -1504,6 +1701,8 @@ objects:
       name: (for high protection needs)
       description: + Key sovereignty requirements (particularly in case of external
         processing) are determined and fulfilled. (C, I)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.1.2
       assessable: false
       depth: 3
@@ -1520,6 +1719,8 @@ objects:
         \ requirements for the use of network services are defined and implemented.\n\
         + Measures for the protection of transferred contents against unauthorized\
         \ access are implemented."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node133
       assessable: true
       depth: 4
@@ -1530,6 +1731,8 @@ objects:
         \ using content or transport encryption according to the respective classification.\
         \ \n+ Remote access connections are verified to possess adequate security\
         \ features (e.g., encryption, granting and termination of access) and capabilities."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node134
       assessable: true
       depth: 4
@@ -1538,6 +1741,8 @@ objects:
       description: "+ Information is transported or transferred in encrypted form:\
         \ (C)\n  - Where encryption is not feasible, information must be protected\
         \ by similarly effective measures."
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node135
       assessable: true
       depth: 4
@@ -1545,6 +1750,8 @@ objects:
       name: (for very high protection needs)
       description: + Information is transported or transferred in content-encrypted
         form. (C)
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2
       assessable: false
       depth: 2
@@ -1564,6 +1771,8 @@ objects:
       name: (must)
       description: + Information security requirements for changes to the organization,
         business processes, IT systems are determined and applied.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node139
       assessable: true
       depth: 4
@@ -1578,6 +1787,8 @@ objects:
         testing.
 
         + Procedures for fallback in fault cases are considered.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node140
       assessable: true
       depth: 4
@@ -1585,6 +1796,8 @@ objects:
       name: (for high protection needs)
       description: + Compliance with the information security requirements is verified
         during and after the changes are applied. (C, I, A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.2
       assessable: false
       depth: 3
@@ -1602,6 +1815,8 @@ objects:
         operational systems.
 
         + A segmentation is implemented based on the results of risk analysis.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node143
       assessable: true
       depth: 4
@@ -1613,6 +1828,8 @@ objects:
         \ system tools on operational systems (except those required for operation),\n\
         \  - Use of different user profiles for development, testing, and operational\
         \ systems."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.3
       assessable: false
       depth: 3
@@ -1628,6 +1845,8 @@ objects:
 
         + Technical and organizational measures for protection against malware are
         defined and implemented.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node146
       assessable: true
       depth: 4
@@ -1647,6 +1866,8 @@ objects:
         + For IT systems operated without the use of malware protection software,\
         \ alternative measures (e.g. special resilience measures, few services, no\
         \ active users, network isolation) are implemented. "
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.4
       assessable: false
       depth: 3
@@ -1671,6 +1892,8 @@ objects:
 
         + Event logs are checked regularly for rule violations and noticeable problems
         in compliance with the permissible legal and organizational provisions.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node149
       assessable: true
       depth: 4
@@ -1685,6 +1908,8 @@ objects:
 
         + Adequate monitoring and recording of any actions on the network that are
         relevant to information security are established.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node150
       assessable: true
       depth: 4
@@ -1696,6 +1921,8 @@ objects:
 
         + Cases of access during connection and disconnection of external networks
         (e.g. remote maintenance) are logged. (C, I, A)'
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node151
       assessable: true
       depth: 4
@@ -1704,6 +1931,8 @@ objects:
       description: + Logging of any access to data of very high protection needs as
         far as technically feasible and as permissible according to legal and organizational
         provisions. (C, I)
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.5
       assessable: false
       depth: 3
@@ -1721,6 +1950,8 @@ objects:
 
         + Potentially affected IT systems and software are identified, assessed and
         any vulnerabilities are addressed.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node154
       assessable: true
       depth: 4
@@ -1732,6 +1963,8 @@ objects:
         + Risk minimizing measures are implemented, as necessary.
 
         + Successful installation of patches is verified in an appropriate manner.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node155
       assessable: false
       depth: 4
@@ -1780,6 +2013,8 @@ objects:
         and reported to the relevant management.
 
         + Measures are derived from the results.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node158
       assessable: true
       depth: 4
@@ -1792,6 +2027,8 @@ objects:
         \ audits (if applicable)\n  - performed from the internet and the internal\
         \ network\n+ Within a reasonable period following completion of the audit,\
         \ a report is prepared."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node159
       assessable: true
       depth: 4
@@ -1801,6 +2038,8 @@ objects:
         audit requirements have been identified and are fulfilled (e.g., service specific
         tests and tools and/or human penetration tests, risk-based time intervals)
         (A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node160
       assessable: true
       depth: 4
@@ -1809,6 +2048,8 @@ objects:
       description: "+ IT systems and services are regularly scanned for vulnerabilities.\
         \ (A)\n      - Suitable protective measures must be implemented for systems\
         \ and services that may not be scanned."
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.7
       assessable: false
       depth: 3
@@ -1827,6 +2068,8 @@ objects:
         determined and fulfilled.
 
         + Requirements regarding network segmentation are determined and fulfilled.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node163
       assessable: true
       depth: 4
@@ -1844,6 +2087,8 @@ objects:
         \ separation options when using external IT services,\n  - Adequate separation\
         \ between own networks and customer networks while considering customer requirements\n\
         \  - Detection and prevention of data loss/leakage"
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node164
       assessable: true
       depth: 4
@@ -1854,6 +2099,8 @@ objects:
         \ I, A)\n  - Authentication of IT systems on the network,\n  - Access to the\
         \ management interfaces of IT systems is restricted.\n  - Specific risks (e.g.\
         \ wireless and remote access)"
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.8
       assessable: false
       depth: 3
@@ -1870,6 +2117,8 @@ objects:
 
         + Requirements and responsibilities for continuity and recovery of those IT
         services are known to relevant stakeholders and fulfilled.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node167
       assessable: true
       depth: 4
@@ -1886,6 +2135,8 @@ objects:
         \ storage strategies, in case primary storage means are not available\n  -\
         \ Alternative power and network\n+ Continuity planning is regularly reviewed\
         \ and updated"
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node168
       assessable: true
       depth: 4
@@ -1903,6 +2154,8 @@ objects:
         \ protected against unauthorized modification or deletion by malicious software.\
         \ (I, A)\n  - Backups are protected against unauthorized access by malicious\
         \ software or operators (C, I)"
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node169
       assessable: true
       depth: 4
@@ -1918,6 +2171,8 @@ objects:
         \  - Alternate storage and backup sites that provide controls equivalent to\
         \ that of the primary site. (C, I, A)\n+ Continuity planning is tested regularly.\
         \ Tests and any lessons learned are documented. (I, A)"
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.2.9
       assessable: false
       depth: 3
@@ -1933,6 +2188,8 @@ objects:
         \ aspects are considered:\n  - Appropriate protective measures to ensure confidentiality,\
         \ integrity, and availability for data backups.\n+ Recovery concepts exist\
         \ for relevant IT services."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node172
       assessable: true
       depth: 4
@@ -1940,6 +2197,8 @@ objects:
       name: (should)
       description: "+ A backup and recovery concept exists for each relevant IT service.\n\
         \  - Dependencies between IT services and the sequence for recovery are considered.\n"
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node173
       assessable: true
       depth: 4
@@ -1954,6 +2213,8 @@ objects:
         \ overload scenarios during recovery.\n  - Appropriate spatial redundancy\
         \ (e.g., separate room, separate fire  section, separate datacentre, separate\
         \ site)."
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node174
       assessable: true
       depth: 4
@@ -1967,6 +2228,8 @@ objects:
 
         + Geographical redundancy is considered in data backup and recovery concepts.
         (A)'
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3
       assessable: false
       depth: 2
@@ -1996,6 +2259,8 @@ objects:
 
         + System approval tests are carried out under consideration of the information
         security requirements.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node178
       assessable: true
       depth: 4
@@ -2015,6 +2280,8 @@ objects:
         \ on the operational system,\n  - Requirements for the lifecycle of test data\
         \ (e.g. deletion, maximum lifetime on the IT system),\n  - Case-related specifications\
         \ for the generation of test data are defined."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node179
       assessable: true
       depth: 4
@@ -2023,6 +2290,8 @@ objects:
       description: "+ The security of purpose built software or significantly customized\
         \ software is tested (e.g. penetration testing) (C, I, A)\n   - during commissioning\n\
         \   - in case of significant changes\n   - or at regular intervals"
+      implementation_groups:
+      - very_high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.2
       assessable: false
       depth: 3
@@ -2036,6 +2305,8 @@ objects:
       name: (must)
       description: + Requirements regarding the information security of network services
         are determined and fulfilled.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node182
       assessable: true
       depth: 4
@@ -2047,6 +2318,8 @@ objects:
         + The requirements are agreed in the form of SLAs.
 
         + Adequate redundancy solutions are implemented.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node183
       assessable: true
       depth: 4
@@ -2055,6 +2328,8 @@ objects:
       description: + Procedures for monitoring the quality of network traffic (e.g.
         traffic flow analyses, availability measurements) are defined and carried
         out. (A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.3
       assessable: false
       depth: 3
@@ -2069,6 +2344,8 @@ objects:
       name: (must)
       description: + A procedure for the return and secure removal of information
         assets from each external IT service is defined and implemented.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node186
       assessable: true
       depth: 4
@@ -2076,6 +2353,8 @@ objects:
       name: (should)
       description: + A description of the termination process is given, adapted to
         any changes, and contractually regulated.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:5.3.4
       assessable: false
       depth: 3
@@ -2089,6 +2368,8 @@ objects:
       name: (must)
       description: + Effective segregation (e.g. segregation of clients) prevents
         access to own information by unauthorized users of other organizations.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node189
       assessable: true
       depth: 4
@@ -2099,6 +2380,8 @@ objects:
         \ data, functions, customer-specific software, operating system, storage system\
         \ and network,\n  - Risk assessment for the operation of external software\
         \ within the shared environment."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:6
       assessable: false
       depth: 1
@@ -2129,6 +2412,8 @@ objects:
         and cooperation partners.
 
         + Compliance with contractual agreements is verified.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node193
       assessable: true
       depth: 3
@@ -2140,6 +2425,8 @@ objects:
 
         + Service reports and documents by contractors and cooperation partners are
         reviewed.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node194
       assessable: true
       depth: 3
@@ -2148,6 +2435,8 @@ objects:
       description: + Proof is provided that the information security level of the
         supplier is adequate for the protection needs of the information (e.g. certificate,
         attestation, internal audit). (C, I, A)
+      implementation_groups:
+      - high
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node195
       assessable: false
       depth: 3
@@ -2210,6 +2499,8 @@ objects:
         + The requirements and procedures for the use of non-disclosure agreements
         and the handling of information requiring protection are reviewed at regular
         intervals.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node198
       assessable: true
       depth: 3
@@ -2226,6 +2517,8 @@ objects:
         \ or audit rights) are defined.\n+ A process for monitoring the validity period\
         \ of temporary non-disclosure agreements and initiating their extension in\
         \ due time is defined and implemented."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:7
       assessable: false
       depth: 1
@@ -2248,6 +2541,8 @@ objects:
 
         + Policies regarding compliance with the provisions are defined, implemented,
         and communicated to the responsible persons.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node202
       assessable: true
       depth: 3
@@ -2255,6 +2550,8 @@ objects:
       name: (should)
       description: + The integrity of records in accordance with the legal, regulatory,
         or contractual provisions and business requirements is considered.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node203
       assessable: false
       depth: 3
@@ -2306,6 +2603,8 @@ objects:
 
         + Processes and procedures for the protection of personally identifiable data
         are considered in the information security management system.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8
       assessable: false
       depth: 1
@@ -2333,12 +2632,16 @@ objects:
         \ is established: \n - stability of outer skin,\n - view and sight protection,\n\
         \ - protection against unauthorized entry and access control,\n - intrusion\
         \ monitoring,\n - documented visitor management,\n - client segregation."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node210
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.1
       name: (should)
       description: + Perimeter security.
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.2
       assessable: false
       depth: 3
@@ -2352,6 +2655,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.2
       name: (must)
       description: + Unauthorized access to properties is not possible.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node213
       assessable: true
       depth: 4
@@ -2360,6 +2665,8 @@ objects:
       description: "+ Suitable barriers are in place such as:\n  - artificial barriers\
         \ (fence systems, walls),\n  - technical barriers (detection),\n  - natural\
         \ barriers (growth, vegetation)."
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.3
       assessable: false
       depth: 3
@@ -2374,6 +2681,8 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.3
       name: (must)
       description: + Unauthorized access to buildings/security areas is not possible.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node216
       assessable: true
       depth: 4
@@ -2384,6 +2693,8 @@ objects:
 
         + Windows and doors in the outer skin are to be built in compliance with RC2
         or better.'
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.4
       assessable: false
       depth: 3
@@ -2398,6 +2709,8 @@ objects:
       name: (must)
       description: + Unauthorized viewing of new developments needing high or very
         high protection is not possible.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node219
       assessable: true
       depth: 4
@@ -2406,13 +2719,17 @@ objects:
       description: '+ Sight protection through relevant glass surfaces is ensured.
 
         + View into defined security areas through open doors/gates/windows is prevented. '
+      implementation_groups:
+      - should
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node220
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.4
-      name: (for high protection needs)
+      name: (for vehicles classified as requiring protection)
       description: + The spatial situation is also suitable for protecting vehicles
         classified as requiring protection against unauthorized view.
+      implementation_groups:
+      - vehicle
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.5
       assessable: false
       depth: 3
@@ -2429,13 +2746,17 @@ objects:
         \  - mechanical locks with documented key assignment,\n  - electronic access\
         \ systems with documented authorization assignment,\n  - personal access control\
         \ including documentation."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node223
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.5
-      name: (for high protection needs)
+      name: (for vehicles classified as requiring protection)
       description: + The spatial situation is also suitable for protecting vehicles
         classified as requiring protection against unauthorized access.
+      implementation_groups:
+      - vehicle
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.6
       assessable: false
       depth: 3
@@ -2453,6 +2774,8 @@ objects:
         \ security service or control unit (e.g., according to DIN\_77200, VdS\_3138),\n\
         \  - or 24/7 guarding by a certified security service.\n+ Alarm plans are\
         \ available.\n+ Timely alarm processing is ensured."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.7
       assessable: false
       depth: 3
@@ -2471,6 +2794,8 @@ objects:
         + Publication of security and visitor regulations.
 
         + Country-specific legal provisions regarding data protection are to be observed.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.8
       assessable: false
       depth: 3
@@ -2486,13 +2811,17 @@ objects:
         \ in effect according to the following aspects:\n  - customers, and/or\n \
         \ - projects,\n  - where segregation is not in effect, explicit approval by\
         \ the customer is required."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:node230
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.1.8
-      name: (for high protection needs)
+      name: (for vehicles classified as requiring protection)
       description: + The spatial situation is also suitable for implementing client
         segregation for vehicles classified as requiring protection.
+      implementation_groups:
+      - vehicle
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2
       assessable: false
       depth: 2
@@ -2514,6 +2843,8 @@ objects:
       description: "+ A non-disclosure agreement: \n  - between contractor and customer\
         \ (company level),\n  - with all employees and project members (personal obligation).\n\
         + Country-specific legal provisions regarding data protection are to be observed."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.2
       assessable: false
       depth: 3
@@ -2533,6 +2864,8 @@ objects:
         \ actual customer (proof is obtained).\n+ Proof of the subcontractor\u2019\
         s compliance with minimum requirements for prototype protection (e.g., certificate,\
         \ attestation) is provided."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.3
       assessable: false
       depth: 3
@@ -2555,6 +2888,8 @@ objects:
         + The completed measures are to be documented. \n+ The training concept for\
         \ prototype protection is an integral part of the general training concept\
         \ (see also control question 2.1.3 Information Security)."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.4
       assessable: false
       depth: 3
@@ -2575,6 +2910,8 @@ objects:
 
         + The requirements are considered as a requirement regarding the information
         security of the project (see Controls 1.2.3 and 7.1.1 Information Security).'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.5
       assessable: false
       depth: 3
@@ -2593,6 +2930,8 @@ objects:
         is in place.
 
         + Code of conduct in case of the loss/theft of access control means.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.6
       assessable: false
       depth: 3
@@ -2615,6 +2954,8 @@ objects:
 
         + Secured transmission/shipping of image material to authorized recipients
         only.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.2.7
       assessable: false
       depth: 3
@@ -2630,6 +2971,8 @@ objects:
       description: '+ Specification for carrying along (e.g., sealed/unsealed, etc.).
 
         + Specification for use (e.g., phone calls, photography, etc.).'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3
       assessable: false
       depth: 2
@@ -2654,6 +2997,8 @@ objects:
         \ customer are known and observed.\n+ The logistics/transport companies explicitly\
         \ approved by the customer are commissioned.\n+ A process for reporting any\
         \ security-relevant events to the customer is described and implemented."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.3.2
       assessable: false
       depth: 3
@@ -2668,6 +3013,8 @@ objects:
       name: (must)
       description: + The customer-specific requirements for parking/storage are verifiably
         known and observed.
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4
       assessable: false
       depth: 2
@@ -2694,6 +3041,8 @@ objects:
 
         + A process for the immediate reporting of any damages to the camouflage is
         described and implemented.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.2
       assessable: false
       depth: 3
@@ -2712,6 +3061,8 @@ objects:
         \ known to users of test and trial grounds: \n  - a current list of customer-approved\
         \ test and trial grounds\n  - code of conduct for ensuring undisturbed trial\
         \ operation \n  - customer-defined protective measures These are implemented."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.4.3
       assessable: false
       depth: 3
@@ -2732,6 +3083,8 @@ objects:
 
         + The code of conduct in case of special incidents (e.g., breakdown, accident,
         theft...) is known and observed.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5
       assessable: false
       depth: 2
@@ -2760,6 +3113,8 @@ objects:
         staff-related).
 
         + Code of conduct in case of special incidents.'
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:8.5.2
       assessable: false
       depth: 3
@@ -2784,6 +3139,8 @@ objects:
         staff-related).
 
         + Code of conduct in case of special incidents. '
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9
       assessable: false
       depth: 1
@@ -2810,6 +3167,8 @@ objects:
         organization''s management.
 
         '
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.2
       assessable: false
       depth: 2
@@ -2841,6 +3200,8 @@ objects:
         \ the data protection officer by data protection coordinators in the companies\
         \ organizational units, depending on the company size (e.g. marketing, sales,\
         \ personnel, logistics, development, etc.)"
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.3
       assessable: false
       depth: 2
@@ -2865,6 +3226,8 @@ objects:
         \ for processing as required by the information security questionnaire are\
         \ adequatly implemented for the processing activities\n  - There is a process\
         \ description / sequence description with defined responsibilities."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.4
       assessable: false
       depth: 2
@@ -2887,6 +3250,8 @@ objects:
         \ assessment are known.\n+ Data protection impact assessments are carried\
         \ out.\n  - Responsibilities/tasks and support possibilities in the context\
         \ of data protection impact assessments are defined and known."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5
       assessable: false
       depth: 2
@@ -2909,6 +3274,8 @@ objects:
         \ GDPR, suitable transfer instruments like standard contractual clauses, transfer\
         \ impact assessments, adequacy decisions)\n  - Ensuring the consent or the\
         \ right of objection of the person responsible for subcontracting"
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.2
       assessable: false
       depth: 3
@@ -2925,6 +3292,8 @@ objects:
         \ to subcontractors and cooperation partners (sub processors).\n+ Compliance\
         \ with contractual agreements is reviewed.\n  - Contact details of the contact\
         \ persons of the subcontractor are available and up to date."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.5.3
       assessable: false
       depth: 3
@@ -2944,6 +3313,8 @@ objects:
         \ transfers.\n+ In the case of data transfers to third countries, it is determined\
         \ whether the consent of the person responsible is to be obtained for each\
         \ transfer to third countries."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6
       assessable: false
       depth: 2
@@ -2967,6 +3338,8 @@ objects:
         \ immediately contact the respective person responsible in the event of an\
         \ incoming request from a data subject and coordinate the further procedure\
         \ with this person."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.6.2
       assessable: false
       depth: 3
@@ -2988,6 +3361,8 @@ objects:
         \  - Documentation of the incident handling activities\n  - Training of employees\
         \ on the defined measures/processes\n  - Support of the respective controller\
         \ in the processing of data protection incidents"
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7
       assessable: false
       depth: 2
@@ -3009,6 +3384,8 @@ objects:
         \ are obliged to maintain confidentiality (even beyond the duration of the\
         \ employment relationship) and to comply with applicable data protection laws.\
         \  \n  - The obligation is documented"
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.7.2
       assessable: false
       depth: 3
@@ -3025,6 +3402,8 @@ objects:
         \ of the data\n  - Employees in critical areas (e.g. IT administrators) are\
         \ instructed and trained specifically for their work (e.g. specific training\
         \ courses or instructions, short videos, etc.)."
+      implementation_groups:
+      - must
     - urn: urn:intuitem:risk:req_node:tisax-v6.0.2:9.8
       assessable: false
       depth: 2
@@ -3047,3 +3426,5 @@ objects:
         \ ensure that:\n - Received instructions are documented\n - Instructions can\
         \ be implemented (e.g. procedures for correcting, deleting, ...)\n - Data\
         \ is separated by client and specific order or project"
+      implementation_groups:
+      - must
