@@ -25,19 +25,16 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "urn",
+            "ref_id",
             "locale",
             "version",
+            "packager",
+            "provider",
             "builtin",
             "objects_meta",
+            "is_imported",
         ]
-
-    # name = serializers.CharField()
-    # description = serializers.CharField()
-    # locale = serializers.ChoiceField(choices=["en", "fr"])
-    # version = serializers.CharField()
-    # copyright = serializers.CharField()
-    # builtin = serializers.BooleanField()
-    # objects_meta = serializers.JSONField()
 
 
 class StoredLibraryDetailedSerializer(serializers.ModelSerializer):
