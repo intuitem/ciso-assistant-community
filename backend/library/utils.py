@@ -388,7 +388,7 @@ class ReferenceControlImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
+    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge", "transpose"}
 
     def __init__(self, risk_matrix_data):
         self.risk_matrix_data = risk_matrix_data
