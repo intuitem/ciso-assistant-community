@@ -5,7 +5,7 @@ name: NIST CSF version 2.0
 description: National Institute of Standards and Technology - Cybersecurity Framework
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: 1
+version: 2
 provider: NIST
 packager: intuitem
 objects:
@@ -14,8 +14,10 @@ objects:
     ref_id: NIST-CSF-2.0
     name: NIST CSF v2.0
     description: NIST Cybersecurity Framework
+    min_score: 1
+    max_score: 4
     scores_definition:
-    - score: 2
+    - score: 1
       name: Partial
       description: 'Application of the organizational cybersecurity risk strategy
         is managed in an ad hoc manner.
