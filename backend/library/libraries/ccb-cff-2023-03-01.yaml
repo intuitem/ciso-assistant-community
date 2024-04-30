@@ -7,7 +7,7 @@ description: 'Centre For Cybersecurity Belgium - CyberFundamentals Framework
   https://ccb.belgium.be'
 copyright: All texts, layouts, designs and other elements of any nature in this document
   are subject to copyright law.
-version: 2
+version: 3
 provider: CCB
 packager: intuitem
 objects:
@@ -16,6 +16,8 @@ objects:
     ref_id: CCB-CFF-2023-03-01
     name: CCB CyberFundamentals Framework
     description: Centre For Cybersecurity Belgium - CyberFundamentals Framework
+    min_score: 1
+    max_score: 5
     scores_definition:
     - score: 1
       name: Initial
