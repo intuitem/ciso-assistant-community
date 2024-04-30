@@ -1,3 +1,4 @@
+from pathlib import Path
 from django.apps import apps
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
@@ -12,13 +13,12 @@ from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 
 import os
-import re
 import json
 import yaml
 
 from django.urls import reverse
 from datetime import date, datetime
-from typing import Union, List, Self
+from typing import Union, Self
 from django.utils.html import format_html
 
 from structlog import get_logger
@@ -88,7 +88,9 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
 class LibraryMixin(ReferentialObjectMixin):
     class Meta:
         abstract = True
+        unique_together = [["urn", "locale", "version"]]
 
+    urn = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
@@ -123,40 +125,42 @@ class StoredLibrary(LibraryMixin):
             value["hash_checksum"] for value in cls.objects.values("hash_checksum")
         )
 
-    @staticmethod
-    def store_libary_content(library_content: bytes) -> Union[str, None]:
+    @classmethod
+    def store_library_content(cls, library_content: bytes) -> "StoredLibrary | None":
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
-            return None  # We do not store the libary if its hash checksum is in the database.
-
-        # urn(str:max_length=100), version(int), name(str:max_length=200)
-
+            return None  # We do not store the library if its hash checksum is in the database.
         try:
             library_data = yaml.safe_load(library_content)
-        except Exception:
-            return "Invalid formatted file, the library file must be formatted in YAML."
+        except yaml.YAMLError as e:
+            logger.error("Error while loading library content", error=e)
+            raise e
 
         missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
 
         if missing_fields:
-            return "The following fields are missing : {}".format(
+            err = "The following fields are missing : {}".format(
                 ", ".join(repr(field) for field in missing_fields)
             )
+            logger.error("Error while loading library content", error=err)
+            raise ValueError(err)
 
         urn = library_data["urn"]
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
 
         library_matches = [*StoredLibrary.objects.filter(urn=urn, locale=locale)]
-        if any(libary.version >= version for libary in library_matches):
+        if any(library.version >= version for library in library_matches):
             # The library isn't stored if it's obsolete due to be a too old version of itself.
-            return "A library with the urn '{}', a locale '{}' with a superior superior or equal to {} is already stored in the database.".format(
+            err = "A library with the urn '{}', a locale '{}' with a superior superior or equal to {} is already stored in the database.".format(
                 urn, locale, version
             )
+            logger.error("Error while loading library content", error=err)
+            raise ValueError(err)
 
         for library in library_matches:
             library.is_obsolete = True
-            library.save()  # If a user delete a library from the libary store we must set the is_obsolete value of its most recent obsolete version to False.
+            library.save()  # If a user delete a library from the library store we must set the is_obsolete value of its most recent obsolete version to False.
 
         objects_meta = {
             key: len(value) for key, value in library_data["objects"].items()
@@ -167,7 +171,7 @@ class StoredLibrary(LibraryMixin):
         )  # I don't want whitespaces in URN anymore nontheless
 
         library_objects = json.dumps(library_data["objects"])
-        StoredLibrary.objects.create(
+        return StoredLibrary.objects.create(
             name=library_data["name"],
             is_published=True,
             urn=urn,
@@ -189,11 +193,11 @@ class StoredLibrary(LibraryMixin):
             content=library_objects,
         )
 
-    @staticmethod
-    def store_library_file(fname: str) -> Union[str, None]:
+    @classmethod
+    def store_library_file(cls, fname: Path) -> "StoredLibrary | None":
         with open(fname, "rb") as f:
             library_content = f.read()
-        return StoredLibrary.store_libary_content(library_content)
+        return StoredLibrary.store_library_content(library_content)
 
     def loads(self) -> Union[str, None]:
         from library.utils import LibraryImporter
