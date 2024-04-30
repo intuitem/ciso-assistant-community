@@ -21,6 +21,8 @@
 	export let onSubmit = (submit_data: any) => {};
 	export let taintedMessage: string | null = m.taintedFormMessage();
 
+	export let useFocusTrap = true;
+
 	export let debug = false; // set to true to enable SuperDebug component
 
 	function handleFormUpdated({ form, closeModal }: { form: any; closeModal: boolean }) {
@@ -48,7 +50,7 @@
 	<SuperDebug data={$errors} />
 {/if}
 
-<form method="POST" use:enhance use:focusTrap={true} {...$$restProps}>
+<form method="POST" use:enhance use:focusTrap={useFocusTrap} {...$$restProps}>
 	{#if $errors._errors}
 		{#each $errors._errors as error}
 			<p class="text-error-500 text-sm font-medium">{error}</p>
