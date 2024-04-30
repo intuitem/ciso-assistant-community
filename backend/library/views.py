@@ -1,8 +1,6 @@
 import json
 from django.db import IntegrityError
-from django.db.models import QuerySet
-from rest_framework import viewsets, permissions, status
-from rest_framework.generics import get_object_or_404
+from rest_framework import viewsets, status
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
@@ -11,14 +9,10 @@ from rest_framework.status import (
 )
 from rest_framework.parsers import FileUploadParser
 
-from django.contrib import messages
-from django.utils.translation import gettext_lazy as _
 from django.http import HttpResponse
-import yaml
 
 from core.helpers import get_sorted_requirement_nodes
 from core.models import StoredLibrary, LoadedLibrary
-from core.views import BaseModelViewSet
 from iam.models import RoleAssignment, Folder, Permission
 from library.validators import validate_file_extension
 from .helpers import preview_library
@@ -28,15 +22,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .serializers import (
     StoredLibraryDetailedSerializer,
-    LoadedLibrarySerializer,
     LoadedLibraryDetailedSerializer,
-    LibraryUploadSerializer,
-)
-from .utils import (
-    LibraryImporter,
-    get_available_libraries,
-    get_library,
-    import_library_view,
 )
 
 
@@ -50,7 +36,7 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
     queryset = StoredLibrary.objects.filter(is_obsolete=False)
 
     def list(self, request, *args, **kwargs):
-        if not "view_storedlibrary" in request.user.permissions:
+        if "view_storedlibrary" not in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
         available_libraries = self.queryset.values(
             "id",
@@ -90,7 +76,7 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def retrieve(self, request, *args, pk, **kwargs):
-        if not "view_storedlibrary" in request.user.permissions:
+        if "view_storedlibrary" not in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             lib = self.queryset.get(urn=pk)
@@ -121,7 +107,7 @@ class StoredLibraryViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception as e:
+        except Exception:
             """print(f"ERROR {type(e)}")
             print(str(e))
             raise e"""
@@ -195,7 +181,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     queryset = LoadedLibrary.objects.all()
 
     def list(self, request, *args, **kwargs):
-        if not "view_storedlibrary" in request.user.permissions:
+        if "view_storedlibrary" not in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         loaded_libraries = [
@@ -221,7 +207,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         return Response({"results": loaded_libraries})
 
     def retrieve(self, request, *args, pk, **kwargs):
-        if not "view_loadedlibrary" in request.user.permissions:
+        if "view_loadedlibrary" not in request.user.permissions:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             lib = LoadedLibrary.objects.get(
