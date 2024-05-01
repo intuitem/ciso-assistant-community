@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('iam', '0002_purge_validator'),
+        ("iam", "0002_purge_validator"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='folder',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='Updated at'),
+            model_name="folder",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Updated at"),
         ),
         migrations.AlterField(
-            model_name='role',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='Updated at'),
+            model_name="role",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Updated at"),
         ),
         migrations.AlterField(
-            model_name='roleassignment',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='Updated at'),
+            model_name="roleassignment",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Updated at"),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='Updated at'),
+            model_name="user",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Updated at"),
         ),
         migrations.AlterField(
-            model_name='usergroup',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, verbose_name='Updated at'),
+            model_name="usergroup",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Updated at"),
         ),
     ]
