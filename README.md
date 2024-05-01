@@ -113,14 +113,16 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
+- ANSSI: RECOMMANDATIONS DE SÉCURITÉ POUR UN SYSTÈME D'IA GÉNÉRATIVE
+- FBI CJIS
 - CCPA
 - AI Act
 - Part-IS
 - SecNumCloud
+- NIST SP 800-218
 - SOX
 - MASVS
 - FedRAMP
-- FBI CJIS
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
