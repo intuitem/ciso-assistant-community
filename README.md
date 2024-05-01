@@ -82,7 +82,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 10. Essential Eight 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA 🇪🇺
-13. NIST AI Risk Management Framework 🇺🇸
+13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
@@ -101,6 +101,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 🇺🇸
+32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 
 <br/>
 
@@ -113,7 +114,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- ANSSI: RECOMMANDATIONS DE SÉCURITÉ POUR UN SYSTÈME D'IA GÉNÉRATIVE
 - FBI CJIS
 - CCPA
 - AI Act
