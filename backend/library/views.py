@@ -65,7 +65,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
 
         try:
-            error_msg = library.loads()
+            error_msg = library.load()
             if error_msg is not None:
                 return Response(
                     {"status": "error", "error": error_msg},

@@ -584,7 +584,7 @@ class LibraryImporter:
                 dependency = StoredLibrary.objects.get(
                     urn=dependency_urn, is_obsolete=False
                 )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
-                error_msg = dependency.loads()
+                error_msg = dependency.load()
                 if error_msg is not None:
                     return error_msg
 
