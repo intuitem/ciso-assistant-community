@@ -202,7 +202,7 @@ class TestRequirementAssessmentsAuthenticated:
                 "compliance_assessment": str(compliance_assessment2.id),
                 "requirement": str(RequirementNode.objects.all()[1].id),
                 "applied_controls": [str(applied_control.id)],
-                "score": 50,
+                "score": 3,
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
