@@ -6,12 +6,18 @@ export class PageDetail extends BasePage {
 	readonly form: FormContent;
 	item: string;
 	readonly editButton: Locator;
+	readonly statusAcceptButton: Locator;
+	readonly statusRejectButton: Locator;
+	readonly statusRevokeButton: Locator;
 
 	constructor(public readonly page: Page, url: string, form: FormContent, item: string) {
 		super(page, url, item);
 		this.form = form;
 		this.item = item;
 		this.editButton = this.page.getByTestId('edit-button');
+		this.statusAcceptButton = this.page.getByTestId('status-accept-button');
+		this.statusRejectButton = this.page.getByTestId('status-reject-button');
+		this.statusRevokeButton = this.page.getByTestId('status-revoke-button');
 	}
 
 	setItem(item: string) {

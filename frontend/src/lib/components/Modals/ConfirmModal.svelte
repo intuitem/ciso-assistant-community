@@ -32,16 +32,18 @@
 
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}">
-		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
+		<header class={cHeader} data-testid="modal-title">
+			{$modalStore[0].title ?? '(title missing)'}
+		</header>
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 		<!-- Enable for debugging: -->
 		<form method="POST" action={formAction} class="modal-form {cForm}" use:enhance>
 			<!-- prettier-ignore -->
 			<footer class="modal-footer {parent.regionFooter}">
-        <button type="button" class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{m.cancel()}</button>
+        <button type="button" class="btn {parent.buttonNeutral}" data-testid="cancel-button" on:click={parent.onClose}>{m.cancel()}</button>
         <input type="hidden" name="urlmodel" value={URLModel} />
         <input type="hidden" name="id" value={id} />
-        <button class="btn variant-filled-error" type="submit" on:click={parent.onClose}>{m.submit()}</button>
+        <button class="btn variant-filled-error" data-testid="confirm-button" type="submit" on:click={parent.onClose}>{m.submit()}</button>
     </footer>
 		</form>
 		{#if debug === true}

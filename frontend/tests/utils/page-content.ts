@@ -9,7 +9,9 @@ export class PageContent extends BasePage {
 	readonly addButton: Locator;
 	readonly editButton: Locator;
 	readonly searchInput: Locator;
-	readonly deleteModalTitle: Locator;
+	readonly modalTitle: Locator;
+	readonly modalConfirmButton: Locator;
+	readonly modalCancelButton: Locator;
 	readonly deleteModalConfirmButton: Locator;
 	readonly deleteModalCancelButton: Locator;
 
@@ -31,7 +33,9 @@ export class PageContent extends BasePage {
 		this.addButton = this.page.getByTestId('add-button');
 		this.editButton = this.page.getByTestId('edit-button');
 		this.searchInput = this.page.getByTestId('search-input');
-		this.deleteModalTitle = this.page.getByTestId('modal-title');
+		this.modalTitle = this.page.getByTestId('modal-title');
+		this.modalConfirmButton = this.page.getByTestId('confirm-button');
+		this.modalCancelButton = this.page.getByTestId('cancel-button');
 		this.deleteModalConfirmButton = this.page.getByTestId('delete-confirm-button');
 		this.deleteModalCancelButton = this.page.getByTestId('delete-cancel-button');
 	}
