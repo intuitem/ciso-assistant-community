@@ -124,8 +124,8 @@ class TestComplianceAssessmentsAuthenticated:
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
-                    "min_score": 0,
-                    "max_score": 100,
+                    "min_score": 1,
+                    "max_score": 4,
                 },
             },
             user_group=test.user_group,
