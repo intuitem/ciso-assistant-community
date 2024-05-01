@@ -58,8 +58,9 @@
 
 	const assessableNodes = getAssessableNodes(node);
 	const hasAssessableChildren =
-		children && Object.keys(children).length > 0 && 
-			assessableNodes.length - (node.assessable?1:0) > 0;
+		children &&
+		Object.keys(children).length > 0 &&
+		assessableNodes.length - (node.assessable ? 1 : 0) > 0;
 
 	const REQUIREMENT_ASSESSMENT_STATUS = [
 		'compliant',
