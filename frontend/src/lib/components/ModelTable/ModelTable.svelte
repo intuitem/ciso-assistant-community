@@ -130,7 +130,7 @@
 	const tagMap = FIELD_COLORED_TAG_MAP[URLModel] ?? {};
 	const taggedKeys = new Set(Object.keys(tagMap));
 
-	$: model = source.meta.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
+	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
 </script>
 
