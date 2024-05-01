@@ -5,7 +5,7 @@ name: NIST CSF version 1.1
 description: National Institute of Standards and Technology - Cybersecurity Framework
 copyright: With the exception of material marked as copyrighted, information presented
   on NIST sites are considered public information and may be distributed or copied.
-version: 1
+version: 2
 provider: NIST
 packager: intuitem
 objects:
@@ -14,6 +14,39 @@ objects:
     ref_id: NIST-CSF-1.1
     name: NIST CSF v1.1
     description: NIST Cybersecurity Framework
+    min_score: 1
+    max_score: 4
+    scores_definition:
+    - score: 1
+      name: Partial
+      description: 'Application of the organizational cybersecurity risk strategy
+        is managed in an ad hoc manner.
+
+        There is limited awareness of cybersecurity risks at the organizational level.'
+    - score: 2
+      name: Risk informed
+      description: 'Risk management practices are approved by management but may not
+        be established as organization-wide policy.
+
+        There is an awareness of cybersecurity risks at the organizational level,
+        but an organization-wide approach to managing cybersecurity risks has not
+        been established.'
+    - score: 3
+      name: Repeatable
+      description: "The organization\u2019s risk management practices are formally\
+        \ approved and expressed as policy.\nOrganizational cybersecurity practices\
+        \ are regularly updated based on the application of risk management processes\
+        \ to changes in business/mission requirements, threats, and technological\
+        \ landscape."
+    - score: 4
+      name: Adaptive
+      description: 'There is an organization-wide approach to managing cybersecurity
+        risks that uses risk-informed policies, processes, and procedures to address
+        potential cybersecurity events.
+
+        The organization adapts its cybersecurity practices based on previous and
+        current cybersecurity activities, including lessons learned and predictive
+        indicators.'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:nist-csf-1.1:id
       assessable: false
