@@ -199,7 +199,7 @@ class StoredLibrary(LibraryMixin):
             library_content = f.read()
         return StoredLibrary.store_library_content(library_content)
 
-    def loads(self) -> Union[str, None]:
+    def load(self) -> Union[str, None]:
         from library.utils import LibraryImporter
 
         library_importer = LibraryImporter(self)
