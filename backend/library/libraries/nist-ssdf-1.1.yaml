@@ -1,5 +1,5 @@
 urn: urn:intuitem:risk:library:nist-ssdf-1.1
-locale: fr
+locale: en
 ref_id: nist-ssdf-1.1
 name: Secure Software Development Framework (SSDF)
 description: The Secure Software Development Framework (SSDF), SP 800-218, is a set
