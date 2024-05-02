@@ -6,7 +6,8 @@ description: The Secure Software Development Framework (SSDF), SP 800-218, is a 
   of fundamental, sound, and secure software development practices based on established
   secure software development practice documents from organizations such as BSA, OWASP,
   and SAFECode
-copyright: NIST
+copyright: With the exception of material marked as copyrighted, information presented
+  on NIST sites are considered public information and may be distributed or copied.
 version: 1
 provider: NIST
 packager: intuitem
