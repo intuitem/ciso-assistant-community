@@ -102,6 +102,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
+33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 
 <br/>
 
