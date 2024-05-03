@@ -217,7 +217,7 @@ for tab in dataframe:
                 if annotation:
                     req_node["annotation"] = annotation
                 if implementation_groups:
-                    req_node["implementation_groups"] = implementation_groups.split(',')
+                    req_node["implementation_groups"] = implementation_groups.split(",")
                 threats = row[header["threats"]].value if "threats" in header else None
                 reference_controls = (
                     row[header["reference_controls"]].value
@@ -404,13 +404,19 @@ if has_framework:
         "description": library_vars["framework_description"],
     }
     if "framework_min_score" in library_vars:
-        library["objects"]["framework"]["min_score"] = library_vars["framework_min_score"]
+        library["objects"]["framework"]["min_score"] = library_vars[
+            "framework_min_score"
+        ]
     if "framework_max_score" in library_vars:
-        library["objects"]["framework"]["max_score"] = library_vars["framework_max_score"]
+        library["objects"]["framework"]["max_score"] = library_vars[
+            "framework_max_score"
+        ]
     if scores_definition:
         library["objects"]["framework"]["scores_definition"] = scores_definition
     if implementation_groups_definition:
-        library["objects"]["framework"]["implementation_groups_definition"] = implementation_groups_definition
+        library["objects"]["framework"]["implementation_groups_definition"] = (
+            implementation_groups_definition
+        )
     library["objects"]["framework"]["requirement_nodes"] = requirement_nodes
 
 if has_reference_controls:
