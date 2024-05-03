@@ -1159,6 +1159,25 @@ class UploadAttachmentView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+def filter_graph_by_implementation_groups(
+    graph: dict[str, dict], implementation_groups: set[str] | None
+) -> dict[str, dict]:
+    if len(implementation_groups) == 0:
+        return graph
+    filtered_graph = {}
+    for key, value in graph.items():
+        if value["implementation_groups"] is None:
+            filtered_graph[key] = value
+        elif any(
+            group in value["implementation_groups"] for group in implementation_groups
+        ):
+            filtered_graph[key] = value
+        value["children"] = filter_graph_by_implementation_groups(
+            value["children"], implementation_groups
+        )
+    return filtered_graph
+
+
 class ComplianceAssessmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows compliance assessments to be viewed or edited.
@@ -1172,6 +1191,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
+
+    @action(detail=True, name="Get implementation group choices")
+    def selected_implementation_groups(self, request, pk):
+        compliance_assessment = self.get_object()
+        _framework = compliance_assessment.framework
+        implementation_groups_definiition = _framework.implementation_groups_definition
+        implementation_group_choices = {
+            group["ref_id"]: group["name"]
+            for group in implementation_groups_definiition
+        }
+        return Response(implementation_group_choices)
 
     def perform_create(self, serializer):
         """
@@ -1240,13 +1270,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = self.get_object().framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+        )
+        implementation_groups = self.get_object().selected_implementation_groups
         return Response(
-            get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
-                RequirementAssessment.objects.filter(
-                    compliance_assessment=self.get_object()
-                ).all(),
-            )
+            filter_graph_by_implementation_groups(tree, implementation_groups)
         )
 
     @action(detail=True)
