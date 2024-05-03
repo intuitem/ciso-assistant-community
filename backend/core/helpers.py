@@ -240,6 +240,9 @@ def get_sorted_requirement_nodes(
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
+                "implementation_groups": node.implementation_groups
+                if node.implementation_groups
+                else None,
                 "ra_id": str(req_as.id) if requirements_assessed else None,
                 "status": req_as.status if requirements_assessed else None,
                 "is_scored": req_as.is_scored if requirements_assessed else None,
@@ -275,6 +278,9 @@ def get_sorted_requirement_nodes(
                         {
                             "urn": req.urn,
                             "ref_id": req.ref_id,
+                            "implementation_groups": req.implementation_groups
+                            if req.implementation_groups
+                            else None,
                             "name": req.name,
                             "description": req.description,
                             "ra_id": str(req_as.id),
