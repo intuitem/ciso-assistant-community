@@ -77,6 +77,13 @@ export class PageContent extends BasePage {
 				return;
 			}
 		}
+		// If the library is not visible, it might have already been imported
+		if (await this.getRow(ref).isHidden()) {
+			await this.tab('Imported libraries').click();
+			expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
+			expect(this.getRow(ref)).toBeVisible();
+			return;
+		}
 		await this.importItemButton(ref, language === 'any' ? undefined : language).click();
 		await this.isToastVisible(`The library object has been successfully imported.+`, undefined, {
 			timeout: 15000
