@@ -97,12 +97,18 @@ ws.append(["tab", "implementation_groups", "implementation_groups"])
 ws1 = wb_output.create_sheet("controls")
 ws1.append(
     ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
-    )
+)
 for row in output_table:
     ws1.append(row)
 ws2 = wb_output.create_sheet("implementation_groups")
 ws2.append(["ref_id", "name", "description"])
-ws2.append(["lite", "foundational", "foundational controls that should be implemented by any organization, regardless of their budget, maturity and risk profile"])
+ws2.append(
+    [
+        "lite",
+        "foundational",
+        "foundational controls that should be implemented by any organization, regardless of their budget, maturity and risk profile",
+    ]
+)
 ws2.append(["full", "systematic ", "systematic assessment of a cloud implementation"])
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
