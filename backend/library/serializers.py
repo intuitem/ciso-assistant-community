@@ -1,7 +1,4 @@
 from core.models import StoredLibrary, LoadedLibrary
-from core.serializers import (
-    BaseModelSerializer,
-)
 from rest_framework import serializers
 
 """class LibraryObjectSerializer(serializers.Serializer):
