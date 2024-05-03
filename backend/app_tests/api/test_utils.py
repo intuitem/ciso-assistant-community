@@ -1,3 +1,4 @@
+from django.db import models
 from knox.auth import AuthToken
 import pytest
 import json
@@ -6,6 +7,7 @@ from django.db.models.fields.related_descriptors import ManyToManyDescriptor
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
+from core.models import StoredLibrary
 
 from test_vars import *
 
@@ -26,6 +28,13 @@ class EndpointTestsUtils:
         urn_varname = format_urn(object_name)
         urn = get_var(urn_varname)
         return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{urn}/" if resolved else eval(urn)
+
+    def get_referential_object_url_from_urn(
+        authenticated_client, urn: str, model: models.Model = StoredLibrary
+    ):
+        """Get the object URL from the URN"""
+        uuid = model.objects.filter(urn=urn).last().id
+        return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{uuid}/"
 
     @pytest.mark.django_db
     def get_test_client_and_folder(
@@ -958,7 +967,7 @@ class EndpointTestsQueries:
                     user_perm_expected_status,
                     user_perm_reason,
                 ) = EndpointTestsUtils.expected_request_response(
-                    "add", "library", scope, user_group, expected_status
+                    "add", "loadedlibrary", scope, user_group, expected_status
                 )
 
             url = urn or EndpointTestsUtils.get_object_urn(verbose_name)
@@ -1014,9 +1023,10 @@ class EndpointTestsQueries:
                 reference.status_code == status.HTTP_200_OK
             ), "reference endpoint is not accessible"
 
-            for object in reference.json()["objects"]["framework"][
-                object_name.lower().replace(" ", "_")
-            ][:count]:
+            content = json.loads(reference.json()["content"])
+            for object in content["framework"][object_name.lower().replace(" ", "_")][
+                :count
+            ]:
                 comparelist = authenticated_client.get(compare_url)
                 compare = dict()
                 assert (

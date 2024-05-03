@@ -26,6 +26,7 @@ READER_PERMISSIONS_LIST = [
     "view_evidence",
     "view_framework",
     "view_loadedlibrary",
+    "view_storedlibrary",
     "view_user",
 ]
 
@@ -238,7 +239,6 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_framework",
     "delete_framework",
     "view_requirementnode",
-    "view_requirementlevel",  # Permits to see the object on api by an admin
     "view_storedlibrary",
     "add_storedlibrary",
     "delete_storedlibrary",

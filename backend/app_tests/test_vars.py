@@ -95,7 +95,7 @@ def get_var(varname: str) -> Any:
 
 def get_singular_name(plural_name: str) -> str:
     exceptions = {
-        "Libraries": "Library",
+        "Stored libraries": "Stored library",
         "Risk matrices": "Risk matrix",
         "Policies": "Policy",
     }
