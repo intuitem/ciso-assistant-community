@@ -27,6 +27,10 @@ from .serializers import (
     StoredLibrarySerializer,
 )
 
+import structlog
+
+logger = structlog.get_logger(__name__)
+
 
 class StoredLibraryViewSet(BaseModelViewSet):
     parser_classes = [FileUploadParser]
@@ -118,8 +122,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
             try:
                 StoredLibrary.store_library_content(content)
             except ValueError as e:
+                logger.error("Failed to store library content", error=e)
                 return HttpResponse(
-                    json.dumps({"error": e}),
+                    json.dumps({"error": "Failed to store library content"}),
                     status=HTTP_422_UNPROCESSABLE_ENTITY,
                 )
 
