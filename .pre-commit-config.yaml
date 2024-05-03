@@ -14,6 +14,7 @@ repos:
       # Run the formatter.
       - id: ruff-format
         args: [backend]
+        exclude: (migrations)
   - repo: local
     hooks:
       - id: format-frontend
