@@ -142,7 +142,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	librariesPage: async ({ page }, use) => {
-		const lPage = new PageContent(page, '/loaded-ibraries', 'Loaded Libraries');
+		const lPage = new PageContent(page, '/libraries', 'Libraries');
 		await use(lPage);
 	},
 
@@ -621,7 +621,7 @@ export function getUniqueValue(value: string): string {
 }
 
 export function replaceValues(obj: any, searchValue: string, replaceValue: string) {
-	for (let key in obj) {
+	for (const key in obj) {
 		if (typeof obj[key] === 'object') {
 			replaceValues(obj[key], searchValue, replaceValue);
 		} else if (typeof obj[key] === 'string') {

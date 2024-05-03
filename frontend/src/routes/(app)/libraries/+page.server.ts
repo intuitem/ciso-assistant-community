@@ -61,7 +61,13 @@ export const load = (async ({ fetch }) => {
 		};
 	};
 
-	const storedLibrariesTable = makeLibrariesTable(storedLibraries, 'stored-libraries');
+	const unimportedStoredLibraries = storedLibraries.filter((lib) => lib.is_imported === false);
+	const storedLibrariesTable = {
+		head: makeHeadData('stored-libraries'),
+		meta: { urlmodel: 'stored-libraries', ...unimportedStoredLibraries },
+		body: tableSourceMapper(unimportedStoredLibraries, listViewFields['stored-libraries'].body)
+	};
+
 	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries, 'loaded-libraries');
 
 	const schema = z.object({ id: z.string() });
