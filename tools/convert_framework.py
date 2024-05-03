@@ -243,7 +243,7 @@ for tab in dataframe:
                         urn_prefix = library_vars_dict_reverse[
                             "reference_control_base_urn"
                         ][prefix]
-                        function_urns.append(f"{urn_prefix}{part_name}")
+                        function_urns.append(f"{urn_prefix}:{part_name}")
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:
