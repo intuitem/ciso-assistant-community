@@ -25,7 +25,6 @@ from core.models import (
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from iam.models import Folder
-from library.utils import import_library_view, get_library
 
 User = get_user_model()
 
