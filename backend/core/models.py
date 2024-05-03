@@ -1283,6 +1283,10 @@ class ComplianceAssessment(Assessment):
             self.scores_definition = self.framework.scores_definition
         super().save(*args, **kwargs)
 
+    @property
+    def available_implementation_groups(self):
+        return self.framework.implementation_groups_definition
+
     def get_global_score(self):
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
@@ -1342,15 +1346,20 @@ class ComplianceAssessment(Assessment):
             "compliant": "#86efac",
         }
         for st in RequirementAssessment.Status:
-            count = (
+            _requirement_assessments = (
                 RequirementAssessment.objects.filter(status=st)
                 .filter(compliance_assessment=self)
                 .filter(requirement__assessable=True)
-                .count()
             )
-            total = RequirementAssessment.objects.filter(
-                compliance_assessment=self
-            ).count()
+            if (
+                self.selected_implementation_groups
+                and len(self.selected_implementation_groups) > 0
+            ):
+                for ig in self.selected_implementation_groups:
+                    _requirement_assessments = _requirement_assessments.filter(
+                        requirement__implementation_groups__icontains=ig
+                    )
+            count = _requirement_assessments.count()
             v = {
                 "name": st,
                 "localName": camel_case(st.value),
