@@ -67,6 +67,12 @@
 											{definition.name}{definition.description ? `: ${definition.description}` : ''}
 										</div>
 									{/each}
+								{:else if key === 'implementation_groups_definition'}
+									{#each Object.entries(value) as [key, definition]}
+										<div>
+											{definition.ref_id}. {definition.name}
+										</div>
+									{/each}
 								{:else if Array.isArray(value)}
 									<ul>
 										{#each value as val}
