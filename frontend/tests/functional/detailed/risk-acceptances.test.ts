@@ -42,11 +42,11 @@ test('risk acceptances can be processed', async ({ logedPage, pages, riskAccepta
     await expect(riskAcceptancesPage.modalConfirmButton).toBeVisible();
     await riskAcceptancesPage.modalConfirmButton.click();
 
-    //TODO check if the accepted time is visible in item detail
+    expect(await page.getByTestId('accepted-at-field-value').innerText()).not.toBe('--');
     await expect(riskAcceptancesPage.itemDetail.statusAcceptButton).not.toBeVisible();
     await expect(riskAcceptancesPage.itemDetail.statusRejectButton).not.toBeVisible();
     await expect(riskAcceptancesPage.itemDetail.statusRevokeButton).toBeVisible();
-
+    
     // Revoke
     await riskAcceptancesPage.itemDetail.statusRevokeButton.click();
 
@@ -55,23 +55,23 @@ test('risk acceptances can be processed', async ({ logedPage, pages, riskAccepta
     await expect(riskAcceptancesPage.modalConfirmButton).toBeVisible();
     await riskAcceptancesPage.modalConfirmButton.click();
 
-    //TODO check if the revoked time is visible in item detail
+    expect(await page.getByTestId('revoked-at-field-value').innerText()).not.toBe('--');
     await expect(riskAcceptancesPage.itemDetail.statusAcceptButton).not.toBeVisible();
     await expect(riskAcceptancesPage.itemDetail.statusRejectButton).not.toBeVisible();
     await expect(riskAcceptancesPage.itemDetail.statusRevokeButton).not.toBeVisible();
-
+    
     // Reject
     await riskAcceptancesPage.goto();
     await riskAcceptancesPage.viewItemDetail(testObjectsData.riskAcceptancesPage.build.name + ' rejected');
     await expect(riskAcceptancesPage.itemDetail.statusRejectButton).toBeVisible();
     await riskAcceptancesPage.itemDetail.statusRejectButton.click();
-
+    
     await expect(riskAcceptancesPage.modalTitle).toBeVisible();
     await expect(riskAcceptancesPage.modalCancelButton).toBeVisible();
     await expect(riskAcceptancesPage.modalConfirmButton).toBeVisible();
     await riskAcceptancesPage.modalConfirmButton.click();
-
-    //TODO check if the rejected time is visible in item detail
+    
+    expect(await page.getByTestId('rejected-at-field-value').innerText()).not.toBe('--');
     await expect(riskAcceptancesPage.itemDetail.statusAcceptButton).not.toBeVisible();
     await expect(riskAcceptancesPage.itemDetail.statusRejectButton).not.toBeVisible();
     await expect(riskAcceptancesPage.itemDetail.statusRevokeButton).not.toBeVisible();
