@@ -511,5 +511,6 @@
 	"youCanSetNewPassword": "Vous pouvez définir un nouveau mot de passe ici",
 	"userWillBeDisconnected": "L'utilisateur sera déconnecté et devra se reconnecter",
 	"scoresDefinition": "Définition des scores",
+	"selectedImplementationGroups": "Groupes d'implémentation sélectionnés",
 	"implementationGroupsDefinition": "Définition des groupes d'implémentation"
 }
