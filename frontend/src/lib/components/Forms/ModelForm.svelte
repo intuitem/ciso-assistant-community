@@ -62,6 +62,7 @@
 	let:data
 	let:initialData
 	validators={zod(schema)}
+	debug
 	{...$$restProps}
 >
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
@@ -327,6 +328,13 @@
 		/>
 		<TextField {form} field="version" label={m.version()} />
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
+		<AutocompleteSelect
+			multiple
+			{form}
+			options={model.selectOptions['selected_implementation_groups']}
+			field="selected_implementation_groups"
+			label={m.status()}
+		/>
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
