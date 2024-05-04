@@ -120,7 +120,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - AI Act
 - Part-IS
 - SecNumCloud
-- NIST SP 800-218
 - SOX
 - MASVS
 - FedRAMP
