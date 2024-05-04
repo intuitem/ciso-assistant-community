@@ -62,7 +62,6 @@
 	let:data
 	let:initialData
 	validators={zod(schema)}
-	debug
 	{...$$restProps}
 >
 	<input type="hidden" name="urlmodel" value={model.urlModel} />
