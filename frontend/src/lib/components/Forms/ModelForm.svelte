@@ -327,13 +327,15 @@
 		/>
 		<TextField {form} field="version" label={m.version()} />
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
-		<AutocompleteSelect
-			multiple
-			{form}
-			options={model.selectOptions['selected_implementation_groups']}
-			field="selected_implementation_groups"
-			label={m.selectedImplementationGroups()}
-		/>
+		{#if origin === 'edit'}
+			<AutocompleteSelect
+				multiple
+				{form}
+				options={model.selectOptions['selected_implementation_groups']}
+				field="selected_implementation_groups"
+				label={m.selectedImplementationGroups()}
+			/>
+		{/if}
 		<AutocompleteSelect
 			{form}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
