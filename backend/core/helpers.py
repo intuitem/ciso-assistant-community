@@ -485,6 +485,7 @@ def applied_control_per_status(user: User):
         v = {"value": count, "itemStyle": {"color": color_map[st[0]]}}
         values.append(v)
         labels.append(st[1])
+    labels.insert(0, "undefined")
     local_lables = [camel_case(str(label)) for label in labels]
     return {"localLables": local_lables, "labels": labels, "values": values}
 
