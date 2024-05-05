@@ -8,6 +8,7 @@ env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   working-directory: ./frontend
+  POSTGRES_PASSWORD: postgres
 
 jobs:
   startup-functional-test:
@@ -18,7 +19,6 @@ jobs:
         image: postgres:14.1
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
