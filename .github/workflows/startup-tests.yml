@@ -8,7 +8,7 @@ env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   working-directory: ./frontend
-  POSTGRES_PASSWORD: postgres
+  POSTGRES_PASSWORD: $(uuidgen)
 
 jobs:
   startup-functional-test:
