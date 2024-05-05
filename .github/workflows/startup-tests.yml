@@ -8,8 +8,7 @@ env:
   GITHUB_WORKFLOW: github_actions
   backend-directory: ./backend
   working-directory: ./frontend
-  POSTGRES_PASSWORD: $(uuidgen)
-
+  
 jobs:
   startup-functional-test:
     runs-on: ubuntu-20.04
@@ -19,7 +18,7 @@ jobs:
         image: postgres:14.1
         env:
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
@@ -66,11 +65,10 @@ jobs:
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
           echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }} >> .env
+          echo POSTGRES_PASSWORD=postgres >> .env
           echo DB_HOST=localhost >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo "THIS IS A TEST, DO NOT KEEP IT;" ${{ env.POSTGRES_PASSWORD }}
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
