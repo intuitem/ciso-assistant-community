@@ -65,11 +65,11 @@ jobs:
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
           echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=$POSTGRES_PASSWORD >> .env
+          echo POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }} >> .env
           echo DB_HOST=localhost >> .env
           echo CISO_ASSISTANT_SUPERUSER_EMAIL='' >> .env
           echo CISO_ASSISTANT_URL=http://localhost:4173 >> .env
-          echo "THIS IS A TEST, DO NOT KEEP IT. $POSTGRES_PASSWORD"
+          echo "THIS IS A TEST, DO NOT KEEP IT;" ${{ env.POSTGRES_PASSWORD }}
       - name: Run migrations
         working-directory: ${{ env.backend-directory }}
         run: |
