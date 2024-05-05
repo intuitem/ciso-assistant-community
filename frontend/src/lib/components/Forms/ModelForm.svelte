@@ -332,7 +332,7 @@
 			{form}
 			options={model.selectOptions['selected_implementation_groups']}
 			field="selected_implementation_groups"
-			label={m.status()}
+			label={m.selectedImplementationGroups()}
 		/>
 		<AutocompleteSelect
 			{form}
