@@ -1162,7 +1162,7 @@ class UploadAttachmentView(APIView):
 def filter_graph_by_implementation_groups(
     graph: dict[str, dict], implementation_groups: set[str] | None
 ) -> dict[str, dict]:
-    if len(implementation_groups) == 0:
+    if implementation_groups is None or len(implementation_groups) == 0:
         return graph
     filtered_graph = {}
     for key, value in graph.items():
