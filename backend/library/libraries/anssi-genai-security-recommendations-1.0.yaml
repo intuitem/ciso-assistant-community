@@ -1,0 +1,567 @@
+urn: urn:intuitem:risk:library:anssi-genai-security-recommendations-1.0
+locale: fr
+ref_id: anssi-genai-security-recommendations-1.0
+name: "ANSSI: RECOMMANDATIONS DE S\xC9CURIT\xC9 POUR UN SYST\xC8ME D'IA G\xC9N\xC9\
+  RATIVE"
+description: "Ce document a pour objet de donner des recommandations de s\xE9curit\xE9\
+  \ sur la mise en oeuvre\nde solutions d\u2019IA g\xE9n\xE9rative reposant sur des\
+  \ LLM au sein d\u2019entit\xE9s publiques et priv\xE9es."
+copyright: ANSSI Etalab
+version: 1
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:anssi-genai-security-recommendations-1.0
+    ref_id: anssi-genai-security-recommendations-1.0
+    name: "ANSSI: RECOMMANDATIONS DE S\xC9CURIT\xC9 POUR UN SYST\xC8ME D'IA G\xC9\
+      N\xC9RATIVE"
+    description: "Ce document a pour objet de donner des recommandations de s\xE9\
+      curit\xE9 sur la mise en oeuvre\nde solutions d\u2019IA g\xE9n\xE9rative reposant\
+      \ sur des LLM au sein d\u2019entit\xE9s publiques et priv\xE9es."
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:3.1
+      assessable: false
+      depth: 1
+      ref_id: '3.1'
+      name: "Cycle de vie d'un syst\xE8me d'IA g\xE9n\xE9rative"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:3.1
+      ref_id: R1
+      name: "Int\xE9grer la s\xE9curit\xE9 dans toutes les phases du cycle de vie\
+        \ d\u2019un syst\xE8me d\u2019IA"
+      description: "Des mesures de s\xE9curit\xE9 doivent \xEAtre identifi\xE9es et\
+        \ appliqu\xE9es dans chacune des 3 phases du cycle de vie d'un syst\xE8me\
+        \ d'IA : entra\xEEnement, d\xE9ploiement et production. Ces mesures d\xE9\
+        pendent fortement du sc\xE9nario de partage de responsabilit\xE9s retenu et\
+        \ de la sous-traitance associ\xE9e. Elles doivent \xE9galement tenir compte\
+        \ des interactions avec d'autres applications ou composants internes ou externes\
+        \ au SI.\nIl est possible de se r\xE9f\xE9rer au guide d'hygi\xE8ne de l'ANSSI\
+        \ pour disposer d'un socle de base de s\xE9curit\xE9 \xE0 appliquer."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Analyse de risque
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:4
+      ref_id: R2
+      name: "Mener une analyse de risque sur les syst\xE8mes d\u2019IA avant la phase\
+        \ d\u2019entra\xEEnement"
+      description: "L\u2019analyse de risque d\u2019un syst\xE8me d\u2019IA doit int\xE9\
+        grer les probl\xE9matiques suivantes :\n- cartographier l\u2019ensemble des\
+        \ \xE9l\xE9ments en lien avec le mod\xE8le d\u2019IA : biblioth\xE8ques tierces,\
+        \ sources de donn\xE9es, applications interconnect\xE9es, etc. ;\n- identifier\
+        \ les sous-parties du syst\xE8me d\u2019IA qui traiteront les donn\xE9es de\
+        \ l\u2019organisation, en particulier celles contenues dans les requ\xEAtes\
+        \ des utilisateurs ;\n- prendre en compte le sc\xE9nario de partage de responsabilit\xE9\
+        s et la question de la sous-traitance pour chacune des phases ;\n- identifier\
+        \ les impacts directs et indirects en cas de r\xE9ponses erron\xE9es ou malveillantes\
+        \ du mod\xE8le d\u2019IA aux utilisateurs ;\n- consid\xE9rer la protection\
+        \ des donn\xE9es d\u2019entra\xEEnement du mod\xE8le d\u2019IA."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      assessable: false
+      depth: 1
+      ref_id: '5.1'
+      name: "Recommandations g\xE9n\xE9rales"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R3
+      name: "\xC9valuer le niveau de confiance des biblioth\xE8ques et modules externes\
+        \ utilis\xE9s dans le syst\xE8me d\u2019IA"
+      description: "Il est recommand\xE9 de cartographier l\u2019ensemble des biblioth\xE8\
+        ques et modules externes utilis\xE9s dans le cadre du projet et d\u2019\xE9\
+        valuer leur niveau de confiance."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R4
+      name: "\xC9valuer le niveau de confiance des sources de donn\xE9es externes\
+        \ utilis\xE9es dans le syst\xE8me d\u2019IA"
+      description: "Il est recommand\xE9 de cartographier l\u2019ensemble des sources\
+        \ de donn\xE9es externes utilis\xE9es dans le cadre du projet et d\u2019\xE9\
+        valuer leur niveau de confiance."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R5
+      name: "Appliquer les principes de DevSecOps sur l\u2019ensemble des phases du\
+        \ projet"
+      description: "Il est recommand\xE9 d\u2019appliquer les bonnes pratiques de\
+        \ d\xE9veloppement s\xE9curis\xE9 sur l\u2019ensemble des phases du projet,\
+        \ par exemple :\n- d\xE9ployer et s\xE9curiser des cha\xEEnes d\u2019int\xE9\
+        gration et de d\xE9ploiement en continu (CI/CD) en appliquant le principe\
+        \ de moindre privil\xE8ge pour l\u2019acc\xE8s aux outils de ces cha\xEEnes\
+        \ CI/CD ;\n- mettre en oeuvre une gestion s\xE9curis\xE9e des secrets utilis\xE9\
+        s dans toutes les phases du projet ;\n- pr\xE9voir des tests de s\xE9curit\xE9\
+        \ automatis\xE9s sur le code source (analyse statique de code) et lors de\
+        \ l\u2019ex\xE9cution de ce code source (analyse dynamique de code) ;\n- prot\xE9\
+        ger en int\xE9grit\xE9 le code source et s\xE9curiser l\u2019acc\xE8s \xE0\
+        \ celui-ci (authentification multifacteur, signature du code, droits d\u2019\
+        acc\xE8s, etc.) ;\n- recourir \xE0 des langages de d\xE9veloppement s\xE9\
+        curis\xE9s (scripts de fine tuning, d\xE9veloppement du mod\xE8le, maintenance,\
+        \ d\xE9ploiement, etc.)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R6
+      name: "Utiliser des formats de mod\xE8les d\u2019IA s\xE9curis\xE9s"
+      description: "Il est recommand\xE9 d\u2019utiliser des formats \xE0 l\u2019\xE9\
+        tat de l\u2019art du point de vue de la s\xE9curit\xE9, comme le format safetensor\
+        \ par exemple. Certains formats peu s\xE9curis\xE9s, comme le format pickle,\
+        \ sont \xE0 proscrire."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R7
+      name: "Prendre en compte les enjeux de confidentialit\xE9 des donn\xE9es d\xE8\
+        s la conception du syst\xE8me d\u2019IA"
+      description: "L\u2019\xE9tude du projet doit cartographier l\u2019ensemble des\
+        \ jeux de donn\xE9es utilis\xE9s \xE0 chaque phase du syst\xE8me d\u2019IA\
+        \ : entra\xEEnement (jeux de donn\xE9es d\u2019entra\xEEnement), d\xE9ploiement\
+        \ (jeux de tests) et production (donn\xE9es additionnelles, base de donn\xE9\
+        es vectorielle, etc.).\nCette \xE9tude doit inclure les donn\xE9es d\u2019\
+        usage du syst\xE8me d\u2019IA en production, \xE0 savoir les requ\xEAtes des\
+        \ utilisateurs ainsi que les r\xE9ponses apport\xE9es par le mod\xE8le d\u2019\
+        IA. L\u2019analyse peut \xE9galement traiter le cas de la protection en confidentialit\xE9\
+        \ des param\xE8tres du mod\xE8le lui-m\xEAme, par exemple pour des mod\xE8\
+        les propri\xE9taires."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R8
+      name: "Prendre en compte la probl\xE9matique de besoin d\u2019en conna\xEEtre\
+        \ d\xE8s la conception du syst\xE8me d\u2019IA"
+      description: "Il est important de d\xE9finir en amont du projet les options\
+        \ structurantes du mod\xE8le pour g\xE9rer le besoin d\u2019en conna\xEEtre\
+        \ :\n- le choix des donn\xE9es utilis\xE9es pour l\u2019entra\xEEnement (sans\
+        \ la possibilit\xE9 de g\xE9rer des droits d\u2019acc\xE8s) et des donn\xE9\
+        es additionnelles en production (avec la possibilit\xE9 de g\xE9rer des r\xF4\
+        les et des droits d\u2019acc\xE8s) ;\n- la strat\xE9gie d\u2019apprentissage\
+        \ du mod\xE8le, c\u2019est-\xE0-dire \xE0 quel moment est-ce que l\u2019on\
+        \ r\xE9-entra\xEEne le mod\xE8le et sur la base de quelles donn\xE9es (donn\xE9\
+        es additionnelles m\xE9tier, requ\xEAtes des utilisateurs, r\xE9ponses du\
+        \ mod\xE8le, etc.)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R9
+      name: "Proscrire l\u2019usage automatis\xE9 de syst\xE8mes d\u2019IA pour des\
+        \ actions critiques sur le SI"
+      description: "Un syst\xE8me d\u2019IA doit \xEAtre configur\xE9 de mani\xE8\
+        re \xE0 ne pas \xEAtre en mesure d\u2019ex\xE9cuter de mani\xE8re automatis\xE9\
+        e des actions critiques sur le SI.\nCes actions peuvent \xEAtre des actions\
+        \ critiques d\u2019un point de vue m\xE9tier (transactions bancaires, production\
+        \ de contenu public, impact direct sur des personnes, etc.) ou bien des actions\
+        \ critiques sur l\u2019infrastructure du SI (reconfiguration de composants\
+        \ r\xE9seaux, cr\xE9ations d\u2019utilisateurs \xE0 privil\xE8ge, d\xE9ploiement\
+        \ de serveurs virtuels, etc.)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R10
+      name: "Ma\xEEtriser et s\xE9curiser les acc\xE8s \xE0 privil\xE8ges des d\xE9\
+        veloppeurs et des administrateurs sur le syst\xE8me d\u2019IA"
+      description: "L\u2019ensemble des op\xE9rations \xE0 privil\xE8ges sur le syst\xE8\
+        me d\u2019IA doit respecter les bonnes pratiques d\u2019administration s\xE9\
+        curis\xE9e, notamment :\n- les op\xE9rations \xE0 privil\xE8ge doivent \xEA\
+        tre d\xE9finies et leur d\xE9clenchement doit \xEAtre valid\xE9 : r\xE9-entra\xEE\
+        nement, modification des jeux de donn\xE9es, nouvelle interconnexion avec\
+        \ une application, changement d\u2019h\xE9bergement, etc. ;\n- les op\xE9\
+        rations \xE0 privil\xE8ge doivent \xEAtre r\xE9alis\xE9es avec des comptes\
+        \ d\xE9di\xE9s et depuis un poste d\u2019administration d\xE9di\xE9 \xE0 cet\
+        \ usage ;\n- le principe de moindre privil\xE8ge doit \xEAtre appliqu\xE9\
+        \ et l\u2019usage de jetons d\u2019authentification (token) temporaires doit\
+        \ \xEAtre privil\xE9gi\xE9 ;\n- l\u2019environnement de d\xE9veloppement doit\
+        \ \xEAtre ma\xEEtris\xE9 et administr\xE9 au m\xEAme niveau de s\xE9curit\xE9\
+        \ que l\u2019environnement de production."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R11
+      name: "H\xE9berger le syst\xE8me d\u2019IA dans des environnements de confiance\
+        \ coh\xE9rents avec les besoins de s\xE9curit\xE9"
+      description: "L\u2019h\xE9bergement du syst\xE8me d\u2019IA lors des 3 phases\
+        \ du cycle de vie doit \xEAtre coh\xE9rente avec les besoins de s\xE9curit\xE9\
+        \ du projet, et notamment les besoins en confidentialit\xE9 et en int\xE9\
+        grit\xE9. En particulier, la s\xE9curisation des donn\xE9es d\u2019entra\xEE\
+        nement du mod\xE8le (au repos, en transit, lors d\u2019un traitement) ne doit\
+        \ pas \xEAtre n\xE9glig\xE9e."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R12
+      name: "Cloisonner chaque phase du syst\xE8me d\u2019IA dans un environnement\
+        \ d\xE9di\xE9"
+      description: "Il est recommand\xE9 de cloisonner les 3 environnements techniques\
+        \ correspondant \xE0 chacune des phases du cycle de vie du syst\xE8me d\u2019\
+        IA. Ce cloisonnement peut porter sur :\n- un cloisonnement r\xE9seau : chaque\
+        \ environnement est int\xE9gr\xE9 dans un r\xE9seau physiquement ou logiquement\
+        \ d\xE9di\xE9 ;\n- un cloisonnement syst\xE8me : chaque environnement dispose\
+        \ de ses propres serveurs physiques ou hyperviseurs d\xE9di\xE9s ;\n- un cloisonnement\
+        \ du stockage : chaque environnement dispose de son propre mat\xE9riel de\
+        \ stockage ou de disques d\xE9di\xE9s. Au minimum, un cloisonnement logique\
+        \ est appliqu\xE9 ;\n- un cloisonnement des comptes et des secrets : chaque\
+        \ environnement dispose de ses propres comptes utilisateurs et administrateurs\
+        \ et de secrets distincts."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R13
+      name: "Impl\xE9menter une passerelle Internet s\xE9curis\xE9e dans le cas d\u2019\
+        un syst\xE8me d\u2019IA expos\xE9 sur Internet"
+      description: "Dans le cas d\u2019un syst\xE8me d\u2019IA expos\xE9 sur Internet,\
+        \ il est recommand\xE9 de suivre les bonnes pratiques de cloisonnement du\
+        \ guide de l\u2019ANSSI \xE0 ce sujet, notamment :\n- d\xE9dier une fonction\
+        \ de reverse-proxy avant l\u2019acc\xE8s au service web du syst\xE8me d\u2019\
+        IA ;\n- mettre en place deux zones logiques pour le filtrage r\xE9seau \xE0\
+        \ l\u2019aide de pare-feux : un filtrage externe en frontal d\u2019Internet\
+        \ et un filtrage interne avant l\u2019acc\xE8s au syst\xE8me d\u2019IA ;\n\
+        - ne pas exposer un annuaire interne de l\u2019entit\xE9 pour l\u2019authentification\
+        \ sur le syst\xE8me d\u2019IA ;\n- \xE9viter de mutualiser sur un m\xEAme\
+        \ hyperviseur des fonctions de s\xE9curit\xE9 distinctes de la passerelle\
+        \ Internet s\xE9curis\xE9e (pare-feux, reverse-proxy, serveur de journalisation,\
+        \ etc.)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R14
+      name: "Privil\xE9gier un h\xE9bergement SecNumCloud dans le cas d\u2019un d\xE9\
+        ploiement d\u2019un syst\xE8me d\u2019IA dans un Cloud public"
+      description: "Si l\u2019entit\xE9 fait le choix d\u2019utiliser un h\xE9bergement\
+        \ dans un Cloud public, il est recommand\xE9 de privil\xE9gier une offre de\
+        \ confiance SecNumCloud dans les cas suivants :\n- les donn\xE9es trait\xE9\
+        es par le syst\xE8me d\u2019IA sont consid\xE9r\xE9es comme sensibles ;\n\
+        - l\u2019impact du syst\xE8me d\u2019IA sur le m\xE9tier est consid\xE9r\xE9\
+        \ comme critique ;\n- les utilisateurs du syst\xE8me d\u2019IA ne sont pas\
+        \ consid\xE9r\xE9s comme de confiance."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R15
+      name: "Pr\xE9voir un mode d\xE9grad\xE9 des services m\xE9tier sans syst\xE8\
+        me d\u2019IA"
+      description: "Afin de pr\xE9venir des dysfonctionnements ou des incoh\xE9rences\
+        \ dans les r\xE9ponses apport\xE9es par le mod\xE8le d\u2019IA, il est recommand\xE9\
+        \ de pr\xE9voir au minimum une proc\xE9dure de contournement du syst\xE8me\
+        \ d\u2019IA pour les utilisateurs, afin de r\xE9pondre aux besoins m\xE9tier."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R16
+      name: "D\xE9dier les composants GPU au syst\xE8me d\u2019IA"
+      description: "Il est recommand\xE9 de d\xE9dier les composants physiques GPU\
+        \ aux traitements r\xE9alis\xE9s par le syst\xE8me d\u2019IA. Dans le cas\
+        \ de la virtualisation, il est recommand\xE9 que les hyperviseurs ayant acc\xE8\
+        s aux cartes GPU soient d\xE9di\xE9s au syst\xE8me d\u2019IA, ou bien au minimum\
+        \ qu\u2019il y ait une fonction de filtrage mat\xE9riel (ex. : IOMMU) permettant\
+        \ de restreindre les acc\xE8s des machines virtuelles \xE0 la m\xE9moire de\
+        \ ces cartes GPU."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.1
+      ref_id: R17
+      name: "Prendre en compte les attaques par canaux auxiliaires sur le syst\xE8\
+        me d\u2019IA"
+      description: "Il est recommand\xE9 de s\u2019assurer que le syst\xE8me d\u2019\
+        IA n\u2019est pas vuln\xE9rable \xE0 des attaques par canaux auxiliaires (temporels,\
+        \ consommation, etc.) qui pourraient par exemple permettre \xE0 un attaquant\
+        \ de reconstruire une r\xE9ponse apport\xE9e par un mod\xE8le d\u2019IA."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.2
+      assessable: false
+      depth: 1
+      ref_id: '5.2'
+      name: "Recommandations pour la phase d\u2019entra\xEEnement"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.2
+      ref_id: R18
+      name: "Entra\xEEner un mod\xE8le d\u2019IA uniquement avec des donn\xE9es l\xE9\
+        gitimement accessibles par les utilisateurs"
+      description: "Il est fortement recommand\xE9 d\u2019entra\xEEner un mod\xE8\
+        le avec des donn\xE9es dont la sensibilit\xE9 est coh\xE9rente avec le besoin\
+        \ d\u2019en conna\xEEtre des utilisateurs."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.2
+      ref_id: R19
+      name: "Prot\xE9ger en int\xE9grit\xE9 les donn\xE9es d\u2019entra\xEEnement\
+        \ du mod\xE8le d\u2019IA"
+      description: "Il est recommand\xE9 de s\u2019assurer de l\u2019int\xE9grit\xE9\
+        \ des donn\xE9es d\u2019entra\xEEnement du mod\xE8le tout au long du cycle\
+        \ d\u2019entra\xEEnement. Cette protection peut prendre la forme d\u2019une\
+        \ v\xE9rification syst\xE9matique de la signature ou de l\u2019empreinte (hash)\
+        \ des fichiers utilis\xE9s ou bien des archives compress\xE9s de l\u2019ensemble\
+        \ de ces donn\xE9es."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.2
+      ref_id: R20
+      name: "Prot\xE9ger en int\xE9grit\xE9 les fichiers du syst\xE8me d\u2019IA"
+      description: "Il est recommand\xE9 de prot\xE9ger en int\xE9grit\xE9 les fichiers\
+        \ du mod\xE8le entra\xEEn\xE9, et de contr\xF4ler r\xE9guli\xE8rement que\
+        \ ceux-ci n\u2019ont pas \xE9t\xE9 alt\xE9r\xE9s. La recommandation vaut \xE9\
+        galement par extension pour tous les fichiers inh\xE9rents au fonctionnement\
+        \ du syst\xE8me d\u2019IA (scripts, binaires, etc.)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.2
+      ref_id: R21
+      name: "Proscrire le r\xE9-entra\xEEnement du mod\xE8le d\u2019IA en production"
+      description: "Il est fortement recommand\xE9 de ne pas r\xE9-entra\xEEner un\
+        \ mod\xE8le d\u2019IA directement en production. Cette action de r\xE9-entra\xEE\
+        nement doit d\xE9marrer avec le cycle en 3 phases, dans les environnements\
+        \ ad\xE9quats pour chacune des phases."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.3
+      assessable: false
+      depth: 1
+      ref_id: '5.3'
+      name: "Recommandations pour la phase de d\xE9ploiement"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.3
+      ref_id: R22
+      name: "S\xE9curiser la cha\xEEne de d\xE9ploiement en production des syst\xE8\
+        mes d\u2019IA"
+      description: "Il est recommand\xE9 d\u2019op\xE9rer le d\xE9ploiement des syst\xE8\
+        mes d\u2019IA g\xE9n\xE9rative depuis un SI d\u2019administration, en respectant\
+        \ les bonnes pratiques du guide d\u2019administration s\xE9curis\xE9e de l\u2019\
+        ANSSI."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.3
+      ref_id: R23
+      name: "Pr\xE9voir des audits de s\xE9curit\xE9 des syst\xE8mes d\u2019IA avant\
+        \ d\xE9ploiement en production"
+      description: "Il est recommand\xE9 de pr\xE9voir des tests de robustesse et\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019IA. Ces tests peuvent \xEAtre :\n\
+        - des tests d\u2019intrusion standards sur les composants techniques usuels\
+        \ d\u2019un syst\xE8me d\u2019IA : serveurs web, orchestrateur, base de donn\xE9\
+        es, etc.\n- des tests de s\xE9curit\xE9 sur les d\xE9veloppements r\xE9alis\xE9\
+        s dans le syst\xE8me d\u2019IA (via des outils SAST ou DAST par exemple) ;\n\
+        - des tests automatis\xE9s 20visant sp\xE9cifiquement des vuln\xE9rabilit\xE9\
+        s li\xE9es aux mod\xE8les d\u2019IA (attaques adverses, extraction du mod\xE8\
+        le, etc.) ;\n- des tests manuels d\u2019auditeurs visant sp\xE9cifiquement\
+        \ \xE0 tester la robustesse d\u2019un mod\xE8le d\u2019IA g\xE9n\xE9rative\
+        \ sur des sc\xE9narios d\u2019attaques plus sophistiqu\xE9s."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.3
+      ref_id: R24
+      name: "Pr\xE9voir des tests fonctionnels m\xE9tier des syst\xE8mes d\u2019IA\
+        \ avant d\xE9ploiement en production"
+      description: "Il est recommand\xE9 de pr\xE9voir des tests de performance et\
+        \ de qualit\xE9 des r\xE9ponses apport\xE9es par un syst\xE8me d\u2019IA g\xE9\
+        n\xE9rative."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.4
+      assessable: false
+      depth: 1
+      ref_id: '5.4'
+      name: Recommandations pour la phase de production
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.4
+      ref_id: R25
+      name: "Prot\xE9ger le syst\xE8me d\u2019IA en filtrant les entr\xE9es et les\
+        \ sorties des utilisateurs"
+      description: "Il est recommand\xE9 de mettre en place des fonctions permettant\
+        \ de se pr\xE9munir d\u2019une fuite de donn\xE9es ou d\u2019une fuite de\
+        \ mod\xE8le dans les r\xE9ponses :\n- une fonction de filtre de requ\xEAtes\
+        \ malveillantes des utilisateurs avant envoi au mod\xE8le ;\n- une fonction\
+        \ de filtre de requ\xEAtes jug\xE9es non l\xE9gitimes d\u2019un point de vue\
+        \ m\xE9tier ;\n- une fonction de filtre d\u2019informations internes du mod\xE8\
+        le (param\xE8tres, entra\xEEnement) dans les r\xE9ponses ;\n- une fonction\
+        \ de filtre d\u2019informations d\xE9finies comme sensibles dans les r\xE9\
+        ponses (ex. : coordonn\xE9es personnelles, r\xE9f\xE9rences de projets, etc.)\
+        \ ;\n- une limite sur la taille des r\xE9ponses (nombre de caract\xE8res maximum)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.4
+      ref_id: R26
+      name: "Ma\xEEtriser et s\xE9curiser les interactions du syst\xE8me d\u2019IA\
+        \ avec d\u2019autres applications m\xE9tier"
+      description: "L\u2019ensemble des interactions et des flux r\xE9seaux du syst\xE8\
+        me d\u2019IA doit \xEAtre document\xE9 et valid\xE9. Les flux r\xE9seaux entre\
+        \ le syst\xE8me d\u2019IA et d\u2019autres ressources doivent respecter l\u2019\
+        \xE9tat de l\u2019art en mati\xE8re de s\xE9curit\xE9 :\n- ils doivent \xEA\
+        tre strictement filtr\xE9s au niveau r\xE9seau, chiffr\xE9s et authentifi\xE9\
+        s (ex. : en suivant le guide TLS de l\u2019ANSSI [22]) ;\n- ils doivent utiliser\
+        \ des protocoles s\xE9curis\xE9s (ex. : OpenID Connect) en cas d\u2019usage\
+        \ d\u2019un fournisseur d\u2019identit\xE9 [23] ;\n- ils doivent int\xE9grer\
+        \ un contr\xF4le des autorisations d\u2019acc\xE8s \xE0 la ressource en compl\xE9\
+        ment de l\u2019authentification ;\n- ils doivent faire l\u2019objet d\u2019\
+        une journalisation au niveau de granularit\xE9 ad\xE9quat."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.4
+      ref_id: R27
+      name: "Limiter les actions automatiques depuis un syst\xE8me d\u2019IA traitant\
+        \ des entr\xE9es non-ma\xEEtris\xE9es"
+      description: "Il est fortement recommand\xE9 de limiter voire de proscrire les\
+        \ actions automatiques sur le SI d\xE9clench\xE9es depuis un syst\xE8me d\u2019\
+        IA et \xE0 partir d\u2019entr\xE9es non-ma\xEEtris\xE9es (ex. : donn\xE9es\
+        \ issues d\u2019Internet ou de mails, etc.)."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r28
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.4
+      ref_id: R28
+      name: "Cloisonner le syst\xE8me d\u2019IA dans un ou plusieurs environnements\
+        \ techniques d\xE9di\xE9s"
+      description: "Il est recommand\xE9 que le syst\xE8me d\u2019IA soit cloisonn\xE9\
+        \ dans des zones logiques d\xE9di\xE9es, afin de limiter les risques de lat\xE9\
+        ralisation d\u2019un attaquant qui aurait compromis ce syst\xE8me."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.4
+      ref_id: R29
+      name: "Journaliser l\u2019ensemble des traitements r\xE9alis\xE9s au sein du\
+        \ syst\xE8me d\u2019IA"
+      description: "Il est recommand\xE9 de journaliser au bon niveau de granularit\xE9\
+        \ l\u2019ensemble des traitements r\xE9alis\xE9s sur le syst\xE8me d\u2019\
+        IA, notamment :\n- les requ\xEAtes des utilisateurs (en prenant garde \xE0\
+        \ leur protection si ces requ\xEAtes contiennent des donn\xE9es sensibles)\
+        \ ;\n- les traitements r\xE9alis\xE9s en entr\xE9e sur cette requ\xEAte avant\
+        \ l\u2019envoi au mod\xE8le ;\n- les appels \xE0 des plugins ;\n- les appels\
+        \ \xE0 des donn\xE9es additionnelles ;\n- les traitements r\xE9alis\xE9s par\
+        \ les filtres en sortie ;\n- les r\xE9ponses aux utilisateurs."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.5
+      assessable: false
+      depth: 1
+      ref_id: '5.5'
+      name: "Cas particulier de la g\xE9n\xE9ration de code source assist\xE9e par\
+        \ l'IA"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.5
+      ref_id: R30
+      name: "Contr\xF4ler syst\xE9matiquement le code source g\xE9n\xE9r\xE9 par IA"
+      description: "Le code source g\xE9n\xE9r\xE9 par IA doit faire l\u2019objet\
+        \ de mesures de s\xE9curit\xE9 afin de v\xE9rifier son innocuit\xE9 :\n- proscrire\
+        \ l\u2019ex\xE9cution automatique de code source g\xE9n\xE9r\xE9 par IA dans\
+        \ l\u2019environnement de d\xE9veloppement ;\n- proscrire le commit automatique\
+        \ de code source g\xE9n\xE9r\xE9 par IA dans les d\xE9p\xF4ts ;\n- int\xE9\
+        grer un outil d\u2019assainissement de code source g\xE9n\xE9r\xE9 par IA\
+        \ dans l\u2019environnement de d\xE9veloppement ;\n- v\xE9rifier l\u2019innocuit\xE9\
+        \ des biblioth\xE8ques r\xE9f\xE9renc\xE9es dans le r\xE9sultat du code source\
+        \ g\xE9n\xE9r\xE9 par IA ;\n- faire contr\xF4ler r\xE9guli\xE8rement par un\
+        \ humain la qualit\xE9 du code source g\xE9n\xE9r\xE9 \xE0 partir de requ\xEA\
+        tes types suffisamment sophistiqu\xE9es."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.5
+      ref_id: R31
+      name: "Limiter la g\xE9n\xE9ration de code source par IA pour des modules critiques\
+        \ d\u2019applications"
+      description: "Il est fortement recommand\xE9 de ne pas utiliser un outil d\u2019\
+        IA g\xE9n\xE9rative pour g\xE9n\xE9rer des blocs de code source destin\xE9\
+        s \xE0 des modules critiques d\u2019applications :\n- les modules de cryptographie\
+        \ (authentification, chiffrement, signature, etc.) ;\n- les modules de gestion\
+        \ des droits d\u2019acc\xE8s des utilisateurs et administrateurs ;\n- les\
+        \ modules de traitement de donn\xE9es sensibles."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r32
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.5
+      ref_id: R32
+      name: "Sensibiliser les d\xE9veloppeurs sur les risques li\xE9s au code source\
+        \ g\xE9n\xE9r\xE9 par IA"
+      description: "Il est recommand\xE9 d\u2019effectuer des campagnes de sensibilisation\
+        \ sur les risques li\xE9s \xE0 l\u2019utilisation de code source g\xE9n\xE9\
+        r\xE9 par IA. Cette sensibilisation peut s\u2019appuyer sur des rapports publics\
+        \ sur ce sujet ou bien des papiers de recherche 23d\xE9montrant la pr\xE9\
+        sence de vuln\xE9rabilit\xE9s dans le code g\xE9n\xE9r\xE9 par IA.\nEn compl\xE9\
+        ment, les d\xE9veloppeurs peuvent \xE9galement \xEAtre form\xE9s sur les outils\
+        \ d\u2019IA pour l\u2019optimisation de leurs requ\xEAtes (prompt engineering\
+        \ 24) afin d\u2019am\xE9liorer la qualit\xE9 et la s\xE9curit\xE9 du code\
+        \ g\xE9n\xE9r\xE9."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.6
+      assessable: false
+      depth: 1
+      ref_id: '5.6'
+      name: "Cas particulier de services d'IA grand public expos\xE9s sur Internet"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r33
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.6
+      ref_id: R33
+      name: "Durcir les mesures de s\xE9curit\xE9 pour des services d\u2019IA grand\
+        \ public expos\xE9s sur Internet"
+      description: "Il est recommand\xE9 d\u2019apporter une attention particuli\xE8\
+        re sur certaines mesures de s\xE9curit\xE9 pour les services expos\xE9s au\
+        \ grand public, notamment :\n- entra\xEEner le mod\xE8le d\u2019IA uniquement\
+        \ \xE0 partir de donn\xE9es publiques ;\n- s\u2019assurer que les utilisateurs\
+        \ du syst\xE8me d\u2019IA ont fait l\u2019objet d\u2019une authentification\
+        \ au pr\xE9alable ;\n- analyser syst\xE9matiquement les requ\xEAtes des utilisateurs\
+        \ sur le syst\xE8me d\u2019IA ;\n- faire un contr\xF4le et une validation\
+        \ des r\xE9ponses avant l\u2019envoi aux utilisateurs ;\n- prot\xE9ger en\
+        \ confidentialit\xE9 les donn\xE9es des utilisateurs (historique des requ\xEA\
+        tes et des r\xE9ponses, etc.) ;\n- mettre en place des mesures contre les\
+        \ d\xE9nis de service distribu\xE9s (DDoS);\n- s\xE9curiser le service web\
+        \ en frontal des utilisateurs."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.7
+      assessable: false
+      depth: 1
+      ref_id: '5.7'
+      name: "Cas particulier de l'utilisation de solutions d'IA g\xE9n\xE9rative tierces"
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r34
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.7
+      ref_id: R34
+      name: "Proscrire l\u2019utilisation d\u2019outils d\u2019IA g\xE9n\xE9rative\
+        \ sur Internet pour un usage professionnel impliquant des donn\xE9es sensibles"
+      description: "L\u2019entit\xE9 cliente n\u2019ayant pas la ma\xEEtrise du service\
+        \ d\u2019IA g\xE9n\xE9rative, il n\u2019est pas possible de s\u2019assurer\
+        \ que la protection en confidentialit\xE9 des donn\xE9es soumises en entr\xE9\
+        e respecte les besoins de s\xE9curit\xE9 de l\u2019entit\xE9.\nPar mesure\
+        \ de pr\xE9caution, il est donc obligatoire de ne jamais int\xE9grer de donn\xE9\
+        es sensibles de l\u2019entit\xE9 dans les requ\xEAtes des utilisateurs."
+    - urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:r35
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-genai-security-recommendations-1.0:5.7
+      ref_id: R35
+      name: "Effectuer une revue r\xE9guli\xE8re de la configuration des droits des\
+        \ outils d\u2019IA g\xE9n\xE9rative sur les applications m\xE9tier"
+      description: "Il est recommand\xE9 de faire une revue des droits d\u2019acc\xE8\
+        s des outils d\u2019IA g\xE9n\xE9rative d\xE8s l\u2019activation du produit\
+        \ dans l\u2019entit\xE9, afin de s\u2019assurer que les droits positionn\xE9\
+        s par d\xE9faut ne sont pas trop laxistes ou trop ouverts par conception.\n\
+        Enfin, une revue r\xE9guli\xE8re des droits d\u2019acc\xE8s doit \xEAtre r\xE9\
+        alis\xE9e (ex. : tous les mois), afin notamment de s\u2019assurer que les\
+        \ mises \xE0 jour fonctionnelles et de s\xE9curit\xE9 du produit ne viennent\
+        \ pas impacter le besoin d\u2019en conna\xEEtre pour les utilisateurs."

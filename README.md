@@ -82,7 +82,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 10. Essential Eight 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA 🇪🇺
-13. NIST AI Risk Management Framework 🇺🇸
+13. NIST AI Risk Management Framework 🇺🇸🤖
 14. NIST SP 800-53 rev5 🇺🇸
 15. France LPM/OIV rules 🇫🇷
 16. CCB CyberFundamentals Framework 🇧🇪
@@ -101,6 +101,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 29. CSA CCM (Cloud Controls Matrix)\*
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 🇺🇸
+32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
+33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 
 <br/>
 
@@ -113,13 +115,11 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 
 ### Coming soon
 
-- ANSSI: RECOMMANDATIONS DE SÉCURITÉ POUR UN SYSTÈME D'IA GÉNÉRATIVE
 - FBI CJIS
 - CCPA
 - AI Act
 - Part-IS
 - SecNumCloud
-- NIST SP 800-218
 - SOX
 - MASVS
 - FedRAMP
@@ -177,6 +177,10 @@ For the following executions, use "docker compose up" directly.
 
 > [!TIP]
 > If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
+
+## Docker-compose on remote
+
+For docker setup on a remote server or hypervisor, checkout the [specific instructions here](https://intuitem.gitbook.io/ciso-assistant/deployment/remote-virtualization)
 
 ## Setting up CISO Assistant for development
 
@@ -401,6 +405,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend framework
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
+- [Caddy](https://caddyserver.com) - The coolest reverse Proxy 
 - [Gitbook](https://www.gitbook.com) - Documentation platform
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
