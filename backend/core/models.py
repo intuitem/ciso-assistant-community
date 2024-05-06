@@ -1295,6 +1295,16 @@ class ComplianceAssessment(Assessment):
             return round(score["score__avg"], 1)
         return -1
 
+    def get_selected_implementation_groups(self):
+        framework = self.framework
+        if not framework.implementation_groups_definition:
+            return []
+        return [
+            group.get("name")
+            for group in framework.implementation_groups_definition
+            if group.get("ref_id") in self.selected_implementation_groups
+        ]
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:
