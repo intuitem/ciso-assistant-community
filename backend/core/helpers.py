@@ -331,19 +331,26 @@ def get_sorted_requirement_nodes(
 def filter_graph_by_implementation_groups(
     graph: dict[str, dict], implementation_groups: set[str] | None
 ) -> dict[str, dict]:
-    if implementation_groups is None or len(implementation_groups) == 0:
+    if not implementation_groups:
         return graph
+
+    def should_include_node(node: dict) -> bool:
+        node_groups = node.get("implementation_groups")
+        if node_groups:
+            return any(group in node_groups for group in implementation_groups)
+
+        # Nodes without implementation groups but with children are included
+        return bool(node.get("children"))
+
     filtered_graph = {}
     for key, value in graph.items():
-        if value["implementation_groups"] is None:
+        if value.get("children"):
+            value["children"] = filter_graph_by_implementation_groups(
+                value["children"], implementation_groups
+            )
+        if should_include_node(value):
             filtered_graph[key] = value
-        elif any(
-            group in value["implementation_groups"] for group in implementation_groups
-        ):
-            filtered_graph[key] = value
-        value["children"] = filter_graph_by_implementation_groups(
-            value["children"], implementation_groups
-        )
+
     return filtered_graph
 
 
