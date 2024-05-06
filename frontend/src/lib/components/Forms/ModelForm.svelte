@@ -327,7 +327,25 @@
 		/>
 		<TextField {form} field="version" label={m.version()} />
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
-		{#if origin === 'edit'}
+		<AutocompleteSelect
+			{form}
+			options={getOptions({ objects: model.foreignKeys['framework'] })}
+			field="framework"
+			label={m.framework()}
+			on:change={async (e) => {
+				if (e.detail) {
+					await fetch(`/frameworks/${e.detail}`)
+						.then((r) => r.json())
+						.then((r) => {
+							const implementation_groups = r['implementation_groups_definition'] || [];
+							model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
+								(group) => ({ label: group.name, value: group.ref_id })
+							);
+						});
+				}
+			}}
+		/>
+		{#if model.selectOptions['selected_implementation_groups'].length}
 			<AutocompleteSelect
 				multiple
 				{form}
@@ -336,12 +354,6 @@
 				label={m.selectedImplementationGroups()}
 			/>
 		{/if}
-		<AutocompleteSelect
-			{form}
-			options={getOptions({ objects: model.foreignKeys['framework'] })}
-			field="framework"
-			label={m.framework()}
-		/>
 		<AutocompleteSelect
 			{form}
 			multiple
