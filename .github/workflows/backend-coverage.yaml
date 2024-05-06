@@ -15,16 +15,6 @@ jobs:
     env:
       working-directory: ./backend
 
-    services:
-      postgres:
-        image: postgres:14.1
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: postgres
-        ports: ["5432:5432"]
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     strategy:
       max-parallel: 4
       matrix:
@@ -46,12 +36,7 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: |
           touch .env
-          echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
           echo DJANGO_DEBUG='True' >> .env
-          echo POSTGRES_NAME=postgres >> .env
-          echo POSTGRES_USER=postgres >> .env
-          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
-          echo DB_HOST=localhost >> .env
           echo EMAIL_HOST=localhost >> .env
           echo EMAIL_PORT=1025 >> .env
           echo EMAIL_HOST_USER='' >> .env
@@ -67,13 +52,9 @@ jobs:
           python manage.py migrate
       - name: Run coverage
         working-directory: ${{env.working-directory}}
-        env:
-          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: |
           export $(grep -v '^#' .env | xargs)
           find . -path '*/tests/*' -and -name 'test*.py' -and -not -path "./venv/*" | xargs coverage run -m pytest
       - name: Display coverage report
         working-directory: ${{env.working-directory}}
-        env:
-          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
         run: coverage report
