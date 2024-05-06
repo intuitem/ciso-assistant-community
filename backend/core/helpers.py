@@ -328,6 +328,25 @@ def get_sorted_requirement_nodes(
     return tree
 
 
+def filter_graph_by_implementation_groups(
+    graph: dict[str, dict], implementation_groups: set[str] | None
+) -> dict[str, dict]:
+    if implementation_groups is None or len(implementation_groups) == 0:
+        return graph
+    filtered_graph = {}
+    for key, value in graph.items():
+        if value["implementation_groups"] is None:
+            filtered_graph[key] = value
+        elif any(
+            group in value["implementation_groups"] for group in implementation_groups
+        ):
+            filtered_graph[key] = value
+        value["children"] = filter_graph_by_implementation_groups(
+            value["children"], implementation_groups
+        )
+    return filtered_graph
+
+
 def get_parsed_matrices(user: User, risk_assessments: list | None = None):
     (
         object_ids_view,
