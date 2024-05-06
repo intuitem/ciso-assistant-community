@@ -345,7 +345,7 @@
 				}
 			}}
 		/>
-		{#if model.selectOptions['selected_implementation_groups'].length}
+		{#if model.selectOptions['selected_implementation_groups'] && model.selectOptions['selected_implementation_groups'].length}
 			<AutocompleteSelect
 				multiple
 				{form}
