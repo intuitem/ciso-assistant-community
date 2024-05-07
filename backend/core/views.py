@@ -1420,6 +1420,14 @@ def generate_html(
         compliance_assessment=compliance_assessment,
     ).all()
 
+    implementation_groups = compliance_assessment.selected_implementation_groups
+    graph = get_sorted_requirement_nodes(list(requirement_nodes), list(assessments))
+    graph = filter_graph_by_implementation_groups(graph, implementation_groups)
+    flattened_graph = flatten_dict(graph)
+
+    requirement_nodes = requirement_nodes.filter(urn__in=flattened_graph.values())
+    assessments = assessments.filter(requirement__urn__in=flattened_graph.values())
+
     node_per_urn = {r.urn: r for r in requirement_nodes}
     ancestors = {}
     for a in assessments:
@@ -1500,8 +1508,16 @@ def generate_html(
     content += "<div>"
     content += "<p class='font-semibold'>Reviewers</p>"
     content += "<ul>"
-    for reviewer in compliance_assessment.reviewers.all():
-        content += f"<li>{reviewer}</li>"
+    for group in compliance_assessment.reviewers.all():
+        content += f"<li>{group}</li>"
+    content += "</ul>"
+    content += "</div>"
+
+    content += "<div>"
+    content += "<p class='font-semibold'>Selected implementation groups</p>"
+    content += "<ul>"
+    for group in compliance_assessment.get_selected_implementation_groups():
+        content += f"<li>{group}</li>"
     content += "</ul>"
     content += "</div>"
 
