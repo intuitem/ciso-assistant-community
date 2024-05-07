@@ -60,7 +60,6 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
-          echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
           echo DJANGO_SUPERUSER_EMAIL=admin@tests.com >> .env
           echo DJANGO_SUPERUSER_PASSWORD=1234 >> .env
           echo POSTGRES_NAME=postgres >> .env
@@ -114,7 +113,6 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         run: |
           touch .env
-          echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
           export $(grep -v '^#' .env | xargs)
       - name: Config the Docker app
         run: |
