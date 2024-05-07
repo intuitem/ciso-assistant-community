@@ -120,7 +120,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - AI Act
 - Part-IS
 - SecNumCloud
-- NIST SP 800-218
 - SOX
 - MASVS
 - FedRAMP
@@ -178,6 +177,10 @@ For the following executions, use "docker compose up" directly.
 
 > [!TIP]
 > If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
+
+## Docker-compose on remote
+
+For docker setup on a remote server or hypervisor, checkout the [specific instructions here](https://intuitem.gitbook.io/ciso-assistant/deployment/remote-virtualization)
 
 ## Setting up CISO Assistant for development
 
@@ -402,6 +405,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend framework
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
+- [Caddy](https://caddyserver.com) - The coolest reverse Proxy 
 - [Gitbook](https://www.gitbook.com) - Documentation platform
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
