@@ -202,6 +202,10 @@ if DEBUG:
     REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
         "rest_framework.renderers.BrowsableAPIRenderer"
     )
+    # Add session authentication to allow using the browsable API
+    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"].append(
+        "rest_framework.authentication.SessionAuthentication"
+    )
 
     INSTALLED_APPS.append("django.contrib.staticfiles")
     STATIC_URL = "/static/"
