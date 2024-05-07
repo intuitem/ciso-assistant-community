@@ -1,7 +1,6 @@
 from collections.abc import MutableMapping
 from datetime import date, timedelta
 
-import pandas as pd
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
@@ -12,9 +11,17 @@ from .models import *
 from .utils import camel_case
 
 
-def flatten_dict(d: MutableMapping, sep: str = ".") -> MutableMapping:
-    [flat_dict] = pd.json_normalize(d, sep=sep).to_dict(orient="records")
-    return flat_dict
+def flatten_dict(
+    d: MutableMapping, parent_key: str = "", sep: str = "."
+) -> MutableMapping:
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
