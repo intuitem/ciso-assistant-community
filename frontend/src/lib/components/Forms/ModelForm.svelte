@@ -135,6 +135,7 @@
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
 			{form}
+			disabled={object.id}
 			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
 			field="risk_matrix"
 			label={m.riskMatrix()}
@@ -329,6 +330,7 @@
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
 			{form}
+			disabled={object.id}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
 			field="framework"
 			label={m.framework()}
