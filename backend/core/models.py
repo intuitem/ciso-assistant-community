@@ -1342,7 +1342,13 @@ class ComplianceAssessment(Assessment):
         return measures_status_count
 
     def donut_render(self) -> dict:
-        compliance_assessments_status = {"values": [], "labels": []}
+        def union_queries(base_query, groups, field_name):
+            queries = [
+                base_query.filter(**{f"{field_name}__icontains": group}).distinct()
+                for group in groups
+            ]
+            return queries[0].union(*queries[1:]) if queries else base_query.none()
+
         color_map = {
             "in_progress": "#3b82f6",
             "non_compliant": "#f87171",
@@ -1351,38 +1357,33 @@ class ComplianceAssessment(Assessment):
             "not_applicable": "#000000",
             "compliant": "#86efac",
         }
-        for st in RequirementAssessment.Status:
-            _requirement_assessments = (
-                RequirementAssessment.objects.filter(status=st)
-                .filter(compliance_assessment=self)
-                .filter(requirement__assessable=True)
-            )
-            queries = dict()
-            union = RequirementAssessment.objects.none()
-            if (
-                self.selected_implementation_groups
-                and len(self.selected_implementation_groups) > 0
-            ):
-                for ig in self.selected_implementation_groups:
-                    queries[ig] = _requirement_assessments.filter(
-                        requirement__implementation_groups__icontains=ig
-                    )
-                for query in queries:
-                    if union is None:
-                        union = queries[query]
-                    else:
-                        union = union | queries[query]
+
+        compliance_assessments_status = {"values": [], "labels": []}
+        for status in RequirementAssessment.Status:
+            base_query = RequirementAssessment.objects.filter(
+                status=status, compliance_assessment=self, requirement__assessable=True
+            ).distinct()
+
+            if self.selected_implementation_groups:
+                union_query = union_queries(
+                    base_query,
+                    self.selected_implementation_groups,
+                    "requirement__implementation_groups",
+                )
             else:
-                union = _requirement_assessments
-            count = union.distinct().count()
-            v = {
-                "name": st,
-                "localName": camel_case(st.value),
+                union_query = base_query
+
+            count = union_query.count()
+            value_entry = {
+                "name": status,
+                "localName": camel_case(status.value),
                 "value": count,
-                "itemStyle": {"color": color_map[st]},
+                "itemStyle": {"color": color_map[status]},
             }
-            compliance_assessments_status["values"].append(v)
-            compliance_assessments_status["labels"].append(st.label)
+
+            compliance_assessments_status["values"].append(value_entry)
+            compliance_assessments_status["labels"].append(status.label)
+
         return compliance_assessments_status
 
     def quality_check(self) -> dict:
