@@ -44,7 +44,9 @@ for tab in dataframe:
                 else:
                     safeguard_index += 1
                     safeguard = f"{control},{safeguard_index}"
-                    implementation_groups = "IG1,IG2,IG3" if ig1 else "IG2,IG3" if ig2 else "IG3"
+                    implementation_groups = (
+                        "IG1,IG2,IG3" if ig1 else "IG2,IG3" if ig2 else "IG3"
+                    )
                     output_table.append(
                         ("x", 2, safeguard, title, description, implementation_groups)
                     )
@@ -73,14 +75,28 @@ ws.append(["tab", "controls", "requirements"])
 ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("controls")
-ws1.append(["assessable", "depth", "ref_id", "name", "description", "implementation_groups"])
+ws1.append(
+    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
+)
 for row in output_table:
     ws1.append(row)
 
 ws2 = wb_output.create_sheet("implementation_groups")
 ws2.append(["ref_id", "name", "description"])
-ws2.append(["IG1", "Essential Cyber Hygiene", "Minimum standard of information security for all enterprises."])
-ws2.append(["IG2", "", "For enterprises managing IT infrastructure of multiple departments with differing risk profiles."])
+ws2.append(
+    [
+        "IG1",
+        "Essential Cyber Hygiene",
+        "Minimum standard of information security for all enterprises.",
+    ]
+)
+ws2.append(
+    [
+        "IG2",
+        "",
+        "For enterprises managing IT infrastructure of multiple departments with differing risk profiles.",
+    ]
+)
 ws2.append(["IG3", "", "To secure sensitive and confidential data."])
 
 print("generate ", output_file_name)
