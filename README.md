@@ -128,9 +128,9 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
-### Add your own framework
+### Add your own library (framework, threat catalog, reference controls catalog or matrix)
 
-Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
+Have a look in the tools directory and its dedicated readme. The convert_library.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
 
 You will also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
