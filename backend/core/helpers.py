@@ -1,5 +1,7 @@
+from collections.abc import MutableMapping
 from datetime import date, timedelta
 
+import pandas as pd
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from iam.models import Folder, Permission, RoleAssignment, User
@@ -8,6 +10,12 @@ from core.serializers import ReferenceControlReadSerializer, ThreatReadSerialize
 
 from .models import *
 from .utils import camel_case
+
+
+def flatten_dict(d: MutableMapping, sep: str = ".") -> MutableMapping:
+    [flat_dict] = pd.json_normalize(d, sep=sep).to_dict(orient="records")
+    return flat_dict
+
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "undefined": "#CCC",
