@@ -50,9 +50,9 @@ for tab in dataframe:
             req_sga = None
             req_vehicle = None
             further_info = None
-            ex_normal=None
-            ex_high=None
-            ex_very_high=None
+            ex_normal = None
+            ex_high = None
+            ex_very_high = None
             if title == "Information Security":
                 (
                     _,
@@ -127,10 +127,19 @@ for tab in dataframe:
                 output_table.append(("", level, control_number, control_question, ""))
                 output_table.append(("x", level + 1, "", "(must)", req_must, "must"))
                 if req_should and req_should != "None":
-                    output_table.append(("x", level + 1, "", "(should)", req_should, "should"))
+                    output_table.append(
+                        ("x", level + 1, "", "(should)", req_should, "should")
+                    )
                 if req_high and req_high != "None":
                     output_table.append(
-                        ("x", level + 1, "", "(for high protection needs)", req_high, "high")
+                        (
+                            "x",
+                            level + 1,
+                            "",
+                            "(for high protection needs)",
+                            req_high,
+                            "high",
+                        )
                     )
                 if req_very_high and req_very_high != "None":
                     output_table.append(
@@ -140,7 +149,7 @@ for tab in dataframe:
                             "",
                             "(for very high protection needs)",
                             req_very_high,
-                            "very_high"
+                            "very_high",
                         )
                     )
                 if req_sga and req_sga != "None":
@@ -194,7 +203,9 @@ ws.append(["tab", "scores", "scores"])
 ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("controls")
-ws1.append(["assessable", "depth", "ref_id", "name", "description", "implementation_groups"])
+ws1.append(
+    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
+)
 for row in output_table:
     ws1.append(row)
 
