@@ -1357,15 +1357,24 @@ class ComplianceAssessment(Assessment):
                 .filter(compliance_assessment=self)
                 .filter(requirement__assessable=True)
             )
+            queries = dict()
+            union = RequirementAssessment.objects.none()
             if (
                 self.selected_implementation_groups
                 and len(self.selected_implementation_groups) > 0
             ):
                 for ig in self.selected_implementation_groups:
-                    _requirement_assessments = _requirement_assessments.filter(
+                    queries[ig] = _requirement_assessments.filter(
                         requirement__implementation_groups__icontains=ig
                     )
-            count = _requirement_assessments.count()
+                for query in queries:
+                    if union is None:
+                        union = queries[query]
+                    else:
+                        union = union | queries[query]
+            else:
+                union = _requirement_assessments
+            count = union.distinct().count()
             v = {
                 "name": st,
                 "localName": camel_case(st.value),
