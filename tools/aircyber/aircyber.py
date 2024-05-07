@@ -95,7 +95,9 @@ ws.append(["tab", "controls", "requirements"])
 ws.append(["tab", "implementation_groups", "implementation_groups"])
 
 ws1 = wb_output.create_sheet("controls")
-ws1.append(["assessable", "depth", "ref_id", "name", "description", "implementation_groups"])
+ws1.append(
+    ["assessable", "depth", "ref_id", "name", "description", "implementation_groups"]
+)
 for row in output_table:
     ws1.append(row)
 ws2 = wb_output.create_sheet("implementation_groups")
