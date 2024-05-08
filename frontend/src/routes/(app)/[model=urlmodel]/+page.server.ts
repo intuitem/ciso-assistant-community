@@ -45,6 +45,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const selectOptions: Record<string, any> = {};
 
 	for (const selectField of selectFields) {
+		if (selectField.detail) continue;
 		const url = `${BASE_API_URL}/${params.model}/${selectField.field}/`;
 		const response = await fetch(url);
 		if (response.ok) {
