@@ -19,19 +19,19 @@ objects:
       \ l'aviation civile (DSAC), pr\xE9sente le Cadre de Conformit\xE9 Cyber France\
       \ (3CF) pour l'aviation civile.\n\xE9dition 1, version 1 du 3 sept. 2021"
     implementation_groups_definition:
-    - ref_id: 1
+    - ref_id: '1'
       name: Niveau 1
       description: "Gestion de la s\xE9curit\xE9 des syst\xE8mes d'information standard\
         \ dans le domaine de la s\xFBret\xE9"
-    - ref_id: 2
+    - ref_id: '2'
       name: Niveau 2
       description: "Gestion de la s\xE9curit\xE9 des syst\xE8mes d\u2018information\
         \ avanc\xE9e dans le domaine de la s\xFBret\xE9"
-    - ref_id: 3
+    - ref_id: '3'
       name: Niveau 3
       description: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information\
         \ all\xE9g\xE9 dans le domaine de la s\xFBret\xE9"
-    - ref_id: 4
+    - ref_id: '4'
       name: Niveau 4
       description: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information\
         \ dans le domaine de la s\xFBret\xE9 "
@@ -1123,39 +1123,60 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.3.
       description: "L\u2019op\xE9rateur \xE9labore un plan de traitement des risques\
         \ permettant d\u2019identifier :"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node118
       assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
       description: "Les mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
         \ :"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node119
       assessable: true
       depth: 8
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node118
       description: "du plan d\u2019action ;"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node120
       assessable: true
       depth: 8
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node118
       description: "compl\xE9mentaires d\xE9termin\xE9es supra et les risques qu\u2019\
         elles traitent."
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node121
       assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
       description: "leurs priorit\xE9s et ;"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node122
       assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
       description: "leurs d\xE9lais de mise en \u0153uvre ;"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node123
       assessable: true
       depth: 7
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
       description: "le cas \xE9ch\xE9ant, les raisons ne permettant pas de les mettre\
         \ en \u0153uvre."
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.4
       assessable: false
       depth: 5
@@ -2114,6 +2135,9 @@ objects:
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.3
       description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node237
       assessable: true
       depth: 5
@@ -3072,307 +3096,461 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M1
-      name: 1
       description: "Former les \xE9quipes op\xE9rationnelles \xE0 la s\xE9curit\xE9\
         \ des syst\xE8mes d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M2
-      name: 2
       description: "Sensibiliser les utilisateurs aux bonnes pratiques \xE9l\xE9mentaires\
         \ de s\xE9curit\xE9 informatique"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M3
-      name: 3
       description: "Ma\xEEtriser les risques de l\u2019infog\xE9rance"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M4
-      name: 4
       description: "Identifier les informations et serveurs les plus sensibles et\
         \ maintenir un sch\xE9ma du r\xE9seau"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M5
-      name: 5
       description: "Disposer d\u2019un inventaire exhaustif des comptes privil\xE9\
         gi\xE9s et le maintenir \xE0 jour"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m6
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M6
-      name: 6
       description: "Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et\
         \ de changement de fonction des utilisateurs"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m7
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M7
-      name: 7
       description: "Autoriser la connexion au r\xE9seau de l\u2019entit\xE9 aux seuls\
         \ \xE9quipements ma\xEEtris\xE9s"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m8
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M8
-      name: 8
       description: "Identifier nomm\xE9ment chaque personne acc\xE9dant au syst\xE8\
         me et distinguer les r\xF4les utilisateurs/administrateurs"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m9
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M9
-      name: 9
       description: "Attribuer les bons droits sur les ressources sensibles du syst\xE8\
         me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m10
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M10
-      name: 10
       description: "D\xE9finir et v\xE9rifier des r\xE8gles de choix et de dimensionnement\
         \ des mots de passe"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m11
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M11
-      name: 11
       description: "Prot\xE9ger les mots de passe stock\xE9s sur les syst\xE8mes"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m12
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M12
-      name: 12
       description: "Changer les \xE9l\xE9ments d\u2019authentification par d\xE9faut\
         \ sur les \xE9quipements et services"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m13
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M13
-      name: 13
       description: "Privil\xE9gier lorsque c\u2019est possible une authentification\
         \ forte"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m14
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M14
-      name: 14
       description: "Mettre en place un niveau de s\xE9curit\xE9 minimal sur l\u2019\
         ensemble du parc informatique"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m15
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M15
-      name: 15
       description: "Se prot\xE9ger des menaces relatives \xE0 l\u2019utilisation de\
         \ supports amovibles"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m16
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M16
-      name: 16
       description: "Utiliser un outil de gestion centralis\xE9e afin d\u2019homog\xE9\
         n\xE9iser les politiques de s\xE9curit\xE9"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m17
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M17
-      name: 17
       description: Activer et configurer le pare-feu local des postes de travail
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m18
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M18
-      name: 18
       description: "Chiffrer les donn\xE9es sensibles transmises par voie Internet"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m19
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M19
-      name: 19
       description: "Segmenter le r\xE9seau et mettre en place un cloisonnement entre\
         \ ces zones"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m20
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M20
-      name: 20
       description: "S\u2019assurer de la s\xE9curit\xE9 des r\xE9seaux d\u2019acc\xE8\
         s Wi-Fi et de la s\xE9paration des usages"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m21
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M21
-      name: 21
       description: "Utiliser des protocoles s\xE9curis\xE9s d\xE8s qu\u2019ils existent"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m22
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M22
-      name: 22
       description: "Mettre en place une passerelle d\u2019acc\xE8s s\xE9curis\xE9\
         \ \xE0 Internet"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m23
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M23
-      name: 23
       description: "Cloisonner les services visibles depuis Internet du reste du syst\xE8\
         me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m25
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M25
-      name: 25
       description: "S\xE9curiser les interconnexions r\xE9seau d\xE9di\xE9es avec\
         \ les partenaires"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m26
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M26
-      name: 26
       description: "Contr\xF4ler et prot\xE9ger l\u2019acc\xE8s aux salles serveurs\
         \ et aux locaux techniques"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m27
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M27
-      name: 27
       description: "Interdire l\u2019acc\xE8s \xE0 Internet depuis les postes ou serveurs\
         \ utilis\xE9s pour l\u2019administration du syst\xE8me"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m28
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M28
-      name: 28
       description: "Utiliser un r\xE9seau d\xE9di\xE9 et cloisonn\xE9 pour l\u2019\
         administration du syst\xE8me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m29
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M29
-      name: 29
       description: "Limiter au strict besoin op\xE9rationnel les droits d\u2019administration\
         \ sur les postes de travail"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m30
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M30
-      name: 30
       description: "Prendre des mesures de s\xE9curisation physique des terminaux\
         \ nomades"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m31
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M31
-      name: 31
       description: "Chiffrer les donn\xE9es sensibles, en particulier sur le mat\xE9\
         riel potentiellement perdable"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m32
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M32
-      name: 32
       description: "S\xE9curiser la connexion r\xE9seau des postes utilis\xE9s en\
         \ situation de nomadisme"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m33
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M33
-      name: 33
       description: "Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
         \ mobiles"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m34
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M34
-      name: 34
       description: "D\xE9finir une politique de mise \xE0 jour des composants du syst\xE8\
         me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m35
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M35
-      name: 35
       description: "Anticiper la fin de la maintenance des logiciels et syst\xE8mes\
         \ et limiter les adh\xE9rences logicielles"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m36
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M36
-      name: 36
       description: Activer et configurer les journaux des composants les plus importants
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m37
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M37
-      name: 37
       description: "D\xE9finir et appliquer une politique de sauvegarde des composants\
         \ critiques"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m38
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M38
-      name: 38
       description: "Proc\xE9der \xE0 des contr\xF4les et audits de s\xE9curit\xE9\
         \ r\xE9guliers puis appliquer les actions correctives"
+      implementation_groups:
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m39
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M39
-      name: 39
       description: "D\xE9signer un r\xE9f\xE9rent en s\xE9curit\xE9 des syst\xE8mes\
         \ d\u2019information et le faire conna\xEEtre aupr\xE8s du personnel"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m40
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
       ref_id: M40
-      name: 40
       description: "D\xE9finir une proc\xE9dure de gestion des incidents de s\xE9\
         curit\xE9"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
     - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
       assessable: false
       depth: 1
