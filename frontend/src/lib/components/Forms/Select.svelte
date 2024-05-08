@@ -22,7 +22,7 @@
 		value: unknown;
 	}
 
-	export let options: Option[];
+	export let options: Option[] = [];
 
 	$: classesTextField = (errors: string[] | undefined) =>
 		errors && errors.length > 0 ? 'input-error' : '';

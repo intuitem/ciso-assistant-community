@@ -510,5 +510,7 @@
 	"setTemporaryPassword2": "Please use a strong one and make sure to inform the user to change it as soon as possible",
 	"youCanSetNewPassword": "You can set a new password here",
 	"userWillBeDisconnected": "The user will be disconnected and will need to log in again",
-	"scoresDefinition": "Scores definition"
+	"scoresDefinition": "Scores definition",
+	"selectedImplementationGroups": "Selected implementation groups",
+	"implementationGroupsDefinition": "Implementation groups definition"
 }

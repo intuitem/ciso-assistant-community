@@ -195,6 +195,7 @@ export const ComplianceAssessmentSchema = baseNamedObject({
 	version: z.string().optional().default('0.1'),
 	project: z.string(),
 	status: z.string().optional().nullable(),
+	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
 	eta: z.string().optional().nullable(),
 	due_date: z.string().optional().nullable(),
