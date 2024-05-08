@@ -1290,10 +1290,17 @@ class ComplianceAssessment(Assessment):
             .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
             .exclude(is_scored=False)
         )
-        score = requirement_assessments_scored.aggregate(models.Avg("score"))
-        if score["score__avg"] is not None:
-            return round(score["score__avg"], 1)
-        return -1
+        ig = set(self.selected_implementation_groups)
+        score = 0
+        n = 0
+        for ras in requirement_assessments_scored:
+            if not(ig) or (ig & set(ras.requirement.implementation_groups)):
+                score += ras.score
+                n += 1
+        if n > 0:
+            return round(score/n, 1)
+        else:
+            return -1
 
     def get_selected_implementation_groups(self):
         framework = self.framework
