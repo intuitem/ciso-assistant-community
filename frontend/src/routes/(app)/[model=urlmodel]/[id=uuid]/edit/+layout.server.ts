@@ -57,7 +57,9 @@ export const load: LayoutServerLoad = async (event) => {
 
 	if (selectFields) {
 		for (const selectField of selectFields) {
-			const url = `${BASE_API_URL}/${event.params.model}/${selectField.field}/`;
+			const url = `${BASE_API_URL}/${event.params.model}/${
+				selectField.detail ? event.params.id + '/' : ''
+			}${selectField.field}/`;
 			const response = await event.fetch(url);
 			if (response.ok) {
 				selectOptions[selectField.field] = await response.json().then((data) =>
