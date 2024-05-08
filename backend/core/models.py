@@ -1290,15 +1290,19 @@ class ComplianceAssessment(Assessment):
             .exclude(status=RequirementAssessment.Status.NOT_APPLICABLE)
             .exclude(is_scored=False)
         )
-        ig = set(self.selected_implementation_groups)
+        ig = (
+            set(self.selected_implementation_groups)
+            if self.selected_implementation_groups
+            else None
+        )
         score = 0
         n = 0
         for ras in requirement_assessments_scored:
-            if not(ig) or (ig & set(ras.requirement.implementation_groups)):
+            if not (ig) or (ig & set(ras.requirement.implementation_groups)):
                 score += ras.score
                 n += 1
         if n > 0:
-            return round(score/n, 1)
+            return round(score / n, 1)
         else:
             return -1
 
