@@ -1308,7 +1308,10 @@ class ComplianceAssessment(Assessment):
 
     def get_selected_implementation_groups(self):
         framework = self.framework
-        if not framework.implementation_groups_definition:
+        if (
+            not framework.implementation_groups_definition
+            or not self.selected_implementation_groups
+        ):
             return []
         return [
             group.get("name")
