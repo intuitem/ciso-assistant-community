@@ -1,0 +1,647 @@
+urn: urn:intuitem:risk:library:iso-42001-2023
+locale: en
+ref_id: ISO 42001:2023
+name: ISO/IEC 42001:2023
+description: 'ISO/IEC 42001:2023
+
+  Information technology
+
+  Artificial intelligence Management system
+
+  https://www.iso.org/standard/81230.html'
+copyright: "\xA9 ISO"
+version: 1
+provider: ISO
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso-42001-2023
+    ref_id: ISO 42001:2023
+    name: ISO/IEC 42001:2023
+    description: 'Annex A of ISO/IEC 42001:2023
+
+      Information technology
+
+      Artificial intelligence Management system'
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      assessable: false
+      depth: 1
+      ref_id: Core
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '4'
+      name: Context of the organization
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:4
+      ref_id: '4.3'
+      name: Determining the scope of the AI management system
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:4
+      ref_id: '4.4'
+      name: AI management system
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '5'
+      name: Leadership
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:5
+      ref_id: '5.2'
+      name: AI Policy
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:5
+      ref_id: '5.3'
+      name: Roles, responsibilities and authorities
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '6'
+      name: Planning
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1
+      ref_id: 6.1.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1
+      ref_id: 6.1.2
+      name: AI risk assessment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1
+      ref_id: 6.1.3
+      name: AI risk treatment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6.1
+      ref_id: 6.1.4
+      name: AI system impact assessment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6
+      ref_id: '6.2'
+      name: AI objectives and planning to achieve them
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:6
+      ref_id: '6.3'
+      name: Planning of changes
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '7'
+      name: Support
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7
+      ref_id: '7.1'
+      name: Resources
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7
+      ref_id: '7.2'
+      name: Competence
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7
+      ref_id: '7.3'
+      name: Awareness
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7
+      ref_id: '7.4'
+      name: Communication
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7
+      ref_id: '7.5'
+      name: Documented information
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5
+      ref_id: 7.5.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5
+      ref_id: 7.5.2
+      name: Creating and updating documented information
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '8'
+      name: Operations
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:8
+      ref_id: '8.1'
+      name: Operational planning and control
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:8
+      ref_id: '8.2'
+      name: AI risk assessment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:8
+      ref_id: '8.3'
+      name: 'AI risk treatment '
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:8
+      ref_id: '8.4'
+      name: AI system impact assessment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '9'
+      name: Performance evaluation
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis and evaluation
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9
+      ref_id: '9.2'
+      name: Internal audit
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9.2
+      ref_id: 9.2.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9.2
+      ref_id: 9.2.2
+      name: Internal audit programme
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9
+      ref_id: '9.3'
+      name: Management review
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3
+      ref_id: 9.3.1
+      name: General
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3
+      ref_id: 9.3.2
+      name: Management review inputs
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:9.3
+      ref_id: 9.3.3
+      name: Management review results
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:core
+      ref_id: '10'
+      name: Improvement
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:10
+      ref_id: '10.1'
+      name: Continual improvement
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:10
+      ref_id: '10.2'
+      name: Nonconformity and corrective action
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      assessable: false
+      depth: 1
+      ref_id: Annex B
+      name: 'Implementation guidance for AI control '
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.2
+      name: Policies Related to AI
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2
+      ref_id: B.2.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2
+      ref_id: B.2.2
+      name: AI policy
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2
+      ref_id: B.2.3
+      name: Alignment with other organizational policies
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.2
+      ref_id: B.2.4
+      name: Review of the AI policy
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.3
+      name: Internal Organization
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3
+      ref_id: B.3.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3
+      ref_id: B.3.2
+      name: AI roles and responsibilities
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.3
+      ref_id: B.3.3
+      name: Reporting of concerns
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.4
+      name: Resources for AI Systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      ref_id: B.4.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      ref_id: B.4.2
+      name: Resource documentation
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      ref_id: B.4.3
+      name: Data resources
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      ref_id: B.4.4
+      name: Tooling resources
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      ref_id: B.4.5
+      name: System and computing resources
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.4
+      ref_id: B.4.6
+      name: Human resources
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.5
+      name: Assessing Impacts of AI Systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5
+      ref_id: B.5.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5
+      ref_id: B.5.2
+      name: AI system impact assessment process
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5
+      ref_id: B.5.3
+      name: Documentation of AI system impact assessments
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5
+      ref_id: B.5.4
+      name: Assessing AI system impact on individuals and groups of individuals
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.5
+      ref_id: B.5.5
+      name: Assessing societal impacts of AI systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.6
+      name: AI System Life Cycle
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6
+      ref_id: B.6.1
+      name: Management guidance for AI system development
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1
+      ref_id: B.6.1.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1
+      ref_id: B.6.1.2
+      name: 'Objectives for responsible development of AI system '
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.1
+      ref_id: B.6.1.3
+      name: Processes for responsible design and development of AI systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6
+      ref_id: B.6.2
+      name: AI System Life Cycle
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.1
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.2
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.2
+      name: AI system requirements and specification
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.3
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.3
+      name: Documentation of AI system design and development
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.4
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.4
+      name: AI system verification and validation
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.5
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.5
+      name: AI system deployment
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.6
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.6
+      name: AI system operation and monitoring
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.7
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.7
+      name: AI system technical documentation
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2.8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.6.2
+      ref_id: B.6.2.8
+      name: AI system recording of event logs
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.7
+      name: Data for AI systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      ref_id: B.7.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      ref_id: B.7.2
+      name: Data for development and enhancement of AI system
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      ref_id: B.7.3
+      name: Acquisition of data
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      ref_id: B.7.4
+      name: Quality of data for AI systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      ref_id: B.7.5
+      name: Data provenance
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.7
+      ref_id: B.7.6
+      name: Data preparation
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.8
+      name: Information for interested parties
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8
+      ref_id: B.8.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8
+      ref_id: B.8.2
+      name: System documentation and information for users
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8
+      ref_id: B.8.3
+      name: External reporting
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8
+      ref_id: B.8.4
+      name: Communication of incidents
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.8
+      ref_id: B.8.5
+      name: Information for interested parties
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.9
+      name: Use of AI systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9
+      ref_id: B.9.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9
+      ref_id: B.9.2
+      name: Processes for responsible use of AI systems
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9
+      ref_id: B.9.3
+      name: Objectives for responsible use of AI system
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.9
+      ref_id: B.9.4
+      name: Intended use of the AI system
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:annex-b
+      ref_id: B.10
+      name: Third-party and customer relationships
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10
+      ref_id: B.10.1
+      name: Objective
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10
+      ref_id: B.10.2
+      name: Allocating responsibilities
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10
+      ref_id: B.10.3
+      name: Suppliers
+    - urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso-42001-2023:b.10
+      ref_id: B.10.4
+      name: Customers
