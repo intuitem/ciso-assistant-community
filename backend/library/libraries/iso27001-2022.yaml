@@ -5,7 +5,7 @@ name: International standard ISO/IEC 27001:2022
 description: "Information security, cybersecurity and privacy protection \u2014 Information\
   \ security management systems \u2014 Requirements"
 copyright: See https://www.iso.org/standard/27001
-version: 1
+version: 2
 provider: ISO/IEC
 packager: intuitem
 dependencies:
@@ -160,6 +160,15 @@ objects:
       - urn:intuitem:risk:function:doc-pol:DOC.SO_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.RISK_REGISTER
       - urn:intuitem:risk:function:doc-pol:DOC.MGMT_REVIEW
+    - urn: urn:intuitem:risk:req_node:iso27001-2022:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27001-2022:6
+      ref_id: '6.3'
+      name: Planning for changes
+      description: Plan the changes to the ISMS
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:POL.MAINTENANCE
     - urn: urn:intuitem:risk:req_node:iso27001-2022:7
       assessable: false
       depth: 1

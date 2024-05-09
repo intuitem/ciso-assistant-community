@@ -39,7 +39,6 @@ jobs:
               working-directory: ${{env.working-directory}}
               run: |
                 touch .env
-                echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
                 echo DJANGO_DEBUG='True' >> .env
                 echo DB_HOST=localhost >> .env
                 echo EMAIL_HOST=localhost >> .env

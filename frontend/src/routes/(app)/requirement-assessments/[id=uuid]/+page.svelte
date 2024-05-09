@@ -151,7 +151,9 @@
 <div class="card space-y-2 p-4 bg-white shadow">
 	<code class="code">{data.requirement.urn}</code>
 	{#if data.requirement.description}
-		<p class="whitespace-pre-line">{data.requirement.description}</p>
+		<p class="whitespace-pre-line p-2 font-light text-lg">
+			👉 {data.requirement.description}
+		</p>
 	{/if}
 	{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 		<div class="card p-4 variant-glass-primary text-sm flex flex-row cursor-auto">
@@ -266,8 +268,9 @@
 			<HiddenInput {form} field="folder" />
 			<HiddenInput {form} field="requirement" />
 			<HiddenInput {form} field="compliance_assessment" />
-			<div class="flex flex-col space-y-3 mt-3">
+			<div class="flex flex-col my-8 space-y-6">
 				<Select {form} options={data.model.selectOptions['status']} field="status" label="Status" />
+
 				<Score
 					{form}
 					min_score={data.compliance_assessment_score.min_score}
@@ -276,8 +279,8 @@
 					field="score"
 					label="Score"
 				/>
-				<TextArea {form} field="observation" label="Observation" />
 
+				<TextArea {form} field="observation" label="Observation" />
 				<div class="flex flex-row justify-between space-x-4">
 					<button
 						class="btn bg-gray-400 text-white font-semibold w-full"
