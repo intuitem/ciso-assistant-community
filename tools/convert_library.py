@@ -1,5 +1,5 @@
 """
-simple script to transform an Excel file to a yaml library for a CISO assistant framework
+simple script to transform an Excel file to a yaml library for CISO assistant
 Conventions:
     | means a cell separation, <> means empty cell
     The first tab shall be named "library_content" and contain the description of the library in the other tabs
@@ -21,12 +21,16 @@ Conventions:
         framework_max_score        | <max_score>
         reference_control_base_urn | <base_urn> | id
         threat_base_urn            | <base_urn> | id
+        risk_matrix_urn            | <urn>
+        risk_matrix_ref_id         | <ref_id>
+        risk_matrix_name           | <name>
+        risk_matrix_description    | <description>
         tab                        | <tab_name> | requirements
         tab                        | <tab_name> | threats            | <base_urn>
         tab                        | <tab_name> | reference_controls | <base_urn>
         tab                        | <tab_name> | scores
         tab                        | <tab_name> | implementation_groups
-        tab                        | <tab_name> | matrix
+        tab                        | <tab_name> | risk_matrix
 
     For requirements:
         If no section_name is given, no upper group is defined, else an upper group (depth 0) with the section name is used.
@@ -51,12 +55,23 @@ Conventions:
             - description
             - category (policy/process/techncial/physical).
             - annotation
+    For risk matrices:
+        The first line is a header, with the following mandatory fields:
+            - type: probability/impact/risk.
+            - id: a number from 0 to n-1 (depending of the number of objects for a given type)
+            - color: empty cells with the desired color. Can be left with no fill.
+            - abbreviation: the abbreviation for the object
+            - name: name of the object
+            - description: description of the object
+            - grid: several columns describing the matrix with colors. The colors shall be consistent with the color column.
+        The grid shall be aligned with the probability objects, the columns being the impact in order of id, and the content of each cell being the id of the risk.
+        This is a topological representation. The display on the screen (transposition, direction of axes) will be managed in the frontend, not in the data model.
     A library has a single locale. Translated libraries have the same urns, they are merged during import.
     Dependencies are given as a comma or blank separated list of urns.
 """
 
 import openpyxl
-import sys
+import argparse
 import re
 import yaml
 from pprint import pprint
@@ -81,6 +96,10 @@ LIBRARY_VARS = (
     "reference_control_base_urn",
     "threat_base_urn",
     "library_dependencies",
+    "risk_matrix_urn",
+    "risk_matrix_ref_id",
+    "risk_matrix_name",
+    "risk_matrix_description",
     "tab",
 )
 library_vars = {}
@@ -89,23 +108,28 @@ library_vars_dict_reverse = defaultdict(dict)
 library_vars_dict_arg = defaultdict(dict)
 urn_unicity_checker = set()
 
-if len(sys.argv) <= 1:
-    print("missing input file parameter")
-    exit()
-input_file_name = sys.argv[1]
-ref_name = re.sub(r"\.\w+$", "", input_file_name).lower()
+
+parser = argparse.ArgumentParser(
+    prog="convert-library.py",
+    description="convert an Excel file in a library for CISO Assistant",
+)
+parser.add_argument("input_file_name")
+args = parser.parse_args()
+
+ref_name = re.sub(r"\.\w+$", "", args.input_file_name).lower()
 output_file_name = ref_name + ".yaml"
 
-print("parsing", input_file_name)
+print("parsing", args.input_file_name)
 
 # Define variable to load the dataframe
-dataframe = openpyxl.load_workbook(input_file_name)
+dataframe = openpyxl.load_workbook(args.input_file_name)
 
 requirement_nodes = []
 reference_controls = []
 threats = []
 scores_definition = []
 implementation_groups_definition = []
+risk_matrix = {}
 
 
 def error(message):
@@ -123,11 +147,118 @@ def read_header(row):
     return header
 
 
+# https://gist.github.com/Mike-Honey/b36e651e9a7f1d2e1d60ce1c63b9b633
+from colorsys import rgb_to_hls, hls_to_rgb
+
+RGBMAX = 0xFF  # Corresponds to 255
+HLSMAX = 240  # MS excel's tint function expects that HLS is base 240. see:
+# https://social.msdn.microsoft.com/Forums/en-US/e9d8c136-6d62-4098-9b1b-dac786149f43/excel-color-tint-algorithm-incorrect?forum=os_binaryfile#d3c2ac95-52e0-476b-86f1-e2a697f24969
+
+
+def rgb_to_ms_hls(red, green=None, blue=None):
+    """Converts rgb values in range (0,1) or a hex string of the form '[#aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
+    if green is None:
+        if isinstance(red, str):
+            if len(red) > 6:
+                red = red[-6:]  # Ignore preceding '#' and alpha values
+            blue = int(red[4:], 16) / RGBMAX
+            green = int(red[2:4], 16) / RGBMAX
+            red = int(red[0:2], 16) / RGBMAX
+        else:
+            red, green, blue = red
+    h, l, s = rgb_to_hls(red, green, blue)
+    return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
+
+
+def ms_hls_to_rgb(hue, lightness=None, saturation=None):
+    """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
+    if lightness is None:
+        hue, lightness, saturation = hue
+    return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
+
+
+def rgb_to_hex(red, green=None, blue=None):
+    """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
+    if green is None:
+        red, green, blue = red
+    return (
+        "%02x%02x%02x"
+        % (
+            int(round(red * RGBMAX)),
+            int(round(green * RGBMAX)),
+            int(round(blue * RGBMAX)),
+        )
+    ).upper()
+
+
+def get_theme_colors(wb):
+    """Gets theme colors from the workbook"""
+    # see: https://groups.google.com/forum/#!topic/openpyxl-users/I0k3TfqNLrc
+    from openpyxl.xml.functions import QName, fromstring
+
+    xlmns = "http://schemas.openxmlformats.org/drawingml/2006/main"
+    root = fromstring(wb.loaded_theme)
+    themeEl = root.find(QName(xlmns, "themeElements").text)
+    colorSchemes = themeEl.findall(QName(xlmns, "clrScheme").text)
+    firstColorScheme = colorSchemes[0]
+
+    colors = []
+
+    for c in [
+        "lt1",
+        "dk1",
+        "lt2",
+        "dk2",
+        "accent1",
+        "accent2",
+        "accent3",
+        "accent4",
+        "accent5",
+        "accent6",
+    ]:
+        accent = firstColorScheme.find(QName(xlmns, c).text)
+        for i in list(accent):  # walk all child nodes, rather than assuming [0]
+            if "window" in i.attrib["val"]:
+                colors.append(i.attrib["lastClr"])
+            else:
+                colors.append(i.attrib["val"])
+
+    return colors
+
+
+def tint_luminance(tint, lum):
+    """Tints a HLSMAX based luminance"""
+    # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
+    if tint < 0:
+        return int(round(lum * (1.0 + tint)))
+    else:
+        return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
+
+
+def theme_and_tint_to_rgb(wb, theme, tint):
+    """Given a workbook, a theme number and a tint return a hex based rgb"""
+    rgb = get_theme_colors(wb)[theme]
+    h, l, s = rgb_to_ms_hls(rgb)
+    return rgb_to_hex(ms_hls_to_rgb(h, tint_luminance(tint, l), s))
+
+
+def get_color(wb, cell):
+    """get cell color; None for no fill"""
+    if not cell.fill.patternType:
+        return None
+    if isinstance(cell.fill.fgColor.rgb, str):
+        return "#" + cell.fill.fgColor.rgb[2:]
+    theme = cell.fill.start_color.theme
+    tint = cell.fill.start_color.tint
+    color = theme_and_tint_to_rgb(wb, theme, tint)
+    return "#" + color
+
+
 for tab in dataframe:
     print("parsing tab", tab.title)
     title = tab.title
     if title.lower() == "library_content":
-        print("...processing content")
+        print("processing library content")
         for row in tab:
             if any([r.value for r in row]):
                 (v1, v2, v3) = (r.value for r in row[0:3])
@@ -140,7 +271,7 @@ for tab in dataframe:
     elif title not in library_vars_dict["tab"]:
         print(f"Ignored tab: {title}")
     elif library_vars_dict["tab"][title] == "requirements":
-        print("...processing requirements")
+        print("processing requirements")
         root_nodes_urn = re.sub("framework", "req_node", library_vars["framework_urn"])
         current_node_urn = None
         current_depth = 0
@@ -217,7 +348,7 @@ for tab in dataframe:
                 if annotation:
                     req_node["annotation"] = annotation
                 if implementation_groups:
-                    req_node["implementation_groups"] = implementation_groups.split(',')
+                    req_node["implementation_groups"] = implementation_groups.split(",")
                 threats = row[header["threats"]].value if "threats" in header else None
                 reference_controls = (
                     row[header["reference_controls"]].value
@@ -243,7 +374,7 @@ for tab in dataframe:
                         urn_prefix = library_vars_dict_reverse[
                             "reference_control_base_urn"
                         ][prefix]
-                        function_urns.append(f"{urn_prefix}{part_name}")
+                        function_urns.append(f"{urn_prefix}:{part_name}")
                 if threat_urns:
                     req_node["threats"] = threat_urns
                 if function_urns:
@@ -253,7 +384,7 @@ for tab in dataframe:
                 pass
                 # print("empty row")
     elif library_vars_dict["tab"][title] == "reference_controls":
-        print("...processing reference controls")
+        print("processing reference controls")
         current_function = {}
         is_header = True
         reference_controls_base_urn = library_vars["reference_control_base_urn"]
@@ -294,7 +425,7 @@ for tab in dataframe:
                     current_function["annotation"] = annotation
                 reference_controls.append(current_function)
     elif library_vars_dict["tab"][title] == "threats":
-        print("...processing threats")
+        print("processing threats")
         current_threat = {}
         is_header = True
         threat_base_urn = library_vars["threat_base_urn"]
@@ -331,7 +462,7 @@ for tab in dataframe:
                     current_threat["annotation"] = annotation
                 threats.append(current_threat)
     elif library_vars_dict["tab"][title] == "scores":
-        print("...processing scores")
+        print("processing scores")
         is_header = True
         for row in tab:
             if is_header:
@@ -348,7 +479,7 @@ for tab in dataframe:
                     {"score": score, "name": name, "description": description}
                 )
     elif library_vars_dict["tab"][title] == "implementation_groups":
-        print("...processing implementation groups")
+        print("processing implementation groups")
         is_header = True
         for row in tab:
             if is_header:
@@ -364,7 +495,63 @@ for tab in dataframe:
                 implementation_groups_definition.append(
                     {"ref_id": ref_id, "name": name, "description": description}
                 )
-
+    elif library_vars_dict["tab"][title] == "risk_matrix":
+        print("processing risk matrix")
+        risk_matrix["urn"] = library_vars["risk_matrix_urn"]
+        risk_matrix["ref_id"] = library_vars["risk_matrix_ref_id"]
+        risk_matrix["name"] = library_vars["risk_matrix_name"]
+        risk_matrix["description"] = library_vars["risk_matrix_description"]
+        risk_matrix["probability"] = []
+        risk_matrix["impact"] = []
+        risk_matrix["risk"] = []
+        risk_matrix["grid"] = []
+        grid = {}
+        grid_color = {}
+        is_header = True
+        for row in tab:
+            if is_header:
+                header = read_header(row)
+                is_header = False
+                assert "type" in header
+                assert "id" in header
+                assert "color" in header
+                assert "abbreviation" in header
+                assert "name" in header
+                assert "description" in header
+                assert "grid" in header
+            elif any([c.value for c in row]):
+                ctype = row[header["type"]].value
+                assert ctype in ("probability", "impact", "risk")
+                id = row[header["id"]].value
+                color = get_color(dataframe, row[header["color"]])
+                abbreviation = row[header["abbreviation"]].value
+                name = row[header["name"]].value
+                description = row[header["description"]].value
+                object = {
+                    "id": id,
+                    "abbreviation": abbreviation,
+                    "name": name,
+                    "description": description,
+                }
+                if color:
+                    object["hexcolor"] = color
+                risk_matrix[ctype].append(object)
+                if ctype == "probability":
+                    grid[id] = [c.value for c in row[6:]]
+                    grid_color[id] = [get_color(dataframe, c) for c in row[6:]]
+        risk_matrix["grid"] = [grid[id] for id in sorted(grid)]
+        for id in grid:
+            for i, risk_id in enumerate(grid[id]):
+                risk_color = (
+                    risk_matrix["risk"][risk_id]["hexcolor"]
+                    if "hexcolor" in risk_matrix["risk"][risk_id]
+                    else None
+                )
+                if not risk_color == grid_color[id][i]:
+                    print(f"color mismatch for risk id {risk_id}")
+                    exit(1)
+        for t in ("probability", "impact", "risk"):
+            risk_matrix[t].sort(key=lambda c: c["id"])
 
 has_framework = "requirements" in [
     library_vars_dict["tab"][x] for x in library_vars_dict["tab"]
@@ -404,13 +591,19 @@ if has_framework:
         "description": library_vars["framework_description"],
     }
     if "framework_min_score" in library_vars:
-        library["objects"]["framework"]["min_score"] = library_vars["framework_min_score"]
+        library["objects"]["framework"]["min_score"] = library_vars[
+            "framework_min_score"
+        ]
     if "framework_max_score" in library_vars:
-        library["objects"]["framework"]["max_score"] = library_vars["framework_max_score"]
+        library["objects"]["framework"]["max_score"] = library_vars[
+            "framework_max_score"
+        ]
     if scores_definition:
         library["objects"]["framework"]["scores_definition"] = scores_definition
     if implementation_groups_definition:
-        library["objects"]["framework"]["implementation_groups_definition"] = implementation_groups_definition
+        library["objects"]["framework"]["implementation_groups_definition"] = (
+            implementation_groups_definition
+        )
     library["objects"]["framework"]["requirement_nodes"] = requirement_nodes
 
 if has_reference_controls:
@@ -418,6 +611,10 @@ if has_reference_controls:
 
 if has_threats:
     library["objects"]["threats"] = threats
+
+if risk_matrix:
+    library["objects"]["risk_matrix"] = [risk_matrix]
+
 
 print("generating", output_file_name)
 with open(output_file_name, "w", encoding="utf8") as file:

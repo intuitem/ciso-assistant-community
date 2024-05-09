@@ -90,11 +90,11 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 18. HDS/HDH 🇫🇷
 19. OWASP Application Security Verification Standard (ASVS) 🐝
 20. RGS v2.0 🇫🇷
-21. AirCyber ✈️
+21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
-25. Tisax 🚘
+25. TISAX (VDA ISA) 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
 28. CIS Controls v8\*
@@ -102,6 +102,9 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
+33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
+34. GSA FedRAMP rev5 ☁️🇺🇸
+35. Cadre Conformité Cyber France (3CF) ✈️🇫🇷    
 
 <br/>
 
@@ -115,22 +118,21 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
+- BSI-IT (as requested by the German community)
 - CCPA
 - AI Act
 - Part-IS
 - SecNumCloud
-- NIST SP 800-218
 - SOX
 - MASVS
-- FedRAMP
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
-### Add your own framework
+### Add your own library (framework, threat catalog, reference controls catalog or matrix)
 
-Have a look in the tools directory and its dedicated readme. The convert_framework.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
+Have a look in the tools directory and its dedicated readme. The convert_library.py script will help you create your library from a simple Excel file. A typical framework can be ingested in a few hours.
 
 You will also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
 
@@ -177,6 +179,10 @@ For the following executions, use "docker compose up" directly.
 
 > [!TIP]
 > If you want a fresh install, simply delete the `db` directory, (default: backend/db) where the database is stored.
+
+## Docker-compose on remote
+
+For docker setup on a remote server or hypervisor, checkout the [specific instructions here](https://intuitem.gitbook.io/ciso-assistant/deployment/remote-virtualization)
 
 ## Setting up CISO Assistant for development
 
@@ -401,6 +407,7 @@ Set DJANGO_DEBUG=False for security reason.
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend framework
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
+- [Caddy](https://caddyserver.com) - The coolest reverse Proxy 
 - [Gitbook](https://www.gitbook.com) - Documentation platform
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS

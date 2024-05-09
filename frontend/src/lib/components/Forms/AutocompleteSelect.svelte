@@ -15,7 +15,7 @@
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
-	export let options: { label: string; value: string; suggested?: boolean }[];
+	export let options: { label: string; value: string; suggested?: boolean }[] = [];
 
 	import MultiSelect from 'svelte-multiselect';
 	import { createEventDispatcher } from 'svelte';

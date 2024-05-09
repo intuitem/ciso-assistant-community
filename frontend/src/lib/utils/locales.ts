@@ -322,6 +322,8 @@ export function localItems(languageTag: string): LocalItems {
 		minScore: m.minScore({ languageTag: languageTag }),
 		maxScore: m.maxScore({ languageTag: languageTag }),
 		scoresDefinition: m.scoresDefinition({ languageTag: languageTag }),
+		selectedImplementationGroups: m.selectedImplementationGroups({ languageTag: languageTag }),
+		implementationGroupsDefinition: m.implementationGroupsDefinition({ languageTag: languageTag }),
 		attemptToDeleteOnlyAdminAccountError: m.attemptToDeleteOnlyAdminAccountError({
 			languageTag: languageTag
 		}),
