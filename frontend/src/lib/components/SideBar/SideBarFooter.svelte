@@ -12,7 +12,7 @@
 		french: m.french(),
 		english: m.english(),
 		arabic: m.arabic(),
-		portuguese: m.portuguese(),
+		portuguese: m.portuguese()
 	};
 
 	const modalStore = getModalStore();

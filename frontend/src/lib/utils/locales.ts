@@ -16,7 +16,7 @@ export const LOCALE_MAP = {
 	pt: {
 		name: 'portuguese',
 		flag: '🇧🇷'
-	},
+	}
 };
 
 export function toCamelCase(str: string) {
