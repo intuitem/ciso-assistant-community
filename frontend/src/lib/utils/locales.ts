@@ -12,7 +12,11 @@ export const LOCALE_MAP = {
 	ar: {
 		name: 'arabic',
 		flag: '🇸🇦'
-	}
+	},
+	pt: {
+		name: 'portuguese',
+		flag: '🇧🇷'
+	},
 };
 
 export function toCamelCase(str: string) {
@@ -34,6 +38,7 @@ export function localItems(languageTag: string): LocalItems {
 		french: m.french({ languageTag: languageTag }),
 		english: m.english({ languageTag: languageTag }),
 		arabic: m.arabic({ languageTag: languageTag }),
+		portuguese: m.portuguese({ languageTag: languageTag }),
 		home: m.home({ languageTag: languageTag }),
 		edit: m.edit({ languageTag: languageTag }),
 		overview: m.overview({ languageTag: languageTag }),
