@@ -1,0 +1,3703 @@
+urn: urn:intuitem:risk:library:3cf-ed1-v1
+locale: fr
+ref_id: 3CF-ed1-v1
+name: "Cadre de Conformit\xE9 Cyber France (3CF) pour l'aviation civile"
+description: "Ce document, \xE9tabli par la direction de la s\xE9curit\xE9 de l'aviation\
+  \ civile (DSAC), pr\xE9sente le Cadre de Conformit\xE9 Cyber France (3CF) pour l'aviation\
+  \ civile.\n\xE9dition 1, version 1 du 3 sept. 2021\nhttps://meteor.dsac.aviation-civile.gouv.fr/meteor-externe/api/file/attachment/c63348e4-81fa-45a7-a380-36dd0166071c"
+copyright: "Ce document peut \xEAtre utilis\xE9 librement, sous r\xE9serve de mentionner\
+  \ sa paternit\xE9 (source et date de la derni\xE8re mise \xE0 jour)."
+version: 1
+provider: "Direction de la s\xE9curit\xE9 de l'aviation civile"
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:c3cf-ed1-v1
+    ref_id: 3CF-ed1-v1
+    name: "Cadre de Conformit\xE9 Cyber France (3CF) pour l'aviation civile."
+    description: "Ce document, \xE9tabli par la direction de la s\xE9curit\xE9 de\
+      \ l'aviation civile (DSAC), pr\xE9sente le Cadre de Conformit\xE9 Cyber France\
+      \ (3CF) pour l'aviation civile.\n\xE9dition 1, version 1 du 3 sept. 2021"
+    implementation_groups_definition:
+    - ref_id: '1'
+      name: Niveau 1
+      description: "Gestion de la s\xE9curit\xE9 des syst\xE8mes d'information standard\
+        \ dans le domaine de la s\xFBret\xE9"
+    - ref_id: '2'
+      name: Niveau 2
+      description: "Gestion de la s\xE9curit\xE9 des syst\xE8mes d\u2018information\
+        \ avanc\xE9e dans le domaine de la s\xFBret\xE9"
+    - ref_id: '3'
+      name: Niveau 3
+      description: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information\
+        \ all\xE9g\xE9 dans le domaine de la s\xFBret\xE9"
+    - ref_id: '4'
+      name: Niveau 4
+      description: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information\
+        \ dans le domaine de la s\xFBret\xE9 "
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Gouvernance
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      ref_id: '3.1'
+      name: Engagement de la direction
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.1
+      description: "La direction s'engage \xE0 assurer la protection des syst\xE8\
+        mes d'information critiques au regard de la s\xFBret\xE9 de l'aviation civile,\
+        \ contre toute atteinte \xE0 la confidentialit\xE9, l'int\xE9grit\xE9 et la\
+        \ disponibilit\xE9 de ces syst\xE8mes et des informations qu'ils contiennent\
+        \ et / ou traitent."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.1
+      description: "Pour ce faire, la direction s'engage \xE0 mettre en place un Syst\xE8\
+        me de Management de la S\xE9curit\xE9 de l'Information (SMSI) visant \xE0\
+        \ \xE9tablir, mettre en \u0153uvre, exploiter, surveiller, r\xE9examiner,\
+        \ tenir \xE0 jour et am\xE9liorer le niveau de cybers\xE9curit\xE9 des syst\xE8\
+        mes d'information critiques au regard de la s\xFBret\xE9 dont elle a la responsabilit\xE9\
+        ."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      ref_id: '3.2'
+      name: "Strat\xE9gie et objectifs"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node7
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.2
+      description: "De plus, la direction \xE9tablit et approuve :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node8
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node7
+      description: "une strat\xE9gie qui d\xE9crit son ambition globale en mati\xE8\
+        re de cybers\xE9curit\xE9 ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node9
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node7
+      description: les objectifs pour y parvenir ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node10
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node7
+      description: "les \xE9tapes et le plan d'actions pour atteindre ces objectifs."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      ref_id: '3.3'
+      name: "Gestion des ressources, r\xF4les et responsabilit\xE9s de la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node12
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.3
+      description: 'La direction s''assure que :'
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node13
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node12
+      description: "les ressources n\xE9cessaires pour assurer la gestion des risques\
+        \ li\xE9s \xE0 la s\xE9curit\xE9 des syst\xE8mes d'information sont disponibles\
+        \ ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node14
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node12
+      description: "les r\xF4les et responsabilit\xE9s concern\xE9s par la s\xE9curit\xE9\
+        \ des syst\xE8mes d'information, \xE0 tous niveaux de l'organisation :\n-\_\
+        \_\_\_\_\_\_ du personnel interne ;\n-\_\_\_\_\_\_\_ du personnel externe\
+        \ (prestataires, fournisseurs, etc.).\nsont formalis\xE9s, attribu\xE9s, approuv\xE9\
+        s, communiqu\xE9s et connus au sein de l'organisation."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      ref_id: '3.4'
+      name: Approbation
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node16
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.4
+      description: 'La direction approuve formellement :'
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node17
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node16
+      description: "la liste des syst\xE8mes d'informations critiques \xE0 la s\xFB\
+        ret\xE9 de l'aviation civile identifi\xE9s ;  "
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node18
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node16
+      description: "le plan d'actions de mise en \u0153uvre des mesures de s\xE9curit\xE9\
+        \ des syst\xE8mes d'information ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node19
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node16
+      description: "les politiques et proc\xE9dures de s\xE9curit\xE9 des syst\xE8\
+        mes d'information. "
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.4
+      description: "En outre, la direction approuve formellement le compte-rendu d'appr\xE9\
+        ciation des risques."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.4
+      description: "Enfin, la direction accepte formellement, \xE0 chaque r\xE9vision\
+        \ de l'appr\xE9ciation des risques, les risques r\xE9siduels pesant sur le\
+        \ p\xE9rim\xE8tre du syst\xE8me de management de la s\xE9curit\xE9 de l'information\
+        \ sur la base :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node22
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node21
+      description: "d'une appr\xE9ciation des risques ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node23
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node21
+      description: du plan de traitement des risques.
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      ref_id: '3.5'
+      name: "Syst\xE8me de management de la s\xE9curit\xE9 de l'information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node25
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.5
+      description: 'La direction :'
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node26
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node25
+      description: "s'appuie sur et approuve formellement un syst\xE8me de management\
+        \ de la s\xE9curit\xE9 de l'information (SMSI) et les documents associ\xE9\
+        s pour mettre en \u0153uvre la strat\xE9gie et atteindre les objectifs ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node27
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node25
+      description: "s'engage \xE0 satisfaire aux exigences applicables en mati\xE8\
+        re de s\xE9curit\xE9 des syst\xE8mes d'information ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node28
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node25
+      description: "s'engage \xE0 \u0153uvrer pour l'am\xE9lioration continue du SMSI\
+        \ ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node29
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node25
+      description: "d\xE9signe qui a la responsabilit\xE9 et l'autorit\xE9 de s'assurer\
+        \ que le SMSI est conforme aux exigences du pr\xE9sent document et \xE0 la\
+        \ d\xE9clinaison qui en est faite pour l'entreprise ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node30
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node25
+      description: "s'assure que la personne d\xE9sign\xE9e ci-dessus dispose des\
+        \ moyens, des ressources n\xE9cessaires et du statut adapt\xE9 \xE0 la r\xE9\
+        alisation de cette mission. "
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node31
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.5
+      description: "La direction s'engage \xE0 participer aux revues de direction\
+        \ afin de s'assurer que le SMSI est toujours appropri\xE9, adapt\xE9 et efficace."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node32
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.5
+      description: "Lors de ces revues, la direction prend des d\xE9cisions relatives\
+        \ :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node33
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node32
+      description: "aux opportunit\xE9s d'am\xE9lioration continue et ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node34
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node32
+      description: "\xE0 d'\xE9ventuels changements \xE0 apporter au SMSI."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3
+      ref_id: '3.6'
+      name: "Coh\xE9rence de la strat\xE9gie, des objectifs et du SMSI"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node36
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:3.6
+      description: "La direction s'assure de la coh\xE9rence et de l'int\xE9gration\
+        \ ou de l'articulation de la strat\xE9gie, des objectifs SSI et du SMSI avec\
+        \ :  "
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node37
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node36
+      description: "la strat\xE9gie, les objectifs et les risques globaux de l'organisation\
+        \ ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node38
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node36
+      description: "le(s) syst\xE8me(s) de management existant(s) de l'organisation."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Gestion de la s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4
+      ref_id: '4.1'
+      name: "Organisation de la s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1
+      ref_id: 4.1.1
+      name: Missions et enjeux
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node42
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.1
+      description: "L\u2019op\xE9rateur identifie les missions critiques au regard\
+        \ de la s\xFBret\xE9 de l\u2019aviation civile."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1
+      ref_id: 4.1.2
+      name: Besoins et attentes prestataires et fournisseurs
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node44
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.2
+      description: "L\u2019op\xE9rateur identifie :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node45
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node44
+      description: "les prestataires de services et fournisseurs d\u2019\xE9quipements\
+        \ auxquels il fait appel dans le cadre de la mise en \u0153uvre des missions\
+        \ critiques au regard de la s\xFBret\xE9 de l\u2019aviation civile, et ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node46
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node44
+      description: "les exigences relatives \xE0 la s\xE9curit\xE9 des syst\xE8mes\
+        \ d\u2019information \xE0 leur faire appliquer. Elles sont d\u2019ordre :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node47
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node46
+      description: "r\xE8glementaire, notamment celles en mati\xE8re de contr\xF4\
+        le d\u2019ant\xE9c\xE9dents, de sensibilisation et de formation ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node48
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node46
+      description: "contractuel et garantissent que les prestataires et fournisseurs\
+        \ appliquent les mesures de cybers\xE9curit\xE9 d\xE9finies et mises en \u0153\
+        uvre par l\u2019op\xE9rateur."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1
+      ref_id: 4.1.3
+      name: "Politiques et proc\xE9dures"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node50
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.3
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node51
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node50
+      description: "d\xE9finit les politiques et proc\xE9dures pour la mise en \u0153\
+        uvre des mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information, notamment\
+        \ celles de niveau standard pr\xE9cis\xE9es en Annexe 1 ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node52
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node50
+      description: "s\u2019assure que ces documents sont approuv\xE9s par la direction,\
+        \ diffus\xE9s et communiqu\xE9s aux personnels ainsi qu\u2019aux prestataires\
+        \ et fournisseurs le cas \xE9ch\xE9ant."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node53
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.3
+      description: "Puis, l\u2019op\xE9rateur d\xE9finit les politiques et proc\xE9\
+        dures pour la mise en \u0153uvre des mesures de s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information, notamment celles de niveau renforc\xE9."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1
+      ref_id: 4.1.4
+      name: "Personnels et comp\xE9tences"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4
+      ref_id: 4.1.4.1
+      name: Identification des personnes
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node56
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.1
+      description: "L\u2019op\xE9rateur identifie ou fait identifier par les parties\
+        \ int\xE9ress\xE9es concern\xE9es :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node57
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node56
+      description: "les \xE9quipes manag\xE9riales, \xE0 savoir les personnes organisant\
+        \ et pilotant la s\xE9curit\xE9 des syst\xE8mes d\u2019information critiques\
+        \ \xE0 la s\xFBret\xE9 ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node58
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node56
+      description: "les \xE9quipes op\xE9rationnelles, \xE0 savoir les personnes d\xE9\
+        finissant, planifiant et mettant en \u0153uvre les mesures de s\xE9curit\xE9\
+        \ sur les syst\xE8mes d\u2019information critiques \xE0 la s\xFBret\xE9\_;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node59
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node56
+      description: "les utilisateurs des syst\xE8mes d\u2019information critiques\
+        \ \xE0 la s\xFBret\xE9 :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node60
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node59
+      description: "disposant de droits d\u2019administrateur\_;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node61
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node59
+      description: "ne disposant pas de droits d\u2019administrateur."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node62
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node56
+      description: "les acteurs de la s\xFBret\xE9, \xE0 savoir les personnes :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node63
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node62
+      description: "organisant la mise en \u0153uvre des mesures de s\xFBret\xE9\_\
+        ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node64
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node62
+      description: "mettant en \u0153uvre les mesures de s\xFBret\xE9."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4
+      ref_id: 4.1.4.2
+      name: "V\xE9rification des ant\xE9c\xE9dents"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node66
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.2
+      description: "L\u2019op\xE9rateur applique ou fait appliquer par les parties\
+        \ int\xE9ress\xE9es, une v\xE9rification renforc\xE9e des ant\xE9c\xE9dents\
+        \ des personnes identifi\xE9es au \xA7 4.1.4.1."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node67
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.2
+      description: "Ainsi, l\u2019op\xE9rateur"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node68
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.2
+      description: "s\u2019assure que ces personnes disposent d\u2019une habilitation\
+        \ pr\xE9fectorale pr\xE9vue par l\u2019article L6342-3 du code des transports\
+        \ [16], \xE0 savoir :\n- qu\u2019ils disposent d\u2019un titre d\u2019acc\xE8\
+        s en zone de s\xFBret\xE9 \xE0 acc\xE8s r\xE9glement\xE9 valide dont la d\xE9\
+        livrance n\xE9cessite la d\xE9tention de l\u2019habilitation pr\xE9fectorale\
+        \ susmentionn\xE9e, ou bien ;\n- qu\u2019ils disposent d\u2019une habilitation\
+        \ sans badge."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node69
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.2
+      description: "prend en consid\xE9ration les emplois, \xE9tudes et interruptions\
+        \ \xE9ventuelles de ces personnes dans les \xC9tats o\xF9 elles ont r\xE9\
+        sid\xE9 au cours des 5 derni\xE8res ann\xE9es ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node70
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.2
+      description: "conserve des informations document\xE9es appropri\xE9es comme\
+        \ preuves."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4
+      ref_id: 4.1.4.3
+      name: Sensibilisation et formation
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node72
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.1.4.3
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node73
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node72
+      description: "s\u2019assure que\_:"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node74
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node73
+      description: "toutes les personnes identifi\xE9es pr\xE9c\xE9demment sont sensibilis\xE9\
+        es \xE0 la cybers\xE9curit\xE9"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node75
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node73
+      description: "les \xE9quipes manag\xE9riales sont form\xE9es \xE0 la gestion\
+        \ de la s\xE9curit\xE9 des syst\xE8mes d\u2019information en coh\xE9rence\
+        \ avec les t\xE2ches qui leur sont confi\xE9es"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node76
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node73
+      description: "les \xE9quipes op\xE9rationnelles sont form\xE9es \xE0 la mise\
+        \ en \u0153uvre des mesures de s\xE9curit\xE9 \xE0 l\u2019\xE9tat de l\u2019\
+        art, en coh\xE9rence avec les t\xE2ches qui leur sont confi\xE9es"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node77
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node72
+      description: "conserve des informations document\xE9es appropri\xE9es comme\
+        \ preuves."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4
+      ref_id: '4.2'
+      name: 'Gestions des risques '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2
+      ref_id: 4.2.1
+      name: "M\xE9thodologie de gestion des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node80
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.1
+      description: "Dans le cadre de la gestion des risques, l\u2019op\xE9rateur r\xE9\
+        alise une appr\xE9ciation des risques, sur laquelle il s\u2019appuie pour\
+        \ d\xE9finir le traitement des risques appropri\xE9."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node81
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.1
+      description: "L\u2019op\xE9rateur g\xE8re les risques en s\u2019appuyant sur\
+        \ une des normes ou des m\xE9thodes suivantes :\n- ISO/CEI 27005 [20],Norme\
+        \ relative \xE0 la Gestion des risques li\xE9s \xE0 la s\xE9curit\xE9 de l\u2019\
+        information ;\n- EBIOS Risk Manager [21] m\xE9thode d'appr\xE9ciation et de\
+        \ traitement des risques num\xE9riques publi\xE9e par l\u2019ANSSI ;\n- toute\
+        \ autre m\xE9thode conforme \xE0 la norme ISO/CEI 31000, norme relative \xE0\
+        \ la gestion des risques."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2
+      ref_id: 4.2.2
+      name: "Appr\xE9ciation des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2
+      ref_id: 4.2.2.1
+      name: "Activit\xE9s d\u2019appr\xE9ciation des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node84
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.1
+      description: "Sur la base des missions \xE9tablies pr\xE9c\xE9demment, l\u2019\
+        op\xE9rateur :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node85
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node84
+      description: "identifie les fonctions critiques au regard de la s\xFBret\xE9\
+        \ de l\u2019aviation civile ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node86
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node84
+      description: "r\xE9alise une analyse d\u2019impacts sur la s\xFBret\xE9 en cas\
+        \ de perte de confidentialit\xE9, d\u2019int\xE9grit\xE9 et/ou de disponibilit\xE9\
+        \ des fonctions identifi\xE9es ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node87
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node84
+      description: "identifie les \xE9v\xE9nements redout\xE9s et leur niveau de gravit\xE9\
+        ."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node88
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.1
+      description: "De plus, l\u2019op\xE9rateur :"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node89
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node88
+      description: "\xE9tablit des crit\xE8res de risque, notamment :"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node90
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node89
+      description: "les crit\xE8res d\u2019acceptation des risques ;"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node91
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node89
+      description: "les crit\xE8res d\u2019appr\xE9ciation des risques."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node92
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node88
+      description: "identifie les risques sur la base de son analyse d\u2019impact\
+        \ ;"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node93
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node88
+      description: "m\xE8ne une analyse des risques visant \xE0 d\xE9terminer les\
+        \ niveaux de risques associ\xE9s ;"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node94
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node88
+      description: "\xE9value les risques visant \xE0 :"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node95
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node94
+      description: "comparer les r\xE9sultats de l\u2019analyse de risque avec les\
+        \ crit\xE8res de risques ;"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node96
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node94
+      description: "prioriser les risques analys\xE9s."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node97
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.1
+      description: "Enfin, l\u2019op\xE9rateur associe \xE0 chaque risque identifi\xE9\
+        \ son propri\xE9taire ou responsable."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2
+      ref_id: 4.2.2.2
+      name: "R\xE9sultats de l\u2019appr\xE9ciation des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node99
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.2
+      description: "Sur la base de l\u2019analyse d\u2019impact ou de l\u2019appr\xE9\
+        ciation des risques, l\u2019op\xE9rateur identifie les syst\xE8mes d\u2019\
+        information critiques \xE0 la s\xFBret\xE9 et conserve des informations document\xE9\
+        es comme preuves."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node100
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.2.2
+      description: "En outre, l\u2019op\xE9rateur :"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node101
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node100
+      description: "produit un compte-rendu des r\xE9sultats de l\u2019appr\xE9ciation\
+        \ des risques d\xE9taillant :"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node102
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node101
+      description: "les conclusions des diff\xE9rentes activit\xE9s, notamment la\
+        \ liste des risques appr\xE9ci\xE9s et class\xE9s par ordre de priorit\xE9\
+        , en fonction des crit\xE8res d\u2019\xE9valuation des risques d\xE9finis\
+        \ ;"
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node103
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node101
+      description: "la liste des syst\xE8mes d\u2019information critiques \xE0 la\
+        \ s\xFBret\xE9 de l\u2019aviation civile, identifi\xE9s."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node104
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node100
+      description: "conserve des informations document\xE9es comme preuves des r\xE9\
+        sultats d\u2019appr\xE9ciation des risques."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2
+      ref_id: 4.2.3
+      name: Traitement des risques
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3
+      ref_id: 4.2.3.1
+      name: "Activit\xE9s du traitement des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.1
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1
+      ref_id: 4.2.3.1.1
+      name: "\xC9laboration du plan d\u2019actions"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node108
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.1
+      description: "L\u2019op\xE9rateur \xE9labore un plan d\u2019actions de mise\
+        \ en \u0153uvre des 38 mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ standards d\xE9taill\xE9es dans l\u2019annexe 1 ; et pr\xE9cisant"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node109
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node108
+      description: "les priorit\xE9s ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node110
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node108
+      description: "les d\xE9lais de mise en \u0153uvre ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node111
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node108
+      description: "le cas \xE9ch\xE9ant, les raisons ne permettant pas de mettre\
+        \ en \u0153uvre la mesure de s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node112
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.1
+      description: "En outre, l\u2019op\xE9rateur compl\xE8te le plan d\u2019actions\
+        \ avec les 19 mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ renforc\xE9es d\xE9taill\xE9es dans l\u2019annexe 1."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.2
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1
+      ref_id: 4.2.3.1.2
+      name: "Actions et mesures compl\xE9mentaires pour le traitement du risque"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node114
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.2
+      description: "Sur la base des r\xE9sultats de l\u2019appr\xE9ciation des risque,\
+        \ l\u2019op\xE9rateur d\xE9finit pour chacun des risques s\u2019il :\n- maintient\
+        \ le risque, dans le cas o\xF9 il consid\xE8re que le risque identifi\xE9\
+        \ est acceptable en l\u2019\xE9tat ;\n- r\xE9duit le niveau de risque par\
+        \ l\u2019introduction, la suppression ou la modification des mesures de s\xE9\
+        curit\xE9 des syst\xE8mes d\u2019information ;\n- refuse le risque en \xE9\
+        vitant l\u2019activit\xE9 ou la situation qui donne lieu \xE0 un risque ;\n\
+        - partage le risque avec une autre partie capable de g\xE9rer de mani\xE8\
+        re plus efficace le risque, afin que le risque r\xE9siduel puisse \xEAtre\
+        \ r\xE9appr\xE9ci\xE9 et jug\xE9 acceptable."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node115
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.2
+      description: "L\u2019op\xE9rateur d\xE9termine alors, la ou les mesures compl\xE9\
+        mentaires permettant de traiter le risque conform\xE9ment \xE0 l\u2019action\
+        \ choisie."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.3.
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1
+      ref_id: 4.2.3.1.3.
+      name: "\xC9laboration du plan de traitement des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.3.
+      description: "L\u2019op\xE9rateur \xE9labore un plan de traitement des risques\
+        \ permettant d\u2019identifier :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node118
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
+      description: "Les mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node119
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node118
+      description: "du plan d\u2019action ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node120
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node118
+      description: "compl\xE9mentaires d\xE9termin\xE9es supra et les risques qu\u2019\
+        elles traitent."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node121
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
+      description: "leurs priorit\xE9s et ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node122
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
+      description: "leurs d\xE9lais de mise en \u0153uvre ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node123
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node117
+      description: "le cas \xE9ch\xE9ant, les raisons ne permettant pas de les mettre\
+        \ en \u0153uvre."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.4
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1
+      ref_id: 4.2.3.1.4
+      name: "\xC9valuation des risques r\xE9siduels  "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node125
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.4
+      description: "L\u2019op\xE9rateur \xE9value les risques r\xE9siduels, apr\xE8\
+        s l\u2019application des mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information d\xE9finies dans le plan de traitement des risques."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.5
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1
+      ref_id: 4.2.3.1.5
+      name: Approbation des risques
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node127
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.5
+      description: "L\u2019op\xE9rateur formalise l\u2019approbation par la direction\
+        \ :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node128
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node127
+      description: "de la liste des syst\xE8mes d\u2019informations critiques \xE0\
+        \ la s\xFBret\xE9 de l\u2019aviation civile identifi\xE9s ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node129
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node127
+      description: "du plan d\u2019actions de mise en \u0153uvre des mesures de s\xE9\
+        curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node130
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.5
+      description: "En outre, l\u2019op\xE9rateur formalise l\u2019approbation par\
+        \ la direction du compte-rendu d\u2019appr\xE9ciation des risques."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node131
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.5
+      description: "Puis, l\u2019op\xE9rateur formalise :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node132
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node131
+      description: "l\u2019approbation du plan de traitement des risques ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node133
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node131
+      description: "l\u2019acceptation des risques r\xE9siduels, aupr\xE8s de la direction."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node134
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.1.5
+      description: "Enfin, l\u2019op\xE9rateur formalise l\u2019acceptation des risques\
+        \ r\xE9siduels, aupr\xE8s des propri\xE9taires ou responsables des risques."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3
+      ref_id: 4.2.3.2
+      name: "R\xE9sultats du traitement des risques"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node136
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.2
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node137
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node136
+      description: 'produit un rapport comprenant  :'
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node138
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node137
+      description: "la liste approuv\xE9e des syst\xE8mes d\u2019informations critiques\
+        \ \xE0 la s\xFBret\xE9 tels qu\u2019identifi\xE9s ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node139
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node137
+      description: "le plan d\u2019actions approuv\xE9 relatif \xE0 la mise en \u0153\
+        uvre des mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node140
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node136
+      description: "conserve des informations document\xE9es comme preuves des r\xE9\
+        sultats du traitement des risques."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node141
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.2
+      description: "Puis, l\u2019op\xE9rateur compl\xE8te le rapport approuv\xE9 en\
+        \ incluant le compte-rendu d\u2019appr\xE9ciation des risques."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node142
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.3.2
+      description: "Enfin l\u2019op\xE9rateur compl\xE8te le rapport avec :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node143
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node142
+      description: "le plan approuv\xE9 de traitement des risques ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node144
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node142
+      description: "l\u2019\xE9valuation des risques r\xE9siduels accept\xE9s."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2
+      ref_id: 4.2.4
+      name: "Mise en \u0153uvre des mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node146
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.4
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node147
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node146
+      description: "met en \u0153uvre : "
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node148
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node147
+      description: les mesures standards 1,2 et 4, et ;
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node149
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node147
+      description: "au moins 10% des mesures identifi\xE9es dans le plan d\u2019action\
+        \ ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node150
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node146
+      description: "produit un tableau de bord de suivi d\u2019avancement du plan\
+        \ d\u2019actions ;"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node151
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node146
+      description: "conserve des informations document\xE9es comme preuves des r\xE9\
+        sultats de la gestion des risques."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node152
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.4
+      description: "En outre, l\u2019op\xE9rateur met en \u0153uvre au moins 50% des\
+        \ mesures identifi\xE9es dans le plan d\u2019actions."
+      implementation_groups:
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node153
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:4.2.4
+      description: "Puis, l\u2019op\xE9rateur applique les mesures de s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information en s\u2019appuyant sur la mise en \u0153\
+        uvre du SMSI d\xE9taill\xE9e au \xA7 5.3."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: "Syst\xE8me de management de la s\xE9curit\xE9 de l\u2019information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5
+      ref_id: '5.1'
+      name: "D\xE9finition du SMSI"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1
+      ref_id: 5.1.1
+      name: "Strat\xE9gie du SMSI"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1
+      ref_id: 5.1.1.1
+      name: Missions et enjeux
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node158
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.1
+      description: "Outre les dispositions pr\xE9vues au \xA7 4.1.1. du pr\xE9sent\
+        \ document, l\u2019op\xE9rateur identifie en fonction des missions, les enjeux\
+        \ externes et internes pertinents qui influent sur la capacit\xE9 \xE0 obtenir\
+        \ le(s) r\xE9sultat(s) attendu(s) du SMSI, notamment :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node159
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node158
+      description: 'les contraintes externes :'
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node160
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node159
+      description: "le r\xE8glements (UE) n\xB02015/1998 [1] ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node161
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node159
+      description: "les lois et textes nationaux : Loi de programmation militaire,\
+        \ loi de transposition de la directive NIS \u2013 D\xE9crets et Arr\xEAt\xE9\
+        s associ\xE9s, le cas \xE9ch\xE9ant ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node162
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node158
+      description: les contraintes internes.
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1
+      ref_id: 5.1.1.2
+      name: "Besoin et attentes des parties int\xE9ress\xE9es"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node164
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.2
+      description: "Outre les dispositions pr\xE9vues au 4.1.2. relatives aux prestataires\
+        \ et fournisseurs, l\u2019op\xE9rateur identifie :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node165
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node164
+      description: "les parties int\xE9ress\xE9es concern\xE9es par le syst\xE8me\
+        \ de management de la s\xE9curit\xE9 de l\u2019information :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node166
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node165
+      description: les clients ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node167
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node165
+      description: 'les partenaires qui sont :'
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node168
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node167
+      description: "les organisations avec lesquelles elle \xE9change des informations\
+        \ pour assurer les missions critiques au regard de la s\xFBret\xE9 ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node169
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node167
+      description: "les prestataires de services et fournisseurs d\u2019\xE9quipements\
+        \ ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node170
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node167
+      description: "toute autre personne ou organisation susceptible d\u2019affecter\
+        \ ou d\u2019\xEAtre affect\xE9e par une d\xE9cision ou une activit\xE9 du\
+        \ SMSI ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node171
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node167
+      description: "les autorit\xE9s comp\xE9tentes."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node172
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node164
+      description: "les exigences relatives \xE0 la s\xE9curit\xE9 des syst\xE8mes\
+        \ d\u2019information \xE0 faire appliquer aux parties int\xE9ress\xE9es. Elles\
+        \ sont d\u2019ordre :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node173
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node172
+      description: "r\xE8glementaire, notamment celles en mati\xE8re de contr\xF4\
+        le d\u2019ant\xE9c\xE9dent, de sensibilisation et de formation ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node174
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node172
+      description: "contractuel et garantissent que les parties int\xE9ress\xE9es\
+        \ appliquent les exigences de cybers\xE9curit\xE9 d\xE9finies et mises en\
+        \ \u0153uvre par l\u2019op\xE9rateur."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1
+      ref_id: 5.1.1.3
+      name: "Domaine d\u2019application et p\xE9rim\xE8tre"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node176
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.3
+      description: "L\u2019op\xE9rateur d\xE9termine le domaine d\u2019application\
+        \ du SMSI, \xE0 savoir les limites et l\u2019applicabilit\xE9. Pour ce faire,\
+        \ il prend en compte :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node177
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node176
+      description: les enjeux externes et internes ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node178
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node176
+      description: les exigences ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node179
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node176
+      description: "les interfaces et les d\xE9pendances existant entre les activit\xE9\
+        s r\xE9alis\xE9es par l\u2019organisation et celles r\xE9alis\xE9es par d\u2019\
+        autres organisations."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1
+      ref_id: 5.1.1.4
+      name: "Interface avec les autres syst\xE8mes de management"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node181
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.1.4
+      description: "L\u2019op\xE9rateur \xE9tablit et formalise l\u2019articulation\
+        \ entre le SMSI et les autres syst\xE8mes de management existants, qui peuvent\
+        \ \xEAtre :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node182
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node181
+      description: "un Syst\xE8me de Gestion de la S\xE9curit\xE9 de l\u2019aviation\
+        \ civile (Safety Management System, SMS) ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node183
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node181
+      description: "un Syst\xE8me de Gestion de la S\xFBret\xE9 (Security Management\
+        \ System, SeMS)."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1
+      ref_id: 5.1.2
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node185
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.2
+      description: "Outre les dispositions pr\xE9vues au \xA7 4.1.4.3, l\u2019op\xE9\
+        rateur :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node186
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node185
+      description: "s\u2019assure que les \xE9quipes manag\xE9riales sont form\xE9\
+        es \xE0 :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node187
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node186
+      description: "l\u2019audit interne d\u2019un SMSI ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node188
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node186
+      description: "la gestion des incidents de cybers\xE9curit\xE9, en coh\xE9rence\
+        \ avec les t\xE2ches qui leur sont confi\xE9es."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node189
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node185
+      description: "conserve des informations document\xE9es appropri\xE9es comme\
+        \ preuves."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1
+      ref_id: 5.1.3
+      name: Documentation
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node191
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.3
+      description: "L\u2019op\xE9rateur d\xE9crit \xE0 travers une proc\xE9dure de\
+        \ gestion documentaire, la mani\xE8re dont il ma\xEEtrise les informations\
+        \ document\xE9es."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node192
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.3
+      description: "La proc\xE9dure de gestion documentaire pr\xE9cise :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node193
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node192
+      description: "l\u2019identification des types d\u2019informations \xE0 documenter\
+        \ (impos\xE9 r\xE9glementairement ou jug\xE9 n\xE9cessaires \xE0 l\u2019efficacit\xE9\
+        \ du syst\xE8me de management de la s\xE9curit\xE9 de l\u2019information)\
+        \ ; "
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node194
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node192
+      description: "les dispositions \xE0 appliquer lors de la cr\xE9ation et de la\
+        \ mise \xE0 jour des informations document\xE9es de l\u2019op\xE9rateur. En\
+        \ particulier, l\u2019op\xE9rateur s\u2019assure que les \xE9l\xE9ments suivants\
+        \ sont appropri\xE9s :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node195
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node194
+      description: "identification et description (par exemple titre, date, auteur,\
+        \ num\xE9ro de r\xE9f\xE9rence) ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node196
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node194
+      description: "format (par exemple langue, version logicielle, graphique) et\
+        \ support (par exemple papier, \xE9lectronique) ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node197
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node194
+      description: "examen et approbation du caract\xE8re appropri\xE9 et pertinent\
+        \ des informations."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node198
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node192
+      description: "l\u2019objectif du contr\xF4le exerc\xE9 par l\u2019op\xE9rateur,\
+        \ \xE0 savoir s\u2019assurer que les informations document\xE9es sont :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node199
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node198
+      description: "disponibles et conviennent \xE0 l\u2019utilisation, o\xF9 et quand\
+        \ elles sont n\xE9cessaires ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node200
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node198
+      description: "correctement prot\xE9g\xE9es (par exemple de toute perte de confidentialit\xE9\
+        , utilisation inappropri\xE9e ou perte d\u2019int\xE9grit\xE9)."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node201
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node192
+      description: "le contr\xF4le exerc\xE9 concerne, quand applicables :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node202
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node201
+      description: "la distribution, l\u2019acc\xE8s, la r\xE9cup\xE9ration et l\u2019\
+        utilisation ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node203
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node201
+      description: "le stockage et la conservation, y compris la pr\xE9servation de\
+        \ la lisibilit\xE9 ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node204
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node201
+      description: "le contr\xF4le des modifications;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node205
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node201
+      description: "la dur\xE9e de conservation et suppression."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node206
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node192
+      description: "les informations document\xE9es d\u2019origine externe que l\u2019\
+        op\xE9rateur juge n\xE9cessaires \xE0 la planification et au fonctionnement\
+        \ du SMSI sont identifi\xE9es et ma\xEEtris\xE9es."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1
+      ref_id: 5.1.4
+      name: Communication
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node208
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.1.4
+      description: "L\u2019op\xE9rateur d\xE9termine les besoins de communication\
+        \ interne et externe pertinents pour le SMSI, et notamment :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node209
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node208
+      description: sur quels sujets communiquer ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node210
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node208
+      description: "\xE0 quels moments communiquer ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node211
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node208
+      description: avec qui communiquer ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node212
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node208
+      description: qui doit communiquer ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node213
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node208
+      description: "les processus par lesquels la communication doit s\u2019effectuer."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5
+      ref_id: '5.2'
+      name: Planification du SMSI
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node215
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.2
+      description: "L\u2019op\xE9rateur planifie le SMSI en s\u2019appuyant sur la\
+        \ gestion des risques de niveau de conformit\xE9 3 et plus."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5
+      ref_id: '5.3'
+      name: "Mise en \u0153uvre du SMSI"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3
+      ref_id: 5.3.1
+      name: Organisation de la gestion des risques
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node218
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.1
+      description: "L\u2019op\xE9rateur d\xE9finit l\u2019organisation de la gestion\
+        \ des risques et en pr\xE9cise :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node219
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node218
+      description: la structure et le positionnement ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node220
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node218
+      description: "les responsabilit\xE9s des diff\xE9rents participants ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node221
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node218
+      description: "la p\xE9riodicit\xE9 et/ou les \xE9v\xE9nements significatifs\
+        \ d\xE9clenchant une r\xE9union ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node222
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node218
+      description: "les diff\xE9rents indicateurs de suivi d\u2019avancement du plan\
+        \ de traitement des risques."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3
+      ref_id: 5.3.2
+      name: Missions de la gestion des risques
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node224
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.2
+      description: "Au travers de cette organisation, l\u2019op\xE9rateur :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node225
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node224
+      description: "proc\xE8de \xE0 une r\xE9appr\xE9ciation des risques et/ou ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node226
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node224
+      description: "planifie et met en \u0153uvre :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node227
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node226
+      description: "les mesures standards 1 et 4  et renforc\xE9e 2 ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node228
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node226
+      description: au moins 70% des mesures standards ;
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node229
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node226
+      description: "au moins 20% des mesures renforc\xE9es ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node230
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node226
+      description: "les mesures compl\xE9mentaires identifi\xE9es dans le plan de\
+        \ traitement des risques."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node231
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node224
+      description: "contr\xF4le l\u2019avanc\xE9e du plan de traitement des risques."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node232
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.2
+      description: "En outre, l\u2019op\xE9rateur planifie et met en \u0153uvre :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node233
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node232
+      description: au moins 80% des mesures standards;
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node234
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node232
+      description: "au moins 50% des mesures renforc\xE9es."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3
+      ref_id: 5.3.3
+      name: "R\xE9sultats de la gestion des risques"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node236
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.3.3
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node237
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node236
+      description: "produit un tableau de bord de suivi d\u2019avancement du plan\
+        \ de traitement des risques ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node238
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node236
+      description: "conserve des informations document\xE9es comme preuves des r\xE9\
+        sultats de la gestion des risques."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5
+      ref_id: '5.4'
+      name: "\xC9valuation et am\xE9lioration du SMSI"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4
+      ref_id: 5.4.1
+      name: "\xC9valuation des performances de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1
+      ref_id: 5.4.1.1
+      name: "Organisation de l\u2019\xE9valuation des performances de s\xE9curit\xE9"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node242
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1.1
+      description: "L\u2019op\xE9rateur d\xE9finit l\u2019organisation de l\u2019\xE9\
+        valuation des performances et pr\xE9cise :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node243
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node242
+      description: la structure et le positionnement ;
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node244
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node242
+      description: "les responsabilit\xE9s des diff\xE9rents participants ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node245
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node242
+      description: "la p\xE9riodicit\xE9 et/ou les \xE9v\xE9nements significatifs\
+        \ d\xE9clenchant une r\xE9union ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node246
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node242
+      description: 'les indicateurs :'
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node247
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node246
+      description: "de conformit\xE9 du syst\xE8me de management de la s\xE9curit\xE9\
+        \ de l\u2019information ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node248
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node246
+      description: "d\u2019efficacit\xE9 de la s\xE9curit\xE9."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1
+      ref_id: 5.4.1.2
+      name: "Missions de l\u2019\xE9valuation des performances"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node250
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1.2
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node251
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node250
+      description: "Au travers de cette organisation, l\u2019op\xE9rateur \xE9value\
+        \ l\u2019efficacit\xE9 :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node252
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node251
+      description: "de la gestion des risques\_:"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node253
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node252
+      description: "Appr\xE9ciation des risques ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node254
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node252
+      description: Traitement des risques.
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node255
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node251
+      description: des mesures inscrites dans le plan de traitement des risques.
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node256
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node250
+      description: 'Par rapport :'
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node257
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node256
+      description: "aux objectifs de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ d\xE9finis dans la strat\xE9gie ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node258
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node256
+      description: "au retour d\u2019exp\xE9rience de la gestion des incidents."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node259
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node250
+      description: "En s\u2019appuyant sur :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node260
+      assessable: false
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node259
+      description: "les r\xE9sultats :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node261
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node260
+      description: des audits internes ;
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node262
+      assessable: true
+      depth: 8
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node260
+      description: "des audits des autorit\xE9s comp\xE9tentes."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node263
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node259
+      description: "son retour d\u2019exp\xE9rience."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1
+      ref_id: 5.4.1.3
+      name: "R\xE9sultats de l\u2019\xE9valuation des performances"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node265
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.1.3
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node266
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node265
+      description: "produit un tableau de bord de suivi des performances de s\xE9\
+        curit\xE9 ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node267
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node265
+      description: "conserve des informations document\xE9es comme preuves des r\xE9\
+        sultats d\u2019\xE9valuation des performances."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4
+      ref_id: 5.4.2
+      name: Audits internes
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2
+      ref_id: 5.4.2.1
+      name: Objectifs des audits internes
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node270
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.1
+      description: "L\u2019op\xE9rateur r\xE9alise des audits internes visant \xE0\
+        \ \xE9valuer :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node271
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node270
+      description: "la conformit\xE9 :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node272
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node271
+      description: "avec le pr\xE9sent document, du SMSI ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node273
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node271
+      description: "des syst\xE8mes d\u2019information critiques au regard de la s\xFB\
+        ret\xE9 avec les mesures pr\xE9vues dans le plan de traitement du risque."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node274
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node270
+      description: "la mise en \u0153uvre efficace et la tenue \xE0 jour du SMSI."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2
+      ref_id: 5.4.2.2
+      name: "Programme d\u2019audits"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node276
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.2
+      description: "L\u2019op\xE9rateur d\xE9finit un ou plusieurs programmes d\u2019\
+        audits, prenant en compte :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node277
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node276
+      description: "la d\xE9marche d\u2019appr\xE9ciation des risques ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node278
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node276
+      description: "la d\xE9marche de traitement des risques ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node279
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node276
+      description: "les r\xE9sultats des audits pr\xE9c\xE9dents."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node280
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.2
+      description: "et pr\xE9cise :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node281
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node280
+      description: "la fr\xE9quence, les m\xE9thodes et les responsabilit\xE9s des\
+        \ audits ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node282
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node280
+      description: les exigences de planification ;
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node283
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node280
+      description: "l\u2019\xE9laboration des rapports."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node284
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.2
+      description: "De plus l\u2019op\xE9rateur : "
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node285
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node284
+      description: "d\xE9finit les crit\xE8res d\u2019audits et les p\xE9rim\xE8tres\
+        \ de chaque audit ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node286
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node284
+      description: "s\xE9lectionne des auditeurs qui assurent l\u2019objectivit\xE9\
+        \ et l\u2019impartialit\xE9 du processus d\u2019audit."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2
+      ref_id: 5.4.2.3
+      name: "Suivi du programme d\u2019audit"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node288
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.3
+      description: "L\u2019op\xE9rateur assure le suivi du programme d\u2019audit\
+        \ au sein du dispositif d\u2019\xE9valuation des performances."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2
+      ref_id: 5.4.2.4
+      name: "R\xE9sultats des audits internes"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node290
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.2.4
+      description: "L\u2019op\xE9rateur :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node291
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node290
+      description: "produit un tableau de bord de suivi du ou des programmes d\u2019\
+        audits internes ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node292
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node290
+      description: 'enrichit les tableaux de bord de suivis :'
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node293
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node292
+      description: "des performances de s\xE9curit\xE9\_;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node294
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node292
+      description: "des non-conformit\xE9s et actions correctives avec les r\xE9sultats\
+        \ des audits internes ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node295
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node290
+      description: "s\u2019assure qu\u2019il est rendu compte des r\xE9sultats des\
+        \ audits \xE0 la direction concern\xE9e ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node296
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node290
+      description: "conserve des informations document\xE9es comme preuves de la mise\
+        \ en \u0153uvre du ou des programme(s) d\u2019audit et des r\xE9sultats d\u2019\
+        audit."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4
+      ref_id: 5.4.3
+      name: Revue de direction
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3
+      ref_id: 5.4.3.1
+      name: Revue de direction
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node299
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.1
+      description: "L\u2019op\xE9rateur d\xE9finit et pr\xE9cise :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node300
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node299
+      description: "l\u2019organisation et le positionnement de la revue de direction\_\
+        ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node301
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node299
+      description: "les responsabilit\xE9s des diff\xE9rents participants ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node302
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node299
+      description: "la p\xE9riodicit\xE9 :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node303
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node302
+      description: "au moins 1 fois entre 2 audits de l\u2019autorit\xE9, et/ou ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node304
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node302
+      description: "les \xE9v\xE9nements significatifs d\xE9clenchant la revue de\
+        \ direction (incident, changement de contexte etc.)."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3
+      ref_id: 5.4.3.2
+      name: Missions de la revue de direction
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node306
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.2
+      description: 'Sur la base :'
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node307
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node306
+      description: "des changements de contexte de l\u2019op\xE9rateur, notamment\
+        \ :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node308
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node307
+      description: "l\u2019\xE9volution de la menace ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node309
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node307
+      description: "un changement de l\u2019organisation ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node310
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node307
+      description: "des changements des besoins et attentes des parties int\xE9ress\xE9\
+        es ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node311
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node307
+      description: "une modification du domaine d\u2019application."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node312
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node306
+      description: "des r\xE9sultats de l\u2019appr\xE9ciation des risques ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node313
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node306
+      description: "des tableaux de bord de suivi d\u2019avancement du plan de traitement\
+        \ des risques."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node314
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.2
+      description: "L\u2019op\xE9rateur identifie et d\xE9cide des :"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node315
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node314
+      description: "actions pr\xE9ventives \xE0 mettre en \u0153uvre ;"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node316
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node314
+      description: "modifications \xE0 apporter au SMSI : Organisation, besoins et\
+        \ attentes des parties int\xE9ress\xE9es, et du domaine d\u2019application."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node317
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.2
+      description: "Pour prendre ses d\xE9cisions, l\u2019op\xE9rateur s\u2019appuie\
+        \ \xE9galement sur : "
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node318
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node317
+      description: "des tableaux de bord de suivi d\u2019avancement du plan de traitement\
+        \ des risques, des performances de s\xE9curit\xE9 et des actions correctives\
+        \ ; "
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node319
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node317
+      description: "des r\xE9sultats d\u2019audits."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3
+      ref_id: 5.4.3.3
+      name: Conclusions de la revue de direction
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node321
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.3.3
+      description: "L\u2019op\xE9rateur conserve des informations document\xE9es comme\
+        \ preuves des conclusions des revues de direction."
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4
+      ref_id: 5.4.4
+      name: "R\xE9action aux non-conformit\xE9s"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.1
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4
+      ref_id: 5.4.4.1
+      name: "Sources des non-conformit\xE9s"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node324
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.1
+      description: "L\u2019op\xE9rateur r\xE9agit aux non-conformit\xE9s notifi\xE9\
+        es par les autorit\xE9s comp\xE9tentes."
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node325
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.1
+      description: "L\u2019op\xE9rateur r\xE9agit aux non-conformit\xE9s :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node326
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node325
+      description: "identifi\xE9es lors :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node327
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node326
+      description: "de l\u2019\xE9valuation des performances ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node328
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node326
+      description: des audits internes ;
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node329
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node326
+      description: de la gestion des incidents,
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node330
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node325
+      description: "notifi\xE9es par :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node331
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node330
+      description: "ses parties int\xE9ress\xE9es, en particulier les clients  et\
+        \ les partenaires (fournisseurs, sous-traitants, etc.) ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node332
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node330
+      description: "l\u2019autorit\xE9 comp\xE9tente dans le cadre de sa surveillance,\
+        \ la DSAC."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.2
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4
+      ref_id: 5.4.4.2
+      name: "Traitement des non-conformit\xE9s"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node334
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.2
+      description: "Lorsqu\u2019une non-conformit\xE9 est d\xE9tect\xE9e, l\u2019\
+        op\xE9rateur en :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node335
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node334
+      description: "traite les cons\xE9quences ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node336
+      assessable: false
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node334
+      description: 'identifie :'
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node337
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node336
+      description: la ou les causes ;
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node338
+      assessable: true
+      depth: 7
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node336
+      description: "si des non-conformit\xE9s similaires existent ou pourraient se\
+        \ produire."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node339
+      assessable: false
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.2
+      description: "Sur la base de cette analyse, l\u2019op\xE9rateur :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node340
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node339
+      description: "d\xE9termine l\u2019action corrective associ\xE9e comme par exemple\
+        \ :\n- aucune action ;\n- un ajout, une suppression ou une modification d\u2019\
+        une mesure de traitement du risque ;\n- une modification du syst\xE8me de\
+        \ management de la s\xE9curit\xE9 de l\u2019information."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node341
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node339
+      description: "planifie sa mise en \u0153uvre ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node342
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node339
+      description: "\xE9value son efficacit\xE9."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.3
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4
+      ref_id: 5.4.4.3
+      name: "Suivi des non-conformit\xE9s"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node344
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.3
+      description: "L\u2019op\xE9rateur assure le suivi des non-conformit\xE9s au\
+        \ sein du dispositif d\u2019\xE9valuation des performances et lors des revues\
+        \ de direction."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.4
+      assessable: false
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4
+      ref_id: 5.4.4.4
+      name: "R\xE9sultat de la r\xE9action aux non-conformit\xE9s"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node346
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.4
+      description: "L\u2019op\xE9rateur produit un tableau de bord de suivi des non-conformit\xE9\
+        s et actions correctives qui pr\xE9cise :"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node347
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node346
+      description: "la non-conformit\xE9 et l\u2019action corrective associ\xE9e ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node348
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node346
+      description: "le statut de mise en \u0153uvre et les d\xE9lais ;"
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node349
+      assessable: true
+      depth: 6
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node346
+      description: "l\u2019\xE9valuation de son efficacit\xE9."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node350
+      assessable: true
+      depth: 5
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:5.4.4.4
+      description: "L\u2019op\xE9rateur conserve des informations document\xE9es comme\
+        \ preuves des r\xE9actions \xE0 une non-conformit\xE9."
+      implementation_groups:
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Cas particuliers des OIV et des OSE
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node352
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:6
+      description: "Concernant le r\xE8glement (UE) n\xB02015/1998 [1] les OIV et\
+        \ OSE peuvent faire valoir la mesure d\u2019\xE9quivalence pr\xE9vue par ledit\
+        \ r\xE8glement mais uniquement pour les donn\xE9es et syst\xE8mes critiques\
+        \ relevant de la s\xFBret\xE9 de l\u2019aviation civile qui sont \xE9galement\
+        \ :"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node353
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node352
+      description: "des syst\xE8mes d'information d'importance vitale (SIIV) ou  tels\
+        \ que d\xE9finis par le code de la d\xE9fense ;"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node354
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node352
+      description: "des r\xE9seaux et syst\xE8mes d'information essentiels (SIE) tels\
+        \ que d\xE9finis par la directive europ\xE9enne de 2016 dite \xAB NIS \xBB\
+        ."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node355
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:6
+      description: "Cependant cette \xE9quivalence ne s\u2019applique pas pour les\
+        \ exigences r\xE8glementaires relatives \xE0 la v\xE9rification des ant\xE9\
+        c\xE9dents. En effet, ils doivent s\u2019y soumettre au m\xEAme titre que\
+        \ les autres op\xE9rateurs."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node356
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:6
+      description: "Concernant le futur r\xE8glement (UE) Part IS [2], les OIV et\
+        \ les OSE ayant d\xE9j\xE0 men\xE9 des travaux en mati\xE8re de s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information dans le cadre des dispositifs LPM et\
+        \ NIS, peuvent s\u2019appuyer dessus pour la mise en \u0153uvre du SMSI, \xE0\
+        \ condition d\u2019avoir pris en consid\xE9ration les enjeux en mati\xE8re\
+        \ de s\xE9curit\xE9 de l\u2019aviation civile dans leurs d\xE9marches."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node357
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:6
+      description: "Concr\xE8tement, les OIV et les OSE peuvent s\u2019appuyer sur"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node358
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node357
+      description: "leur PSSI pour la d\xE9finition du SMSI  et l\u2019\xE9valuation\
+        \ des performances ;"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node359
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node357
+      description: "leur analyse d\u2019impacts ou leur d\xE9marche globale d\u2019\
+        analyse de risques pour l\u2019appr\xE9ciation des risques\_;"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node360
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node357
+      description: "les mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information\
+        \ d\xE9j\xE0 mises en \u0153uvre pour le traitement du risque. Ils n\u2019\
+        ont pas obligation d\u2019appliquer des mesures compl\xE9mentaires ;"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node361
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node357
+      description: "leurs audits pr\xE9vus dans le cadre de la LPM et de la NIS pour\
+        \ l\u2019\xE9valuation de leurs performances."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:annexe-1
+      assessable: false
+      depth: 1
+      ref_id: Annexe 1
+      name: "Mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node363
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:annexe-1
+      description: "Le tableau ci-dessous pr\xE9sente les mesures de s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information \xE0 consid\xE9rer pour l\u2019\xE9laboration\
+        \ du plan d\u2019actions ou du plan de traitement des risques. Elles sont\
+        \ extraites du Guide d\u2019hygi\xE8ne informatique publi\xE9 par l\u2019\
+        ANSSI et constituent le socle minimal de s\xE9curit\xE9 des syst\xE8mes d\u2019\
+        information. Deux niveaux d\u2019impl\xE9mentation y sont identifi\xE9s :\n\
+        - Standard pour les niveaux de conformit\xE9 1 et 2 ;\n- Renforc\xE9 pour\
+        \ les niveaux de conformit\xE9 3 et plus."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node364
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:annexe-1
+      description: "Le guide ne sp\xE9cifie pas comment les mesures doivent \xEAtre\
+        \ mises en \u0153uvre, car cela d\xE9pend de chaque op\xE9rateur, mais fait\
+        \ r\xE9f\xE9rence \xE0 d\u2019autres guides et r\xE9f\xE9rentiels de l\u2019\
+        ANSSI qui apportent des indications."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node365
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:annexe-1
+      description: "A noter que certaines mesures ne sont pas pertinentes dans le\
+        \ domaine du transport a\xE9rien, elles ont \xE9t\xE9 supprim\xE9es. D\u2019\
+        autres mesures, quant \xE0 elles, rel\xE8vent de l\u2019organisation de la\
+        \ s\xE9curit\xE9 des syst\xE8mes d\u2019information ou de la gestion du risque\
+        \ et sont donc explicitement cit\xE9es dans les chapitres du document traitant\
+        \ ces sujets. Une r\xE9f\xE9rence au dit chapitre est alors faite."
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:annexe-1
+      name: "Mesures de s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M1
+      description: "Former les \xE9quipes op\xE9rationnelles \xE0 la s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M2
+      description: "Sensibiliser les utilisateurs aux bonnes pratiques \xE9l\xE9mentaires\
+        \ de s\xE9curit\xE9 informatique"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M3
+      description: "Ma\xEEtriser les risques de l\u2019infog\xE9rance"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M4
+      description: "Identifier les informations et serveurs les plus sensibles et\
+        \ maintenir un sch\xE9ma du r\xE9seau"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M5
+      description: "Disposer d\u2019un inventaire exhaustif des comptes privil\xE9\
+        gi\xE9s et le maintenir \xE0 jour"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M6
+      description: "Organiser les proc\xE9dures d\u2019arriv\xE9e, de d\xE9part et\
+        \ de changement de fonction des utilisateurs"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M7
+      description: "Autoriser la connexion au r\xE9seau de l\u2019entit\xE9 aux seuls\
+        \ \xE9quipements ma\xEEtris\xE9s"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M8
+      description: "Identifier nomm\xE9ment chaque personne acc\xE9dant au syst\xE8\
+        me et distinguer les r\xF4les utilisateurs/administrateurs"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M9
+      description: "Attribuer les bons droits sur les ressources sensibles du syst\xE8\
+        me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M10
+      description: "D\xE9finir et v\xE9rifier des r\xE8gles de choix et de dimensionnement\
+        \ des mots de passe"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M11
+      description: "Prot\xE9ger les mots de passe stock\xE9s sur les syst\xE8mes"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M12
+      description: "Changer les \xE9l\xE9ments d\u2019authentification par d\xE9faut\
+        \ sur les \xE9quipements et services"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M13
+      description: "Privil\xE9gier lorsque c\u2019est possible une authentification\
+        \ forte"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M14
+      description: "Mettre en place un niveau de s\xE9curit\xE9 minimal sur l\u2019\
+        ensemble du parc informatique"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M15
+      description: "Se prot\xE9ger des menaces relatives \xE0 l\u2019utilisation de\
+        \ supports amovibles"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M16
+      description: "Utiliser un outil de gestion centralis\xE9e afin d\u2019homog\xE9\
+        n\xE9iser les politiques de s\xE9curit\xE9"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M17
+      description: Activer et configurer le pare-feu local des postes de travail
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M18
+      description: "Chiffrer les donn\xE9es sensibles transmises par voie Internet"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M19
+      description: "Segmenter le r\xE9seau et mettre en place un cloisonnement entre\
+        \ ces zones"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M20
+      description: "S\u2019assurer de la s\xE9curit\xE9 des r\xE9seaux d\u2019acc\xE8\
+        s Wi-Fi et de la s\xE9paration des usages"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M21
+      description: "Utiliser des protocoles s\xE9curis\xE9s d\xE8s qu\u2019ils existent"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M22
+      description: "Mettre en place une passerelle d\u2019acc\xE8s s\xE9curis\xE9\
+        \ \xE0 Internet"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M23
+      description: "Cloisonner les services visibles depuis Internet du reste du syst\xE8\
+        me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m25
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M25
+      description: "S\xE9curiser les interconnexions r\xE9seau d\xE9di\xE9es avec\
+        \ les partenaires"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m26
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M26
+      description: "Contr\xF4ler et prot\xE9ger l\u2019acc\xE8s aux salles serveurs\
+        \ et aux locaux techniques"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m27
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M27
+      description: "Interdire l\u2019acc\xE8s \xE0 Internet depuis les postes ou serveurs\
+        \ utilis\xE9s pour l\u2019administration du syst\xE8me"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m28
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M28
+      description: "Utiliser un r\xE9seau d\xE9di\xE9 et cloisonn\xE9 pour l\u2019\
+        administration du syst\xE8me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m29
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M29
+      description: "Limiter au strict besoin op\xE9rationnel les droits d\u2019administration\
+        \ sur les postes de travail"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m30
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M30
+      description: "Prendre des mesures de s\xE9curisation physique des terminaux\
+        \ nomades"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m31
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M31
+      description: "Chiffrer les donn\xE9es sensibles, en particulier sur le mat\xE9\
+        riel potentiellement perdable"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m32
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M32
+      description: "S\xE9curiser la connexion r\xE9seau des postes utilis\xE9s en\
+        \ situation de nomadisme"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m33
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M33
+      description: "Adopter des politiques de s\xE9curit\xE9 d\xE9di\xE9es aux terminaux\
+        \ mobiles"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m34
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M34
+      description: "D\xE9finir une politique de mise \xE0 jour des composants du syst\xE8\
+        me d\u2019information"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m35
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M35
+      description: "Anticiper la fin de la maintenance des logiciels et syst\xE8mes\
+        \ et limiter les adh\xE9rences logicielles"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m36
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M36
+      description: Activer et configurer les journaux des composants les plus importants
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m37
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M37
+      description: "D\xE9finir et appliquer une politique de sauvegarde des composants\
+        \ critiques"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m38
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M38
+      description: "Proc\xE9der \xE0 des contr\xF4les et audits de s\xE9curit\xE9\
+        \ r\xE9guliers puis appliquer les actions correctives"
+      implementation_groups:
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m39
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M39
+      description: "D\xE9signer un r\xE9f\xE9rent en s\xE9curit\xE9 des syst\xE8mes\
+        \ d\u2019information et le faire conna\xEEtre aupr\xE8s du personnel"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:m40
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node366
+      ref_id: M40
+      description: "D\xE9finir une proc\xE9dure de gestion des incidents de s\xE9\
+        curit\xE9"
+      implementation_groups:
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      assessable: false
+      depth: 1
+      ref_id: Terminologie
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node407
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'ANSSI '
+      description: "Agence Nationale de la S\xE9curit\xE9 des Syst\xE8mes d'Information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node408
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'CAMO '
+      description: 'Continuing Airworthiness Management Organisation '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node409
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'DOA '
+      description: 'Design Organisation Approval '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node410
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'DSAC '
+      description: "Direction de la S\xE9curit\xE9 de l\u2019Aviation Civile "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node411
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'FNAM '
+      description: "F\xE9d\xE9ration Nationale de l\u2019Aviation Marchande"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node412
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'FSTD '
+      description: 'Flight Simulation Training Device '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node413
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'LPM '
+      description: 'Loi de Programmation Militaire '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node414
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'NIS '
+      description: 'Network and Information Security '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node415
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'OIV '
+      description: "Op\xE9rateur d'Importance Vitale "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node416
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'OSE '
+      description: "Op\xE9rateur de Service Essentiel"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node417
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'Part - IS '
+      description: 'Part - Information Security '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node418
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'POA '
+      description: 'Production Organisation Approval '
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node419
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'SeMS '
+      description: "Security Management System - Syst\xE8me de management de la s\xFB\
+        ret\xE9  "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node420
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'SGS '
+      description: "Syst\xE8me de Gestion de la S\xE9curit\xE9 (de l\u2019aviation\
+        \ civile) "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node421
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'SIE '
+      description: "Syst\xE8me d\u2019Information Essentiel"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node422
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'SIIV '
+      description: "Syst\xE8me d\u2019Information d\u2019Importance Vitale"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node423
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'SMSI '
+      description: "Syst\xE8me de Management de la S\xE9curit\xE9 de l'Information"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node424
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'SSI '
+      description: "S\xE9curit\xE9 des Syst\xE8mes d'Information "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node425
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'UAF '
+      description: "Union des A\xE9roports Fran\xE7ais"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node426
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'UE '
+      description: "Union Europ\xE9enne"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node427
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'UAS '
+      description: "Unmanned Aircraft system - Syst\xE8mes d\u2019a\xE9ronefs sans\
+        \ \xE9quipage \xE0 bord"
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node428
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'U-Space '
+      description: "Une zone g\xE9ographique UAS d\xE9sign\xE9e par les \xC9tats membres,\
+        \ dans laquelle les exploitations d\u2019UAS ne sont autoris\xE9es qu\u2019\
+        avec l\u2019appui de services U-spac "
+    - urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:node429
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:c3cf-ed1-v1:terminologie
+      name: 'USSP '
+      description: "U-space Service Provider - Un service U-space est un service reposant\
+        \ sur des services num\xE9riques et l\u2019automatisation de fonctions, con\xE7\
+        u pour garantir \xE0 un grand nombre d\u2019UAS un acc\xE8s s\xE9curis\xE9\
+        , s\xFBr et efficace \xE0 l\u2019espace a\xE9rien U-space"
