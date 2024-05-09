@@ -90,7 +90,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 18. HDS/HDH 🇫🇷
 19. OWASP Application Security Verification Standard (ASVS) 🐝
 20. RGS v2.0 🇫🇷
-21. AirCyber ✈️
+21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
@@ -103,6 +103,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 31. NIST SP 800-171 rev2 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
+34. GSA FedRAMP rev5 ☁️🇺🇸
+35. Cadre Conformité Cyber France (3CF) ✈️🇫🇷    
 
 <br/>
 
@@ -116,13 +118,13 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
+- BSI-IT (as requested by the German community)
 - CCPA
 - AI Act
 - Part-IS
 - SecNumCloud
 - SOX
 - MASVS
-- FedRAMP
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
