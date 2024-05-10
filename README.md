@@ -104,7 +104,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 34. GSA FedRAMP rev5 ☁️🇺🇸
-35. Cadre Conformité Cyber France (3CF) ✈️🇫🇷    
+35. Cadre Conformité Cyber France (3CF) ✈️🇫🇷
+36. ANSSI : SecNumCloud ☁️🇫🇷    
 
 <br/>
 
@@ -122,7 +123,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - CCPA
 - AI Act
 - Part-IS
-- SecNumCloud
 - SOX
 - MASVS
 - NIST 800-82
