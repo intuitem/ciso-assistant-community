@@ -104,6 +104,7 @@ interface Field {
 
 interface SelectField {
 	field: string;
+	detail?: boolean;
 }
 
 export interface ModelMapEntry {
@@ -378,7 +379,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'authors', urlModel: 'users' },
 			{ field: 'reviewers', urlModel: 'users' }
 		],
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'selected_implementation_groups', detail: true }],
 		filters: [{ field: 'status' }]
 	},
 	requirements: {
