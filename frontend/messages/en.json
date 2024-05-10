@@ -3,6 +3,7 @@
 	"french": "French",
 	"english": "English",
 	"arabic": "Arabic",
+	"portuguese": "Portuguese",
 	"addThreat": "Add threat",
 	"addReferenceControl": "Add reference control",
 	"addAppliedControl": "Add applied control",
@@ -338,7 +339,7 @@
 	"librariesStore": "Libraries store",
 	"currentlyNoImportedLibraries": "You currently have no imported libraries",
 	"loadingLibraryUploadButton": "Loading the library upload button",
-	"errorOccuredWhileLoadingLibrary": "The following error occured while loading the library form",
+	"errorOccuredWhileLoadingLibrary": "The following error occurred while loading the library form",
 	"packager": "Packager",
 	"dependencies": "Dependencies",
 	"copyright": "Copyright",
@@ -491,7 +492,7 @@
 	"lowSOK": "The strength of the knowledge supporting the assessment is low",
 	"mediumSOK": "The strength of the knowledge supporting the assessment is medium",
 	"highSOK": "The strength of the knowledge supporting the assessment is high",
-	"libraryImportError": "An error occured during the importation of your library.",
+	"libraryImportError": "An error occurred during the importation of your library.",
 	"libraryAlreadyImportedError": "This library has already been imported.",
 	"invalidLibraryFileError": "Invalid library file. Please make sure the format is correct.",
 	"taintedFormMessage": "Do you want to leave this page? Changes you made may not be saved.",
@@ -510,5 +511,7 @@
 	"setTemporaryPassword2": "Please use a strong one and make sure to inform the user to change it as soon as possible",
 	"youCanSetNewPassword": "You can set a new password here",
 	"userWillBeDisconnected": "The user will be disconnected and will need to log in again",
-	"scoresDefinition": "Scores definition"
+	"scoresDefinition": "Scores definition",
+	"selectedImplementationGroups": "Selected implementation groups",
+	"implementationGroupsDefinition": "Implementation groups definition"
 }

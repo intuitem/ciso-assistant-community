@@ -135,6 +135,7 @@
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
 			{form}
+			disabled={object.id}
 			options={getOptions({ objects: model.foreignKeys['risk_matrix'] })}
 			field="risk_matrix"
 			label={m.riskMatrix()}
@@ -329,10 +330,32 @@
 		<Select {form} options={model.selectOptions['status']} field="status" label={m.status()} />
 		<AutocompleteSelect
 			{form}
+			disabled={object.id}
 			options={getOptions({ objects: model.foreignKeys['framework'] })}
 			field="framework"
 			label={m.framework()}
+			on:change={async (e) => {
+				if (e.detail) {
+					await fetch(`/frameworks/${e.detail}`)
+						.then((r) => r.json())
+						.then((r) => {
+							const implementation_groups = r['implementation_groups_definition'] || [];
+							model.selectOptions['selected_implementation_groups'] = implementation_groups.map(
+								(group) => ({ label: group.name, value: group.ref_id })
+							);
+						});
+				}
+			}}
 		/>
+		{#if model.selectOptions['selected_implementation_groups'] && model.selectOptions['selected_implementation_groups'].length}
+			<AutocompleteSelect
+				multiple
+				{form}
+				options={model.selectOptions['selected_implementation_groups']}
+				field="selected_implementation_groups"
+				label={m.selectedImplementationGroups()}
+			/>
+		{/if}
 		<AutocompleteSelect
 			{form}
 			multiple

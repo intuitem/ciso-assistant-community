@@ -1,0 +1,104 @@
+urn: urn:intuitem:risk:library:risk-matrix-5x5-sensitive
+locale: en
+ref_id: risk-matrix-5x5-sensitive
+name: 5x5 sensitive
+description: 5x5 matrix for highly sensitive
+copyright: domaine public
+version: 1
+provider: intuitem
+packager: intuitem
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:5x5-sensitive
+    ref_id: risk-matrix-5x5-sensitive
+    name: 5x5 sensitive
+    description: 5x5 matrix for highly sensitive
+    probability:
+    - id: 0
+      abbreviation: AC
+      name: rare
+      description: rare
+    - id: 1
+      abbreviation: LI
+      name: unlikely
+      description: unlikely
+    - id: 2
+      abbreviation: MO
+      name: moderate
+      description: moderate
+    - id: 3
+      abbreviation: UN
+      name: likely
+      description: likely
+    - id: 4
+      abbreviation: RA
+      name: almost certain
+      description: almost certain
+    impact:
+    - id: 0
+      abbreviation: IN
+      name: insignificant
+      description: insignificant
+    - id: 1
+      abbreviation: MI
+      name: minor
+      description: minor
+    - id: 2
+      abbreviation: SI
+      name: significant
+      description: significant
+    - id: 3
+      abbreviation: MA
+      name: major
+      description: major
+    - id: 4
+      abbreviation: SE
+      name: severe
+      description: severe
+    risk:
+    - id: 0
+      abbreviation: LO
+      name: low
+      description: low
+      hexcolor: '#02A45A'
+    - id: 1
+      abbreviation: ME
+      name: medium
+      description: medium
+      hexcolor: '#FFCE02'
+    - id: 2
+      abbreviation: HI
+      name: high
+      description: high
+      hexcolor: '#FFA600'
+    - id: 3
+      abbreviation: CR
+      name: critical
+      description: critical
+      hexcolor: '#FF1A00'
+    grid:
+    - - 0
+      - 0
+      - 0
+      - 1
+      - 1
+    - - 0
+      - 0
+      - 1
+      - 1
+      - 2
+    - - 0
+      - 1
+      - 1
+      - 2
+      - 3
+    - - 1
+      - 1
+      - 2
+      - 3
+      - 3
+    - - 1
+      - 2
+      - 3
+      - 3
+      - 3

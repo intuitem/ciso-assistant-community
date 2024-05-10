@@ -35,9 +35,16 @@ class RBACPermissions(permissions.DjangoObjectPermissions):
         _codename = perms[0].split(".")[1]
         if request.method in ["GET", "OPTIONS", "HEAD"] and obj.is_published:
             return True
+        perm = Permission.objects.get(codename=_codename)
+        # special case of risk acceptance approval
+        if (
+            request.parser_context["request"]._request.resolver_match.url_name
+            == "risk-acceptances-accept"
+        ):
+            perm = Permission.objects.get(codename="approve_riskacceptance")
         return RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(codename=_codename),
+            perm=perm,
             folder=Folder.get_folder(obj),
         )
 
