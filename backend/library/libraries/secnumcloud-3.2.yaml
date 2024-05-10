@@ -18,7 +18,7 @@ objects:
       f\xE9rentiel d\u2019exigences"
     description: "Premier ministre\nAgence nationale de la s\xE9curit\xE9 des syst\xE8\
       mes d\u2019information\nPrestataires de services d\u2019informatique en nuage\
-      \ (SecNumCloud)\nr\xE9f\xE9rentiel d\u2019exigences\nVersion 3.2 du 8 mars 202"
+      \ (SecNumCloud)\nr\xE9f\xE9rentiel d\u2019exigences\nVersion 3.2 du 8 mars 2022"
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:secnumcloud-3.2:1
       assessable: false
