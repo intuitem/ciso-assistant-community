@@ -66,9 +66,7 @@ export const load = (async ({ fetch }) => {
 		};
 	};
 
-	const defaultLibrariesTable = librariesTable(
-		libraries.filter((lib) => !lib.id && lib.packager === 'intuitem')
-	);
+	const defaultLibrariesTable = librariesTable(libraries.filter((lib) => !lib.id));
 
 	const importedLibrariesTable = librariesTable(libraries.filter((lib) => lib.id));
 
