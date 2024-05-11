@@ -108,6 +108,11 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷    
 
+### Community contrib
+
+1. ISO 27001:2022, version Française 🇫🇷🌐
+2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
+
 <br/>
 
 > [!NOTE]
