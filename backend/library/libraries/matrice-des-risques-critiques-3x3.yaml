@@ -4,7 +4,7 @@ ref_id: matrice-des-risques-critiques-3x3
 name: Matrice des risques critiques 3x3
 description: Matrice des risques critiques 3x3
 version: 1
-provider: intuitem traduit par protocolpaladin
+provider: intuitem
 packager: protocolpaladin
 objects:
   risk_matrix:
