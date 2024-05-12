@@ -12,6 +12,7 @@
 	export let nullable = false;
 
 	export let hide = false;
+	export let translateOptions = true;
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
 
@@ -88,7 +89,7 @@
 				{#if option.suggested}
 					<span class="text-indigo-600">{option.label}</span>
 					<span class="text-sm text-gray-500"> (suggested)</span>
-				{:else if localItems(languageTag())[toCamelCase(option.label)]}
+				{:else if translateOptions && localItems(languageTag())[toCamelCase(option.label)]}
 					{localItems(languageTag())[toCamelCase(option.label)]}
 				{:else}
 					{option.label}
