@@ -99,6 +99,6 @@ jobs:
         with:
           name: functional-tests-report
           path: |
-            ${{ env.working-directory }}/tests/results/
-            ${{ env.working-directory }}/tests/reports/
+            ${{ env.working-directory }}/tests/${{ matrix.playwright-browser }}results/
+            ${{ env.working-directory }}/tests/${{ matrix.playwright-browser }}reports/
           retention-days: 5
