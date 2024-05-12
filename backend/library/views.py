@@ -77,9 +77,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 )  # This can cause translation issues
             return Response({"status": "success"})
         except Exception:
-            """print(f"ERROR {type(e)}")
-            print(str(e))
-            raise e"""
             return Response(
                 {
                     "error": "Failed to load library, please check if it has dependencies"

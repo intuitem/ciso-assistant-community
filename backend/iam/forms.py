@@ -61,28 +61,28 @@ class StyledModelForm(ModelForm):
                 f.widget.attrs["id"] = (
                     f"id_{model_name}_{fname}" if model_name else f"id_{fname}"
                 )
-                f.widget.attrs["class"] = (
-                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                )
+                f.widget.attrs[
+                    "class"
+                ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             if input_type in select_inputs:
                 f.widget.attrs["id"] = f"id_{model_name}_{fname}"
-                f.widget.attrs["class"] = (
-                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                )
+                f.widget.attrs[
+                    "class"
+                ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             if input_type == Textarea:
-                f.widget.attrs["class"] = (
-                    "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                )
+                f.widget.attrs[
+                    "class"
+                ] = "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             if input_type == CheckboxInput:
                 f.widget.attrs["id"] = f"id_{model_name}_{fname}"
-                f.widget.attrs["class"] = (
-                    "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                )
+                f.widget.attrs[
+                    "class"
+                ] = "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
             if input_type == DefaultDateInput:
                 f.widget.attrs["id"] = f"id_{model_name}_{fname}"
-                f.widget.attrs["class"] = (
-                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                )
+                f.widget.attrs[
+                    "class"
+                ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
 
 
 class FolderUpdateForm(StyledModelForm):
@@ -238,10 +238,9 @@ class UserPasswordChangeForm(AdminPasswordChangeForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
         for fname, f in self.fields.items():
-            f.widget.attrs["class"] = (
-                "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            )
-            print("FNAME:", fname)
+            f.widget.attrs[
+                "class"
+            ] = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
         self.fields.get("password1").widget.attrs["id"] = "password1"
         self.fields.get("password2").widget.attrs["id"] = "password2"
 

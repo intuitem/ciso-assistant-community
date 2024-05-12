@@ -611,9 +611,6 @@ class AppliedControlViewSet(BaseModelViewSet):
     def to_review(self, request):
         measures = measures_to_review(request.user)
 
-        """print("ODZFFHZ")
-        print(measures[0].get_ranking_score())"""
-
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
@@ -772,7 +769,6 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     def perform_create(self, serializer):
         risk_acceptance = serializer.validated_data
         submitted = False
-        print(risk_acceptance)
         if risk_acceptance.get("approver"):
             submitted = True
         for scenario in risk_acceptance.get("risk_scenarios"):
@@ -1356,8 +1352,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
-        # How to add ranking_score directly in the serializer ?
-
         for i in range(len(measures)):
             measures[i]["ranking_score"] = ranking_scores[measures[i]["id"]]
 
@@ -1370,10 +1364,6 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     @action(detail=False, name="Get the secuity measures to review")
     def to_review(self, request):
         measures = measures_to_review(request.user)
-
-        """print("ODZFFHZ")
-        print(measures[0].get_ranking_score())"""
-
         measures = [AppliedControlReadSerializer(mtg).data for mtg in measures]
 
         """
