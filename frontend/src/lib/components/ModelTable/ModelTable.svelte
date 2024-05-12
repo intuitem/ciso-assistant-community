@@ -132,6 +132,9 @@
 
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
+	$: preventDelete = (row: TableSource) =>
+		row.meta.builtin ||
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 </script>
 
 <div class="table-container {classesBase}">
@@ -272,7 +275,7 @@
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
-                preventDelete={(row.meta.builtin) || (row.meta.reference_count) || !(row.meta.allowDeleteLibrary ?? false)}
+                preventDelete={preventDelete(row)}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}
