@@ -33,7 +33,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: ["3.11"]
-        playwright-project: ["chromium", "firefox"]
+        playwright-browser: ["chromium", "firefox"]
 
     steps:
       - uses: actions/checkout@v4
@@ -53,9 +53,9 @@ jobs:
       - name: Install dependencies
         working-directory: ${{ env.working-directory }}
         run: npm ci
-      - name: Install Playwright Browsers
+      - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps ${{ matrix.playwright-browser }}
       - name: Create frontend environment variables file
         working-directory: ${{ env.working-directory }}
         run: |
@@ -91,9 +91,9 @@ jobs:
           export $(grep -v '^#' .env | xargs)
           python manage.py createsuperuser --noinput
           nohup python manage.py runserver &
-      - name: Run tests
+      - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
-        run: npx playwright test --project=${{ matrix.playwright-project }}
+        run: npx playwright test --project=${{ matrix.playwright-browser }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
