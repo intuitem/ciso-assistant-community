@@ -27,15 +27,13 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
         image: mailhog/mailhog
-        ports: [
-          "1025:1025",
-          "8025:8025"
-        ]
+        ports: ["1025:1025", "8025:8025"]
 
     strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.11"]
+        playwright-project: ["chromium", "firefox"]
 
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +93,7 @@ jobs:
           nohup python manage.py runserver &
       - name: Run tests
         working-directory: ${{ env.working-directory }}
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.playwright-project }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
