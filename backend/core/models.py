@@ -1466,11 +1466,6 @@ class ComplianceAssessment(Assessment):
                     st,
                 )
             )
-        print(
-            "AppliedControl".objects.filter(status=st[0])
-            .filter(id__in=measures_list)
-            .count()
-        )
         return measures_status_count
 
     def donut_render(self) -> dict:

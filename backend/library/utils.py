@@ -409,13 +409,7 @@ class RiskMatrixImporter:
             for key, value in self.risk_matrix_data.items()
             if key in self.MATRIX_FIELDS
         }
-
-        print("\n\n\n" + "-" * 60)
-        print("YES I HAVE BEEN CALLED")
-        print(json.dumps(matrix_data, indent=4))
-        print("-" * 60)
-
-        created = RiskMatrix.objects.create(
+        matrix = RiskMatrix.objects.create(
             library=library_object,
             folder=Folder.get_root_folder(),
             name=self.risk_matrix_data.get("name"),
@@ -429,7 +423,8 @@ class RiskMatrixImporter:
             default_locale=library_object.default_locale,  # Change this in the future ?
             is_published=True,
         )
-        print(f"Object created ===> {created}")
+        logger.info("Risk matrix created", matrix=matrix)
+        return matrix
 
 
 class LibraryImporter:
@@ -438,7 +433,7 @@ class LibraryImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = ["threats", "reference_controls", "risk_matrix", "framework"]
 
-    def __init__(self, library: dict):
+    def __init__(self, library: StoredLibrary):
         self._library = library
         self._framework_importer = None
         self._threats = []
@@ -589,8 +584,13 @@ class LibraryImporter:
         _locale = self._library.locale
         _default_locale = not LoadedLibrary.objects.filter(urn=_urn).exists()
 
-        print(f"VALUE ===> {self._library}")
-        print(f"FIELD ===> {self._library.objects_meta}")
+        logger.info(
+            "Loading library",
+            urn=_urn,
+            locale=_locale,
+            default_locale=_default_locale,
+            library=self._library,
+        )
         library_object, _created = LoadedLibrary.objects.update_or_create(
             defaults={
                 "ref_id": self._library.ref_id,
@@ -655,8 +655,7 @@ class LibraryImporter:
                 else:
                     raise e
             except Exception as e:
-                # TODO: Switch to proper logging
-                print(f"Library import exception: {e}")
+                logger.error("Library import error", error=e, library=self._library)
                 raise e
 
 
