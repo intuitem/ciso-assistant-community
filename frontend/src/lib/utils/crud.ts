@@ -47,8 +47,8 @@ export const getOptions = ({
 	label: string;
 	value: string;
 	suggested: boolean;
-	self: Record<string, any>;
-	selfSelect: boolean;
+	self?: Record<string, any>;
+	selfSelect?: boolean;
 }[] => {
 	const options = objects
 		.map((object) => {
