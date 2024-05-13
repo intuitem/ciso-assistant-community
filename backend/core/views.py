@@ -236,6 +236,10 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
+    @action(detail=False, name="Get threats count")
+    def threats_count(self, request):
+        return Response({"results": threats_count_per_name(request.user)})
+
 
 class AssetViewSet(BaseModelViewSet):
     """
