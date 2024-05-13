@@ -12,7 +12,8 @@
 	export let title = '';
 
 	export let values: any[]; // Set the types for these variables later on
-	export let colors: string[] = [];
+    export let labels: any[];
+
 
 	for (const index in values) {
 		if (values[index].localName) {
@@ -42,24 +43,17 @@
 				data: ['Allocated Budget', 'Actual Spending']
 			},
 			radar: {
-				//shape: 'circle',
-				indicator: [
-					{ name: 'Rogue Admin',  },
-                    { name: 'Unavailability',  },
-                    { name: 'Regulation',  },
-                    { name: 'Data Breach',  },
-                    { name: 'Phishing',  },
-                    { name: 'Ransomware',  }
-				]
+				shape: 'circle',
+				indicator: labels
 			},
 			series: [
 				{
-					name: 'Budget vs spending',
+					name: s_label,
 					type: 'radar',
 					data: [
 						{
-							value: [500, 600, 700, 800, 900, 1000],
-							name: 'Current'
+							value: values,
+							name: 'Radar'
 						},
 					]
 				}
