@@ -1,4 +1,4 @@
-urn: Urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux
+urn: urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux
 locale: fr
 ref_id: 'ANSSI-RECOMMANDATIONS-CONFIGURATION-SYSTEME-GNU-LINUX '
 name: "ANSSI - Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
@@ -9,7 +9,7 @@ provider: ANSSI
 packager: protocolpaladin
 objects:
   framework:
-    urn: Urn:protocolpaladin:risk:framework:anssi-recommandations-configuration-systeme-gnu-linux
+    urn: urn:protocolpaladin:risk:framework:anssi-recommandations-configuration-systeme-gnu-linux
     ref_id: 'ANSSI-RECOMMANDATIONS-CONFIGURATION-SYSTEME-GNU-LINUX '
     name: "ANSSI - Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me\
       \ GNU-Linux"
@@ -28,21 +28,21 @@ objects:
       name: "\xE9lev\xE9"
       description: null
     requirement_nodes:
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
       assessable: false
       depth: 1
       ref_id: '4'
       name: "Configuration mat\xE9rielle"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.1
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
       ref_id: '4.1'
       name: "Support mat\xE9riel"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r1
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.1
       ref_id: R1
       name: "Choisir et configurer son mat\xE9riel"
       description: "Il est conseill\xE9 d\u2019appliquer les recommandations du support\
@@ -56,16 +56,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.2
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
       ref_id: '4.2'
       name: BIOS/UEFI
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r2
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.2
       ref_id: R2
       name: Configurer le BIOS/UEFI
       description: "Il est conseill\xE9 d\u2019appliquer les recommandations de la\
@@ -75,22 +75,22 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
       ref_id: '4.3'
       name: "D\xE9marrage s\xE9curis\xE9 UEFI"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
       ref_id: 4.3.1
       name: "Cl\xE9s pr\xE9charg\xE9es"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r3
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.1
       ref_id: R3
       name: "Activer le d\xE9marrage s\xE9curis\xE9 UEFI"
       description: "Il est recommand\xE9 d\u2019activer la configuration du d\xE9\
@@ -99,16 +99,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
       ref_id: 4.3.2
       name: "Nouvelles cl\xE9s"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r4
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r4
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.2
       ref_id: R4
       name: "Remplacer les cl\xE9s pr\xE9charg\xE9es"
       description: "Il est recommand\xE9 de remplacer les cl\xE9s pr\xE9charg\xE9\
@@ -117,21 +117,21 @@ objects:
         \ Linux au format EFI."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
       assessable: false
       depth: 1
       ref_id: '5'
       name: Configuration du noyau Linux
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.1
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
       ref_id: '5.1'
       name: "Chargeur de d\xE9marrage"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r5
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r5
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.1
       ref_id: R5
       name: "Configurer un mot de passe pour le chargeur de d\xE9marrage"
       description: "Un chargeur de d\xE9marrage permettant de prot\xE9ger son d\xE9\
@@ -145,16 +145,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
       ref_id: '5.2'
       name: Configuration dynamique
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r6
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r6
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       ref_id: R6
       name: "Prot\xE9ger les param\xE8tres de ligne de commande du noyau et l\u2019\
         initramfs"
@@ -163,16 +163,16 @@ objects:
         rifi\xE9s lors du d\xE9marrage s\xE9curis\xE9 UEFI."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       ref_id: 5.2.1
       name: "Configuration de la m\xE9moire"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r7
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r7
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
       ref_id: R7
       name: "Activer l\u2019IOMMU"
       description: "Il est recommand\xE9 d\u2019activer l\u2019IOMMU en ajoutant la\
@@ -182,10 +182,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r8
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r8
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
       ref_id: R8
       name: "Param\xE9trer les options de configuration de la m\xE9moire"
       description: "Les listes ci-dessous pr\xE9sentent les options de configuration\
@@ -194,16 +194,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       ref_id: 5.2.2
       name: Configuration du noyau
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r9
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r9
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
       ref_id: R9
       name: "Param\xE9trer les options de configuration du noyau"
       description: "La liste ci-dessous pr\xE9sente les options de configuration du\
@@ -230,10 +230,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r10
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r10
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
       ref_id: R10
       name: "D\xE9sactiver le chargement des modules noyau"
       description: "Il est recommand\xE9 de bloquer le chargement des modules noyau\
@@ -241,16 +241,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.3
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       ref_id: 5.2.3
       name: Configuration des processus
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r11
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r11
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.3
       ref_id: R11
       name: Activer et configurer le LSM Yama
       description: "Il est recommand\xE9 de charger le module de s\xE9curit\xE9 Yama\
@@ -261,16 +261,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       ref_id: 5.2.4
       name: "Configuration du r\xE9seau"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r12
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r12
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
       ref_id: R12
       name: "Param\xE9trer les options de configuration du r\xE9seau IPv4"
       description: "La liste ci-dessous pr\xE9sente les options de configuration du\
@@ -335,10 +335,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r13
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r13
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
       ref_id: R13
       name: "D\xE9sactiver le plan IPv6"
       description: "Quand IPv6 n\u2019est pas utilis\xE9, il est recommand\xE9 de\
@@ -356,16 +356,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.5
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.5
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
       ref_id: 5.2.5
       name: "Configuration des syst\xE8mes de fichiers"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r14
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r14
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.5
       ref_id: R14
       name: "Param\xE9trer les options de configuration des syst\xE8mes de fichiers"
       description: "La liste ci-dessous pr\xE9sente les options de configuration des\
@@ -393,22 +393,22 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
       ref_id: '5.3'
       name: Configuration statique
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
       ref_id: 5.3.1
       name: "Configuration ind\xE9pendante de la cible mat\xE9rielle"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r15
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r15
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R15
       name: "Param\xE9trer les options de compilation pour la gestion de la m\xE9\
         moire"
@@ -463,10 +463,10 @@ objects:
         CONFIG_LEGACY_VSYSCALL_XONLY=n\LCONFIG_X86_VSYSCALL_EMULATION=n"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r16
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r16
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R16
       name: "Param\xE9trer les options de compilation pour les structures de donn\xE9\
         es du noyau"
@@ -481,10 +481,10 @@ objects:
         \ de d\xE9tection de corruption. \nCONFIG_BUG_ON_DATA_CORRUPTION=y"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r17
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r17
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R17
       name: "Param\xE9trer les options de compilation pour l\u2019allocateur m\xE9\
         moire"
@@ -516,10 +516,10 @@ objects:
         \ set"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r18
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r18
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R18
       name: "Param\xE9trer les options de compilation pour la gestion des modules\
         \ noyau"
@@ -543,10 +543,10 @@ objects:
         \ noyau.\LCONFIG_MODULE_SIG_KEY=\"certs/signing_key.pem\""
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r19
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r19
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R19
       name: "Param\xE9trer les options de compilation pour les \xE9v\xE8nements anormaux"
       description: "La liste ci-dessous pr\xE9sente les options de compilation du\
@@ -562,10 +562,10 @@ objects:
         \ un impact fort sur des serveurs en production.\LCONFIG_PANIC_TIMEOUT=-1"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r20
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r20
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R20
       name: "Param\xE9trer les options de compilation pour les primitives de s\xE9\
         curit\xE9 du noyau"
@@ -591,10 +591,10 @@ objects:
         \ Smack, TOMOYO et Yama.\L#CONFIG_SECURITY_WRITABLE_HOOKS is not set"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r21
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r21
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R21
       name: "Param\xE9trer les options de compilation pour les plugins du compilateur"
       description: "La liste ci-dessous pr\xE9sente les options de compilation du\
@@ -616,10 +616,10 @@ objects:
         \ si # cet impact n'est pas acceptable.\LCONFIG_GCC_PLUGIN_RANDSTRUCT=y"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r22
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r22
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R22
       name: "Param\xE9trer les options de compilation pour la pile r\xE9seau"
       description: "La liste ci-dessous pr\xE9sente les options de compilation du\
@@ -629,10 +629,10 @@ objects:
         venir les attaques de type SYN flood. \nCONFIG_SYN_COOKIES=y"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r23
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r23
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
       ref_id: R23
       name: "Param\xE9trer les options de compilation pour divers comportements du\
         \ noyau"
@@ -652,16 +652,16 @@ objects:
         sactiv\xE9. \n#CONFIG_MODULES is not set"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
       ref_id: 5.3.2
       name: "Configuration sp\xE9cifique aux architectures mat\xE9rielles"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r24
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r24
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
       ref_id: R24
       name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
         \ 32 bits"
@@ -679,10 +679,10 @@ objects:
         che d'un attaquant.\LCONFIG_RANDOMIZE_BASE=y"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r25
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r25
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
       ref_id: R25
       name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
         \ x86_64 bits"
@@ -705,10 +705,10 @@ objects:
         \ is not set"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r26
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r26
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
       ref_id: R26
       name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
         \ ARM"
@@ -726,10 +726,10 @@ objects:
         \ \n#CONFIG_OABI_COMPAT is unset"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r27
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r27
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
       ref_id: R27
       name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
         \ ARM 64 bits"
@@ -747,21 +747,21 @@ objects:
         # Contre mesure \xE0 l'attaque Meltdown.\LCONFIG_UNMAP_KERNEL_AT_EL0=y \n\n"
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       assessable: false
       depth: 1
       ref_id: '6'
       name: "Configuration syst\xE8me"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       ref_id: '6.1'
       name: Partitionnement
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r28
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r28
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
       ref_id: R28
       name: Partitionnement type
       description: "Le partitionnement type recommand\xE9 est le suivant :\n\nPoint\
@@ -791,10 +791,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r29
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r29
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
       ref_id: R29
       name: "Restreindre les acc\xE8s au dossier /boot"
       description: "Lorsque c\u2019est possible, il est recommand\xE9 de ne pas monter\
@@ -806,22 +806,22 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       ref_id: '6.2'
       name: "Comptes d'acc\xE8s"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
       ref_id: 6.2.1
       name: Comptes utilisateur
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r30
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r30
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
       ref_id: R30
       name: "D\xE9sactiver les comptes utilisateur inutilis\xE9s"
       description: "Les comptes utilisateur inutilis\xE9s doivent \xEAtre d\xE9sactiv\xE9\
@@ -831,10 +831,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r31
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r31
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
       ref_id: R31
       name: Utiliser des mots de passe robustes
       description: "Il est conseill\xE9 d\u2019appliquer les recommandations de la\
@@ -846,10 +846,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r32
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r32
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
       ref_id: R32
       name: "\xC9xpirer les sessions utilisateur locales"
       description: "Les sessions utilisateur locales (console TTY, session graphique)\
@@ -859,16 +859,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
       ref_id: 6.2.2
       name: Comptes administrateur
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r33
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r33
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.2
       ref_id: R33
       name: "Assurer l\u2019imputabilit\xE9 des actions d\u2019administration"
       description: "Les actions d\u2019administration n\xE9cessitant des privil\xE8\
@@ -878,16 +878,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
       ref_id: 6.2.3
       name: Comptes de service
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r34
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r34
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
       ref_id: R34
       name: "D\xE9sactiver les comptes de service"
       description: "Les comptes de service doivent \xEAtre d\xE9sactiv\xE9s."
@@ -895,10 +895,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r35
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r35
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
       ref_id: R35
       name: Utiliser des comptes de service uniques et exclusifs
       description: "Chaque service m\xE9tier (nginx, php, mysql, ...) ajout\xE9 par\
@@ -908,22 +908,22 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       ref_id: '6.3'
       name: "Contr\xF4le d'acc\xE8s"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
       ref_id: 6.3.1
       name: "Mod\xE8le traditionnel Unix"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r36
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r36
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R36
       name: "Modifier la valeur par d\xE9faut de UMASK"
       description: "La valeur par d\xE9faut de UMASK des shells doit \xEAtre positionn\xE9\
@@ -941,10 +941,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r37
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r37
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R37
       name: "Utiliser des fonctionnalit\xE9s de contr\xF4le d\u2019acc\xE8s obligatoire\
         \ MAC"
@@ -956,10 +956,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r38
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r38
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R38
       name: "Cr\xE9er un groupe d\xE9di\xE9 \xE0 l\u2019usage de sudo"
       description: "Un groupe d\xE9di\xE9 \xE0 l\u2019usage de sudo doit \xEAtre cr\xE9\
@@ -968,10 +968,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r39
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r39
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R39
       name: Modifier les directives de configuration sudo
       description: "Les directives suivantes doivent \xEAtre activ\xE9es par d\xE9\
@@ -985,10 +985,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r40
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r40
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R40
       name: "Utiliser des utilisateurs cibles non-privil\xE9gi\xE9s pour les commandes\
         \ sudo"
@@ -999,10 +999,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r41
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r41
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R41
       name: "Limiter l\u2019utilisation de commandes n\xE9cessitant la directive EXEC"
       description: "Les commandes n\xE9cessitant l\u2019ex\xE9cution de sous-processus,\
@@ -1011,10 +1011,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r42
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r42
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R42
       name: "Bannir les n\xE9gations dans les sp\xE9cifications sudo"
       description: "Les sp\xE9cifications de commande ne doivent pas faire intervenir\
@@ -1023,10 +1023,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r43
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r43
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R43
       name: "Pr\xE9ciser les arguments dans les sp\xE9cifications sudo"
       description: "Toutes les commandes du fichier de configuration sudoers doivent\
@@ -1039,10 +1039,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r44
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r44
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
       ref_id: R44
       name: "\xC9diter les fichiers de mani\xE8re s\xE9curis\xE9e avec sudo"
       description: "L\u2019\xE9dition d\u2019un fichier par sudo doit \xEAtre r\xE9\
@@ -1051,16 +1051,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
       ref_id: 6.3.2
       name: AppArmor
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r45
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r45
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.2
       ref_id: R45
       name: "Activer les profils de s\xE9curit\xE9 AppArmor"
       description: "Tout profil de s\xE9curit\xE9 AppArmor pr\xE9sent sur le syst\xE8\
@@ -1070,16 +1070,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
       ref_id: 6.3.3
       name: SELinux
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r46
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r46
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
       ref_id: R46
       name: Activer SELinux avec la politique targeted
       description: "Il est recommand\xE9 d\u2019activer SELinux en mode enforcing\
@@ -1088,10 +1088,10 @@ objects:
         \ autre que SELinux."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r47
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r47
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
       ref_id: R47
       name: "Confiner les utilisateurs interactifs non privil\xE9gi\xE9s"
       description: "Les utilisateurs interactifs non privil\xE9gi\xE9s d\u2019un syst\xE8\
@@ -1099,10 +1099,10 @@ objects:
         ."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r48
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r48
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
       ref_id: R48
       name: "Param\xE9trer les variables SELinux"
       description: "Il est recommand\xE9 d\u2019appliquer les politiques de s\xE9\
@@ -1114,32 +1114,32 @@ objects:
         \ logins SSH de se connecter directement en r\xF4le sysadmin."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r49
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r49
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
       ref_id: R49
       name: "D\xE9sinstaller les outils de d\xE9bogage de politique SELinux"
       description: "Les outils de manipulation et de d\xE9bogage de politique SELinux\
         \ ne doivent pas \xEAtre install\xE9s sur une machine en production."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       ref_id: '6.4'
       name: "Fichiers et r\xE9pertoires"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
       ref_id: 6.4.1
       name: "Fichiers et r\xE9pertoires sensibles"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r50
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r50
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
       ref_id: R50
       name: "Restreindre les droits d\u2019acc\xE8s aux fichiers et aux r\xE9pertoires\
         \ sensibles"
@@ -1150,10 +1150,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r51
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r51
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
       ref_id: R51
       name: "Changer les secrets et droits d\u2019acc\xE8s d\xE8s l\u2019installation"
       description: "Tous les fichiers sensibles et ceux qui concourent aux m\xE9canismes\
@@ -1164,16 +1164,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
       ref_id: 6.4.2
       name: "Fichiers IPC nomm\xE9s, sockets ou pipes"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r52
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r52
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.2
       ref_id: R52
       name: "Restreindre les acc\xE8s aux sockets et aux pipes nomm\xE9es"
       description: "Les sockets et pipes nomm\xE9es doivent \xEAtre prot\xE9g\xE9\
@@ -1184,16 +1184,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
       ref_id: 6.4.3
       name: "Droits d'acc\xE8s"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r53
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r53
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
       ref_id: R53
       name: "\xC9viter les fichiers ou r\xE9pertoires sans utilisateur ou sans groupe\
         \ connu"
@@ -1205,10 +1205,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r54
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r54
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
       ref_id: R54
       name: "Activer le sticky bit sur les r\xE9pertoires inscriptibles"
       description: "Tous les r\xE9pertoires accessibles en \xE9criture par tous doivent\
@@ -1218,10 +1218,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r55
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r55
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
       ref_id: R55
       name: "S\xE9parer les r\xE9pertoires temporaires des utilisateurs"
       description: "Chaque utilisateur ou application doit poss\xE9der son propre\
@@ -1230,10 +1230,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r56
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r56
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
       ref_id: R56
       name: "\xC9viter l\u2019usage d\u2019ex\xE9cutables avec les droits sp\xE9ciaux\
         \ setuid et setgid"
@@ -1246,10 +1246,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r57
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r57
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
       ref_id: R57
       name: "\xC9viter l\u2019usage d\u2019ex\xE9cutables avec les droits sp\xE9ciaux\
         \ setuid root et setgid root"
@@ -1261,16 +1261,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       ref_id: '6.5'
       name: Gestion des paquets
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r58
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r58
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
       ref_id: R58
       name: "N\u2019installer que les paquets strictement n\xE9cessaires"
       description: "Le choix des paquets doit conduire \xE0 une installation aussi\
@@ -1281,10 +1281,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r59
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r59
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
       ref_id: R59
       name: "Utiliser des d\xE9p\xF4ts de paquets de confiance"
       description: "Seuls les d\xE9p\xF4ts internes \xE0 l\u2019organisation ou officiels\
@@ -1295,10 +1295,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r60
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r60
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
       ref_id: R60
       name: "Utiliser des d\xE9p\xF4ts de paquets durcis"
       description: "Lorsque la distribution fournit plusieurs types de d\xE9p\xF4\
@@ -1310,16 +1310,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.6
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.6
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
       ref_id: '6.6'
       name: Veille et maintenance
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r61
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r61
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.6
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.6
       ref_id: R61
       name: "Effectuer des mises \xE0 jour r\xE9guli\xE8res"
       description: "Il est recommand\xE9 d\u2019avoir une proc\xE9dure de mise \xE0\
@@ -1329,15 +1329,15 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
       assessable: false
       depth: 1
       ref_id: '7'
       name: Configuration des services
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r62
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r62
       assessable: true
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
       ref_id: R62
       name: "D\xE9sactiver les services non n\xE9cessaires"
       description: "Seuls les composants strictement n\xE9cessaires au service rendu\
@@ -1352,10 +1352,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r63
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r63
       assessable: true
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
       ref_id: R63
       name: "D\xE9sactiver les fonctionnalit\xE9s des services non essentielles"
       description: "Les fonctionnalit\xE9s configur\xE9es au niveau des services d\xE9\
@@ -1364,10 +1364,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r64
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r64
       assessable: true
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
       ref_id: R64
       name: "Configurer les privil\xE8ges des services"
       description: "Tous les services et ex\xE9cutables disponibles sur le syst\xE8\
@@ -1378,16 +1378,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
       ref_id: '7.1'
       name: Cloisonnement
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r65
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r65
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: R65
       name: Cloisonner les services
       description: "Dans le cadre du principe de minimisation, il est recommand\xE9\
@@ -1396,10 +1396,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r66
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r66
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: R66
       name: Durcir les composants de cloisonnement
       description: "Tout composant support de cloisonnement doit \xEAtre durci, notamment\
@@ -1407,22 +1407,22 @@ objects:
         exploitation."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: '7.2'
       name: "Services syst\xE8me"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: 7.2.1
       name: Pluggable Authentication Module ou module d'authentification enfichable
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r67
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r67
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
       ref_id: R67
       name: "S\xE9curiser les authentifications distante par PAM"
       description: "Quand l\u2019authentification se d\xE9roule au travers d\u2019\
@@ -1433,10 +1433,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r68
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r68
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
       ref_id: R68
       name: "Prot\xE9ger les mots de passe stock\xE9s"
       description: "Tout mot de passe doit \xEAtre prot\xE9g\xE9 par des m\xE9canismes\
@@ -1449,16 +1449,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: 7.2.2
       name: Name Service Switch ou service de gestion de noms
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r69
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r69
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
       ref_id: R69
       name: "S\xE9curiser les acc\xE8s aux bases utilisateur distantes"
       description: "Lorsque les bases utilisateur sont stock\xE9es sur un serveur\
@@ -1469,10 +1469,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r70
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r70
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
       ref_id: R70
       name: "S\xE9parer les comptes syst\xE8me et d\u2019administrateur de l\u2019\
         annuaire"
@@ -1485,16 +1485,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: 7.2.3
       name: Journalisation
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r71
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r71
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
       ref_id: R71
       name: "Mettre en place un syst\xE8me de journalisation"
       description: "Il est conseill\xE9 d\u2019appliquer les recommandations de la\
@@ -1503,10 +1503,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r72
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r72
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
       ref_id: R72
       name: "Mettre en place des journaux d\u2019activit\xE9 de service d\xE9di\xE9\
         s"
@@ -1517,10 +1517,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r73
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r73
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
       ref_id: R73
       name: "Journaliser l\u2019activit\xE9 syst\xE8me avec auditd"
       description: "La journalisation de l\u2019activit\xE9 du syst\xE8me doit \xEA\
@@ -1528,16 +1528,16 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: 7.2.4
       name: Messagerie
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r74
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r74
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
       ref_id: R74
       name: Durcir le service de messagerie locale
       description: "Quand un service de messagerie est install\xE9 sur la machine,\
@@ -1549,10 +1549,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r75
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r75
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
       ref_id: R75
       name: Configurer un alias de messagerie des comptes de service
       description: "Pour chaque service exploit\xE9 sur le syst\xE8me, ainsi que pour\
@@ -1563,16 +1563,16 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
       assessable: false
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
       ref_id: 7.2.5
       name: "Surveillance du syst\xE8me de fichiers"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r76
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r76
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
       ref_id: R76
       name: "Sceller et v\xE9rifier l\u2019int\xE9grit\xE9 des fichiers"
       description: "Tout fichier qui ne rev\xEAt pas un caract\xE8re transitoire (comme\
@@ -1583,10 +1583,10 @@ objects:
         s cryptographiques, mots de passe, donn\xE9es confidentielles...)."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r77
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r77
       assessable: true
       depth: 4
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
       ref_id: R77
       name: "Prot\xE9ger la base de donn\xE9es des scell\xE9s"
       description: "La base de donn\xE9es de scellement doit \xEAtre prot\xE9g\xE9\
@@ -1596,16 +1596,16 @@ objects:
         \ de celle sur laquelle le scellement est r\xE9alis\xE9."
       implementation_groups:
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
       assessable: false
       depth: 2
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
       ref_id: '7.3'
       name: "Services r\xE9seau"
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r78
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r78
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
       ref_id: R78
       name: "Cloisonner les services r\xE9seau"
       description: "Les services r\xE9seau doivent autant que possible \xEAtre h\xE9\
@@ -1615,10 +1615,10 @@ objects:
       implementation_groups:
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r79
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r79
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
       ref_id: R79
       name: "Durcir et surveiller les services expos\xE9s"
       description: "Les services expos\xE9s \xE0 des flux non ma\xEEtris\xE9s doivent\
@@ -1627,10 +1627,10 @@ objects:
       - I
       - R
       - E
-    - urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r80
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r80
       assessable: true
       depth: 3
-      parent_urn: Urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
       ref_id: R80
       name: "R\xE9duire la surface d\u2019attaque des services r\xE9seau"
       description: "Tous les services r\xE9seau doivent \xEAtre en \xE9coute sur les\
