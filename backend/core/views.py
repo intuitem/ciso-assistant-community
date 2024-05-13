@@ -574,7 +574,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         measures = sorted(
             AppliedControl.objects.filter(id__in=object_ids_view)
-            .exclude(status="done")
+            .exclude(status="active")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
