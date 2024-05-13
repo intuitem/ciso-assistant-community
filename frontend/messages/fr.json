@@ -513,5 +513,7 @@
 	"userWillBeDisconnected": "L'utilisateur sera déconnecté et devra se reconnecter",
 	"scoresDefinition": "Définition des scores",
 	"selectedImplementationGroups": "Groupes d'implémentation sélectionnés",
-	"implementationGroupsDefinition": "Définition des groupes d'implémentation"
+	"implementationGroupsDefinition": "Définition des groupes d'implémentation",
+	"threatRadarChart": "Radar des menaces",
+	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité."
 }

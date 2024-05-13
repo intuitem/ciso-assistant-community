@@ -1,0 +1,1642 @@
+urn: urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux
+locale: fr
+ref_id: 'ANSSI-RECOMMANDATIONS-CONFIGURATION-SYSTEME-GNU-LINUX '
+name: "ANSSI - Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me GNU-Linux"
+description: "Renforcer la s\xE9curit\xE9 d\u2019un syst\xE8me GNU-Linux\nhttps://cyber.gouv.fr/sites/default/files/document/fr_np_linux_configuration-v2.0.pdf"
+copyright: Licence ouverte / Open Licence v2.0 (Etalab)
+version: 1
+provider: ANSSI
+packager: protocolpaladin
+objects:
+  framework:
+    urn: urn:protocolpaladin:risk:framework:anssi-recommandations-configuration-systeme-gnu-linux
+    ref_id: 'ANSSI-RECOMMANDATIONS-CONFIGURATION-SYSTEME-GNU-LINUX '
+    name: "ANSSI - Recommandations de s\xE9curit\xE9 relatives \xE0 un syst\xE8me\
+      \ GNU-Linux"
+    description: "Renforcer la s\xE9curit\xE9 d\u2019un syst\xE8me GNU-Linux"
+    implementation_groups_definition:
+    - ref_id: M
+      name: minimal
+      description: null
+    - ref_id: I
+      name: "interm\xE9diaire "
+      description: null
+    - ref_id: R
+      name: "renforc\xE9"
+      description: null
+    - ref_id: E
+      name: "\xE9lev\xE9"
+      description: null
+    requirement_nodes:
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: "Configuration mat\xE9rielle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      ref_id: '4.1'
+      name: "Support mat\xE9riel"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r1
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.1
+      ref_id: R1
+      name: "Choisir et configurer son mat\xE9riel"
+      description: "Il est conseill\xE9 d\u2019appliquer les recommandations du support\
+        \ mat\xE9riel mentionn\xE9es dans la note technique \xAB Recommandations de\
+        \ configuration mat\xE9rielle de postes clients et serveurs x86 \xBB. Les\
+        \ recommandations de la note technique \xAB Recommandations de configuration\
+        \ mat\xE9rielle de postes clients et serveurs x86 \xBB s\u2019appliquent aux\
+        \ architectures x86. L\u2019approche reste cependant applicable \xE0 d\u2019\
+        autres architectures \xE0 ceci pr\xE8s que les m\xE9canismes et directives\
+        \ de configuration seront susceptibles d\u2019\xEAtre diff\xE9rents."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      ref_id: '4.2'
+      name: BIOS/UEFI
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r2
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.2
+      ref_id: R2
+      name: Configurer le BIOS/UEFI
+      description: "Il est conseill\xE9 d\u2019appliquer les recommandations de la\
+        \ configuration du BIOS/UEFI mentionn\xE9es dans la note technique \xAB Recommandations\
+        \ de configuration mat\xE9rielle de postes clients et serveurs x86 \xBB."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4
+      ref_id: '4.3'
+      name: "D\xE9marrage s\xE9curis\xE9 UEFI"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
+      ref_id: 4.3.1
+      name: "Cl\xE9s pr\xE9charg\xE9es"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r3
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.1
+      ref_id: R3
+      name: "Activer le d\xE9marrage s\xE9curis\xE9 UEFI"
+      description: "Il est recommand\xE9 d\u2019activer la configuration du d\xE9\
+        marrage s\xE9curis\xE9 UEFI associ\xE9e \xE0 \nla distribution."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3
+      ref_id: 4.3.2
+      name: "Nouvelles cl\xE9s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r4
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:4.3.2
+      ref_id: R4
+      name: "Remplacer les cl\xE9s pr\xE9charg\xE9es"
+      description: "Il est recommand\xE9 de remplacer les cl\xE9s pr\xE9charg\xE9\
+        es dans l\u2019UEFI par de nouvelles cl\xE9s avec lesquelles seront sign\xE9\
+        s : le chargeur de d\xE9marrage et le noyau Linux ou l\u2019image du noyau\
+        \ Linux au format EFI."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Configuration du noyau Linux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      ref_id: '5.1'
+      name: "Chargeur de d\xE9marrage"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r5
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.1
+      ref_id: R5
+      name: "Configurer un mot de passe pour le chargeur de d\xE9marrage"
+      description: "Un chargeur de d\xE9marrage permettant de prot\xE9ger son d\xE9\
+        marrage par mot de passe est \xE0 privil\xE9gier. Ce mot de passe doit emp\xEA\
+        cher un utilisateur quelconque de modifier ses options de configuration.\L\
+        \LQuand le chargeur de d\xE9marrage n\u2019offre pas la possibilit\xE9 de\
+        \ lui adjoindre un mot de passe, une autre mesure technique ou organisationnelle\
+        \ doit \xEAtre mise en place afin de bloquer toutes tentatives de modification\
+        \ des options de configuration par un utilisateur non-autoris\xE9."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      ref_id: '5.2'
+      name: Configuration dynamique
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r6
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      ref_id: R6
+      name: "Prot\xE9ger les param\xE8tres de ligne de commande du noyau et l\u2019\
+        initramfs"
+      description: "Il est recommand\xE9 de prot\xE9ger les param\xE8tres de ligne\
+        \ de commande du noyau Linux et l\u2019initramfs pour qu\u2019ils soient v\xE9\
+        rifi\xE9s lors du d\xE9marrage s\xE9curis\xE9 UEFI."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      ref_id: 5.2.1
+      name: "Configuration de la m\xE9moire"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r7
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
+      ref_id: R7
+      name: "Activer l\u2019IOMMU"
+      description: "Il est recommand\xE9 d\u2019activer l\u2019IOMMU en ajoutant la\
+        \ directive iommu=force \xE0 la liste des param\xE8tres du noyau lors du d\xE9\
+        marrage en plus de celles d\xE9j\xE0 pr\xE9sentes dans les fichiers de configuration\
+        \ du chargeur de d\xE9marrage."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r8
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.1
+      ref_id: R8
+      name: "Param\xE9trer les options de configuration de la m\xE9moire"
+      description: "Les listes ci-dessous pr\xE9sentent les options de configuration\
+        \ de la m\xE9moire recommand\xE9es."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      ref_id: 5.2.2
+      name: Configuration du noyau
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r9
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
+      ref_id: R9
+      name: "Param\xE9trer les options de configuration du noyau"
+      description: "La liste ci-dessous pr\xE9sente les options de configuration du\
+        \ noyau recommand\xE9es.\L\LListe des options de configuration du noyau recommand\xE9\
+        es \L\nLes options de configuration du noyau d\xE9taill\xE9es dans cette liste\
+        \ sont pr\xE9sent\xE9es telles que rencontr\xE9es dans le fichier de configuration\
+        \ sysctl.conf : \L\n# Restreint l'acc\xE8s au buffer dmesg (\xE9quivalent\
+        \ \xE0\L# CONFIG_SECURITY_DMESG_RESTRICT=y)\Lkernel.dmesg_restrict=1\L# Cache\
+        \ les adresses noyau dans /proc et les diff\xE9rentes autres interfaces, y\
+        \ compris aux utilisateurs privil\xE9gi\xE9s \nkernel.kptr_restrict=2 \n#\
+        \ Sp\xE9cifie explicitement l'espace d'identifiants de processus support\xE9\
+        \ par le noyau, 65 536 \xE9tant une valeur donn\xE9e \xE0 titre d'exemple\
+        \ kernel.pid_max=65536\L# Restreint l'utilisation du sous-syst\xE8me perf\L\
+        kernel.perf_cpu_time_max_percent=1 \nkernel.perf_event_max_sample_rate=1 \n\
+        # Interdit l'acc\xE8s non privil\xE9gi\xE9 \xE0 l'appel syst\xE8me perf_event_open().\
+        \ Avec une valeur plus grande que 2, on impose la possession de CAP_SYS_ADMIN,\
+        \ pour pouvoir recueillir les \xE9v\xE8nements perf.\Lkernel.perf_event_paranoid=2\L\
+        # Active l'ASLR\Lkernel.randomize_va_space=2\L# D\xE9sactive les combinaisons\
+        \ de touches magiques (Magic System Request Key)\Lkernel.sysrq=0\L# Restreint\
+        \ l'usage du BPF noyau aux utilisateurs privil\xE9gi\xE9s\Lkernel.unprivileged_bpf_disabled=1\L\
+        # Arr\xEAte compl\xE8tement le syst\xE8me en cas de comportement inattendu\
+        \ du noyau Linux\Lkernel.panic_on_oops=1"
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r10
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.2
+      ref_id: R10
+      name: "D\xE9sactiver le chargement des modules noyau"
+      description: "Il est recommand\xE9 de bloquer le chargement des modules noyau\
+        \ par l\u2019activation de \nl\u2019option de configuration du noyau kernel.modules_disabled.\n"
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      ref_id: 5.2.3
+      name: Configuration des processus
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r11
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.3
+      ref_id: R11
+      name: Activer et configurer le LSM Yama
+      description: "Il est recommand\xE9 de charger le module de s\xE9curit\xE9 Yama\
+        \ lors du d\xE9marrage, par exemple en passant la directive security=yama\
+        \ au noyau, et d\u2019affecter \xE0 l\u2019option de configuration du noyau\
+        \ kernel.yama.ptrace_scope une valeur au moins \xE9gale \xE0 1."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      ref_id: 5.2.4
+      name: "Configuration du r\xE9seau"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r12
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
+      ref_id: R12
+      name: "Param\xE9trer les options de configuration du r\xE9seau IPv4"
+      description: "La liste ci-dessous pr\xE9sente les options de configuration du\
+        \ r\xE9seau IPv4 pour un h\xF4te \xAB serveur \xBB typique qui n\u2019effectue\
+        \ pas de routage et ayant une configuration IPv4 minimaliste (adressage statique).\L\
+        \nListe des options de configuration du r\xE9seau IPv4 recommand\xE9es \L\n\
+        Les options de configuration du r\xE9seau IPv4 d\xE9taill\xE9es dans cette\
+        \ liste sont recommand\xE9es pour un h\xF4te de type \xAB serveur \xBB n\u2019\
+        effectuant pas de routage et ayant une configuration IPv4 minimaliste. Elles\
+        \ sont pr\xE9sent\xE9es telles que rencontr\xE9es dans le fichier de configuration\
+        \ sysctl.conf : \L\n# Att\xE9nuation de l'effet de dispersion du JIT noyau\
+        \ au co\xFBt d'un compromis sur les performances associ\xE9es.\Lnet.core.bpf_jit_harden=2\L\
+        # Pas de routage entre les interfaces. Cette option est sp\xE9ciale et peut\
+        \ entrainer des modifications d'autres options. En pla\xE7ant cette option\
+        \ au plus t\xF4t, on s'assure que la configuration des options suivantes ne\
+        \ change pas. net.ipv4.ip_forward=0\L# Consid\xE8re comme invalides les paquets\
+        \ re\xE7us de l'ext\xE9rieur ayant comme source le r\xE9seau 127/8. \nnet.ipv4.conf.all.accept_local=0\
+        \ \n# Refuse la r\xE9ception de paquet ICMP redirect. Le param\xE9trage sugg\xE9\
+        r\xE9 de cette option est \xE0 consid\xE9rer fortement dans le cas de routeurs\
+        \ qui ne doivent pas d\xE9pendre d'un \xE9l\xE9ment ext\xE9rieur pour d\xE9\
+        terminer le calcul d'une route. M\xEAme pour le cas de machines non-routeurs,\
+        \ ce param\xE9trage pr\xE9munit contre les  d\xE9tournements de trafic avec\
+        \ des paquets de type ICMP redirect. \nnet.ipv4.conf.all.accept_redirects=0\L\
+        net.ipv4.conf.default.accept_redirects=0\Lnet.ipv4.conf.all.secure_redirects=0\L\
+        net.ipv4.conf.default.secure_redirects=0\Lnet.ipv4.conf.all.shared_media=0\L\
+        net.ipv4.conf.default.shared_media=0\L# Refuse les informations d'en-t\xEA\
+        tes de source routing fournies par le paquet pour d\xE9terminer sa route.\L\
+        net.ipv4.conf.all.accept_source_route=0\Lnet.ipv4.conf.default.accept_source_route=0\
+        \ \n# Emp\xEAche le noyau Linux de g\xE9rer la table ARP globalement. Par\
+        \ d\xE9faut, il peut r\xE9pondre \xE0 une requ\xEAte ARP d'une interface X\
+        \ avec les informations d'une interface Y. Ce comportement est probl\xE9matique\
+        \ pour les routeurs et les \xE9quipements d'un syst\xE8me en haute disponibilit\xE9\
+        \ (VRRP...).\Lnet.ipv4.conf.all.arp_filter=1 \n# Ne r\xE9pond aux sollicitations\
+        \ ARP que si l'adresse source et destination sont sur # le m\xEAme r\xE9seau\
+        \ et sur l'interface sur laquelle le paquet a \xE9t\xE9 re\xE7u. Il est \xE0\
+        \ noter que la configuration de cette option est \xE0 \xE9tudier selon le\
+        \ cas d'usage. net.ipv4.conf.all.arp_ignore=2 \n# Refuse le routage de paquet\
+        \ dont l'adresse source ou destination est celle de la boucle locale. Cela\
+        \ interdit l'\xE9mission de paquet ayant comme source 127/8.\Lnet.ipv4.conf.all.route_localnet=0\L\
+        # Ignore les sollicitations de type gratuitous ARP. Cette configuration est\
+        \ efficace contre les attaques de type ARP poisoning mais ne s'applique qu'en\
+        \ association avec un ou plusieurs proxy ARP ma\xEEtris\xE9s. Elle peut \xE9\
+        galement \xEAtre probl\xE9matique sur un r\xE9seau avec des \xE9quipements\
+        \ en haute disponibilit\xE9 (VRRP...) net.ipv4.conf.all.drop_gratuitous_arp=1\L\
+        # V\xE9rifie que l'adresse source des paquets re\xE7us sur une interface donn\xE9\
+        e aurait bien \xE9t\xE9 contact\xE9e via cette m\xEAme interface. \xC0 d\xE9\
+        faut, le paquet est ignor\xE9. Selon l'usage, la valeur 1 peut permettre d'accro\xEE\
+        tre la v\xE9rification \xE0 l'ensemble des interfaces, lorsque l'\xE9quipement\
+        \ est un routeur dont le calcul de # routes est dynamique. Le lecteur int\xE9\
+        ress\xE9 est renvoy\xE9 \xE0 la RFC3704 pour tout compl\xE9ment concernant\
+        \ cette fonctionnalit\xE9.\Lnet.ipv4.conf.default.rp_filter=1\Lnet.ipv4.conf.all.rp_filter=1\L\
+        # Cette option ne doit \xEAtre mise \xE0 1 que dans le cas d'un routeur, car\
+        \ pour ces \xE9quipements l'envoi de ICMP redirect est un comportement normal.\
+        \ Un \xE9quipement terminal n'a pas de raison de recevoir un flux dont il\
+        \ n'est pas destinataire et donc d'\xE9mettre un paquet ICMP redirect.\Lnet.ipv4.conf.default.send_redirects=0\L\
+        net.ipv4.conf.all.send_redirects=0\L# Ignorer les r\xE9ponses non conformes\
+        \ \xE0 la RFC 1122\Lnet.ipv4.icmp_ignore_bogus_error_responses=1\L# Augmenter\
+        \ la plage pour les ports \xE9ph\xE9m\xE8res\Lnet.ipv4.ip_local_port_range=32768\
+        \ 65535\L# RFC 1337\Lnet.ipv4.tcp_rfc1337=1\L# Utilise les SYN cookies. Cette\
+        \ option permet la pr\xE9vention d'attaque de type SYN flood.\Lnet.ipv4.tcp_syncookies=1"
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r13
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.4
+      ref_id: R13
+      name: "D\xE9sactiver le plan IPv6"
+      description: "Quand IPv6 n\u2019est pas utilis\xE9, il est recommand\xE9 de\
+        \ d\xE9sactiver la pile IPv6 en :\L\n- Ajoutant la directive ipv6.disable=1\
+        \ \xE0 la liste des param\xE8tres du noyau choisi lors du d\xE9marrage en\
+        \ plus de celles d\xE9j\xE0 pr\xE9sentes dans les fichiers de configuration\
+        \  du chargeur de d\xE9marrage\L\n- Activant les options de configuration du r\xE9\
+        seau pr\xE9sent\xE9es dans la liste ci-dessous.\L\nListe des options de configuration\
+        \ du r\xE9seau pour d\xE9sactiver le plan IPv6\L\nLes options de configuration\
+        \ du r\xE9seau d\xE9taill\xE9es dans cette liste d\xE9sactivent le plan IPv6.\
+        \ Elles sont pr\xE9sent\xE9es telles que rencontr\xE9es dans le fichier de\
+        \ configuration sysctl.conf : \L\Lnet.ipv6.conf.default.disable_ipv6=1 \n\
+        net.ipv6.conf.all.disable_ipv6=1"
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2
+      ref_id: 5.2.5
+      name: "Configuration des syst\xE8mes de fichiers"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r14
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.2.5
+      ref_id: R14
+      name: "Param\xE9trer les options de configuration des syst\xE8mes de fichiers"
+      description: "La liste ci-dessous pr\xE9sente les options de configuration des\
+        \ syst\xE8mes de fichiers recommand\xE9es au format du ficher de configuration\
+        \ sysctl.conf.\L\nListe des options de configuration des syst\xE8mes de fichiers\
+        \ recommand\xE9es\L\nLes options de configuration des syst\xE8mes de fichiers\
+        \ d\xE9taill\xE9es dans cette liste sont pr\xE9sent\xE9es telles que rencontr\xE9\
+        es dans le fichier de configuration sysctl.conf :\L\n# D\xE9sactive la cr\xE9\
+        ation de coredump pour les ex\xE9cutables setuid\L# Notez qu'il est possible\
+        \ de d\xE9sactiver tous les coredumps avec la configuration CONFIG_COREDUMP=n\L\
+        fs.suid_dumpable = 0\L# Disponible \xE0 partir de la version 4.19 du noyau\
+        \ Linux, permet d'interdire l'ouverture des FIFOS et des fichiers \"r\xE9\
+        guliers\" qui ne sont pas la propri\xE9t\xE9 de l'utilisateur dans les dossiers\
+        \ sticky en \xE9criture pour tout le monde.\Lfs.protected_fifos=2\Lfs.protected_regular=2\L\
+        # Restreint la cr\xE9ation de liens symboliques \xE0 des fichiers dont l\u2019\
+        utilisateur est propri\xE9taire. Cette option fait partie des m\xE9canismes\
+        \ de pr\xE9vention contre les vuln\xE9rabilit\xE9s de la famille Time of Check\
+        \ - Time of Use (Time of Check - Time of Use)\Lfs.protected_symlinks=1\L#\
+        \ Restreint la cr\xE9ation de liens durs \xE0 des fichiers dont l'utilisateur\
+        \ est propri\xE9taire. Ce sysctl fait partie des m\xE9canismes de pr\xE9vention\
+        \ contre les vuln\xE9rabilit\xE9s Time of Check - Time of Use, mais aussi\
+        \ contre la possibilit\xE9 de conserver des acc\xE8s \xE0 des fichiers obsol\xE8\
+        tes\Lfs.protected_hardinks=1"
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5
+      ref_id: '5.3'
+      name: Configuration statique
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
+      ref_id: 5.3.1
+      name: "Configuration ind\xE9pendante de la cible mat\xE9rielle"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r15
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R15
+      name: "Param\xE9trer les options de compilation pour la gestion de la m\xE9\
+        moire"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour durcir la gestion de la m\xE9moire.\L\nListe\
+        \ des options de compilation du noyau recommand\xE9es pour durcir la gestion\
+        \ de la m\xE9moire\L\n# Cette option a remplac\xE9 CONFIG_DEBUG_RODATA dans\
+        \ le noyau (>=4.11) qui \xE9tait une d\xE9pendance de CONFIG_DEBUG_KERNEL\L\
+        CONFIG_STRICT_KERNEL_RWX=y\L# CONFIG_ARCH_OPTIONAL_KERNEL_RWX et CONFIG_ARCH_HAS_STRICT_KERNEL_RWX\
+        \ sont des d\xE9pendances de CONFIG_STRICT_KERNEL_RWX\LCONFIG_ARCH_OPTIONAL_KERNEL_RWX=y\
+        \ \nCONFIG_ARCH_HAS_STRICT_KERNEL_RWX=y \n# V\xE9rifie et rapporte les permissions\
+        \ de mapping m\xE9moire dangereuses, par # exemple, lorsque les pages noyau\
+        \ sont en \xE9criture et sont ex\xE9cutables. Cette option n'est pas disponible\
+        \ sur l'ensemble des architectures mat\xE9rielles (x86 >=4.4, arm64 >=4.10,\
+        \ etc.).\LCONFIG_DEBUG_WX=y\L# D\xE9sactive le syst\xE8me de fichiers utilis\xE9\
+        \ uniquement dans le cadre de d\xE9bogage. Prot\xE9ger ce syst\xE8me de fichiers\
+        \ n\xE9cessite un travail suppl\xE9mentaire. \nCONFIG_DEBUG_FS=n \n# A partir\
+        \ de la version 4.18 du noyau, ces options ajoutent -fstack-protector-strong\
+        \ \xE0 la compilation afin de renforcer le stack canary, il est n\xE9cessaire\
+        \ d'avoir une version de GCC au moins \xE9gale \xE0 4.9.\L# Avant la version\
+        \ 4.18 du noyau linux, il faut utiliser les options CONFIG_CC_STACKPROTECTOR\
+        \ et CONFIG_CC_STACKPROTECTOR_STRONG\LCONFIG_STACKPROTECTOR=y\LCONFIG_STACKPROTECTOR_STRONG=y\L\
+        # Interdit l'acc\xE8s direct \xE0 la m\xE9moire physique. En cas de besoin\
+        \ et uniquement dans ce cas, il est possible d'activer un acc\xE8s strict\
+        \ \xE0 la m\xE9moire, limitant ainsi son acc\xE8s, avec les options CONFIG_STRICT_DEVMEM=y\
+        \ et CONFIG_IO_STRICT_DEVMEM=y\LCONFIG_DEVMEM is not set\L# D\xE9tecte la\
+        \ corruption de la pile pendant l'appel \xE0 l'ordonnanceur CONFIG_SCHED_STACK_END_CHECK=y\L\
+        # Impose une v\xE9rification des limites du mapping m\xE9moire du processus\
+        \ au moment des copies de donn\xE9es.\LCONFIG_HARDENED_USERCOPY=y\L# Interdit\
+        \ de revenir \xE0 une v\xE9rification du mapping aupr\xE8s de l'allocateur\
+        \ si l'option pr\xE9c\xE9dente a \xE9chou\xE9 (<=5.15)\L#CONFIG_HARDENED_USERCOPY_FALLBACK\
+        \ is not set\L# Ajout de pages de garde entre les piles noyau. Cela prot\xE8\
+        ge contre les effets de bord des d\xE9bordements de pile (cette option n'est\
+        \ pas support\xE9e sur toutes # les architectures).\LCONFIG_VMAP_STACK=y\L\
+        # V\xE9rifications exhaustives sur les compteurs de r\xE9f\xE9rence du noyau\
+        \ (<=5.4)\LCONFIG_REFCOUNT_FULL=y\L# V\xE9rifie les actions de recopie m\xE9\
+        moire qui pourraient provoquer une corruption de structure dans les fonctions\
+        \ noyau str*() et mem*(). Cette v\xE9rification est effectu\xE9e \xE0 la compilation\
+        \ et \xE0 l'ex\xE9cution.\LCONFIG_FORTIFY_SOURCE=y\L# D\xE9sactive l'usage\
+        \ dangereux de l'ACPI, pouvant entrainer une \xE9criture directe en m\xE9\
+        moire physique.\L#CONFIG_ACPI_CUSTOM_METHOD is not set\L# Interdit tout acc\xE8\
+        s direct \xE0 la m\xE9moire du noyau \xE0 partir du users-ace (<=-5.12)\L\
+        #CONFIG_DEVKMEM is not set\L# Interdit la fourniture de la disposition de\
+        \ l'image noyau\L#CONFIG_PROC_KCORE is not set\L# D\xE9sactive la r\xE9trocompatibilit\xE9\
+        \ VDSO, qui rend impossible l\u2019usage de l\u2019ASLR\L#CONFIG_COMPAT_VDSO\
+        \ is not set\L# Emp\xE8che les utilisateurs non privil\xE9gi\xE9s de r\xE9\
+        cup\xE9rer des adresses noyau avec dmesg(8)\LCONFIG_SECURITY_DMESG_RESTRICT=y\L\
+        # Active les retpoline qui sont n\xE9cessaires pour se prot\xE9ger de Spectre\
+        \ v2 GCC >= 7.3.0 est requis.\LCONFIG_RETPOLINE=y\L# D\xE9sactive la table\
+        \ vsyscall. Elle n'est plus requise par la libc et est une source potentielle\
+        \ de ROP gadgets.\LCONFIG_LEGACY_VSYSCALL_NONE=y\LCONFIG_LEGACY_VSYSCALL_EMULATE=n\L\
+        CONFIG_LEGACY_VSYSCALL_XONLY=n\LCONFIG_X86_VSYSCALL_EMULATION=n"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r16
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R16
+      name: "Param\xE9trer les options de compilation pour les structures de donn\xE9\
+        es du noyau"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour prot\xE9ger les structures de donn\xE9es du noyau.\L\
+        \nListe des options de compilation du noyau recommand\xE9es pour prot\xE9\
+        ger les structures de donn\xE9es du noyau\L\L# V\xE9rifie les structures de\
+        \ gestion des autorisations.\nCONFIG_DEBUG_CREDENTIALS=y \n# V\xE9rifie les\
+        \ structures de notification.\nCONFIG_DEBUG_NOTIFIERS=y \n# V\xE9rifie les\
+        \ listes noyau. \nCONFIG_DEBUG_LIST=y\n# V\xE9rifie les tables de Scatter-Gather\
+        \ du noyau. \nCONFIG_DEBUG_SG=y \n# G\xE9n\xE8re un appel \xE0 BUG() en cas\
+        \ de d\xE9tection de corruption. \nCONFIG_BUG_ON_DATA_CORRUPTION=y"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r17
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R17
+      name: "Param\xE9trer les options de compilation pour l\u2019allocateur m\xE9\
+        moire"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour durcir l\u2019allocateur m\xE9moire.\L\nListe\
+        \ des options de compilation du noyau recommand\xE9es pour durcir l'allocateur\
+        \ m\xE9moire\L \n# Positionne les informations de cha\xEEnage des blocs libres\
+        \ de l'allocateur de mani\xE8re al\xE9atoire.\LCONFIG_SLAB_FREELIST_RANDOM=y\L\
+        # CONFI_SLAB est une d\xE9pendance de CONFIG_SLAB_FREELIST_RANDOM \nCONFIG_SLUB=y\
+        \ \n# Prot\xE8ge les m\xE9tadonn\xE9es de l'allocateur en int\xE9grit\xE9\
+        . \nCONFIG_SLAB_FREELIST_HARDENED=y \n# A partir de la version 4.13 du noyau,\
+        \ cette option d\xE9sactive le merge des caches SLAB\LCONFIG_SLAB_MERGE_DEFAULT=n\L\
+        # Active la v\xE9rification des structures de l'allocateur m\xE9moire et r\xE9\
+        initialise \xE0 z\xE9ro les zones allou\xE9es \xE0 leur lib\xE9ration (n\xE9\
+        cessite l'activation de l'option de configuration de la m\xE9moire page_poison=on\
+        \ ajout\xE9e \xE0 la liste des # param\xE8tres du noyau lors du d\xE9marrage).\
+        \ Il est pr\xE9f\xE9rable d'utiliser l'option de configuration slub_debug\
+        \ de la m\xE9moire ajout\xE9e \xE0 la liste des param\xE8tres du noyau lors\
+        \ du d\xE9marrage car elle permet une gestion plus fine du slub debug. \n\
+        CONFIG_SLUB_DEBUG=y\L# Nettoie les pages m\xE9moire au moment de leur lib\xE9\
+        ration. \nCONFIG_PAGE_POISONING=y \n# Nettoyage en profondeur d\xE9sactiv\xE9\
+        . Cette option a un co\xFBt important; cependant si l'impact en performance\
+        \ est compatible avec le besoin op\xE9rationnel de l'\xE9quipement il est\
+        \ recommand\xE9 de l'activer (<=5.10)\LCONFIG_PAGE_POISONING_NO_SANITY=y\L\
+        #Le nettoyage des pages m\xE9moire est effectu\xE9 avec une r\xE9\xE9criture\
+        \ de z\xE9ros en # lieu et place des donn\xE9es (<=5.10)\LCONFIG_PAGE_POISONING_ZERO=y\L\
+        # D\xE9sactive la r\xE9trocompatibilit\xE9 avec brk() qui rend impossible\
+        \ une impl\xE9mentation de brk() avec l'ASLR. \n#CONFIG_COMPAT_BRK is not\
+        \ set"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r18
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R18
+      name: "Param\xE9trer les options de compilation pour la gestion des modules\
+        \ noyau"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour durcir la gestion des modules noyau.\L\nListe\
+        \ des options de compilation du noyau recommand\xE9es pour durcir la gestion\
+        \ des modules noyau\L\n# Activation du support des modules \nCONFIG_MODULES=y\
+        \ \n# Cette option a remplac\xE9 CONFIG_DEBUG_SET_MODULE_RONX dans le noyau\
+        \ (>=4.11) \nCONFIG_STRICT_MODULE_RWX=y \n# Les modules doivent \xEAtre sign\xE9\
+        s. Attention, les modules ne doivent pas \xEAtre stripp\xE9s apr\xE8s signature.\L\
+        CONFIG_MODULE_SIG=y\L# Emp\xE8che le chargement des modules non sign\xE9s\
+        \ ou sign\xE9s avec une cl\xE9 qui ne nous appartient pas. \nCONFIG_MODULE_SIG_FORCE=y\
+        \ \n# Activer CONFIG_MODULE_SIG_ALL permet de signer tous les modules automatiquement\
+        \ pendant l'\xE9tape \"make modules_install\", sans cette option les modules\
+        \ doivent \xEAtre sign\xE9s manuellement en utilisant le script scripts/sign-file.\
+        \ L'option CONFIG_MODULE_SIG_ALL d\xE9pend de CONFIG_MODULE_SIG et CONFIG_MODULE_SIG_FORCE,\
+        \ elles doivent donc \xEAtre activ\xE9es.\LCONFIG_MODULE_SIG_ALL=y\L# La signature\
+        \ des modules utilise SHA512 comme fonction de hash CONFIG_MODULE_SIG_SHA512=y\L\
+        CONFIG_MODULE_SIG_HASH=\"sha512\"\L# Indique le chemin vers le fichier contenant\
+        \ certificat X.509 au format PEM utilis\xE9 pour relatif \xE0 la racine du\
+        \ noyau.\LCONFIG_MODULE_SIG_KEY=\"certs/signing_key.pem\""
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r19
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R19
+      name: "Param\xE9trer les options de compilation pour les \xE9v\xE8nements anormaux"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour r\xE9agir aux \xE9v\xE8nements anormaux.\L\n\
+        Liste des options de compilation du noyau recommand\xE9es pour r\xE9agir aux\
+        \ \xE9v\xE8nements anormaux\L\n# \xC9met un rapport sur les conditions d'appel\
+        \ \xE0 la macro noyau BUG() et tue le processus \xE0 l'origine de l'appel.\
+        \ Ne pas positionner cette variable peut passer sous silence un certain nombre\
+        \ d'erreurs critiques.\LCONFIG_BUG=y\L# Arr\xEAte le syst\xE8me en cas d'erreur\
+        \ critique pour couper court \xE0 tout comportement erron\xE9.\LCONFIG_PANIC_ON_OOPS=y\L\
+        # Emp\xEAche le red\xE9marrage de la machine suite \xE0 un panic ce qui coupe\
+        \ court \xE0 toute tentative d'attaque par force brute. Ceci a \xE9videmment\
+        \ un impact fort sur des serveurs en production.\LCONFIG_PANIC_TIMEOUT=-1"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r20
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R20
+      name: "Param\xE9trer les options de compilation pour les primitives de s\xE9\
+        curit\xE9 du noyau"
+      description: "La liste ci-dessous pr\xE9sente une liste des options de compilation\
+        \ du noyau recommand\xE9es pour configurer les primitives de s\xE9curit\xE9\
+        \ du noyau.\L\nListe des options de compilation du noyau recommand\xE9es pour\
+        \ configurer les primitives de s\xE9curit\xE9 du noyau\L\n# Active la possibilit\xE9\
+        \ de filtrer les appels syst\xE8me faits par une\L# application.\LCONFIG_SECCOMP=y\L\
+        # Active la possibilit\xE9 d'utiliser des script BPF (Berkeley Packet Filter).\
+        \ CONFIG_SECCOMP_FILTER=y \n# Active les primitives de s\xE9curit\xE9 du noyau\
+        \ Linux, n\xE9cessaire pour les LSM. \nCONFIG_SECURITY=y \n# Active Yama,\
+        \ qui permet de limiter simplement l'usage de l'appel syst\xE8me ptrace().\
+        \ Une fois les modules de s\xE9curit\xE9 utilis\xE9s par le syst\xE8me s\xE9\
+        lectionn\xE9, il convient de d\xE9sactiver le support des autres modules de\
+        \ s\xE9curit\xE9 dans le noyau afin de r\xE9duire la surface d'attaque. CONFIG_SECURITY_YAMA=y\
+        \ \n# Assure que les structures noyau associ\xE9es aux LSM sont toujours mapp\xE9\
+        es en lecture seule apr\xE8s le d\xE9marrage du syst\xE8me. Dans le cas o\xF9\
+        \ SELinux est utilis\xE9, il faut s'assurer que CONFIG_SECURITY_SELINUX_DISABLE\
+        \ is not set, pour que cette option soit disponible. Il n'est alors plus possible\
+        \ de d\xE9sactiver un LSM une fois le noyau d\xE9marr\xE9. Il est en revanche\
+        \ encore possible de le faire en modifiant la ligne de commande du noyau.\
+        \ Pour le noyau 4.18 les LSM pr\xE9sents sont: AppArmor, LoadPin, SELinux,\
+        \ Smack, TOMOYO et Yama.\L#CONFIG_SECURITY_WRITABLE_HOOKS is not set"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r21
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R21
+      name: "Param\xE9trer les options de compilation pour les plugins du compilateur"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour configurer les plugins du compilateur.\L\nListe\
+        \ des options de compilation du noyau recommand\xE9es pour configurer les\
+        \ plugins du compilateur\L\n# Active le support des plugins du compilateur\
+        \ (implique l'usage de GCC). \nCONFIG_GCC_PLUGINS=y \n# Amplifie la g\xE9\
+        n\xE9ration d'entropie au d\xE9marrage de l'\xE9quipement pour ceux ayant\
+        \ des sources d'entropie inappropri\xE9es\LCONFIG_GCC_PLUGIN_LATENT_ENTROPY=y\L\
+        # Nettoie le contenu de la pile au moment de l'appel syst\xE8me exit. CONFIG_GCC_PLUGIN_STACKLEAK=y\
+        \ \n# Impose l'initialisation des structures en m\xE9moire pour \xE9viter\
+        \ la fuite de donn\xE9es par superposition avec une ancienne structure.\L\
+        CONFIG_GCC_PLUGIN_STRUCTLEAK=y\L# Globalisation de l'option pr\xE9c\xE9dente\
+        \ au cas du passage de structure par r\xE9f\xE9rence entre fonction si celles-ci\
+        \ ont des champs non initialis\xE9s. \nCONFIG_GCC_PLUGIN_STRUCTLEAK_BYREF_ALL=y\
+        \ \n# Construit un plan m\xE9moire al\xE9atoire pour les structures syst\xE8\
+        me du noyau. Cette option a un impact fort sur les performances. L\u2019option\
+        \ CONFIG_GCC_PLUGIN_RANDSTRUCT_PERFORMANCE=y est \xE0 utiliser en substitution\
+        \ si # cet impact n'est pas acceptable.\LCONFIG_GCC_PLUGIN_RANDSTRUCT=y"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r22
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R22
+      name: "Param\xE9trer les options de compilation pour la pile r\xE9seau"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour configurer la pile r\xE9seau.\L\nListe des options\
+        \ de compilation du noyau recommand\xE9es pour configurer la pile r\xE9seau\L\
+        \n# D\xE9sactive le plan IPv6 \n#CONFIG_IPV6 option set. \n# Permet de pr\xE9\
+        venir les attaques de type SYN flood. \nCONFIG_SYN_COOKIES=y"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r23
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.1
+      ref_id: R23
+      name: "Param\xE9trer les options de compilation pour divers comportements du\
+        \ noyau"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour configurer divers comportements du noyau.\L\n\
+        Certains comportements du noyau Linux peuvent augmenter inutilement la surface\
+        \ d\u2019attaque du noyau. Si ceux-ci ne sont pas absolument n\xE9cessaires,\
+        \ ils ne doivent pas \xEAtre activ\xE9s.\L\nListe des options de compilation\
+        \ du noyau recommand\xE9es pour configurer divers comportements du noyau\L\
+        \n# Interdit l'ex\xE9cution d'une nouvelle image noyau \xE0 chaud. \n#CONFIG_KEXEC\
+        \ is not set \n# Interdit le passage en mode hibernation, qui permet de substituer\
+        \ l'image noyau \xE0 son insu.\L#CONFIG_HIBERNATION is not set\L# D\xE9sactive\
+        \ le support de format binaire arbitraire. \n#CONFIG_BINFMT_MISC is not set\
+        \ \n# Impose l'utilisation des ptys modernes (devpts) dont on peut contr\xF4\
+        ler le nombre et l'usage.\L#CONFIG_LEGACY_PTYS is not set\L# Si le support\
+        \ des modules n'est pas absolument n\xE9cessaire celui-ci doit \xEAtre d\xE9\
+        sactiv\xE9. \n#CONFIG_MODULES is not set"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3
+      ref_id: 5.3.2
+      name: "Configuration sp\xE9cifique aux architectures mat\xE9rielles"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r24
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      ref_id: R24
+      name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
+        \ 32 bits"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour les architectures de type x86 32 bits. Elles\
+        \ ne sont pas toutes pertinentes sur des architectures 64 bits.\L\nListe des\
+        \ options de compilation du noyau recommand\xE9es pour les architectures 32\
+        \ bits\L\n# Active le support des extensions d'adresse physique, ce qui est\
+        \ un pr\xE9requis pour le support du bit de permission NX dans la table des\
+        \ pages qui permet de # marquer certaines pages comme non ex\xE9cutables.\L\
+        CONFIG_HIGHMEM64G=y\LCONFIG_X86_PAE=y\L# Interdit l'utilisation d'adresses\
+        \ m\xE9moire en dessous d'une certaine valeur\L# (contre-mesure contre les\
+        \ null pointer dereference). CONFIG_DEFAULT_MMAP_MIN_ADDR=65536\L# Rend non\
+        \ pr\xE9dictible l'adresse de base du noyau. Cette option complexifie la t\xE2\
+        che d'un attaquant.\LCONFIG_RANDOMIZE_BASE=y"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r25
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      ref_id: R25
+      name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
+        \ x86_64 bits"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour les architectures de type x86_64 bits. Elles\
+        \ ne sont pas toutes pertinentes sur des architectures 32 bits.\L\nListe des\
+        \ options de compilation du noyau recommand\xE9es pour les architectures x86_64\
+        \ bits\L\n# Activate le mode complet 64 bits. \nCONFIG_X86_64=y \n# Interdit\
+        \ l'utilisation d'adresses m\xE9moire en dessous d'une certaine valeur (contre-mesure\
+        \ contre les null pointer dereference).\LCONFIG_DEFAULT_MMAP_MIN_ADDR=65536\L\
+        # Rend non pr\xE9dictible l'adresse de base du noyau, cette option complexifie\
+        \ la t\xE2che d'un attaquant. \nCONFIG_RANDOMIZE_BASE=y \n# Rend non pr\xE9\
+        dictible l'adresse \xE0 laquelle les composants du noyau sont expos\xE9s dans\
+        \ l'espace d'adressage des processus.\LCONFIG_RANDOMIZE_MEMORY=y\L# Contre-mesure\
+        \ \xE0 l'attaque Meltdown. \nCONFIG_PAGE_TABLE_ISOLATION=y \n# D\xE9sactive\
+        \ la r\xE9tro-compatibilit\xE9 32 bits, ce qui permet de r\xE9duire la surface\
+        \ d'attaque mais emp\xEAche d'ex\xE9cuter des binaires 32 bits.\L#CONFIG_IA32_EMULATION\
+        \ is not set\L# Interdit la surcharge par processus de la Local Descriptor\
+        \ Table (m\xE9canisme li\xE9 \xE0 l'usage de la segmentation). \n#CONFIG_MODIFY_LDT_SYSCALL\
+        \ is not set"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r26
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      ref_id: R26
+      name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
+        \ ARM"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour les architectures de type ARM.\L\nListe des options\
+        \ de compilation du noyau recommand\xE9es pour les architectures ARM\L \n\
+        # Interdit l'utilisation d'adresses m\xE9moire en dessous d'une certaine valeur\
+        \ (contre-mesure contre les null pointer dereference).\LCONFIG_DEFAULT_MMAP_MIN_ADDR=32768\L\
+        # Maximise la taille de la m\xE9moire virtuelle des processus (et de l'ASLR\
+        \ aff\xE9rent). \nCONFIG_VMSPLIT_3G=y \n# Interdit les mappings m\xE9moire\
+        \ RWX. \nCONFIG_STRICT_MEMORY_RWX=y \n# Interdit les acc\xE8s par le noyau\
+        \ \xE0 la m\xE9moire utilisateur (m\xE9canisme \xE9quivalent sur ARM \xE0\
+        \ SMAP sur x86_64).\LCONFIG_CPU_SW_DOMAIN_PAN=y\L# Cette option de compatibilit\xE9\
+        \ avec l'ancienne ABI ARM est dangereuse et ouvre la voie \xE0 diverses attaques.\
+        \ \n#CONFIG_OABI_COMPAT is unset"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r27
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:5.3.2
+      ref_id: R27
+      name: "Param\xE9trer les options de compilation sp\xE9cifiques aux architectures\
+        \ ARM 64 bits"
+      description: "La liste ci-dessous pr\xE9sente les options de compilation du\
+        \ noyau recommand\xE9es pour les architectures de type ARM 64 bits.\L\nListe\
+        \ des options de compilation du noyau recommand\xE9es pour les architectures\
+        \ ARM 64 bits\L\n# Interdit l'utilisation d'adresses m\xE9moire en dessous\
+        \ d'une certaine valeur (contre-mesure contre les null pointer dereference).\L\
+        CONFIG_DEFAULT_MMAP_MIN_ADDR=32768\L# Rend non pr\xE9dictible l'adresse de\
+        \ base du noyau, cette option complexifie la t\xE2che d'un attaquant. L'entropie\
+        \ n\xE9cessaire \xE0 la g\xE9n\xE9ration de l'al\xE9a doit \xEAtre fournie\
+        \ par l'UEFI ou, \xE0 d\xE9faut, par le chargeur de d\xE9marrage. \nCONFIG_RANDOMIZE_BASE=y\
+        \ \n# Interdit les acc\xE8s par le noyau \xE0 la m\xE9moire utilisateur (m\xE9\
+        canisme \xE9quivalent sur ARM \xE0 SMAP sur 86_64).\LCONFIG_ARM64_SW_TTBR0_PAN=y\L\
+        # Contre mesure \xE0 l'attaque Meltdown.\LCONFIG_UNMAP_KERNEL_AT_EL0=y \n\n"
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: "Configuration syst\xE8me"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      ref_id: '6.1'
+      name: Partitionnement
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r28
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
+      ref_id: R28
+      name: Partitionnement type
+      description: "Le partitionnement type recommand\xE9 est le suivant :\n\nPoint\
+        \ de montage : /\nOptions: <sans option>\nDescription: Partition racine, contient\
+        \ le reste de l\u2019arborescence \nPoint de montage : /boot\nOptions: nosuid,nodev,noexec\
+        \ (noauto optionnel)\nDescription: Contient le noyau et le chargeur de d\xE9\
+        marrage. Pas d\u2019acc\xE8s n\xE9cessaire une fois le boot termin\xE9 (sauf\
+        \ mise \xE0 jour) \nPoint de montage : /opt\nOptions: nosuid,nodev (ro optionnel)\n\
+        Description: Packages additionnels au syst\xE8me. Montage en lecture seule\
+        \ si non utilis\xE9 \nPoint de montage : /tmp\nOptions: nosuid,nodev,noexec\n\
+        Description: Fichiers temporaires. Ne doit contenir que des \xE9l\xE9ments\
+        \ non ex\xE9cutables. Nettoy\xE9 apr\xE8s red\xE9marrage ou pr\xE9f\xE9rablement\
+        \ de type tmpfs \nPoint de montage : /srv\nOptions: nosuid,nodev (noexec,ro\
+        \ optionnels)\nDescription: Contient des fichiers servis par un service type\
+        \ Web, FTP... \nPoint de montage : /home\nOptions: nosuid,nodev,noexec\nDescription:\
+        \ Contient les HOME utilisateurs. \nPoint de montage : /proc\nOptions: hidepid=2\
+        \ 14\nDescription: Contient des informations sur les processus et le syst\xE8\
+        me \nPoint de montage : /usr\nOptions: nodev\nDescription: Contient la majorit\xE9\
+        \ des utilitaires et fichiers syst\xE8me \nPoint de montage : /var\nOptions:\
+        \ nosuid,nodev,noexec\nDescription: Partition contenant des fichiers variables\
+        \ pendant la vie du syst\xE8me (mails, fichiers PID, bases de donn\xE9es d\u2019\
+        un service) \nPoint de montage : /var/log\nOptions: nosuid,nodev,noexec\n\
+        Description: Contient les logs du syst\xE8me \nPoint de montage : /var/tmp\n\
+        Options: nosuid,nodev,noexec\nDescription: Fichiers temporaires conserv\xE9\
+        s apr\xE8s extinction \n"
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r29
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.1
+      ref_id: R29
+      name: "Restreindre les acc\xE8s au dossier /boot"
+      description: "Lorsque c\u2019est possible, il est recommand\xE9 de ne pas monter\
+        \ automatiquement la partition /boot. Dans tous les cas, l\u2019acc\xE8s au\
+        \ dossier /boot doit \xEAtre uniquement autoris\xE9 pour l\u2019utilisateur\
+        \ root.\L\nAttention \nLa modification du montage de /boot demande une adaptation\
+        \ des outils syst\xE8me \xE0 cette configuration particuli\xE8re, notamment\
+        \ pour la mise \xE0 jour du noyau et du chargeur de d\xE9marrage."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      ref_id: '6.2'
+      name: "Comptes d'acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      ref_id: 6.2.1
+      name: Comptes utilisateur
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r30
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      ref_id: R30
+      name: "D\xE9sactiver les comptes utilisateur inutilis\xE9s"
+      description: "Les comptes utilisateur inutilis\xE9s doivent \xEAtre d\xE9sactiv\xE9\
+        s au niveau du syst\xE8me."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r31
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      ref_id: R31
+      name: Utiliser des mots de passe robustes
+      description: "Il est conseill\xE9 d\u2019appliquer les recommandations de la\
+        \ note technique \xAB Recommandations relatives \xE0 l\u2019authentification\
+        \ multifacteur et aux mots de passe \xBB. Ce mot de passe doit \xEAtre unique\
+        \ et propre \xE0 chaque machine."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r32
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.1
+      ref_id: R32
+      name: "\xC9xpirer les sessions utilisateur locales"
+      description: "Les sessions utilisateur locales (console TTY, session graphique)\
+        \ doivent \xEAtre verrouill\xE9es au bout d\u2019un certain d\xE9lai d\u2019\
+        inactivit\xE9."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      ref_id: 6.2.2
+      name: Comptes administrateur
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r33
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.2
+      ref_id: R33
+      name: "Assurer l\u2019imputabilit\xE9 des actions d\u2019administration"
+      description: "Les actions d\u2019administration n\xE9cessitant des privil\xE8\
+        ges doivent \xEAtre trac\xE9es afin de pouvoir identifier l\u2019administrateur\
+        \ \xE0 l\u2019origine d\u2019une activit\xE9 malveillante."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2
+      ref_id: 6.2.3
+      name: Comptes de service
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r34
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
+      ref_id: R34
+      name: "D\xE9sactiver les comptes de service"
+      description: "Les comptes de service doivent \xEAtre d\xE9sactiv\xE9s."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r35
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.2.3
+      ref_id: R35
+      name: Utiliser des comptes de service uniques et exclusifs
+      description: "Chaque service m\xE9tier (nginx, php, mysql, ...) ajout\xE9 par\
+        \ l\u2019administrateur doit poss\xE9der son propre compte syst\xE8me d\xE9\
+        di\xE9."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      ref_id: '6.3'
+      name: "Contr\xF4le d'acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      ref_id: 6.3.1
+      name: "Mod\xE8le traditionnel Unix"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r36
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R36
+      name: "Modifier la valeur par d\xE9faut de UMASK"
+      description: "La valeur par d\xE9faut de UMASK des shells doit \xEAtre positionn\xE9\
+        e \xE0 0077 pour permettre un acc\xE8s au fichier ou au r\xE9pertoire cr\xE9\
+        \xE9 en lecture et \xE9criture uniquement \xE0 l\u2019utilisateur propri\xE9\
+        taire. Celle-ci peut \xEAtre sp\xE9cifi\xE9e dans le fichier de configuration\
+        \ /etc/profile que la plupart des shells (bash, dash, ksh...) utiliseront.\L\
+        \nLa valeur par d\xE9faut de UMASK des services doit \xEAtre \xE9tudi\xE9\
+        e au cas par cas mais devrait g\xE9n\xE9ralement \xEAtre \xE00027(ou plus\
+        \ restrictif). Ceci permet un acc\xE8s au fichier ou au r\xE9pertoire cr\xE9\
+        \xE9 en lecture uniquement \xE0 l\u2019utilisateur propri\xE9taire et \xE0\
+        \ son groupe et un acc\xE8s en \xE9criture au propri\xE9taire. Pour les services\
+        \ systemd, cette valeur peut \xEAtre sp\xE9cifi\xE9e dans le fichier de configuration\
+        \ du service avec la directive UMask=0027."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r37
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R37
+      name: "Utiliser des fonctionnalit\xE9s de contr\xF4le d\u2019acc\xE8s obligatoire\
+        \ MAC"
+      description: "Il est recommand\xE9 d\u2019utiliser les fonctionnalit\xE9s de\
+        \ Mandatory Access Control ou contr\xF4le d\u2019acc\xE8s obligatoire (MAC)\
+        \ en plus du traditionnel mod\xE8le utilisateur Unix, Discretionary Access\
+        \ Control ou contr\xF4le d\u2019acc\xE8s discr\xE9tionnaire (DAC), voire \xE9\
+        ventuellement de les combiner avec des m\xE9canismes de cloisonnement."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r38
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R38
+      name: "Cr\xE9er un groupe d\xE9di\xE9 \xE0 l\u2019usage de sudo"
+      description: "Un groupe d\xE9di\xE9 \xE0 l\u2019usage de sudo doit \xEAtre cr\xE9\
+        \xE9. Seuls les utilisateurs membres de ce groupe doivent avoir le droit d\u2019\
+        ex\xE9cuter sudo."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r39
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R39
+      name: Modifier les directives de configuration sudo
+      description: "Les directives suivantes doivent \xEAtre activ\xE9es par d\xE9\
+        faut : \nnoexec appliquer le tag NOEXEC par d\xE9faut sur les commandes\L\
+        requiretty imposer \xE0 l\u2019utilisateur d\u2019avoir un tty de login\L\
+        use_pty utiliser un pseudo-tty lorsqu\u2019une commande est ex\xE9cut\xE9\
+        e\Lumask=0077 forcer umask \xE0 un masque plus restrictif \nignore_dot ignorer\
+        \ le \xAB . \xBB dans $PATH\Lenv_reset r\xE9initialiser les variables d\u2019\
+        environnement"
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r40
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R40
+      name: "Utiliser des utilisateurs cibles non-privil\xE9gi\xE9s pour les commandes\
+        \ sudo"
+      description: "Les utilisateurs cibles d\u2019une r\xE8gle doivent autant que\
+        \ possible \xEAtre des utilisateurs non privil\xE9gi\xE9s (c\u2019est-\xE0\
+        -dire non root)."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r41
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R41
+      name: "Limiter l\u2019utilisation de commandes n\xE9cessitant la directive EXEC"
+      description: "Les commandes n\xE9cessitant l\u2019ex\xE9cution de sous-processus,\
+        \ directive EXEC doivent \xEAtre explicitement list\xE9es et r\xE9duites autant\
+        \ que possible au strict minimum."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r42
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R42
+      name: "Bannir les n\xE9gations dans les sp\xE9cifications sudo"
+      description: "Les sp\xE9cifications de commande ne doivent pas faire intervenir\
+        \ de n\xE9gation."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r43
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R43
+      name: "Pr\xE9ciser les arguments dans les sp\xE9cifications sudo"
+      description: "Toutes les commandes du fichier de configuration sudoers doivent\
+        \ pr\xE9ciser strictement les arguments autoris\xE9s \xE0 \xEAtre utilis\xE9\
+        s pour un utilisateur donn\xE9. L\u2019usage de * (wildcard) dans les r\xE8\
+        gles doit \xEAtre autant que possible \xE9vit\xE9. L\u2019absence d\u2019\
+        arguments aupr\xE8s d\u2019une commande doit \xEAtre sp\xE9cifi\xE9e par la\
+        \ pr\xE9sence d\u2019une cha\xEEne vide (\"\")."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r44
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.1
+      ref_id: R44
+      name: "\xC9diter les fichiers de mani\xE8re s\xE9curis\xE9e avec sudo"
+      description: "L\u2019\xE9dition d\u2019un fichier par sudo doit \xEAtre r\xE9\
+        alis\xE9e au travers de l\u2019\xE9diteur de texte sudoedit."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      ref_id: 6.3.2
+      name: AppArmor
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r45
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.2
+      ref_id: R45
+      name: "Activer les profils de s\xE9curit\xE9 AppArmor"
+      description: "Tout profil de s\xE9curit\xE9 AppArmor pr\xE9sent sur le syst\xE8\
+        me doit \xEAtre activ\xE9 en mode enforce par d\xE9faut quand la distribution\
+        \ en offre le support et qu\u2019elle n\u2019exploite pas de module de s\xE9\
+        curit\xE9 autre que AppArmor."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3
+      ref_id: 6.3.3
+      name: SELinux
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r46
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      ref_id: R46
+      name: Activer SELinux avec la politique targeted
+      description: "Il est recommand\xE9 d\u2019activer SELinux en mode enforcing\
+        \ et d\u2019utiliser la politique targeted quand la distribution en offre\
+        \ le support et qu\u2019elle n\u2019exploite pas de module de s\xE9curit\xE9\
+        \ autre que SELinux."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r47
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      ref_id: R47
+      name: "Confiner les utilisateurs interactifs non privil\xE9gi\xE9s"
+      description: "Les utilisateurs interactifs non privil\xE9gi\xE9s d\u2019un syst\xE8\
+        me doivent \xEAtre confin\xE9s en leur associant un utilisateur SELinux confin\xE9\
+        ."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r48
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      ref_id: R48
+      name: "Param\xE9trer les variables SELinux"
+      description: "Il est recommand\xE9 d\u2019appliquer les politiques de s\xE9\
+        curit\xE9 suivantes :\L\n- Interdit aux processus de rendre ex\xE9cutable leur\
+        \ tas - heap -\L\n- Interdit aux processus d\u2019avoir une zone m\xE9moire avec\
+        \ des droits en \xE9criture - w - et en ex\xE9cution - x -\L\n- Interdit aux processus\
+        \ le droit de rendre leur pile - stack - ex\xE9cutable\L\n- Interdit le chargement\
+        \ dynamique des modules par n\u2019importe quel processus ;\L\n- Interdit les\
+        \ logins SSH de se connecter directement en r\xF4le sysadmin."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r49
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.3.3
+      ref_id: R49
+      name: "D\xE9sinstaller les outils de d\xE9bogage de politique SELinux"
+      description: "Les outils de manipulation et de d\xE9bogage de politique SELinux\
+        \ ne doivent pas \xEAtre install\xE9s sur une machine en production."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      ref_id: '6.4'
+      name: "Fichiers et r\xE9pertoires"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      ref_id: 6.4.1
+      name: "Fichiers et r\xE9pertoires sensibles"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r50
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
+      ref_id: R50
+      name: "Restreindre les droits d\u2019acc\xE8s aux fichiers et aux r\xE9pertoires\
+        \ sensibles"
+      description: "Les fichiers et les r\xE9pertoires sensibles ne doivent \xEAtre\
+        \ lisibles que par les utilisateurs ayant le strict besoin d\u2019en conna\xEE\
+        tre."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r51
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.1
+      ref_id: R51
+      name: "Changer les secrets et droits d\u2019acc\xE8s d\xE8s l\u2019installation"
+      description: "Tous les fichiers sensibles et ceux qui concourent aux m\xE9canismes\
+        \ d\u2019authentification doivent \xEAtre mis en place d\xE8s l\u2019installation\
+        \ du syst\xE8me. Si des secrets par d\xE9faut sont pr\xE9configur\xE9s, ils\
+        \ doivent alors \xEAtre remplac\xE9s pendant, ou juste apr\xE8s, la phase\
+        \ d\u2019installation du syst\xE8me."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      ref_id: 6.4.2
+      name: "Fichiers IPC nomm\xE9s, sockets ou pipes"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r52
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.2
+      ref_id: R52
+      name: "Restreindre les acc\xE8s aux sockets et aux pipes nomm\xE9es"
+      description: "Les sockets et pipes nomm\xE9es doivent \xEAtre prot\xE9g\xE9\
+        es en acc\xE8s par un r\xE9pertoire poss\xE9dant des droits appropri\xE9s.\
+        \ Les droits de la socket ou du pipe nomm\xE9 doivent \xE9galement restreindre\
+        \ les acc\xE8s."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4
+      ref_id: 6.4.3
+      name: "Droits d'acc\xE8s"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r53
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      ref_id: R53
+      name: "\xC9viter les fichiers ou r\xE9pertoires sans utilisateur ou sans groupe\
+        \ connu"
+      description: "Les fichiers ou r\xE9pertoires sans utilisateur ou groupe identifiable\
+        \ par le syst\xE8me doivent \xEAtre analys\xE9s et \xE9ventuellement corrig\xE9\
+        s afin d\u2019avoir un propri\xE9taire ou un groupe connu du syst\xE8me."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r54
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      ref_id: R54
+      name: "Activer le sticky bit sur les r\xE9pertoires inscriptibles"
+      description: "Tous les r\xE9pertoires accessibles en \xE9criture par tous doivent\
+        \ avoir le sticky bit positionn\xE9."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r55
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      ref_id: R55
+      name: "S\xE9parer les r\xE9pertoires temporaires des utilisateurs"
+      description: "Chaque utilisateur ou application doit poss\xE9der son propre\
+        \ r\xE9pertoire temporaire et en disposer exclusivement."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r56
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      ref_id: R56
+      name: "\xC9viter l\u2019usage d\u2019ex\xE9cutables avec les droits sp\xE9ciaux\
+        \ setuid et setgid"
+      description: "Seuls les logiciels de confiance issus, par exemple, de la distribution\
+        \ ou de d\xE9p\xF4ts officiels de paquets et sp\xE9cifiquement con\xE7us pour\
+        \ \xEAtre utilis\xE9s avec les droits sp\xE9ciaux setuid ou setgid peuvent\
+        \ avoir ces droits positionn\xE9s."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r57
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.4.3
+      ref_id: R57
+      name: "\xC9viter l\u2019usage d\u2019ex\xE9cutables avec les droits sp\xE9ciaux\
+        \ setuid root et setgid root"
+      description: "Les ex\xE9cutables avec les droits sp\xE9ciaux setuid root et\
+        \ setgid root doivent \xEAtre le moins nombreux possible. Lorsqu\u2019il est\
+        \ attendu que seuls les administrateurs les ex\xE9cutent, il faut leur retirer\
+        \ ces droits sp\xE9ciaux (setuid ou setgid) et leur pr\xE9f\xE9rer les commandes\
+        \ comme su ou sudo, qui peuvent \xEAtre surveill\xE9es."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      ref_id: '6.5'
+      name: Gestion des paquets
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r58
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      ref_id: R58
+      name: "N\u2019installer que les paquets strictement n\xE9cessaires"
+      description: "Le choix des paquets doit conduire \xE0 une installation aussi\
+        \ minimale que possible, se limitant \xE0 ne s\xE9lectionner que ceux qui\
+        \ sont n\xE9cessaires au besoin."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r59
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      ref_id: R59
+      name: "Utiliser des d\xE9p\xF4ts de paquets de confiance"
+      description: "Seuls les d\xE9p\xF4ts internes \xE0 l\u2019organisation ou officiels\
+        \ (de la distribution ou de d\u2019un \xE9diteur) doivent \xEAtre utilis\xE9\
+        s."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r60
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.5
+      ref_id: R60
+      name: "Utiliser des d\xE9p\xF4ts de paquets durcis"
+      description: "Lorsque la distribution fournit plusieurs types de d\xE9p\xF4\
+        ts, la pr\xE9f\xE9rence doit aller \xE0 ceux contenant des paquets faisant\
+        \ l\u2019objet de mesures de durcissement suppl\xE9mentaires. Entre deux paquets\
+        \ fournissant le m\xEAme service, ceux faisant l\u2019objet de mesures de\
+        \ durcissement (\xE0 la compilation, \xE0 l\u2019installation ou dans la configuration\
+        \ par d\xE9faut) doivent \xEAtre privil\xE9gi\xE9s."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.6
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6
+      ref_id: '6.6'
+      name: Veille et maintenance
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r61
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:6.6
+      ref_id: R61
+      name: "Effectuer des mises \xE0 jour r\xE9guli\xE8res"
+      description: "Il est recommand\xE9 d\u2019avoir une proc\xE9dure de mise \xE0\
+        \ jour de s\xE9curit\xE9 r\xE9guli\xE8re et r\xE9active."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Configuration des services
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r62
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      ref_id: R62
+      name: "D\xE9sactiver les services non n\xE9cessaires"
+      description: "Seuls les composants strictement n\xE9cessaires au service rendu\
+        \ par le syst\xE8me doivent \xEAtre install\xE9s.Tout service, et particuli\xE8\
+        rement ceux en \xE9coute active sur le r\xE9seau, est un \xE9l\xE9ment sensible.\
+        \ Seuls ceux connus et requis pour le fonctionnement et la maintenance doivent\
+        \ \xEAtre install\xE9s. Il est recommand\xE9 de d\xE9sinstaller les services\
+        \ dont la pr\xE9sence ne peut \xEAtre justifi\xE9e ou de les d\xE9sactiver\
+        \ si leur d\xE9sinstallation n\u2019est pas possible."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r63
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      ref_id: R63
+      name: "D\xE9sactiver les fonctionnalit\xE9s des services non essentielles"
+      description: "Les fonctionnalit\xE9s configur\xE9es au niveau des services d\xE9\
+        marr\xE9s doivent \xEAtre limit\xE9es au strict n\xE9cessaire."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r64
+      assessable: true
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      ref_id: R64
+      name: "Configurer les privil\xE8ges des services"
+      description: "Tous les services et ex\xE9cutables disponibles sur le syst\xE8\
+        me doivent faire l\u2019objet d\u2019une analyse afin de conna\xEEtre les\
+        \ privil\xE8ges qui leur sont associ\xE9s, et doivent ensuite \xEAtre mis\
+        \ en \u0153uvre et configur\xE9s en vue d\u2019en utiliser le strict n\xE9\
+        cessaire."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      ref_id: '7.1'
+      name: Cloisonnement
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r65
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: R65
+      name: Cloisonner les services
+      description: "Dans le cadre du principe de minimisation, il est recommand\xE9\
+        \ de cloisonner les services avec les m\xE9canismes de confinement, de filtrage\
+        \ et d\u2019isolation disponibles dans le noyau Linux."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r66
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: R66
+      name: Durcir les composants de cloisonnement
+      description: "Tout composant support de cloisonnement doit \xEAtre durci, notamment\
+        \ par l\u2019application de mesures techniques contrant les tentatives d\u2019\
+        exploitation."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: '7.2'
+      name: "Services syst\xE8me"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: 7.2.1
+      name: Pluggable Authentication Module ou module d'authentification enfichable
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r67
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
+      ref_id: R67
+      name: "S\xE9curiser les authentifications distante par PAM"
+      description: "Quand l\u2019authentification se d\xE9roule au travers d\u2019\
+        une application distante (r\xE9seau), le protocole d\u2019authentification\
+        \ utilis\xE9 par PAM doit \xEAtre s\xE9curis\xE9 (chiffrement du flux, authentification\
+        \ du serveur distant, m\xE9canismes d\u2019anti-rejeu...)."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r68
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.1
+      ref_id: R68
+      name: "Prot\xE9ger les mots de passe stock\xE9s"
+      description: "Tout mot de passe doit \xEAtre prot\xE9g\xE9 par des m\xE9canismes\
+        \ cryptographiques \xE9vitant de les exposer en clair \xE0 un attaquant. Pour\
+        \ cela, se r\xE9f\xE9rer \xE0 la section 4.6 Stockage de mots de passe du\
+        \ guide Recommandations relatives \xE0 l\u2019authentification multifacteur\
+        \ et aux mots de passe."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: 7.2.2
+      name: Name Service Switch ou service de gestion de noms
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r69
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
+      ref_id: R69
+      name: "S\xE9curiser les acc\xE8s aux bases utilisateur distantes"
+      description: "Lorsque les bases utilisateur sont stock\xE9es sur un serveur\
+        \ r\xE9seau distant, NSS doit \xEAtre configur\xE9 pour \xE9tablir une liaison\
+        \ s\xE9curis\xE9e permettant au minimum d\u2019authentifier le serveur et\
+        \ de prot\xE9ger le canal de communication."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r70
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.2
+      ref_id: R70
+      name: "S\xE9parer les comptes syst\xE8me et d\u2019administrateur de l\u2019\
+        annuaire"
+      description: "Il est recommand\xE9 de ne pas avoir de recouvrement de compte\
+        \ entre ceux utilis\xE9s par le syst\xE8me d\u2019exploitation et ceux utilis\xE9\
+        s pour administrer l\u2019annuaire. L\u2019usage de comptes administrateur\
+        \ d\u2019annuaire pour effectuer des requ\xEAtes d\u2019\xE9num\xE9ration\
+        \ de comptes par NSS doit \xEAtre prohib\xE9."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: 7.2.3
+      name: Journalisation
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r71
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      ref_id: R71
+      name: "Mettre en place un syst\xE8me de journalisation"
+      description: "Il est conseill\xE9 d\u2019appliquer les recommandations de la\
+        \ note technique \xAB Recommandations de s\xE9curit\xE9 pour l\u2019architecture\
+        \ d\u2019un syst\xE8me de journalisation \xBB."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r72
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      ref_id: R72
+      name: "Mettre en place des journaux d\u2019activit\xE9 de service d\xE9di\xE9\
+        s"
+      description: "Chaque service doit poss\xE9der un journal d\u2019\xE9v\xE9nements\
+        \ d\xE9di\xE9 sur le syst\xE8me. Ce journal ne doit \xEAtre accessible que\
+        \ par le serveur syslog, et ne doit pas \xEAtre lisible, modifiable ou supprimable\
+        \ par le service directement."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r73
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.3
+      ref_id: R73
+      name: "Journaliser l\u2019activit\xE9 syst\xE8me avec auditd"
+      description: "La journalisation de l\u2019activit\xE9 du syst\xE8me doit \xEA\
+        tre faite au travers du service auditd."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: 7.2.4
+      name: Messagerie
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r74
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
+      ref_id: R74
+      name: Durcir le service de messagerie locale
+      description: "Quand un service de messagerie est install\xE9 sur la machine,\
+        \ il doit \xEAtre configur\xE9 pour n\u2019accepter que :\L\n- Les messages \xE0\
+        \ destination d\u2019un compte utilisateur local \xE0 la machine\L\n- Les connexions\
+        \ sur l\u2019interface r\xE9seau de la boucle locale, les connexions distantes\
+        \ au service de messagerie doivent \xEAtre rejet\xE9es."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r75
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.4
+      ref_id: R75
+      name: Configurer un alias de messagerie des comptes de service
+      description: "Pour chaque service exploit\xE9 sur le syst\xE8me, ainsi que pour\
+        \ le compte d\u2019administrateur (ou root), un alias vers un compte utilisateur\
+        \ administrateur doit \xEAtre configur\xE9 afin que celui-ci re\xE7oive les\
+        \ notifications et les rapports adress\xE9s par messagerie \xE9lectronique."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
+      assessable: false
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.1
+      ref_id: 7.2.5
+      name: "Surveillance du syst\xE8me de fichiers"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r76
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
+      ref_id: R76
+      name: "Sceller et v\xE9rifier l\u2019int\xE9grit\xE9 des fichiers"
+      description: "Tout fichier qui ne rev\xEAt pas un caract\xE8re transitoire (comme\
+        \ des fichiers temporaires, des bases de donn\xE9es...) doit \xEAtre surveill\xE9\
+        \ par un logiciel de scellement. Cela inclut notamment : les r\xE9pertoires\
+        \ contenant des ex\xE9cutables, des biblioth\xE8ques, des fichiers de configuration,\
+        \ ainsi que tout fichier pouvant contenir des \xE9l\xE9ments sensibles (cl\xE9\
+        s cryptographiques, mots de passe, donn\xE9es confidentielles...)."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r77
+      assessable: true
+      depth: 4
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.2.5
+      ref_id: R77
+      name: "Prot\xE9ger la base de donn\xE9es des scell\xE9s"
+      description: "La base de donn\xE9es de scellement doit \xEAtre prot\xE9g\xE9\
+        e de tout acc\xE8s frauduleux par des m\xE9canismes de signature cryptographique\
+        \ (avec la cl\xE9 utilis\xE9e pour la signature non enregistr\xE9e localement\
+        \ en clair), ou \xEAtre \xE9ventuellement stock\xE9e sur une machine distincte\
+        \ de celle sur laquelle le scellement est r\xE9alis\xE9."
+      implementation_groups:
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7
+      ref_id: '7.3'
+      name: "Services r\xE9seau"
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r78
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      ref_id: R78
+      name: "Cloisonner les services r\xE9seau"
+      description: "Les services r\xE9seau doivent autant que possible \xEAtre h\xE9\
+        berg\xE9s sur des environnements distincts. Cela \xE9vite d\u2019avoir d\u2019\
+        autres services potentiellement affect\xE9s si l\u2019un d\u2019eux se retrouve\
+        \ compromis sous le m\xEAme environnement."
+      implementation_groups:
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r79
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      ref_id: R79
+      name: "Durcir et surveiller les services expos\xE9s"
+      description: "Les services expos\xE9s \xE0 des flux non ma\xEEtris\xE9s doivent\
+        \ \xEAtre durcis et particuli\xE8rement surveill\xE9s."
+      implementation_groups:
+      - I
+      - R
+      - E
+    - urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:r80
+      assessable: true
+      depth: 3
+      parent_urn: urn:protocolpaladin:risk:req_node:anssi-recommandations-configuration-systeme-gnu-linux:7.3
+      ref_id: R80
+      name: "R\xE9duire la surface d\u2019attaque des services r\xE9seau"
+      description: "Tous les services r\xE9seau doivent \xEAtre en \xE9coute sur les\
+        \ interfaces r\xE9seau ad\xE9quates."
+      implementation_groups:
+      - M
+      - I
+      - R
+      - E

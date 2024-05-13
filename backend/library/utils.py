@@ -8,6 +8,8 @@ from django.core.exceptions import SuspiciousFileOperation
 from django.http import Http404
 
 import yaml
+
+# interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from ciso_assistant import settings
 from core.models import (
     Framework,
@@ -75,7 +77,7 @@ def get_available_libraries():
         libs = AVAILABLE_LIBRARIES.get((fname, modified_time))
         if libs is None:
             with open(fname, "r", encoding="utf-8") as file:
-                libs = list(yaml.safe_load_all(file))
+                libs = list(yaml.load_all(file, Loader=yaml.CSafeLoader))
             AVAILABLE_LIBRARIES[(fname, os.path.getmtime(fname))] = libs
         for _lib in libs:
             if (
@@ -155,7 +157,8 @@ def get_library(urn: str) -> dict | None:
         # Attempt to directly load the library from its specific YAML file.
         if os.path.isfile(path):
             with open(path, "r", encoding="utf-8") as file:
-                library_data = yaml.safe_load(file)
+                library_data = yaml.load(file, Loader=yaml.CSafeLoader)
+                # TODO: looks like we are going through here twice, why?
                 if library_data and library_data.get("urn") == urn:
                     return library_data
         logger.error("File not found", path=path)

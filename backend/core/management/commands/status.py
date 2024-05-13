@@ -23,7 +23,12 @@ class Command(BaseCommand):
         nb_risk_acceptances = RiskAcceptance.objects.all().count()
         created_at = Folder.get_root_folder().created_at
         last_login = max(
-            x["last_login"] for x in User.objects.all().values("last_login")
+            [
+                x["last_login"]
+                for x in User.objects.all().values("last_login")
+                if x["last_login"]
+            ],
+            default=None,
         )
         self.stdout.write(
             f"created_at={created_at.strftime('%Y-%m-%dT%H:%M')} last_login={last_login.strftime('%Y-%m-%dT%H:%M') if last_login else last_login} "
