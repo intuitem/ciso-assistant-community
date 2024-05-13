@@ -131,7 +131,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyImportedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except:
+        except yaml.YAMLError:
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,

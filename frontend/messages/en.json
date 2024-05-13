@@ -513,5 +513,7 @@
 	"userWillBeDisconnected": "The user will be disconnected and will need to log in again",
 	"scoresDefinition": "Scores definition",
 	"selectedImplementationGroups": "Selected implementation groups",
-	"implementationGroupsDefinition": "Implementation groups definition"
+	"implementationGroupsDefinition": "Implementation groups definition",
+	"threatRadarChart": "Threat radar",
+	"noThreatsMapped": "No threats mapped. Consider attaching threats to your risk scenarios for a better overview."
 }
