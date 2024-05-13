@@ -12,8 +12,7 @@
 	export let title = '';
 
 	export let values: any[]; // Set the types for these variables later on
-    export let labels: any[];
-
+	export let labels: any[];
 
 	for (const index in values) {
 		if (values[index].localName) {
@@ -36,7 +35,7 @@
 				}
 				// show: false
 			},
-            tooltip: {
+			tooltip: {
 				trigger: 'item'
 			},
 			legend: {
@@ -54,7 +53,7 @@
 						{
 							value: values,
 							name: 'Radar'
-						},
+						}
 					]
 				}
 			]

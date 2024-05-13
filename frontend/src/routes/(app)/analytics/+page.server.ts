@@ -71,7 +71,9 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		residual: Record<string, any>[];
 	} = await req_get_risks_count_per_level.json().then((res) => res.results);
 
-	const threats_count = await fetch(`${BASE_API_URL}/threats/threats_count/`).then((res) => res.json());
+	const threats_count = await fetch(`${BASE_API_URL}/threats/threats_count/`).then((res) =>
+		res.json()
+	);
 
 	const req_get_measures_to_review = await fetch(`${BASE_API_URL}/applied-controls/to_review/`);
 	const measures_to_review = await req_get_measures_to_review.json();

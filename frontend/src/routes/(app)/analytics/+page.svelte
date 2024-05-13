@@ -244,22 +244,22 @@
 					</div>
 				</section>
 			{:else if tabSet === 1}
-			<!-- Risk tab -->
+				<!-- Risk tab -->
 
 				<section>
-					{#if (data.threats_count.results.labels.length > 0)}
-					<div class=" h-96 my-2">
-						<RadarChart
-							name="threatRadar"
-							title={m.threatRadarChart()}
-							labels={data.threats_count.results.labels}
-							values={data.threats_count.results.values}
-						/>
-					</div>
+					{#if data.threats_count.results.labels.length > 0}
+						<div class=" h-96 my-2">
+							<RadarChart
+								name="threatRadar"
+								title={m.threatRadarChart()}
+								labels={data.threats_count.results.labels}
+								values={data.threats_count.results.values}
+							/>
+						</div>
 					{:else}
-					<div class="py-4 flex items-center justify-center">
-						<p class="">{m.noThreatsMapped()}</p>
-					</div>
+						<div class="py-4 flex items-center justify-center">
+							<p class="">{m.noThreatsMapped()}</p>
+						</div>
 					{/if}
 					<div class="flex">
 						<div class="h-96 flex-1">
