@@ -115,7 +115,8 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 
 <br/>
 
-> [!NOTE] > `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> [!NOTE]
+> `*` These frameworks require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
 
 <br/>
 
@@ -411,7 +412,8 @@ Set DJANGO_DEBUG=False for security reason.
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
-- [SvelteKit](https://kit.svelte.dev/) - Frontend framework
+- [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
+- [eCharts](https://echarts.apache.org) - Charting library 
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform
