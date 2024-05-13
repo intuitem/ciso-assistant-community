@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
+	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
@@ -243,7 +244,14 @@
 					</div>
 				</section>
 			{:else if tabSet === 1}
+			<!-- Risk tab -->
 				<section>
+					<div class=" h-96 my-2">
+						<RadarChart
+							name="blalba"
+							title="Risk Radar"
+						/>
+					</div>
 					<div class="flex">
 						<div class="h-96 flex-1">
 							<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
