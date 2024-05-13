@@ -64,7 +64,7 @@
 			'eta',
 			'expiry_date'
 		]),
-		meta: data.measures
+		meta: data.measures_to_review
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
