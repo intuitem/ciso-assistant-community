@@ -464,7 +464,12 @@ class AttachmentUploadSerializer(serializers.Serializer):
 
 
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
-    framework = FieldsRelatedField(["id", "min_score", "max_score"])
+    framework = FieldsRelatedField(
+        ["id", "min_score", "max_score", "implementation_groups_definition"]
+    )
+    selected_implementation_groups = serializers.ReadOnlyField(
+        source="get_selected_implementation_groups"
+    )
 
     class Meta:
         model = ComplianceAssessment

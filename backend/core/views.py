@@ -236,6 +236,10 @@ class ThreatViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "risk_scenarios"]
     search_fields = ["name", "provider", "description"]
 
+    @action(detail=False, name="Get threats count")
+    def threats_count(self, request):
+        return Response({"results": threats_count_per_name(request.user)})
+
 
 class AssetViewSet(BaseModelViewSet):
     """
@@ -1173,6 +1177,17 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(ComplianceAssessment.Status.choices))
 
+    @action(detail=True, name="Get implementation group choices")
+    def selected_implementation_groups(self, request, pk):
+        compliance_assessment = self.get_object()
+        _framework = compliance_assessment.framework
+        implementation_groups_definiition = _framework.implementation_groups_definition
+        implementation_group_choices = {
+            group["ref_id"]: group["name"]
+            for group in implementation_groups_definiition
+        }
+        return Response(implementation_group_choices)
+
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
@@ -1240,13 +1255,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         _framework = self.get_object().framework
+        tree = get_sorted_requirement_nodes(
+            RequirementNode.objects.filter(framework=_framework).all(),
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self.get_object()
+            ).all(),
+        )
+        implementation_groups = self.get_object().selected_implementation_groups
         return Response(
-            get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
-                RequirementAssessment.objects.filter(
-                    compliance_assessment=self.get_object()
-                ).all(),
-            )
+            filter_graph_by_implementation_groups(tree, implementation_groups)
         )
 
     @action(detail=True)
@@ -1407,6 +1424,14 @@ def generate_html(
         compliance_assessment=compliance_assessment,
     ).all()
 
+    implementation_groups = compliance_assessment.selected_implementation_groups
+    graph = get_sorted_requirement_nodes(list(requirement_nodes), list(assessments))
+    graph = filter_graph_by_implementation_groups(graph, implementation_groups)
+    flattened_graph = flatten_dict(graph)
+
+    requirement_nodes = requirement_nodes.filter(urn__in=flattened_graph.values())
+    assessments = assessments.filter(requirement__urn__in=flattened_graph.values())
+
     node_per_urn = {r.urn: r for r in requirement_nodes}
     ancestors = {}
     for a in assessments:
@@ -1487,8 +1512,16 @@ def generate_html(
     content += "<div>"
     content += "<p class='font-semibold'>Reviewers</p>"
     content += "<ul>"
-    for reviewer in compliance_assessment.reviewers.all():
-        content += f"<li>{reviewer}</li>"
+    for group in compliance_assessment.reviewers.all():
+        content += f"<li>{group}</li>"
+    content += "</ul>"
+    content += "</div>"
+
+    content += "<div>"
+    content += "<p class='font-semibold'>Selected implementation groups</p>"
+    content += "<ul>"
+    for group in compliance_assessment.get_selected_implementation_groups():
+        content += f"<li>{group}</li>"
     content += "</ul>"
     content += "</div>"
 

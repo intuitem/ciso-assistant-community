@@ -9,7 +9,7 @@ WORKDIR /code
 
 # Configure locales
 RUN apt update && \
-    apt install -y gettext locales && \
+    apt install -y gettext locales libyaml-cpp0.7 && \
     apt clean && \
     rm -rf /var/lib/apt/lists/* && \
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \

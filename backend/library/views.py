@@ -133,7 +133,7 @@ class LibraryViewSet(BaseModelViewSet):
             attachment = request.FILES["file"]
             validate_file_extension(attachment)
             # Use safe_load to prevent arbitrary code execution.
-            library = yaml.safe_load(attachment)
+            library = yaml.load(attachment, Loader=yaml.CSafeLoader)
 
             # This code doesn't handle the library "dependencies" field yet as decribed in the architecture.
 
@@ -151,7 +151,7 @@ class LibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "libraryAlreadyImportedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
-        except:
+        except yaml.YAMLError:
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,
