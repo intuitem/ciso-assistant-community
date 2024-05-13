@@ -1,0 +1,57 @@
+urn: urn:protocolpaladin:risk:library:matrice-des-risques-critiques-3x3
+locale: fr
+ref_id: matrice-des-risques-critiques-3x3
+name: Matrice des risques critiques 3x3
+description: Matrice des risques critiques 3x3
+version: 1
+provider: intuitem
+packager: protocolpaladin
+objects:
+  risk_matrix:
+    - urn: urn:protocolpaladin:risk:matrix:matrice-des-risques-critiques-3x3
+      ref_id: matrice-des-risques-critiques-3x3
+      name: Matrice des risques critiques 3x3
+      description: Matrice des risques critiques 3x3
+      probability:
+        - abbreviation: F
+          name: Faible
+          description: Événement peu fréquent
+        - abbreviation: M
+          name: Moyen
+          description: Événement occasionnel
+        - abbreviation: E
+          name: Élevé
+          description: Événement fréquent
+      impact:
+        - abbreviation: F
+          name: Faible
+          description: Impact faible
+        - abbreviation: M
+          name: Moyen
+          description: Impact moyen
+        - abbreviation: E
+          name: Élevé
+          description: Impact élevé
+      risk:
+        - abbreviation: F
+          name: Faible
+          description: Risque acceptable
+          hexcolor: "#00FF00"
+        - abbreviation: M
+          name: Moyen
+          description: Risque nécessitant une atténuation dans les 2 ans
+          hexcolor: "#FFFF00"
+        - abbreviation: E
+          name: Élevé
+          description: Risque inacceptable
+          hexcolor: "#FF0000"
+      grid:
+        - - 0
+          - 1
+          - 1
+        - - 1
+          - 1
+          - 2
+        - - 1
+          - 2
+          - 2

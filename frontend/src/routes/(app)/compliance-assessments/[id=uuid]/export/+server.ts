@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	}
 
 	const fileName = `${compliance_assessment.name}-${
-		compliance_assessment.framework
+		compliance_assessment.framework.str
 	}-${new Date().toISOString()}.zip`;
 
 	return new Response(await res.blob(), {

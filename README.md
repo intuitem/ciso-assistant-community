@@ -90,11 +90,11 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 18. HDS/HDH 🇫🇷
 19. OWASP Application Security Verification Standard (ASVS) 🐝
 20. RGS v2.0 🇫🇷
-21. AirCyber ✈️
+21. AirCyber ✈️🌐
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
-25. Tisax 🚘
+25. TISAX (VDA ISA) 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
 28. CIS Controls v8\*
@@ -103,6 +103,15 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 31. NIST SP 800-171 rev2 🇺🇸
 32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
+34. GSA FedRAMP rev5 ☁️🇺🇸
+35. Cadre Conformité Cyber France (3CF) v1 (2021) ✈️🇫🇷
+36. ANSSI : SecNumCloud ☁️🇫🇷
+37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
+
+### Community contrib
+
+1. ISO 27001:2022, version Française 🇫🇷🌐
+2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 
 <br/>
 
@@ -116,13 +125,12 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - FBI CJIS
+- BSI-IT (as requested by the German community)
 - CCPA
 - AI Act
 - Part-IS
-- SecNumCloud
 - SOX
 - MASVS
-- FedRAMP
 - NIST 800-82
 - NCSC Cyber Assessment Framework (CAF)
 - UK Cyber Essentials
@@ -190,6 +198,7 @@ For docker setup on a remote server or hypervisor, checkout the [specific instru
 - pip 20.3+
 - node 18+
 - npm 10.2+
+- yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
 
 ### Running the backend
 
@@ -403,9 +412,10 @@ Set DJANGO_DEBUG=False for security reason.
 ## Built With 💜
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
-- [SvelteKit](https://kit.svelte.dev/) - Frontend framework
+- [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
+- [eCharts](https://echarts.apache.org) - Charting library 
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
-- [Caddy](https://caddyserver.com) - The coolest reverse Proxy 
+- [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform
 - [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
 - [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS

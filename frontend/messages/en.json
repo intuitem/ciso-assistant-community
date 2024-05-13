@@ -3,6 +3,7 @@
 	"french": "French",
 	"english": "English",
 	"arabic": "Arabic",
+	"portuguese": "Portuguese",
 	"addThreat": "Add threat",
 	"addReferenceControl": "Add reference control",
 	"addAppliedControl": "Add applied control",
@@ -510,5 +511,9 @@
 	"setTemporaryPassword2": "Please use a strong one and make sure to inform the user to change it as soon as possible",
 	"youCanSetNewPassword": "You can set a new password here",
 	"userWillBeDisconnected": "The user will be disconnected and will need to log in again",
-	"scoresDefinition": "Scores definition"
+	"scoresDefinition": "Scores definition",
+	"selectedImplementationGroups": "Selected implementation groups",
+	"implementationGroupsDefinition": "Implementation groups definition",
+	"threatRadarChart": "Threat radar",
+	"noThreatsMapped": "No threats mapped. Consider attaching threats to your risk scenarios for a better overview."
 }

@@ -1,3 +1,4 @@
+from collections.abc import MutableMapping
 from datetime import date, timedelta
 
 from django.db.models import Count
@@ -8,6 +9,20 @@ from core.serializers import ReferenceControlReadSerializer, ThreatReadSerialize
 
 from .models import *
 from .utils import camel_case
+
+
+def flatten_dict(
+    d: MutableMapping, parent_key: str = "", sep: str = "."
+) -> MutableMapping:
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
 
 STATUS_COLOR_MAP = {  # TODO: Move these kinds of color maps to frontend
     "undefined": "#CCC",
@@ -240,19 +255,24 @@ def get_sorted_requirement_nodes(
                 "parent_urn": node.parent_urn,
                 "ref_id": node.ref_id,
                 "name": node.name,
+                "implementation_groups": (
+                    node.implementation_groups if node.implementation_groups else None
+                ),
                 "ra_id": str(req_as.id) if requirements_assessed else None,
                 "status": req_as.status if requirements_assessed else None,
                 "is_scored": req_as.is_scored if requirements_assessed else None,
                 "score": req_as.score if requirements_assessed else None,
-                "max_score": req_as.compliance_assessment.framework.max_score
-                if requirements_assessed
-                else None,
-                "status_display": req_as.get_status_display()
-                if requirements_assessed
-                else None,
-                "status_i18n": camel_case(req_as.status)
-                if requirements_assessed
-                else None,
+                "max_score": (
+                    req_as.compliance_assessment.framework.max_score
+                    if requirements_assessed
+                    else None
+                ),
+                "status_display": (
+                    req_as.get_status_display() if requirements_assessed else None
+                ),
+                "status_i18n": (
+                    camel_case(req_as.status) if requirements_assessed else None
+                ),
                 "node_content": node.display_long,
                 "style": "node",
                 "assessable": node.assessable,
@@ -275,6 +295,11 @@ def get_sorted_requirement_nodes(
                         {
                             "urn": req.urn,
                             "ref_id": req.ref_id,
+                            "implementation_groups": (
+                                req.implementation_groups
+                                if req.implementation_groups
+                                else None
+                            ),
                             "name": req.name,
                             "description": req.description,
                             "ra_id": str(req_as.id),
@@ -320,6 +345,32 @@ def get_sorted_requirement_nodes(
         ),
     )
     return tree
+
+
+def filter_graph_by_implementation_groups(
+    graph: dict[str, dict], implementation_groups: set[str] | None
+) -> dict[str, dict]:
+    if not implementation_groups:
+        return graph
+
+    def should_include_node(node: dict) -> bool:
+        node_groups = node.get("implementation_groups")
+        if node_groups:
+            return any(group in node_groups for group in implementation_groups)
+
+        # Nodes without implementation groups but with children are included
+        return bool(node.get("children"))
+
+    filtered_graph = {}
+    for key, value in graph.items():
+        if value.get("children"):
+            value["children"] = filter_graph_by_implementation_groups(
+                value["children"], implementation_groups
+            )
+        if should_include_node(value):
+            filtered_graph[key] = value
+
+    return filtered_graph
 
 
 def get_parsed_matrices(user: User, risk_assessments: list | None = None):
@@ -903,3 +954,28 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
         },
         "colors": get_risk_color_ordered_list(user, risk_assessment_list),
     }
+
+
+def threats_count_per_name(user: User):
+    labels = list()
+    values = list()
+    (
+        object_ids_view,
+        _,
+        _,
+    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+
+    # expected by echarts to send the threats names in labels and the count of each threat in values
+
+    for threat in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
+        val = RiskScenario.objects.filter(threats=threat).count()
+        if val > 0:
+            labels.append({"name": threat.name})
+            values.append(val)
+    max_offset = max(values, default=0)  # we can add x later on to improve visibility
+
+    # update each label to include the max_offset
+    for label in labels:
+        label["max"] = max_offset
+
+    return {"labels": labels, "values": values}
