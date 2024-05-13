@@ -137,4 +137,8 @@ export class PageDetail extends BasePage {
 			}
 		}
 	}
+
+	treeViewItem(value: string) {
+		return this.page.getByTestId("tree-item-content").getByText(value);
+	}
 }

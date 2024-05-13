@@ -390,7 +390,7 @@
 			{/if}
 		{/if}
 		<!-- Slot: Content -->
-		<div class="tree-item-content w-full">
+		<div class="tree-item-content w-full" data-testid="tree-item-content">
 			<slot />
 		</div>
 		<!-- Slot: Lead -->
