@@ -15,7 +15,6 @@
 
 	onMount(async () => {
 		const riskAssessments = await fetch('/risk-assessments').then((res) => res.json());
-		console.log(riskAssessments)
 		options = getOptions({ objects: riskAssessments, extra_fields: [['project', 'str']] });
 	});
 </script>
