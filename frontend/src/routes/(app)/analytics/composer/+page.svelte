@@ -20,7 +20,7 @@
 	}
 </script>
 
-<div class="flex flex-col space-y-4">
+<div class="flex flex-col space-y-4 p-2">
 	<div>
 		<div class="px-2 mx-2 font-semibold text-xl">{m.yourSelection()}</div>
 		<div class="px-2 mx-2 text-sm">
@@ -126,7 +126,7 @@
 							{/if}
 						</div>
 						<button class=" text-gray-700 font-semibold focus:outline-none" type="button">
-							{item.risk_assessment.name}
+							{item.risk_assessment.project.str}/{item.risk_assessment.name}
 						</button>
 						<div>
 							{#if item.risk_assessment.quality_check.count > 0}
