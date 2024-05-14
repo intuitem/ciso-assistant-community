@@ -459,6 +459,7 @@
 	"successfullyUpdatedObject": "The {object} object: {name} has been successfully updated",
 	"successfullySavedObject": "The {object} object has been successfully saved",
 	"successfullyDeletedObject": "The {object} object has been successfully deleted",
+	"successfullyDeletedLibrary": "The library has been successfully deleted",
 	"successfullyCreatedUser": "User successfully created. An email was sent to set the password.",
 	"successfullyUpdatedUser": "The user: {email} has been successfully updated",
 	"successfullyValidatedObject": "The {object} object has been successfully validated",

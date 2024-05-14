@@ -459,6 +459,7 @@
 	"successfullyUpdatedObject": "L'objet {object}: {name} a été mis à jour avec succès",
 	"successfullySavedObject": "L'objet {object} a été enregistré avec succès",
 	"successfullyDeletedObject": "L'objet {object} a été supprimé avec succès",
+	"successfullyDeletedLibrary": "La librairie a été supprimée avec succès",
 	"successfullyCreatedUser": "Utilisateur créé avec succès. Un email a été envoyé pour définir le mot de passe.",
 	"successfullyUpdatedUser": "L'utilisateur: {email} a été mis à jour avec succès",
 	"successfullyValidatedObject": "L'objet {object} a été validé avec succès",
