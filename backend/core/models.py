@@ -103,7 +103,7 @@ class LibraryMixin(ReferentialObjectMixin):
         verbose_name=_("Packager"),
     )
     builtin = models.BooleanField(default=False)
-    objects_meta = models.JSONField()
+    objects_meta = models.JSONField(default=dict)
     dependencies = models.JSONField(
         null=True
     )  # models.CharField(blank=False,null=True,max_length=16384)
