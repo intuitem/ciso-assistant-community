@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:soc2-2017
+builtin: true
 locale: en
 ref_id: SOC2-2017
 name: 'SOC2-2017 Trust Services Criteria '

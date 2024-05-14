@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:anssi-nis-rules
+builtin: true
 locale: en
 ref_id: ANSSI-NIS
 name: ANSSI NIS rules

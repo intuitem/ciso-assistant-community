@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:nist-800-171-rev2
+builtin: true
 locale: en
 ref_id: nist-800-171-rev2
 name: NIST SP 800-171 Rev. 2

@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:dora
+builtin: true
 locale: en
 ref_id: DORA
 name: Digital Operational Resilience Act

@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:lpm-oiv-2019
+builtin: true
 locale: fr
 ref_id: LPM-OIV-2019
 name: "R\xE8gles OIV"

@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:mitre-attack-v14
+builtin: true
 locale: en
 ref_id: mitre-attack
 name: Mitre ATT&CK v14 - Threats and mitigations

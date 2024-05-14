@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:nist-csf-2.0
+builtin: true
 locale: en
 ref_id: NIST-CSF-2.0
 name: NIST CSF version 2.0
