@@ -16,10 +16,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyImportedObject({
-					object: 'library',
-					id: event.params.id?.toString() ?? ''
-				})
+				message: m.librarySuccessfullyLoaded()
 			},
 			event
 		);
