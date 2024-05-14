@@ -132,9 +132,11 @@
 
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
-	$: preventDelete = (row: TableSource) =>
-		row.meta.builtin ||
-		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
+
+	const actionsURLModel = source.meta.urlmodel ?? URLModel
+	const preventDelete = (row: TableSource) =>
+		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0)
 </script>
 
 <div class="table-container {classesBase}">
@@ -267,7 +269,7 @@
               {@const actionsComponent = field_component_map['actions']}
               {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
               <TableRowActions
-                deleteForm={!row.meta.builtin ? deleteForm : undefined}
+                deleteForm={deleteForm}
                 {model}
                 URLModel={actionsURLModel}
                 detailURL={`/${actionsURLModel}/${row.meta[identifierField]}`}
