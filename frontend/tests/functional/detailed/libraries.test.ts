@@ -1,7 +1,7 @@
 import { test, expect } from '../../utils/test-utils.js';
 
 test.describe.configure({ mode: 'serial' });
-test('every libraries can be imported', async ({ logedPage, librariesPage, page }) => {
+test('every libraries can be loaded', async ({ logedPage, librariesPage, page }) => {
 	test.slow();
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
@@ -38,15 +38,15 @@ test('every libraries can be deleted', async ({ logedPage, librariesPage, page }
 	await librariesPage.hasUrl();
 
 	await expect(
-		librariesPage.tab('Imported libraries'),
-		'There is no imported libraries to delete'
+		librariesPage.tab('Loaded libraries'),
+		'There is no loaded libraries to delete'
 	).toBeVisible();
 	if (
-		(await librariesPage.tab('Imported libraries').isVisible()) &&
-		(await librariesPage.tab('Imported libraries').getAttribute('aria-selected')) === 'false'
+		(await librariesPage.tab('Loaded libraries').isVisible()) &&
+		(await librariesPage.tab('Loaded libraries').getAttribute('aria-selected')) === 'false'
 	) {
-		await librariesPage.tab('Imported libraries').click();
-		expect(librariesPage.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
+		await librariesPage.tab('Loaded libraries').click();
+		expect(librariesPage.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 	}
 
 	let previousRemainingLibrary = '';
@@ -54,7 +54,7 @@ test('every libraries can be deleted', async ({ logedPage, librariesPage, page }
 	let count = 0;
 	do {
 		await page.reload(); // this is a workaround to try to fix the issue with delete button not being visible with dependencies in CI
-		if (await librariesPage.tab('Imported libraries').isVisible()) {
+		if (await librariesPage.tab('Loaded libraries').isVisible()) {
 			previousRemainingLibrary = nextRemainingLibrary;
 			nextRemainingLibrary = await page.locator('tbody tr td:nth-child(1)').nth(count)?.innerText();
 			expect(
@@ -75,7 +75,7 @@ test('every libraries can be deleted', async ({ logedPage, librariesPage, page }
 					timeout: 15000
 				}
 			);
-			if (await page.getByText(' You currently have no imported libraries.').isHidden()) {
+			if (await page.getByText(' You currently have no loaded libraries.').isHidden()) {
 				await expect(librariesPage.getRow(nextRemainingLibrary)).not.toBeVisible();
 			} else {
 				break;
@@ -87,6 +87,6 @@ test('every libraries can be deleted', async ({ logedPage, librariesPage, page }
 		}
 	} while (
 		nextRemainingLibrary ||
-		(await page.getByText(' You currently have no imported libraries.').isHidden())
+		(await page.getByText(' You currently have no loaded libraries.').isHidden())
 	);
 });
