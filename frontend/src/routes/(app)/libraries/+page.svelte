@@ -76,13 +76,13 @@
 					{form}
 					helpText={m.libraryFileInYaml()}
 					field="file"
-					label={m.uploadYourLibrary()}
+					label={m.addYourLibrary()}
 				/>
 
 				<button
 					class="btn variant-filled-primary font-semibold w-full"
 					data-testid="save-button"
-					type="submit">{m.upload()}</button
+					type="submit">{m.add()}</button
 				>
 			</SuperForm>
 		{:catch err}
