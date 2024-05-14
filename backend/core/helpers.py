@@ -994,7 +994,11 @@ def threats_count_per_name(user: User):
     # expected by echarts to send the threats names in labels and the count of each threat in values
 
     for threat in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
-        val = RiskScenario.objects.filter(threats=threat).filter(id__in=viewable_scenarios).count()
+        val = (
+            RiskScenario.objects.filter(threats=threat)
+            .filter(id__in=viewable_scenarios)
+            .count()
+        )
         if val > 0:
             labels.append({"name": threat.name})
             values.append(val)
