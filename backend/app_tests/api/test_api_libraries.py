@@ -66,10 +66,10 @@ class TestLibrariesAuthenticated:
         ).json()["content"]
         lib_detail_response = json.loads(lib_detail_response)["framework"]
 
-        # Asserts that the library is not already imported
+        # Asserts that the library is not already loaded
         assert (
             Framework.objects.all().count() == 0
-        ), "libraries are already imported in the database"
+        ), "libraries are already loaded in the database"
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Frameworks",
@@ -88,7 +88,7 @@ class TestLibrariesAuthenticated:
             else 0
         ), "Frameworks are not correctly imported in the database"
 
-        # Uses the API endpoint to assert that the library was properly imported
+        # Uses the API endpoint to assert that the library was properly loaded
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Frameworks",
@@ -132,10 +132,10 @@ class TestLibrariesAuthenticated:
         ).json()["content"]
         lib_detail_response = json.loads(lib_detail_response)["risk_matrix"][0]
 
-        # Asserts that the library is not already imported
+        # Asserts that the library is not already loaded
         assert (
             RiskMatrix.objects.all().count() == 0
-        ), "libraries are already imported in the database"
+        ), "libraries are already loaded in the database"
         EndpointTestsQueries.Auth.get_object(
             test.client, "Risk matrices", user_group=test.user_group
         )
@@ -152,7 +152,7 @@ class TestLibrariesAuthenticated:
             else 0
         ), "Risk matrices are not correctly imported in the database"
 
-        # Uses the API endpoint to assert that the library was properly imported
+        # Uses the API endpoint to assert that the library was properly loaded
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Risk matrices",

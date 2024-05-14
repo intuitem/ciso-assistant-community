@@ -67,8 +67,8 @@ export class PageContent extends BasePage {
 
 	async importLibrary(ref: string, urn?: string, language = 'English') {
 		if (
-			(await this.tab('Imported libraries').isVisible()) &&
-			(await this.tab('Imported libraries').getAttribute('aria-selected')) === 'true'
+			(await this.tab('Loaded libraries').isVisible()) &&
+			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
 		) {
 			if (await this.getRow(ref).isHidden()) {
 				await this.tab('Libraries store').click();
@@ -77,19 +77,19 @@ export class PageContent extends BasePage {
 				return;
 			}
 		}
-		// If the library is not visible, it might have already been imported
+		// If the library is not visible, it might have already been loaded
 		if (await this.getRow(ref).isHidden()) {
-			await this.tab('Imported libraries').click();
-			expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
+			await this.tab('Loaded libraries').click();
+			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 			expect(this.getRow(ref)).toBeVisible();
 			return;
 		}
 		await this.importItemButton(ref, language === 'any' ? undefined : language).click();
-		await this.isToastVisible(`The library object has been successfully imported.+`, undefined, {
+		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
-		await this.tab('Imported libraries').click();
-		expect(this.tab('Imported libraries').getAttribute('aria-selected')).toBeTruthy();
+		await this.tab('Loaded libraries').click();
+		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 		expect(this.getRow(ref)).toBeVisible();
 	}
 
