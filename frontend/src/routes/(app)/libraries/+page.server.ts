@@ -140,7 +140,7 @@ export const actions: Actions = {
 				return fail(400, { form: deleteForm });
 			}
 			setFlash(
-				{ type: 'success', message: m.successfullyDeletedObject({ object: 'library' }) },
+				{ type: 'success', message: m.successfullyDeletedLibrary() },
 				event
 			);
 		}
