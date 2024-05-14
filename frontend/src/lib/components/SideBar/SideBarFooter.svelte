@@ -17,6 +17,13 @@
 
 	const modalStore = getModalStore();
 
+	const defaultLangLabels = {
+		fr: 'Français',
+		en: 'English',
+		ar: 'العربية',
+		pt: 'Português'
+	};
+
 	let value = languageTag();
 
 	async function handleLocaleChange(event: Event) {
@@ -85,9 +92,9 @@
 				data-testid="language-select"
 			>
 				{#each availableLanguageTags as lang}
-					<option value={lang} selected={lang === languageTag()}
-						>{LOCALE_MAP[lang].flag} {language[LOCALE_MAP[lang].name]}</option
-					>
+					<option value={lang} selected={lang === languageTag()}>
+						{defaultLangLabels[lang]} ({language[LOCALE_MAP[lang].name]})
+					</option>
 				{/each}
 			</select>
 			<button
