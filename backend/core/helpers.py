@@ -82,9 +82,8 @@ def measures_to_review(user: User):
     )
     measures = (
         AppliedControl.objects.filter(id__in=object_ids_view)
-        .filter(eta__lte=date.today() + timedelta(days=30))
-        .exclude(status__iexact="done")
-        .order_by("eta")
+        .filter(expiry_date__lte=date.today() + timedelta(days=30))
+        .order_by("expiry_date")
     )
 
     return measures
@@ -580,7 +579,7 @@ def applied_control_per_cur_risk(user: User):
     for lvl in get_rating_options(user):
         cnt = (
             AppliedControl.objects.filter(id__in=object_ids_view)
-            .exclude(status="done")
+            .exclude(status="active")
             .filter(risk_scenarios__current_level=lvl[0])
             .count()
         )
@@ -868,12 +867,9 @@ def acceptances_to_review(user: User):
     acceptances = (
         RiskAcceptance.objects.filter(id__in=object_ids_view)
         .filter(expiry_date__lte=date.today() + timedelta(days=30))
-        .order_by("expiry_date")
-    )
-    acceptances |= (
-        RiskAcceptance.objects.filter(id__in=object_ids_view)
         .filter(approver=user)
-        .filter(state="submitted")
+        .filter(state__in=["submitted", "accepted"])
+        .order_by("expiry_date")
     )
 
     return acceptances
