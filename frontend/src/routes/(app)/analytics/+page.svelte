@@ -46,7 +46,14 @@
 			eta: 'eta',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.measures, ['name', 'category', 'folder', 'ranking_score', 'eta', 'state']),
+		body: tableSourceMapper(data.measures, [
+			'name',
+			'category',
+			'folder',
+			'ranking_score',
+			'eta',
+			'state'
+		]),
 		meta: data.measures
 	};
 
@@ -77,7 +84,12 @@
 			expiry_date: 'expiryDate',
 			state: 'state'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date', 'state']),
+		body: tableSourceMapper(data.acceptances_to_review, [
+			'name',
+			'risk_scenarios',
+			'expiry_date',
+			'state'
+		]),
 		meta: data.acceptances_to_review
 	};
 

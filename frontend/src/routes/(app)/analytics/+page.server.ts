@@ -56,12 +56,11 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	function timeState(date: string) {
 		const eta = new Date(date);
 		if (eta.getDate() > TODAY.getDate()) {
-			return {'name': 'incoming', 'hexcolor': '#93c5fd'};
+			return { name: 'incoming', hexcolor: '#93c5fd' };
 		} else if (eta.getDate() < TODAY.getDate()) {
-			return {'name': 'outdated', 'hexcolor': '#f87171'};
-		}
-		else {
-			return {'name': 'today', 'hexcolor': '#fbbf24'};
+			return { name: 'outdated', hexcolor: '#f87171' };
+		} else {
+			return { name: 'today', hexcolor: '#fbbf24' };
 		}
 	}
 
@@ -87,7 +86,6 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		current: Record<string, any>[];
 		residual: Record<string, any>[];
 	} = await req_get_risks_count_per_level.json().then((res) => res.results);
-
 
 	const req_get_measures_to_review = await fetch(`${BASE_API_URL}/applied-controls/to_review/`);
 	const measures_to_review = await req_get_measures_to_review.json();
