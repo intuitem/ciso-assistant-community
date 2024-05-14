@@ -322,7 +322,7 @@ export function localItems(languageTag: string): LocalItems {
 		mediumSOK: m.mediumSOK({ languageTag: languageTag }),
 		highSOK: m.highSOK({ languageTag: languageTag }),
 		libraryImportError: m.libraryImportError({ languageTag: languageTag }),
-		libraryAlreadyExistsError: m.libraryAlreadyImportedError({ languageTag: languageTag }),
+		libraryAlreadyExistsError: m.libraryAlreadyLoadedError({ languageTag: languageTag }),
 		invalidLibraryFileError: m.invalidLibraryFileError({ languageTag: languageTag }),
 		minScore: m.minScore({ languageTag: languageTag }),
 		maxScore: m.maxScore({ languageTag: languageTag }),

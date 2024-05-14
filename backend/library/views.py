@@ -128,7 +128,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return HttpResponse(json.dumps({}), status=HTTP_200_OK)
         except IntegrityError:
             return HttpResponse(
-                json.dumps({"error": "libraryAlreadyImportedError"}),
+                json.dumps({"error": "libraryAlreadyLoadedError"}),
                 status=HTTP_400_BAD_REQUEST,
             )
         except yaml.YAMLError:

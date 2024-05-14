@@ -387,17 +387,17 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'stored-libraries': {
 		name: 'storedlibrary',
-		localName: 'imported library',
-		localNamePlural: 'imported libraries',
-		verboseName: 'Imported Library',
-		verboseNamePlural: 'Imported Libraries'
+		localName: 'stored library',
+		localNamePlural: 'stored libraries',
+		verboseName: 'stored Library',
+		verboseNamePlural: 'stored Libraries'
 	},
 	'loaded-libraries': {
 		name: 'loadedlibrary',
-		localName: 'imported library',
-		localNamePlural: 'imported libraries',
-		verboseName: 'Imported Library',
-		verboseNamePlural: 'Imported Libraries'
+		localName: 'loaded library',
+		localNamePlural: 'loaded libraries',
+		verboseName: 'loaded Library',
+		verboseNamePlural: 'loaded Libraries'
 	}
 };
 

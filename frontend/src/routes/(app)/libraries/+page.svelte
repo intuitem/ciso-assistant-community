@@ -20,11 +20,11 @@
 		<!-- data.loadedLibrariesTable.body.length > 0 -->
 		{#if data.loadedLibrariesTable.body.length > 0}
 			<Tab bind:group={tabSet} value={0}>{m.librariesStore()}</Tab>
-			<Tab bind:group={tabSet} value={1}>{m.importedLibraries()}</Tab>
+			<Tab bind:group={tabSet} value={1}>{m.loadedLibraries()}</Tab>
 		{:else}
 			<div class="card p-4 variant-soft-secondary w-full m-4">
 				<i class="fa-solid fa-info-circle mr-2" />
-				{m.currentlyNoImportedLibraries()}.
+				{m.currentlyNoLoadedLibraries()}.
 			</div>
 		{/if}
 		<svelte:fragment slot="panel">
