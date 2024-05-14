@@ -6,65 +6,71 @@ import iam.models
 import uuid
 from django.db import migrations, models
 
-BUILTIN_LIBRARY_URNS = set([
-    "urn:intuitem:risk:library:nis2-directive",
-    "urn:intuitem:risk:library:cmmc-2.0",
-    "urn:intuitem:risk:library:pcidss-4_0",
-    "urn:intuitem:risk:library:nist-ssdf-1.1",
-    "urn:intuitem:risk:library:rgs-v2.0",
-    "urn:intuitem:risk:library:doc-pol",
-    "urn:intuitem:risk:library:dora",
-    "urn:intuitem:risk:library:3cf-v2",
-    "urn:intuitem:risk:library:owasp-top-10-web",
-    "urn:intuitem:risk:library:hds-v2023-a",
-    "urn:ackwa:risk:library:pgssi-s-1.0",
-    "urn:intuitem:risk:library:gdpr-checklist",
-    "urn:intuitem:risk:library:anssi-guide-hygiene",
-    "urn:intuitem:risk:library:iso27001-2022",
-    "urn:intuitem:risk:library:mitre-attack-v14",
-    "urn:protocolpaladin:risk:library:matrice-des-risques-critiques-5x5",
-    "urn:intuitem:risk:library:risk-matrix-3x3-mult",
-    "urn:intuitem:risk:library:fedramp-rev5",
-    "urn:intuitem:risk:library:nist-csf-1.1",
-    "urn:intuitem:risk:library:critical_risk_matrix_3x3",
-    "urn:intuitem:risk:library:nist-800-171-rev2",
-    "urn:intuitem:risk:library:ecc-1",
-    "urn:intuitem:risk:library:secnumcloud-3.2-annexe-2",
-    "urn:intuitem:risk:library:secnumcloud-3.2",
-    "urn:intuitem:risk:library:3cf-ed1-v1",
-    "urn:intuitem:risk:library:fadp",
-    "urn:intuitem:risk:library:tisax-v6.0.2",
-    "urn:intuitem:risk:library:owasp-asvs-4.0.3",
-    "urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux",
-    "urn:intuitem:risk:library:lpm-oiv-2019",
-    "urn:intuitem:risk:library:aircyber-v1.5.2",
-    "urn:intuitem:risk:library:nist-ai-rmf-1.0",
-    "urn:intuitem:risk:library:dfs-500-2023-11",
-    "urn:intuitem:risk:library:nist-csf-2.0",
-    "urn:intuitem:risk:library:anssi-nis-rules",
-    "urn:intuitem:risk:library:risk-matrix-5x5-sensitive",
-    "urn:intuitem:risk:library:iso27001-2022-fr",
-    "urn:intuitem:risk:library:pspf",
-    "urn:intuitem:risk:library:nist-privacy-1.0",
-    "urn:intuitem:risk:library:ccb-cff-2023-03-01",
-    "urn:intuitem:risk:library:cra-proposal-annexes",
-    "urn:ackwa:risk:library:risk-matrix-4x4-pgssi-s-1.0",
-    "urn:intuitem:risk:library:essential-eight",
-    "urn:intuitem:risk:library:nist-sp-800-66-rev2",
-    "urn:intuitem:risk:library:critical_risk_matrix_5x5",
-    "urn:protocolpaladin:risk:library:matrice-des-risques-critiques-3x3",
-    "urn:intuitem:risk:library:nist-sp-800-53-rev5",
-    "urn:intuitem:risk:library:tiber-eu-2018",
-    "urn:intuitem:risk:library:anssi-genai-security-recommendations-1.0",
-    "urn:intuitem:risk:library:soc2-2017"
-])
+BUILTIN_LIBRARY_URNS = set(
+    [
+        "urn:intuitem:risk:library:nis2-directive",
+        "urn:intuitem:risk:library:cmmc-2.0",
+        "urn:intuitem:risk:library:pcidss-4_0",
+        "urn:intuitem:risk:library:nist-ssdf-1.1",
+        "urn:intuitem:risk:library:rgs-v2.0",
+        "urn:intuitem:risk:library:doc-pol",
+        "urn:intuitem:risk:library:dora",
+        "urn:intuitem:risk:library:3cf-v2",
+        "urn:intuitem:risk:library:owasp-top-10-web",
+        "urn:intuitem:risk:library:hds-v2023-a",
+        "urn:ackwa:risk:library:pgssi-s-1.0",
+        "urn:intuitem:risk:library:gdpr-checklist",
+        "urn:intuitem:risk:library:anssi-guide-hygiene",
+        "urn:intuitem:risk:library:iso27001-2022",
+        "urn:intuitem:risk:library:mitre-attack-v14",
+        "urn:protocolpaladin:risk:library:matrice-des-risques-critiques-5x5",
+        "urn:intuitem:risk:library:risk-matrix-3x3-mult",
+        "urn:intuitem:risk:library:fedramp-rev5",
+        "urn:intuitem:risk:library:nist-csf-1.1",
+        "urn:intuitem:risk:library:critical_risk_matrix_3x3",
+        "urn:intuitem:risk:library:nist-800-171-rev2",
+        "urn:intuitem:risk:library:ecc-1",
+        "urn:intuitem:risk:library:secnumcloud-3.2-annexe-2",
+        "urn:intuitem:risk:library:secnumcloud-3.2",
+        "urn:intuitem:risk:library:3cf-ed1-v1",
+        "urn:intuitem:risk:library:fadp",
+        "urn:intuitem:risk:library:tisax-v6.0.2",
+        "urn:intuitem:risk:library:owasp-asvs-4.0.3",
+        "urn:protocolpaladin:risk:library:anssi-recommandations-configuration-systeme-gnu-linux",
+        "urn:intuitem:risk:library:lpm-oiv-2019",
+        "urn:intuitem:risk:library:aircyber-v1.5.2",
+        "urn:intuitem:risk:library:nist-ai-rmf-1.0",
+        "urn:intuitem:risk:library:dfs-500-2023-11",
+        "urn:intuitem:risk:library:nist-csf-2.0",
+        "urn:intuitem:risk:library:anssi-nis-rules",
+        "urn:intuitem:risk:library:risk-matrix-5x5-sensitive",
+        "urn:intuitem:risk:library:iso27001-2022-fr",
+        "urn:intuitem:risk:library:pspf",
+        "urn:intuitem:risk:library:nist-privacy-1.0",
+        "urn:intuitem:risk:library:ccb-cff-2023-03-01",
+        "urn:intuitem:risk:library:cra-proposal-annexes",
+        "urn:ackwa:risk:library:risk-matrix-4x4-pgssi-s-1.0",
+        "urn:intuitem:risk:library:essential-eight",
+        "urn:intuitem:risk:library:nist-sp-800-66-rev2",
+        "urn:intuitem:risk:library:critical_risk_matrix_5x5",
+        "urn:protocolpaladin:risk:library:matrice-des-risques-critiques-3x3",
+        "urn:intuitem:risk:library:nist-sp-800-53-rev5",
+        "urn:intuitem:risk:library:tiber-eu-2018",
+        "urn:intuitem:risk:library:anssi-genai-security-recommendations-1.0",
+        "urn:intuitem:risk:library:soc2-2017",
+    ]
+)
+
 
 def adapt_libraries(apps, schema_editor):
     LoadedLibrary = apps.get_model("core", "LoadedLibrary")
-    for library in LoadedLibrary.objects.all() :
-        library.builtin = library.urn in BUILTIN_LIBRARY_URNS # There is no perfect way to verify is a loaded custom library is builtin or not
+    for library in LoadedLibrary.objects.all():
+        library.builtin = (
+            library.urn in BUILTIN_LIBRARY_URNS
+        )  # There is no perfect way to verify is a loaded custom library is builtin or not
         # There is no way to generate the objects_meta dictionary without reading all files from ./backend/library/libraries, but we can generate the missing objects_meta values at the same time we generate the StoredLibrary objects.
         library.save()
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -147,27 +153,33 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="loadedlibrary",
             name="provider",
-            field=models.CharField(blank=True, max_length=200, null=True, verbose_name="Provider")
+            field=models.CharField(
+                blank=True, max_length=200, null=True, verbose_name="Provider"
+            ),
         ),
         migrations.AlterField(
             model_name="loadedlibrary",
             name="urn",
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name="URN")
+            field=models.CharField(
+                blank=True, max_length=100, null=True, verbose_name="URN"
+            ),
         ),
         migrations.AlterField(
             model_name="loadedlibrary",
             name="dependencies",
-            field=models.ManyToManyField(blank=True, to="core.loadedlibrary", verbose_name="Dependencies"),
+            field=models.ManyToManyField(
+                blank=True, to="core.loadedlibrary", verbose_name="Dependencies"
+            ),
         ),
         migrations.AddField(
             model_name="loadedlibrary",
             name="builtin",
-            field=models.BooleanField(default=False)
+            field=models.BooleanField(default=False),
         ),
         migrations.AddField(
             model_name="loadedlibrary",
             name="objects_meta",
-            field=models.JSONField(default=dict)
+            field=models.JSONField(default=dict),
         ),
         migrations.AlterModelOptions(
             name="loadedlibrary",

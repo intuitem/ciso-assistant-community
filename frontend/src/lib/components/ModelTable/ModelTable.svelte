@@ -133,10 +133,10 @@
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
 
-	const actionsURLModel = source.meta.urlmodel ?? URLModel
+	const actionsURLModel = source.meta.urlmodel ?? URLModel;
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
-		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0)
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 </script>
 
 <div class="table-container {classesBase}">

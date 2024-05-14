@@ -139,10 +139,7 @@ export const actions: Actions = {
 				}
 				return fail(400, { form: deleteForm });
 			}
-			setFlash(
-				{ type: 'success', message: m.successfullyDeletedLibrary() },
-				event
-			);
+			setFlash({ type: 'success', message: m.successfullyDeletedLibrary() }, event);
 		}
 		return { deleteForm };
 	}
