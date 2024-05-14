@@ -30,7 +30,7 @@ class StoredLibrarySerializer(serializers.ModelSerializer):
             "provider",
             "builtin",
             "objects_meta",
-            "is_imported",
+            "is_loaded",
         ]
 
 

@@ -61,11 +61,11 @@ export const load = (async ({ fetch }) => {
 		};
 	};
 
-	const unimportedStoredLibraries = storedLibraries.filter((lib) => lib.is_imported === false);
+	const unloadedStoredLibraries = storedLibraries.filter((lib) => lib.is_loaded === false);
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
-		meta: { urlmodel: 'stored-libraries', ...unimportedStoredLibraries },
-		body: tableSourceMapper(unimportedStoredLibraries, listViewFields['stored-libraries'].body)
+		meta: { urlmodel: 'stored-libraries', ...unloadedStoredLibraries },
+		body: tableSourceMapper(unloadedStoredLibraries, listViewFields['stored-libraries'].body)
 	};
 
 	const loadedLibrariesTable = makeLibrariesTable(loadedLibraries, 'loaded-libraries');

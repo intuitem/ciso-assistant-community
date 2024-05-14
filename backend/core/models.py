@@ -111,7 +111,7 @@ class LibraryMixin(ReferentialObjectMixin):
 
 class StoredLibrary(LibraryMixin):
     is_obsolete = models.BooleanField(default=False)
-    is_imported = models.BooleanField(default=False)
+    is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.TextField()
 
@@ -205,7 +205,7 @@ class StoredLibrary(LibraryMixin):
         library_importer = LibraryImporter(self)
         error_msg = library_importer.import_library()
         if error_msg is None:
-            self.is_imported = True
+            self.is_loaded = True
             self.save()
         return error_msg
 
@@ -277,7 +277,7 @@ class LoadedLibrary(LibraryMixin):
         stored_library = StoredLibrary.objects.get(
             urn=self.urn, locale=self.locale, version=self.version
         )  # I don't if it works yet
-        stored_library.is_imported = False
+        stored_library.is_loaded = False
         stored_library.save()
 
 
