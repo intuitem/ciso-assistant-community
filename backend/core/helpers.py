@@ -748,15 +748,38 @@ def risks_per_project_groups(user: User):
 
 
 def get_counters(user: User):
+    print()
     return {
-        "domains": Folder.objects.filter(
-            content_type=Folder.ContentType.DOMAIN
-        ).count(),
-        "projects": Project.objects.all().count(),
-        "applied_controls": AppliedControl.objects.all().count(),
-        "risk_assessments": RiskAssessment.objects.all().count(),
-        "compliance_assessments": ComplianceAssessment.objects.all().count(),
-        "policies": Policy.objects.all().count(),
+        "domains": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Folder
+            )[0]
+        ),
+        "projects": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Project
+            )[0]
+        ),
+        "applied_controls": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, AppliedControl
+            )[0]
+        ),
+        "risk_assessments": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, RiskAssessment
+            )[0]
+        ),
+        "compliance_assessments": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, ComplianceAssessment
+            )[0]
+        ),
+        "policies": len(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), user, Policy
+            )[0]
+        ),
     }
 
 
@@ -964,11 +987,14 @@ def threats_count_per_name(user: User):
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
+        Folder.get_root_folder(), user, RiskScenario
+    )[0]
 
     # expected by echarts to send the threats names in labels and the count of each threat in values
 
     for threat in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
-        val = RiskScenario.objects.filter(threats=threat).count()
+        val = RiskScenario.objects.filter(threats=threat).filter(id__in=viewable_scenarios).count()
         if val > 0:
             labels.append({"name": threat.name})
             values.append(val)
