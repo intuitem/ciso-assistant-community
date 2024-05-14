@@ -8,6 +8,7 @@ import zipfile
 from datetime import datetime
 from typing import Any
 from uuid import UUID
+from datetime import date, timedelta
 
 import django_filters as df
 from ciso_assistant.settings import (
@@ -574,6 +575,7 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         measures = sorted(
             AppliedControl.objects.filter(id__in=object_ids_view)
+            .filter(eta__lte=date.today() + timedelta(days=30))
             .exclude(status="active")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
