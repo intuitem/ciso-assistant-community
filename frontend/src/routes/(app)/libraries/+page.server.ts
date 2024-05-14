@@ -104,7 +104,7 @@ export const actions: Actions = {
 				setFlash({ type: 'error', message: toast_error_message }, event);
 				return fail(400, { form });
 			}
-			setFlash({ type: 'success', message: m.librarySuccessfullyImported() }, event);
+			setFlash({ type: 'success', message: m.librarySuccessfullyLoaded() }, event);
 		} else {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });
