@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:nist-privacy-1.0
+builtin: true
 locale: en
 ref_id: NIST-PRIVACY-1.0
 name: NIST PRIVACY FRAMEWORK 1.0

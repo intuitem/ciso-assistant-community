@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:critical_risk_matrix_5x5
+builtin: true
 locale: en
 ref_id: critical_5x5
 name: Critical risk matrix 5x5

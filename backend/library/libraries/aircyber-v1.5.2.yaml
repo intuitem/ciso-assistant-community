@@ -1,4 +1,5 @@
 urn: urn:intuitem:risk:library:aircyber-v1.5.2
+builtin: true
 locale: en
 ref_id: AirCyber-v1.5.2
 name: Public AirCyber Maturity Level Matrix

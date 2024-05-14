@@ -1,4 +1,5 @@
 urn: urn:protocolpaladin:risk:library:matrice-des-risques-critiques-5x5
+builtin: true
 locale: fr
 ref_id: matrice-des-risques-critiques-5x5
 name: Matrice des risques critiques 5x5
