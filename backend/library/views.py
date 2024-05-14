@@ -53,6 +53,22 @@ class StoredLibraryViewSet(BaseModelViewSet):
         lib = StoredLibrary.objects.get(id=pk)
         return Response(lib.content)
 
+    def destroy(self, request, *args, pk, **kwargs):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="delete_storedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            lib = StoredLibrary.objects.get(urn=pk)
+        except:
+            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+
+        lib.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=["get"], url_path="import")
     def import_library(self, request, pk):
         if not RoleAssignment.is_access_allowed(
