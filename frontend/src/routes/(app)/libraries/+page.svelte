@@ -46,6 +46,7 @@
 					identifierField="urn"
 					pagination={false}
 					deleteForm={data.deleteForm}
+					detailQueryParameter="loaded"
 				/>
 			{/if}
 		</svelte:fragment>

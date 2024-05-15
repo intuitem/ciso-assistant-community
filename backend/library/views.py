@@ -3,7 +3,9 @@ from django.db import IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.status import (
     HTTP_200_OK,
+    HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
     HTTP_422_UNPROCESSABLE_ENTITY,
 )
@@ -48,9 +50,31 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return StoredLibrarySerializer
         return StoredLibraryDetailedSerializer
 
+    def retrieve(self, request, *args, pk, **kwargs):
+        if "view_storedlibrary" not in request.user.permissions:
+            return Response(status=HTTP_403_FORBIDDEN)
+        try:
+            lib = StoredLibrary.objects.get(
+                urn=pk
+            )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
+        except:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+        data = StoredLibrarySerializer(lib).data
+        return Response(data)
+
+    def content(self, request, pk):
+        try :
+            lib = StoredLibrary.objects.get(urn=pk)
+        except :
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        return Response(lib.content)
+
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
-        lib = StoredLibrary.objects.get(id=pk)
+        try :
+            lib = StoredLibrary.objects.get(urn=pk)
+        except :
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib.content)
 
     def destroy(self, request, *args, pk, **kwargs):
@@ -59,15 +83,15 @@ class StoredLibraryViewSet(BaseModelViewSet):
             perm=Permission.objects.get(codename="delete_storedlibrary"),
             folder=Folder.get_root_folder(),
         ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=HTTP_403_FORBIDDEN)
 
         try:
             lib = StoredLibrary.objects.get(urn=pk)
         except:
-            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         lib.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"], url_path="import")
     def import_library(self, request, pk):
@@ -76,20 +100,20 @@ class StoredLibraryViewSet(BaseModelViewSet):
             perm=Permission.objects.get(codename="add_loadedlibrary"),
             folder=Folder.get_root_folder(),
         ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=HTTP_403_FORBIDDEN)
         try:
             library = StoredLibrary.objects.get(
                 urn=pk
             )  # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
         except:
-            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         try:
             error_msg = library.load()
             if error_msg is not None:
                 return Response(
                     {"status": "error", "error": error_msg},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
         except Exception:
@@ -103,9 +127,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         try:
-            lib = StoredLibrary.objects.get(id=pk)
+            lib = StoredLibrary.objects.get(urn=pk)
         except:
-            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         library_objects = json.loads(lib.content)  # We may need caching for this
         if not (framework := library_objects.get("framework")):
@@ -113,6 +137,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 data="This library does not include a framework.",
                 status=HTTP_400_BAD_REQUEST,
             )
+
         preview = preview_library(framework)
         return Response(
             get_sorted_requirement_nodes(preview.get("requirement_nodes"), None)
@@ -165,7 +190,7 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if "view_storedlibrary" not in request.user.permissions:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=HTTP_403_FORBIDDEN)
 
         loaded_libraries = [
             {
@@ -191,13 +216,13 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, pk, **kwargs):
         if "view_loadedlibrary" not in request.user.permissions:
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=HTTP_403_FORBIDDEN)
         try:
             lib = LoadedLibrary.objects.get(
                 urn=pk
             )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
         except:
-            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
         data = LoadedLibraryDetailedSerializer(lib).data
         data["objects"] = lib._objects
         return Response(data)
@@ -208,30 +233,39 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             perm=Permission.objects.get(codename="delete_loadedlibrary"),
             folder=Folder.get_root_folder(),
         ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
+            return Response(status=HTTP_403_FORBIDDEN)
 
         try:
             lib = LoadedLibrary.objects.get(urn=pk)
         except:
-            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         if lib.reference_count != 0:
             return Response(
                 data="Library cannot be deleted because it has references.",
-                status=status.HTTP_400_BAD_REQUEST,
+                status=HTTP_400_BAD_REQUEST,
             )
 
         lib.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["get"])
+    def content(self, request, pk):
+        try :
+            lib = LoadedLibrary.objects.get(urn=pk)
+        except :
+            return Response("Library not found.", status=HTTP_404_NOT_FOUND)
+        return Response(lib._objects)
 
     @action(detail=True, methods=["get"])
     def tree(
         self, request, pk
     ):  # We must ensure that users that are not allowed to read the content of libraries can't have any access to them either from the /api/{URLModel/{library_urn}/tree view or the /api/{URLModel}/{library_urn} view.
+
         try:
             lib = LoadedLibrary.objects.get(urn=pk)
         except:
-            return Response(data="Library not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         if lib.frameworks.count() == 0:
             return Response(
