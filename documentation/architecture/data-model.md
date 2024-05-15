@@ -35,7 +35,8 @@ erDiagram
     DOMAIN                ||--o{ COMPLIANCE_ASSESSMENT_REVIEW: contains
     ROOT_FOLDER           ||--o{ FRAMEWORK                   : contains
     ROOT_FOLDER           ||--o{ REFERENCE_CONTROL           : contains
-    ROOT_FOLDER           ||--o{ LIBRARY                     : contains
+    ROOT_FOLDER           ||--o{ STORED_LIBRARY              : contains
+    ROOT_FOLDER           ||--o{ LOADED_LIBRARY              : contains
     ROOT_FOLDER           ||--o{ USER                        : contains
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
@@ -58,12 +59,12 @@ erDiagram
 ```mermaid
 erDiagram
 
-    LIBRARY  |o--o{ REFERENCE_CONTROL: contains
-    LIBRARY  |o--o{ THREAT           : contains
-    LIBRARY  ||--o{ FRAMEWORK        : contains
-    LIBRARY  ||--o{ RISK_MATRIX      : contains
-    LIBRARY  ||--o{ MAPPING          : contains
-    LIBRARY2 }o--o{ LIBRARY          : depends_on
+    LOADED_LIBRARY  |o--o{ REFERENCE_CONTROL: contains
+    LOADED_LIBRARY  |o--o{ THREAT           : contains
+    LOADED_LIBRARY  ||--o{ FRAMEWORK        : contains
+    LOADED_LIBRARY  ||--o{ RISK_MATRIX      : contains
+    LOADED_LIBRARY  ||--o{ MAPPING          : contains
+    LOADED_LIBRARY2 }o--o{ LOADED_LIBRARY   : depends_on
 ```
 
 ### General data model
@@ -419,13 +420,15 @@ NameDescriptionMixin   <|-- RiskScenario
 AbstractBaseModel      <|-- NameDescriptionMixin
 NameDescriptionMixin   <|-- ReferentialObjectMixin
 FolderMixin            <|-- ReferentialObjectMixin
-ReferentialObjectMixin <|-- Library
 ReferentialObjectMixin <|-- Threat
 ReferentialObjectMixin <|-- ReferenceControl
 ReferentialObjectMixin <|-- RiskMatrix
 ReferentialObjectMixin <|-- Framework
 ReferentialObjectMixin <|-- RequirementNode
 ReferentialObjectMixin <|-- Mapping
+ReferentialObjectMixin <|-- LibraryMixin
+LibraryMixin           <|-- StoredLibrary
+LibraryMixin           <|-- LoadedLibrary
 NameDescriptionMixin   <|-- Assessment
 FolderMixin            <|-- Project
 NameDescriptionMixin   <|-- Project
@@ -455,23 +458,36 @@ namespace ReferentialObjects {
         +display_long() str
     }
 
-    class Library {
+    class LibraryMixin {
         +CharField copyright
         +IntegerField version
         +CharField provider
         +CharField packager
-        +Library[] dependencies
+        +JsonField dependencies
+        +BooleanField builtin
+        +JSONField objects_meta
+    }
+
+    class StoredLibrary {
+        +BooleanField is_obsolete
+        +BooleanField is_loaded
+        +CharField hash_checksum
+        +TextField content
+    }
+
+    class LoadedLibrary {
+        +LoadedLibrary[] dependencies
         +reference_count() int
     }
 
     class Threat {
-        +Library library
+        +LoadedLibrary library
         +is_deletable() bool
         +frameworks() Framework[]
     }
 
     class ReferenceControl {
-        +Library library
+        +LoadedLibrary library
         +CharField category
         +JSONField typical_evidence
         +is_deletable() bool
@@ -479,7 +495,7 @@ namespace ReferentialObjects {
     }
 
     class RiskMatrix {
-        +Library library
+        +LoadedLibrary library
         +JSONField json_definition
         +BooleanField is_enabled
         +CharField provider
@@ -492,7 +508,7 @@ namespace ReferentialObjects {
     }
 
     class Framework {
-        +Library library
+        +LoadedLibrary library
         +int get_next_order_id(obj_type, _parent_urn)
         +is_deletable() bool
     }
