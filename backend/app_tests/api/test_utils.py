@@ -33,8 +33,13 @@ class EndpointTestsUtils:
         authenticated_client, urn: str, model: models.Model = StoredLibrary
     ):
         """Get the object URL from the URN"""
-        uuid = model.objects.filter(urn=urn).last().id
-        return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{uuid}/"
+        return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{urn}/"
+
+    def get_stored_library_content(
+        authenticated_client,urn: str
+    ) -> str :
+        """Return an URL to fetch the content of a stored library"""
+        return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{urn}/content/"
 
     @pytest.mark.django_db
     def get_test_client_and_folder(
@@ -1023,7 +1028,9 @@ class EndpointTestsQueries:
                 reference.status_code == status.HTTP_200_OK
             ), "reference endpoint is not accessible"
 
-            content = json.loads(reference.json()["content"])
+            content = json.loads(reference.content)
+            content = json.loads(content)
+
             for object in content["framework"][object_name.lower().replace(" ", "_")][
                 :count
             ]:

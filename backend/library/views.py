@@ -54,8 +54,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
         if "view_storedlibrary" not in request.user.permissions:
             return Response(status=HTTP_403_FORBIDDEN)
         try:
+            key = "urn" if pk.startswith("urn:") else "id"
             lib = StoredLibrary.objects.get(
-                urn=pk
+                **{key: pk}
             )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
@@ -64,7 +65,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
     def content(self, request, pk):
         try:
-            lib = StoredLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib.content)
@@ -72,7 +74,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
         try:
-            lib = StoredLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib.content)
@@ -86,7 +89,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
 
         try:
-            lib = StoredLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
@@ -102,8 +106,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
         ):
             return Response(status=HTTP_403_FORBIDDEN)
         try:
+            key = "urn" if pk.startswith("urn:") else "id"
             library = StoredLibrary.objects.get(
-                urn=pk
+                **{key: pk}
             )  # This is only fetching the lib by URN without caring about the locale or the version, this must change in the future.
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
@@ -127,7 +132,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def tree(self, request, pk):
         try:
-            lib = StoredLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = StoredLibrary.objects.get(**{key: pk})
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
@@ -218,8 +224,9 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         if "view_loadedlibrary" not in request.user.permissions:
             return Response(status=HTTP_403_FORBIDDEN)
         try:
+            key = "urn" if pk.startswith("urn:") else "id"
             lib = LoadedLibrary.objects.get(
-                urn=pk
+                **{key: pk}
             )  # There is no "locale" value involved in the fetch + we have to handle the exception if the pk urn doesn't exist
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
@@ -236,7 +243,8 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
             return Response(status=HTTP_403_FORBIDDEN)
 
         try:
-            lib = LoadedLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
@@ -252,7 +260,8 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
         try:
-            lib = LoadedLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
         except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
@@ -262,7 +271,8 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
         self, request, pk
     ):  # We must ensure that users that are not allowed to read the content of libraries can't have any access to them either from the /api/{URLModel/{library_urn}/tree view or the /api/{URLModel}/{library_urn} view.
         try:
-            lib = LoadedLibrary.objects.get(urn=pk)
+            key = "urn" if pk.startswith("urn:") else "id"
+            lib = LoadedLibrary.objects.get(**{key: pk})
         except:
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 

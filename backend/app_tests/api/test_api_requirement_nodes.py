@@ -77,9 +77,7 @@ class TestRequirementNodesAuthenticated:
             test.client,
             "Requirement nodes",
             EndpointTestsUtils.get_endpoint_url("Requirement nodes"),
-            EndpointTestsUtils.get_referential_object_url_from_urn(
-                test.client, TEST_FRAMEWORK_URN, StoredLibrary
-            ),
+            EndpointTestsUtils.get_stored_library_content(test.client, TEST_FRAMEWORK_URN),
             [
                 "name",
                 "description",
