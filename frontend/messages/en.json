@@ -519,5 +519,6 @@
 	"actionPlan": "Action plan",
 	"noStatus": "No status",
 	"actionPlanHelpText": "Separated by status and sorted by eta",
-	"requirementsCount": "Requirements count"
+	"requirementsCount": "Requirements count",
+	"asZIP": "as ZIP"
 }

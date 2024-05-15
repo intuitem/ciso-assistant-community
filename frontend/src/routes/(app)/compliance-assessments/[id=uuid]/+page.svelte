@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
 	import { breadcrumbObject } from '$lib/utils/stores';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton';
+	import type { PopupSettings, TreeViewNode } from '@skeletonlabs/skeleton';
+	import { popup } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import TreeViewItemLead from './TreeViewItemLead.svelte';
@@ -103,6 +104,12 @@
 
 	expandedNodes = $expandedNodesState;
 	$: expandedNodesState.set(expandedNodes);
+
+	const popupDownload: PopupSettings = {
+		event: 'click',
+		target: 'popupDownload',
+		placement: 'bottom'
+	};
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -183,9 +190,24 @@
 		</div>
 		<div class="flex flex-col space-y-2 ml-4">
 			<div class="flex flex-row space-x-2">
-				<a href={`${$page.url.pathname}/export`} class="btn variant-filled-primary h-fit"
-					><i class="fa-solid fa-download mr-2" /> {m.exportButton()}</a
+				<button class="btn variant-filled-primary" use:popup={popupDownload}
+					><i class="fa-solid fa-download mr-2" />{m.exportButton()}</button
 				>
+				<div
+					class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					data-popup="popupDownload"
+				>
+					<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+					<a
+						href="/compliance-assessments/{data.compliance_assessment.id}/export"
+						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+					>
+					<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+					<a
+						href="/compliance-assessments/{data.compliance_assessment.id}/action-plan/export/pdf"
+						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+					>
+				</div>
 				{#if canEditObject}
 					<a
 						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}

@@ -16,6 +16,8 @@
         <p class="font-semibold text-lg"> {% trans "Project" %}: {{ compliance_assessment.project.name }}</p>
         <p class="font-semibold text-lg">/</p>
         <p class="font-semibold text-lg"> {% trans "Audit" %}: {{ compliance_assessment.name }} - {{ compliance_assessment.version }}</p>
+        <p class="font-semibold text-lg">/</p>
+        <p class="font-semibold text-lg"> {% trans "Framework" %}: {{ compliance_assessment.framework }}</p>
     </div>
     <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated applied controls" %}: </p>
     <p class="m-2 p-2">{% trans "Separated by status and sorted by eta" %}</p>
