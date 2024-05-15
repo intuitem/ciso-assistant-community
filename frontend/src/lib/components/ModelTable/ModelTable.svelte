@@ -86,8 +86,8 @@
 	export let identifierField = 'id';
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
 	export let URLModel: urlModel | undefined = undefined;
-	export let detailQueryParameter: string | undefined ;
-	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : "";
+	export let detailQueryParameter: string | undefined;
+	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
 

@@ -61,7 +61,7 @@ export const load = (async ({ fetch }) => {
 		};
 	};
 
-	const visibleStoredLibraries = storedLibraries.filter(lib => !(lib.is_loaded && lib.builtin));
+	const visibleStoredLibraries = storedLibraries.filter((lib) => !(lib.is_loaded && lib.builtin));
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
 		meta: { urlmodel: 'stored-libraries', ...visibleStoredLibraries },
