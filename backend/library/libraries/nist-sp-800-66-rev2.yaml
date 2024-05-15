@@ -1,5 +1,4 @@
 urn: urn:intuitem:risk:library:nist-sp-800-66-rev2
-builtin: true
 locale: en
 ref_id: NIST-SP-800-66-rev2
 name: NIST SP-800-66 rev2 (HIPAA)

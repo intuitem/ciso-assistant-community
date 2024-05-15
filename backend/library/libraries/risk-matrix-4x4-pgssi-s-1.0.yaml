@@ -1,5 +1,4 @@
 urn: urn:ackwa:risk:library:risk-matrix-4x4-pgssi-s-1.0
-builtin: true
 locale: fr
 ref_id: risk-matrix-4x4-pgssi-s-1.0
 name: Matrice de risques 4x4 PGSSI-S v1.0

@@ -1,5 +1,4 @@
 urn: urn:intuitem:risk:library:risk-matrix-3x3-mult
-builtin: true
 locale: fr
 ref_id: risk-matrix-3x3-mult
 name: Matrice 3x3 multiplicative

@@ -1,5 +1,4 @@
 urn: urn:intuitem:risk:library:owasp-top-10-web
-builtin: true
 locale: en
 ref_id: OWASP top 10 Web
 name: OWASP top 10 Web
