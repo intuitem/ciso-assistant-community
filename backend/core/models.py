@@ -938,7 +938,7 @@ class RiskAssessment(Assessment):
             measures[i]["id"] = json.loads(_measures)[i]["pk"]
 
         for mtg in measures:
-            if not mtg["eta"]:
+            if not mtg["eta"] and not mtg["status"] == "active":
                 warnings_lst.append(
                     {
                         "msg": _("{} does not have an ETA").format(mtg["name"]),
@@ -946,7 +946,7 @@ class RiskAssessment(Assessment):
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
                 )
-            else:
+            elif mtg["eta"] and not mtg["status"] == "active":
                 if date.today() > datetime.strptime(mtg["eta"], "%Y-%m-%d").date():
                     errors_lst.append(
                         {

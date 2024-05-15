@@ -8,6 +8,7 @@ import zipfile
 from datetime import datetime
 from typing import Any
 from uuid import UUID
+from datetime import date, timedelta
 
 import django_filters as df
 from ciso_assistant.settings import (
@@ -283,14 +284,25 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used risk matrices")
     def used(self, request):
-        _used_matrices = RiskMatrix.objects.filter(
-            riskassessment__isnull=False
-        ).distinct()
+        viewable_matrices = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskMatrix
+        )[0]
+        viewable_assessments = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, RiskAssessment
+        )[0]
+        _used_matrices = (
+            RiskMatrix.objects.filter(riskassessment__isnull=False)
+            .filter(id__in=viewable_matrices)
+            .filter(riskassessment__id__in=viewable_assessments)
+            .distinct()
+        )
         used_matrices = _used_matrices.values("id", "name")
         for i in range(len(used_matrices)):
-            used_matrices[i]["risk_assessments_count"] = _used_matrices.get(
-                id=used_matrices[i]["id"]
-            ).riskassessment_set.count()
+            used_matrices[i]["risk_assessments_count"] = (
+                RiskAssessment.objects.filter(risk_matrix=_used_matrices[i].id)
+                .filter(id__in=viewable_assessments)
+                .count()
+            )
         return Response({"results": used_matrices})
 
 
@@ -578,7 +590,8 @@ class AppliedControlViewSet(BaseModelViewSet):
 
         measures = sorted(
             AppliedControl.objects.filter(id__in=object_ids_view)
-            .exclude(status="done")
+            .filter(eta__lte=date.today() + timedelta(days=30))
+            .exclude(status="active")
             .order_by("eta"),
             key=lambda mtg: mtg.get_ranking_score(),
             reverse=True,
@@ -1060,14 +1073,25 @@ class FrameworkViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
-        _used_frameworks = Framework.objects.filter(
-            complianceassessment__isnull=False
-        ).distinct()
+        viewable_framework = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Framework
+        )[0]
+        viewable_assessments = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )[0]
+        _used_frameworks = (
+            Framework.objects.filter(complianceassessment__isnull=False)
+            .filter(id__in=viewable_framework)
+            .filter(complianceassessment__id__in=viewable_assessments)
+            .distinct()
+        )
         used_frameworks = _used_frameworks.values("id", "name")
         for i in range(len(used_frameworks)):
-            used_frameworks[i]["compliance_assessments_count"] = _used_frameworks.get(
-                id=used_frameworks[i]["id"]
-            ).complianceassessment_set.count()
+            used_frameworks[i]["compliance_assessments_count"] = (
+                ComplianceAssessment.objects.filter(framework=_used_frameworks[i].id)
+                .filter(id__in=viewable_assessments)
+                .count()
+            )
         return Response({"results": used_frameworks})
 
 
