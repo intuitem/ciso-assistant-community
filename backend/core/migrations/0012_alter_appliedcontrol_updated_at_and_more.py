@@ -69,6 +69,13 @@ def adapt_libraries(apps, schema_editor):
             library.urn in BUILTIN_LIBRARY_URNS
         )  # There is no perfect way to verify is a loaded custom library is builtin or not
         # There is no way to generate the objects_meta dictionary without reading all files from ./backend/library/libraries, but we can generate the missing objects_meta values at the same time we generate the StoredLibrary objects.
+
+        library.objects_meta = {
+            "frameworks": library.frameworks.count(),
+            "threats": library.threats.count(),
+            "reference_controls": library.reference_controls.count(),
+            "risk_matrix": library.risk_matrices.count()
+        }
         library.save()
 
 
