@@ -125,7 +125,9 @@ class StoredLibrary(LibraryMixin):
         )
 
     @classmethod
-    def store_library_content(cls, library_content: bytes,builtin: bool=False) -> "StoredLibrary | None":
+    def store_library_content(
+        cls, library_content: bytes, builtin: bool = False
+    ) -> "StoredLibrary | None":
         hash_checksum = sha256(library_content)
         if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             return None  # We do not store the library if its hash checksum is in the database.
@@ -182,10 +184,12 @@ class StoredLibrary(LibraryMixin):
         )
 
     @classmethod
-    def store_library_file(cls, fname: Path,builtin: bool=False) -> "StoredLibrary | None":
+    def store_library_file(
+        cls, fname: Path, builtin: bool = False
+    ) -> "StoredLibrary | None":
         with open(fname, "rb") as f:
             library_content = f.read()
-        return StoredLibrary.store_library_content(library_content,builtin)
+        return StoredLibrary.store_library_content(library_content, builtin)
 
     def load(self) -> Union[str, None]:
         from library.utils import LibraryImporter
