@@ -181,17 +181,22 @@
 				colors={compliance_assessment_donut_values.values.map((object) => object.itemStyle.color)}
 			/>
 		</div>
-		<div class="flex flex-row space-x-2 ml-4">
-			<a href={`${$page.url.pathname}/export`} class="btn variant-filled-primary h-fit"
-				><i class="fa-solid fa-download mr-2" /> {m.exportButton()}</a
-			>
-			{#if canEditObject}
-				<a
-					href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
-					class="btn variant-filled-primary h-fit"
-					data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+		<div class="flex flex-col space-y-2 ml-4">
+			<div class="flex flex-row space-x-2">
+				<a href={`${$page.url.pathname}/export`} class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-download mr-2" /> {m.exportButton()}</a
 				>
-			{/if}
+				{#if canEditObject}
+					<a
+						href={`${$page.url.pathname}/edit?next=${$page.url.pathname}`}
+						class="btn variant-filled-primary h-fit"
+						data-testid="edit-button"><i class="fa-solid fa-pen-to-square mr-2" /> {m.edit()}</a
+					>
+				{/if}
+			</div>
+			<a href="#" class="btn variant-filled-primary h-fit"
+					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
+			>
 		</div>
 	</div>
 
