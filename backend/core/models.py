@@ -148,6 +148,11 @@ class StoredLibrary(LibraryMixin):
         urn = library_data["urn"]
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
+        is_loaded = LoadedLibrary.objects.filter(
+            urn=urn,
+            locale=locale,
+            version=version
+        ).exists()
 
         library_matches = [*StoredLibrary.objects.filter(urn=urn, locale=locale)]
         if any(library.version >= version for library in library_matches):
@@ -186,6 +191,7 @@ class StoredLibrary(LibraryMixin):
             packager=library_data.get("packager"),
             objects_meta=objects_meta,
             dependencies=dependencies,
+            is_loaded=is_loaded,
             builtin=library_data.get(
                 "builtin", False
             ),  # We have to add a "builtin: true" line to every builtin library file.
