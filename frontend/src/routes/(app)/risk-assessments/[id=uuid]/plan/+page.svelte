@@ -32,14 +32,6 @@
 
 <div class="bg-white p-2 m-2 shadow rounded-lg space-x-2 flex flex-row justify-center">
 	<p class="font-semibold text-lg">
-		{m.domain()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.name}</a
-		>
-	</p>
-	<p>/</p>
-	<p class="font-semibold text-lg">
 		{m.project()}:
 		<a
 			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
