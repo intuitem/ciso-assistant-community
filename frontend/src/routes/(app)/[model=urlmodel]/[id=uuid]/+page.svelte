@@ -25,6 +25,7 @@
 	const toastStore: ToastStore = getToastStore();
 
 	export let data;
+	data.relatedModels = Object.fromEntries(Object.entries(data.relatedModels).sort());
 
 	if (data.model.detailViewFields) {
 		data.data = Object.fromEntries(
