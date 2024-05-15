@@ -2,6 +2,7 @@ from django import template
 
 from ciso_assistant.settings import VERSION, BUILD, DEBUG
 from core.utils import COUNTRY_FLAGS, LANGUAGES
+from core.models import RequirementAssessment
 
 register = template.Library()
 
@@ -14,6 +15,12 @@ def app_version():
 @register.simple_tag()
 def app_build():
     return f"{BUILD} (dev)" if DEBUG else BUILD
+
+@register.simple_tag()
+def get_requirements_count(applied_control, compliance_assessment):
+    return RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment
+                    ).filter(applied_controls=applied_control).count()
 
 
 @register.filter("class")
