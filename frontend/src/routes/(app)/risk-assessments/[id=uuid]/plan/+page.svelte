@@ -17,10 +17,10 @@
 
 	const measureStatusColorMap = (treatment: string) => {
 		const map: Record<string, string> = {
-			open: 'bg-orange-200',
-			'in progress': 'bg-blue-200',
-			'on hold': 'bg-red-200',
-			done: 'bg-success-200'
+			'--': 'bg-gray-200',
+			'planned': 'bg-blue-200',
+			'inactive': 'bg-red-200',
+			active: 'bg-green-200'
 		};
 		if (treatment !== null) {
 			return map[treatment.toLowerCase()];
@@ -84,7 +84,7 @@
 						<td class="px-2 text-center">#</td>
 						<td class="px-2 font-semibold">{m.name()}</td>
 						<td class="px-2 font-semibold">{m.description()}</td>
-						<td class="px-2 font-semibold">{m.type()}</td>
+						<td class="px-2 font-semibold">{m.category()}</td>
 						<td class="px-2 font-semibold">{m.referenceControl()}</td>
 						<td class="px-2 font-semibold">{m.eta()}</td>
 						<td class="px-2 font-semibold">{m.effort()}</td>
@@ -99,7 +99,7 @@
 							<td class="px-2 py-3 text-center pl-4">M.{index + 1}</td>
 							<td class="px-2 py-3">{measure.name ?? '--'}</td>
 							<td class="px-2 py-3 max-w-md">{measure.description ?? '--'}</td>
-							<td class="px-2 py-3">{measure.type ?? '--'}</td>
+							<td class="px-2 py-3">{measure.category ?? '--'}</td>
 							<td class="px-2 py-3"
 								>{measure.reference_control ? measure.reference_control.str : '--'}</td
 							>
@@ -109,9 +109,9 @@
 							<td class="text-center"
 								><span
 									class="text-xs text-gray-900 whitespace-nowrap text-center p-1 mx-1 rounded {measureStatusColorMap(
-										measure.status
+										measure.status ?? '--'
 									)}"
-									>{measure.status}
+									>{measure.status ?? '--'}
 								</span></td
 							>
 						</tr>
