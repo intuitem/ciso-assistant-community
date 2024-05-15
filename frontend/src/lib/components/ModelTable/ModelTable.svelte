@@ -72,7 +72,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
 	}
 
 	// Row Keydown Handler
@@ -84,10 +84,10 @@
 	}
 
 	export let identifierField = 'id';
-
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-
 	export let URLModel: urlModel | undefined = undefined;
+	export let detailQueryParameter: string | undefined ;
+	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : "";
 
 	const user = $page.data.user;
 
@@ -133,7 +133,7 @@
 	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
 
-	const actionsURLModel = source.meta.urlmodel ?? URLModel;
+	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
 	const preventDelete = (row: TableSource) =>
 		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
 		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
@@ -272,7 +272,7 @@
                 deleteForm={deleteForm}
                 {model}
                 URLModel={actionsURLModel}
-                detailURL={`/${actionsURLModel}/${row.meta[identifierField]}`}
+                detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
                 editURL={!(row.meta.builtin || row.meta.urn) ? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}
