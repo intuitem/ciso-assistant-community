@@ -1,0 +1,60 @@
+{% extends 'core/base_pdf.html' %}
+{% block content %}
+{% load i18n core_extras %}
+
+<style>
+    table, th, td {
+        border: 1px solid black;
+      }
+</style>
+
+<main class="p-2 m-2 main">
+    <h1 class="flex justify-center">Action plan</h1>
+    <div class="bg-white p-2 m-2 space-x-3 flex flex-row justify-center">
+        <p class="font-semibold text-lg"> {% trans "Domain" %}: {{ compliance_assessment.project.folder }}</p>
+        <p class="font-semibold text-lg">/</p>
+        <p class="font-semibold text-lg"> {% trans "Project" %}: {{ compliance_assessment.project.name }}</p>
+        <p class="font-semibold text-lg">/</p>
+        <p class="font-semibold text-lg"> {% trans "Audit" %}: {{ compliance_assessment.name }} - {{ compliance_assessment.version }}</p>
+    </div>
+    <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated applied controls" %}: </p>
+    <p class="m-2 p-2">{% trans "Separated by status and sorted by eta" %}</p>
+    {% for status, applied_controls in context.items%}
+        {% for status_color, color in color_map.items %}
+            {% if status_color == status %}
+                <p class="flex p-2 m-2 text-lg font-semibold justify-center" style="background-color: {{color}}">{% trans status|title %}:</p>
+            {% endif %}
+        {% endfor %}
+        <div class="bg-white p-2 m-2 shadow overflow-hidden rounded-lg flex flex-row">  
+            <div class="flex w-full">
+                <table class="w-full p-2 mt-2">
+                    <thead>
+                        <tr class="uppercase">
+                            <th class="text-md p-2 text-center">{% trans "Name" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "Description" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "Category" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "ETA" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "Expiry date" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "Effort" %}</th>
+                            <th class="text-md p-2 text-center">{% trans "Requirements count" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for applied_control in applied_controls %}
+                        <tr>
+                            <td class="text-md p-2 text-center">{{ applied_control.name }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.description }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.category }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.eta }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.expiry_date }}</td>
+                            <td class="text-md p-2 text-center">{{ applied_control.effort }}</td>
+                            <td class="text-md p-2 text-center">{% get_requirements_count applied_control compliance_assessment %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+</main>
+{% endblock %}
