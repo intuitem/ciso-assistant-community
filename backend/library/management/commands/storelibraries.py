@@ -25,7 +25,7 @@ class Command(BaseCommand):
             library_files = [path]
         for fname in library_files:
             # logger.info("Begin library file storage", filename=fname)
-            library = StoredLibrary.store_library_file(fname)
+            library = StoredLibrary.store_library_file(fname, True)
             if library:
                 logger.info(
                     "Successfully stored library",
