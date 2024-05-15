@@ -9,6 +9,10 @@ export const LOCALE_MAP = {
 		name: 'french',
 		flag: '🇫🇷'
 	},
+	de: {
+		name: 'german',
+		flag: '🇩🇪'
+	},
 	ar: {
 		name: 'arabic',
 		flag: '🇸🇦'

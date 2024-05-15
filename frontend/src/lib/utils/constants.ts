@@ -39,7 +39,8 @@ export const URN_REGEX =
 
 export const LOCALE_DISPLAY_MAP = {
 	en: '🇬🇧 English',
-	fr: '🇫🇷 Français'
+	fr: '🇫🇷 Français',
+	de: '🇩🇪 Deutsch'
 };
 
 export const ISO_8601_REGEX =
