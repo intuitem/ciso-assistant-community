@@ -1226,7 +1226,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     applied_control
                 )
         return Response(response)
-    
+
     @action(detail=True, name="Get action plan PDF")
     def action_plan_pdf(self, request, pk):
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
@@ -1249,9 +1249,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments()
             )
-            applied_controls = AppliedControl.objects.filter(
+            applied_controls = (
+                AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
-                ).distinct().order_by("eta")
+                )
+                .distinct()
+                .order_by("eta")
+            )
             for applied_control in applied_controls:
                 context[applied_control.status].append(
                     applied_control

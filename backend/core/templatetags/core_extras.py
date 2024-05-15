@@ -16,11 +16,16 @@ def app_version():
 def app_build():
     return f"{BUILD} (dev)" if DEBUG else BUILD
 
+
 @register.simple_tag()
 def get_requirements_count(applied_control, compliance_assessment):
-    return RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment
-                    ).filter(applied_controls=applied_control).count()
+    return (
+        RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        )
+        .filter(applied_controls=applied_control)
+        .count()
+    )
 
 
 @register.filter("class")
