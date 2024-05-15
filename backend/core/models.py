@@ -149,9 +149,7 @@ class StoredLibrary(LibraryMixin):
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(
-            urn=urn,
-            locale=locale,
-            version=version
+            urn=urn, locale=locale, version=version
         ).exists()
 
         library_matches = [*StoredLibrary.objects.filter(urn=urn, locale=locale)]

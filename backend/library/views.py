@@ -63,17 +63,17 @@ class StoredLibraryViewSet(BaseModelViewSet):
         return Response(data)
 
     def content(self, request, pk):
-        try :
+        try:
             lib = StoredLibrary.objects.get(urn=pk)
-        except :
+        except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib.content)
 
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
-        try :
+        try:
             lib = StoredLibrary.objects.get(urn=pk)
-        except :
+        except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib.content)
 
@@ -251,9 +251,9 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"])
     def content(self, request, pk):
-        try :
+        try:
             lib = LoadedLibrary.objects.get(urn=pk)
-        except :
+        except:
             return Response("Library not found.", status=HTTP_404_NOT_FOUND)
         return Response(lib._objects)
 
@@ -261,7 +261,6 @@ class LoadedLibraryViewSet(viewsets.ModelViewSet):
     def tree(
         self, request, pk
     ):  # We must ensure that users that are not allowed to read the content of libraries can't have any access to them either from the /api/{URLModel/{library_urn}/tree view or the /api/{URLModel}/{library_urn} view.
-
         try:
             lib = LoadedLibrary.objects.get(urn=pk)
         except:
