@@ -326,7 +326,6 @@ class Migration(migrations.Migration):
                 ("builtin", models.BooleanField(default=False)),
                 ("objects_meta", models.JSONField()),
                 ("dependencies", models.JSONField(null=True)),
-                ("is_obsolete", models.BooleanField(default=False)),
                 ("is_loaded", models.BooleanField(default=False)),
                 ("hash_checksum", models.CharField(max_length=64)),
                 ("content", models.TextField()),

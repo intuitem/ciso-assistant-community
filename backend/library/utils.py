@@ -575,7 +575,7 @@ class LibraryImporter:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
                 # import_library_view(get_library(dependency))
                 dependency = StoredLibrary.objects.get(
-                    urn=dependency_urn, is_obsolete=False
+                    urn=dependency_urn
                 )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
                 error_msg = dependency.load()
                 if error_msg is not None:

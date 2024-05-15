@@ -40,7 +40,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
     # solve issue with URN containing dot, see https://stackoverflow.com/questions/27963899/django-rest-framework-using-dot-in-url
     lookup_value_regex = r"[\w.:-]+"
     model = StoredLibrary
-    queryset = StoredLibrary.objects.filter(is_obsolete=False)
+    queryset = StoredLibrary.objects.all()
 
     filterset_fields = ["urn", "locale", "version", "packager", "provider"]
     search_fields = ["name", "description", "urn"]
