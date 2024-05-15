@@ -35,9 +35,7 @@ class EndpointTestsUtils:
         """Get the object URL from the URN"""
         return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{urn}/"
 
-    def get_stored_library_content(
-        authenticated_client,urn: str
-    ) -> str :
+    def get_stored_library_content(authenticated_client, urn: str) -> str:
         """Return an URL to fetch the content of a stored library"""
         return f"{reverse(STORED_LIBRARIES_ENDPOINT)}{urn}/content/"
 
