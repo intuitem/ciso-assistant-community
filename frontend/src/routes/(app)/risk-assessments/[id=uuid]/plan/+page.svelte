@@ -18,8 +18,8 @@
 	const measureStatusColorMap = (treatment: string) => {
 		const map: Record<string, string> = {
 			'--': 'bg-gray-200',
-			'planned': 'bg-blue-200',
-			'inactive': 'bg-red-200',
+			planned: 'bg-blue-200',
+			inactive: 'bg-red-200',
 			active: 'bg-green-200'
 		};
 		if (treatment !== null) {

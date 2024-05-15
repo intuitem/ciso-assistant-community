@@ -1213,10 +1213,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 many=True,
             ).data
             for applied_control in applied_controls:
-                applied_control["requirements_count"] = RequirementAssessment.objects.filter(compliance_assessment=compliance_assessment_object).filter(applied_controls=applied_control["id"]).count()
+                applied_control["requirements_count"] = (
+                    RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment_object
+                    )
+                    .filter(applied_controls=applied_control["id"])
+                    .count()
+                )
                 response[applied_control["status"].lower()].append(
                     applied_control
-                ) if applied_control["status"] else response["none"].append(applied_control)
+                ) if applied_control["status"] else response["none"].append(
+                    applied_control
+                )
         return Response(response)
 
     def perform_create(self, serializer):
