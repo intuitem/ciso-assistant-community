@@ -1,5 +1,4 @@
 urn: urn:intuitem:risk:library:nist-ssdf-1.1
-builtin: true
 locale: en
 ref_id: nist-ssdf-1.1
 name: Secure Software Development Framework (SSDF)

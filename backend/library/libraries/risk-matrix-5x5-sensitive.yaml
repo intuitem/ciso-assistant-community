@@ -1,5 +1,4 @@
 urn: urn:intuitem:risk:library:risk-matrix-5x5-sensitive
-builtin: true
 locale: en
 ref_id: risk-matrix-5x5-sensitive
 name: 5x5 sensitive

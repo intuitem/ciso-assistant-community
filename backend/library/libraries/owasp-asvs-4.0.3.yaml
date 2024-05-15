@@ -1,5 +1,4 @@
 urn: urn:intuitem:risk:library:owasp-asvs-4.0.3
-builtin: true
 locale: en
 ref_id: OWASP-ASVS-4.0.3
 name: OWASP ASVS 4.0.3
