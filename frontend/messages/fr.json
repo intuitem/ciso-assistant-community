@@ -515,5 +515,10 @@
 	"selectedImplementationGroups": "Groupes d'implémentation sélectionnés",
 	"implementationGroupsDefinition": "Définition des groupes d'implémentation",
 	"threatRadarChart": "Radar des menaces",
-	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité."
+	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité.",
+	"actionPlan": "Plan d'action",
+	"noStatus": "Pas de statut",
+	"actionPlanHelpText": "Séparé par statut et trié par eta",
+	"requirementsCount": "Nombre d'exigences",
+	"asZIP": "en ZIP"
 }
