@@ -469,7 +469,6 @@ namespace ReferentialObjects {
     }
 
     class StoredLibrary {
-        +BooleanField is_obsolete
         +BooleanField is_loaded
         +CharField hash_checksum
         +TextField content

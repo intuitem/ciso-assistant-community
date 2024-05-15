@@ -110,7 +110,6 @@ class LibraryMixin(ReferentialObjectMixin):
 
 
 class StoredLibrary(LibraryMixin):
-    is_obsolete = models.BooleanField(default=False)
     is_loaded = models.BooleanField(default=False)
     hash_checksum = models.CharField(max_length=64)
     content = models.TextField()
@@ -151,19 +150,6 @@ class StoredLibrary(LibraryMixin):
         is_loaded = LoadedLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).exists()
-
-        library_matches = [*StoredLibrary.objects.filter(urn=urn, locale=locale)]
-        if any(library.version >= version for library in library_matches):
-            # The library isn't stored if it's obsolete due to be a too old version of itself.
-            err = "A library with the urn '{}', a locale '{}' with a superior superior or equal to {} is already stored in the database.".format(
-                urn, locale, version
-            )
-            logger.error("Error while loading library content", error=err)
-            raise ValueError(err)
-
-        for library in library_matches:
-            library.is_obsolete = True
-            library.save()  # If a user delete a library from the library store we must set the is_obsolete value of its most recent obsolete version to False.
 
         objects_meta = {
             key: len(value) for key, value in library_data["objects"].items()
