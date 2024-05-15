@@ -334,7 +334,8 @@ export function localItems(languageTag: string): LocalItems {
 		}),
 		attemptToRemoveOnlyAdminUserGroup: m.attemptToRemoveOnlyAdminUserGroup({
 			languageTag: languageTag
-		})
+		}),
+		actionPlan: m.actionPlan({ languageTag: languageTag }),
 	};
 	return LOCAL_ITEMS;
 }

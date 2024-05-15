@@ -194,7 +194,7 @@
 					>
 				{/if}
 			</div>
-			<a href="#" class="btn variant-filled-primary h-fit"
+			<a href={`${$page.url.pathname}/action-plan`} class="btn variant-filled-primary h-fit"
 					><i class="fa-solid fa-heart-pulse mr-2" />{m.actionPlan()}</a
 			>
 		</div>

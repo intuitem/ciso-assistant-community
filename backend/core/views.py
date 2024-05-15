@@ -1188,6 +1188,33 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         }
         return Response(implementation_group_choices)
 
+    @action(detail=True, methods=["get"], name="Get action plan data")
+    def action_plan(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=ComplianceAssessment,
+        )
+        if UUID(pk) in viewable_objects:
+            response = {"planned": dict(), "active": dict(), "inactive": dict(), "none": dict()}
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = AppliedControlReadSerializer(
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                ),
+                many=True,
+            ).data
+            for applied_control in applied_controls:
+                response[applied_control["status"].lower()].update(
+                    applied_control
+                ) if applied_control["status"] else response["none"].update(
+                    applied_control
+                )
+        return Response(response)
+
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment
