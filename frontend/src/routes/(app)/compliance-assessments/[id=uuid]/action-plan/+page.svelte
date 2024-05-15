@@ -107,6 +107,15 @@
 			>{data.compliance_assessment.name} - {data.compliance_assessment.version}</a
 		>
 	</p>
+	<p>/</p>
+	<p class="font-semibold text-lg">
+		{m.framework()}:
+		<a
+			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+			href="/frameworks/{data.compliance_assessment.framework.id}/"
+			>{data.compliance_assessment.framework.str}</a
+		>
+	</p>
 </div>
 <div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
 	<div>
