@@ -1196,7 +1196,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             object_type=ComplianceAssessment,
         )
         if UUID(pk) in viewable_objects:
-            response = {"planned": dict(), "active": dict(), "inactive": dict(), "none": dict()}
+            response = {
+                "planned": list(),
+                "active": list(),
+                "inactive": list(),
+                "none": list(),
+            }
             compliance_assessment_object = self.get_object()
             requirement_assessments_objects = (
                 compliance_assessment_object.get_requirement_assessments()
@@ -1204,15 +1209,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             applied_controls = AppliedControlReadSerializer(
                 AppliedControl.objects.filter(
                     requirement_assessments__in=requirement_assessments_objects
-                ),
+                ).distinct(),
                 many=True,
             ).data
             for applied_control in applied_controls:
-                response[applied_control["status"].lower()].update(
+                applied_control["requirements_count"] = RequirementAssessment.objects.filter(compliance_assessment=compliance_assessment_object).filter(applied_controls=applied_control["id"]).count()
+                response[applied_control["status"].lower()].append(
                     applied_control
-                ) if applied_control["status"] else response["none"].update(
-                    applied_control
-                )
+                ) if applied_control["status"] else response["none"].append(applied_control)
         return Response(response)
 
     def perform_create(self, serializer):

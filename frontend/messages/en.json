@@ -516,5 +516,8 @@
 	"implementationGroupsDefinition": "Implementation groups definition",
 	"threatRadarChart": "Threat radar",
 	"noThreatsMapped": "No threats mapped. Consider attaching threats to your risk scenarios for a better overview.",
-	"actionPlan": "Action plan"
+	"actionPlan": "Action plan",
+	"noStatus": "No status",
+	"actionPlanHelpText": "Separated by status and sorted by eta",
+	"requirementsCount": "Requirements count"
 }
