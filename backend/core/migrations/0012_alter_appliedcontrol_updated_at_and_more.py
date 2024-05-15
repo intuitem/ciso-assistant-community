@@ -74,7 +74,7 @@ def adapt_libraries(apps, schema_editor):
             "frameworks": library.frameworks.count(),
             "threats": library.threats.count(),
             "reference_controls": library.reference_controls.count(),
-            "risk_matrix": library.risk_matrices.count()
+            "risk_matrix": library.risk_matrices.count(),
         }
         library.save()
 
