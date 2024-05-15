@@ -60,11 +60,14 @@ class TestLibrariesAuthenticated:
 
         # Uses the API endpoint to get library details with the admin client
         lib_detail_response = test.admin_client.get(
-            EndpointTestsUtils.get_referential_object_url_from_urn(
-                test.client, TEST_FRAMEWORK_URN, StoredLibrary
+            EndpointTestsUtils.get_stored_library_content(
+                test.client, TEST_FRAMEWORK_URN
             )
-        ).json()["content"]
-        lib_detail_response = json.loads(lib_detail_response)["framework"]
+        )
+        lib_detail_response = lib_detail_response.content
+        lib_detail_response = json.loads(lib_detail_response)
+        lib_detail_response = json.loads(lib_detail_response)
+        lib_detail_response = lib_detail_response["framework"]
 
         # Asserts that the library is not already loaded
         assert (
@@ -126,11 +129,14 @@ class TestLibrariesAuthenticated:
 
         # Uses the API endpoint to get library details with the admin client
         lib_detail_response = test.admin_client.get(
-            EndpointTestsUtils.get_referential_object_url_from_urn(
-                test.client, TEST_RISK_MATRIX_URN, StoredLibrary
+            EndpointTestsUtils.get_stored_library_content(
+                test.client, TEST_RISK_MATRIX_URN
             )
-        ).json()["content"]
-        lib_detail_response = json.loads(lib_detail_response)["risk_matrix"][0]
+        )
+        lib_detail_response = lib_detail_response.content
+        lib_detail_response = json.loads(lib_detail_response)
+        lib_detail_response = json.loads(lib_detail_response)
+        lib_detail_response = lib_detail_response["risk_matrix"][0]
 
         # Asserts that the library is not already loaded
         assert (
