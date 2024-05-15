@@ -154,7 +154,7 @@ class StoredLibrary(LibraryMixin):
         ).exists()
 
         objects_meta = {
-            key: len(value) for key, value in library_data["objects"].items()
+            key: (1 if key == "framework" else len(value)) for key, value in library_data["objects"].items()
         }
 
         dependencies = library_data.get(
