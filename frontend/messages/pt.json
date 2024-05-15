@@ -515,5 +515,10 @@
 	"selectedImplementationGroups": "Grupos de implementação selecionados",
 	"implementationGroupsDefinition": "Definição de grupos de implementação",
 	"threatRadarChart": "Radar de ameaças",
-	"noThreatsMapped": "Nenhuma ameaça mapeada. Considere anexar ameaças aos seus cenários de risco para ter uma visão geral melhor."
+	"noThreatsMapped": "Nenhuma ameaça mapeada. Considere anexar ameaças aos seus cenários de risco para ter uma visão geral melhor.",
+	"actionPlan": "Plano de ação",
+	"noStatus": "Sem status",
+	"actionPlanHelpText": "Separados por status e classificados por eta",
+	"requirementsCount": "Contagem de requisitos",
+	"asZIP": "em ZIP"
 }
