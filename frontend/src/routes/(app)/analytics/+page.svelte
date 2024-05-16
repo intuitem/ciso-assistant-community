@@ -44,9 +44,17 @@
 			category: 'category',
 			folder: 'domain',
 			ranking_score: 'rankingScore',
-			eta: 'eta'
+			eta: 'eta',
+			state: 'state'
 		},
-		body: tableSourceMapper(data.measures, ['name', 'category', 'folder', 'ranking_score', 'eta']),
+		body: tableSourceMapper(data.measures, [
+			'name',
+			'category',
+			'folder',
+			'ranking_score',
+			'eta',
+			'state'
+		]),
 		meta: data.measures
 	};
 
@@ -56,25 +64,33 @@
 			category: 'category',
 			folder: 'domain',
 			eta: 'eta',
-			expiry_date: 'expiryDate'
+			expiry_date: 'expiryDate',
+			state: 'state'
 		},
 		body: tableSourceMapper(data.measures_to_review, [
 			'name',
 			'category',
 			'folder',
 			'eta',
-			'expiry_date'
+			'expiry_date',
+			'state'
 		]),
-		meta: data.measures
+		meta: data.measures_to_review
 	};
 
 	const riskAcceptanceWatchlistTable: TableSource = {
 		head: {
 			name: 'name',
 			risk_scenarios: 'riskScenarios',
-			expiry_date: 'expiryDate'
+			expiry_date: 'expiryDate',
+			state: 'state'
 		},
-		body: tableSourceMapper(data.acceptances_to_review, ['name', 'risk_scenarios', 'expiry_date']),
+		body: tableSourceMapper(data.acceptances_to_review, [
+			'name',
+			'risk_scenarios',
+			'expiry_date',
+			'state'
+		]),
 		meta: data.acceptances_to_review
 	};
 
