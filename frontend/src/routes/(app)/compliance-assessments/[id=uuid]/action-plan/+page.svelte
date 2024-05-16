@@ -126,10 +126,34 @@
 	</div>
 	<div class="">
 		<TabGroup>
-			<Tab bind:group={tabSet} class="border-x border-t border-gray-300" active="bg-blue-200 border-b-2 border-blue-500" name="planned" value={0}>{m.planned()}</Tab>
-			<Tab bind:group={tabSet} class="border-x border-t border-gray-300" active="bg-green-200 border-b-2 border-green-500" name="active" value={1}>{m.active()}</Tab>
-			<Tab bind:group={tabSet} class="border-x border-t border-gray-300" active="bg-red-300 border-b-2 border-red-600" name="inactive" value={2}>{m.inactive()}</Tab>
-			<Tab bind:group={tabSet} class="border-x border-t border-gray-300" active="bg-gray-300 border-b-2 border-gray-600" name="noStatus" value={3}>{m.noStatus()}</Tab>
+			<Tab
+				bind:group={tabSet}
+				class="border-x border-t border-gray-300"
+				active="bg-blue-200 border-b-2 border-blue-500"
+				name="planned"
+				value={0}>{m.planned()}</Tab
+			>
+			<Tab
+				bind:group={tabSet}
+				class="border-x border-t border-gray-300"
+				active="bg-green-200 border-b-2 border-green-500"
+				name="active"
+				value={1}>{m.active()}</Tab
+			>
+			<Tab
+				bind:group={tabSet}
+				class="border-x border-t border-gray-300"
+				active="bg-red-300 border-b-2 border-red-600"
+				name="inactive"
+				value={2}>{m.inactive()}</Tab
+			>
+			<Tab
+				bind:group={tabSet}
+				class="border-x border-t border-gray-300"
+				active="bg-gray-300 border-b-2 border-gray-600"
+				name="noStatus"
+				value={3}>{m.noStatus()}</Tab
+			>
 			<svelte:fragment slot="panel">
 				<div class="p-2">
 					{#if tabSet === 0}
