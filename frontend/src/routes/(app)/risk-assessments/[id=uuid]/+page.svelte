@@ -270,6 +270,7 @@
 				deleteForm={data.scenarioDeleteForm}
 				model={getModelInfo('risk-scenarios')}
 				URLModel="risk-scenarios"
+				search={false}
 			>
 				<button
 					slot="addButton"

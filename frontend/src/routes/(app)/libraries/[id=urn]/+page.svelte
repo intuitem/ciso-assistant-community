@@ -68,7 +68,7 @@
 		return riskMatricesDumps;
 	}
 
-	$: displayImportButton = data.library.id === undefined;
+	$: displayImportButton = !(data.library.is_loaded ?? true);
 </script>
 
 <div class="card bg-white p-4 shadow space-y-4">

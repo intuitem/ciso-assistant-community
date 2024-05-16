@@ -73,7 +73,7 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		/** @event {rowMetaData} selected - Fires when a table row is clicked. */
 		if (!rowMetaData[identifierField] || !URLModel) return;
-		goto(`/${URLModel}/${rowMetaData[identifierField]}`);
+		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`);
 	}
 
 	// Row Keydown Handler
@@ -85,11 +85,10 @@
 	}
 
 	export let identifierField = 'id';
-
 	export let deleteForm: SuperValidated<AnyZodObject> | undefined = undefined;
-
 	export let URLModel: urlModel | undefined = undefined;
-	$: model = URLModel ? URL_MODEL_MAP[URLModel] : undefined;
+	export let detailQueryParameter: string | undefined;
+	detailQueryParameter = detailQueryParameter ? `?${detailQueryParameter}` : '';
 
 	const user = $page.data.user;
 
@@ -129,13 +128,17 @@
 	});
 
 	$: field_component_map = FIELD_COMPONENT_MAP[URLModel] ?? {};
-	// const field_component_map = FIELD_MAP;
 
 	const tagMap = FIELD_COLORED_TAG_MAP[URLModel] ?? {};
 	const taggedKeys = new Set(Object.keys(tagMap));
 
-	// tagged_keys tag_map[key][value]
+	$: model = source.meta?.urlmodel ? URL_MODEL_MAP[source.meta.urlmodel] : URL_MODEL_MAP[URLModel];
 	$: source, handler.setRows(data);
+
+	const actionsURLModel = source.meta?.urlmodel ?? URLModel;
+	const preventDelete = (row: TableSource) =>
+		(row.meta.builtin && actionsURLModel !== 'loaded-libraries') ||
+		(Object.hasOwn(row.meta, 'reference_count') && row.meta.reference_count > 0);
 </script>
 
 <div class="table-container {classesBase}">
@@ -272,16 +275,17 @@
             <slot name="actions" meta={row.meta}>
             {#if row.meta[identifierField]}
               {@const actionsComponent = field_component_map['actions']}
+              {@const actionsURLModel = source.meta.urlmodel ?? URLModel}
               <TableRowActions
-                deleteForm={!row.meta.builtin ? deleteForm : undefined}
-                model={URL_MODEL_MAP[URLModel]}
-                {URLModel}
-                detailURL={`/${URLModel}/${row.meta[identifierField]}`}
-                editURL={!(row.meta.builtin || row.meta.urn) ? `/${URLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
+                deleteForm={deleteForm}
+                {model}
+                URLModel={actionsURLModel}
+                detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
+                editURL={!(row.meta.builtin || row.meta.urn) ? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${$page.url.pathname}` : undefined}
                 {row}
                 hasBody={$$slots.actionsBody}
                 {identifierField}
-                preventDelete={(row.meta.builtin || (row.meta.urn ?? false)) && !(row.meta.allowDeleteLibrary ?? false)}
+                preventDelete={preventDelete(row)}
               >
                 <svelte:fragment slot="head">
                   {#if $$slots.actionsHead}

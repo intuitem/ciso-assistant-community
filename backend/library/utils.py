@@ -13,7 +13,8 @@ import yaml
 from ciso_assistant import settings
 from core.models import (
     Framework,
-    Library,
+    StoredLibrary,
+    LoadedLibrary,
     RequirementNode,
     RiskMatrix,
     ReferenceControl,
@@ -79,7 +80,9 @@ def get_available_libraries():
                 libs = list(yaml.load_all(file, Loader=yaml.CSafeLoader))
             AVAILABLE_LIBRARIES[(fname, os.path.getmtime(fname))] = libs
         for _lib in libs:
-            if (lib := Library.objects.filter(urn=_lib["urn"]).first()) is not None:
+            if (
+                lib := LoadedLibrary.objects.filter(urn=_lib["urn"]).first()
+            ) is not None:
                 _lib["id"] = lib.id
                 _lib["reference_count"] = lib.reference_count
             libraries.append(_lib)
@@ -115,7 +118,7 @@ def get_library(urn: str) -> dict | None:
 
     # First, try to fetch the library from the database.dd
     try:
-        lib = Library.objects.get(urn=urn)
+        lib = LoadedLibrary.objects.get(urn=urn)
         return {
             "id": lib.id,
             "urn": lib.urn,
@@ -127,7 +130,7 @@ def get_library(urn: str) -> dict | None:
             "reference_count": lib.reference_count,
             "objects": lib._objects,
         }
-    except Library.DoesNotExist:
+    except LoadedLibrary.DoesNotExist:
         # Construct the path to the YAML file from the urn.
         filename = urn.split(":")[-1]
         libraries_path = settings.BASE_DIR / "library/libraries"
@@ -286,7 +289,7 @@ class FrameworkImporter:
             ) is not None:
                 return requirement_node_import_error
 
-    def import_framework(self, library_object: Library):
+    def import_framework(self, library_object: LoadedLibrary):
         min_score = self.framework_data.get("min_score", 0)
         max_score = self.framework_data.get("max_score", 100)
 
@@ -333,7 +336,7 @@ class ThreatImporter:
         if missing_fields := self.REQUIRED_FIELDS - set(self.threat_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
-    def import_threat(self, library_object: Library):
+    def import_threat(self, library_object: LoadedLibrary):
         Threat.objects.create(
             library=library_object,
             urn=self.threat_data.get("urn"),
@@ -367,7 +370,7 @@ class ReferenceControlImporter:
                     category, ", ".join(ReferenceControlImporter.CATEGORIES)
                 )
 
-    def import_reference_control(self, library_object: Library):
+    def import_reference_control(self, library_object: LoadedLibrary):
         ReferenceControl.objects.create(
             library=library_object,
             urn=self.reference_control_data.get("urn"),
@@ -403,14 +406,13 @@ class RiskMatrixImporter:
         if missing_fields := self.REQUIRED_FIELDS - set(self.risk_matrix_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
 
-    def import_risk_matrix(self, library_object: Library):
+    def import_risk_matrix(self, library_object: LoadedLibrary):
         matrix_data = {
             key: value
             for key, value in self.risk_matrix_data.items()
             if key in self.MATRIX_FIELDS
         }
-
-        RiskMatrix.objects.create(
+        matrix = RiskMatrix.objects.create(
             library=library_object,
             folder=Folder.get_root_folder(),
             name=self.risk_matrix_data.get("name"),
@@ -424,14 +426,18 @@ class RiskMatrixImporter:
             default_locale=library_object.default_locale,  # Change this in the future ?
             is_published=True,
         )
+        logger.info("Risk matrix created", matrix=matrix)
+        return matrix
 
 
 class LibraryImporter:
+    # The word "import" must be replaced by "load" in all classes/methods/variables declared in this file.
+
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = ["threats", "reference_controls", "risk_matrix", "framework"]
 
-    def __init__(self, data: dict):
-        self._library_data = data
+    def __init__(self, library: StoredLibrary):
+        self._library = library
         self._framework_importer = None
         self._threats = []
         self._reference_controls = []
@@ -515,18 +521,18 @@ class LibraryImporter:
         return self._framework_importer.init()
 
     def init(self) -> Union[str, None]:
-        missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
+        """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
         if missing_fields:
             return "The following fields are missing in the library: {}".format(
                 ", ".join(missing_fields)
-            )
+            )"""
 
-        library_objects = self._library_data["objects"]
+        library_objects = json.loads(self._library.content)
 
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
         ):
-            return "The libary 'objects' field data must contain at least one of the following fields : {}".format(
+            return "The library 'objects' field data must contain at least one of the following fields : {}".format(
                 ", ".join(self.OBJECT_FIELDS)
             )
 
@@ -562,31 +568,48 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self):
         """Check and import library dependencies."""
-        dependencies = self._library_data.get("dependencies", [])
-        for dependency in dependencies:
-            if not Library.objects.filter(urn=dependency).exists():
-                import_library_view(get_library(dependency))
+
+        if not self._library.dependencies:
+            return None
+        for dependency_urn in self._library.dependencies:
+            if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
+                # import_library_view(get_library(dependency))
+                dependency = StoredLibrary.objects.get(
+                    urn=dependency_urn
+                )  # We only fetch by URN without thinking about what locale, that may be a problem in the future.
+                error_msg = dependency.load()
+                if error_msg is not None:
+                    return error_msg
 
     def create_or_update_library(self):
         """Create or update the library object."""
-        _urn = self._library_data["urn"]
-        _locale = self._library_data["locale"]
-        _default_locale = not Library.objects.filter(urn=_urn).exists()
+        _urn = self._library.urn
+        _locale = self._library.locale
+        _default_locale = not LoadedLibrary.objects.filter(urn=_urn).exists()
 
-        library_object, _created = Library.objects.update_or_create(
+        logger.info(
+            "Loading library",
+            urn=_urn,
+            locale=_locale,
+            default_locale=_default_locale,
+            library=self._library,
+        )
+        library_object, _created = LoadedLibrary.objects.update_or_create(
             defaults={
-                "ref_id": self._library_data["ref_id"],
-                "name": self._library_data.get("name"),
-                "description": self._library_data.get("description", None),
+                "ref_id": self._library.ref_id,
+                "name": self._library.name,
+                "description": self._library.description,
                 "urn": _urn,
                 "locale": _locale,
                 "default_locale": _default_locale,
-                "version": self._library_data.get("version", None),
-                "provider": self._library_data.get("provider", None),
-                "packager": self._library_data.get("packager", None),
-                "copyright": self._library_data.get("copyright", None),
-                "folder": Folder.get_root_folder(),  # TODO: make this configurable
+                "version": self._library.version,
+                "provider": self._library.provider,
+                "packager": self._library.packager,
+                "copyright": self._library.copyright,
+                "folder": Folder.get_root_folder(),  # TODO: make this configurable,
                 "is_published": True,
+                "builtin": self._library.builtin,
+                "objects_meta": self._library.objects_meta,
             },
             urn=_urn,
             locale=_locale,
@@ -611,16 +634,19 @@ class LibraryImporter:
     def _import_library(self):
         library_object = self.create_or_update_library()
         self.import_objects(library_object)
-        library_object.dependencies.set(
-            Library.objects.filter(urn__in=self._library_data.get("dependencies", []))
-        )
+        if dependencies := self._library.dependencies:
+            library_object.dependencies.set(
+                LoadedLibrary.objects.filter(urn__in=dependencies)
+            )
 
     def import_library(self):
         """Main method to import a library."""
         if (error_message := self.init()) is not None:
-            return error_message
+            return error_message  # This error check should be done when storing the Library but no after.
 
-        self.check_and_import_dependencies()
+        error_msg = self.check_and_import_dependencies()
+        if error_msg is not None:
+            return error_msg
 
         for _ in range(10):
             try:
@@ -632,8 +658,7 @@ class LibraryImporter:
                 else:
                     raise e
             except Exception as e:
-                # TODO: Switch to proper logging
-                print(f"Library import exception: {e}")
+                logger.error("Library import error", error=e, library=self._library)
                 raise e
 
 
