@@ -86,18 +86,18 @@ ws2.append(["ref_id", "name", "description"])
 ws2.append(
     [
         "IG1",
-        "Essential Cyber Hygiene",
+        "IG1",
         "Minimum standard of information security for all enterprises.",
     ]
 )
 ws2.append(
     [
         "IG2",
-        "",
+        "IG2",
         "For enterprises managing IT infrastructure of multiple departments with differing risk profiles.",
     ]
 )
-ws2.append(["IG3", "", "To secure sensitive and confidential data."])
+ws2.append(["IG3", "IG3", "To secure sensitive and confidential data."])
 
 print("generate ", output_file_name)
 wb_output.save(output_file_name)
