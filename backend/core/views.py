@@ -1208,6 +1208,92 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         }
         return Response(implementation_group_choices)
 
+    @action(detail=True, methods=["get"], name="Get action plan data")
+    def action_plan(self, request, pk):
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=ComplianceAssessment,
+        )
+        if UUID(pk) in viewable_objects:
+            response = {
+                "planned": list(),
+                "active": list(),
+                "inactive": list(),
+                "none": list(),
+            }
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = AppliedControlReadSerializer(
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                ).distinct(),
+                many=True,
+            ).data
+            for applied_control in applied_controls:
+                applied_control["requirements_count"] = (
+                    RequirementAssessment.objects.filter(
+                        compliance_assessment=compliance_assessment_object
+                    )
+                    .filter(applied_controls=applied_control["id"])
+                    .count()
+                )
+                response[applied_control["status"].lower()].append(
+                    applied_control
+                ) if applied_control["status"] else response["none"].append(
+                    applied_control
+                )
+        return Response(response)
+
+    @action(detail=True, name="Get action plan PDF")
+    def action_plan_pdf(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+        if UUID(pk) in object_ids_view:
+            context = {
+                "planned": list(),
+                "active": list(),
+                "inactive": list(),
+                "no status": list(),
+            }
+            color_map = {
+                "planned": "#93c5fd",
+                "active": "#86efac",
+                "inactive": "#fca5a5",
+                "no status": "#e5e7eb",
+            }
+            compliance_assessment_object = self.get_object()
+            requirement_assessments_objects = (
+                compliance_assessment_object.get_requirement_assessments()
+            )
+            applied_controls = (
+                AppliedControl.objects.filter(
+                    requirement_assessments__in=requirement_assessments_objects
+                )
+                .distinct()
+                .order_by("eta")
+            )
+            for applied_control in applied_controls:
+                context[applied_control.status].append(
+                    applied_control
+                ) if applied_control.status else context["no status"].append(
+                    applied_control
+                )
+            data = {
+                "color_map": color_map,
+                "context": context,
+                "compliance_assessment": compliance_assessment_object,
+            }
+            html = render_to_string("core/action_plan_pdf.html", data)
+            pdf_file = HTML(string=html).write_pdf()
+            response = HttpResponse(pdf_file, content_type="application/pdf")
+            return response
+        else:
+            return Response({"error": "Permission denied"})
+
     def perform_create(self, serializer):
         """
         Create RequirementAssessment objects for the newly created ComplianceAssessment

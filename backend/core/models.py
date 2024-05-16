@@ -1430,6 +1430,9 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
+    def get_requirement_assessments(self):
+        return RequirementAssessment.objects.filter(compliance_assessment=self)
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:

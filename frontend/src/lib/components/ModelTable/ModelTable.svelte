@@ -36,6 +36,7 @@
 	export let pagination = true;
 	export let numberRowsPerPage = 10;
 	export let thFiler = false;
+	export let tags = true;
 
 	export let orderBy: { identifier: string; direction: 'asc' | 'desc' } | undefined = undefined;
 
@@ -206,7 +207,7 @@
 								{@const tagList = Array.isArray(_tagList) ? _tagList : [_tagList]}
 								{#each tagList as tag}
 									{@const tagData = tag.values[meta[tag.key]]}
-									{#if tagData}
+									{#if tagData && tags}
 										{@const {text, cssClasses} = tagData}
 										<span class={cssClasses}>
 											{localItems(languageTag())[text]}
@@ -245,7 +246,13 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">
+					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+						{localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+					{:else}
+						{value.name ?? value.str ?? '-'}
+					{/if}
+				</p>
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
