@@ -55,8 +55,6 @@ jobs:
         run: |
           npm install
           npm ci
-      - name: Install Playwright Browsers
-        run: npm ci
       - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
         run: npx playwright install --with-deps ${{ matrix.playwright-browser }}
