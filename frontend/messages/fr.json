@@ -164,8 +164,8 @@
 	"currentRisk": "Risque courant",
 	"residualRisk": "Risque résiduel",
 	"planned": "Planifié",
-	"active": "Active",
-	"inactive": "Inactive",
+	"active": "Actif",
+	"inactive": "Inactif",
 	"watchlist": "Liste de surveillance",
 	"watchlistDescription": "Objets qui ont expiré ou expireront dans les 30 prochains jours",
 	"measuresToReview": "Mesures à revoir",
@@ -517,5 +517,12 @@
 	"selectedImplementationGroups": "Groupes d'implémentation sélectionnés",
 	"implementationGroupsDefinition": "Définition des groupes d'implémentation",
 	"threatRadarChart": "Radar des menaces",
-	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité."
+	"noThreatsMapped": "Aucune menace n'a été attachée. Pensez à lier les menaces à vos scénarios de risque pour une meilleure visibilité.",
+	"actionPlan": "Plan d'action",
+	"noStatus": "Pas de statut",
+	"actionPlanHelpText": "Séparé par statut et trié par eta",
+	"matchingRequirements": "Exigences associées",
+	"asZIP": "en ZIP",
+	"incoming": "En approche",
+	"outdated": "Dépassé"
 }

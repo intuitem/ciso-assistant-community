@@ -161,7 +161,9 @@
 	<div>
 		<div class="card bg-white p-4 m-4 shadow flex space-x-2 relative">
 			<div class="absolute right-2 top-2 py-2 px-4">
-				<a href="/risk-assessments/{risk_assessment.id}/plan" class="btn variant-filled-primary"
+				<a
+					href="/risk-assessments/{risk_assessment.id}/remediation-plan"
+					class="btn variant-filled-primary"
 					><i class="fa-solid fa-heart-pulse mr-2" />{m.remediationPlan()}</a
 				>
 				<button class="btn variant-filled-primary" use:popup={popupDownload}
@@ -183,11 +185,11 @@
 					>
 					<p class="block px-4 py-2 text-sm text-gray-800">{m.treatmentPlan()}</p>
 					<a
-						href="/risk-assessments/{risk_assessment.id}/plan/export/pdf"
+						href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/pdf"
 						class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
 					>
 					<a
-						href="/risk-assessments/{risk_assessment.id}/plan/export/csv"
+						href="/risk-assessments/{risk_assessment.id}/remediation-plan/export/csv"
 						class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 						>... {m.asCSV()}</a
 					>
