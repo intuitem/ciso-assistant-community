@@ -8,9 +8,11 @@ import pytest
 
 @pytest.fixture
 def risk_matrix_fixture():
-    import_library_view(
-        get_library("urn:intuitem:risk:library:critical_risk_matrix_5x5")
-    )
+    library = StoredLibrary.objects.filter(
+        urn="urn:intuitem:risk:library:critical_risk_matrix_5x5"
+    ).last()
+    assert library is not None
+    library.load()
 
 
 @pytest.mark.django_db
