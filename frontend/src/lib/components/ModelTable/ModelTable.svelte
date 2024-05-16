@@ -243,7 +243,13 @@
                     {value.str ?? '-'}
                   {/if}
                 {:else if value && value.hexcolor}
-                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">{value.name ?? value.str ?? '-'}</p>
+                  <p class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap" style="background-color: {value.hexcolor}">
+					{#if localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+						{localItems(languageTag())[toCamelCase(value.name ?? value.str ?? '-')]}
+					{:else}
+						{value.name ?? value.str ?? '-'}
+					{/if}
+				</p>
 				{:else if ISO_8601_REGEX.test(value)}
 									{formatDateOrDateTime(value, languageTag())}
                 {:else}
