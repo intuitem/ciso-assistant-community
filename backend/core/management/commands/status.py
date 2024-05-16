@@ -9,7 +9,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         nb_users = User.objects.all().count()
         nb_first_login = User.objects.filter(first_login=True).count()
-        nb_libraries = Library.objects.all().count()
+        nb_libraries = LoadedLibrary.objects.all().count()
         nb_domains = Folder.objects.filter(content_type="DO").count()
         nb_projects = Project.objects.all().count()
         nb_assets = Asset.objects.all().count()

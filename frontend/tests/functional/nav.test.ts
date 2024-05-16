@@ -60,10 +60,13 @@ test('sidebar navigation tests', async ({ logedPage, analyticsPage, sideBar, pag
 
 	await test.step('translation panel is working properly', async () => {
 		await analyticsPage.goto();
-		for await (const languageTag of availableLanguageTags.toSorted((a, b) => {
-			// English is always tested at last to ensure a clean state at the end
-			return a === 'en' ? 1 : b === 'en' ? -1 : a.localeCompare(b);
-		})) {
+		const locales = [...availableLanguageTags];
+		const index = locales.indexOf('en');
+		if (index !== -1) {
+			locales.splice(index, 1);
+			locales.push('en');
+		}
+		for (const languageTag of locales) {
 			await sideBar.moreButton.click();
 			await expect(sideBar.morePanel).not.toHaveAttribute('inert');
 			await expect(sideBar.languageSelect).toBeVisible();
