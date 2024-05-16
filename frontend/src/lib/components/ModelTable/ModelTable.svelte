@@ -108,6 +108,7 @@
 	import Th from './Th.svelte';
 	import ThFilter from './ThFilter.svelte';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+
 	$: data = source.body.map((item: Record<string, any>, index: number) => {
 		return { ...item, meta: source.meta ? { ...source.meta[index] } : undefined };
 	});
@@ -183,7 +184,7 @@
 		<!-- Body -->
 		<tbody class="table-body {regionBody}">
 			{#each $rows as row, rowIndex}
-				{@const meta = source.meta ? source.meta[rowIndex] : source.body[rowIndex]}
+				{@const meta = row.meta ? row.meta : row}
 				<!-- Row -->
 				<!-- prettier-ignore -->
 				<tr
