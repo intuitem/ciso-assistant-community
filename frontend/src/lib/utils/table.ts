@@ -96,5 +96,13 @@ export const listViewFields = {
 	libraries: {
 		head: ['ref', 'name', 'description', 'language', 'overview'],
 		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+	},
+	'stored-libraries': {
+		head: ['ref', 'name', 'description', 'language', 'overview'],
+		body: ['ref_id', 'name', 'description', 'locale', 'overview']
+	},
+	'loaded-libraries': {
+		head: ['ref', 'name', 'description', 'language', 'overview'],
+		body: ['ref_id', 'name', 'description', 'locale', 'overview']
 	}
 };

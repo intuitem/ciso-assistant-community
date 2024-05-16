@@ -72,7 +72,7 @@ export default {
 				'view_riskmatrix',
 				'view_requirementnode',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -96,7 +96,7 @@ export default {
 				'view_requirementnode',
 				'view_evidence',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -156,7 +156,7 @@ export default {
 				'delete_evidence',
 				'view_requirementnode',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		},
@@ -181,7 +181,7 @@ export default {
 				'view_requirementnode',
 				'view_evidence',
 				'view_framework',
-				'view_library',
+				'view_loadedlibrary',
 				'view_user'
 			]
 		}

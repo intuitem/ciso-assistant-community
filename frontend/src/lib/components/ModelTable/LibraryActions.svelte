@@ -24,7 +24,8 @@
 	}
 </script>
 
-{#if !library.id}{#if loading.form && loading.library === library.urn}
+{#if Object.hasOwn(library, 'is_loaded') && !library.is_loaded}
+	{#if loading.form && loading.library === library.urn}
 		<div class="flex items-center cursor-progress" role="status">
 			<svg
 				aria-hidden="true"
