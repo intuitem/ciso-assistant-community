@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import * as m from '$paraglide/messages.js';
+	import { breadcrumbObject } from '$lib/utils/stores';
 
 	export let data;
+
+	breadcrumbObject.set(data.risk_assessment);
 
 	const scenarioTreatmentColorMap = (status: string) => {
 		const map: Record<string, string> = {

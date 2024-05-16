@@ -3,8 +3,11 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { Tab, TabGroup, tableSourceMapper } from '@skeletonlabs/skeleton';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { breadcrumbObject } from '$lib/utils/stores';
 
 	export let data;
+
+	breadcrumbObject.set(data.compliance_assessment);
 
 	let tabSet = 0;
 
