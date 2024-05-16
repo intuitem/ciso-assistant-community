@@ -1,33 +1,34 @@
-import { test, expect } from '../../utils/test-utils.js';
+import { test, expect, type Locator } from '../../utils/test-utils.js';
 
 test.describe.configure({ mode: 'serial' });
-test('every libraries can be loaded', async ({ logedPage, librariesPage, page }) => {
+test('every library can be loaded', async ({ logedPage, librariesPage, page }) => {
 	test.slow();
 	await librariesPage.goto();
 	await librariesPage.hasUrl();
 
+	const libraries: Locator[] = await page.locator('tbody tr td:nth-child(1)').all();
+	const libraryNames: string[] = await Promise.all(
+		libraries.map(async (library) => await library.innerText())
+	);
+
 	let previousRemainingLibrary = '';
-	let nextRemainingLibrary = await page.locator('tbody tr td:nth-child(1)').first()?.innerText();
-	while (nextRemainingLibrary) {
+	let nextRemainingLibrary = libraryNames[0];
+	for (let i = 1; i < libraryNames.length; i++) {
 		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
 
 		await librariesPage.tab('Libraries store').click();
 		expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
 
 		previousRemainingLibrary = nextRemainingLibrary;
-		if ((await page.locator('tbody tr td:nth-child(1)').count()) !== 0) {
-			nextRemainingLibrary = await page.locator('tbody tr td:nth-child(1)').first()?.innerText();
-		} else {
-			break;
-		}
+		nextRemainingLibrary = libraryNames[i];
 		expect(
 			previousRemainingLibrary,
 			'An error occured while importing library: ' + previousRemainingLibrary
-		).toEqual(nextRemainingLibrary);
+		).not.toEqual(nextRemainingLibrary);
 	}
 });
 
-test('every libraries can be deleted', async ({ logedPage, librariesPage, page }) => {
+test('every library can be deleted', async ({ logedPage, librariesPage, page }) => {
 	test.slow();
 	test.skip(
 		true,
