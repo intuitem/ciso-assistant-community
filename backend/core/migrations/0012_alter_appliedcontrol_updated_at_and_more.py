@@ -188,6 +188,11 @@ class Migration(migrations.Migration):
             name="objects_meta",
             field=models.JSONField(default=dict),
         ),
+        migrations.AlterField(
+            model_name="loadedlibrary",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+        ),
         migrations.AlterModelOptions(
             name="loadedlibrary",
             options={
@@ -324,7 +329,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("builtin", models.BooleanField(default=False)),
-                ("objects_meta", models.JSONField()),
+                ("objects_meta", models.JSONField(default=dict)),
                 ("dependencies", models.JSONField(null=True)),
                 ("is_loaded", models.BooleanField(default=False)),
                 ("hash_checksum", models.CharField(max_length=64)),
