@@ -20,7 +20,7 @@
         <p class="font-semibold text-lg"> {% trans "Framework" %}: {{ compliance_assessment.framework }}</p>
     </div>
     <p class="p-2 m-2 text-lg font-semibold"> {% trans "Associated applied controls" %}: </p>
-    <p class="m-2 p-2">{% trans "Separated by status and sorted by eta" %}</p>
+    <p class="m-2 p-2" style="color: #374151">{% trans "Separated by status and sorted by eta" %}</p>
     {% for status, applied_controls in context.items%}
         {% for status_color, color in color_map.items %}
             {% if status_color == status %}
