@@ -520,5 +520,7 @@
 	"noStatus": "Pas de statut",
 	"actionPlanHelpText": "Séparé par statut et trié par eta",
 	"matchingRequirements": "Exigences associées",
-	"asZIP": "en ZIP"
+	"asZIP": "en ZIP",
+	"incoming": "En approche",
+	"outdated": "Dépassé"
 }
