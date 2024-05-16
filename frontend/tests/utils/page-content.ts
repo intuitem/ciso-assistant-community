@@ -78,7 +78,7 @@ export class PageContent extends BasePage {
 			}
 		}
 		// If the library is not visible, it might have already been loaded
-		if (await this.getRow(ref).isHidden()) {
+		if (await this.importItemButton(ref, language === 'any' ? undefined : language).isHidden()) {
 			await this.tab('Loaded libraries').click();
 			expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
 			expect(this.getRow(ref)).toBeVisible();
