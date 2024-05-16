@@ -340,7 +340,7 @@ export function localItems(languageTag: string): LocalItems {
 		remediationPlan: m.remediationPlan({ languageTag: languageTag }),
 		incoming: m.incoming({ languageTag: languageTag }),
 		today: m.today({ languageTag: languageTag }),
-		outdated: m.outdated({ languageTag: languageTag }),
+		outdated: m.outdated({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }
