@@ -52,6 +52,12 @@
                             <td class="text-md p-2 text-center">{{ applied_control.effort }}</td>
                             <td class="text-md p-2 text-center">{% get_requirements_count applied_control compliance_assessment %}</td>
                         </tr>
+                        {% empty %}
+                            <tr>
+                                <td class="text-md p-2 text-center" colspan="7">
+                                    <p>{% trans "No entries found" %}</p>
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
