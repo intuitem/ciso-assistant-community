@@ -49,8 +49,7 @@
 	}
 
 	const user = $page.data.user;
-	$: canDeleteObject =
-		Object.hasOwn(user.permissions, `delete_${model?.name}`) && preventDelete === false;
+	$: canDeleteObject = Object.hasOwn(user.permissions, `delete_${model?.name}`) && !preventDelete;
 	$: canEditObject = Object.hasOwn(user.permissions, `change_${model?.name}`);
 
 	$: displayDetail = detailURL;
