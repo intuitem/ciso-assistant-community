@@ -336,7 +336,7 @@ export function localItems(languageTag: string): LocalItems {
 			languageTag: languageTag
 		}),
 		actionPlan: m.actionPlan({ languageTag: languageTag }),
-		requirementsCount: m.requirementsCount({ languageTag: languageTag })
+		matchingRequirements: m.matchingRequirements({ languageTag: languageTag })
 	};
 	return LOCAL_ITEMS;
 }

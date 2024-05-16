@@ -15,7 +15,7 @@
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
-			requirements_count: 'requirementsCount'
+			requirements_count: 'matchingRequirements'
 		},
 		body: tableSourceMapper(data.actionPlan.planned, [
 			'name',
@@ -35,7 +35,7 @@
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
-			requirements_count: 'requirementsCount'
+			requirements_count: 'matchingRequirements'
 		},
 		body: tableSourceMapper(data.actionPlan.active, [
 			'name',
@@ -55,7 +55,7 @@
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
-			requirements_count: 'requirementsCount'
+			requirements_count: 'matchingRequirements'
 		},
 		body: tableSourceMapper(data.actionPlan.inactive, [
 			'name',
@@ -75,7 +75,7 @@
 			eta: 'eta',
 			expiry_date: 'expiryDate',
 			effort: 'effort',
-			requirements_count: 'requirementsCount'
+			requirements_count: 'matchingRequirements'
 		},
 		body: tableSourceMapper(data.actionPlan.none, [
 			'name',
