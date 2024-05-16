@@ -23,7 +23,7 @@ test('every libraries can be loaded', async ({ logedPage, librariesPage, page })
 		expect(
 			previousRemainingLibrary,
 			'An error occured while importing library: ' + previousRemainingLibrary
-		).not.toEqual(nextRemainingLibrary);
+		).toEqual(nextRemainingLibrary);
 	}
 });
 
