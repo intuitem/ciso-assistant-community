@@ -519,6 +519,6 @@
 	"actionPlan": "Plano de ação",
 	"noStatus": "Sem status",
 	"actionPlanHelpText": "Separados por status e classificados por eta",
-	"requirementsCount": "Contagem de requisitos",
+	"matchingRequirements": "Requisitos correspondentes",
 	"asZIP": "em ZIP"
 }

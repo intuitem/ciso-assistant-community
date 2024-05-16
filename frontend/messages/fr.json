@@ -519,6 +519,6 @@
 	"actionPlan": "Plan d'action",
 	"noStatus": "Pas de statut",
 	"actionPlanHelpText": "Séparé par statut et trié par eta",
-	"requirementsCount": "Nombre d'exigences",
+	"matchingRequirements": "Exigences associées",
 	"asZIP": "en ZIP"
 }
