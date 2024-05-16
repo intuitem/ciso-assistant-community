@@ -5,7 +5,7 @@ import * as m from '$paraglide/messages';
 
 export const actions: Actions = {
 	default: async (event) => {
-		const endpoint = `${BASE_API_URL}/libraries/${event.params.id}/import`;
+		const endpoint = `${BASE_API_URL}/stored-libraries/${event.params.id}/import`;
 		const res = await event.fetch(endpoint);
 		if (!res.ok) {
 			const response = await res.json();
@@ -16,10 +16,7 @@ export const actions: Actions = {
 		setFlash(
 			{
 				type: 'success',
-				message: m.successfullyImportedObject({
-					object: 'library',
-					id: event.params.id?.toString() ?? ''
-				})
+				message: m.librarySuccessfullyLoaded()
 			},
 			event
 		);
