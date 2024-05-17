@@ -41,18 +41,18 @@
     </div>
 {% else %}
     <div class="w-full">
-        <div class="flex flex-row justify-center">
-            <div class="text-black font-bold text-center print-impact flex items-center">
+        <div class="flex flex-row h-full">
+            <div class="text-black font-bold mt-45">
                 <p class="-rotate-90">{% trans "Probability" %}</p>
             </div>
-            <table class="w-3/4 mt-10">
+            <table class="w-3/4 mt-10 ml-13">
                 {% for row in risk_matrix.render_grid_as_colors reversed %}
                     {% with row_index=forloop.revcounter0 %}
                         <tr>
                             <td class="w-1/6 text-center text-black bg-gray-200 border-4 border-white pr-2">
-                                {% with impact=risk_matrix.parse_json.impact|index:row_index %}
-                                {{ impact.name }}:
-                                {{ impact.description|linebreaksbr }}
+                                {% with probability=risk_matrix.parse_json.probability|index:row_index %}
+                                {{ probability.name }}:
+                                {{ probability.description|linebreaksbr }}
                                 {% endwith %}
                             </td>
                             {% if enriched_data %}
@@ -73,14 +73,14 @@
                 {% endfor %}
                 <tr>
                     <td></td>
-                    {% for probability in risk_matrix.parse_json.probability %}
+                    {% for impact in risk_matrix.parse_json.impact %}
                         <td class="w-1/6 h-16 text-center text-black bg-gray-200 border-4 border-white">
                             {{ impact.name }}:
                             {{ impact.description|linebreaksbr }}
                         </td>
                     {% endfor %}
                 </tr>
-            </table>
+            </table> 
         </div>
         <div class="text-black font-bold text-center mx-auto mt-4">
             {% trans "Impact" %}
