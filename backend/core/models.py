@@ -18,7 +18,7 @@ import yaml
 
 from django.urls import reverse
 from datetime import date, datetime
-from typing import Union, Self
+from typing import Union, Dict, Set, Tuple, Type, Self
 from django.utils.html import format_html
 
 from structlog import get_logger
@@ -203,10 +203,158 @@ class StoredLibrary(LibraryMixin):
         return error_msg
 
 
+class LibraryUpgrader:
+    def __init__(self,old_library: Type["LoadedLibrary"],new_library: StoredLibrary) :
+        self.old_library = old_library
+        self.old_objects = [
+            *old_library.threats.all(),
+            *old_library.reference_controls.all(),
+            *old_library.threats.all(),
+            *old_library.risk_matrices.all()
+        ]
+        self.new_library = new_library
+        library_content = json.loads(self.new_library.content)
+        self.new_framework = library_content.get("framework")
+        self.new_matrices = library_content.get("risk_matrix")
+        self.threats = library_content.get("threats",[])
+        self.reference_controls = library_content.get("reference_controls",[])
+        self.new_objects = {obj["urn"]: obj for obj in self.threats}
+        self.new_objects.update({obj["urn"]: obj for obj in self.reference_controls})
+        if self.new_framework :
+            self.new_object[self.new_framework["urn"]] = self.new_framework
+        if self.new_matrices :
+            for matrix in self.new_matrices :
+                self.new_objects[matrix["urn"]] = matrix
+
+    # We should create a LibraryVerifier class in the future that check if the libary is valid and use it for a better error handling.
+    def upgrade_library(self) -> Union[str,None] :
+        old_urns = set(obj.urn for obj in self.old_objects)
+        new_urns = set(self.new_objects.keys())
+
+        if not new_urns.issuperset(old_urns) :
+            return "This library upgrade is deleting existing objects."
+
+        for key, value in [
+            ("name", self.new_library.name),
+            ("version", self.new_library.version),
+            ("provider", self.new_library.provider),
+            ("packager", self.new_library.packager), # A user can fake a builtin library in this case because he can upgrade a builtin library by adding its own libary with the same URN as a builtin libary.
+            ("ref_id", self.new_library.ref_id), # Should we even update the ref_id ?
+            ("description", self.new_library.description),
+            ("annotation", self.new_library.annotation),
+            ("copyright", self.new_library.copyright),
+            ("objects_meta", self.new_library.objects_meta)
+        ] :
+            setattr(self.old_library,key,value)
+        self.old_library.save()
+
+        objects_created = {} # URN => Object Created
+        referential_object_dict = {
+            "locale": self.old_library.locale,
+            "default_locale": self.old_library.default_locale,
+            "provider": self.new_library.provider,
+            "is_published": True
+        }
+
+        for threat in self.threats :
+            new_threat, _ = Threat.objects.update_or_create(
+                urn=threat["urn"],
+                defaults=threat,
+                create_defaults={
+                    **referential_object_dict,
+                    **threat
+                }
+            )
+            objects_created[threat["urn"]] = new_threat
+
+        for reference_control in self.reference_controls :
+            new_reference_control, _ = ReferenceControl.objects.update_or_create(
+                urn=reference_control["urn"],
+                defaults=reference_control,
+                create_defaults={
+                    **referential_object_dict,
+                    **reference_control
+                }
+            )
+            objects_created[reference_control["urn"]] = new_reference_control
+
+        if self.new_framework is not None :
+            framework_dict = {**self.new_framework}
+            del framework_dict["requirement_nodes"]
+
+            new_framework, _ = Framework.objects.update_or_create(
+                library=self,
+                defaults=framework_dict,
+                create_defaults={
+                    **referential_object_dict,
+                    **framework_dict
+                }
+            )
+
+            for requirement_node in self.new_framework["requirement_nodes"] :
+                # I can simplify this code and do like i did for the framework update/creation process !
+
+                requirement_node_dict = {**requirement_node}
+                for key in ["maturity","reference_controls","threats"] :
+                    del requirement_node_dict[key]
+
+                new_requirement_node, _ = RequirementNode.objects.update_or_create(
+                    urn=requirement_node["urn"],
+                    defaults=requirement_node_dict,
+                    create_defaults={
+                        **referential_object_dict,
+                        **requirement_node_dict,
+                        "framework": new_framework,
+                    }
+                )
+
+                for threat_urn in requirement_node :
+                    new_requirement_node.threats.add(objects_created[threat_urn])
+
+                for reference_control_urn in requirement_node :
+                    new_requirement_node.reference_controls.add(objects_created[reference_control_urn])
+
+        if self.new_matrices is not None :
+            for matrix in self.new_matrices :
+                json_definition_keys = {"grid","probability","impact","risk"} # Store this as a constant somewhere (as a static attribute of the class)
+                other_keys = set(matrix.keys()) - json_definition_keys
+                matrix_dict = {
+                    key: matrix["key"]
+                    for key in other_keys
+                }
+                matrix_dict["json_definition"] = {}
+                for key in json_definition_keys :
+                    if key in matrix : # If all keys are mandatory this condition is useless
+                        matrix_dict["json_definition"][key] = matrix[key]
+
+                RiskMatrix.objects.update_or_create(
+                    urn=matrix["urn"],
+                    defaults=matrix_dict,
+                    create_defaults={
+                        **referential_object_dict
+                        **matrix_dict,
+                    }
+                )
+
+
 class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
+
+    def upgrade(self) :
+        # What happens if we delete a loaded library while it's being upgraded ?
+        # Should we make some kind of mutex for this ?
+
+        new_libraries = [*StoredLibrary.objects.filter(urn=self.urn,locale=self.locale,version__gt=self.version)]
+        if not new_libraries :
+            return None # We should raise an error there in the future to inform that no new library has been found.
+
+        # Dependencies updates are not working yet
+
+        new_library = max(new_libraries,key=lambda lib: lib.version)
+        library_upgrader = LibraryUpgrader(self,new_library)
+        return library_upgrader.upgrade_library()
 
     @property
     def _objects(self):
