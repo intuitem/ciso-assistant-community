@@ -30,6 +30,7 @@ logger = structlog.get_logger(__name__)
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
 
+
 def match_urn(urn_string):
     match = re.match(URN_REGEX, urn_string)
     if match:
