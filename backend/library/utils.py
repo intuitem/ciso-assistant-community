@@ -618,8 +618,6 @@ class LibraryImporter:
 
     def import_objects(self, library_object):
         """Import library objects."""
-        if self._framework_importer is not None:
-            self._framework_importer.import_framework(library_object)
 
         for threat in self._threats:
             threat.import_threat(library_object)
@@ -629,6 +627,9 @@ class LibraryImporter:
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)
+
+        if self._framework_importer is not None:
+            self._framework_importer.import_framework(library_object)
 
     @transaction.atomic
     def _import_library(self):
