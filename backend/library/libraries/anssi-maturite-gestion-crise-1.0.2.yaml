@@ -1,0 +1,1282 @@
+urn: urn:intuitem:risk:library:anssi-maturite-gestion-crise-1.0.2
+locale: fr
+ref_id: ANSSI-MATURITE-GESTION-CRISE
+name: "ANSSI: auto\xE9valuation de gestion de crise cyber"
+description: "Bas\xE9 sur l'outil ANSSI (Excel) d\u2019auto\xE9valuation de gestion\
+  \ de crise cyber"
+copyright: anssi
+version: 1
+provider: ANSSI
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:anssi-maturite-gestion-crise-1.0.2
+    ref_id: ANSSI-MATURITE-GESTION-CRISE
+    name: "ANSSI: auto\xE9valuation de gestion de crise cyber"
+    description: "Bas\xE9 sur l'outil ANSSI (Excel) d\u2019auto\xE9valuation de gestion\
+      \ de crise cyber"
+    min_score: 0
+    max_score: 3
+    scores_definition:
+    - score: 0
+      name: niveau 0
+      description: null
+    - score: 1
+      name: niveau 1
+      description: null
+    - score: 2
+      name: niveau 2
+      description: null
+    - score: 3
+      name: niveau 3
+      description: null
+    implementation_groups_definition:
+    - ref_id: S
+      name: STRATEGIQUE
+      description: null
+    - ref_id: O
+      name: OPERATIONNEL CYBER ET IT
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      assessable: false
+      depth: 1
+      name: "Gouvernance et interactions entre \xE9quipes mobilis\xE9es"
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '1.1'
+      description: "Les fonctions d\xE9cisionnelles de l'organisation sont-elles sensibilis\xE9\
+        es aux enjeux cyber ?\nNiveau 0 : Les fonctions d\xE9cisionnelles de l'organisation\
+        \ ne sont pas sensibilis\xE9es aux enjeux cyber.\nNiveau 1 : Une partie des\
+        \ fonctions d\xE9cisionnelles est sensibilis\xE9e aux enjeux cyber. Un dispositif\
+        \ de gestion de crise est pr\xE9sent.\nNiveau 2 : Les fonctions d\xE9cisionnelles\
+        \ de l\u2019organisation sont sensibilis\xE9es aux enjeux cyber. Un dispositif\
+        \ de crise est pr\xE9sent. Les fonctions cyber et IT sont syst\xE9matiquement\
+        \ repr\xE9sent\xE9es dans la gouvernance de crise cyber. \nNiveau 3 : Les\
+        \ fonctions d\xE9cisionnelles de l\u2019organisation sont sensibilis\xE9es\
+        \ aux enjeux cyber. Les fonctions cyber et IT sont syst\xE9matiquement repr\xE9\
+        sent\xE9es dans la gouvernance de crise (cyber et hors cyber)."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '1.2'
+      description: "Quelle est la strat\xE9gie d'entra\xEEnement de gestion de crise\
+        \ au niveau strat\xE9gique ?\nNiveau 0 : Aucun entra\xEEnement \xE0 la gestion\
+        \ de crise n'est organis\xE9.\nNiveau 1 : Des exercices testant des sc\xE9\
+        narios cyber sont organis\xE9s au niveau strat\xE9gique.\nNiveau 2 : Une strat\xE9\
+        gie d\u2019entra\xEEnement de gestion de crise est d\xE9finie et des exercices\
+        \ testant des sc\xE9narios cyber sont r\xE9guli\xE8rement organis\xE9s au\
+        \ niveau strat\xE9gique. Les exercices impliquent des p\xE9rim\xE8tres d\u2019\
+        impacts et des sc\xE9narios en ligne avec la cartographie des risques et l'\xE9\
+        tat de la menace. \nNiveau 3 : Une strat\xE9gie d\u2019entra\xEEnement de\
+        \ gestion de crise est d\xE9finie et des exercices testant des sc\xE9narios\
+        \ cyber sont r\xE9guli\xE8rement organis\xE9s au niveau strat\xE9gique. Les\
+        \ exercices impliquent des p\xE9rim\xE8tres d\u2019impacts et des sc\xE9narios\
+        \ en ligne avec la cartographie des risques et l'\xE9tat de la menace. La\
+        \ cellule strat\xE9gique s'entra\xEEne \xE0 prendre des d\xE9cisions dans\
+        \ l'incertitude. \nLa strat\xE9gie d'exercice int\xE8gre le sujet de la coordination\
+        \ avec son \xE9cosyst\xE8me et prend en compte l'articulation avec les exercices\
+        \ op\xE9rationnels.\nLa strat\xE9gie est align\xE9e avec un plan de mont\xE9\
+        e en comp\xE9tence sur les savoir-faire li\xE9s \xE0 la gestion de crise cyber. "
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '1.3'
+      description: "Quelle est la strat\xE9gie d'entra\xEEnement de gestion de crise\
+        \ au niveau op\xE9rationnel ?\nNiveau 0 : Aucun entra\xEEnement \xE0 la gestion\
+        \ de crise cyber n'est organis\xE9.\nNiveau 1 : Des exercices testant des\
+        \ sc\xE9narios cyber sont organis\xE9s au niveau op\xE9rationnel.\nNiveau\
+        \ 2 : Des exercices testant des sc\xE9narios cyber sont organis\xE9s au niveau\
+        \ op\xE9rationnel. Certains exercices testent l\u2019articulation entre les\
+        \ volets op\xE9rationnel et strat\xE9gique.\nNiveau 3 : Des exercices testant\
+        \ des sc\xE9narios cyber sont organis\xE9s. Certains exercices testent l\u2019\
+        articulation entre les volets op\xE9rationnel et strat\xE9gique.\nLa complexit\xE9\
+        \ technique des exercices est adapt\xE9e \xE0 la maturit\xE9 de l\u2019organisation.\
+        \ Ils tendent progressivement vers plus de r\xE9alisme pour entra\xEEner les\
+        \ \xE9quipes d\u2019investigation (type entra\xEEnement sur Cyber Range)."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.1'
+      description: "L'ensemble du dispositif de crise est-il formalis\xE9 dans un\
+        \ r\xE9f\xE9rentiel de management (politique globale) ?\nNiveau 0 : Il n'existe\
+        \ pas de r\xE9f\xE9rentiel de management des crises cyber.\nNiveau 1 : Un\
+        \ r\xE9f\xE9rentiel de management des crises int\xE9grant une description\
+        \ de l\u2019ensemble du dispositif de crise (organisation, gouvernance, ressources,\
+        \ outils, annuaire) existe mais n'int\xE8gre pas le volet cyber.\nNiveau 2\
+        \ : Un r\xE9f\xE9rentiel de management des crises contenant d'un volet cyber\
+        \ int\xE9grant une description de l\u2019ensemble du dispositif de crise (organisation,\
+        \ gouvernance, ressources, outils, annuaire) est formalis\xE9 et valid\xE9\
+        . Il est li\xE9 aux autres dispositifs de crise existant.\nNiveau 3 : Un r\xE9\
+        f\xE9rentiel de management des crises cyber int\xE9grant une description de\
+        \ l\u2019ensemble du dispositif de crise (organisation, gouvernance, ressources,\
+        \ outils, annuaire) est formalis\xE9, promu, maintenu \xE0 jour et test\xE9\
+        . Il est li\xE9 aux autres dispositifs de crise existant."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.2'
+      description: "Comment le processus de gestion de crise pr\xE9voit-il l'organisation\
+        \ des \xE9quipes cyber ? \nNiveau 0 : La gestion des \xE9quipes est identique\
+        \ \xE0 la normale. \nNiveau 1 : Le roulement des \xE9quipes est anticip\xE9\
+        \ et l'activit\xE9 op\xE9rationnelle des collaborateurs (en particulier l'intervention\
+        \ en heures non ouvr\xE9es) est suivie afin de pr\xE9server leur capacit\xE9\
+        \ \xE0 op\xE9rer dans la dur\xE9e et de r\xE9gulariser leur temps de travail.\n\
+        Niveau 2 : Le roulement des \xE9quipes est anticip\xE9 et l'activit\xE9 op\xE9\
+        rationnelle des collaborateurs (en particulier l'intervention en heures non\
+        \ ouvr\xE9es) est suivie afin de pr\xE9server leur capacit\xE9 \xE0 op\xE9\
+        rer dans la dur\xE9e et de r\xE9gulariser leur temps de travail.  Les prestataires\
+        \ mobilis\xE9s font \xE9galement un suivi \xE9quivalent pour les ressources\
+        \ utilis\xE9es. Les collaborateurs sans activit\xE9 peuvent \xEAtre mobilis\xE9\
+        s pour fournir de l\u2019aide sur les diff\xE9rentes actions \xE0 r\xE9aliser.\
+        \ \nNiveau 3 : Le roulement des \xE9quipes est anticip\xE9 et l'activit\xE9\
+        \ op\xE9rationnelle des collaborateurs (en particulier l'intervention en heures\
+        \ non ouvr\xE9es) est suivie afin de pr\xE9server leur capacit\xE9 \xE0 op\xE9\
+        rer dans la dur\xE9e et de r\xE9gulariser leur temps de travail.  Les prestataires\
+        \ mobilis\xE9s font \xE9galement un suivi \xE9quivalent pour les ressources\
+        \ utilis\xE9es. Les collaborateurs sans activit\xE9 peuvent \xEAtre mobilis\xE9\
+        s pour fournir de l\u2019aide sur les diff\xE9rentes actions \xE0 r\xE9aliser.\
+        \ \nLe travail est organis\xE9 sous forme d\u2019\xE9quipes-projet, afin de\
+        \ r\xE9pondre \xE0 plusieurs objectifs dans un d\xE9lai r\xE9duit."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.3'
+      description: "Comment est form\xE9e la cellule de crise strat\xE9gique ?\nNiveau\
+        \ 0 : Les membres de la cellule de crise ne sont pas identifi\xE9s.\nNiveau\
+        \ 1 : Les membres de la cellule de crise sont identifi\xE9s et sont inform\xE9\
+        s de leur nomination au dispositif. \nNiveau 2 : Les membres de la cellule\
+        \ de crise sont identifi\xE9s et sont inform\xE9s de leur nomination au dispositif.\
+        \ Ils sont inform\xE9s de leur r\xF4le, leurs missions et leur p\xE9rim\xE8\
+        tre d'action, qui ont \xE9t\xE9 d\xE9finis en amont. \nDes suppl\xE9ants sont\
+        \ identifi\xE9s.\nNiveau 3 : Les membres de la cellule de crise sont identifi\xE9\
+        s et sont inform\xE9s de leur nomination au dispositif. Ils sont inform\xE9\
+        s de leur r\xF4le, leurs missions et leur p\xE9rim\xE8tre d'action, qui ont\
+        \ \xE9t\xE9 d\xE9finis en amont, et y sont form\xE9s. Ils participent \xE0\
+        \ au moins un exercice par an. Des suppl\xE9ants sont identifi\xE9s et int\xE9\
+        gr\xE9s aux formations et aux exercices."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.4'
+      description: "Comment s'organisent les \xE9quipes op\xE9rationnelles en cas\
+        \ de crise ?\nNiveau 0 : Les membres de la cellule de crise op\xE9rationnelle\
+        \ ne sont pas identifi\xE9s. L'organisation usuelle est maintenue. \nNiveau\
+        \ 1 : Les membres de la cellule de crise op\xE9rationnelle sont identifi\xE9\
+        s et sont inform\xE9s de leur nomination au dispositif. Une organisation alternative\
+        \ des \xE9quipes est mise en place. \nNiveau 2 : Les membres de la cellule\
+        \ de crise op\xE9rationnelle sont identifi\xE9s et sont inform\xE9s de leur\
+        \ nomination au dispositif. Ils sont inform\xE9s de leur r\xF4le, leurs missions\
+        \ et leur p\xE9rim\xE8tre d'action, qui ont \xE9t\xE9 d\xE9finis en amont.\
+        \ L'organisation des \xE9quipes est pens\xE9e pour \xEAtre la plus efficace\
+        \ possible. \nDes suppl\xE9ants sont identifi\xE9s.\nNiveau 3 : Les membres\
+        \ de la cellule de crise op\xE9rationnelle sont identifi\xE9s et sont inform\xE9\
+        s de leur nomination au dispositif. Ils sont inform\xE9s de leur r\xF4le,\
+        \ leurs missions et leur p\xE9rim\xE8tre d'action, qui ont \xE9t\xE9 d\xE9\
+        finis en amont, et y sont form\xE9s.\nDes suppl\xE9ants sont identifi\xE9\
+        s et int\xE9gr\xE9s aux formations et aux exercices.\n La cellule int\xE8\
+        gre des experts cl\xE9s capables de fournir des orientations ainsi qu\u2019\
+        un relais pour la communication de crise. L'organisation des \xE9quipes est\
+        \ pens\xE9e pour \xEAtre la plus efficace possible de mani\xE8re \xE0 r\xE9\
+        aliser les actions d\u2019investigation/endiguement, de durcissement/rem\xE9\
+        diation et de reconstruction."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.5'
+      description: "Quelles sont les expertises identifi\xE9es au niveau strat\xE9\
+        gique?\nNiveau 0 : Aucune expertise en mati\xE8re de crise n'a \xE9t\xE9 pr\xE9\
+        -identifi\xE9e. \nNiveau 1 : Des expertises sont identifi\xE9es, et couvrent\
+        \ au moins l'un des domaines suivants : \n- gestion et conduite de crise ;\n\
+        - communication de crise cyber ;\n- gestion de projet.\nNiveau 2 : Des expertises\
+        \ sont identifi\xE9es et mises \xE0 jour. Elles couvrent les domaines suivants\
+        \ :\n- gestion et conduite de crise ;\n- communication de crise cyber.\nEn\
+        \ cas d'externalisation, des accords de non divulgation sont mis en place\
+        \ pour l\u2019ensemble des experts sollicit\xE9s.\nNiveau 3 : Des expertises\
+        \ sont identifi\xE9es et mises \xE0 jour. Elles couvrent les domaines suivants\
+        \ :\n- gestion et conduite de crise ;\n- communication de crise cyber ;\n\
+        - gestion de projet ;\n- expertise juridique.\nEn cas d'externalisation, des\
+        \ accords de non divulgation sont mis en place pour l\u2019ensemble des experts\
+        \ sollicit\xE9s."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.6'
+      description: "Quelles sont les expertises identifi\xE9es au niveau op\xE9rationnel?\n\
+        Niveau 0 : Aucune expertise en mati\xE8re de crise n'a \xE9t\xE9 pr\xE9-identifi\xE9\
+        e. \nNiveau 1 : Des expertises sont identifi\xE9es, et couvrent certains des\
+        \ domaines suivants : \n- r\xE9ponse \xE0 incidents ;\n- supervision de s\xE9\
+        curit\xE9 ;\n- rem\xE9diation technique\n- infrastructure informatique.\n\n\
+        Niveau 2 : Des expertises sont identifi\xE9es et mises \xE0 jour. Elles couvrent\
+        \ les domaines suivants :\n- r\xE9ponse \xE0 incidents ;\n- supervision de\
+        \ s\xE9curit\xE9 ;\n- rem\xE9diation technique ;\n- infrastructure informatique\
+        \ ;\n- annuaires et acc\xE8s privil\xE9gi\xE9s (souvent Active Directory)\
+        \ ;\n- restauration de donn\xE9es ;\n- recouvrement de donn\xE9es.\nEn cas\
+        \ d'externalisation, des accords de non divulgation sont mis en place pour\
+        \ l\u2019ensemble des experts sollicit\xE9s.\nNiveau 3 : Des expertises sont\
+        \ identifi\xE9es et mises \xE0 jour. Elles couvrent les domaines suivants\
+        \ :\n- r\xE9ponse \xE0 incidents ;\n- supervision de s\xE9curit\xE9 ;\n- rem\xE9\
+        diation technique ;\n- infrastructure informatique ;\n- annuaires et acc\xE8\
+        s privil\xE9gi\xE9s (souvent Active Directory) ;\n- restauration de donn\xE9\
+        es ;\n- recouvrement de donn\xE9es ;\n- solutions nuagiques ;\n- r\xE9seaux\
+        \ ;\n- administration Linux/Windows ; \n- pare-feu.\nEn cas d'externalisation,\
+        \ des accords de non divulgation sont mis en place pour l\u2019ensemble des\
+        \ experts sollicit\xE9s.\nTous les prestataires mobilis\xE9s travaillent ensemble,\
+        \ sous la coordination de la cellule op\xE9rationnelle, avec des objectifs\
+        \ et des p\xE9rim\xE8tres clairement d\xE9finis."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.7'
+      description: "Comment la cellule de crise strat\xE9gique communique-t-elle avec\
+        \ les \xE9quipes op\xE9rationnelles cyber et IT ?\nNiveau 0 : Les diff\xE9\
+        rents r\xF4les des interlocuteurs  des cellules op\xE9rationnelles et de la\
+        \ cellule strat\xE9gique et leur mani\xE8re de se r\xE9unir ne sont pas d\xE9\
+        finis.\nNiveau 1 : Les diff\xE9rents r\xF4les des interlocuteurs des cellules\
+        \ op\xE9rationnelles et de la cellule strat\xE9gique sont d\xE9finis et se\
+        \ r\xE9unissent ponctuellement. \nNiveau 2 : Les diff\xE9rents interlocuteurs\
+        \ des cellules op\xE9rationnelles et de la cellule strat\xE9gique connaissent\
+        \ leurs r\xF4les et se r\xE9unissent en respectant un rythme r\xE9gulier d\xE9\
+        fini en amont. \nNiveau 3 : Les diff\xE9rents interlocuteurs des cellules\
+        \ op\xE9rationnelles et de la cellule strat\xE9gique connaissent leurs r\xF4\
+        les et se r\xE9unissent en respectant un rythme r\xE9gulier d\xE9fini en amont.\
+        \ Des coordinateurs sont d\xE9sign\xE9s pour permettre une meilleure circulation\
+        \ de l'information."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.8'
+      description: "Comment sont anticip\xE9es les interactions entre les \xE9quipes\
+        \ techniques et les cellules op\xE9rationnelles ? \nNiveau 0 : Il n'y a pas\
+        \ de comitologie d\xE9finie entre les \xE9quipes techniques et les autres\
+        \ cellules. \nNiveau 1 : Il est pr\xE9vu que les \xE9quipes techniques communiquent\
+        \ avec les autres cellules sur la base de r\xE9unions ad-hoc. \nNiveau 2 :\
+        \ Le rythme des remont\xE9es d\u2019information adapt\xE9 \xE0 la crise est\
+        \ formalis\xE9e et partag\xE9e. \nDes \xE9l\xE9ments de langages vulgaris\xE9\
+        s sont pr\xE9par\xE9s en amont afin de s'adapter \xE0 des publics non experts.\n\
+        Niveau 3 : Le rythme des remont\xE9es d\u2019information adapt\xE9 \xE0 la\
+        \ crise est formalis\xE9e et partag\xE9e. \nEn particulier, leurs r\xE9unions\
+        \ servent \xE0 partager l\u2019avancement, les priorit\xE9s, les difficult\xE9\
+        s et incertitudes et les besoins. Les \xE9l\xE9ments techniques sont vulgaris\xE9\
+        s afin de s'adapter \xE0 des publics non-experts. Des collaborateurs des \xE9\
+        quipes techniques travaillent avec les \xE9quipes de communication afin de\
+        \ participer \xE0 la r\xE9daction des communications internes ou externes."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.9'
+      description: "Comment sont prises en compte les probl\xE9matiques internationales\
+        \ ? (si non applicable, ne pas r\xE9pondre)\nNiveau 0 : Les probl\xE9matiques\
+        \ internationales ne sont pas prises en compte. \nNiveau 1 : Les probl\xE9\
+        matiques internationales sont prises en compte de mani\xE8re informelle.\n\
+        Niveau 2 : Des processus d\xE9di\xE9s aux probl\xE9matiques internationales\
+        \ sont d\xE9finis, valid\xE9s et couvrent la majorit\xE9 des aspects, par\
+        \ exemple la gestion des fuseaux horaires. \nNiveau 3 : Des processus d\xE9\
+        di\xE9s aux probl\xE9matiques internationales sont mis en place et couvrent\
+        \ tous les aspects, y compris les questions culturelles. Des relais de communication\
+        \ sont identifi\xE9s. Ces processus sont stock\xE9s hors-ligne et mis \xE0\
+        \ jour r\xE9guli\xE8rement."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.10'
+      description: "Comment l'anticipation est-elle int\xE9gr\xE9e \xE0 la cellule\
+        \ de crise strat\xE9gique?\nNiveau 0 : L'anticipation n'est pas int\xE9gr\xE9\
+        \ danse les fonctions de la cellule de crise strat\xE9gique.\nNiveau 1 : Une\
+        \ \xE9quipe est en charge du volet anticipation dans la cellule de crise.\n\
+        Niveau 2 : Une \xE9quipe est en charge du volet anticipation dans la cellule\
+        \ de crise. Elle s'appuie sur une m\xE9thodologie d'anticipation qui prend\
+        \ en compte les sp\xE9cificit\xE9s des attaques cyber. Ses travaux sont pris\
+        \ en compte dans la r\xE9solution de la crise.\nUne fiche de poste pr\xE9\
+        cise son r\xF4le.\nNiveau 3 : Une \xE9quipe est en charge du volet anticipation\
+        \ dans la cellule de crise. Elle s'appuie sur une m\xE9thodologie d'anticipation\
+        \ qui prend en compte les sp\xE9cificit\xE9s des attaques cyber ainsi que\
+        \ sur des mod\xE8les de restitution des travaux. Ses travaux sont pris en\
+        \ compte dans la r\xE9solution de la crise. L'\xE9quipe est r\xE9guli\xE8\
+        rement entrain\xE9e via des exercices de crise.\n Une fiche de poste pr\xE9\
+        cise son r\xF4le."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '2.11'
+      description: "Comment l'anticipation et la connaissance de la menace est-elle\
+        \ int\xE9gr\xE9e au niveau op\xE9rationnel?\nNiveau 0 : Les \xE9quipes cyber\
+        \ et IT ne travaillent pas sur la connaissance de la menace cyber.\nNiveau\
+        \ 1 : Une fonction CTI existe au sein des \xE9quipes cyber. Elle n'est pas\
+        \ prise en compte en pr\xE9vision ou durant les crises.\nNiveau 2 : Une fonction\
+        \ CTI existe au sein des \xE9quipes cyber. Elle est contribue \xE0 l'identification\
+        \ des sc\xE9narios de menace \xE0 couvrir et \xE0 la d\xE9finition des fiches\
+        \ r\xE9flexes.\nNiveau 3 : Une fonction CTI existe au sein des \xE9quipes\
+        \ cyber. Elle est contribue \xE0 l'identification des sc\xE9narios de menace\
+        \ \xE0 couvrir et \xE0 la d\xE9finition des fiches r\xE9flexes.\nLa fonction\
+        \ CTI est mobilis\xE9e durant les entrainements et durant les crises pour\
+        \ identifier les comportements possibles de l'attaquant et pour identifier\
+        \ les actions de durcissement et de rem\xE9diation \xE0 mettre en place."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node2
+      ref_id: '3.1'
+      description: "Comment est organis\xE9 la phase de RETEX de crise?\nNiveau 0\
+        \ : Aucun processus n'est mis en place pour le RETEX.\nNiveau 1 : L'\xE9quipe\
+        \ en charge du RETEX est identifi\xE9e. Cette \xE9quipe identifie les acteurs\
+        \ \xE0 interroger, la grille d'entretien et organise les aspects pratiques\
+        \ du RETEX. \nNiveau 2 : L'\xE9quipe en charge du RETEX est identifi\xE9e.\
+        \ Cette \xE9quipe identifie les acteurs \xE0 interroger, la grille d'entretien\
+        \ et organise les aspects pratiques du RETEX. \nLe processus de RETEX est\
+        \ pr\xE9vu pour se terminer maximum 30 jours apr\xE8s la fin de la crise.\
+        \ \nUn rapport d'investigation num\xE9rique est demand\xE9 aux prestataires\
+        \ mobilis\xE9s.\nNiveau 3 : L'\xE9quipe en charge du RETEX est identifi\xE9\
+        e. Cette \xE9quipe identifie les acteurs \xE0 interroger, la grille d'entretien\
+        \ et organise les aspects pratiques du RETEX, pour le volet strat\xE9gique\
+        \ et op\xE9rationnel. \nLe processus de RETEX est pr\xE9vu pour se terminer\
+        \ maximum 30 jours apr\xE8s la fin de la crise. \nUn rapport d'investigation\
+        \ num\xE9rique est demand\xE9 aux prestataires mobilis\xE9s.\nLes axes d'am\xE9\
+        lioration identifi\xE9s \xE0 l'issue de la restitution font l'objet d'un suivi\
+        \ sp\xE9cifique."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      assessable: false
+      depth: 1
+      name: Processus et outillage
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '4.1'
+      description: "Un dispositif d'astreinte est-il existant?\nNiveau 0 : Aucun moyen\
+        \ d'astreinte n'existe pour la gestion de crise cyber.\nNiveau 1 : Des personnes\
+        \ sont identifi\xE9es pour intervenir en heures non-ouvr\xE9es, de mani\xE8\
+        re informelle.\nNiveau 2 : Des personnes sont identifi\xE9es au niveau op\xE9\
+        rationnel et strat\xE9gique pour intervenir en heures non-ouvr\xE9es, et sont\
+        \ inform\xE9es qu'elles pourraient \xEAtre jointes. La politique est celle\
+        \ du \"meilleur effort\".\nNiveau 3 : Des personnes sont identifi\xE9es au\
+        \ niveau op\xE9rationnel et strat\xE9gique pour intervenir en heures non-ouvr\xE9\
+        es, et sont inform\xE9es qu'elles pourraient \xEAtre jointes. La politique\
+        \ d'astreintes est cadr\xE9e et formalis\xE9e, et est test\xE9 une fois par\
+        \ an."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '4.2'
+      description: "La cellule de crise dispose-t-elle d'outils num\xE9riques d\xE9\
+        di\xE9s \xE0 la gestion de crise?\nNiveau 0 : La cellule de crise ne poss\xE8\
+        de pas d'outils num\xE9riques d\xE9di\xE9s \xE0 la gestion de crise. \nNiveau\
+        \ 1 : La cellule de crise poss\xE8de des outils num\xE9riques d\xE9di\xE9\
+        s. \nNiveau 2 : La cellule de crise poss\xE8de des outils num\xE9riques d\xE9\
+        di\xE9s accessibles hors ligne.\nNiveau 3 : La cellule de crise poss\xE8de\
+        \ des outils num\xE9riques d\xE9di\xE9s accessibles hors ligne, maintenus\
+        \ en conditions op\xE9rationnelles et de s\xE9curit\xE9. Ces outils sont utilis\xE9\
+        s et test\xE9s lors d'exercices de crise."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '4.3'
+      description: "Comment circule l'information au sein de la cellule de crise ?\n\
+        Niveau 0 : La cellule de crise ne dispose pas de moyens (outils) pour faire\
+        \ circuler l'information.\nNiveau 1 : La cellule de crise communique \xE0\
+        \ l'aide de diff\xE9rents moyens (outils) de communications. \nNiveau 2 :\
+        \ L'information circule au sein de la cellule de crise \xE0 l'aide d'un moyen\
+        \ de communication d\xE9fini. \nNiveau 3 : La cellule de crise dispose d'une\
+        \ interface unique (type tableau de bord) pour uniformiser la circulation\
+        \ de l\u2019information. Une communication descendante est mise en place pour\
+        \ fournir de la visibilit\xE9 sur l'\xE9volution de la situation. "
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '4.4'
+      description: "Les crit\xE8res d'activation de la cellule strat\xE9gique sont-ils\
+        \ formalis\xE9s ?\nNiveau 0 : Les crit\xE8res d'activation de la cellule strat\xE9\
+        gique ne sont pas d\xE9finis. \nNiveau 1 : Les crit\xE8res d'activation de\
+        \ la cellule strat\xE9gique sont d\xE9finis de mani\xE8re informelle. \nNiveau\
+        \ 2 : Les crit\xE8res d'activation sont formalis\xE9s et valid\xE9s. Des objectifs\
+        \ et des crit\xE8res de sortie de crise atteignables sont pr\xE9-identifi\xE9\
+        s. lls sont connus des membres du dispositif. Ils prennent en compte les besoins\
+        \ de notification d'incidents vers les autorit\xE9s.\nNiveau 3 : Les crit\xE8\
+        res d'activation et de d\xE9sactivation de la cellule strat\xE9gique sont\
+        \ valid\xE9s. Des objectifs et des crit\xE8res de sortie de crise atteignables\
+        \ sont pr\xE9-identifi\xE9s, en lien avec les \xE9quipes m\xE9tiers, cyber\
+        \ et IT. lls sont connus des membres du dispositif. Ils prennent en compte\
+        \ les besoins de notification d'incidents vers les autorit\xE9s."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '4.5'
+      description: "Comment sont d\xE9finis les crit\xE8res d'activation et de d\xE9\
+        sactivation du dispositif op\xE9rationnel ?\nNiveau 0 : Les crit\xE8res d'activation\
+        \ et de d\xE9sactivation des dispositifs op\xE9rationnels ne sont pas d\xE9\
+        finis. \nNiveau 1 : Les crit\xE8res d'activation et de d\xE9sactivation des\
+        \ dispositifs op\xE9rationnels pr\xE9voient en particulier l\u2019activation\
+        \ par effet de seuil (par le bas) et l\u2019activation sur d\xE9cision du\
+        \ dispositif strat\xE9gique (par le haut).\nNiveau 2 : Les crit\xE8res d'activation\
+        \ et de d\xE9sactivation des dispositifs op\xE9rationnels pr\xE9voient en\
+        \ particulier l\u2019activation par effet de seuil (par le bas) et l\u2019\
+        activation sur d\xE9cision du dispositif strat\xE9gique (par le haut). Ils\
+        \ sont connus des membres du dispositif de crise et des \xE9quipes de gestion\
+        \ d\u2019incident. Ils prennent en compte les besoins de notification d'incidents\
+        \ vers les autorit\xE9s et font lien avec la politique de r\xE9ponse \xE0\
+        \ incident num\xE9rique de s\xE9curit\xE9.\nNiveau 3 : Les crit\xE8res d\u2019\
+        activation et de d\xE9sactivation du dispositif op\xE9rationnel sont d\xE9\
+        finis en fonction des sc\xE9narios cyber de r\xE9f\xE9rence. Ils pr\xE9voient\
+        \ en particulier l\u2019activation par effet de seuil (par le bas) et l\u2019\
+        activation sur d\xE9cision du dispositif strat\xE9gique (par le haut). Ils\
+        \ sont connus des membres du dispositif de crise et des \xE9quipes de gestion\
+        \ d\u2019incident. Ils permettent d\u2019objectiver la mobilisation et la\
+        \ d\xE9mobilisation d\u2019une cellule strat\xE9gique.\nIls prennent en compte\
+        \ les besoins de notification d'incidents vers les autorit\xE9s et font lien\
+        \ avec la politique de r\xE9ponse \xE0 incident num\xE9rique de s\xE9curit\xE9\
+        ."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '5.1'
+      description: "Comment le processus de gestion de crise pr\xE9voit-il le premier\
+        \ \xE9tat des lieux de la situation ?\nNiveau 0 : Il n'existe aucun document\
+        \ de pr\xE9paration de la r\xE9union de lancement de crise.\nNiveau 1 : Les\
+        \ personnes convi\xE9es au lancement de crise sont d\xE9finies en amont d'une\
+        \ crise.\nNiveau 2 : Les personnes convi\xE9es au lancement de crise sont\
+        \ d\xE9finies en amont d'une crise. L'organisation dispose d'un mod\xE8le\
+        \ de pr\xE9sentation (fonctionnement du dispositif rappel des r\xF4les et\
+        \ responsabilit\xE9s, premi\xE8res orientations / priorit\xE9s, etc.). \n\
+        Niveau 3 : Les personnes convi\xE9es au lancement de crise sont d\xE9finies\
+        \ en amont d'une crise. L'organisation dispose d'un mod\xE8le de pr\xE9sentation\
+        \ mod\xE8le de pr\xE9sentation (fonctionnement du dispositif rappel des r\xF4\
+        les et responsabilit\xE9s, premi\xE8res orientations / priorit\xE9s, etc.)\
+        \ ainsi que d'autres mod\xE8les utiles \xE0 la gestion de crise (points de\
+        \ situation, graphique de r\xE9solution, pr\xE9sentation de suivi de crise,\
+        \ etc.). "
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '5.2'
+      description: "Un suivi de crise est-il mis en place ?\nNiveau 0 : Les d\xE9\
+        cisions prises pendant la crise ne font pas l'objet d'un suivi.\nNiveau 1\
+        \ : Les d\xE9cisions prises pendant la crise font l'objet d'un suivi informel.\n\
+        Niveau 2 : Un registre (type main courante) est mis en place pour suivre les\
+        \ d\xE9cisions prises pendant la crise.\nNiveau 3 : Un registre (type main\
+        \ courante) est mis en place pour suivre les risques, les d\xE9rogations,\
+        \ et les communications internes et externes, y compris les sollicitations\
+        \ des clients, des partenaires et des autorit\xE9s. "
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '5.3'
+      description: "Les conditions de sortie de crise sont-elles pr\xE9 d\xE9finies\
+        \ et \xE9valu\xE9es durant la crise ?\nNiveau 0 : Aucun processus d'\xE9valuation\
+        \ des crit\xE8res de sortie de crise n'est mis en place.\nNiveau 1 : Les processus\
+        \ pr\xE9voient l'\xE9valuation des crit\xE8res de sortie de crise au d\xE9\
+        marrage de la crise.\nNiveau 2 : Les processus pr\xE9voient une r\xE9\xE9\
+        valuation des crit\xE8res de sortie de crise pendant la crise. \nNiveau 3\
+        \ : Le processus de r\xE9\xE9valuation des crit\xE8res de sortie de crise\
+        \  prend en compte, en particulier, les connaissances sur l\u2019attaque,\
+        \ le r\xE9tablissement des services et la remise en production des syst\xE8\
+        mes affect\xE9s."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:5.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '5.4'
+      description: "Quels sont les moyens logistiques pr\xE9vus pour une gestion de\
+        \ crise cyber ?\nNiveau 0 : La logistique de crise n'a pas \xE9t\xE9 formalis\xE9\
+        e.\nNiveau 1 : Des salles de r\xE9unions permettant aux diff\xE9rentes cellules\
+        \ de crise de se retrouver et de travailler ensemble sont identifi\xE9es et\
+        \ mobilisables.\nNiveau 2 : Des salles de r\xE9unions permettant aux diff\xE9\
+        rentes cellules de crise de se retrouver et de travailler ensemble sont mises\
+        \ \xE0 disposition. Si des prestataires sont mobilis\xE9s, une liste nominative\
+        \ des personnes est communiqu\xE9e aux \xE9quipes logistiques pour fournir\
+        \ des badges et un acc\xE8s aux locaux. \nUne personne est d\xE9di\xE9e au\
+        \ suivi RH.\nNiveau 3 : Des salles de r\xE9unions permettant aux diff\xE9\
+        rentes cellules de crise de se retrouver et de travailler ensemble sont mises\
+        \ \xE0 disposition. Si des prestataires sont mobilis\xE9s, une liste nominative\
+        \ des personnes est communiqu\xE9e aux \xE9quipes logistiques pour fournir\
+        \ des badges et un acc\xE8s aux locaux. \nUne personne est d\xE9di\xE9e au\
+        \ suivi RH. Des moyens de restauration, de logement, de transport sont mis\
+        \ \xE0 disposition des \xE9quipes impliqu\xE9es, y compris en dehors du temps\
+        \ de travail habituel. Les besoins familiaux sont pris en compte voire solutionn\xE9\
+        s."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:5.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node18
+      ref_id: '5.5'
+      description: "Les besoins en assurance en cas de crise cyber sont-ils correctement\
+        \ couverts ?\nNiveau 0 : Les besoins d'assurance en cas de crise cyber ne\
+        \ sont pas identifi\xE9s. L'\xE9tendue de la couverture d'assurance n'est\
+        \ pas clairement identifi\xE9e. \nNiveau 1 :  Les besoins en cas de crise\
+        \ cyber sont identifi\xE9s pour compl\xE9ter les dispositifs op\xE9rationnels\
+        \ existants (expertise, couverture des frais, etc.). Un \xE9tat des lieux\
+        \ est men\xE9 pour identifier la couverture et les polices existantes au sein\
+        \ de l\u2019organisation.\nNiveau 2 : Les besoins en cas de crise cyber sont\
+        \ identifi\xE9s pour compl\xE9ter les dispositifs op\xE9rationnels existants\
+        \ (expertise, couverture des frais, etc.). Un \xE9tat des lieux est men\xE9\
+        \ pour identifier la couverture et les polices existantes au sein de l\u2019\
+        organisation.  \nUn seuil d\u2019activation des polices d\u2019assurance est\
+        \ d\xE9fini. Sa mise en \u0153uvre est test\xE9e dans le cadre d\u2019un exercice\
+        \ de gestion de crise cyber.\nUne fiche de bonnes pratiques est formalis\xE9\
+        e pour faciliter l\u2019utilisation de la police d\u2019assurance en cas de\
+        \ crise : contacts de l\u2019assureur, conservation des justificatifs etc.\n\
+        Niveau 3 :  Un \xE9tat des lieux est men\xE9 pour identifier la couverture\
+        \ et les polices existantes au sein de l\u2019organisation.\nCes besoins en\
+        \ cas de crise cyber sont identifi\xE9s pour compl\xE9ter les dispositifs\
+        \ op\xE9rationnels existants (expertise, couverture des frais, etc.).\nUne\
+        \ fiche de bonnes pratiques est formalis\xE9e pour faciliter l\u2019utilisation\
+        \ de la police d\u2019assurance en cas de crise : contacts de l\u2019assureur,\
+        \ conservation des justificatifs etc.\nUn seuil d\u2019activation des polices\
+        \ d\u2019assurance est d\xE9fini. Sa mise en \u0153uvre est test\xE9e dans\
+        \ le cadre d\u2019exercice de gestion de crise cyber avec le cyber assureur.\n\
+        L\u2019utilisation du contrat d\u2019assurance fait l\u2019objet d\u2019un\
+        \ retour d\u2019exp\xE9rience apr\xE8s chaque activation."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      assessable: false
+      depth: 1
+      name: Communication de crise et relations externes
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:5.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '5.6'
+      description: "Comment est activ\xE9e l'assurance cyber ?\nNiveau 0 : Il n'existe\
+        \ pas de processus pour activer l'assurance cyber.\nNiveau 1 : L\u2019assurance\
+        \ cyber est activ\xE9e sur d\xE9cision de la cellule strat\xE9gique.\nNiveau\
+        \ 2 : L\u2019assurance cyber est activ\xE9e sur d\xE9cision de la cellule\
+        \ strat\xE9gique, selon les crit\xE8res pr\xE9\xE9tablis.\nNiveau 3 : L\u2019\
+        assurance cyber est activ\xE9e sur d\xE9cision de la cellule strat\xE9gique,\
+        \ selon les crit\xE8res pr\xE9\xE9tablis. Une synth\xE8se des \xE9v\xE8nements\
+        \ et de la situation actuelle est formalis\xE9e pour la partager avec l\u2019\
+        assureur."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:6.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '6.1'
+      description: "Les parties prenantes \xE0 contacter ou tenir inform\xE9es en\
+        \ cas de crise sont-elles identifi\xE9es ?\nNiveau 0 : La liste des parties\
+        \ prenantes \xE0 contacter ou tenir inform\xE9es n'est pas formalis\xE9e.\
+        \ \nNiveau 1 : La liste des parties prenantes est pr\xE9-identifi\xE9e avec\
+        \ leurs contacts.\nLes contacts suivants sont notamment identifi\xE9s:\n-\
+        \ contacts internes\n- autorit\xE9s\nNiveau 2 : La liste des parties prenantes\
+        \ est pr\xE9-identifi\xE9e avec leurs contacts, avec une contribution des\
+        \ \xE9quipes IT.\nLes contacts suivants sont notamment identifi\xE9s:\n- contacts\
+        \ internes\n- autorit\xE9s\n- public / m\xE9dia\nNiveau 3 : La liste des parties\
+        \ prenantes est pr\xE9-identifi\xE9e avec leurs contacts avec une contribution\
+        \ des \xE9quipes IT. Le contact d'urgence ainsi que le moyen de communication\
+        \ de secours des clients et fournisseurs les plus critiques est pr\xE9vu dans\
+        \ les contrats. Un fichier presse (liste des contacts des journalistes ainsi\
+        \ que les supports pour lesquels ils r\xE9digent) est disponible et stock\xE9\
+        \ hors ligne. \nLes contacts suivants sont notamment identifi\xE9s:\n- contacts\
+        \ internes\n- autorit\xE9s\n- public / m\xE9dia\n- clients importants\n- fournisseurs\n\
+        - partenaires techniques (CSIRT, etc.)"
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '6.2'
+      description: "L'organisation dispose-t-elle de moyens de communication alternatifs\
+        \ ?\nNiveau 0 : L'organisation ne poss\xE8de pas de moyens de communication\
+        \ alternatifs.\nNiveau 1 : L'organisation poss\xE8de des moyens de communication\
+        \ alternatifs internes.\nNiveau 2 : L'organisation poss\xE8de des moyens de\
+        \ communication alternatifs internes et externes.\nNiveau 3 : Des moyens de\
+        \ communication alternatifs internes et externes sont identifi\xE9s. Ils peuvent\
+        \ servir \xE0 atteindre les diff\xE9rentes cibles de la communication de crise.\
+        \ Ces solutions sont maintenues en conditions op\xE9rationnelles et de s\xE9\
+        curit\xE9, et test\xE9es une fois par an."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '7.1'
+      description: "La strat\xE9gie de communication cyber est-elle formalis\xE9e\
+        \ ?\nNiveau 0 : La strat\xE9gie de communication de crise en cas d'incident\
+        \ cyber n'est pas formalis\xE9e. \nNiveau 1 : Une strat\xE9gie de  crise en\
+        \ cas d'incident cyber est \xE9tablie de mani\xE8re informelle.\nNiveau 2\
+        \ : Une strat\xE9gie de communication de crise en cas d'incident cyber est\
+        \ formalis\xE9e et valid\xE9e sur la base de sc\xE9narios de r\xE9f\xE9rence\
+        \ cyber sont disponibles. Des \xE9l\xE9ments de langage sont formalis\xE9\
+        s en fonction des sc\xE9narios cyber de r\xE9f\xE9rence identifi\xE9s. Plusieurs\
+        \ sujets m\xE9diatiques sp\xE9cifiques sont anticip\xE9s (e.g. attribution\
+        \ de l'attaque).\nNiveau 3 : Une strat\xE9gie de communication de crise en\
+        \ cas d'incident cyber est formalis\xE9e et valid\xE9e et test\xE9e lors d'exercices\
+        \ de crise cyber. Les \xE9quipes sont familiaris\xE9es et entra\xEEn\xE9es\
+        \ \xE0 la communication de crise cyber et assurent une formation r\xE9guli\xE8\
+        re aupr\xE8s des agents et des responsables de l\u2019entit\xE9.  Des sc\xE9\
+        narios de r\xE9f\xE9rence cyber sont disponibles. Des \xE9l\xE9ments de langage\
+        \ sont formalis\xE9s en fonction des sc\xE9narios cyber de r\xE9f\xE9rence\
+        \ identifi\xE9s. Plusieurs sujets m\xE9diatiques sp\xE9cifiques sont anticip\xE9\
+        s (e.g. attribution de l'attaque).\nUn porte-parole de crise a \xE9t\xE9 pr\xE9\
+        -identifi\xE9."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '7.2'
+      description: "Comment est r\xE9alis\xE9e l'analyse de risque communicationnelle\
+        \  (pour identifier les risques provenant de communications de m\xE9dias,\
+        \ de salari\xE9s, de concurrents, d'autorit\xE9s, etc.) ?\nNiveau 0 : Aucune\
+        \ m\xE9thode d'analyse de risque communicationnelle  n'est disponible. \n\
+        Niveau 1 : Les grandes orientations permettant d'identifier les risques communicationnelles\
+        \ sont identifi\xE9es mais non formalis\xE9es.\nNiveau 2 : Les grandes orientations\
+        \ permettant d'identifier les risques communicationnelles d\xE9finis dans\
+        \ un document (proc\xE9dure, m\xE9thode, etc.). L'analyse de risque m\xE9\
+        diatique s'appuie sur les sc\xE9narios de r\xE9f\xE9rence cyber. \nNiveau\
+        \ 3 : Une veille m\xE9diatique est mise en place pour alerter en cas de sujets\
+        \ crisog\xE8nes dans les m\xE9dias ou sur les r\xE9seaux sociaux. Une m\xE9\
+        thode d'analyse de risque communicationnelle est disponible."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '7.3'
+      description: "Comment est pr\xE9par\xE9e l'\xE9quipe juridique \xE0 une crise\
+        \ cyber ?\nNiveau 0 : L'\xE9quipe juridique n'est pas mobilis\xE9e dans la\
+        \ gestion de la crise cyber. \nNiveau 1 : L'\xE9quipe juridique est mobilis\xE9\
+        e dans la gestion de crise cyber afin d'identifier les obligations qui ne\
+        \ pourront pas \xEAtre respect\xE9es aupr\xE8s des partenaires, clients et\
+        \ fournisseurs.\nNiveau 2 : L'\xE9quipe juridique est mobilis\xE9e dans la\
+        \ gestion de crise cyber afin d'identifier les obligations qui ne pourront\
+        \ pas \xEAtre respect\xE9es aupr\xE8s des partenaires, clients et fournisseurs.\
+        \ Elle s'assure en lien avec les \xE9quipes communication, achats et commerciales\
+        \ de la transmission des informations n\xE9cessaires aux partenaires.\nNiveau\
+        \ 3 : L'\xE9quipe juridique est mobilis\xE9e dans la gestion de crise cyber\
+        \ afin d'identifier les obligations qui ne pourront pas \xEAtre respect\xE9\
+        es aupr\xE8s des partenaires, clients et fournisseurs. Elle s'assure en lien\
+        \ avec les \xE9quipes  communication, achats et commerciales de la transmission\
+        \ des informations n\xE9cessaires aux partenaires. Les d\xE9lais et informations\
+        \ \xE0 transmettre sont pr\xE9vus dans tous les contrats critiques. "
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '7.4'
+      description: "Comment sont anticip\xE9es les actions de d\xE9claration d'incident\
+        \ ?\nNiveau 0 : Les d\xE9clarations obligatoires ne sont pas pr\xE9vues.\n\
+        Niveau 1 : Les d\xE9clarations obligatoires sont anticip\xE9es dans un processus\
+        \ informel.\nNiveau 2 : Les actions de d\xE9claration d\u2019incident (ANSSI,\
+        \ CNIL, autorit\xE9s judiciaires) sont centralis\xE9es et coordonn\xE9es par\
+        \ la cellule strat\xE9gique. En cas de violation des donn\xE9es personnelles\
+        \ (r\xE8glement g\xE9n\xE9ral sur la protection des donn\xE9es), une notification\
+        \ de l\u2019incident est r\xE9alis\xE9e par le d\xE9l\xE9gu\xE9 \xE0 la protection\
+        \ des donn\xE9es.\nNiveau 3 : Les actions de d\xE9claration d\u2019incident\
+        \ (ANSSI, CNIL, autorit\xE9s judiciaires) sont centralis\xE9es et coordonn\xE9\
+        es par la cellule strat\xE9gique. En cas de violation des donn\xE9es personnelles\
+        \ (r\xE8glement g\xE9n\xE9ral sur la protection des donn\xE9es), une notification\
+        \ de l\u2019incident est r\xE9alis\xE9e par le d\xE9l\xE9gu\xE9 \xE0 la protection\
+        \ des donn\xE9es. Dans le cadre d\u2019une crise d\u2019ampleur internationale,\
+        \ les \xE9quipes juridiques prennent en compte la l\xE9gislation en vigueur\
+        \ et coordonnent la notification d\u2019incident aux autorit\xE9s locales.\
+        \ En lien avec les \xE9quipes juridiques, un d\xE9p\xF4t de plainte est envisag\xE9\
+        . "
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:7.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node29
+      ref_id: '7.5'
+      description: "Quelle est la proc\xE9dure de d\xE9claration d'incident ?\nNiveau\
+        \ 0 : Aucun processus de d\xE9claration d'incident cyber n'est mis en place.\n\
+        Niveau 1 : Les \xE9quipes cyber et SI partagent les informations n\xE9cessaires\
+        \ \xE0 la d\xE9claration selon un processus informel.\nNiveau 2 : Les \xE9\
+        quipes cyber et SI partagent les informations n\xE9cessaires \xE0 la d\xE9\
+        claration selon un processus formalis\xE9 et valid\xE9. En fonction des obligations\
+        \ l\xE9gales, une d\xE9claration d\u2019incident est r\xE9alis\xE9e et les\
+        \ \xE9l\xE9ments de compromission sont partag\xE9s avec l\u2019ANSSI.\nNiveau\
+        \ 3 : Les \xE9quipes cyber et SI partagent les informations n\xE9cessaires\
+        \ \xE0 la d\xE9claration selon un processus valid\xE9, stock\xE9 hors ligne\
+        \ et mis \xE0 jour r\xE9guli\xE8rement. En fonction des obligations l\xE9\
+        gales, une d\xE9claration d\u2019incident est r\xE9alis\xE9e et les \xE9l\xE9\
+        ments de compromission sont partag\xE9s avec l\u2019ANSSI.\nLes preuves de\
+        \ compromission (serveurs, donn\xE9es) sont conserv\xE9es pour la justice\
+        \ (si judiciarisation) et pour l\u2019assureur (si activation d\u2019un contrat\
+        \ d\u2019assurance). En cas de judiciarisation, un huissier sp\xE9cialis\xE9\
+        \ est sollicit\xE9 pour \xE9tablir le constat. "
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      assessable: false
+      depth: 1
+      name: "D\xE9tection et r\xE9ponse \xE0 incidents"
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '8.1'
+      description: "Les modalit\xE9s d'escalade d'une alerte vers la cellule strat\xE9\
+        gique sont-elles formalis\xE9es ?\nNiveau 0 : Les modalit\xE9s d\u2019escalade\
+        \ de l\u2019alerte vers le niveau strat\xE9gique n'est pas formalis\xE9e.\
+        \ \nNiveau 1 : Les modalit\xE9s d\u2019escalade de l\u2019alerte vers le niveau\
+        \ strat\xE9gique est d\xE9finie de mani\xE8re informelle.\nNiveau 2 : Les\
+        \ modalit\xE9s d\u2019escalade de l\u2019alerte vers le niveau strat\xE9gique\
+        \ est valid\xE9e. Elle pr\xE9voit un mode \xAB alerte \xBB et un mode \xAB\
+        \ crise \xBB.\nNiveau 3 : Les modalit\xE9s d\u2019escalade de l\u2019alerte\
+        \ vers le niveau strat\xE9gique est valid\xE9e. Plusieurs modes sont pr\xE9\
+        vus dont un mode \xAB alerte \xBB et un mode \xAB crise \xBB. Le dispositif\
+        \ de crise peut s'adapter au mode choisi. La chaine de remont\xE9e d'alerte\
+        \ est test\xE9e r\xE9guli\xE8rement lors d'exercices de crise."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '8.2'
+      description: "Un processus d'alerte, de gestion et de r\xE9ponse d\xE9di\xE9\
+        \ aux incidents cyber est-il formalis\xE9 ?\nNiveau 0 : Il n'existe pas de\
+        \ processus d'alerte, de gestion et de r\xE9ponse aux incidents. \nNiveau\
+        \ 1 : Un processus d'alerte, de gestion et de r\xE9ponse aux incidents int\xE9\
+        grant un volet \xAB s\xE9curit\xE9 du num\xE9rique \xBB existe de mani\xE8\
+        re informelle. \nNiveau 2 : Un processus d'alerte, de gestion et de r\xE9\
+        ponse aux incidents, s\u2019appuyant notamment sur un dispositif de r\xE9\
+        ponse \xE0 incident et des outils de d\xE9tection et de gestion d\u2019incident\
+        \ et int\xE9grant un volet \xAB s\xE9curit\xE9 du num\xE9rique \xBB est formalis\xE9\
+        \ et valid\xE9. \nLe processus pr\xE9voit une classification des incidents.\n\
+        Niveau 3 : Un processus d'alerte, de gestion et de r\xE9ponse aux incidents,\
+        \ s\u2019appuyant notamment sur un dispositif de r\xE9ponse \xE0 incident\
+        \ et des outils de d\xE9tection et de gestion d\u2019incident et int\xE9grant\
+        \ un volet \xAB s\xE9curit\xE9 du num\xE9rique \xBB est valid\xE9, stock\xE9\
+        \ hors-ligne et test\xE9 r\xE9guli\xE8rement. \nLe processus pr\xE9voit une\
+        \ classification des incidents, en prenant en compte la nature, le p\xE9rim\xE8\
+        tre et l'impact des incidents. Elle est accompagn\xE9e de fiches pratiques\
+        \ pour acc\xE9l\xE9rer la r\xE9ponse \xE0 incident."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '9.1'
+      description: "Comment sont men\xE9es les actions de d\xE9tection et d'investigation?\n\
+        Niveau 0 : L'organisation ne poss\xE8de pas d'outils de d\xE9tection, d'investigation\
+        \ et de r\xE9ponse \xE0 incident.\nNiveau 1 : Des outils sont mis en place\
+        \ pour faciliter les actions de d\xE9tection et d'investigation.\nNiveau 2\
+        \ : Des outils de d\xE9tection et d'endiguement sont mis en place pour faciliter\
+        \ les actions de d\xE9tection et la r\xE9ponse \xE0 incident.\nNiveau 3 :\
+        \ Des outils de d\xE9tection et d'endiguement sont mis en place et test\xE9\
+        s r\xE9guli\xE8rement lors d'exercice pour faciliter les actions de d\xE9\
+        tection et la r\xE9ponse \xE0 incident. \nDes outils num\xE9riques d\xE9connect\xE9\
+        s, sont disponibles pour r\xE9aliser les investigations num\xE9riques.\nLes\
+        \ \xE9quipes sont form\xE9es \xE0 l'utilisation de ces outils."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:9.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '9.2'
+      description: "Comment sont formalis\xE9es les proc\xE9dure de confinement en\
+        \ amont de la crise ?\nNiveau 0 : Les proc\xE9dures de confinement ne sont\
+        \ pas identifi\xE9es. \nNiveau 1 : Les actions \xE0 r\xE9aliser par les \xE9\
+        quipes techniques sont d\xE9finies de mani\xE8re informelle. \nNiveau 2 :\
+        \ Des listes d'actions \xE0 r\xE9aliser par les \xE9quipes techniques sont\
+        \ formalis\xE9es et valid\xE9es. Des m\xE9mos techniques sur les proc\xE9\
+        dures de confinement et d\u2019\xE9radication d\u2019une menace cyber active\
+        \ sont d\xE9finis. Ces proc\xE9dures sont adapt\xE9es aux diff\xE9rents types\
+        \ de menaces cyber (DDoS, ran\xE7ongiciel, fuite de donn\xE9es, etc.).\nNiveau\
+        \ 3 : Des listes d'actions \xE0 r\xE9aliser par les \xE9quipes techniques\
+        \ sont formalis\xE9es et valid\xE9es. Des m\xE9mos techniques sur les proc\xE9\
+        dures de confinement et d\u2019\xE9radication d\u2019une menace cyber active\
+        \ sont formalis\xE9s et test\xE9s. Ces proc\xE9dures sont adapt\xE9es aux\
+        \ diff\xE9rents types de menaces cyber (DDoS, ran\xE7ongiciel, fuite de donn\xE9\
+        es, etc.)."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:9.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '9.3'
+      description: "Des m\xE9mos techniques sont-ils \xE0 disposition des \xE9quipes\
+        \ ?\nNiveau 0 : Des m\xE9mos techniques ne sont pas formalis\xE9s. \nNiveau\
+        \ 1 : Les m\xE9mos techniques int\xE8grent des listes d'actions \xE0 mener\
+        \ par les diff\xE9rentes \xE9quipes m\xE9tiers.\nNiveau 2 : Les m\xE9mos techniques\
+        \ sont compl\xE9t\xE9s par les aspects fonctionnels et strat\xE9giques de\
+        \ la gestion de crise et int\xE8grent en particulier des listes d\u2019actions\
+        \ \xE0 mener par les diff\xE9rentes \xE9quipes m\xE9tiers.\nCes m\xE9mos techniques\
+        \ sont adapt\xE9s aux diff\xE9rents types de menaces cyber (DDoS, ran\xE7\
+        ongiciel, fuite de donn\xE9es, etc.).\nNiveau 3 : Les m\xE9mos techniques\
+        \ sont compl\xE9t\xE9s par les aspects fonctionnels et strat\xE9giques de\
+        \ la gestion de crise et int\xE8grent en particulier des listes d\u2019actions\
+        \ \xE0 mener par les diff\xE9rentes \xE9quipes m\xE9tiers.\nCes m\xE9mos sont\
+        \ test\xE9s lors d\u2019exercices de gestion de crise. Ils font l\u2019objet\
+        \ d\u2019une mise \xE0 jour apr\xE8s chaque exercice ou d\u2019une utilisation\
+        \ en situation de crise. Ces m\xE9mos techniques sont adapt\xE9s aux diff\xE9\
+        rents types de menaces cyber (DDoS, ran\xE7ongiciel, fuite de donn\xE9es,\
+        \ etc.)."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:9.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '9.4'
+      description: "Comment est d\xE9fini le plan de durcissement durant la crise\
+        \ ? Comment les investigations sont-elles int\xE9gr\xE9s dans le travail de\
+        \ durcissement ?\nNiveau 0 : Aucun plan de durcissement n'est d\xE9fini ou\
+        \ mis en place.\nNiveau 1 : Des actions de durcissement sont mises en place\
+        \ sur la base de fiches r\xE9flexes, sans tenir compte des r\xE9sultats d'investigation.\n\
+        Niveau 2 : Un plan de durcissement et de rem\xE9diation est \xE9labor\xE9\
+        \ de fa\xE7on  it\xE9rative en fonction des retours des investigations num\xE9\
+        riques. Les fiches r\xE9flexes sont adapt\xE9es aux diff\xE9rents types de\
+        \ menaces cyber (DDoS, ran\xE7ongiciel, fuite de donn\xE9es, etc.).\nNiveau\
+        \ 3 : Un plan de durcissement et de rem\xE9diation est \xE9labor\xE9 de fa\xE7\
+        on  it\xE9rative en fonction des retours des investigations num\xE9riques.\
+        \ Les fiches r\xE9flexes sont adapt\xE9es aux diff\xE9rents types de menaces\
+        \ cyber (DDoS, ran\xE7ongiciel, fuite de donn\xE9es, etc.).\nUne bulle s\xE9\
+        curis\xE9e est mise en place pour les op\xE9rations les plus sensibles et\
+        \ la reconstruction du syst\xE8me d'information. Cette bulle, ainsi que les\
+        \ syst\xE8mes reconstruits sont suivi via des outils de surveillance, en particulier\
+        \ ceux \nidentifi\xE9s comme pr\xE9c\xE9demment compromis par l\u2019investigation."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:9.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '9.5'
+      description: "Quelle gouvernance est mise en place dans le cadre du durcissement\
+        \ et de la rem\xE9diation des SI?\nNiveau 0 : Aucune gouvernance n'est d\xE9\
+        fini pour suivre le plan de durcissement des SI.\nNiveau 1 : Un plan d'action\
+        \ consolide la liste des mesures \xE0 entreprendre pour durcir les syst\xE8\
+        mes et isoler l'attaquant. Les mesures sont mises en place et consolid\xE9\
+        s dans le document.\nNiveau 2 : Un plan d'action consolide la liste des actions\
+        \ \xE0 entreprendre pour durcir les syst\xE8mes et isoler l'attaquant. Les\
+        \ mesures sont mises en place et consolid\xE9s dans le document. \nEn cas\
+        \ de mesures structurantes, les risques et impacts sur les SI et les m\xE9\
+        tiers sont identifi\xE9s et valid\xE9s en amont de leur d\xE9ploiement, et\
+        \ les risques de ne pas appliquer les mesures sont consolid\xE9s.\nNiveau\
+        \ 3 : Un plan d'actions consolide la liste des actions \xE0 entreprendre pour\
+        \ durcir les syst\xE8mes et isoler l'attaquant. Les mesures sont mises en\
+        \ place et consolid\xE9s dans le document, ainsi que les risques et impacts\
+        \ associ\xE9s \xE0 l'application ou non-application des mesures.\nUn plan\
+        \ de conduite du changement, soutenu par la cellule d\xE9cisionnelle, est\
+        \ mis en place pour aider les utilisateurs suites aux changements n\xE9cessaire\
+        \ dans les pratiques d'utilisation ou d'administration des syst\xE8mes."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:9.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node38
+      ref_id: '9.6'
+      description: "Comment les mesures conservatoires et de rem\xE9diation sont-elles\
+        \ valid\xE9es par la cellule strat\xE9gique durant la crise ?\nNiveau 0 :\
+        \ Les mesures conservatoires et de rem\xE9diation mises en place par les \xE9\
+        quipes cyber IT ne font jamais l'objet d'une validation par la cellule strat\xE9\
+        gique.\nNiveau 1 : Les cas o\xF9 les mesures conservatoires et de rem\xE9\
+        diation font l'objet d'une validation par la cellule strat\xE9gique sont d\xE9\
+        finis informellement.\nNiveau 2 : Les cas o\xF9 les mesures conservatoires\
+        \ et de rem\xE9diation font l'objet d'une validation par la cellule strat\xE9\
+        gique sont formalis\xE9s en amont et incluent en particulier toutes les mesures\
+        \ qui ont des cons\xE9quences sur la continuit\xE9 de l'activit\xE9 (isolement,\
+        \ d\xE9connexion d\u2019applicatifs ou serveur, blocage des acc\xE8s Internet,\
+        \ etc.).\nNiveau 3 : Les cas o\xF9 les mesures conservatoires et de rem\xE9\
+        diation font l'objet d'une validation par la cellule strat\xE9gique sont formalis\xE9\
+        s en amont et incluent en particulier toutes les mesures qui ont des cons\xE9\
+        quences sur la continuit\xE9 de l'activit\xE9 (isolement, d\xE9connexion d\u2019\
+        applicatifs ou serveur, blocage des acc\xE8s Internet, etc.). La cellule strat\xE9\
+        gique est form\xE9e sur les cons\xE9quences de continuit\xE9 de certaines\
+        \ mesures, et des exercices sur tables testent leur prise de d\xE9cision."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      assessable: false
+      depth: 1
+      name: "Continuit\xE9 d'activit\xE9 et reconstruction"
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.1'
+      description: "Comment est \xE9tablie et prioris\xE9e la liste des services critiques\
+        \ ?\nNiveau 0 : Les services critiques et applications associ\xE9s ne sont\
+        \ pas list\xE9es.\nNiveau 1 : Une liste des services critiques et des applications\
+        \ associ\xE9es est informelle ou incompl\xE8te.\nNiveau 2 : Sur la base d'un\
+        \ bilan d'impact, la liste des services critiques et des applications associ\xE9\
+        es est formalis\xE9e. Elle est class\xE9e selon la criticit\xE9 des services.\n\
+        Niveau 3 : Sur la base d'un bilan d'impact, la cartographie des services,\
+        \ des applications et des activit\xE9s critiques, ainsi que des donn\xE9es\
+        \ essentielles a \xE9t\xE9 \xE9tablie. Cette cartographie est r\xE9guli\xE8\
+        rement mise \xE0 jour et sauvegard\xE9e hors ligne. Elle est class\xE9e selon\
+        \ la criticit\xE9 des services."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.2'
+      description: "Comment sont cartographi\xE9s les actifs technologiques ?\nNiveau\
+        \ 0 : Les principaux actifs technologiques ne sont pas list\xE9s.\nNiveau\
+        \ 1 : Les principaux actifs technologiques et leurs d\xE9pendances sont list\xE9\
+        s de mani\xE8re informelle. \nNiveau 2 : La cartographie des principaux actifs\
+        \ technologiques et leurs d\xE9pendances est formalis\xE9e et sauvegard\xE9\
+        e hors-ligne. \nNiveau 3 : Une cartographie des principaux actifs technologiques\
+        \ et leurs d\xE9pendances est \xE0 jour et sauvegard\xE9e hors-ligne tous\
+        \ les ans."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.3'
+      description: "Comment sont cartographi\xE9s les services num\xE9riques externalis\xE9\
+        s ?\nNiveau 0 : Les interconnexions avec les services externalis\xE9s ne sont\
+        \ pas list\xE9es. \nNiveau 1 : Les interconnexions avec les services externalis\xE9\
+        s sont list\xE9es de mani\xE8re informelle.\nNiveau 2 : Les interconnexions\
+        \ sont cartographi\xE9es, la cartographie est \xE0 jour et disponibles hors-ligne.\n\
+        Niveau 3 : Les interconnexions sont cartographi\xE9es, la cartographie est\
+        \ \xE0 jour et disponibles hors-ligne. La liste de contacts d'urgences des\
+        \ prestataires est \xE9galement formalis\xE9e et disponible-hors ligne. "
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.4'
+      description: "Quelles informations sont inclues dans le plan de continuit\xE9\
+        \ d'activit\xE9 ?\nNiveau 0 : Il n'existe pas de PCA couvrant les risques\
+        \ num\xE9riques et cyber.\nNiveau 1 : Un ou plusieurs PCA inclut l\u2019analyse,\
+        \ l\u2019\xE9valuation et le traitement des risques num\xE9riques et cyber.\
+        \ \nNiveau 2 : Un ou plusieurs PCA inclut l\u2019analyse, l\u2019\xE9valuation\
+        \ et le traitement des risques num\xE9riques et cyber. \nCes PCA prennent\
+        \ notamment en compte une perte totale ou un fonctionnement tr\xE8s d\xE9\
+        grad\xE9 des services et des processus critiques de l\u2019organisation.\n\
+        Des mesures relatives au PCA, tel que le temps d\u2019arr\xEAt maximal tol\xE9\
+        rable et le temps de r\xE9cup\xE9ration des donn\xE9es sont d\xE9finies en\
+        \ int\xE9grant les sc\xE9narios cyber.\nDes solutions de continuit\xE9 d\u2019\
+        activit\xE9 sont identifi\xE9es en lien avec les \xE9quipes cyber et IT. \n\
+        Niveau 3 : Un ou plusieurs PCA inclut l\u2019analyse, l\u2019\xE9valuation\
+        \ et le traitement des risques num\xE9riques et cyber et prend notamment en\
+        \ compte une perte totale ou un fonctionnement tr\xE8s d\xE9grad\xE9 des services\
+        \ et des processus critiques de l\u2019organisation.\nDes mesures relatives\
+        \ au PCA, tel que le temps d\u2019arr\xEAt maximal tol\xE9rable et le temps\
+        \ de r\xE9cup\xE9ration des donn\xE9es sont d\xE9finies en int\xE9grant les\
+        \ sc\xE9narios cyber.\nDes solutions de continuit\xE9 d\u2019activit\xE9 sont\
+        \ identifi\xE9es en lien avec les \xE9quipes cyber et IT. Elles sont test\xE9\
+        es. \nDes dispositifs op\xE9rationnels m\xE9tiers sont envisag\xE9s et maintiennent\
+        \ \xE0 un seuil minimum le fonctionnement des processus critiques de l\u2019\
+        organisation. Les dispositifs sont test\xE9s."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.5'
+      description: "Comment sont consult\xE9s les m\xE9tiers pour l'int\xE9gration\
+        \ des aspects cyber dans les PCA \"M\xE9tiers\"?\nNiveau 0 : Les m\xE9tiers\
+        \ ne sont pas consult\xE9s lors de l'int\xE9gration des aspects cyber dans\
+        \ les PCA \"M\xE9tiers\".\nNiveau 1 : Les m\xE9tiers sont consult\xE9s de\
+        \ mani\xE8re informelle lors de l'int\xE9gration des aspects cyber dans les\
+        \ PCA \"M\xE9tiers\".\nNiveau 2 : Les \xE9quipes cyber et SI accompagnent\
+        \ les m\xE9tiers pour l\u2019analyse, l\u2019\xE9valuation et le traitement\
+        \ des risques num\xE9riques et cyber via une compr\xE9hension des impacts\
+        \ pour l\u2019activit\xE9 m\xE9tiers, afin d'int\xE9grer les ressources SI\
+        \ dans les PCA m\xE9tiers.\nNiveau 3 : Les \xE9quipes cyber et SI accompagnent\
+        \ les m\xE9tiers pour l\u2019analyse, l\u2019\xE9valuation et le traitement\
+        \ des risques num\xE9riques et cyber via une compr\xE9hension des impacts\
+        \ pour l\u2019activit\xE9 m\xE9tiers, afin d'int\xE9grer les ressources SI\
+        \ dans les PCA m\xE9tiers. Les \xE9quipes cyber et SI mettent \xE0 jour r\xE9\
+        guli\xE8rement, avec les m\xE9tiers, l'analyse et le traitement des risques."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.6'
+      description: "Comment l'activit\xE9 des prestataires de services num\xE9riques\
+        \ (h\xE9bergement, nuagique, administration/maintenance, etc.) est inclue\
+        \ dans le PCA ?\nNiveau 0 : Le PCA ne pr\xE9voit pas de situation en lien\
+        \ avec l'activit\xE9 des prestataires.\nNiveau 1 : Le PCA ne pr\xE9voit qu'une\
+        \ partie des situations li\xE9es \xE0 l'activit\xE9 des prestataires. \nNiveau\
+        \ 2 : Les p\xE9rim\xE8tres du PCA int\xE8grent \xE9galement la perte d\u2019\
+        une solution nuagique, d\u2019un partenaire ou prestataire de services num\xE9\
+        riques de l\u2019entit\xE9. \nNiveau 3 : Les p\xE9rim\xE8tres du PCA int\xE8\
+        grent \xE9galement la perte d\u2019une solution nuagique, d\u2019un partenaire\
+        \ ou prestataire de l\u2019entit\xE9. \nLes modalit\xE9s de gestion de crise\
+        \ cyber sont int\xE9gr\xE9es dans les contrats d\u2019infog\xE9rance et d\u2019\
+        externalisation. \nLe PCA est maintenu \xE0 jour tous les ans et stock\xE9\
+        \ hors-ligne."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.7'
+      description: "Comment est envisag\xE9e l'indisponibilit\xE9 des services num\xE9\
+        riques dans le PCA ?\nNiveau 0 : Les PCA m\xE9tiers ne pr\xE9voit pas l'indisponibilit\xE9\
+        \ des services num\xE9riques. \nNiveau 1 : En cas d'indisponibilit\xE9 des\
+        \ services num\xE9riques, des solutions de continuit\xE9 d'activit\xE9 m\xE9\
+        tier ont \xE9t\xE9 d\xE9finies de mani\xE8re informelle. \nNiveau 2 : En cas\
+        \ d'indisponibilit\xE9 des services num\xE9riques, des solutions de continuit\xE9\
+        \ d'activit\xE9 m\xE9tier ont \xE9t\xE9 d\xE9finies et valid\xE9es. \nNiveau\
+        \ 3 : En cas d\u2019indisponibilit\xE9 des services et outils num\xE9riques,\
+        \ des solutions de continuit\xE9 d\u2019activit\xE9 sont d\xE9finies, test\xE9\
+        es et mises \xE0 jour r\xE9guli\xE8rement."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.8'
+      description: "Comment est d\xE9finie les m\xE9triques de continuit\xE9 (TAMT,\
+        \ DMIA, PDMA, TRD) ?\nNiveau 0 : Les m\xE9triques de continuit\xE9 d'activit\xE9\
+        \ ne sont pas d\xE9finies.\nNiveau 1 : Les m\xE9triques de continuit\xE9 d'activit\xE9\
+        \ sont d\xE9finies pour certains services critiques. \nNiveau 2 : Les m\xE9\
+        triques de continuit\xE9 d'activit\xE9 sont d\xE9finies pour chaque service.\
+        \ \nNiveau 3 : Les m\xE9tiers d\xE9finissent pour chaque service Les m\xE9\
+        triques de continuit\xE9 d'activit\xE9 int\xE9grant un temps d\u2019indisponibilit\xE9\
+        \ long, li\xE9 au sc\xE9nario de risque cyber."
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:10.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '10.9'
+      description: "Comment est surveill\xE9 l'\xE9volution de l'\xE9tat de la menace\
+        \ cyber ?\nNiveau 0 : L'\xE9tat de la menace cyber n'est pas surveill\xE9\
+        .\nNiveau 1 : L'\xE9tat de la menace cyber fait l'objet d'une surveillance\
+        \ ponctuelle. \nNiveau 2 : L\u2019\xE9tat de la menace cyber est r\xE9guli\xE8\
+        rement revu et alimente la r\xE9flexion sur la r\xE9silience des solutions\
+        \ et des processus mis en place.\nNiveau 3 : L\u2019\xE9tat de la menace cyber\
+        \ est revu et analys\xE9 r\xE9guli\xE8rement. Il conditionne les choix de\
+        \ solutions et de processus mis en place dans les plans de continuit\xE9 d'activit\xE9\
+        ."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.1'
+      description: "Comment sont prioris\xE9es les actions \xE0 mener pour relancer\
+        \ les services num\xE9riques et l'activit\xE9 des m\xE9tiers ?\nNiveau 0 :\
+        \ Les actions \xE0 r\xE9aliser ne sont pas d\xE9finies. \nNiveau 1 : La liste\
+        \ des actions \xE0 r\xE9aliser est \xE9tablie sans priorisation. \nNiveau\
+        \ 2 : Les actions \xE0 r\xE9aliser sont formalis\xE9es dans un planning avec\
+        \ une priorisation (P0 \u2013 P1 \u2013 P2 \u2013 P3) des applications et\
+        \ des syst\xE8mes en fonction de leur criticit\xE9.\nNiveau 3 : Le planning\
+        \ des actions prioritaires inclut  les reconstructions de l\u2019Active Directory,\
+        \ des serveurs, des postes de travail, des syst\xE8mes de noms de domaines\
+        \ (DNS), des infrastructures de gestion des cl\xE9s (PKI), et de toute infrastructure\
+        \ critique. "
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.2'
+      description: "Comment est d\xE9fini le plan de sauvegarde des donn\xE9es ?\n\
+        Niveau 0 : Aucun plan de sauvegarde des donn\xE9es n'a \xE9t\xE9 d\xE9fini.\
+        \ \nNiveau 1 : Le plan de sauvegarde est d\xE9fini de mani\xE8re informelle.\
+        \ \nNiveau 2 : Le plan de sauvegarde  des donn\xE9es est d\xE9fini et valid\xE9\
+        , et repose sur l'existence de sauvegarde saines. Les sauvegardes sont stock\xE9\
+        s dans un espace s\xE9curis\xE9, respectant la politique de sauvegarde d\xE9\
+        finie et avec une copie hors ligne disponible.\nNiveau 3 : Un plan de sauvegarde\
+        \ et de restauration des donn\xE9es est d\xE9fini et valid\xE9. Ce plan est\
+        \ revu r\xE9guli\xE8rement sur la base d'une analyse de la menace cyber. Il\
+        \ s\u2019appuie sur l\u2019existence de sauvegardes saines. Les sauvegardes\
+        \ sont stock\xE9s dans un espace s\xE9curis\xE9, respectant la politique de\
+        \ sauvegarde d\xE9finie et avec une copie hors ligne disponible.\nCes derni\xE8\
+        res sont catalogu\xE9es dans un stockage prot\xE9g\xE9. Le risque d\u2019\
+        une incoh\xE9rence de donn\xE9es li\xE9es \xE0 leur synchronisation est pris\
+        \ en compte. "
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.3'
+      description: "Les proc\xE9dures de basculement sur un r\xE9seau SI de secours\
+        \ sont-elles formalis\xE9es ?\nNiveau 0 : L'organisation ne poss\xE8de pas\
+        \ de r\xE9seau de secours SI. \nNiveau 1 : L'organisation poss\xE8de un r\xE9\
+        seau de secours SI et les proc\xE9dures de basculement sur ce r\xE9seau sont\
+        \ d\xE9finies de mani\xE8re informelle.\nNiveau 2 : Les proc\xE9dures de basculement\
+        \ sur le r\xE9seau de secours SI sont d\xE9finies et valid\xE9es. \nNiveau\
+        \ 3 : Des proc\xE9dures de basculement sur un r\xE9seau de secours SI sont\
+        \ valid\xE9es et test\xE9es au moins une fois par an."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.4'
+      description: "Les processus de restauration des donn\xE9es et de r\xE9installation\
+        \ des SI sont-ils formalis\xE9s ?\nNiveau 0 : Il n'existe pas de processus\
+        \ de restauration des donn\xE9es ou de r\xE9installation des SI. \nNiveau\
+        \ 1 : Le processus de restauration des donn\xE9es et de r\xE9installation\
+        \ des SI est d\xE9fini de mani\xE8re informelle.\nNiveau 2 : Des processus\
+        \ de restauration des donn\xE9es et de r\xE9installation des SI sont formalis\xE9\
+        s et valid\xE9es,  avec des proc\xE9dures de basculement.\nNiveau 3 : Des\
+        \ processus de restauration des donn\xE9es et de r\xE9installation des SI\
+        \ sont formalis\xE9s et valid\xE9es,  avec des proc\xE9dures de basculement.\
+        \ La restauration des sauvegardes et les proc\xE9dures sont sont test\xE9\
+        es au moins une fois par an. Ces tests sont en particulier r\xE9alis\xE9s\
+        \ en coh\xE9rence avec les processus m\xE9tier, via des tests unitaires et\
+        \ des tests par bloc m\xE9tier (ensemble d'applications coh\xE9rentes pour\
+        \ supporter un processus m\xE9tier)."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.5'
+      description: "Quelles gouvernance est mise en place dans le cadre de la reconstruction\
+        \ des SI?\nNiveau 0 : La reconstruction des SI n'est pas formellement suivie.\n\
+        Niveau 1 : Une strat\xE9gie de reconstruction est d\xE9finie. Elle conduit\
+        \ \xE0 un \xE9tat des lieux r\xE9guli\xE8rement partag\xE9 \xE0 la cellule\
+        \ op\xE9rationnelle cyber et IT et la \ncellule strat\xE9gique.\nNiveau 2\
+        \ : Une strat\xE9gie de reconstruction \nest d\xE9finie et valid\xE9e par\
+        \ la cellule strat\xE9gique. Elle conduit \xE0 un \xE9tat des lieux r\xE9\
+        guli\xE8rement partag\xE9 \xE0 la cellule op\xE9rationnelle cyber et IT et\
+        \ la \ncellule strat\xE9gique. La strat\xE9gie repose sur l'utilisation de\
+        \ sauvegarde saines, les risques de perte de donn\xE9es en cas de sauvegardes\
+        \ d\xE9synchronis\xE9s sont identifi\xE9s et communiqu\xE9es. \nNiveau 3 :\
+        \ Une strat\xE9gie de reconstruction est d\xE9finie et valid\xE9e par la cellule\
+        \ strat\xE9gique. Elle conduit \xE0 un \xE9tat des lieux r\xE9guli\xE8rement\
+        \ partag\xE9  \xE0 la cellule op\xE9rationnelle cyber et IT et la cellule\
+        \ strat\xE9gique. La strat\xE9gie repose sur l'utilisation de sauvegarde saines,\
+        \ les risques de perte de donn\xE9es en cas de sauvegardes d\xE9synchronis\xE9\
+        s sont identifi\xE9s et communiqu\xE9es.\nLe PRA est adapt\xE9 en fonction\
+        \ des \navanc\xE9es de l'\u2019investigation et de rem\xE9diation. "
+      implementation_groups:
+      - S
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.6'
+      description: "Comment l'industrialisation de la reconstruction est-elle effectu\xE9\
+        e?\nNiveau 0 : La reconstruction des syst\xE8mes d'information n'est pas industrialis\xE9\
+        e.\nNiveau 1 : Une proc\xE9dure consolide les principales r\xE8gles d'industrialisation\
+        \ de la reconstruction. Un plan d'action consolide les actions \xE0 entreprendre\
+        \ et l'avanc\xE9e du chantier. \nNiveau 2 : Une proc\xE9dure consolide les\
+        \ principales r\xE8gles d'industrialisation de la reconstruction. Un plan\
+        \ d'action consolide les actions \xE0 entreprendre et l'avanc\xE9e du chantier.\
+        \ Le support en ressources \nest renforc\xE9 pour assurer la  reconstruction\
+        \ SI, le cas \xE9ch\xE9ant en  travail post\xE9 (24 h/24).\nNiveau 3 : Une\
+        \ proc\xE9dure consolide les principales r\xE8gles d'industrialisation de\
+        \ la reconstruction. Un plan d'action consolide les actions \xE0 entreprendre\
+        \ et l'avanc\xE9e du chantier. Le support en ressources \nest renforc\xE9\
+        \ pour assurer la \nreconstruction SI, le cas \xE9ch\xE9ant en \ntravail post\xE9\
+        \ (24 h/24). Des proc\xE9dures ou des scripts sont produits pour faciliter\
+        \ la reconstruction. Les m\xE9tiers sont mobilis\xE9s pour r\xE9aliser des\
+        \ tests utilisateurs avant la remise en production des applications."
+      implementation_groups:
+      - O
+    - urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:11.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-maturite-gestion-crise-1.0.2:node47
+      ref_id: '11.7'
+      description: "Comment les travaux de reconstruction et d'industrialisation sont-ils\
+        \ v\xE9rifi\xE9s et s\xE9curis\xE9s?\nNiveau 0 : Aucune v\xE9rification de\
+        \ s\xE9curit\xE9 n'a lieu sur les syst\xE8mes reconstruits.\nNiveau 1 : Une\
+        \ checklist de s\xE9curit\xE9 standard est d\xE9finie pour la reconstruction,\
+        \ et est v\xE9rifi\xE9e avant mise en production.\nNiveau 2 : Une checklist\
+        \ de s\xE9curit\xE9 standard est d\xE9finie pour la reconstruction, et est\
+        \ v\xE9rifi\xE9e avant mise en production. Une coordination renforc\xE9e est\
+        \ \nmise en \u0153uvre entre les \xE9quipes  en charge du durcissement et\
+        \  de la rem\xE9diation et celles en charge de la reconstruction afin de faire\
+        \ appliquer les mesures de cybers\xE9curit\xE9. \nNiveau 3 : Une checklist\
+        \ de s\xE9curit\xE9 standard est d\xE9finie pour la reconstruction, et est\
+        \ v\xE9rifi\xE9e avant mise en production. Une coordination renforc\xE9e est\
+        \ \nmise en \u0153uvre entre les \xE9quipes  en charge du durcissement et\
+        \  de la rem\xE9diation et celles en charge de la reconstruction afin de faire\
+        \ appliquer les mesures de cybers\xE9curit\xE9. \nLa v\xE9rification des r\xE8\
+        gles de s\xE9curit\xE9 est automatis\xE9e au maximum par des outils. Les syst\xE8\
+        mes mis en production sont sous la surveillance d'outils de d\xE9tection."
+      implementation_groups:
+      - O
