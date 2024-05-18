@@ -123,9 +123,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response({"status": "success"})
         except Exception as e:
             return Response(
-                {
-                    "error": f"Failed to load library ({e})"
-                },  # This must translated
+                {"error": f"Failed to load library ({e})"},  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
