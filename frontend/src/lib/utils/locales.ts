@@ -25,14 +25,14 @@ export const LOCALE_MAP = {
 		name: 'spanish',
 		flag: '🇪🇸'
 	},
-	nl : {
+	nl: {
 		name: 'dutch',
 		flag: '🇳🇱'
 	},
 	it: {
 		name: 'italian',
 		flag: '🇮🇹'
-	},
+	}
 };
 
 export function toCamelCase(str: string) {

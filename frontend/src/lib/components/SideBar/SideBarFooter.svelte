@@ -16,7 +16,7 @@
 		spanish: m.spanish(),
 		german: m.german(),
 		dutch: m.dutch(),
-		italian: m.italian(),
+		italian: m.italian()
 	};
 
 	const modalStore = getModalStore();
@@ -29,7 +29,7 @@
 		es: 'Español',
 		nl: 'Nederlands',
 		de: 'Deutsch',
-		it: 'Italiano',
+		it: 'Italiano'
 	};
 
 	let value = languageTag();
