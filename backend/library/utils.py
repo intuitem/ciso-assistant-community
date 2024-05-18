@@ -659,6 +659,7 @@ class LibraryImporter:
                 else:
                     raise e
             except Exception as e:
+                print("Library import error", e)
                 logger.error("Library import error", error=e, library=self._library)
                 raise e
 
