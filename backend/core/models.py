@@ -352,11 +352,14 @@ class ReferenceControl(ReferentialObjectMixin):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
     def __str__(self):
-        res = ""
-        res = res if self.ref_id is None else res + self.ref_id
-        res = res if self.name is None else res + " - " + self.name
-        res = res if self.description is None else res + " - " + self.description
-        return res
+        if self.name:
+            return self.ref_id + " - " + self.name if self.ref_id else self.name
+        else:
+            return (
+                self.ref_id + " - " + self.description
+                if self.ref_id
+                else self.description
+            )
 
 
 class RiskMatrix(ReferentialObjectMixin):
