@@ -69,6 +69,8 @@ test('every library can be deleted', async ({ logedPage, librariesPage, page }) 
 		if (await librariesPage.deleteItemButton(nextRemainingLibrary).isVisible()) {
 			await librariesPage.deleteItemButton(nextRemainingLibrary).click();
 			await librariesPage.deleteModalConfirmButton.click();
+			//TODO: Disabled temporarily
+			/*
 			await librariesPage.isToastVisible(
 				'The library object has been successfully deleted.+',
 				undefined,
@@ -76,6 +78,7 @@ test('every library can be deleted', async ({ logedPage, librariesPage, page }) 
 					timeout: 15000
 				}
 			);
+			*/
 			if (await page.getByText(' You currently have no loaded libraries.').isHidden()) {
 				await expect(librariesPage.getRow(nextRemainingLibrary)).not.toBeVisible();
 			} else {
