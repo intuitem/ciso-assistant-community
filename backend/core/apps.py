@@ -2,6 +2,8 @@ from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
 import os
+from django.core.management import call_command
+
 
 READER_PERMISSIONS_LIST = [
     "view_project",
@@ -21,7 +23,8 @@ READER_PERMISSIONS_LIST = [
     "view_requirementnode",
     "view_evidence",
     "view_framework",
-    "view_library",
+    "view_loadedlibrary",
+    "view_storedlibrary",
     "view_user",
 ]
 
@@ -44,7 +47,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_requirementnode",
     "view_evidence",
     "view_framework",
-    "view_library",
+    "view_storedlibrary",
+    "view_loadedlibrary",
     "view_user",
 ]
 
@@ -97,7 +101,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_riskmatrix",
     "view_requirementnode",
     "view_framework",
-    "view_library",
+    "view_storedlibrary",
+    "view_loadedlibrary",
     "view_user",
 ]
 
@@ -155,7 +160,8 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_evidence",
     "view_requirementnode",
     "view_framework",
-    "view_library",
+    "view_storedlibrary",
+    "view_loadedlibrary",
     "view_user",
 ]
 
@@ -231,15 +237,18 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_framework",
     "delete_framework",
     "view_requirementnode",
-    "view_library",
-    "add_library",
-    "delete_library",
+    "view_storedlibrary",
+    "add_storedlibrary",
+    "delete_storedlibrary",
+    "view_loadedlibrary",
+    "add_loadedlibrary",
+    "delete_loadedlibrary",
     "backup",
     "restore",
 ]
 
 
-def startup(**kwargs):
+def startup(sender: AppConfig, **kwargs):
     """
     Implement CISO Assistant 1.0 default Roles and User Groups during migrate
     This makes sure root folder and global groups are defined before any other object is created
@@ -345,6 +354,8 @@ def startup(**kwargs):
             )
         except Exception as e:
             print(e)  # NOTE: Add this exception in the logger
+
+    call_command("storelibraries")
 
 
 class CoreConfig(AppConfig):

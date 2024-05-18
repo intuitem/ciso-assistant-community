@@ -1,3 +1,4 @@
+from pathlib import Path
 from django.apps import apps
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
@@ -7,16 +8,17 @@ from django.db.models import Q
 
 from .base_models import *
 from .validators import validate_file_size, validate_file_name
-from .utils import camel_case
+from .utils import camel_case, sha256
 from iam.models import FolderMixin, PublishInRootFolderMixin
 from django.core import serializers
 
 import os
 import json
+import yaml
 
 from django.urls import reverse
 from datetime import date, datetime
-from typing import Self
+from typing import Union, Self
 from django.utils.html import format_html
 
 from structlog import get_logger
@@ -83,18 +85,16 @@ class ReferentialObjectMixin(NameDescriptionMixin, FolderMixin):
         return self.display_short
 
 
-class Library(ReferentialObjectMixin):
+class LibraryMixin(ReferentialObjectMixin):
+    class Meta:
+        abstract = True
+        unique_together = [["urn", "locale", "version"]]
+
+    urn = models.CharField(max_length=100, null=True, blank=True, verbose_name=_("URN"))
     copyright = models.CharField(
         max_length=4096, null=True, blank=True, verbose_name=_("Copyright")
     )
     version = models.IntegerField(null=False, verbose_name=_("Version"))
-    provider = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        help_text=_("Provider of the library"),
-        verbose_name=_("Provider"),
-    )
     packager = models.CharField(
         max_length=100,
         blank=True,
@@ -102,6 +102,108 @@ class Library(ReferentialObjectMixin):
         help_text=_("Packager of the library"),
         verbose_name=_("Packager"),
     )
+    builtin = models.BooleanField(default=False)
+    objects_meta = models.JSONField(default=dict)
+    dependencies = models.JSONField(
+        null=True
+    )  # models.CharField(blank=False,null=True,max_length=16384)
+
+
+class StoredLibrary(LibraryMixin):
+    is_loaded = models.BooleanField(default=False)
+    hash_checksum = models.CharField(max_length=64)
+    content = models.TextField()
+
+    REQUIRED_FIELDS = {"urn", "name", "version", "objects"}
+    FIELDS_VERIFIERS = {}
+    HASH_CHECKSUM_SET = set()  # For now a library isn't updated if its SHA256 checksum has already been registered in the database.
+
+    @classmethod
+    def __init_class__(cls):
+        cls.HASH_CHECKSUM_SET = set(
+            value["hash_checksum"] for value in cls.objects.values("hash_checksum")
+        )
+
+    @classmethod
+    def store_library_content(
+        cls, library_content: bytes, builtin: bool = False
+    ) -> "StoredLibrary | None":
+        hash_checksum = sha256(library_content)
+        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
+            return None  # We do not store the library if its hash checksum is in the database.
+        try:
+            library_data = yaml.safe_load(library_content)
+        except yaml.YAMLError as e:
+            logger.error("Error while loading library content", error=e)
+            raise e
+
+        missing_fields = StoredLibrary.REQUIRED_FIELDS - set(library_data.keys())
+
+        if missing_fields:
+            err = "The following fields are missing : {}".format(
+                ", ".join(repr(field) for field in missing_fields)
+            )
+            logger.error("Error while loading library content", error=err)
+            raise ValueError(err)
+
+        urn = library_data["urn"]
+        locale = library_data.get("locale", "en")
+        version = int(library_data["version"])
+        is_loaded = LoadedLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).exists()
+
+        objects_meta = {
+            key: (1 if key == "framework" else len(value))
+            for key, value in library_data["objects"].items()
+        }
+
+        dependencies = library_data.get(
+            "dependencies", []
+        )  # I don't want whitespaces in URN anymore nontheless
+
+        library_objects = json.dumps(library_data["objects"])
+        return StoredLibrary.objects.create(
+            name=library_data["name"],
+            is_published=True,
+            urn=urn,
+            locale=locale,
+            version=version,
+            ref_id=library_data["ref_id"],
+            default_locale=False,  # We don't care about this value yet.
+            description=library_data.get("description"),
+            annotation=library_data.get("annotation"),
+            copyright=library_data.get("copyright"),
+            provider=library_data.get("provider"),
+            packager=library_data.get("packager"),
+            objects_meta=objects_meta,
+            dependencies=dependencies,
+            is_loaded=is_loaded,
+            builtin=builtin,  # We have to add a "builtin: true" line to every builtin library file.
+            hash_checksum=hash_checksum,
+            content=library_objects,
+        )
+
+    @classmethod
+    def store_library_file(
+        cls, fname: Path, builtin: bool = False
+    ) -> "StoredLibrary | None":
+        with open(fname, "rb") as f:
+            library_content = f.read()
+        return StoredLibrary.store_library_content(library_content, builtin)
+
+    def load(self) -> Union[str, None]:
+        from library.utils import LibraryImporter
+
+        library_importer = LibraryImporter(self)
+        error_msg = library_importer.import_library()
+        if error_msg is None:
+            self.is_loaded = True
+            self.save()
+        return error_msg
+
+
+class LoadedLibrary(LibraryMixin):
     dependencies = models.ManyToManyField(
         "self", blank=True, verbose_name=_("Dependencies"), symmetrical=False
     )
@@ -151,7 +253,7 @@ class Library(ReferentialObjectMixin):
             )
             .distinct()
             .count()
-            + Library.objects.filter(dependencies=self).distinct().count()
+            + LoadedLibrary.objects.filter(dependencies=self).distinct().count()
         )
 
     def delete(self, *args, **kwargs):
@@ -159,17 +261,26 @@ class Library(ReferentialObjectMixin):
             raise ValueError(
                 "This library is still referenced by some risk or compliance assessments"
             )
-        dependent_libraries = Library.objects.filter(dependencies=self)
+        dependent_libraries = LoadedLibrary.objects.filter(dependencies=self)
         if dependent_libraries:
             raise ValueError(
                 f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
-        super(Library, self).delete(*args, **kwargs)
+        super(LoadedLibrary, self).delete(*args, **kwargs)
+        stored_library = StoredLibrary.objects.get(
+            urn=self.urn, locale=self.locale, version=self.version
+        )  # I don't if it works yet
+        stored_library.is_loaded = False
+        stored_library.save()
 
 
 class Threat(ReferentialObjectMixin, PublishInRootFolderMixin):
     library = models.ForeignKey(
-        Library, on_delete=models.CASCADE, null=True, blank=True, related_name="threats"
+        LoadedLibrary,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="threats",
     )
 
     fields_to_check = ["ref_id", "name"]
@@ -203,7 +314,7 @@ class ReferenceControl(ReferentialObjectMixin):
     ]
 
     library = models.ForeignKey(
-        Library,
+        LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -246,7 +357,7 @@ class ReferenceControl(ReferentialObjectMixin):
 
 class RiskMatrix(ReferentialObjectMixin):
     library = models.ForeignKey(
-        Library,
+        LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -336,7 +447,7 @@ class Framework(ReferentialObjectMixin):
         blank=True, null=True, verbose_name=_("Implementation groups definition")
     )
     library = models.ForeignKey(
-        Library,
+        LoadedLibrary,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
@@ -938,7 +1049,7 @@ class RiskAssessment(Assessment):
             measures[i]["id"] = json.loads(_measures)[i]["pk"]
 
         for mtg in measures:
-            if not mtg["eta"]:
+            if not mtg["eta"] and not mtg["status"] == "active":
                 warnings_lst.append(
                     {
                         "msg": _("{} does not have an ETA").format(mtg["name"]),
@@ -946,7 +1057,7 @@ class RiskAssessment(Assessment):
                         "object": {"name": mtg["name"], "id": mtg["id"]},
                     }
                 )
-            else:
+            elif mtg["eta"] and not mtg["status"] == "active":
                 if date.today() > datetime.strptime(mtg["eta"], "%Y-%m-%d").date():
                     errors_lst.append(
                         {
@@ -1319,6 +1430,9 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
+    def get_requirement_assessments(self):
+        return RequirementAssessment.objects.filter(compliance_assessment=self)
+
     def get_requirements_status_count(self):
         requirements_status_count = []
         for st in RequirementAssessment.Status:
@@ -1348,11 +1462,6 @@ class ComplianceAssessment(Assessment):
                     st,
                 )
             )
-        print(
-            "AppliedControl".objects.filter(status=st[0])
-            .filter(id__in=measures_list)
-            .count()
-        )
         return measures_status_count
 
     def donut_render(self) -> dict:
