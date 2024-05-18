@@ -1,6 +1,6 @@
 urn: urn:intuitem:risk:library:enisa-5g-scm-v1.3
 locale: en
-ref_id: ENISA 5G SCM v1.3
+ref_id: enisa-5g-scm-v1.3
 name: ENISA 5G Security Control Matrix v1.3
 description: "The main goal of the ENISA 5G security controls matrix is to support\
   \ the national authorities in the EU Member States with implementing the technical\
@@ -848,7 +848,7 @@ objects:
     description: 'Objective: SO29, level: 3'
   framework:
     urn: urn:intuitem:risk:framework:enisa-5g-scm-v1.3
-    ref_id: ENISA 5G SCM v1.3
+    ref_id: enisa-5g-scm-v1.3
     name: ENISA 5G Security Control Matrix v1.3
     description: "The main goal of the ENISA 5G security controls matrix is to support\
       \ the national authorities in the EU Member States with implementing the technical\
