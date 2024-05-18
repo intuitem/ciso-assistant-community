@@ -121,10 +121,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     status=HTTP_400_BAD_REQUEST,
                 )  # This can cause translation issues
             return Response({"status": "success"})
-        except Exception:
+        except Exception as e:
             return Response(
                 {
-                    "error": "Failed to load library, please check if it has dependencies"
+                    "error": f"Failed to load library ({e})"
                 },  # This must translated
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
