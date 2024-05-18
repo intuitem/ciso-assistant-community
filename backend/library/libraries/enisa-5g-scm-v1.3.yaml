@@ -1,6 +1,6 @@
 urn: urn:intuitem:risk:library:enisa-5g-scm-v1.3
 locale: en
-ref_id: enisa-5g-scm-v1.3
+ref_id: ENISA 5G SCM v1.3
 name: ENISA 5G Security Control Matrix v1.3
 description: "The main goal of the ENISA 5G security controls matrix is to support\
   \ the national authorities in the EU Member States with implementing the technical\
@@ -16,839 +16,718 @@ objects:
   reference_controls:
   - urn: risk:reference_control:enisa-5g-scm:m1
     ref_id: M1
-    name: '(L1) Set a high level security policy addressing the security of networks
-      and services '
     category: process
-    description: 'Objective: SO1, level: 1'
+    description: '(L1) Set a high level security policy addressing the security of
+      networks and services '
   - urn: risk:reference_control:enisa-5g-scm:m2
     ref_id: M2
-    name: (L1) Make key personnel aware of the security policy
     category: process
-    description: 'Objective: SO1, level: 1'
+    description: (L1) Make key personnel aware of the security policy
   - urn: risk:reference_control:enisa-5g-scm:m3
     ref_id: M3
-    name: (L2) Set detailed information security policies for critical assets and
-      business processes
     category: process
-    description: 'Objective: SO1, level: 2'
+    description: (L2) Set detailed information security policies for critical assets
+      and business processes
   - urn: risk:reference_control:enisa-5g-scm:m4
     ref_id: M4
-    name: (L2) Make all personnel aware of the security policy and what it implies
-      for their work
     category: process
-    description: 'Objective: SO1, level: 2'
+    description: (L2) Make all personnel aware of the security policy and what it
+      implies for their work
   - urn: risk:reference_control:enisa-5g-scm:m5
     ref_id: M5
-    name: (L2) Review the security policy following incidents
     category: process
-    description: 'Objective: SO1, level: 2'
+    description: (L2) Review the security policy following incidents
   - urn: risk:reference_control:enisa-5g-scm:m6
     ref_id: M6
-    name: (L3) Review the information security policies periodically, and take into
-      account violations, exceptions, past incidents, past tests/exercises, and incidents
-      affecting other (similar) providers in the sector
     category: process
-    description: 'Objective: SO1, level: 3'
+    description: (L3) Review the information security policies periodically, and take
+      into account violations, exceptions, past incidents, past tests/exercises, and
+      incidents affecting other (similar) providers in the sector
   - urn: risk:reference_control:enisa-5g-scm:m7
     ref_id: M7
-    name: (L1) Make a list of the main risks for security of networks and services,
-      taking into account main threats for the critical assets
     category: process
-    description: 'Objective: SO2, level: 1'
+    description: (L1) Make a list of the main risks for security of networks and services,
+      taking into account main threats for the critical assets
   - urn: risk:reference_control:enisa-5g-scm:m8
     ref_id: M8
-    name: (L1) Make key personnel aware of the main risks and how they are mitigated
     category: process
-    description: 'Objective: SO2, level: 1'
+    description: (L1) Make key personnel aware of the main risks and how they are
+      mitigated
   - urn: risk:reference_control:enisa-5g-scm:m9
     ref_id: M9
-    name: (L2) Set up a risk management methodology and/or tools based on industry
-      standards
     category: process
-    description: 'Objective: SO2, level: 2'
+    description: (L2) Set up a risk management methodology and/or tools based on industry
+      standards
   - urn: risk:reference_control:enisa-5g-scm:m10
     ref_id: M10
-    name: (L2) Ensure that key personnel use the risk management methodology and tools
     category: process
-    description: 'Objective: SO2, level: 2'
+    description: (L2) Ensure that key personnel use the risk management methodology
+      and tools
   - urn: risk:reference_control:enisa-5g-scm:m11
     ref_id: M11
-    name: (L2) Review the risk assessments following changes or incidents
     category: process
-    description: 'Objective: SO2, level: 2'
+    description: (L2) Review the risk assessments following changes or incidents
   - urn: risk:reference_control:enisa-5g-scm:m12
     ref_id: M12
-    name: (L2) Ensure residual risks are accepted by management
     category: process
-    description: 'Objective: SO2, level: 2'
+    description: (L2) Ensure residual risks are accepted by management
   - urn: risk:reference_control:enisa-5g-scm:m13
     ref_id: M13
-    name: (L3) Review the risk management methodology and/or tools, periodically,
-      taking into account changes and past incidents
     category: process
-    description: 'Objective: SO2, level: 3'
+    description: (L3) Review the risk management methodology and/or tools, periodically,
+      taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m14
     ref_id: M14
-    name: (L1) Assign security roles and responsibilities to personnel
     category: process
-    description: 'Objective: SO3, level: 1'
+    description: (L1) Assign security roles and responsibilities to personnel
   - urn: risk:reference_control:enisa-5g-scm:m15
     ref_id: M15
-    name: (L1) Make sure the security roles are reachable in case of security incidents
     category: process
-    description: 'Objective: SO3, level: 1'
+    description: (L1) Make sure the security roles are reachable in case of security
+      incidents
   - urn: risk:reference_control:enisa-5g-scm:m16
     ref_id: M16
-    name: (L2) Personnel is formally appointed in security roles
     category: process
-    description: 'Objective: SO3, level: 2'
+    description: (L2) Personnel is formally appointed in security roles
   - urn: risk:reference_control:enisa-5g-scm:m17
     ref_id: M17
-    name: (L2) Make personnel aware of the security roles in your organisation and
-      when they should be contacted
     category: process
-    description: 'Objective: SO3, level: 2'
+    description: (L2) Make personnel aware of the security roles in your organisation
+      and when they should be contacted
   - urn: risk:reference_control:enisa-5g-scm:m18
     ref_id: M18
-    name: (L3) Structure of security roles and responsibilities is regularly reviewed
-      and revised, based on changes and/or past incidents
     category: process
-    description: 'Objective: SO3, level: 3'
+    description: (L3) Structure of security roles and responsibilities is regularly
+      reviewed and revised, based on changes and/or past incidents
   - urn: risk:reference_control:enisa-5g-scm:m19
     ref_id: M19
-    name: (L1) Include security requirements in contracts with third-parties, including
-      confidentiality and secure transfer of information
     category: process
-    description: 'Objective: SO4, level: 1'
+    description: (L1) Include security requirements in contracts with third-parties,
+      including confidentiality and secure transfer of information
   - urn: risk:reference_control:enisa-5g-scm:m20
     ref_id: M20
-    name: (L2) Set a security policy for contracts with third-parties
     category: process
-    description: 'Objective: SO4, level: 2'
+    description: (L2) Set a security policy for contracts with third-parties
   - urn: risk:reference_control:enisa-5g-scm:m21
     ref_id: M21
-    name: (L2) Ensure that all procurement of services/products from third-parties
-      follows the policy
     category: process
-    description: 'Objective: SO4, level: 2'
+    description: (L2) Ensure that all procurement of services/products from third-parties
+      follows the policy
   - urn: risk:reference_control:enisa-5g-scm:m22
     ref_id: M22
-    name: (L2) Review security policy for third parties, following incidents or changes
     category: process
-    description: 'Objective: SO4, level: 2'
+    description: (L2) Review security policy for third parties, following incidents
+      or changes
   - urn: risk:reference_control:enisa-5g-scm:m23
     ref_id: M23
-    name: "(L2) Demand specific security standards in third-party supplier\u2019s\
-      \ processes during procurement"
     category: process
-    description: 'Objective: SO4, level: 2'
+    description: "(L2) Demand specific security standards in third-party supplier\u2019\
+      s processes during procurement"
   - urn: risk:reference_control:enisa-5g-scm:m24
     ref_id: M24
-    name: (L2) Mitigate residual risks that are not addressed by the third party
     category: process
-    description: 'Objective: SO4, level: 2'
+    description: (L2) Mitigate residual risks that are not addressed by the third
+      party
   - urn: risk:reference_control:enisa-5g-scm:m25
     ref_id: M25
-    name: (L3) Keep track of security incidents related to or caused by third-parties
     category: process
-    description: 'Objective: SO4, level: 3'
+    description: (L3) Keep track of security incidents related to or caused by third-parties
   - urn: risk:reference_control:enisa-5g-scm:m26
     ref_id: M26
-    name: (L3) Periodically review and update security policy for third parties at
-      regular intervals, taking into account past incidents, changes, etc.
     category: process
-    description: 'Objective: SO4, level: 3'
+    description: (L3) Periodically review and update security policy for third parties
+      at regular intervals, taking into account past incidents, changes, etc.
   - urn: risk:reference_control:enisa-5g-scm:m27
     ref_id: M27
-    name: '(L1) Check professional references of key personnel (system administrators,
-      security officers, guards, etc.) '
     category: process
-    description: 'Objective: SO5, level: 1'
+    description: '(L1) Check professional references of key personnel (system administrators,
+      security officers, guards, etc.) '
   - urn: risk:reference_control:enisa-5g-scm:m28
     ref_id: M28
-    name: (L2) Perform background checks/screening for key personnel, when needed
-      and legally permitted
     category: process
-    description: 'Objective: SO5, level: 2'
+    description: (L2) Perform background checks/screening for key personnel, when
+      needed and legally permitted
   - urn: risk:reference_control:enisa-5g-scm:m29
     ref_id: M29
-    name: (L2) Set up a policy and procedure for background checks
     category: process
-    description: 'Objective: SO5, level: 2'
+    description: (L2) Set up a policy and procedure for background checks
   - urn: risk:reference_control:enisa-5g-scm:m30
     ref_id: M30
-    name: (L3) Review and update policy/procedures for background checks and reference
-      checks at regular intervals, taking into account changes and past incidents
     category: process
-    description: 'Objective: SO5, level: 3'
+    description: (L3) Review and update policy/procedures for background checks and
+      reference checks at regular intervals, taking into account changes and past
+      incidents
   - urn: risk:reference_control:enisa-5g-scm:m31
     ref_id: M31
-    name: (L1) Provide key personnel with relevant training and material on security
-      issues
     category: process
-    description: 'Objective: SO6, level: 1'
+    description: (L1) Provide key personnel with relevant training and material on
+      security issues
   - urn: risk:reference_control:enisa-5g-scm:m32
     ref_id: M32
-    name: (L2) Implement a program for training, making sure that key personnel have
-      sufficient and up-to-date security knowledge
     category: process
-    description: 'Objective: SO6, level: 2'
+    description: (L2) Implement a program for training, making sure that key personnel
+      have sufficient and up-to-date security knowledge
   - urn: risk:reference_control:enisa-5g-scm:m33
     ref_id: M33
-    name: (L2) Organise trainings and awareness sessions for personnel on security
-      topics important for your organisation
     category: process
-    description: 'Objective: SO6, level: 2'
+    description: (L2) Organise trainings and awareness sessions for personnel on security
+      topics important for your organisation
   - urn: risk:reference_control:enisa-5g-scm:m34
     ref_id: M34
-    name: (L3) Review and update the training program periodically, taking into account
-      changes and past incidents
     category: process
-    description: 'Objective: SO6, level: 3'
+    description: (L3) Review and update the training program periodically, taking
+      into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m35
     ref_id: M35
-    name: (L3) Test the security knowledge of personnel
     category: process
-    description: 'Objective: SO6, level: 3'
+    description: (L3) Test the security knowledge of personnel
   - urn: risk:reference_control:enisa-5g-scm:m36
     ref_id: M36
-    name: (L1) Following changes in personnel revoke access rights, badges, equipment,
-      etc., if no longer necessary or permitted
     category: process
-    description: 'Objective: SO7, level: 1'
+    description: (L1) Following changes in personnel revoke access rights, badges,
+      equipment, etc., if no longer necessary or permitted
   - urn: risk:reference_control:enisa-5g-scm:m37
     ref_id: M37
-    name: (L1) Brief and educate new personnel on the policies and procedures in place
     category: process
-    description: 'Objective: SO7, level: 1'
+    description: (L1) Brief and educate new personnel on the policies and procedures
+      in place
   - urn: risk:reference_control:enisa-5g-scm:m38
     ref_id: M38
-    name: (L2) Implement policy/procedures for personnel changes, taking into account
-      timely revocation of access rights, badges and equipment
     category: process
-    description: 'Objective: SO7, level: 2'
+    description: (L2) Implement policy/procedures for personnel changes, taking into
+      account timely revocation of access rights, badges and equipment
   - urn: risk:reference_control:enisa-5g-scm:m39
     ref_id: M39
-    name: (L2) Implement policy/procedures for education and training for personnel
-      in new roles
     category: process
-    description: 'Objective: SO7, level: 2'
+    description: (L2) Implement policy/procedures for education and training for personnel
+      in new roles
   - urn: risk:reference_control:enisa-5g-scm:m40
     ref_id: M40
-    name: (L3) Periodically check that the policy/procedures are effective
     category: process
-    description: 'Objective: SO7, level: 3'
+    description: (L3) Periodically check that the policy/procedures are effective
   - urn: risk:reference_control:enisa-5g-scm:m41
     ref_id: M41
-    name: (L3) Review and evaluate policy/procedures for personnel changes, taking
-      into account changes or past incidents
     category: process
-    description: 'Objective: SO7, level: 3'
+    description: (L3) Review and evaluate policy/procedures for personnel changes,
+      taking into account changes or past incidents
   - urn: risk:reference_control:enisa-5g-scm:m42
     ref_id: M42
-    name: (L1) Hold personnel accountable for security incidents caused by violations
-      of policies, for example via the employment contract
     category: process
-    description: 'Objective: SO8, level: 1'
+    description: (L1) Hold personnel accountable for security incidents caused by
+      violations of policies, for example via the employment contract
   - urn: risk:reference_control:enisa-5g-scm:m43
     ref_id: M43
-    name: (L2) Set up procedures for violations of policies by personnel
     category: process
-    description: 'Objective: SO8, level: 2'
+    description: (L2) Set up procedures for violations of policies by personnel
   - urn: risk:reference_control:enisa-5g-scm:m44
     ref_id: M44
-    name: (L3) Periodically review and update the disciplinary process, based on changes
-      and past incidents
     category: process
-    description: 'Objective: SO8, level: 3'
+    description: (L3) Periodically review and update the disciplinary process, based
+      on changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m45
     ref_id: M45
-    name: "(L1) Prevent unauthorized physical access to facilities and infrastructure\
+    category: process
+    description: "(L1) Prevent unauthorized physical access to facilities and infrastructure\
       \ and set up adequate environmental controls, to protect provider assets (including\
       \ third party assets, where applicable) against unauthorized access, burglary,\
       \ fire, flooding, etc. Security controls should be selected based on the risk\
       \ assessment, which should also take in consideration current and forecasted\
       \ environmental security risks \u2013 e.g. related to climate change"
-    category: process
-    description: 'Objective: SO9, level: 1'
   - urn: risk:reference_control:enisa-5g-scm:m46
     ref_id: M46
-    name: (L2) Implement a policy for physical security measures and environmental
-      controls
     category: process
-    description: 'Objective: SO9, level: 2'
+    description: (L2) Implement a policy for physical security measures and environmental
+      controls
   - urn: risk:reference_control:enisa-5g-scm:m47
     ref_id: M47
-    name: (L2) Industry standard implementation of physical and environmental controls
     category: process
-    description: 'Objective: SO9, level: 2'
+    description: (L2) Industry standard implementation of physical and environmental
+      controls
   - urn: risk:reference_control:enisa-5g-scm:m48
     ref_id: M48
-    name: (L2) Apply reinforced controls for physical access to critical assets. For
-      example, physical access to such assets should only be granted to a limited
+    category: process
+    description: (L2) Apply reinforced controls for physical access to critical assets.
+      For example, physical access to such assets should only be granted to a limited
       number of security-vetted, trained and qualified personnel. Access by third-parties,
       contractors, and employees of suppliers/vendors, integrators, should be limited
       and monitored
-    category: process
-    description: 'Objective: SO9, level: 2'
   - urn: risk:reference_control:enisa-5g-scm:m49
     ref_id: M49
-    name: (L3) Evaluate the effectiveness of physical and environmental controls periodically
     category: process
-    description: 'Objective: SO9, level: 3'
+    description: (L3) Evaluate the effectiveness of physical and environmental controls
+      periodically
   - urn: risk:reference_control:enisa-5g-scm:m50
     ref_id: M50
-    name: (L3) Review and update the policy for physical security measures and environmental
-      controls taking into account changes and past incidents
     category: process
-    description: 'Objective: SO9, level: 3'
+    description: (L3) Review and update the policy for physical security measures
+      and environmental controls taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m51
     ref_id: M51
-    name: (L1) Ensure security of critical supplies
     category: process
-    description: 'Objective: SO10, level: 1'
+    description: (L1) Ensure security of critical supplies
   - urn: risk:reference_control:enisa-5g-scm:m52
     ref_id: M52
-    name: (L2) Implement a policy for security of critical supplies
     category: process
-    description: 'Objective: SO10, level: 2'
+    description: (L2) Implement a policy for security of critical supplies
   - urn: risk:reference_control:enisa-5g-scm:m53
     ref_id: M53
-    name: (L2) Implement industry standard security measures to protect critical supplies
-      and supporting facilities (e.g. passive cooling, automatic restart after power
-      interruption, battery backup power, diesel generators, backup fuel, etc.)
     category: process
-    description: 'Objective: SO10, level: 2'
+    description: (L2) Implement industry standard security measures to protect critical
+      supplies and supporting facilities (e.g. passive cooling, automatic restart
+      after power interruption, battery backup power, diesel generators, backup fuel,
+      etc.)
   - urn: risk:reference_control:enisa-5g-scm:m54
     ref_id: M54
-    name: (L3) Implement state of the art security measures to protect critical supplies
-      (such as active cooling, UP, hot standby power generators, SLAs with fuel delivery
-      companies, redundant cooling and power backup systems)
     category: process
-    description: 'Objective: SO10, level: 3'
+    description: (L3) Implement state of the art security measures to protect critical
+      supplies (such as active cooling, UP, hot standby power generators, SLAs with
+      fuel delivery companies, redundant cooling and power backup systems)
   - urn: risk:reference_control:enisa-5g-scm:m55
     ref_id: M55
-    name: (L3) Review and update policy and procedures to secure critical supplies
-      regularly, taking into account changes and past incidents
     category: process
-    description: 'Objective: SO10, level: 3'
+    description: (L3) Review and update policy and procedures to secure critical supplies
+      regularly, taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m56
     ref_id: M56
-    name: "(L1) Users and systems have unique ID\u2019s and are authenticated before\
-      \ accessing services or systems"
     category: process
-    description: 'Objective: SO11, level: 1'
+    description: "(L1) Users and systems have unique ID\u2019s and are authenticated\
+      \ before accessing services or systems"
   - urn: risk:reference_control:enisa-5g-scm:m57
     ref_id: M57
-    name: (L1) Implement logical access control mechanism for network and information
-      systems to allow only authorized use
     category: process
-    description: 'Objective: SO11, level: 1'
+    description: (L1) Implement logical access control mechanism for network and information
+      systems to allow only authorized use
   - urn: risk:reference_control:enisa-5g-scm:m58
     ref_id: M58
-    name: (L2) Implement policy for protecting access to network and information systems,
-      addressing for example roles, rights, responsibilities and procedures for assigning
-      and revoking access rights
     category: process
-    description: 'Objective: SO11, level: 2'
+    description: (L2) Implement policy for protecting access to network and information
+      systems, addressing for example roles, rights, responsibilities and procedures
+      for assigning and revoking access rights
   - urn: risk:reference_control:enisa-5g-scm:m59
     ref_id: M59
-    name: (L2) Choose appropriate authentication mechanisms, depending on the type
-      of access
     category: process
-    description: 'Objective: SO11, level: 2'
+    description: (L2) Choose appropriate authentication mechanisms, depending on the
+      type of access
   - urn: risk:reference_control:enisa-5g-scm:m60
     ref_id: M60
-    name: (L2) Monitor access to network and information systems, have a process for
-      approving exceptions and registering access violations
     category: process
-    description: 'Objective: SO11, level: 2'
+    description: (L2) Monitor access to network and information systems, have a process
+      for approving exceptions and registering access violations
   - urn: risk:reference_control:enisa-5g-scm:m61
     ref_id: M61
-    name: (L2) Reinforce controls for remote access to critical assets of network
-      and information systems by third parties
     category: process
-    description: 'Objective: SO11, level: 2'
+    description: (L2) Reinforce controls for remote access to critical assets of network
+      and information systems by third parties
   - urn: risk:reference_control:enisa-5g-scm:m62
     ref_id: M62
-    name: (L3) Evaluate the effectiveness of access control policies and procedures
-      and implement cross checks on access control mechanisms
     category: process
-    description: 'Objective: SO11, level: 3'
+    description: (L3) Evaluate the effectiveness of access control policies and procedures
+      and implement cross checks on access control mechanisms
   - urn: risk:reference_control:enisa-5g-scm:m63
     ref_id: M63
-    name: (L3) Access control policy and access control mechanisms are reviewed and
-      when needed revised
     category: process
-    description: 'Objective: SO11, level: 3'
+    description: (L3) Access control policy and access control mechanisms are reviewed
+      and when needed revised
   - urn: risk:reference_control:enisa-5g-scm:m64
     ref_id: M64
-    name: (L1) Make sure software of network and information systems is not tampered
-      with or altered, for instance by using input controls and firewalls
     category: process
-    description: 'Objective: SO12, level: 1'
+    description: (L1) Make sure software of network and information systems is not
+      tampered with or altered, for instance by using input controls and firewalls
   - urn: risk:reference_control:enisa-5g-scm:m65
     ref_id: M65
-    name: (L1) Check for malware on (internal) network and information systems
     category: process
-    description: 'Objective: SO12, level: 1'
+    description: (L1) Check for malware on (internal) network and information systems
   - urn: risk:reference_control:enisa-5g-scm:m66
     ref_id: M66
-    name: (L2) Implement industry standard security measures, providing defence-in-depth
-      against tampering and altering of systems
     category: process
-    description: 'Objective: SO12, level: 2'
+    description: (L2) Implement industry standard security measures, providing defence-in-depth
+      against tampering and altering of systems
   - urn: risk:reference_control:enisa-5g-scm:m67
     ref_id: M67
-    name: (L2) Apply reinforced software integrity, update and patch management controls
-      for critical assets in virtualised networks
     category: process
-    description: 'Objective: SO12, level: 2'
+    description: (L2) Apply reinforced software integrity, update and patch management
+      controls for critical assets in virtualised networks
   - urn: risk:reference_control:enisa-5g-scm:m68
     ref_id: M68
-    name: (L3) Set up state of the art controls to protect integrity of systems
     category: process
-    description: 'Objective: SO12, level: 3'
+    description: (L3) Set up state of the art controls to protect integrity of systems
   - urn: risk:reference_control:enisa-5g-scm:m69
     ref_id: M69
-    name: (L3) Evaluate and review the effectiveness of measures to protect integrity
-      of systems
     category: process
-    description: 'Objective: SO12, level: 3'
+    description: (L3) Evaluate and review the effectiveness of measures to protect
+      integrity of systems
   - urn: risk:reference_control:enisa-5g-scm:m70
     ref_id: M70
-    name: (L1) Where appropriate to prevent and/or minimise the impact of security
+    category: process
+    description: (L1) Where appropriate to prevent and/or minimise the impact of security
       incidents on users and on other networks and services, encrypt data during its
       storage in and/or transmission via networks. The type and scope of data to be
       encrypted should be determined based on the risk assessment performed and will
       typically include communication data, customer critical data (e.g. unique identifiers),
       relevant management and signalling traffic and any other data or metadata, the
       disclosure or tampering of which may cause security incidents
-    category: process
-    description: 'Objective: SO13, level: 1'
   - urn: risk:reference_control:enisa-5g-scm:m71
     ref_id: M71
-    name: (L2) Implement encryption policy
     category: process
-    description: 'Objective: SO13, level: 2'
+    description: (L2) Implement encryption policy
   - urn: risk:reference_control:enisa-5g-scm:m72
     ref_id: M72
-    name: (L2) Use industry standard encryption algorithms and the corresponding recommended
-      lengths of encryption keys
     category: process
-    description: 'Objective: SO13, level: 2'
+    description: (L2) Use industry standard encryption algorithms and the corresponding
+      recommended lengths of encryption keys
   - urn: risk:reference_control:enisa-5g-scm:m73
     ref_id: M73
-    name: (L3) Review and update encryption policy
     category: process
-    description: 'Objective: SO13, level: 3'
+    description: (L3) Review and update encryption policy
   - urn: risk:reference_control:enisa-5g-scm:m74
     ref_id: M74
-    name: (L3) Use state of the art encryption algorithms
     category: process
-    description: 'Objective: SO13, level: 3'
+    description: (L3) Use state of the art encryption algorithms
   - urn: risk:reference_control:enisa-5g-scm:m75
     ref_id: M75
-    name: (L1) Make sure that cryptographic key material and secret authentication
+    category: process
+    description: (L1) Make sure that cryptographic key material and secret authentication
       information (including cryptographic key material used for authentication) are
       not disclosed or tampered with
-    category: process
-    description: 'Objective: SO14, level: 1'
   - urn: risk:reference_control:enisa-5g-scm:m76
     ref_id: M76
-    name: (L2) Implement policy for management of cryptographic keys
     category: process
-    description: 'Objective: SO14, level: 2'
+    description: (L2) Implement policy for management of cryptographic keys
   - urn: risk:reference_control:enisa-5g-scm:m77
     ref_id: M77
-    name: (L2) Implement policy for management of user passwords
     category: process
-    description: 'Objective: SO14, level: 2'
+    description: (L2) Implement policy for management of user passwords
   - urn: risk:reference_control:enisa-5g-scm:m78
     ref_id: M78
-    name: (L3) Review and update of key management policy
     category: process
-    description: 'Objective: SO14, level: 3'
+    description: (L3) Review and update of key management policy
   - urn: risk:reference_control:enisa-5g-scm:m79
     ref_id: M79
-    name: (L3) Review and update of user password management policy
     category: process
-    description: 'Objective: SO14, level: 3'
+    description: (L3) Review and update of user password management policy
   - urn: risk:reference_control:enisa-5g-scm:m80
     ref_id: M80
-    name: (L1) Set up operational procedures and assign responsibilities for operation
-      of critical systems
     category: process
-    description: 'Objective: SO15, level: 1'
+    description: (L1) Set up operational procedures and assign responsibilities for
+      operation of critical systems
   - urn: risk:reference_control:enisa-5g-scm:m81
     ref_id: M81
-    name: (L2) Implement a policy for operation of systems to make sure all critical
-      systems are operated and managed in line with predefined procedures
     category: process
-    description: 'Objective: SO15, level: 2'
+    description: (L2) Implement a policy for operation of systems to make sure all
+      critical systems are operated and managed in line with predefined procedures
   - urn: risk:reference_control:enisa-5g-scm:m82
     ref_id: M82
-    name: (L3) Review and update the policy/procedures for operation of critical systems,
-      taking into account incidents and/or changes
     category: process
-    description: 'Objective: SO15, level: 3'
+    description: (L3) Review and update the policy/procedures for operation of critical
+      systems, taking into account incidents and/or changes
   - urn: risk:reference_control:enisa-5g-scm:m83
     ref_id: M83
-    name: (L1) Follow predefined methods or procedures when making changes to critical
-      systems
     category: process
-    description: 'Objective: SO16, level: 1'
+    description: (L1) Follow predefined methods or procedures when making changes
+      to critical systems
   - urn: risk:reference_control:enisa-5g-scm:m84
     ref_id: M84
-    name: (L2) Implement policy/procedures for change management, to make sure that
-      changes of critical systems are always done following a predefined way
     category: process
-    description: 'Objective: SO16, level: 2'
+    description: (L2) Implement policy/procedures for change management, to make sure
+      that changes of critical systems are always done following a predefined way
   - urn: risk:reference_control:enisa-5g-scm:m85
     ref_id: M85
-    name: (L2) Document change management procedures, and record for each change the
-      steps of the followed procedure
     category: process
-    description: 'Objective: SO16, level: 2'
+    description: (L2) Document change management procedures, and record for each change
+      the steps of the followed procedure
   - urn: risk:reference_control:enisa-5g-scm:m86
     ref_id: M86
-    name: (L3) Review and update change management procedures regularly, taking into
-      account changes and past incidents
     category: process
-    description: 'Objective: SO16, level: 3'
+    description: (L3) Review and update change management procedures regularly, taking
+      into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m87
     ref_id: M87
-    name: (L1) Identify critical assets and configurations of critical systems
     category: process
-    description: 'Objective: SO17, level: 1'
+    description: (L1) Identify critical assets and configurations of critical systems
   - urn: risk:reference_control:enisa-5g-scm:m88
     ref_id: M88
-    name: (L2) Implement policy/procedures for asset management and configuration
-      control
     category: process
-    description: 'Objective: SO17, level: 2'
+    description: (L2) Implement policy/procedures for asset management and configuration
+      control
   - urn: risk:reference_control:enisa-5g-scm:m89
     ref_id: M89
-    name: (L3) Review and update the asset management policy regularly, based on changes
-      and past incidents
     category: process
-    description: 'Objective: SO17, level: 3'
+    description: (L3) Review and update the asset management policy regularly, based
+      on changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m90
     ref_id: M90
-    name: (L1) Make sure personnel is available and prepared to manage and handle
-      incidents
     category: process
-    description: 'Objective: SO18, level: 1'
+    description: (L1) Make sure personnel is available and prepared to manage and
+      handle incidents
   - urn: risk:reference_control:enisa-5g-scm:m91
     ref_id: M91
-    name: (L1) Keep a record of all major incidents
     category: process
-    description: 'Objective: SO18, level: 1'
+    description: (L1) Keep a record of all major incidents
   - urn: risk:reference_control:enisa-5g-scm:m92
     ref_id: M92
-    name: (L2) Implement policy/procedures for managing incidents
     category: process
-    description: 'Objective: SO18, level: 2'
+    description: (L2) Implement policy/procedures for managing incidents
   - urn: risk:reference_control:enisa-5g-scm:m93
     ref_id: M93
-    name: (L3) Investigate major incidents and draft final incident reports, including
-      actions taken and recommendations to mitigate future occurrence of this type
-      of incident
     category: process
-    description: 'Objective: SO18, level: 3'
+    description: (L3) Investigate major incidents and draft final incident reports,
+      including actions taken and recommendations to mitigate future occurrence of
+      this type of incident
   - urn: risk:reference_control:enisa-5g-scm:m94
     ref_id: M94
-    name: (L3) Evaluate incident management policy/procedures based on past incidents
     category: process
-    description: 'Objective: SO18, level: 3'
+    description: (L3) Evaluate incident management policy/procedures based on past
+      incidents
   - urn: risk:reference_control:enisa-5g-scm:m95
     ref_id: M95
-    name: (L1) Set up processes or systems for incident detection
     category: process
-    description: 'Objective: SO19, level: 1'
+    description: (L1) Set up processes or systems for incident detection
   - urn: risk:reference_control:enisa-5g-scm:m96
     ref_id: M96
-    name: (L2) Implement industry standard systems and procedures for incident detection
     category: process
-    description: 'Objective: SO19, level: 2'
+    description: (L2) Implement industry standard systems and procedures for incident
+      detection
   - urn: risk:reference_control:enisa-5g-scm:m97
     ref_id: M97
-    name: (L2) Implement systems and procedures for registering and forwarding incidents
-      timely to the appropriate people
     category: process
-    description: 'Objective: SO19, level: 2'
+    description: (L2) Implement systems and procedures for registering and forwarding
+      incidents timely to the appropriate people
   - urn: risk:reference_control:enisa-5g-scm:m98
     ref_id: M98
-    name: (L3) Review systems and processes for incident detection regularly and update
-      them taking into account changes and past incidents
     category: process
-    description: 'Objective: SO19, level: 3'
+    description: (L3) Review systems and processes for incident detection regularly
+      and update them taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m99
     ref_id: M99
-    name: (L3) Implement state of the art systems and procedures for incident detection
     category: process
-    description: 'Objective: SO19, level: 3'
+    description: (L3) Implement state of the art systems and procedures for incident
+      detection
   - urn: risk:reference_control:enisa-5g-scm:m100
     ref_id: M100
-    name: (L1) Communicate and report about on-going or past incidents to third parties,
-      customers, and/or government authorities, when necessary
     category: process
-    description: 'Objective: SO20, level: 1'
+    description: (L1) Communicate and report about on-going or past incidents to third
+      parties, customers, and/or government authorities, when necessary
   - urn: risk:reference_control:enisa-5g-scm:m101
     ref_id: M101
-    name: (L2) Implement policy and procedures for communicating and reporting about
-      incidents
     category: process
-    description: 'Objective: SO20, level: 2'
+    description: (L2) Implement policy and procedures for communicating and reporting
+      about incidents
   - urn: risk:reference_control:enisa-5g-scm:m102
     ref_id: M102
-    name: (L3) Evaluate past communications and reporting about incidents
     category: process
-    description: 'Objective: SO20, level: 3'
+    description: (L3) Evaluate past communications and reporting about incidents
   - urn: risk:reference_control:enisa-5g-scm:m103
     ref_id: M103
-    name: (L3) Review and update the reporting and communication plans, based on changes
-      or past incidents
     category: process
-    description: 'Objective: SO20, level: 3'
+    description: (L3) Review and update the reporting and communication plans, based
+      on changes or past incidents
   - urn: risk:reference_control:enisa-5g-scm:m104
     ref_id: M104
-    name: (L1) Implement a service continuity strategy for the communications networks
-      and/or services provided
     category: process
-    description: 'Objective: SO21, level: 1'
+    description: (L1) Implement a service continuity strategy for the communications
+      networks and/or services provided
   - urn: risk:reference_control:enisa-5g-scm:m105
     ref_id: M105
-    name: (L2) Implement contingency plans for critical systems
     category: process
-    description: 'Objective: SO21, level: 2'
+    description: (L2) Implement contingency plans for critical systems
   - urn: risk:reference_control:enisa-5g-scm:m106
     ref_id: M106
-    name: (L2) Monitor activation and execution of contingency plans, registering
-      successful and failed recovery times
     category: process
-    description: 'Objective: SO21, level: 2'
+    description: (L2) Monitor activation and execution of contingency plans, registering
+      successful and failed recovery times
   - urn: risk:reference_control:enisa-5g-scm:m107
     ref_id: M107
-    name: (L2) Implement contingency plans for dependent and inter-dependent critical
-      sectors and services. When determining dependent critical sectors and services,
-      providers may take into account those services that are dependent on the continuity
-      of the network and service operation which are essential for the maintenance
-      of critical societal and/or economic activities and for which an incident would
-      have significant disruptive effects on the provision of that service. One possible
-      way for identifying such dependent services may be to pass the obligation to
-      service consumers to inform the providers if their service is considered critical
     category: process
-    description: 'Objective: SO21, level: 2'
+    description: (L2) Implement contingency plans for dependent and inter-dependent
+      critical sectors and services. When determining dependent critical sectors and
+      services, providers may take into account those services that are dependent
+      on the continuity of the network and service operation which are essential for
+      the maintenance of critical societal and/or economic activities and for which
+      an incident would have significant disruptive effects on the provision of that
+      service. One possible way for identifying such dependent services may be to
+      pass the obligation to service consumers to inform the providers if their service
+      is considered critical
   - urn: risk:reference_control:enisa-5g-scm:m108
     ref_id: M108
-    name: (L3) Review and revise service continuity strategy periodically
     category: process
-    description: 'Objective: SO21, level: 3'
+    description: (L3) Review and revise service continuity strategy periodically
   - urn: risk:reference_control:enisa-5g-scm:m109
     ref_id: M109
-    name: (L3) Review and revise contingency plans, based on past incidents and changes
     category: process
-    description: 'Objective: SO21, level: 3'
+    description: (L3) Review and revise contingency plans, based on past incidents
+      and changes
   - urn: risk:reference_control:enisa-5g-scm:m110
     ref_id: M110
-    name: (L1) Prepare for recovery and restoration of services following disasters
     category: process
-    description: 'Objective: SO22, level: 1'
+    description: (L1) Prepare for recovery and restoration of services following disasters
   - urn: risk:reference_control:enisa-5g-scm:m111
     ref_id: M111
-    name: (L2) Implement policy/procedures for deploying disaster recovery capabilities
     category: process
-    description: 'Objective: SO22, level: 2'
+    description: (L2) Implement policy/procedures for deploying disaster recovery
+      capabilities
   - urn: risk:reference_control:enisa-5g-scm:m112
     ref_id: M112
-    name: (L2) Implement industry standard disaster recovery capabilities, or be assured
-      they are available from third parties (such as national emergency networks)
     category: process
-    description: 'Objective: SO22, level: 2'
+    description: (L2) Implement industry standard disaster recovery capabilities,
+      or be assured they are available from third parties (such as national emergency
+      networks)
   - urn: risk:reference_control:enisa-5g-scm:m113
     ref_id: M113
-    name: (L3) Set up state of the art disaster recovery capabilities to mitigate
-      natural and/major disasters
     category: process
-    description: 'Objective: SO22, level: 3'
+    description: (L3) Set up state of the art disaster recovery capabilities to mitigate
+      natural and/major disasters
   - urn: risk:reference_control:enisa-5g-scm:m114
     ref_id: M114
-    name: (L3) Review and update disaster recovery capabilities regularly, taking
-      into account changes, past incidents, and results of tests and exercises
     category: process
-    description: 'Objective: SO22, level: 3'
+    description: (L3) Review and update disaster recovery capabilities regularly,
+      taking into account changes, past incidents, and results of tests and exercises
   - urn: risk:reference_control:enisa-5g-scm:m115
     ref_id: M115
-    name: (L1) Implement monitoring and logging of critical systems
     category: process
-    description: 'Objective: SO23, level: 1'
+    description: (L1) Implement monitoring and logging of critical systems
   - urn: risk:reference_control:enisa-5g-scm:m116
     ref_id: M116
-    name: (L2) Implement policy for logging and monitoring of critical systems
     category: process
-    description: 'Objective: SO23, level: 2'
+    description: (L2) Implement policy for logging and monitoring of critical systems
   - urn: risk:reference_control:enisa-5g-scm:m117
     ref_id: M117
-    name: '(L2) Set up tools for monitoring critical systems '
     category: process
-    description: 'Objective: SO23, level: 2'
+    description: '(L2) Set up tools for monitoring critical systems '
   - urn: risk:reference_control:enisa-5g-scm:m118
     ref_id: M118
-    name: (L2) Set up tools to collect and store logs of critical systems
     category: process
-    description: 'Objective: SO23, level: 2'
+    description: (L2) Set up tools to collect and store logs of critical systems
   - urn: risk:reference_control:enisa-5g-scm:m119
     ref_id: M119
-    name: (L3) Set up tools for automated collection and analysis of monitoring data
-      and logs
     category: process
-    description: 'Objective: SO23, level: 3'
+    description: (L3) Set up tools for automated collection and analysis of monitoring
+      data and logs
   - urn: risk:reference_control:enisa-5g-scm:m120
     ref_id: M120
-    name: (L3) Review and update logging and monitoring policy/procedures, taking
-      into account changes and past incidents
     category: process
-    description: 'Objective: SO23, level: 3'
+    description: (L3) Review and update logging and monitoring policy/procedures,
+      taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m121
     ref_id: M121
-    name: (L1) Exercise and test backup and contingency plans to make sure systems
-      and processes work and personnel is prepared for large failures and contingencies
     category: process
-    description: 'Objective: SO24, level: 1'
+    description: (L1) Exercise and test backup and contingency plans to make sure
+      systems and processes work and personnel is prepared for large failures and
+      contingencies
   - urn: risk:reference_control:enisa-5g-scm:m122
     ref_id: M122
-    name: (L2) Implement a program for exercising backup and contingency plans regularly,
-      using realistic scenarios covering a range of different scenarios over time
     category: process
-    description: 'Objective: SO24, level: 2'
+    description: (L2) Implement a program for exercising backup and contingency plans
+      regularly, using realistic scenarios covering a range of different scenarios
+      over time
   - urn: risk:reference_control:enisa-5g-scm:m123
     ref_id: M123
-    name: (L2) Make sure that the issues and lessons learnt from exercises are addressed
-      by the responsible people and that the relevant processes and systems are updated
-      accordingly
     category: process
-    description: 'Objective: SO24, level: 2'
+    description: (L2) Make sure that the issues and lessons learnt from exercises
+      are addressed by the responsible people and that the relevant processes and
+      systems are updated accordingly
   - urn: risk:reference_control:enisa-5g-scm:m124
     ref_id: M124
-    name: (L3) Review and update the exercise plans, taking into account changes,
-      past incidents and contingencies which were not covered by the exercise program
     category: process
-    description: 'Objective: SO24, level: 3'
+    description: (L3) Review and update the exercise plans, taking into account changes,
+      past incidents and contingencies which were not covered by the exercise program
   - urn: risk:reference_control:enisa-5g-scm:m125
     ref_id: M125
-    name: (L3) Involve suppliers and other third parties in exercises, for example
-      business partners and customers
     category: process
-    description: 'Objective: SO24, level: 3'
+    description: (L3) Involve suppliers and other third parties in exercises, for
+      example business partners and customers
   - urn: risk:reference_control:enisa-5g-scm:m126
     ref_id: M126
-    name: (L1) Test networks and information systems before using them or connecting
-      them to existing systems
     category: process
-    description: 'Objective: SO25, level: 1'
+    description: (L1) Test networks and information systems before using them or connecting
+      them to existing systems
   - urn: risk:reference_control:enisa-5g-scm:m127
     ref_id: M127
-    name: (L2) Implement policy/procedures for testing network and information systems
     category: process
-    description: 'Objective: SO25, level: 2'
+    description: (L2) Implement policy/procedures for testing network and information
+      systems
   - urn: risk:reference_control:enisa-5g-scm:m128
     ref_id: M128
-    name: (L2) Implement tools for automated testing
     category: process
-    description: 'Objective: SO25, level: 2'
+    description: (L2) Implement tools for automated testing
   - urn: risk:reference_control:enisa-5g-scm:m129
     ref_id: M129
-    name: (L3) Review and update the policy/procedures for testing, taking into account
-      changes and past incidents
     category: process
-    description: 'Objective: SO25, level: 3'
+    description: (L3) Review and update the policy/procedures for testing, taking
+      into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m130
     ref_id: M130
-    name: (L1) Ensure critical systems undergo security scans and security testing
-      regularly, particularly when new systems are introduced and following changes
     category: process
-    description: 'Objective: SO26, level: 1'
+    description: (L1) Ensure critical systems undergo security scans and security
+      testing regularly, particularly when new systems are introduced and following
+      changes
   - urn: risk:reference_control:enisa-5g-scm:m131
     ref_id: M131
-    name: (L2) Implement policy/procedures for security assessments and security testing
     category: process
-    description: 'Objective: SO26, level: 2'
+    description: (L2) Implement policy/procedures for security assessments and security
+      testing
   - urn: risk:reference_control:enisa-5g-scm:m132
     ref_id: M132
-    name: (L3) Evaluate the effectiveness of policy/procedures for security assessments
-      and security testing
     category: process
-    description: 'Objective: SO26, level: 3'
+    description: (L3) Evaluate the effectiveness of policy/procedures for security
+      assessments and security testing
   - urn: risk:reference_control:enisa-5g-scm:m133
     ref_id: M133
-    name: (L3) Review and update policy/procedures for security assessments and security
-      testing, taking into account changes and past incidents
     category: process
-    description: 'Objective: SO26, level: 3'
+    description: (L3) Review and update policy/procedures for security assessments
+      and security testing, taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m134
     ref_id: M134
-    name: (L1) Monitor compliance to standards and legal requirements
     category: process
-    description: 'Objective: SO27, level: 1'
+    description: (L1) Monitor compliance to standards and legal requirements
   - urn: risk:reference_control:enisa-5g-scm:m135
     ref_id: M135
-    name: (L2) Implement policy/procedures for compliance monitoring and auditing
     category: process
-    description: 'Objective: SO27, level: 2'
+    description: (L2) Implement policy/procedures for compliance monitoring and auditing
   - urn: risk:reference_control:enisa-5g-scm:m136
     ref_id: M136
-    name: (L3) Evaluate the policy/procedures for compliance and auditing
     category: process
-    description: 'Objective: SO27, level: 3'
+    description: (L3) Evaluate the policy/procedures for compliance and auditing
   - urn: risk:reference_control:enisa-5g-scm:m137
     ref_id: M137
-    name: (L3) Review and update the policy/procedures for compliance and auditing,
-      taking into account changes and past incidents
     category: process
-    description: 'Objective: SO27, level: 3'
+    description: (L3) Review and update the policy/procedures for compliance and auditing,
+      taking into account changes and past incidents
   - urn: risk:reference_control:enisa-5g-scm:m138
     ref_id: M138
-    name: (L1) Perform regular threat monitoring
     category: process
-    description: 'Objective: SO28, level: 1'
+    description: (L1) Perform regular threat monitoring
   - urn: risk:reference_control:enisa-5g-scm:m139
     ref_id: M139
-    name: (L2) Implement threat intelligence program
     category: process
-    description: 'Objective: SO28, level: 2'
+    description: (L2) Implement threat intelligence program
   - urn: risk:reference_control:enisa-5g-scm:m140
     ref_id: M140
-    name: (L3) Review and update the threat intelligence program
     category: process
-    description: 'Objective: SO28, level: 3'
+    description: (L3) Review and update the threat intelligence program
   - urn: risk:reference_control:enisa-5g-scm:m141
     ref_id: M141
-    name: (L3) Threat intelligence program makes use of state of the art threat intelligence
-      systems
     category: process
-    description: 'Objective: SO28, level: 3'
+    description: (L3) Threat intelligence program makes use of state of the art threat
+      intelligence systems
   - urn: risk:reference_control:enisa-5g-scm:m142
     ref_id: M142
-    name: (L1) Inform end-users of communication networks and services about particular
-      and significant security threats to network or service that may affect them
     category: process
-    description: 'Objective: SO29, level: 1'
+    description: (L1) Inform end-users of communication networks and services about
+      particular and significant security threats to network or service that may affect
+      them
   - urn: risk:reference_control:enisa-5g-scm:m143
     ref_id: M143
-    name: (L2) Implement policy/procedures for regular update of end-users about security
-      threats to network or service that may affect them
     category: process
-    description: 'Objective: SO29, level: 2'
+    description: (L2) Implement policy/procedures for regular update of end-users
+      about security threats to network or service that may affect them
   - urn: risk:reference_control:enisa-5g-scm:m144
     ref_id: M144
-    name: (L3) Review and update the policy/procedures for regular update of end-users
-      about security threats to network or service that may affect them
     category: process
-    description: 'Objective: SO29, level: 3'
+    description: (L3) Review and update the policy/procedures for regular update of
+      end-users about security threats to network or service that may affect them
   framework:
     urn: urn:intuitem:risk:framework:enisa-5g-scm-v1.3
-    ref_id: enisa-5g-scm-v1.3
+    ref_id: ENISA 5G SCM v1.3
     name: ENISA 5G Security Control Matrix v1.3
     description: "The main goal of the ENISA 5G security controls matrix is to support\
       \ the national authorities in the EU Member States with implementing the technical\

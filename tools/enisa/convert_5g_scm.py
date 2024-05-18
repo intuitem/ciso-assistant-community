@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("filename", help="name of 5G SCM Excel file")
 args = parser.parse_args()
 input_file_name = args.filename
-output_file_name = "enisa-5g_scm-v1.3.xlsx"
+output_file_name = "enisa-5g-scm-v1.3.xlsx"
 
 library_copyright = """The Matrix is provided on an ‘as is’ basis. ENISA is not responsible for the information contained in the Matrix, including the use that might be made of this information, or the content of any external sources referenced in the Matrix.
 """
@@ -93,11 +93,10 @@ ws.append(["tab", "reference_controls", "reference_controls"])
 ws.append(["tab", "requirements", "requirements"])
 
 ws2 = wb_output.create_sheet("reference_controls")
-ws2.append(["ref_id", "name", "category", "description"])
+ws2.append(["ref_id", "category", "description"])
 for measure_id in measures:
     (objective, so_level, description) = measures[measure_id]
-
-    ws2.append([measure_id, f"(L{so_level}) {description[3:]}", "process", f"Objective: {objective}, level: {so_level}"])
+    ws2.append([measure_id, "process", f"(L{so_level}) {description[3:]}"])
 
 ws1 = wb_output.create_sheet("requirements")
 ws1.append(
