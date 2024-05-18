@@ -50,11 +50,13 @@ export const getOptions = ({
 	self?: Record<string, any>;
 	selfSelect?: boolean;
 }[] => {
-	const append = (x, y) => (!y) ? x : (!x || x == '' ? y : x + " - " + y);
+	const append = (x, y) => (!y ? x : !x || x == '' ? y : x + ' - ' + y);
 	const options = objects
 		.map((object) => {
-			let my_label = label != 'auto' ? object[label] :
-				append(object['ref_id'], object['name'] ? object['name'] : object['description'])
+			let my_label =
+				label != 'auto'
+					? object[label]
+					: append(object['ref_id'], object['name'] ? object['name'] : object['description']);
 			return {
 				label:
 					extra_fields.length > 0
