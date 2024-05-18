@@ -1,0 +1,2082 @@
+urn: urn:ackwa:risk:library:mcas-1.0
+locale: fr
+ref_id: mcas-1.0
+name: PSSI-MCAS v1.0
+description: "Politique de s\xE9curit\xE9 des syst\xE8mes d\u2019information pour\
+  \ les minist\xE8res charg\xE9s des affaires sociales"
+copyright: "Minist\xE8re des Affaires sociales, de la Sant\xE9 et des Droits des femmes\
+  \ - 01/10/2015"
+version: 1
+provider: MCAS
+packager: Ackwa.fr
+objects:
+  framework:
+    urn: urn:ackwa:risk:framework:mcas-1.0
+    ref_id: mcas-1.0
+    name: PSSI-MCAS v1.0
+    description: "Politique de s\xE9curit\xE9 des syst\xE8mes d\u2019information pour\
+      \ les minist\xE8res charg\xE9s des affaires sociales"
+    requirement_nodes:
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      assessable: false
+      depth: 1
+      ref_id: ORG
+      name: "Organisation de la s\xE9curit\xE9 des syst\xE8mes d\u2019information"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-SSI
+      name: Organisation SSI
+      description: "Une organisation d\xE9di\xE9e \xE0 la SSI est d\xE9ploy\xE9e dans\
+        \ toutes les directions, services d\xE9concentr\xE9s, agences r\xE9gionales\
+        \ de sant\xE9, \xE9tablissements publics et op\xE9rateurs du p\xE9rim\xE8\
+        tre des MCAS. Cette organisation, \xE9tablie selon les directives du haut\
+        \ fonctionnaire de d\xE9fense et de s\xE9curit\xE9 (HFDS), d\xE9finit les\
+        \ responsabilit\xE9s internes et \xE0 l'\xE9gard des tiers, les modalit\xE9\
+        s de coordination avec les autorit\xE9s externes, ainsi que les modalit\xE9\
+        s d'application des mesures de protection. Des proc\xE9dures d'applications\
+        \ sont \xE9crites et port\xE9es \xE0 la connaissance de tous."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-act-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-ACT-SSI
+      name: Identification des acteurs SSI
+      description: "L\u2019organisation SSI des MCAS s\u2019appuie sur des acteurs\
+        \ SSI clairement identifi\xE9s, \xE0 tous ses niveaux d\u2019organisation.\
+        \ Les acteurs responsables en mati\xE8re de SSI sont charg\xE9s de la mise\
+        \ en application g\xE9n\xE9rale de la PSSI-MCAS Ils sont r\xE9f\xE9renc\xE9\
+        s dans un annuaire minist\xE9riel. Cette cha\xEEne fonctionnelle s\u2019appuie\
+        \ sur le service du haut fonctionnaire de d\xE9fense et de s\xE9curit\xE9\
+        ), notamment sur le fonctionnaire de s\xE9curit\xE9 des syst\xE8mes d'information\
+        \ (FSSI) pour les MCAS."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-rssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-RSSI
+      name: "D\xE9signation du responsable SSI"
+      description: "Chaque autorit\xE9 qualifi\xE9e en s\xE9curit\xE9 des syst\xE8\
+        mes d\u2019information (AQSSI) s'appuie sur un ou plusieurs responsables de\
+        \ la s\xE9curit\xE9 des syst\xE8mes d'information (RSSI), charg\xE9(s) de\
+        \ l'assister dans le pilotage et la gestion de la SSI Des correspondants locaux\
+        \ SSI (CLSSI) peuvent \xEAtre d\xE9sign\xE9s, le cas \xE9ch\xE9ant, afin de\
+        \ constituer un relais du RSSI. Le RSSI d'une entit\xE9 fait valider les mesures\
+        \ d'application de la PSSI-MCAS par l'AQSSI et veille \xE0 leur application.\
+        \ Des d\xE9nominations alternatives des fonctions cit\xE9es ci- dessus peuvent\
+        \ \xEAtre utilis\xE9es si n\xE9cessaire."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-resp
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-RESP
+      name: "Formalisation des responsabilit\xE9s"
+      description: "Une note d'organisation fixe la r\xE9partition au sein de chaque\
+        \ entit\xE9 et au niveau local des responsabilit\xE9s et r\xF4les en mati\xE8\
+        re de SSI Cette note sera, le plus souvent, propos\xE9e par le RSSI et valid\xE9\
+        e par l'AQSSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-tiers
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-TIERS
+      name: Gestion contractuelle des tiers
+      description: "Le RSSI coordonne les actions permettant l'int\xE9gration des\
+        \ clauses li\xE9es \xE0 la SSI dans tout contrat ou convention impliquant\
+        \ un acc\xE8s par des tiers \xE0 des informations ou \xE0 des ressources informatiques."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-pil-pmssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-PIL-PMSSI
+      name: "D\xE9finition et pilotage de la PSSI minist\xE9rielle"
+      description: "La PSSI-MCAS est plac\xE9e sous la responsabilit\xE9 du HFDS.\
+        \ Elle reprend le socle commun \xE9tabli par la PSSIE. Une structure de pilotage\
+        \ de la PSSI minist\xE9rielle est d\xE9finie : le Comit\xE9 Strat\xE9gique\
+        \ de la S\xE9curit\xE9 des Syst\xE8mes d'Information (CosStratSSI). Cette\
+        \ structure est charg\xE9e de sa mise en place, de son \xE9volution, de son\
+        \ suivi et de son contr\xF4le."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-app-instr
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-APP-INSTR
+      name: "Application de l\u2019instruction dans l\u2019entit\xE9"
+      description: "Le RSSI planifie les actions de mise en application de la PSSI-MCAS.\
+        \ Il rend compte r\xE9guli\xE8rement de la mise en application des mesures\
+        \ de s\xE9curit\xE9 \xE0 son autorit\xE9 qualifi\xE9e et, le cas \xE9ch\xE9\
+        ant au FSSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:org-app-docs
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:org
+      ref_id: ORG-APP-DOCS
+      name: Formalisation de documents d'application
+      description: "Le RSSI formalise et tient \xE0 jour les documents d'application,\
+        \ approuv\xE9s par l'autorit\xE9 qualifi\xE9e, permettant la mise en \u0153\
+        uvre des mesures de la PSSI-MCAS sur son p\xE9rim\xE8tre."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      assessable: false
+      depth: 1
+      ref_id: RH
+      name: Ressources humaines
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      ref_id: RH-SSI
+      name: "Charte d\u2019application SSI "
+      description: "Une charte d\u2019application de la politique SSI, r\xE9capitulant\
+        \ les mesures pratiques d'utilisation s\xE9curis\xE9e des ressources informatiques\
+        \ et \xE9labor\xE9e sous le pilotage de la cha\xEEne fonctionnelle SSI, est\
+        \ communiqu\xE9e \xE0 l'ensemble des agents de chaque entit\xE9. Cette charte\
+        \ doit \xEAtre opposable juridiquement et, si possible, int\xE9gr\xE9e au\
+        \ r\xE8glement int\xE9rieur de l\u2019entit\xE9. Le personnel non permanent\
+        \ (stagiaires, int\xE9rimaires, prestataires...) est inform\xE9 de ses devoirs\
+        \ dans le cadre de son usage des SI. Des exemples de chartes sont propos\xE9\
+        s."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh-motiv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      ref_id: RH-MOTIV
+      name: "Choix et sensibilisation des personnes tenant les postes cl\xE9s de la\
+        \ SSI "
+      description: "Une attention particuli\xE8re doit \xEAtre port\xE9e au recrutement\
+        \ des personnes-cl\xE9s de la SSI : RSSI, correspondants SSI locaux et administrateurs\
+        \ de s\xE9curit\xE9. Les RSSI et leurs correspondants SSI locaux doivent \xEA\
+        tre sp\xE9cifiquement form\xE9s \xE0 la SSI. Les administrateurs des SI doivent\
+        \ \xEAtre r\xE9guli\xE8rement sensibilis\xE9s aux devoirs li\xE9s \xE0 leur\
+        \ fonction, et doivent veiller \xE0 respecter ces exigences dans le cadre\
+        \ de leurs activit\xE9s quotidiennes."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh-conf
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      ref_id: RH-CONF
+      name: Personnels de confiance
+      description: "Toutes les personnes manipulant des informations sensibles doivent\
+        \ le faire avec une attention et une probit\xE9 particuli\xE8re, dans le respect\
+        \ des textes en vigueur. Les sanctions \xE9ventuelles s\u2019appliquant aux\
+        \ cas de n\xE9gligence ou de malveillance leur sont rappel\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh-util
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      ref_id: RH-UTIL
+      name: "Sensibilisation des utilisateurs des syst\xE8mes d\u2019information"
+      description: "Chaque utilisateur doit \xEAtre r\xE9guli\xE8rement inform\xE9\
+        \ des exigences de s\xE9curit\xE9 le concernant, et motiv\xE9 \xE0 leur respect.\
+        \ Il doit \xEAtre form\xE9 \xE0 l'utilisation des outils de travail conform\xE9\
+        ment aux r\xE8gles SSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh-mouv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      ref_id: RH-MOUV
+      name: "Gestion des arriv\xE9es, des mutations et des d\xE9parts"
+      description: "Une proc\xE9dure permettant de g\xE9rer les arriv\xE9es, les mutations\
+        \ et les d\xE9parts des collaborateurs dans les SI doit \xEAtre formalis\xE9\
+        e, et appliqu\xE9e strictement. Cette proc\xE9dure doit couvrir au minimum\
+        \ :\n\n- la gestion/r\xE9vocation des comptes et des droits d\u2019acc\xE8\
+        s aux SI, y compris pour les partenaires et les prestataires externes ;\n\
+        - la gestion du contr\xF4le d'acc\xE8s aux locaux ;\n- la gestion des \xE9\
+        quipements mobiles ;\n- la gestion du contr\xF4le des habilitations.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:rh-nperm
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:rh
+      ref_id: RH-NPERM
+      name: "Gestion du personnel non permanent (stagiaires, int\xE9rimaires, prestataires\u2026\
+        )"
+      description: "Les r\xE8gles de la PSSI-MICAS s\u2019appliquent \xE0 tout personnel\
+        \ non permanent utilisateur d'un SI des MICAS. Les dispositions contractuelles\
+        \ pr\xE9existantes r\xE9gissant l'emploi de ce personnel sont amend\xE9es\
+        \ si n\xE9cessaire. Pour tout personnel non permanent, un tutorat par un agent\
+        \ permanent est mis en place, afin de l'informer de ces r\xE8gles et d\u2019\
+        en contr\xF4ler l\u2019application."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:gdb
+      assessable: false
+      depth: 1
+      ref_id: GDB
+      name: Gestion des biens
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:gdb-invent
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:gdb
+      ref_id: GDB-INVENT
+      name: Inventaire des ressources informatiques
+      description: "Chaque entit\xE9 \xE9tablit et maintient \xE0 jour un inventaire\
+        \ des ressources informatiques sous sa responsabilit\xE9, en s'appuyant sur\
+        \ un outillage adapt\xE9. Cet inventaire est tenu \xE0 disposition du RSSI,\
+        \ ainsi que du FSSI et de l'ANSSI en cas de besoin de coordination op\xE9\
+        rationnelle. Il comprend la liste des \xAB briques \xBB mat\xE9rielles et\
+        \ logicielles utilis\xE9es, ainsi que leurs versions exactes. Il est constitu\xE9\
+        \ d\u2019une base de donn\xE9es de configuration, maintenue \xE0 jour et tenue\
+        \ \xE0 disposition du RSSI. L\u2019historique des attributions des biens inventori\xE9\
+        s doit \xEAtre conserv\xE9, dans le respect de la l\xE9gislation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:gdb-carto
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:gdb
+      ref_id: GDB-CARTO
+      name: Cartographie
+      description: "La cartographie pr\xE9cise les centres informatiques, les architectures\
+        \ des r\xE9seaux (sur lesquelles sont identifi\xE9s les points n\xE9vralgiques\
+        \ et la sensibilit\xE9 des informations manipul\xE9es) et qualifie le niveau\
+        \ de s\xE9curit\xE9 attendu. Cette cartographie est maintenue \xE0 jour et\
+        \ tenue \xE0 disposition du RSSI, ainsi que du FSSI et de l'ANSSI en cas de\
+        \ besoin de coordination op\xE9rationnelle."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:gdb-qualif-sensi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:gdb
+      ref_id: GDB-QUALIF-SENSI
+      name: Qualification des informations
+      description: "La sensibilit\xE9 de toute information doit \xEAtre \xE9valu\xE9\
+        e. Le marquage syst\xE9matique des documents, en fonction du niveau de sensibilit\xE9\
+        , est fortement recommand\xE9.\n\nLes informations sensibles re\xE7oivent\
+        \ une mention rappelant leur sensibilit\xE9 en consid\xE9ration de la gravit\xE9\
+        \ des cons\xE9quences qu'aurait une divulgation et apposer une mention telle\
+        \ que \xAB confidentiel \xBB sur les documents sensibles ainsi que dans les\
+        \ courriers ou courriels qui les accompagnent. A titre d'exemple, on pourra\
+        \ utiliser les mentions suivantes :\n\n- Confidentiel m\xE9dical\n- Confidentiel\
+        \ (personnel\n- ... \n\nCette mention peut \xEAtre compl\xE9t\xE9e d\u2019\
+        un marquage sp\xE9cifiant l'usage restrictif qui doit \xEAtre fait par son\
+        \ destinataire (diffusion interne, diffusion limit\xE9e)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:gdb-prot-is
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:gdb
+      ref_id: GDB-PROT-IS
+      name: Protection des informations
+      description: "L\u2019utilisateur doit prot\xE9ger les informations qu'il est\
+        \ amen\xE9 \xE0 manipuler dans le cadre de ses fonctions, selon leur sensibilit\xE9\
+        \ et tout au long de leur cycle de vie, depuis la cr\xE9ation du brouillon\
+        \ jusqu'\xE0 son \xE9ventuelle destruction."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      assessable: false
+      depth: 1
+      ref_id: INT
+      name: "Int\xE9gration de la SSI dans le cycle de vie des syst\xE8mes d\u2019\
+        information"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-homqlog-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-HOMQLOG-SSI
+      name: "Homologation de s\xE9curit\xE9 des syst\xE8mes d'information"
+      description: "Tout syst\xE8me d'information doit faire l'objet d'une d\xE9cision\
+        \ d\u2019homologation de sa s\xE9curit\xE9 avant sa mise en exploitation dans\
+        \ les conditions d\u2019emploi d\xE9finies. L'homologation est l\u2019acte\
+        \ selon lequel l\u2019autorit\xE9 atteste formellement aupr\xE8s des utilisateurs\
+        \ que le syst\xE8me d\u2019information est prot\xE9g\xE9 conform\xE9ment aux\
+        \ objectifs de s\xE9curit\xE9 fix\xE9s. La d\xE9cision d\u2019homologation\
+        \ est prise par l\u2019autorit\xE9 d\u2019homologation (d\xE9sign\xE9e par\
+        \ l\u2019autorit\xE9 qualifi\xE9e), le cas \xE9ch\xE9ant apr\xE8s avis de\
+        \ la commission d\u2019homologation. Cette d\xE9cision s\u2019appuie sur une\
+        \ analyse de risques adapt\xE9e aux enjeux du syst\xE8me consid\xE9r\xE9,\
+        \ et pr\xE9cise les conditions d\u2019emploi."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-SSI
+      name: "Int\xE9gration de la s\xE9curit\xE9 dans les projets"
+      description: "La s\xE9curit\xE9 des syst\xE8mes d\u2019information doit \xEA\
+        tre prise en compte dans toutes les phases des projets informatiques, sous\
+        \ le contr\xF4le de l'autorit\xE9 d'homologation, de la conception et de la\
+        \ sp\xE9cification du syst\xE8me jusqu'\xE0 son retrait du service."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-quot-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-QUOT-SSI
+      name: "Mise en \u0153uvre au quotidien de la SSI"
+      description: "La s\xE9curit\xE9 des syst\xE8mes d\u2019information se traite\
+        \ au quotidien par des pratiques d\u2019hygi\xE8ne informatique. Des proc\xE9\
+        dures \xE9crites d\xE9finissent les actes \xE9l\xE9mentaires du maintien en\
+        \ condition de s\xE9curit\xE9 lors des phases de conception, \xE9volution\
+        \ ou retrait d'un syst\xE8me. Tout syst\xE8me d'information doit faire l\u2019\
+        objet, outre le maintien en condition op\xE9rationnelle, d'un maintien en\
+        \ condition de s\xE9curit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-tdb
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-TDB
+      name: "Cr\xE9er un tableau de bord SSI"
+      description: "Un tableau de bord SSI est mis en place et tenu \xE0 jour. Il\
+        \ fournit au RSSI et aux autorit\xE9s une vision g\xE9n\xE9rale du niveau\
+        \ de s\xE9curit\xE9 et de son \xE9volution, rendant ainsi plus efficace le\
+        \ pilotage de la SSI. Au niveau strat\xE9gique, le tableau de bord SSI permet\
+        \ de suivre l\u2019application de la politique de s\xE9curit\xE9 et de disposer\
+        \ d\u2019\xE9l\xE9ments propres \xE0 qualifier les ressources devant \xEA\
+        tre allou\xE9es \xE0 la SSI.\n\nAu niveau du pilotage, la mise en place de\
+        \ ce tableau de bord permet de contr\xF4ler la r\xE9alisation d\u2019objectifs\
+        \ op\xE9rationnels, d\u2019am\xE9liorer la qualit\xE9 de service et de d\xE9\
+        tecter au plus t\xF4t les retards dans la r\xE9alisation de certains objectifs\
+        \ de s\xE9curit\xE9.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-aq-psl
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-AQ-PSL
+      name: Acquisition de produits et services de confiance
+      description: "Il est recommand\xE9 d'utiliser, lorsqu'ils sont disponibles,\
+        \ des produits ou des services de s\xE9curit\xE9 labellis\xE9s (certifi\xE9\
+        s, qualifi\xE9s) par l'ANSSI.\n\nDans le cadre d'un march\xE9, un crit\xE8\
+        re de choix, dont la notation est clairement d\xE9finie, sur l\u2019existence\n\
+        d\u2019un label ANSSI est indiqu\xE9.\n\nL\u2019ordre de choix peut \xEAtre\
+        \ le suivant (avec une quotation adapt\xE9e) :\n\n- Qualification renforc\xE9\
+        e de l\u2019ANSSI ;\n- Qualification standard de l\u2019ANSSI ;\n- Reconnaissance\
+        \ SOG-IS ; \n- Reconnaissance crit\xE8res communs ;\n- Certification de s\xE9\
+        curit\xE9 de premier niveau de l'ANSSI\n- En cours de labellisation aupr\xE8\
+        s de l'ANSSI (sans pr\xE9somption du r\xE9sultat mais dans ce cas avec l'obligation\
+        \ pour le soumissionnaire de fournir le r\xE9c\xE9piss\xE9 du d\xE9p\xF4t\
+        \ de la demande r\xE9alis\xE9e aupr\xE8s de l'ANSSI) ;\n- Reconnaissance autre\
+        \ ;\n- Pas de labellisation.\n\nLa labellisation est r\xE9alis\xE9e suivant\
+        \ une cible de s\xE9curit\xE9 d\xE9finie. En cas de plusieurs solutions labellis\xE9\
+        es\npropos\xE9es, une attention particuli\xE8re doit donc \xEAtre port\xE9\
+        e sur la cible de s\xE9curit\xE9 ayant permis leur\nlabellisation (p\xE9rim\xE8\
+        tre total ou partiel de la solution)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-pres-cs
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-PRES-CS
+      name: "Clauses de s\xE9curit\xE9"
+      description: "Toute prestation dans le domaine des SI doit \xEAtre encadr\xE9\
+        e par des clauses de s\xE9curit\xE9 (plan d\u2019assurance s\xE9curit\xE9\
+        ). Ces clauses sp\xE9cifient les mesures SSI que le prestataire doit respecter\
+        \ dans le cadre de ses activit\xE9s."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-pres-cntrl
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-PRES-CNTRL
+      name: "Suivi et contr\xF4le des prestations fournies"
+      description: "Le maintien d'un niveau de s\xE9curit\xE9 au cours du temps n\xE9\
+        cessite un double contr\xF4le :\n\n- l'un, effectu\xE9 p\xE9riodiquement par\
+        \ l\u2019\xE9quipe encadrant la prestation, qui porte sur les actions du sous-traitant\
+        \ et la conformit\xE9 au cahier des charges ;\n- l'autre, effectu\xE9 par\
+        \ une \xE9quipe externe, qui porte sur la pertinence du cahier des charges\
+        \ en amont des projets, la conformit\xE9 des r\xE9ponses apport\xE9es par\
+        \ le sous- traitant en phase de recette et le niveau de s\xE9curit\xE9 global\
+        \ obtenu en production."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-rex-ar
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-REX-AR
+      name: Analyse de risques
+      description: "Toute op\xE9ration d'externalisation s'appuie sur une analyse\
+        \ de risques pr\xE9alable, de fa\xE7on \xE0 formaliser des objectifs de s\xE9\
+        curit\xE9 et d\xE9finir des mesures adapt\xE9es L'ensemble des objectifs de\
+        \ s\xE9curit\xE9 ainsi formalis\xE9s permet de d\xE9finir une cible de s\xE9\
+        curit\xE9 servant de cadre au contrat \xE9tabli avec le prestataire,"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-rex-hb
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-REX-HB
+      name: "H\xE9bergement"
+      description: "L\u2019h\xE9bergement de donn\xE9es sensibles sur le territoire\
+        \ national est fortement recommand\xE9. En outre, l\u2019h\xE9bergement concernant\
+        \ certaines donn\xE9es doit r\xE9pondre aux exigences l\xE9gales et r\xE9\
+        glementaires (donn\xE9es nominatives, donn\xE9es de sant\xE9...)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:int-rex-hs
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:int
+      ref_id: INT-REX-HS
+      name: "H\xE9bergement et clauses de s\xE9curit\xE9"
+      description: "Tout contrat d'h\xE9bergement d\xE9taille les dispositions mises\
+        \ en \u0153uvre pour prendre en compte la SSI Ce sont notamment les mesures\
+        \ prises pour assurer le maintien en condition de s\xE9curit\xE9 des syst\xE8\
+        mes et permettre une gestion de crise efficace (conditions d'acc\xE8s aux\
+        \ journaux, mise en place d'astreintes, etc)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      assessable: false
+      depth: 1
+      ref_id: PHY
+      name: "S\xE9curit\xE9 physique des locaux abritant les SI"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-zones
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-ZONES
+      name: "D\xE9coupage des sites en zones de s\xE9curit\xE9"
+      description: "Un d\xE9coupage des sites en zones physiques de s\xE9curit\xE9\
+        \ doit \xEAtre effectu\xE9, en liaison avec le RSSI, les correspondants locaux\
+        \ SSI et les services en charge : de l'immobilier, de la s\xE9curit\xE9 et\
+        \ des moyens g\xE9n\xE9raux. Pour chaque zone de s\xE9curit\xE9, des crit\xE8\
+        res pr\xE9cis d'autorisation d'acc\xE8s sont \xE9tablis."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-publ
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-PUBL
+      name: "Acc\xE8s r\xE9seau en zone d\u2019accueil du public"
+      description: "Tout acc\xE8s r\xE9seau install\xE9 dans une zone d'accueil du\
+        \ public doit \xEAtre filtr\xE9 ou isol\xE9 du reste du r\xE9seau informatique\
+        \ de l\u2019entit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-sens
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-SENS
+      name: "Protection des informations sensibles au sein des zones d\u2019accueil"
+      description: "Le traitement d'informations sensibles au sein des zones d'accueil\
+        \ est \xE0 \xE9viter. Si un tel traitement est strictement n\xE9cessaire,\
+        \ il doit rester ponctuel et exceptionnel. Des mesures particuli\xE8res sont\
+        \ alors adopt\xE9es, notamment en mati\xE8re de protection audiovisuelle,\
+        \ ainsi qu\u2019en mati\xE8re de protection des informations stock\xE9es sur\
+        \ les supports."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-tech
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-TECH
+      name: "S\xE9curit\xE9 physique des locaux techniques"
+      description: "L\u2019acc\xE8s aux locaux techniques abritant des \xE9quipements\
+        \ d'alimentation et de distribution d\u2019\xE9nergie, ou des \xE9quipements\
+        \ de r\xE9seau et de t\xE9l\xE9phonie, doit \xEAtre physiquement prot\xE9\
+        g\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-telecom
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-TELECOM
+      name: "Protection des c\xE2bles \xE9lectriques et de t\xE9l\xE9communications"
+      description: "Il convient de prot\xE9ger le c\xE2blage r\xE9seau contre les\
+        \ dommages et les interceptions des communications qu\u2019ils transmettent.\
+        \ En compl\xE9ment, les panneaux de raccordements et les salles des c\xE2\
+        bles doivent \xEAtre plac\xE9s en dehors des zones d\u2019accueil du public\
+        \ et leur acc\xE8s doit \xEAtre contr\xF4l\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ctrl
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CTRL
+      name: "Contr\xF4les anti-pi\xE9geages"
+      description: "Sur les SI particuli\xE8rement sensibles, il est recommand\xE9\
+        \ de mener des contr\xF4les anti-pi\xE9geages r\xE9guliers, effectu\xE9s par\
+        \ du personnel form\xE9. Il peut \xEAtre fait appel \xE0 des services sp\xE9\
+        cialis\xE9s (op\xE9rations dites de \xAB d\xE9poussi\xE9rage \xBB).  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-loc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-LOC
+      name: "D\xE9coupage des locaux en zones de s\xE9curit\xE9"
+      description: "Un d\xE9coupage du centre informatique en zones physiques de s\xE9\
+        curit\xE9 doit \xEAtre effectu\xE9, en liaison avec le RSSI et les services\
+        \ en charge de l\u2019immobilier, de la s\xE9curit\xE9 et des moyens g\xE9\
+        n\xE9raux. Des r\xE8gles doivent fixer les conditions d\u2019acc\xE8s \xE0\
+        \ ces diff\xE9rentes zones."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-heberg
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-HEBERG
+      name: "Convention de service en cas d\u2019h\xE9bergement tiers"
+      description: "Dans le cas o\xF9 un tiers g\xE8re tout ou partie des locaux du\
+        \ centre informatique, une convention de service, d\xE9finissant les responsabilit\xE9\
+        s mutuelles en mati\xE8re de s\xE9curit\xE9, doit \xEAtre \xE9tablie entre\
+        \ ce tiers et l\u2019entit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-ctrlacc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-CTRLACC
+      name: "Contr\xF4le d\u2019acc\xE8s physique"
+      description: "L\u2019acc\xE8s aux zones internes (autoris\xE9es uniquement au\
+        \ personnel du centre informatique ou aux visiteurs accompagn\xE9s) et restreintes\
+        \ (autoris\xE9es aux seules personnes habilit\xE9es ou aux visiteurs accompagn\xE9\
+        s) doit reposer sur un dispositif de contr\xF4le d\u2019acc\xE8s physique.\
+        \ Ce dispositif doit s'appuyer sur des produits qualifi\xE9s, lorsqu\u2019\
+        ils sont disponibles, et b\xE9n\xE9ficier d'un maintien en condition de s\xE9\
+        curit\xE9 rigoureux."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-moyens
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-MOYENS
+      name: "D\xE9livrance des moyens d\u2019acc\xE8s physique"
+      description: "La d\xE9livrance des moyens d'acc\xE8s physique doit respecter\
+        \ un processus formel permettant de s'assurer de l'identit\xE9 de la personne,\
+        \ s'appuyant sur le processus d\u2019arriv\xE9e et de d\xE9part du personnel.\
+        \ Le personnel autre que celui explicitement autoris\xE9 et habilit\xE9, mais\
+        \ n\xE9anmoins appel\xE9 \xE0 intervenir dans les zones sensibles (entretien\
+        \ ou r\xE9paration des b\xE2timents, des \xE9quipements non informatiques,\
+        \ nettoyage, visiteurs, .. . ), intervient syst\xE9matiquement et imp\xE9\
+        rativement sous surveillance permanente."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-trace
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-TRACE
+      name: "Tra\xE7abilit\xE9 des acc\xE8s"
+      description: "Une tra\xE7abilit\xE9 des acc\xE8s, par les visiteurs externes,\
+        \ aux zones restreintes doit \xEAtre mise en place. Ces traces sont alors\
+        \ conserv\xE9es un an, dans le respect des textes prot\xE9geant les donn\xE9\
+        es personnelles."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-energie
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-ENERGIE
+      name: "Local \xE9nergie"
+      description: "L\u2019alimentation secteur des \xE9quipements devra \xEAtre conforme\
+        \ aux r\xE8gles de l\u2019art, de fa\xE7on \xE0 se pr\xE9munir des atteintes\
+        \ \xE0 la s\xE9curit\xE9 des personnes et \xE9quipements li\xE9es \xE0 un\
+        \ d\xE9faut \xE9lectrique."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-clim
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-CLIM
+      name: Climatisation
+      description: "Un dispositif de climatisation dimensionn\xE9 en fonction des\
+        \ besoins \xE9nerg\xE9tiques du syst\xE8me informatique doit \xEAtre install\xE9\
+        . Des proc\xE9dures de r\xE9action en cas de panne, connues du personnel,\
+        \ doivent \xEAtre \xE9labor\xE9es et v\xE9rifi\xE9es annuellement. Ces dispositions\
+        \ visent \xE0 pr\xE9venir toute surchauffe des \xE9quipements, pouvant engendrer\
+        \ une perte du service voire une d\xE9t\xE9rioration du mat\xE9riel."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-inc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-CI-INC
+      name: "Lutte contre l\u2019incendie"
+      description: "L\u2019installation de mat\xE9riel de protection contre le feu\
+        \ est obligatoire. Des proc\xE9dures de r\xE9action \xE0 un incendie sont\
+        \ d\xE9finies et r\xE9guli\xE8rement test\xE9es. Les salles techniques doivent\
+        \ \xEAtre propres. Aucun carton, papier, ou autre source potentielle de d\xE9\
+        part de feu ne doit \xEAtre entrepos\xE9 dans ces locaux.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-ci-eau
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY CI-EAU
+      name: "Lutte contre les voies d\u2019eau"
+      description: "Une \xE9tude sur les risques dus aux voies d'eau doit \xEAtre\
+        \ r\xE9alis\xE9e. Cette \xE9tude doit notamment prendre en compte le risque\
+        \ de fuite sur un collecteur d\u2019eau douce."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:phy-si-sur
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:phy
+      ref_id: PHY-SI-SUR
+      name: "S\xE9curisation du SI de s\xFBret\xE9"
+      description: "Pour les sites physiques consid\xE9r\xE9s comme importants, des\
+        \ mesures de protection doivent \xEAtre d\xE9finies et appliqu\xE9es en se\
+        \ basant sur les conclusions d\u2019une analyse de risques. L\u2019analyse\
+        \ de risques conduit \xE0 la d\xE9signation des briques essentielles dont\
+        \ il faut assurer la protection contre des actes malveillants Un syst\xE8\
+        me de gestion de la s\xE9curit\xE9 du SI de s\xFBret\xE9 (s'inspirant de la\
+        \ norme ISO 27001) assure le maintien en condition de s\xE9curit\xE9. L'emploi\
+        \ de produits labellis\xE9s, quand ils existent, est fortement recommand\xE9\
+        ."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      assessable: false
+      depth: 1
+      ref_id: RES
+      name: "S\xE9curit\xE9 des r\xE9seaux"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-maitrise
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-MAITRISE
+      name: "Syst\xE8mes autoris\xE9s sur le r\xE9seau"
+      description: "Seuls les \xE9quipements g\xE9r\xE9s et configur\xE9s par les\
+        \ \xE9quipes informatiques habilit\xE9es peuvent \xEAtre connect\xE9s au r\xE9\
+        seau local d\u2019une entit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-interco
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-INTERCO
+      name: "Interconnexion avec des r\xE9seaux externes"
+      description: "Toute interconnexion entre les r\xE9seaux locaux d\u2019une entit\xE9\
+        \ et un r\xE9seau externe (r\xE9seau d\u2019un tiers, Internet, etc.) doit\
+        \ \xEAtre, pour les organismes \xE9ligibles, r\xE9alis\xE9e via les infrastructures\
+        \ nationales (r\xE9seau interminist\xE9riel de l'Etat, RENATER). Pour les\
+        \ autres il convient de ma\xEEtriser les interconnexions (connaissance des\
+        \ fournisseurs d\u2019acc\xE8s, r\xE9versibilit\xE9 de la solution, maintien\
+        \ en condition de s\xE9curit\xE9)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-entsor
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-ENTSOR
+      name: "Mettre en place un filtrage r\xE9seau pour les flux sortants et entrants"
+      description: "Dans l\u2019optique de r\xE9duire les possibilit\xE9s offertes\
+        \ \xE0 un attaquant, les connexions des machines du r\xE9seau interne vers\
+        \ l'ext\xE9rieur doivent \xEAtre filtr\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-prot
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-PROT
+      name: Protection des informations
+      description: "Les acc\xE8s \xE0 Internet passent obligatoirement \xE2 travers\
+        \ les passerelles nationales. D\xE8s lors que des informations sensibles doivent\
+        \ transiter sur des r\xE9seaux non ma\xEEtris\xE9s, il convient de les prot\xE9\
+        ger sp\xE9cifiquement par chiffrement adapt\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-clois
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-CLOIS
+      name: "Cloisonner le SI en sous-r\xE9seaux de niveaux de s\xE9curit\xE9 homog\xE8\
+        nes"
+      description: "Par analogie avec le cloisonnement physique d'un b\xE2timent,\
+        \ le syst\xE8me d\u2019information doit \xEAtre segment\xE9 selon des zones\
+        \ pr\xE9sentant chacune un niveau de s\xE9curit\xE9 homog\xE8ne."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-intercogeo
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-INTERCOGEO
+      name: "Interconnexion des sites g\xE9ographiques locaux d\u2019une entit\xE9"
+      description: "L'interconnexion au niveau local de r\xE9seaux locaux d\u2019\
+        une entit\xE9 n'est possible que si la proximit\xE9 g\xE9ographique le justifie\
+        \ et sous r\xE9serve de la mise en place de connexions d\xE9di\xE9es \xE2\
+        \ cet effet, et de passerelles s\xE9curis\xE9es et homologu\xE9es par l'AQSSI\
+        \ et valid\xE9e par le HFDS."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-ress
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-RESS
+      name: Cloisonnement des ressources en cas de partage de locaux
+      description: "Dans le cas o\xF9 une entit\xE9 partage des locaux (bureaux ou\
+        \ locaux techniques) avec des entit\xE9s externes, des mesures de cloisonnement\
+        \ des ressources informatiques doivent \xEAtre mises en place. Si le cloisonnement\
+        \ n\u2019est pas physique, les mesures prises doivent \xEAtre valid\xE9es\
+        \ par le HFDS."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-internet-specifique
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-INTERNET-SPECIFIQUE
+      name: "Cas particulier des acc\xE8s sp\xE9cifiques dans une entit\xE9"
+      description: "Les acc\xE8s sp\xE9cifiques \xE0 Internet n\xE9cessitant des droits\
+        \ particuliers pour un usage m\xE9tier ne peuvent \xEAtre mis en place que\
+        \ sur d\xE9rogation d\xFBment justifi\xE9e, et sur des machines isol\xE9es\
+        \ physiquement et s\xE9par\xE9es du r\xE9seau de l\u2019entit\xE9, apr\xE8\
+        s validation pr\xE9alable de l'autorit\xE9 d'homologation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-ssfil
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-SSFIL
+      name: "Mise en place de r\xE9seaux sans fil"
+      description: "Le d\xE9ploiement de r\xE9seaux sans fil doit faire l'objet d'une\
+        \ analyse de risques sp\xE9cifique. Les protections intrins\xE8ques \xE9tant\
+        \ insuffisantes, des mesures compl\xE9mentaires, valid\xE9es par le SHFDS,\
+        \ doivent \xEAtre prises dans le cadre de la d\xE9fense en profondeur. En\
+        \ particulier, une segmentation du r\xE9seau doit \xEAtre mise en place de\
+        \ fa\xE7on \xE0 limiter \xE2 un p\xE9rim\xE8tre d\xE9termin\xE9 les cons\xE9\
+        quences d\u2019une intrusion depuis la voie radio. \xC0 d\xE9faut de mise\
+        \ en \u0153uvre de mesures sp\xE9cifiques, le d\xE9ploiement de r\xE9seaux\
+        \ sans fil sur des SI manipulant des donn\xE9es sensibles est proscrit S\xE9\
+        curisation des m\xE9canismes de commutation et de routage"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-couchbas
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-COUCHBAS
+      name: "Implanter des m\xE9canismes de protection contre les attaques sur les"
+      description: "couches basses. Une attention particuli\xE8re doit \xEAtre apport\xE9\
+        e \xE2 l'implantation des protocoles de couches basses, de fa\xE7on \xE0 se\
+        \ pr\xE9munir des attaques usuelles."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-routdyn
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-ROUTDYN
+      name: Surveiller les annonces de routage
+      description: "Lorsque l\u2019utilisation de protocoles de routage dynamiques\
+        \ est n\xE9cessaire, celle-ci doit s'accompagner de la mise en place d\u2019\
+        une surveillance des annonces de routage, et de proc\xE9dures permettant de\
+        \ r\xE9agir rapidement en cas d\u2019incidents."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-routdyn-igp
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-ROUTDYN-IGP
+      name: "Configurer le protocole IGP de mani\xE8re s\xE9curis\xE9e"
+      description: "Le protocole de routage dynamique de type IGP doit \xEAtre activ\xE9\
+        \ exclusivement sur les interfaces n\xE9cessaires \xE0 la construction de\
+        \ la topologie du r\xE9seau et d\xE9sactiv\xE9 sur le reste des interfaces.\
+        \ La configuration du protocole de routage dynamique doit syst\xE9matiquement\
+        \ \xEAtre r\xE9alis\xE9e suivant les pr\xE9conisations de l\u2019Agence nationale\
+        \ de s\xE9curit\xE9 des syst\xE8mes d\u2019information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-routdyn-egp
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-ROUTDYN-EGP
+      name: "S\xE9curiser les sessions EGP"
+      description: "Lors de la mise en place d\u2019une session EGP avec un pair ext\xE9\
+        rieur sur un m\xE9dia partag\xE9, cette session doit \xEAtre r\xE9alis\xE9\
+        e suivant les pr\xE9conisations de l\u2019Agence nationale de s\xE9curit\xE9\
+        \ des syst\xE8mes d\u2019information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-secret
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-SECRET
+      name: "Modifier syst\xE9matiquement les \xE9l\xE9ments d\u2019authentification\
+        \ par d\xE9faut des"
+      description: "\xE9quipements et services. Les mots de passe par d\xE9faut doivent\
+        \ \xEAtre imp\xE9rativement modifi\xE9s, de m\xEAme en ce qui concerne les\
+        \ certificats. Les dispositions n\xE9cessaires doivent \xEAtre prises aupr\xE8\
+        s des fournisseurs de fa\xE7on \xE0 pouvoir modifier les certificats install\xE9\
+        s par d\xE9faut."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-durci
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-DURCI
+      name: "Durcir les configurations des \xE9quipements de r\xE9seaux"
+      description: "Les \xE9quipements de r\xE9seaux (comme les routeurs) doivent\
+        \ faire l'objet d\u2019un durcissement sp\xE9cifique comprenant notamment,\
+        \ outre le changement des mots de passe et certificats, la d\xE9sactivation\
+        \ des interfaces et services inutiles, ainsi que la mise en place de m\xE9\
+        canismes de protection du plan de contr\xF4le."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:res-carto
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:res
+      ref_id: RES-CARTO
+      name: "\xC9laborer les documents d\u2019architecture technique et fonctionnelle"
+      description: "L\u2019architecture r\xE9seau du syst\xE8me d\u2019information\
+        \ doit \xEAtre d\xE9crite et formalis\xE9e \xE0 travers des sch\xE9mas d\u2019\
+        architecture, et des configurations, maintenus au fil des \xE9volutions apport\xE9\
+        es au SI. Les documents d\u2019architecture sont sensibles et font l\u2019\
+        objet d'une protection adapt\xE9e. La cartographie r\xE9seau s\u2019ins\xE8\
+        re dans la cartographie globale des SI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:archi
+      assessable: false
+      depth: 1
+      ref_id: ARCHI
+      name: Architecture des SI
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:archi-heberg
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:archi
+      ref_id: ARCHI-HEBERG
+      name: "Principes d\u2019architecture de la zone d'h\xE9bergement"
+      description: "D\u2019une mani\xE8re g\xE9n\xE9rale, l\u2019architecture des\
+        \ infrastructures des centres informatiques est con\xE7ue de fa\xE7on \xE0\
+        \ satisfaire l'ensemble des besoins en disponibilit\xE9, confidentialit\xE9\
+        , tra\xE7abilit\xE9 et int\xE9grit\xE9. Le principe de d\xE9fense en profondeur\
+        \ doit \xEAtre respect\xE9, en particulier par la mise en \u0153uvre successive\
+        \ de \xAB zones d\xE9militaris\xE9es \xBB (DMZ), d\u2019environnements de\
+        \ s\xE9curit\xE9 en zone d'h\xE9bergement, de machines virtuelles ou physiques\
+        \ d\xE9di\xE9es, de r\xE9seaux locaux virtuels (VLAN) appropri\xE9s, d\u2019\
+        un filtrage strict des flux applicatifs et d\u2019administration."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:archi-stockci
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:archi
+      ref_id: ARCHI-STOCKCI
+      name: Architecture de stockage et de sauvegarde
+      description: "Le r\xE9seau de stockage/sauvegarde pour les besoins des centres\
+        \ informatiques repose sur une architecture d\xE9di\xE9e \xE0 cet effet."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:archi-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:archi
+      ref_id: ARCHI-PASS
+      name: Passerelle Internet
+      description: "Les interconnexions Internet passent obligatoirement par des passerelles\
+        \ homologu\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      assessable: false
+      depth: 1
+      ref_id: EXP
+      name: Exploitation des SI
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-prot-inf
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-PROT-INF
+      name: "Protection des informations sensibles en confidentialit\xE9 et en int\xE9\
+        grit\xE9"
+      description: "Des mesures doivent \xEAtre mises en \u0153uvre afin de garantir\
+        \ la protection des informations sensibles en confidentialit\xE9 et en int\xE9\
+        grit\xE9. A d\xE9faut d\u2019utilisation d\u2019un r\xE9seau homologu\xE9\
+        , ces informations doivent \xEAtre chiffr\xE9es \xE0 l\u2019aide d'un moyen\
+        \ de chiffrement labellis\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-trac
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-TRAC
+      name: "Tra\xE7abilit\xE9 des interventions sur le syst\xE8me"
+      description: "Les interventions de maintenance sur les ressources informatiques\
+        \ de l\u2019entit\xE9 doivent \xEAtre trac\xE9es par le service informatique,\
+        \ et ces traces doivent \xEAtre accessibles au RSSI local durant au moins\
+        \ un an."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-config
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CONFIG
+      name: Configuration des ressources informatiques
+      description: "Les syst\xE8mes d\u2019exploitation et les logiciels doivent faire\
+        \ l\u2019objet d'un durcissement. Les configurations et mises \xE0 jour sont\
+        \ appliqu\xE9es dans le strict respect des guides ou proc\xE9dures en vigueur\
+        \ dans l'entit\xE9 ou, par d\xE9faut, en vigueur au niveau central."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-doc-config
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOC-CONFIG
+      name: Documentation des configurations
+      description: "La configuration standard des ressources informatiques doit \xEA\
+        tre document\xE9e et mise \xE0 jour \xE0 chaque changement notable."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-id-auth
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-ID-AUTH
+      name: "Identification, authentification et contr\xF4le d'acc\xE8s logique"
+      description: "L\u2019acc\xE8s \xE0 toute ressource non publique doit n\xE9cessiter\
+        \ une identification et une authentification individuelle de l\u2019utilisateur.\
+        \ Dans le cas de l'acc\xE8s \xE0 des donn\xE9es sensibles, des moyens d\u2019\
+        authentification forte doivent \xEAtre utilis\xE9s. A cette fin, l\u2019usage\
+        \ d\u2019une carte \xE0 puce doit \xEAtre privil\xE9gi\xE9. Le contr\xF4le\
+        \ d\u2019acc\xE8s doit \xEAtre g\xE9r\xE9 et s'appuyer sur un processus formalis\xE9\
+        \ en coh\xE9rence avec la gestion des ressources humaines."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-droits
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DROITS
+      name: "Droits d\u2019acc\xE8s aux ressources"
+      description: "Apr\xE8s avoir d\xE9termin\xE9 le niveau de sensibilit\xE9, le\
+        \ besoin de diffusion et de partage des ressources, les droits d\u2019acc\xE8\
+        s aux ressources doivent \xEAtre g\xE9r\xE9s suivant les principes suivants\
+        \ : besoin d\u2019en conna\xEEtre (chaque utilisateur n\u2019est autoris\xE9\
+        \ \xE0 acc\xE9der qu\u2019aux ressources pour lesquelles on lui accorde explicitement\
+        \ le b\xE9n\xE9fice de l\u2019acc\xE8s), moindre privil\xE8ge (chaque utilisateur\
+        \ acc\xE8de aux ressources avec le minimum de privil\xE8ges lui permettant\
+        \ de conduire les actions explicitement autoris\xE9es pour lui)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-profils
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-PROFILS
+      name: "Gestion des profils d'acc\xE8s aux applications"
+      description: "Les applications manipulant des donn\xE9es sensibles doivent permettre\
+        \ une gestion fine par profils d\u2019acc\xE8s. Les principes du besoin d'en\
+        \ conna\xEEtre et du moindre privil\xE8ge s'appliquent."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-proc-auth
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-PROC-AUTH
+      name: "Autorisations d\u2019acc\xE8s des utilisateurs"
+      description: "Toute action d'autorisation d'acc\xE8s d'un utilisateur \xE0 une\
+        \ ressource des SI, qu'elle soit locale ou nationale, doit s'inscrire dans\
+        \ le cadre d'un processus d'autorisation formalis\xE9, qui s\u2019appuie sur\
+        \ le processus d'arriv\xE9e et de d\xE9part du personnel."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-revue-auth
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-REVUE-AUTH
+      name: "Revue des autorisations d\u2019acc\xE8s"
+      description: "Une revue des autorisations d'acc\xE8s doit \xEAtre r\xE9alis\xE9\
+        e annuellement sous le contr\xF4le du RSSI, le cas \xE9ch\xE9ant avec l\u2019\
+        appui du correspondant local SSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-conf-auth
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CONF-AUTH
+      name: "Confidentialit\xE9 des informations d\u2019authentification"
+      description: "Les informations d'authentification (mots de passe d\u2019acc\xE8\
+        s aux SI, cl\xE9s priv\xE9es li\xE9es aux certificats \xE9lectroniques, etc.)\
+        \ doivent \xEAtre consid\xE9r\xE9es comme des donn\xE9es sensibles."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-gest-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-GEST-PASS
+      name: Gestion des mots de passe
+      description: "Les utilisateurs ne doivent pas stocker leurs mots de passe en\
+        \ clair (par exemple dans un fichier) sur leur poste de travail. Les mots\
+        \ de passe ne doivent pas transiter en clair sur les r\xE9seaux."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-init-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-INIT-PASS
+      name: Initialisation des mots de passe
+      description: "Chaque compte utilisateur doit \xEAtre cr\xE9\xE9 avec un mot\
+        \ de passe initial al\xE9atoire unique. Si les circonstances l'imposent, un\
+        \ mot de passe plus simple mais \xE0 usage unique peut \xEAtre envisag\xE9\
+        ."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-pol-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-POL-PASS
+      name: Politiques de mots de passe
+      description: "Les r\xE8gles de gestion et de protection des mots de passe donnant\
+        \ acc\xE8s aux applications et infrastructures nationales, telles qu\u2019\
+        \xE9dict\xE9es par les ma\xEEtrises d'ouvrage nationales, doivent \xEAtre\
+        \ respect\xE9es dans chaque entit\xE9. Pour les ressources dont la politique\
+        \ de mots de passe est g\xE9r\xE9e localement, les recommandations de l'ANSSI\
+        \ doivent \xEAtre appliqu\xE9es pour tous les comptes."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-certifs
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CERTIFS
+      name: "Utilisation de certificats \xE9lectroniques"
+      description: "L\u2019utilisation de certificats \xE9lectroniques doit respecter\
+        \ les r\xE8gles \xE9dict\xE9es par le RGS."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-qual-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-QUAL-PASS
+      name: "Contr\xF4le syst\xE9matique de la qualit\xE9 des mots de passe"
+      description: "Des moyens techniques permettant d\u2019imposer la politique de\
+        \ mots de passe (par exemple pour s'assurer du respect de l'\xE9ventuelle\
+        \ obligation relative \xE0 l'usage de caract\xE8res sp\xE9ciaux) doivent \xEA\
+        tre mis en place. A d\xE9faut, un contr\xF4le p\xE9riodique des param\xE8\
+        tres techniques relatifs aux mots de passe doit \xEAtre r\xE9alis\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-seq-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-SEQ-ADMIN
+      name: "S\xE9questre des authentifiants \xAB administrateur \xBB"
+      description: "Les authentifiants permettant l'administration des ressources\
+        \ des SI doivent \xEAtre plac\xE9s sous s\xE9questre et tenus \xE0 jour, dans\
+        \ un coffre ou une armoire ferm\xE9e \xE0 cl\xE9. L\u2019authentifi\xE9 doit\
+        \ \xEAtre inform\xE9 de l'existence de ces op\xE9rations de gestion, de leurs\
+        \ finalit\xE9s et limites. Tout acc\xE8s d\u2019administration \xE0 une ressource\
+        \ informatique doit pouvoir \xEAtre trac\xE9 et permettre de remonter \xE0\
+        \ la personne exer\xE7ant ce droit. Les informations d'authentification b\xE9\
+        n\xE9ficiant d\u2019un moyen de protection physique (notamment carte \xE2\
+        \ puce) n\u2019ont, par d\xE9faut, pas besoin d\u2019\xEAtre l\u2019objet\
+        \ d'op\xE9rations de s\xE9questre de la part d\u2019autres personnels que\
+        \ l'authentifi\xE9 lui-m\xEAme."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-pol-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-POL-ADMIN
+      name: "Politique de mots de passe \xAB administrateurs \xBB"
+      description: "Chaque administrateur doit disposer d\u2019un mot de passe propre\
+        \ et destin\xE9 \xE0 l\u2019administration."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dep-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DEP-ADMIN
+      name: "Gestion du d\xE9part d\u2019un administrateur des SI"
+      description: "En cas de d\xE9part d'un administrateur disposant de privil\xE8\
+        ges sur des composants des SI, les comptes individuels dont il disposait doivent\
+        \ \xEAtre imm\xE9diatement d\xE9sactiv\xE9s. Les \xE9ventuels mots de passe\
+        \ d\u2019administration dont il avait connaissance doivent \xEAtre chang\xE9\
+        s (exemples : mots de passe des comptes fonctionnels, comptes g\xE9n\xE9riques\
+        \ ou comptes de service utilis\xE9s dans le cadre des fonctions de l\u2019\
+        administrateur)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-restr-droits
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-RESTR-DROITS
+      name: Restriction des droits
+      description: "Sauf exception d\xFBment motiv\xE9e et valid\xE9e par le RSSI,\
+        \ les utilisateurs, quelque soit leur statut, n\u2019ont pas de droits d\u2019\
+        administration (domaine, local). Dans le cas d'une exception, elle doit \xEA\
+        tre trac\xE9e et doit \xEAtre renouvel\xE9e tous les ans. A d\xE9faut de renouvellement,\
+        \ les privil\xE8ges d\u2019administration doivent \xEAtre supprim\xE9s."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-prot-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-PROT-ADMIN
+      name: "Protection des acc\xE8s aux outils d\u2019administration"
+      description: "L\u2019acc\xE8s aux outils et interfaces d'administration doit\
+        \ \xEAtre strictement limit\xE9 aux personnes habilit\xE9es, selon une proc\xE9\
+        dure formelle d'autorisation d'acc\xE8s."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-habilit-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-HABILIT-ADMIN
+      name: Habilitation des administrateurs
+      description: "L\u2019habilitation des administrateurs s'effectue selon une proc\xE9\
+        dure valid\xE9e par l\u2019autorit\xE9 d\u2019homologation. Le nombre de personnes\
+        \ habilit\xE9es pour des op\xE9rations d\u2019administration doit \xEAtre\
+        \ connu et valid\xE9 par l'autorit\xE9 d'homologation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-gest-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-GEST-ADMIN
+      name: "Gestion des actions d\u2019administration"
+      description: "Les op\xE9rations d\u2019administration doivent \xEAtre trac\xE9\
+        es de mani\xE8re \xE0 pouvoir g\xE9rer au niveau individuel l\u2019imputabilit\xE9\
+        \ des actions d\u2019administration."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-sec-fluxadmin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-SEC-FLUXADMIN
+      name: "S\xE9curisation des flux d'administration"
+      description: "Les op\xE9rations d'administration sur les ressources locales\
+        \ d\u2019une entit\xE9 doivent s\u2019appuyer sur des protocoles s\xE9curis\xE9\
+        s. Un r\xE9seau d\xE9di\xE9 \xE0 l\u2019administration des \xE9quipements,\
+        \ ou au moins un r\xE9seau logiquement s\xE9par\xE9 de celui des utilisateurs,\
+        \ doit \xEAtre utilis\xE9. Les postes d'administrateurs doivent \xEAtre d\xE9\
+        di\xE9s et ne doivent pas pouvoir acc\xE9der \xE0 Internet."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-central
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CENTRAL
+      name: "Centraliser la gestion du syst\xE8me d\u2019information"
+      description: "Afin de g\xE9rer efficacement un grand nombre de postes d'utilisateurs,\
+        \ de serveurs ou d\u2019\xE9quipements r\xE9seau, les administrateurs doivent\
+        \ utiliser des outils centralis\xE9s, permettant l\u2019automatisation de\
+        \ traitements quotidiens et offrant une vue globale et pertinente sur le syst\xE8\
+        me d'information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-secx-dist
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-SECX-DIST
+      name: "S\xE9curisation des outils de prise de main \xE0 distance"
+      description: "La prise de main \xE0 distance d\u2019une ressource informatique\
+        \ locale ne doit \xEAtre r\xE9alisable que par les agents autoris\xE9s par\
+        \ l\u2019\xE9quipe locale charg\xE9e des SI, sur les ressources informatiques\
+        \ de leur p\xE9rim\xE8tre. Des mesures de s\xE9curit\xE9 sp\xE9cifiques doivent\
+        \ \xEAtre d\xE9finies et respect\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-pol
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOM-POL
+      name: "D\xE9finir une politique de gestion des comptes du domaine"
+      description: "Une politique explicite de gestion des comptes du domaine doit\
+        \ \xEAtre document\xE9e."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOM-PASS
+      name: "Configurer la strat\xE9gie des mots de passe des domaines"
+      description: "La politique de gestion des mots de passe doit \xEAtre con\xE7\
+        ue de fa\xE7on \xE0 prot\xE9ger contre les attaques par essais successifs\
+        \ de mots de passe. Une complexit\xE9 minimale dans le choix des mots de passe\
+        \ doit \xEAtre impos\xE9e aux utilisateurs."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-nomenclat
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOM-NOMENCLAT
+      name: "D\xE9finir et appliquer une nomenclature des comptes du domaine"
+      description: "La gestion des comptes doit s\u2019appuyer sur une nomenclature\
+        \ adapt\xE9e, afin de pouvoir distinguer selon leur usage : comptes d'utilisateur\
+        \ standard, comptes d'administration (domaine, serveurs, postes de travail)\
+        \ et comptes de service."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-restadmin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOM-RESTADMIN
+      name: "Restreindre au maximum l\u2019appartenance aux groupes d\u2019administration\
+        \ du domaine"
+      description: "L\u2019appartenance aux groupes du domaine ADMINISTRATEURS et\
+        \ ADMINISTRATEURS DU DOMAINE n\u2019est n\xE9cessaire que dans de tr\xE8s\
+        \ rares cas. Les op\xE9rations les plus courantes doivent \xEAtre effectu\xE9\
+        es avec des comptes du domaine membres des groupes locaux d\u2019administration\
+        \ des ordinateurs ou ayant une d\xE9l\xE9gation d'administration."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-doivi-serv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOIVI-SERV
+      name: "Ma\xEEtriser l\u2019utilisation des comptes de service"
+      description: "Les comptes de service ont la particularit\xE9 d'avoir g\xE9n\xE9\
+        ralement leurs mots de passe inscrits en dur dans des applications ou dans\
+        \ des syst\xE8mes. Afin de pouvoir \xEAtre en mesure de changer ces mots de\
+        \ passe en urgence, il est n\xE9cessaire de ma\xEEtriser leur utilisation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-doivi-limitserv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOIVI-LIMITSERV
+      name: Limiter les droits des comptes de service
+      description: "Les comptes de service doivent faire l\u2019objet d\u2019une restriction\
+        \ des droits, en suivant le principe du moindre privil\xE8ge."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-obsolet
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOM-OBSOLET
+      name: "D\xE9sactiver les comptes du domaine obsol\xE8tes"
+      description: "Il est n\xE9cessaire de d\xE9sactiver imm\xE9diatement, voire\
+        \ de supprimer, les comptes obsol\xE8tes, que ce soient des comptes d\u2019\
+        utilisateur (administrateur, de service ou utilisateur standard) ou des comptes\
+        \ de machine."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-dom-adminloc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DOM-ADMINLOC
+      name: "Am\xE9liorer la gestion des comptes d\u2019administrateur locaux"
+      description: "Afin d\u2019emp\xEAcher la r\xE9utilisation des empreintes d\u2019\
+        un compte utilisateur local d'une machine \xE0 une autre, il faut soit utiliser\
+        \ des mots de passe diff\xE9rents pour les comptes locaux d'administration,\
+        \ soit interdire la connexion \xE0 distance via ces comptes."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-maint-ext
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-MAINT-EXT
+      name: Maintenance externe
+      description: "Les donn\xE9es non chiffr\xE9es doivent \xEAtre effac\xE9es avant\
+        \ l'envoi en maintenance externe de toute ressource informatique. Pour les\
+        \ \xE9quipements contenant des donn\xE9es sensibles, il doit \xEAtre mis en\
+        \ place des mesures de r\xE9tention des supports d\u2019information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-mis-reb
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-MIS-REB
+      name: Mise au rebut
+      description: "Lorsqu\u2019une ressource informatique est amen\xE9e \xE0 quitter\
+        \ d\xE9finitivement l\u2019entit\xE9, les donn\xE9es pr\xE9sentes sur les\
+        \ disques durs ou la m\xE9moire int\xE9gr\xE9e doivent \xEAtre effac\xE9es\
+        \ de mani\xE8re s\xE9curis\xE9e ou le support d\u2019information d\xE9truit.\n\
+        \nL\u2019effacement des donn\xE9es sensibles doit s'appuyer sur des produits\
+        \ qualifi\xE9s, ou respecter des proc\xE9dures \xE9tablies en concertation\
+        \ avec l\u2019ANSSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-prot-malv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-PROT-MALV
+      name: Protection contre les codes malveillants
+      description: "Des logiciels de protection contre les codes malveillants, appel\xE9\
+        s commun\xE9ment antivirus, doivent \xEAtre install\xE9s sur l'ensemble des\
+        \ serveurs d\u2019interconnexion, serveurs applicatifs et postes de travail\
+        \ de l\u2019entit\xE9. Ces logiciels de protection doivent \xEAtre distincts\
+        \ pour ces trois cat\xE9gories au moins, et le d\xE9pouillement de leurs journaux\
+        \ doit \xEAtre corr\xE9l\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ges-antivir
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-GES-ANTIVIR
+      name: "Gestion des \xE9v\xE9nements de s\xE9curit\xE9 de l\u2019antivirus"
+      description: "Les \xE9v\xE9nements de s\xE9curit\xE9 de l'antivirus doivent\
+        \ \xEAtre remont\xE9s sur un serveur central pour analyse statistique et gestion\
+        \ des probl\xE8mes a posteriori (exemples : serveur constamment infect\xE9\
+        , virus d\xE9tect\xE9 et non \xE9radiqu\xE9 par l'antivirus, etc.)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-maj-antmr
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-MAJ-ANTMR
+      name: "Mise \xE0 lourde la base de signatures"
+      description: "Les mises \xE0 jour des bases antivirales et des moteurs d'antivirus\
+        \ doivent \xEAtre d\xE9ploy\xE9es automatiquement sur les serveurs et les\
+        \ postes de travail par un dispositif prescrit par les directions, bureaux\
+        \ ou services informatiques, valid\xE9 par le RSSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-navig
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-NAVIG
+      name: Configuration du navigateur Internet
+      description: "Le navigateur d\xE9ploy\xE9 par l\u2019\xE9quipe locale charg\xE9\
+        e des SI sur l\u2019ensemble des serveurs et des postes de travail n\xE9cessitant\
+        \ un acc\xE8s Internet ou Intranet doit \xEAtre configur\xE9 de mani\xE8re\
+        \ s\xE9curis\xE9e (d\xE9sactivation des services inutiles, nettoyage du magasin\
+        \ de certificats, etc.)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-pol-cor
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-POL-COR
+      name: "D\xE9finir et mettre en \u0153uvre une politique de suivi et d\u2019\
+        application des"
+      description: "correctifs de s\xE9curit\xE9. Le maintien dans le temps du niveau\
+        \ de s\xE9curit\xE9 d\u2019un syst\xE8me d\u2019information impose une gestion\
+        \ organis\xE9e et adapt\xE9e des mises \xE0 jour de s\xE9curit\xE9. Un processus\
+        \ de gestion des correctifs propre \xE0 chaque syst\xE8me ou applicatif doit\
+        \ \xEAtre d\xE9fini, et adapt\xE9 suivant les contraintes et le niveau d\u2019\
+        exposition du syst\xE8me."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-cor-sec
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-COR-SEC
+      name: "D\xE9ploiement des correctifs de s\xE9curit\xE9"
+      description: "Les correctifs de s\xE9curit\xE9 des ressources informatiques\
+        \ locales doivent \xEAtre d\xE9ploy\xE9s par l'\xE9quipe locale charg\xE9\
+        e des SI en s\u2019appuyant sur les pr\xE9conisations et outils propos\xE9\
+        s par les directions, bureaux ou services informatiques."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-obsolet
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-OBSOLET
+      name: "Assurer la migration des syst\xE8mes obsol\xE8tes"
+      description: "L\u2019ensemble des logiciels utilis\xE9s sur le syst\xE8me d\u2019\
+        information doit \xEAtre dans une version pour laquelle l'\xE9diteur assure\
+        \ le support, et tenu \xE0 jour. En cas de d\xE9faillance du support, il convient\
+        \ d'en \xE9tudier l\u2019impact et de prendre les mesures adapt\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-isol
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-ISOL
+      name: "Isoler les syst\xE8mes obsol\xE8tes restants"
+      description: "Il est n\xE9cessaire d'isoler les syst\xE8mes obsol\xE8tes, gard\xE9\
+        s volontairement pour assurer un maintien en condition op\xE9rationnelle des\
+        \ projets, et pour lesquels une migration n'est pas envisageable. Chaque fois\
+        \ que cela est possible, cette isolation doit \xEAtre effectu\xE9e au niveau\
+        \ du r\xE9seau (filtrage strict), des \xE9l\xE9ments d\u2019authentification\
+        \ (qui ne doivent pas \xEAtre communs avec le reste du SI) et des applications\
+        \ (pas de ressources partag\xE9es avec le reste du SI)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-jour-sur
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-JOUR-SUR
+      name: Journalisation des alertes
+      description: "Chaque syst\xE8me doit disposer de dispositifs de journalisation\
+        \ permettant de conserver une trace des \xE9v\xE9nements de s\xE9curit\xE9\
+        . Ces traces doivent \xEAtre conserv\xE9es de mani\xE8re s\xFBre."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-pol-jour
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-POL-JOUR
+      name: "D\xE9finir et mettre en \u0153uvre une politique de gestion et d\u2019\
+        analyse des"
+      description: "journaux de traces. Une politique de gestion et d'analyse des\
+        \ journaux de traces des \xE9v\xE9nements de s\xE9curit\xE9 est d\xE9finie\
+        \ par le RSSI, valid\xE9e par l\u2019autorit\xE9 qualifi\xE9e, et mise en\
+        \ \u0153uvre. Le niveau de s\xE9curit\xE9 d\u2019un syst\xE8me d\u2019information\
+        \ d\xE9pend en grande partie de la capacit\xE9 de ses exploitants et administrateurs\
+        \ \xE0 d\xE9tecter les erreurs, dysfonctionnements et tentatives d\u2019acc\xE8\
+        s illicites survenant sur les \xE9l\xE9ments qui le composent."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-cons-jour
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CONS-JOUR
+      name: Conservation des journaux
+      description: "Les journaux des \xE9v\xE9nements de s\xE9curit\xE9 doivent \xEA\
+        tre conserv\xE9s sur douze mois glissants, hors contraintes l\xE9gales et\
+        \ r\xE9glementaires particuli\xE8res imposant des dur\xE9es de conservation\
+        \ sp\xE9cifiques."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ges-dyn
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-GES-DYN
+      name: "Gestion dynamique de la s\xE9curit\xE9"
+      description: "Les personnes en charge de la SSI doivent proc\xE9der, notamment\
+        \ via l'analyse des journaux, \xE0 la surveillance des comportements anormaux\
+        \ au sein du syst\xE8me d'information, et \xE0 la surveillance des flux d'entr\xE9\
+        e et de sortie du syst\xE8me d'information. Gestion des mat\xE9riels informatiques\
+        \ fournis \xE0 l'utilisateur"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-mait-mat
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-MAIT-MAT
+      name: "Ma\xEEtrise des mat\xE9riels,"
+      description: "Les postes de travail - y compris dans le cas d'une location -\
+        \ sont fournis \xE0 l'utilisateur par l\u2019entit\xE9, g\xE9r\xE9s et configur\xE9\
+        s sous la responsabilit\xE9 de l'entit\xE9. La connexion d'\xE9quipements\
+        \ non ma\xEEtris\xE9s, non administr\xE9s ou non mis \xE0 jour par l\u2019\
+        entit\xE9 (qu'il s'agisse d'ordiphones, d'\xE9quipements informatiques nomades\
+        \ et fixes ou de supports de stockage amovibles) sur des \xE9quipements et\
+        \ des r\xE9seaux professionnels est interdite."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-prot-vol
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-PROT-VOL
+      name: Rappel des mesures de protection contre le vol
+      description: "Les postes fixes b\xE9n\xE9ficient des mesures de protection physique\
+        \ offertes au titre de la directive de s\xE9curit\xE9 physique de la pr\xE9\
+        sente PSSI-MCAS. Chaque utilisateur doit veiller \xE0 la s\xE9curit\xE9 des\
+        \ supports amovibles (cl\xE9s USB et disques amovibles), notamment en les\
+        \ conservant dans un endroit s\xFBr. Il est recommand\xE9 de chiffrer les\
+        \ donn\xE9es contenues sur ces supports. Les supports contenant des donn\xE9\
+        es sensibles doivent \xEAtre stock\xE9s dans des meubles fermant \xE0 clef."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-declar-vol
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-DECLAR-VOL
+      name: "D\xE9clarer les pertes et vols"
+      description: "Toute perte ou vol d'une ressource d\u2019un syst\xE8me d\u2019\
+        information doit \xEAtre d\xE9clar\xE9e au RSSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-reaffect
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-REAFFECT
+      name: "R\xE9affectation de mat\xE9riels informatiques"
+      description: "Une proc\xE9dure de gestion des postes et supports dans le cadre\
+        \ de d\xE9parts de personnel ou de r\xE9affectations \xE0 de nouveaux utilisateurs\
+        \ doit \xEAtre mise en place et valid\xE9e par le RSSI. Elle doit d\xE9finir\
+        \ les conditions de recours \xE0 un effacement des donn\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-nomad-sens
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-NOMAD-SENS
+      name: "D\xE9claration des \xE9quipements nomades aptes \xE0 traiter des"
+      description: "informations sensibles. L\u2019autorit\xE9 d'homologation du SI\
+        \ valide les usages possibles des \xE9quipements nomades vis-\xE0-vis du traitement\
+        \ des informations sensibles ; les usages non explicitement autoris\xE9s sont\
+        \ interdits."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-acc-dist
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-ACC-DIST
+      name: "Acc\xE8s \xE0 distance au syst\xE8me d\u2019information de l\u2019organisme"
+      description: "Les utilisateurs distants doivent s\u2019authentifier sur le r\xE9\
+        seau de l'entit\xE9 en utilisant une authentification forte. S\xE9curisation\
+        \ des imprimantes et copieurs multifonctions manipulant des informations sensibles."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-imp-sens
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-IMP-SENS
+      name: Impression des informations sensibles
+      description: "Les impressions d\u2019informations sensibles doivent \xEAtre\
+        \ effectu\xE9es selon une proc\xE9dure pr\xE9d\xE9finie, garantissant le contr\xF4\
+        le de l'utilisateur, du d\xE9clenchement de l\u2019impression jusqu\u2019\xE0\
+        \ la r\xE9cup\xE9ration du support imprim\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-imp-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-IMP-2
+      name: "S\xE9curit\xE9 des imprimantes et copieurs multifonctions"
+      description: "Les imprimantes et copieurs multifonctions sont des ressources\
+        \ informatiques \xE0 part enti\xE8re qui doivent \xEAtre g\xE9r\xE9es en tant\
+        \ que telles. Elles ne doivent pas pouvoir communiquer directement avec l\u2019\
+        ext\xE9rieur.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-os
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-OS
+      name: "Syst\xE8mes d\u2019exploitation,"
+      description: "Les syst\xE8mes d'exploitation d\xE9ploy\xE9s doivent faire l'objet\
+        \ d'un support valide de la part d\u2019un \xE9diteur ou d\u2019un prestataire\
+        \ de service. Seuls les services et applications n\xE9cessaires sont install\xE9\
+        s, de fa\xE7on \xE0 r\xE9duire la surface d'attaque. Une attention particuli\xE8\
+        re doit \xEAtre apport\xE9e aux comptes administrateurs."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-ltp
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-LTP
+      name: "Logiciels en Tiers Pr\xE9sentation"
+      description: "La mise en \u0153uvre d\u2019une configuration renforc\xE9e est\
+        \ obligatoire sur les logiciels d\xE9ploy\xE9s pour le tiers pr\xE9sentation\
+        \ (ex : serveur Web, Reverse Proxy)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-lta
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-LTA
+      name: Logiciels en Tiers Application
+      description: "Des r\xE8gles de d\xE9veloppement s\xE9curis\xE9, et les configurations\
+        \ des logiciels en Tiers Application doivent \xEAtre fix\xE9es et appliqu\xE9\
+        es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-ltd
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-LTD
+      name: "Logiciels en Tiers Donn\xE9es"
+      description: "Des r\xE8gles tr\xE8s strictes (restrictions d'acc\xE8s, interdictions\
+        \ de connexions, gestion des privil\xE8ges) s'appliquent aux logiciels en\
+        \ tiers donn\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-protfic
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-PROTFIC
+      name: "Passerelle d\u2019\xE9change de fichiers"
+      description: "Les \xE9changes de fichiers entre applications doivent privil\xE9\
+        gier les protocoles s\xE9curis\xE9s (SSUTLS, FTPS...)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-messtech
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-MESSTECH
+      name: Messagerie technique
+      description: "Pour satisfaire les besoins d\u2019exploitation et de supervision\
+        \ des infrastructures et des applications, une messagerie dite technique peut\
+        \ \xEAtre d\xE9ploy\xE9e en zone de Back-office du centre informatique. Cette\
+        \ messagerie technique ne doit \xEAtre en aucun cas utilis\xE9e directement\
+        \ par un utilisateur."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-filt
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-FILT
+      name: Filtrage des flux applicatifs
+      description: "De fa\xE7on \xE0 garantir un niveau de s\xE9curit\xE9 satisfaisant\
+        \ face aux attaques informatiques, des m\xE9canismes de filtrage et de cloisonnement\
+        \ doivent \xEAtre mis en \u0153uvre."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-admin
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-ADMIN
+      name: Flux d'administration
+      description: "D'une mani\xE8re g\xE9n\xE9rale, il convient de diff\xE9rencier\
+        \ deux types de flux d'administration : les flux d\u2019administration de\
+        \ l'infrastructure (r\xE9serv\xE9s aux agents du centre informatique) d\u2019\
+        une part, les flux d\u2019administration des applications m\xE9tier (r\xE9\
+        serv\xE9s \xE0 la direction m\xE9tier) d'autre part. L\u2019attribution des\
+        \ droits d'administration doit respecter cette diff\xE9renciation, et les\
+        \ 2 types de flux d'administration doivent \xEAtre dans la mesure du possible\
+        \ cloisonn\xE9s."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-dns
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-DNS
+      name: Service de noms de domaine - DNS technique
+      description: "Dans le cas du d\xE9ploiement d'un serveur de noms de domaines\
+        \ pour les besoins techniques internes au centre informatique, il sera utilis\xE9\
+        \ de pr\xE9f\xE9rence les extensions s\xE9curis\xE9es DNSSEC."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-effac
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-EFFAC
+      name: Effacement de support
+      description: "Le reconditionnement et la r\xE9utilisation des disques durs pour\
+        \ un autre usage (ex : r\xE9attribution d'une machine/serveur) ne sont autoris\xE9\
+        s qu'apr\xE8s une op\xE9ration d'effacement s\xE9curis\xE9 des donn\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-destr
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-DESTR
+      name: Destruction de support
+      description: "La fin de vie d'un support ou d'un mat\xE9riel embarquant un support\
+        \ de stockage (imprimante, routeur, commutateur... ) doit s'accompagner d'une\
+        \ op\xE9ration de destruction avant remise au rebut."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-trac
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-TRAC
+      name: "Tra\xE7abilit\xE9 / imputabilit\xE9"
+      description: "Afin d\u2019assurer une coh\xE9rence dans les \xE9changes entre\
+        \ applications ainsi qu'une tra\xE7abilit\xE9 pertinente des \xE9v\xE9nements\
+        \ techniques et de s\xE9curit\xE9, les centres d\u2019exploitation emploient\
+        \ une r\xE9f\xE9rence de temps commune (service NTP, Network Time Protocol)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-supervis
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-SUPERVIS
+      name: Supervision
+      description: "Un cloisonnement entre les flux de supervision (remont\xE9e d\u2019\
+        informations) et les flux d\u2019administration (commandes, mises \xE0 jour)\
+        \ doit \xEAtre mis en place."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-amov
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-AMOV
+      name: "Acc\xE8s aux p\xE9riph\xE9riques amovibles"
+      description: "L\u2019acc\xE8s aux supports informatiques amovibles fait l\u2019\
+        objet d\u2019un traitement adapt\xE9, plus particuli\xE8rement lorsqu\u2019\
+        ils ont \xE9t\xE9 utilis\xE9s pour m\xE9moriser de l'information sensible\
+        \ ou lorsqu\u2019ils sont utilis\xE9s pour des op\xE9rations d\u2019exploitation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-accres
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-ACCRES
+      name: "Acc\xE8s aux r\xE9seaux"
+      description: "Dans un centre informatique, le contr\xF4le physique des acc\xE8\
+        s r\xE9seaux, l'attribution des adresses IP, le filtrage des informations\
+        \ et l'usage de dispositifs sp\xE9cifiques (machines virtuelles, cartes d\u2019\
+        administration \xE0 distance, etc.) font l'objet de proc\xE9dures s\xE9curis\xE9\
+        es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:exp-ci-audit
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:exp
+      ref_id: EXP-CI-AUDIT
+      name: "AudiWcontr\xF4le"
+      description: "Le RSSI pilote des audits r\xE9guliers du syst\xE8me d\u2019information\
+        \ relevant de sa responsabilit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      assessable: false
+      depth: 1
+      ref_id: PDT
+      name: "S\xE9curisation des postes de travail"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-gest
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-GEST
+      name: Fourniture et gestion des postes de travail
+      description: "Les postes de travail utilis\xE9s dans le cadre professionnel\
+        \ sont fournis et g\xE9r\xE9s par l\u2019\xE9quipe locale charg\xE9e des SI.\n\
+        \nSi un poste est mis \xE0 disposition par une autre voie, sa connexion au\
+        \ r\xE9seau est soumise \xE0 l\u2019autorisation du RSSI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-config
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-CONFIG
+      name: Formalisation de la configuration des postes de travail
+      description: "Une proc\xE9dure formalis\xE9e de configuration des postes de\
+        \ travail est \xE9tablie par chaque entit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-verouil-fixe
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-VEROUIL-FIXE
+      name: "Verrouillage de l\u2019unit\xE9 centrale des postes fixes"
+      description: "Lorsque l\u2019unit\xE9 centrale d\u2019un poste fixe est peu\
+        \ volumineuse, donc susceptible d\u2019\xEAtre facilement emport\xE9e, elle\
+        \ doit \xEAtre prot\xE9g\xE9e contre le vol par un syst\xE8me d\u2019attache\
+        \ (par exemple un c\xE2ble antivol)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-verouil-port
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-VEROUIL-PORT
+      name: Verrouillage des postes portables
+      description: "Un c\xE2ble physique de s\xE9curit\xE9 doit \xEAtre fourni avec\
+        \ chaque poste portable. Les utilisateurs doivent \xEAtre sensibilis\xE9s\
+        \ \xE0 son utilisation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-reaffect
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-REAFFECT
+      name: "R\xE9affectation du poste de travail"
+      description: "Une proc\xE9dure SSI d\xE9finit les r\xE8gles concernant le traitement\
+        \ \xE0 appliquer aux informations ayant \xE9t\xE9 stock\xE9es o\xF9 manipul\xE9\
+        es sur les postes r\xE9affect\xE9s.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-privil
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-PRIVIL
+      name: "Privil\xE8ges des utilisateurs sur les postes de travail"
+      description: "La gestion des privil\xE8ges des utilisateurs sur leurs postes\
+        \ de travail doit suivre le principe du \xAB moindre privil\xE8ge \xBB : chaque\
+        \ utilisateur ne doit disposer que des privil\xE8ges n\xE9cessaires \xE0 la\
+        \ conduite des actions relevant de sa mission."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-priv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-PRIV
+      name: "Utilisation des privil\xE8ges d\u2019acc\xE8s \xAB administrateur \xBB"
+      description: "Les privil\xE8ges d\u2019acc\xE8s \xAB administrateur \xBB doivent\
+        \ \xEAtre utilis\xE9s uniquement pour les actions d\u2019administration le\
+        \ n\xE9cessitant."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-adm-local
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-ADM-LOCAL
+      name: "Gestion du compte \xAB administrateur local \xBB"
+      description: "L\u2019acc\xE8s au compte \xAB administrateur local \xBB sur les\
+        \ postes de travail doit \xEAtre strictement limit\xE9 aux \xE9quipes en charge\
+        \ de l'exploitation et du support sur ces postes de travail."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-stock
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-STOCK
+      name: Stockage des informations
+      description: "Dans la mesure du possible, les donn\xE9es trait\xE9es par les\
+        \ utilisateurs doivent \xEAtre stock\xE9es sur des espaces r\xE9seau, eux-m\xEA\
+        mes sauvegard\xE9s selon les exigences des entit\xE9s."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-sauv-loc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-SAUV-LOC
+      name: "Sauvegarde I synchronisation des donn\xE9es locales"
+      description: "Dans le cas o\xF9 des donn\xE9es doivent \xEAtre stock\xE9es en\
+        \ local sur le poste de travail, des moyens de synchronisation ou de sauvegarde\
+        \ doivent \xEAtre fournis aux utilisateurs."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-part-fic
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-PART-FIC
+      name: Partage de fichiers
+      description: "Le partage de r\xE9pertoires ou de donn\xE9es h\xE9berg\xE9es\
+        \ localement sur les postes de travail est \xE0 proscrire."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-suppr-part
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-SUPPR-PART
+      name: "Suppression des donn\xE9es sur les postes partag\xE9s"
+      description: "Les donn\xE9es pr\xE9sentes sur les postes partag\xE9s (portable\
+        \ de pr\xEAt, par exemple) doivent \xEAtre supprim\xE9es entre deux utilisations,\
+        \ d\xE8s lors que les utilisateurs ne disposent pas du m\xEAme besoin d\u2019\
+        en conna\xEEtre."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-chiff-sens
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-CHIFF-SENS
+      name: "Chiffrement des donn\xE9es sensibles"
+      description: "Une solution de chiffrement labellis\xE9e doit \xEAtre mise \xE0\
+        \ disposition des utilisateurs et des administrateurs afin de chiffrer les\
+        \ donn\xE9es sensibles stock\xE9es sur les postes de travail, les serveurs,\
+        \ les espaces de travail, ou les supports amovibles."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-amov
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-AMOV
+      name: Fourniture de supports de stockage amovibles
+      description: "Les supports de stockage amovibles (cl\xE9s USB et disque durs\
+        \ externes, notamment) doivent \xEAtre fournis aux utilisateurs par l\u2019\
+        \xE9quipe locale charg\xE9e des SI."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-nomad-access
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-NOMAD-ACCESS
+      name: "Acc\xE8s \xE0 distance aux Syst\xE8mes d'Information de l\u2019entit\xE9"
+      description: "Les acc\xE8s \xE0 distance aux SI de l\u2019entit\xE9 (acc\xE8\
+        s dits \xAB nomades \xBB) doivent \xEAtre r\xE9alis\xE9s via des infrastructures\
+        \ homologu\xE9es. L\u2019usage de r\xE9seaux priv\xE9s virtuels (VPN) de confiance\
+        \ est n\xE9cessaire."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-nomad-parefeu
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-NOMAD-PAREFEU
+      name: Pare-feu local
+      description: "Un pare-feu local conforme aux directives nationales doit \xEA\
+        tre install\xE9 sur les postes nomades."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-nomad-stock
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-NOMAD-STOCK
+      name: "Stockage local d\u2019information sur les postes nomades"
+      description: "Le stockage local d\u2019information sur les postes de travail\
+        \ nomades doit \xEAtre limit\xE9 au strict n\xE9cessaire. Les informations\
+        \ sensibles doivent \xEAtre obligatoirement chiffr\xE9es par un moyen de chiffrement\
+        \ labellis\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-nomad-filt
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-NOMAD-FILT
+      name: "Filtre de confidentialit\xE9"
+      description: "Pour les postes de travail nomades manipulant des donn\xE9es sensibles,\
+        \ un filtre de confidentialit\xE9 doit \xEAtre fourni et \xEAtre positionn\xE9\
+        \ sur l'\xE9cran d\xE8s lors que le poste est utilis\xE9 en dehors de l'entit\xE9\
+        ."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-nomad-connex
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-NOMAD-CONNEX
+      name: Configuration des interfaces de connexion sans fil
+      description: La configuration des interfaces de connexion sans fil doit interdire
+        les usages dangereux de ces interfaces
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-nomad-desactiv
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-NOMAD-DESACTIV
+      name: "D\xE9sactivation des interfaces de connexion sans fil"
+      description: "Des r\xE8gles de configuration des interfaces de connexion sans\
+        \ fil (Wifi, Bluetooth, 3G...), permettant d\u2019interdire les usages non\
+        \ ma\xEEtris\xE9s et d'\xE9viter les intrusions via ces interfaces, doivent\
+        \ \xEAtre d\xE9finies et appliqu\xE9es. Les interfaces sans fil ne doivent\
+        \ \xEAtre activ\xE9es qu'en cas de besoin. S\xE9curisation des imprimantes\
+        \ et copieurs multifonctions."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-mul-durciss
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-MUL-DURCISS
+      name: Durcissement des imprimantes et copieurs multifonctions
+      description: "Les imprimantes et copieurs multifonctions h\xE9berg\xE9s localement\
+        \ dans une entit\xE9 doivent faire l'objet d'un durcissement en termes de\
+        \ s\xE9curit\xE9 : changement des mots de passe initialement fix\xE9s par\
+        \ le \xAB constructeur \xBB, d\xE9sactivation des interfaces r\xE9seau inutiles,\
+        \ suppression des services inutiles, chiffrement des donn\xE9es sur le disque\
+        \ dur lorsque cette fonctionnalit\xE9 est disponible, configuration r\xE9\
+        seau statique."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-mul-secnum
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-MUL-SECNUM
+      name: "S\xE9curisation de la fonction de num\xE9risation"
+      description: "Lorsqu'elle est activ\xE9e, la fonction de num\xE9risation sur\
+        \ les copieurs multifonctions h\xE9berg\xE9s dans une entit\xE9 doit \xEA\
+        tre s\xE9curis\xE9e. Les mesures de s\xE9curit\xE9 suivantes doivent notamment\
+        \ \xEAtre appliqu\xE9es : envoi de documents uniquement \xE0 destination d'une\
+        \ adresse de messagerie interne \xE0 l'entit\xE9, envoi uniquement \xE0 une\
+        \ seule adresse de messagerie. S\xE9curisation de la t\xE9l\xE9phonie"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-tel-miniiv1
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-TEL-MINIIV1
+      name: "S\xE9curiser la configuration des autocommutateurs"
+      description: "Les autocommutateurs doivent \xEAtre maintenus \xE0 jour au niveau\
+        \ des correctifs de s\xE9curit\xE9. Leur configuration doit \xEAtre durcie.\
+        \ La d\xE9finition et l\u2019affectation des droits d'acc\xE8s et des privil\xE8\
+        ges aux utilisateurs (transfert d\xE9part-d\xE9part, entr\xE9e en tiers, interphonie,\
+        \ autorisation de d\xE9blocage, renvoi sur num\xE9ro ext\xE9rieur, substitution,\
+        \ substitution de privil\xE8ge, interception d'appel dirig\xE9, etc.) doivent\
+        \ faire l\u2019objet d'une attention particuli\xE8re. Une revue de la programmation\
+        \ t\xE9l\xE9phonique doit \xEAtre organis\xE9e p\xE9riodiquement."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-tel-codes
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-TEL-CODES
+      name: "Codes d\u2019acc\xE8s t\xE9l\xE9phoniques"
+      description: "Il est n\xE9cessaire de sensibiliser les utilisateurs au besoin\
+        \ de modifier le code d\u2019acc\xE8s de leur t\xE9l\xE9phone et de leur messagerie\
+        \ vocale."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-tel-dect
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-TEL-DECT
+      name: "Limiter l\u2019utilisation du DECT"
+      description: "Les communications r\xE9alis\xE9es au travers du protocole DECT\
+        \ sont susceptibles d'\xEAtre intercept\xE9es, m\xEAme si les m\xE9canismes\
+        \ d\u2019authentification et de chiffrement que propose ce protocole sont\
+        \ activ\xE9s. Il est recommand\xE9 d\u2019attribuer des postes t\xE9l\xE9\
+        phoniques filaires aux utilisateurs dont les \xE9changes sont les plus sensibles."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pdt-conf-verif
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pdt
+      ref_id: PDT-CONF-VERIF
+      name: "Utiliser des outils de v\xE9rification automatique de la conformit\xE9"
+      description: "Un outil de v\xE9rification r\xE9guli\xE8re de la conformit\xE9\
+        \ des \xE9l\xE9ments de configuration des postes de travail doit \xEAtre mis\
+        \ en place, afin d'\xE9viter une d\xE9rive dans le temps de ces \xE9l\xE9\
+        ments de configuration."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      assessable: false
+      depth: 1
+      ref_id: DEV
+      name: "S\xE9curit\xE9 du d\xE9veloppement des syst\xE8mes"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-integr-secloc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-INTEGR-SECLOC
+      name: "Int\xE9grer la s\xE9curit\xE9 dans les d\xE9veloppements locaux"
+      description: "Toute initiative locale de d\xE9veloppement informatique doit\
+        \ respecter les exigences SSI, concernant la prise en compte de la s\xE9curit\xE9\
+        \ dans les projets et les d\xE9veloppements informatiques (notamment la r\xE9\
+        alisation d'une analyse de risques). Le service \xE0 l'origine du projet se\
+        \ porte garant d'une d\xE9marche d\u2019homologation du syst\xE8me de l'application\
+        \ et le cas \xE9ch\xE9ant de l'application du r\xE9f\xE9rentiel g\xE9n\xE9\
+        ral de s\xE9curit\xE9."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-sous-trait
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-SOUS-TRAIT
+      name: "Int\xE9grer des clauses SSI dans les contrats de sous-traitance de d\xE9\
+        veloppement informatique"
+      description: "Lors de l\u2019\xE9criture d\u2019un contrat de sous-traitance\
+        \ de d\xE9veloppement, plusieurs clauses relatives \xE2 la SSI doivent \xEA\
+        tre int\xE9gr\xE9es :\n\n- formation obligatoire des d\xE9veloppeurs sur le\
+        \ d\xE9veloppement s\xE9curis\xE9 et les vuln\xE9rabilit\xE9s classiques ;\n\
+        - utilisation obligatoire d\u2019outils permettant de minimiser les erreurs\
+        \ introduites durant le d\xE9veloppement (outils gratuits d'analyse statique\
+        \ de code, utilisation de biblioth\xE8ques r\xE9put\xE9es pour leur s\xE9\
+        curit\xE9, etc ) ;\n- production de documentation technique d\xE9crivant l'implantation\
+        \ des protections d\xE9velopp\xE9es (gestion de l\u2019authentification, stockage\
+        \ des mots de passe, gestion des droits, chiffrement, etc.) ;\n- respect de\
+        \ normes de d\xE9veloppement s\xE9curis\xE9, qu\u2019elles soient propres\
+        \ au d\xE9veloppeur, publiques ou propres au commanditaire ;\n- obligation\
+        \ pour le prestataire de corriger, dans un temps raisonnable et pour un prix\
+        \ d\xE9fini, les vuln\xE9rabilit\xE9s introduites durant le d\xE9veloppement\
+        \ et qui lui sont remont\xE9es, en incluant automatiquement les corrections\
+        \ des autres occurrences des m\xEAmes erreurs de programmation."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-fuites
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-FUITES
+      name: Limiter les fuites d'information
+      description: "Les fuites d'informations techniques sur les logiciels utilis\xE9\
+        s permettent aux attaquants de d\xE9celer plus facilement d\u2019\xE9ventuelles\
+        \ vuln\xE9rabilit\xE9s. Il est imp\xE9ratif de limiter fortement la diffusion\
+        \ d'informations au sujet des produits utilis\xE9s, m\xEAme si cette pr\xE9\
+        caution ne constitue pas une protection en tant que telle."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-log-adher
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-LOG-ADHER
+      name: "R\xE9duire l\u2019adh\xE9rence des applications \xE0 des produits ou\
+        \ technologies"
+      description: "sp\xE9cifigues. Le fonctionnement d'une application s\u2019appuie\
+        \ sur un environnement logiciel et mat\xE9riel. En phases de conception et\
+        \ de sp\xE9cification technique, il est n\xE9cessaire de s'assurer que les\
+        \ applications n\u2019ont pas une trop forte adh\xE9rence vis-\xE0-vis des\
+        \ environnements sur lesquels elles reposent. En effet, l\u2019apparition\
+        \ de failles sur un environnement a de fait un impact sur la s\xE9curit\xE9\
+        \ des applications qui en d\xE9pendent. En plus du maintien en condition de\
+        \ s\xE9curit\xE9 propre \xE0 l'application, il est donc n\xE9cessaire de pouvoir\
+        \ faire \xE9voluer son environnement pour garantir sa s\xE9curit\xE9 dans\
+        \ la dur\xE9e."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-log-crit
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-LOG-CRIT
+      name: "Instaurer des crit\xE8res de d\xE9veloppement s\xE9curis\xE9"
+      description: "Une fois pass\xE9es les phases de d\xE9finition des besoins et\
+        \ de conception de l'architecture applicative, le niveau de s\xE9curit\xE9\
+        \ d'une application d\xE9pend fortement des modalit\xE9s pratiques suivies\
+        \ lors de sa phase de d\xE9veloppement."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-log-cycle
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-LOG-CYCLE
+      name: "Int\xE9grer la s\xE9curit\xE9 dans le cycle de vie logiciel"
+      description: "La s\xE9curit\xE9 doit \xEAtre int\xE9gr\xE9e \xE0 toutes les\
+        \ \xE9tapes du cycle de vie du projet, depuis l'expression des besoins jusqu'\xE0\
+        \ la maintenance applicative, en passant par la r\xE9daction du cahier des\
+        \ charges et les phases de recette."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-log-web
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-LOG-WEB
+      name: "Am\xE9liorer la prise en compte de la s\xE9curit\xE9 dans les d\xE9veloppements\
+        \ Web"
+      description: "Les d\xE9veloppements Web (et les d\xE9veloppements en PHP en\
+        \ particulier) font l'objet de probl\xE8mes de s\xE9curit\xE9 r\xE9currents\
+        \ qui ont conduit \xE0 la constitution de r\xE9f\xE9rentiels de s\xE9curit\xE9\
+        . Ces r\xE9f\xE9rentiels ont pour objectif de fixer des REGLES DE BONNES PRATIQUES\
+        \ \xE0 l'usage des d\xE9veloppeurs. Ce sont des r\xE8gles d\u2019ordre g\xE9\
+        n\xE9rique ou pouvant \xEAtre sp\xE9cifiques \xE0 un langage (PHP, ASP, NET,\
+        \ etc.)."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-log-pass
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-LOG-PASS
+      name: "Calculer les empreintes de mots de passe de mani\xE8re s\xE9curis\xE9\
+        e"
+      description: "Lorsqu'une application doit stocker les mots de passe de ses utilisateurs,\
+        \ il est important de mettre en \u0153uvre des mesures permettant de se pr\xE9\
+        munir contre les attaques document\xE9es : attaques par dictionnaire, attaques\
+        \ par tables arc-en-ciel, attaques par force brute, etc."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:dev-filt-appl
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:dev
+      ref_id: DEV-FILT-APPL
+      name: "Mettre en \u0153uvre des fonctionnalit\xE9s de filtrage applicatif pour\
+        \ les"
+      description: "applications \xE0 risque. Devant les applications \xE0 risques,\
+        \ il est recommand\xE9 de faire usage d\u2019une solution tierce de filtrage\
+        \ applicatif."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:ti
+      assessable: false
+      depth: 1
+      ref_id: TI
+      name: "Traitement des incidents Cha\xEEnes op\xE9rationnelles"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:ti-ops-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:ti
+      ref_id: TI-OPS-SSI
+      name: "Cha\xEEnes op\xE9rationnelles SSI "
+      description: "Les cha\xEEnes op\xE9rationnelles des MCAS concourent \xE0 l\u2019\
+        effort national de cybers\xE9curit\xE9. Les alertes et les incidents sont\
+        \ g\xE9r\xE9s selon des proc\xE9dures test\xE9es lors d'exercices. La coordination\
+        \ des comp\xE9tences est organis\xE9e \xE0 l\u2019\xE9chelon minist\xE9riel.\
+        \ Les situations d'urgences peuvent faire appel \xE0 des mesures d\xE9finies\
+        \ pr\xE9alablement dans le cadre des plans gouvernementaux."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:ti-mob
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:ti
+      ref_id: TI-MOB
+      name: 'Mobilisation en cas d''alerte '
+      description: "En cas d\u2019alerte de s\xE9curit\xE9 identifi\xE9e au niveau\
+        \ national, les RSSI de chaque entit\xE9 s'assurent de la bonne application\
+        \ des exigences formul\xE9es par les instances nationales, dans les meilleurs\
+        \ d\xE9lais."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:ti-qual-trait
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:ti
+      ref_id: TI-QUAL-TRAIT
+      name: 'Qualification et traitement des incidents '
+      description: "La cha\xEEne fonctionnelle SSI est inform\xE9e par la cha\xEE\
+        ne op\xE9rationnelle de tout incident de s\xE9curit\xE9, et contribue si n\xE9\
+        cessaire \xE0 la qualification de l'incident et au pilotage de son traitement."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:ti-inc-rem
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:ti
+      ref_id: TI-INC-REM
+      name: "Remont\xE9e des incidents"
+      description: "Tout incident de s\xE9curit\xE9, m\xEAme apparemment mineur, dont\
+        \ l'impact d\xE9passe ou est susceptible de d\xE9passer le SI d'une entit\xE9\
+        \ ou des MCAS, fait l'objet d'un compte-rendu, via la cha\xEEne SSI, au FSSI\
+        \ qui, le cas \xE9ch\xE9ant, alerte le Centre op\xE9rationnel de la s\xE9\
+        curit\xE9 des syst\xE8mes d'information (COSSI) de l'ANSSI.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      assessable: false
+      depth: 1
+      ref_id: PCA
+      name: "Continuit\xE9 d\u2019activit\xE9"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-minis
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-MINIS
+      name: "D\xE9finition du plan minist\xE9riel de continuit\xE9 d\u2019activit\xE9\
+        \ des Syst\xE8mes"
+      description: "d\u2019Information. Les MCAS d\xE9finissent un plan de continuit\xE9\
+        \ d'activit\xE9 minist\xE9riel des syst\xE8mes d\u2019information permettant\
+        \ d\u2019assurer, en cas de sinistre, la continuit\xE9 d\u2019activit\xE9\
+        \ des syst\xE8mes d'information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-local
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-LOCAL
+      name: "D\xE9finition du plan local de continuit\xE9 d\u2019activit\xE9 des syst\xE8\
+        mes d\u2019information"
+      description: "Le directeur des syst\xE8mes d\u2019information ou le RSSI d'une\
+        \ entit\xE9 d\xE9finit la structure et les attendus du plan de continuit\xE9\
+        \ d'activit\xE9 des syst\xE8mes d'information permettant d'assurer effectivement,\
+        \ en cas de sinistre, la continuit\xE9 d\u2019activit\xE9. "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-suivilocal
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-SUIVILOCAL
+      name: "Suivi de la mise en \u0153uvre du plan de continuit\xE9 d'activit\xE9\
+        \ local des"
+      description: "Syst\xE8me d'Information (PCA des SI). Le RSSI d'une entit\xE9\
+        \ s\u2019assure de la bonne mise en \u0153uvre des dispositions pr\xE9vues\
+        \ dans le plan de continuit\xE9 d\u2019activit\xE9 des syst\xE8mes d\u2019\
+        information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-proc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-PROC
+      name: "Mise en \u0153uvre des dispositifs techniques et des proc\xE9dures op\xE9\
+        rationnelles"
+      description: "Les \xE9quipes informatiques mettent en \u0153uvre les dispositifs\
+        \ techniques et les proc\xE9dures op\xE9rationnelles contribuant \xE0 la continuit\xE9\
+        \ des SI, en assurent la supervision au quotidien et la maintenance dans le\
+        \ temps."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-sauve
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-SAUVE
+      name: "Protection de la disponibilit\xE9 des sauvegardes"
+      description: "Les sauvegardes de donn\xE9es ne doivent pas \xEAtre soumises\
+        \ aux m\xEAmes risques de sinistres que les donn\xE9es sauvegard\xE9es."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-prot
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-PROT
+      name: "Protection de la confidentialit\xE9 des sauvegardes"
+      description: "Les sauvegardes doivent \xEAtre trait\xE9es de mani\xE8re \xE0\
+        \ garantir leur confidentialit\xE9 et leur int\xE9grit\xE9.  "
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-exerc
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-EXERC
+      name: "Exercice r\xE9gulier du plan local de continuit\xE9 d\u2019activit\xE9\
+        \ des syst\xE8mes d\u2019information"
+      description: "Le RSSI d\u2019une entit\xE9 organise des exercices r\xE9guliers,\
+        \ afin de tester le plan local de continuit\xE9 d'activit\xE9 des syst\xE8\
+        mes d\u2019information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:pca-misajour
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:pca
+      ref_id: PCA-MISAJOUR
+      name: "Mise \xE0 jour du plan local de continuit\xE9 d\u2019activit\xE9 des\
+        \ syst\xE8mes d'information"
+      description: "Le RSSI d\u2019une entit\xE9 assure le maintien \xE0 jour du plan\
+        \ local de continuit\xE9 d'activit\xE9 des Syst\xE8mes d\u2019Information."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:contr
+      assessable: false
+      depth: 1
+      ref_id: CONTR
+      name: "Conformit\xE9, audit, inspection, contr\xF4le"
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:contr-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:contr
+      ref_id: CONTR-SSI
+      name: "Contr\xF4les locaux"
+      description: "La conformit\xE9 \xE0 la PSSIE et \xE0 la PSSI-MCAS est v\xE9\
+        rifi\xE9e par des contr\xF4les r\xE9guliers. Les RSSI de chaque entit\xE9\
+        \ conduisent des actions locales d'\xE9valuation de la conformit\xE9 \xE0\
+        \ la PSSI-MCAS et contribuent \xE2 la consolidation, dans un bilan annuel,\
+        \ de l'\xE9tat d'avancement de sa mise en \u0153uvre."
+    - urn: urn:ackwa:risk:req_node:mcas-1.0:contr-bilan-ssi
+      assessable: true
+      depth: 2
+      parent_urn: urn:ackwa:risk:req_node:mcas-1.0:contr
+      ref_id: CONTR-BILAN-SSI
+      name: Bilan annuel
+      description: "Les minist\xE8res charg\xE9s des affaires sociales \xE9tablissent\
+        \ un bilan annuel mesurant sa maturit\xE9 SSI globale, qu'il transmet \xE0\
+        \ l\u2019ANSSI. "
