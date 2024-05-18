@@ -107,6 +107,7 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 35. Cadre Conformité Cyber France (3CF) v1 (2021) ✈️🇫🇷
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
+38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
 
 ### Community contributions
 
