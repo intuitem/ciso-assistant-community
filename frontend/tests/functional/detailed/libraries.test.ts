@@ -15,7 +15,7 @@ test('every library can be loaded', async ({ logedPage, librariesPage, page }) =
 	let previousRemainingLibrary = '';
 	let nextRemainingLibrary = libraryNames[0];
 	for (let i = 1; i < libraryNames.length; i++) {
-		console.log('library:' + nextRemainingLibrary);
+		console.log('Importing library: ' + nextRemainingLibrary);
 		await librariesPage.importLibrary(nextRemainingLibrary, undefined, 'any');
 
 		await librariesPage.tab('Libraries store').click();
