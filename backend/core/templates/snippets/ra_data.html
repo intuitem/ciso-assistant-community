@@ -29,7 +29,7 @@
                               {% endfor %}
                             </ul>
                           </li>
-                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span> 
+                        <li class="pb-1"><span class="font-semibold">{% trans "Status:" %}</span>
                             {% if risk_assessment.status %} {{risk_assessment.status}} {% else %} -- {% endif %}
                         </li>
                         <li class="pb-1"><span class="font-semibold">{% trans "ETA:" %}</span> {{ risk_assessment.eta|date }}</li>
@@ -52,7 +52,7 @@
         {% include 'snippets/ri_list_nested.html' %}
     </div>
     <!--Risk matrix view-->
-    <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break">
+    <div class="m-4 px-4 py-8 shadow rounded-lg bg-white page-break text-sm">
         <div class="text-xl pb-4 font-semibold">{% trans "Risk matrix view" %}</div>
         <div class="flex space-x-3">
             <div class="w-1/2 shadow rounded-lg p-6">
@@ -71,10 +71,11 @@
                     {% include 'snippets/risk_matrix.html' with data=ri_clusters.residual %}
                 {% endif %}
             </div>
-
-
         </div>
+    </div>
 
+    <div class="m-4 px-4 text-xs">
+        {% include 'snippets/risk_legend.html' %}
     </div>
 
 </main>
