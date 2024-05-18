@@ -108,10 +108,12 @@ Check out the online documentation on https://intuitem.gitbook.io/ciso-assistant
 36. ANSSI : SecNumCloud ☁️🇫🇷
 37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
 
-### Community contrib
+### Community contributions
 
 1. ISO 27001:2022, version Française 🇫🇷🌐
 2. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
+3. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+4. MCAS : PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 
 <br/>
 
@@ -261,6 +263,10 @@ export DJANGO_SECRET_KEY=...
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 export LOG_FORMAT=plain # optional, default value is plain. Available options: json, plain
+
+# Authentication options
+export AUTH_TOKEN_TTL=900 # optional, default value is 900 seconds (15 minutes). It defines the time to live of the authentication token
+export AUTH_TOKEN_AUTO_REFRESH=True # optional, default value is True. It defines if the token TTL should be refreshed automatically after each request authenticated with the token
 ```
 
 3. Choose the tool of your choice, either python-venv or virtualenv. For example:
@@ -413,7 +419,7 @@ Set DJANGO_DEBUG=False for security reason.
 
 - [Django](https://www.djangoproject.com/) - Python Web Development Framework
 - [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
-- [eCharts](https://echarts.apache.org) - Charting library 
+- [eCharts](https://echarts.apache.org) - Charting library
 - [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
 - [Gitbook](https://www.gitbook.com) - Documentation platform

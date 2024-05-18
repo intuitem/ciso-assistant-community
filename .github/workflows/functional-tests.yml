@@ -27,15 +27,13 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       mailhog:
         image: mailhog/mailhog
-        ports: [
-          "1025:1025",
-          "8025:8025"
-        ]
+        ports: ["1025:1025", "8025:8025"]
 
     strategy:
       max-parallel: 4
       matrix:
         python-version: ["3.11"]
+        playwright-browser: ["chromium", "firefox"]
 
     steps:
       - uses: actions/checkout@v4
@@ -54,10 +52,12 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Install dependencies
         working-directory: ${{ env.working-directory }}
-        run: npm ci
-      - name: Install Playwright Browsers
+        run: |
+          npm install
+          npm ci
+      - name: Install Playwright browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps ${{ matrix.playwright-browser }}
       - name: Create frontend environment variables file
         working-directory: ${{ env.working-directory }}
         run: |
@@ -93,14 +93,14 @@ jobs:
           export $(grep -v '^#' .env | xargs)
           python manage.py createsuperuser --noinput
           nohup python manage.py runserver &
-      - name: Run tests
+      - name: Run tests with browser ${{ matrix.playwright-browser }}
         working-directory: ${{ env.working-directory }}
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.playwright-browser }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: functional-tests-report
           path: |
-            ${{ env.working-directory }}/tests/results/
-            ${{ env.working-directory }}/tests/reports/
+            ${{ env.working-directory }}/tests/${{ matrix.playwright-browser }}results/
+            ${{ env.working-directory }}/tests/${{ matrix.playwright-browser }}reports/
           retention-days: 5

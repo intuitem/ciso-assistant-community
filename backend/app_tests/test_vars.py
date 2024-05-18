@@ -13,7 +13,7 @@ ASSETS_ENDPOINT = "assets-list"
 EVIDENCES_ENDPOINT = "evidences-list"
 FOLDERS_ENDPOINT = "folders-list"
 FRAMEWORKS_ENDPOINT = "frameworks-list"
-LIBRARIES_ENDPOINT = "libraries-list"
+STORED_LIBRARIES_ENDPOINT = "stored-libraries-list"
 RISK_MATRICES_ENDPOINT = "risk-matrices-list"
 PROJECTS_ENDPOINT = "projects-list"
 REQUIREMENT_ASSESSMENTS_ENDPOINT = "requirement-assessments-list"
@@ -95,7 +95,7 @@ def get_var(varname: str) -> Any:
 
 def get_singular_name(plural_name: str) -> str:
     exceptions = {
-        "Libraries": "Library",
+        "Stored libraries": "Stored library",
         "Risk matrices": "Risk matrix",
         "Policies": "Policy",
     }

@@ -8,7 +8,7 @@ import uuid
 class AbstractBaseModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("UpdatedÒ at"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated at"))
     is_published = models.BooleanField(_("published"), default=False)
 
     class Meta:
